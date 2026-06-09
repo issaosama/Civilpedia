@@ -151,4 +151,24 @@ class Ar {
   static const String costPerCubic = 'سعر المتر المكعب';
   static const String concreteCost = 'تكلفة الخرسانة';
   static const String options = 'خيارات إضافية';
+
+  // Steel Calculator
+  static const String steelWeightPerMeter = 'الوزن لكل متر';
+  static const String steelTotalLength = 'الطول الإجمالي';
+  static const String steelNetWeight = 'الوزن الصافي';
+  static const String steelWasteWeight = 'وزن الهدر';
+  static const String steelTotalRequiredWeight = 'الإجمالي المطلوب';
+  static const String steelTotalTons = 'الإجمالي (طن)';
+  static const String steelPricePerKg = 'سعر الكيلوغرام';
+  static const String steelNetCost = 'صافي التكلفة';
+  static const String steelWasteCost = 'تكلفة الهدر';
+  static const String steelTotalCost = 'التكلفة الإجمالية';
+  static const String steelStockLength = 'طول السيخ التجاري';
+  static const String steelBarsRequired = 'عدد الأسياخ المطلوبة';
+  static const String steelPurchasedLength = 'الطول المشترى';
+  static const String steelRemainingLength = 'المتبقي';
+  static const String steelPurchasedWeight = 'الوزن المشترى';
+  static const String steelResults = 'النتائج';
+  static const String steelInputSection = 'بيانات التسليح';
+  static const String steelProcurementSection = 'المشتريات';
 }

@@ -67,6 +67,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   String _brickSize = '20×20×40';
   final List<String> _brickSizes = ['20×20×40', '10×20×40', '15×20×40', '25×12×6'];
 
+  // --- steel calculator state ---
+  int _steelDiameter = 12;
+  double _steelWastePercent = 0;
+  final _steelCustomWasteCtrl = TextEditingController();
+  bool _steelIsCustomWaste = false;
+  final _steelCostPerKgCtrl = TextEditingController();
+  bool _showSteelCost = false;
+  final _steelStockLengthCtrl = TextEditingController(text: '12');
+  bool _steelCalculated = false;
+  String? _steelError;
+
   String get _title {
     switch (widget.type) {
       case 'concrete':
@@ -89,6 +100,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   ];
 
   static bool _isCircular(String type) => type == 'circular_column';
+
+  static const Map<int, double> _steelWeightPerMeter = {
+    8: 0.395,
+    10: 0.617,
+    12: 0.888,
+    16: 1.58,
+    20: 2.47,
+    25: 3.85,
+    32: 6.31,
+  };
 
   @override
   void initState() {
@@ -152,6 +173,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (cost == null || cost <= 0 || !_showCost) return null;
     return _totalRequired * cost;
   }
+
+  // --- steel getters ---
+  double get _steelLen => double.tryParse(_lengthCtrl.text) ?? 0;
+  int get _steelBars => int.tryParse(_qtyCtrl.text) ?? 0;
+  double get _steelWPM => 0.00617 * _steelDiameter * _steelDiameter;
+  double get _steelTotalLen => _steelLen * _steelBars;
+  double get _steelNetW => _steelTotalLen * _steelWPM;
+  double get _steelWasteW => _steelNetW * _steelWastePercent / 100;
+  double get _steelTotalW => _steelNetW + _steelWasteW;
+  double? get _steelPriceKg => double.tryParse(_steelCostPerKgCtrl.text);
+  bool get _steelHasCost => _showSteelCost && _steelPriceKg != null && _steelPriceKg! > 0;
+  double get _steelStockLen => double.tryParse(_steelStockLengthCtrl.text) ?? 12;
+  int get _steelReqBars => _steelStockLen > 0 ? (_steelTotalLen / _steelStockLen).ceil() : 0;
+  double get _steelPurchLen => _steelReqBars * _steelStockLen;
+  double get _steelRemainLen => _steelPurchLen - _steelTotalLen;
+  double get _steelPurchW => _steelPurchLen * _steelWPM;
 
   String _firstFieldLabel(_ElementCardData card) =>
       _isCircular(card.elementType) ? Ar.diameter : Ar.length;
@@ -236,6 +273,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
+  void _calcSteelWeight() {
+    if (_steelLen <= 0 || _steelBars <= 0 || _steelWPM <= 0) {
+      setState(() {
+        _steelError = Ar.invalidInputs;
+        _steelCalculated = false;
+      });
+      return;
+    }
+    setState(() {
+      _steelError = null;
+      _steelCalculated = true;
+    });
+  }
+
   @override
   void dispose() {
     for (final card in _cards) {
@@ -248,12 +299,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _diameterCtrl.dispose();
     _customWasteCtrl.dispose();
     _costPerCubicCtrl.dispose();
+    _steelCustomWasteCtrl.dispose();
+    _steelCostPerKgCtrl.dispose();
+    _steelStockLengthCtrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.type == 'concrete') return _buildConcreteScreen();
+    if (widget.type == 'steel') return _buildSteelScreen();
     return _buildSimpleScreen();
   }
 
@@ -768,6 +823,422 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────── steel calculator screen ─────────────
+
+  Widget _buildSteelScreen() {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: _bgOffWhite,
+      appBar: AppBar(
+        title: Text(_title, style: const TextStyle(color: Colors.white)),
+        backgroundColor: _bronze,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: [
+          _buildSteelInputCard(theme),
+          AppSpacing.gapLg,
+          _buildSteelOptionsCard(theme),
+          if (_steelCalculated) ...[
+            AppSpacing.gapLg,
+            _buildSteelResultsCard(theme),
+          ],
+          if (_steelError != null) ...[
+            AppSpacing.gapMd,
+            _buildSteelErrorCard(theme),
+          ],
+          AppSpacing.gapXl,
+        ],
+      ),
+      bottomNavigationBar: _buildSteelBottomBar(theme),
+    );
+  }
+
+  Widget _buildSteelInputCard(ThemeData theme) {
+    return CustomCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Ar.steelInputSection,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: _textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildCardField(Ar.length, _lengthCtrl),
+            const SizedBox(height: 8),
+            _buildCardField(Ar.quantity, _qtyCtrl, isInteger: true),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<int>(
+              value: _steelDiameter,
+              decoration: _inputDecoration(Ar.diameter),
+              items: _steelWeightPerMeter.keys
+                  .map((d) => DropdownMenuItem(
+                        value: d,
+                        child: Text('$d ${Ar.unitMm}'),
+                      ))
+                  .toList(),
+              onChanged: (v) {
+                if (v != null) {
+                  setState(() {
+                    _steelDiameter = v;
+                    _steelCalculated = false;
+                    _steelError = null;
+                  });
+                }
+              },
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _bronze.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, size: 16, color: _bronze),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      '${Ar.steelWeightPerMeter}: ${_steelWPM.toStringAsFixed(3)} ${Ar.kg}/${Ar.meters}',
+                      style: TextStyle(
+                        color: _bronze,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _calcSteelWeight,
+                icon: const Icon(Icons.calculate, size: 20),
+                label: Text(Ar.calculate),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _bronze,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSteelOptionsCard(ThemeData theme) {
+    return CustomCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Ar.options,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: _textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              Ar.wasteFactor,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: _textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final pct in [0, 3, 5, 7])
+                  ChoiceChip(
+                    label: Text('$pct%'),
+                    selected:
+                        !_steelIsCustomWaste && _steelWastePercent == pct,
+                    onSelected: (_) => setState(() {
+                      _steelWastePercent = pct.toDouble();
+                      _steelIsCustomWaste = false;
+                    }),
+                    selectedColor: _bronze.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: !_steelIsCustomWaste && _steelWastePercent == pct
+                          ? _bronze
+                          : _textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ChoiceChip(
+                  label: Text(Ar.wasteCustom),
+                  selected: _steelIsCustomWaste,
+                  onSelected: (_) =>
+                      setState(() => _steelIsCustomWaste = true),
+                  selectedColor: _bronze.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: _steelIsCustomWaste ? _bronze : _textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            if (_steelIsCustomWaste) ...[
+              const SizedBox(height: 8),
+              _buildCardField(Ar.wasteFactor, _steelCustomWasteCtrl),
+            ],
+            const Divider(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    Ar.steelPricePerKg,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: _textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Switch(
+                  value: _showSteelCost,
+                  activeColor: _bronze,
+                  onChanged: (v) => setState(() => _showSteelCost = v),
+                ),
+              ],
+            ),
+            if (_showSteelCost) ...[
+              const SizedBox(height: 8),
+              _buildCardField(Ar.steelPricePerKg, _steelCostPerKgCtrl),
+            ],
+            const Divider(height: 32),
+            Text(
+              Ar.steelProcurementSection,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: _textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            _buildCardField(Ar.steelStockLength, _steelStockLengthCtrl),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSteelResultsCard(ThemeData theme) {
+    return CustomCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Ar.steelResults,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: _textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _steelResultRow(
+                '${Ar.diameter}:', '$_steelDiameter ${Ar.unitMm}'),
+            _steelResultRow('${Ar.steelWeightPerMeter}:',
+                '${_steelWPM.toStringAsFixed(3)} ${Ar.kg}/${Ar.meters}'),
+            _steelResultRow(
+                '${Ar.length}:', '${_steelLen.toStringAsFixed(2)} ${Ar.meters}'),
+            _steelResultRow('${Ar.quantity}:', '$_steelBars'),
+            _steelResultRow('${Ar.steelTotalLength}:',
+                '${_steelTotalLen.toStringAsFixed(2)} ${Ar.meters}'),
+            const Divider(height: 24),
+            _steelResultRow('${Ar.steelNetWeight}:',
+                '${_steelNetW.toStringAsFixed(2)} ${Ar.kg}'),
+            if (_steelWastePercent > 0)
+              _steelResultRow(
+                  '${Ar.steelWasteWeight} ($_steelWastePercent%):',
+                  '${_steelWasteW.toStringAsFixed(2)} ${Ar.kg}'),
+            _steelResultRow('${Ar.steelTotalRequiredWeight}:',
+                '${_steelTotalW.toStringAsFixed(2)} ${Ar.kg}',
+                isBold: true),
+            _steelResultRow('${Ar.steelTotalTons}:',
+                '${(_steelTotalW / 1000).toStringAsFixed(3)} ${Ar.tons}'),
+            if (_steelHasCost) ...[
+              const Divider(height: 24),
+              _steelResultRow('${Ar.steelNetCost}:',
+                  (_steelNetW * _steelPriceKg!).toStringAsFixed(0)),
+              if (_steelWastePercent > 0)
+                _steelResultRow('${Ar.steelWasteCost}:',
+                    (_steelWasteW * _steelPriceKg!).toStringAsFixed(0)),
+              _steelResultRow('${Ar.steelTotalCost}:',
+                  (_steelTotalW * _steelPriceKg!).toStringAsFixed(0),
+                  isBold: true),
+            ],
+            if (_steelTotalLen > 0) ...[
+              const Divider(height: 24),
+              Text(
+                Ar.steelProcurementSection,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: _bronze,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              _steelResultRow('${Ar.steelStockLength}:',
+                  '${_steelStockLen.toStringAsFixed(2)} ${Ar.meters}'),
+              _steelResultRow('${Ar.steelTotalLength}:',
+                  '${_steelTotalLen.toStringAsFixed(2)} ${Ar.meters}'),
+              _steelResultRow(
+                  '${Ar.steelBarsRequired}:', '$_steelReqBars'),
+              _steelResultRow('${Ar.steelPurchasedLength}:',
+                  '${_steelPurchLen.toStringAsFixed(2)} ${Ar.meters}'),
+              _steelResultRow('${Ar.steelRemainingLength}:',
+                  '${_steelRemainLen.toStringAsFixed(2)} ${Ar.meters}'),
+              _steelResultRow('${Ar.steelPurchasedWeight}:',
+                  '${_steelPurchW.toStringAsFixed(2)} ${Ar.kg}'),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSteelErrorCard(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.error.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.error.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Text(
+        _steelError!,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.error,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildSteelBottomBar(ThemeData theme) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: _bronze.withValues(alpha: 0.12), width: 1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _bronze.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.build, color: _bronze, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  Ar.weight,
+                  style: TextStyle(
+                    color: _textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _steelCalculated
+                      ? '${_steelTotalW.toStringAsFixed(2)} ${Ar.kg} / ${(_steelTotalW / 1000).toStringAsFixed(3)} ${Ar.tons}'
+                      : '0.00 ${Ar.kg} / 0.000 ${Ar.tons}',
+                  style: const TextStyle(
+                    color: _textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _bronze.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$_steelDiameter ${Ar.unitMm}',
+              style: TextStyle(
+                color: _bronze,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _steelResultRow(String label, String value, {bool isBold = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: TextStyle(color: _textSecondary, fontSize: 14)),
+          Text(value,
+              style: TextStyle(
+                color: _textPrimary,
+                fontSize: 14,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+              )),
         ],
       ),
     );

@@ -148,4 +148,24 @@ class En {
   static const String costPerCubic = 'Cost per m³';
   static const String concreteCost = 'Concrete Cost';
   static const String options = 'Options';
+
+  // Steel Calculator
+  static const String steelWeightPerMeter = 'Weight per Meter';
+  static const String steelTotalLength = 'Total Length';
+  static const String steelNetWeight = 'Net Weight';
+  static const String steelWasteWeight = 'Waste Weight';
+  static const String steelTotalRequiredWeight = 'Total Required';
+  static const String steelTotalTons = 'Total (tons)';
+  static const String steelPricePerKg = 'Price per kg';
+  static const String steelNetCost = 'Net Cost';
+  static const String steelWasteCost = 'Waste Cost';
+  static const String steelTotalCost = 'Total Cost';
+  static const String steelStockLength = 'Stock Bar Length';
+  static const String steelBarsRequired = 'Bars Required';
+  static const String steelPurchasedLength = 'Purchased Length';
+  static const String steelRemainingLength = 'Remaining';
+  static const String steelPurchasedWeight = 'Purchased Weight';
+  static const String steelResults = 'Results';
+  static const String steelInputSection = 'Steel Data';
+  static const String steelProcurementSection = 'Procurement';
 }
