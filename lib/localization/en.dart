@@ -84,4 +84,47 @@ class En {
   static const String emptyHere = 'Nothing here yet';
   static const String exitConfirm = 'Press again to exit';
   static const String loading = 'Loading...';
+
+  // Tile Calculator
+  static const String tileCalc = 'Tile Calculator';
+  static const String tileCalcDesc = 'Calculate tiles required with waste and cutting';
+  static const String areaLength = 'Area Length';
+  static const String areaWidth = 'Area Width';
+  static const String tileLength = 'Tile Length';
+  static const String tileWidth = 'Tile Width';
+  static const String tileOrientation = 'Tile Orientation';
+  static const String sameDirection = 'Same Direction';
+  static const String alternating = 'Alternating';
+  static const String diagonal = 'Diagonal 45°';
+  static const String wastePercent = 'Waste (%)';
+  static const String wasteRecStraight = 'Recommended: 5-7% for straight layout';
+  static const String wasteRecAlternating = 'Recommended: 7-10% for alternating layout';
+  static const String wasteRecDiagonal = 'Recommended: 10-15% for diagonal layout';
+  static const String cuttingLoss = 'Cutting Loss';
+  static const String edgeTrimLoss = 'Edge Trimming';
+  static const String patternLoss = 'Pattern Loss';
+  static const String tilesPerBox = 'Tiles Per Box';
+  static const String pricePerTile = 'Price Per Tile';
+  static const String pricePerBox = 'Price Per Box';
+  static const String areaCoverage = 'Area Coverage';
+  static const String tileUnitArea = 'Tile Unit Area';
+  static const String requiredTiles = 'Required Tiles';
+  static const String wasteQuantity = 'Waste Quantity';
+  static const String finalTileCount = 'Final Tile Count';
+  static const String requiredBoxes = 'Required Boxes';
+  static const String materialCost = 'Material Cost';
+  static const String wasteCost = 'Waste Cost';
+  static const String totalCost = 'Total Cost';
+  static const String spareRecommendation = 'Spare Tiles';
+  static const String spareText = 'Keep %d spare tiles for future maintenance';
+  static const String smallRoom = '< 15m²';
+  static const String mediumRoom = '15-30m²';
+  static const String largeRoom = '> 30m²';
+  static const String calcTile = 'Calculate Tiles';
+  static const String invalidInputs = 'Please enter valid positive values';
+  static const String tileTooLarge = 'Tile dimensions exceed area dimensions';
+  static const String unitMm = 'mm';
+  static const String unitCm = 'cm';
+  static const String priceMode = 'Price Mode';
+  static const String costOption = 'Cost Calculation (optional)';
 }

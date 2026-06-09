@@ -72,6 +72,13 @@ class ArticleRepository {
       icon: Icons.checklist,
       route: 'calculator/checklist',
     ),
+    ToolModel(
+      id: 'tile',
+      name: 'حاسبة الكاشي',
+      description: 'حساب كمية الكاشي مع الهدر والتكلفة',
+      icon: Icons.grid_on,
+      route: 'calculator/tile',
+    ),
   ];
 
   static final List<ArticleModel> articles = [

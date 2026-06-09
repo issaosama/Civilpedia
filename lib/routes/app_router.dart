@@ -11,6 +11,7 @@ import '../features/home/presentation/home_main_screen.dart';
 import '../features/tools/presentation/screens/tools_screen.dart';
 import '../features/tools/presentation/screens/calculators/calculator_screen.dart';
 import '../features/tools/presentation/screens/calculators/checklist_screen.dart';
+import '../features/tools/presentation/screens/calculators/tile_calculator_screen.dart';
 import '../features/articles/presentation/screens/articles_screen.dart';
 import '../features/articles/presentation/screens/article_details_screen.dart';
 import '../features/saved/presentation/saved_screen.dart';
@@ -132,6 +133,11 @@ final GoRouter appRouter = GoRouter(
       path: '/calculator/checklist',
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const ChecklistScreen(),
+    ),
+    GoRoute(
+      path: '/calculator/tile',
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const TileCalculatorScreen(),
     ),
   ],
 );

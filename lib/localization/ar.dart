@@ -87,4 +87,47 @@ class Ar {
   static const String element = 'عنصر';
   static const String addElement = 'أضف عنصراً';
   static const String numberOfColumns = 'عدد الأعمدة';
+
+  // Tile Calculator
+  static const String tileCalc = 'حاسبة الكاشي';
+  static const String tileCalcDesc = 'حساب عدد الكاشي المطلوب مع مراعاة الهدر والقص';
+  static const String areaLength = 'طول المساحة';
+  static const String areaWidth = 'عرض المساحة';
+  static const String tileLength = 'طول الكاشي';
+  static const String tileWidth = 'عرض الكاشي';
+  static const String tileOrientation = 'طريقة التركيب';
+  static const String sameDirection = 'مستقيم';
+  static const String alternating = 'متبادل';
+  static const String diagonal = 'مائل ٤٥°';
+  static const String wastePercent = 'نسبة الهدر (%)';
+  static const String wasteRecStraight = 'يوصى: 5-7% للتركيب المستقيم';
+  static const String wasteRecAlternating = 'يوصى: 7-10% للتركيب المتبادل';
+  static const String wasteRecDiagonal = 'يوصى: 10-15% للتركيب المائل';
+  static const String cuttingLoss = 'هدر القص';
+  static const String edgeTrimLoss = 'تخريم الحواف';
+  static const String patternLoss = 'هدر النقشة';
+  static const String tilesPerBox = 'عدد الكاشي في العلبة';
+  static const String pricePerTile = 'سعر الكاشي الواحدة';
+  static const String pricePerBox = 'سعر العلبة';
+  static const String areaCoverage = 'مساحة التغطية';
+  static const String tileUnitArea = 'مساحة الكاشي الواحدة';
+  static const String requiredTiles = 'عدد الكاشي المطلوب';
+  static const String wasteQuantity = 'كمية الهدر';
+  static const String finalTileCount = 'إجمالي الكاشي';
+  static const String requiredBoxes = 'عدد العلب المطلوبة';
+  static const String materialCost = 'تكلفة المواد';
+  static const String wasteCost = 'تكلفة الهدر';
+  static const String totalCost = 'الإجمالي';
+  static const String spareRecommendation = 'توصية كاشي احتياطي';
+  static const String spareText = 'احتفظ بـ %d كاشي إضافية للصيانة المستقبلية';
+  static const String smallRoom = 'أقل من ١٥م²';
+  static const String mediumRoom = '١٥-٣٠م²';
+  static const String largeRoom = 'أكثر من ٣٠م²';
+  static const String calcTile = 'احسب الكاشي';
+  static const String invalidInputs = 'يرجى إدخال قيم موجبة صحيحة';
+  static const String tileTooLarge = 'أبعاد الكاشي أكبر من أبعاد المساحة';
+  static const String unitMm = 'مم';
+  static const String unitCm = 'سم';
+  static const String priceMode = 'نظام السعر';
+  static const String costOption = 'حساب التكلفة (اختياري)';
 }
