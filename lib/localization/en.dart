@@ -127,4 +127,25 @@ class En {
   static const String unitCm = 'cm';
   static const String priceMode = 'Price Mode';
   static const String costOption = 'Cost Calculation (optional)';
+
+  // Concrete Calculator
+  static const String columnLabel = 'Column';
+  static const String slabLabel = 'Slab';
+  static const String circularColumnLabel = 'Circular Column';
+  static const String beamLabel = 'Beam';
+  static const String footingLabel = 'Footing';
+  static const String elementType = 'Element Type';
+  static const String addElementsInfo = 'Add concrete elements to calculate total concrete volume';
+  static const String grandTotal = 'Total Concrete Volume';
+  static const String thickness = 'Thickness';
+  static const String wasteFactor = 'Waste Factor';
+  static const String wasteCustom = 'Custom';
+  static const String netVolume = 'Net Volume';
+  static const String wasteVolume = 'Waste Volume';
+  static const String totalRequired = 'Total Required';
+  static const String truckCapacity = 'Truck Capacity';
+  static const String truckCount = 'Trucks';
+  static const String costPerCubic = 'Cost per m³';
+  static const String concreteCost = 'Concrete Cost';
+  static const String options = 'Options';
 }

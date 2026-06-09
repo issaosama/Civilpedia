@@ -130,4 +130,25 @@ class Ar {
   static const String unitCm = 'سم';
   static const String priceMode = 'نظام السعر';
   static const String costOption = 'حساب التكلفة (اختياري)';
+
+  // Concrete Calculator
+  static const String columnLabel = 'عمود';
+  static const String slabLabel = 'بلاطة';
+  static const String circularColumnLabel = 'عمود دائري';
+  static const String beamLabel = 'كمرة';
+  static const String footingLabel = 'قاعدة';
+  static const String elementType = 'نوع العنصر';
+  static const String addElementsInfo = 'أضف العناصر الخرسانية المطلوبة لحساب إجمالي حجم الخرسانة';
+  static const String grandTotal = 'المجموع الكلي للخرسانة';
+  static const String thickness = 'السمك';
+  static const String wasteFactor = 'نسبة الهدر';
+  static const String wasteCustom = 'يدوي';
+  static const String netVolume = 'الحجم الصافي';
+  static const String wasteVolume = 'حجم الهدر';
+  static const String totalRequired = 'الإجمالي المطلوب';
+  static const String truckCapacity = 'سعة الخلاطة';
+  static const String truckCount = 'عدد الخلاطات';
+  static const String costPerCubic = 'سعر المتر المكعب';
+  static const String concreteCost = 'تكلفة الخرسانة';
+  static const String options = 'خيارات إضافية';
 }

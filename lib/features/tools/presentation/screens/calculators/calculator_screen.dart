@@ -45,6 +45,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // --- concrete multi-calc state ---
   final List<_ElementCardData> _cards = [];
 
+  // --- waste factor ---
+  double _wastePercent = 0;
+  final _customWasteCtrl = TextEditingController();
+  bool _isCustomWaste = false;
+
+  // --- truck capacity ---
+  double _truckCapacity = 8;
+
+  // --- cost estimation ---
+  final _costPerCubicCtrl = TextEditingController();
+  bool _showCost = false;
+
   // --- simple calc state (steel, brick) ---
   final _lengthCtrl = TextEditingController();
   final _widthCtrl = TextEditingController();
@@ -68,12 +80,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
   }
 
-  static const List<Map<String, String>> _elementTypes = [
-    {'value': 'column', 'label': 'عمود'},
-    {'value': 'slab', 'label': 'بلاطة'},
-    {'value': 'circular_column', 'label': 'عمود دائري'},
-    {'value': 'beam', 'label': 'كمرة'},
-    {'value': 'footing', 'label': 'قاعدة'},
+  List<Map<String, String>> get _elementTypes => [
+    {'value': 'column', 'label': Ar.columnLabel},
+    {'value': 'slab', 'label': Ar.slabLabel},
+    {'value': 'circular_column', 'label': Ar.circularColumnLabel},
+    {'value': 'beam', 'label': Ar.beamLabel},
+    {'value': 'footing', 'label': Ar.footingLabel},
   ];
 
   static bool _isCircular(String type) => type == 'circular_column';
@@ -106,7 +118,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     if (l <= 0 || h <= 0 || (!_isCircular(card.elementType) && w <= 0)) {
       setState(() {
         card.volume = 0;
-        card.error = 'يرجى إدخال قيم موجبة';
+        card.error = Ar.invalidInputs;
       });
       return;
     }
@@ -118,6 +130,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       vol = l * w * h;
     }
 
+    if (card.elementType == 'column') {
+      final count = int.tryParse(card.columnCountCtrl.text) ?? 1;
+      vol *= count;
+    }
+
     setState(() {
       card.volume = vol;
       card.error = null;
@@ -125,6 +142,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   double get _grandTotal => _cards.fold<double>(0, (sum, card) => sum + card.volume);
+
+  double get _netTotal => _grandTotal;
+  double get _wasteVolume => _netTotal * _wastePercent / 100;
+  double get _totalRequired => _netTotal + _wasteVolume;
+  int get _truckCount => (_totalRequired / _truckCapacity).ceil();
+  double? get _totalConcreteCost {
+    final cost = double.tryParse(_costPerCubicCtrl.text);
+    if (cost == null || cost <= 0 || !_showCost) return null;
+    return _totalRequired * cost;
+  }
 
   String _firstFieldLabel(_ElementCardData card) =>
       _isCircular(card.elementType) ? Ar.diameter : Ar.length;
@@ -219,6 +246,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _heightCtrl.dispose();
     _qtyCtrl.dispose();
     _diameterCtrl.dispose();
+    _customWasteCtrl.dispose();
+    _costPerCubicCtrl.dispose();
     super.dispose();
   }
 
@@ -248,6 +277,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           ...List.generate(_cards.length, (i) => _buildCard(i, theme)),
           AppSpacing.gapMd,
           _buildAddButton(theme),
+          AppSpacing.gapLg,
+          _buildOptionsCard(theme),
           AppSpacing.gapXl,
         ],
       ),
@@ -269,7 +300,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'أضف العناصر الخرسانية المطلوبة لحساب إجمالي حجم الخرسانة',
+              Ar.addElementsInfo,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: _textSecondary,
                 fontSize: 13,
@@ -327,7 +358,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     _buildCardField(Ar.width, card.widthCtrl),
                   ],
                   AppSpacing.gapSm,
-                  _buildCardField(Ar.height, card.heightCtrl),
+                  _buildCardField(
+                    card.elementType == 'slab' ? Ar.thickness : Ar.height,
+                    card.heightCtrl,
+                  ),
                   // Conditional "Number of Columns" field
                   if (card.elementType == 'column') ...[
                     AppSpacing.gapSm,
@@ -407,7 +441,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget _buildTypeDropdown(_ElementCardData card, ThemeData theme) {
     return DropdownButtonFormField<String>(
       value: card.elementType,
-      decoration: _inputDecoration('نوع العنصر'),
+      decoration: _inputDecoration(Ar.elementType),
       items: _elementTypes
           .map(
             (e) => DropdownMenuItem(
@@ -516,7 +550,129 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
+  Widget _buildOptionsCard(ThemeData theme) {
+    return CustomCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Ar.options,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: _textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Waste Factor
+            Text(
+              Ar.wasteFactor,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: _textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final pct in [0, 3, 5, 7])
+                  ChoiceChip(
+                    label: Text('$pct%'),
+                    selected: !_isCustomWaste && _wastePercent == pct,
+                    onSelected: (_) => setState(() {
+                      _wastePercent = pct.toDouble();
+                      _isCustomWaste = false;
+                    }),
+                    selectedColor: _bronze.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: !_isCustomWaste && _wastePercent == pct
+                          ? _bronze
+                          : _textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ChoiceChip(
+                  label: Text(Ar.wasteCustom),
+                  selected: _isCustomWaste,
+                  onSelected: (_) => setState(() => _isCustomWaste = true),
+                  selectedColor: _bronze.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: _isCustomWaste ? _bronze : _textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            if (_isCustomWaste) ...[
+              const SizedBox(height: 8),
+              _buildCardField(Ar.wasteFactor, _customWasteCtrl),
+            ],
+            const Divider(height: 32),
+            // Truck Capacity
+            Text(
+              Ar.truckCapacity,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: _textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              children: [
+                for (final cap in [6, 8, 10])
+                  ChoiceChip(
+                    label: Text('$cap m³'),
+                    selected: _truckCapacity == cap,
+                    onSelected: (_) =>
+                        setState(() => _truckCapacity = cap.toDouble()),
+                    selectedColor: _bronze.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: _truckCapacity == cap ? _bronze : _textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+              ],
+            ),
+            const Divider(height: 32),
+            // Cost Estimation
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    Ar.costPerCubic,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: _textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Switch(
+                  value: _showCost,
+                  activeColor: _bronze,
+                  onChanged: (v) => setState(() => _showCost = v),
+                ),
+              ],
+            ),
+            if (_showCost) ...[
+              const SizedBox(height: 8),
+              _buildCardField(Ar.costPerCubic, _costPerCubicCtrl),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildGrandTotalBar(ThemeData theme) {
+    final hasResults = _cards.isNotEmpty && _cards.any((c) => c.volume > 0);
+
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -554,7 +710,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'المجموع الكلي للخرسانة',
+                  Ar.grandTotal,
                   style: TextStyle(
                     color: _textSecondary,
                     fontSize: 12,
@@ -563,13 +719,37 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_grandTotal.toStringAsFixed(2)} م³',
+                  '${_totalRequired.toStringAsFixed(2)} م³',
                   style: const TextStyle(
                     color: _textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (hasResults) ...[
+                  const SizedBox(height: 6),
+                  if (_wastePercent > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        '${Ar.netVolume}: ${_netTotal.toStringAsFixed(2)} م³  |  ${Ar.wasteVolume} ($_wastePercent%): ${_wasteVolume.toStringAsFixed(2)} م³',
+                        style: TextStyle(
+                          color: _textSecondary,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  Text(
+                    _showCost && _totalConcreteCost != null
+                        ? '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount  |  ${Ar.concreteCost}: ${_totalConcreteCost!.toStringAsFixed(0)}'
+                        : '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount',
+                    style: TextStyle(
+                      color: _textSecondary,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
