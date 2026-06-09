@@ -1,0 +1,726 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../../../core/constants/app_constants.dart';
+import '../../../../../core/theme/design_tokens.dart';
+import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/widgets/custom_card.dart';
+import '../../../../../localization/ar.dart';
+
+const Color _bronze = Color(0xFFB8860B);
+const Color _bgOffWhite = Color(0xFFF5F7FA);
+const Color _textPrimary = Color(0xFF1E293B);
+const Color _textSecondary = Color(0xFF64748B);
+const Color _fieldFill = Color(0xFFF8FAFC);
+
+class CalculatorScreen extends StatefulWidget {
+  final String type;
+
+  const CalculatorScreen({super.key, required this.type});
+
+  @override
+  State<CalculatorScreen> createState() => _CalculatorScreenState();
+}
+
+class _ElementCardData {
+  String elementType = 'column';
+  final lengthCtrl = TextEditingController();
+  final widthCtrl = TextEditingController();
+  final heightCtrl = TextEditingController();
+  final columnCountCtrl = TextEditingController();
+  double volume = 0;
+  String? error;
+
+  _ElementCardData();
+
+  void dispose() {
+    lengthCtrl.dispose();
+    widthCtrl.dispose();
+    heightCtrl.dispose();
+    columnCountCtrl.dispose();
+  }
+}
+
+class _CalculatorScreenState extends State<CalculatorScreen> {
+  // --- concrete multi-calc state ---
+  final List<_ElementCardData> _cards = [];
+
+  // --- simple calc state (steel, brick) ---
+  final _lengthCtrl = TextEditingController();
+  final _widthCtrl = TextEditingController();
+  final _heightCtrl = TextEditingController();
+  final _qtyCtrl = TextEditingController();
+  final _diameterCtrl = TextEditingController();
+  String? _result;
+  String _brickSize = '20×20×40';
+  final List<String> _brickSizes = ['20×20×40', '10×20×40', '15×20×40', '25×12×6'];
+
+  String get _title {
+    switch (widget.type) {
+      case 'concrete':
+        return Ar.concreteCalc;
+      case 'steel':
+        return Ar.steelWeightCalc;
+      case 'brick':
+        return Ar.brickCalc;
+      default:
+        return '';
+    }
+  }
+
+  static const List<Map<String, String>> _elementTypes = [
+    {'value': 'column', 'label': 'عمود'},
+    {'value': 'slab', 'label': 'بلاطة'},
+    {'value': 'circular_column', 'label': 'عمود دائري'},
+    {'value': 'beam', 'label': 'كمرة'},
+    {'value': 'footing', 'label': 'قاعدة'},
+  ];
+
+  static bool _isCircular(String type) => type == 'circular_column';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.type == 'concrete') {
+      _cards.add(_ElementCardData());
+    }
+  }
+
+  void _addCard() {
+    setState(() => _cards.add(_ElementCardData()));
+  }
+
+  void _removeCard(int index) {
+    setState(() {
+      _cards[index].dispose();
+      _cards.removeAt(index);
+    });
+  }
+
+  void _calcCard(int index) {
+    final card = _cards[index];
+    final l = double.tryParse(card.lengthCtrl.text) ?? 0;
+    final w = double.tryParse(card.widthCtrl.text) ?? 0;
+    final h = double.tryParse(card.heightCtrl.text) ?? 0;
+
+    if (l <= 0 || h <= 0 || (!_isCircular(card.elementType) && w <= 0)) {
+      setState(() {
+        card.volume = 0;
+        card.error = 'يرجى إدخال قيم موجبة';
+      });
+      return;
+    }
+
+    double vol;
+    if (_isCircular(card.elementType)) {
+      vol = math.pi * (l / 2) * (l / 2) * h;
+    } else {
+      vol = l * w * h;
+    }
+
+    setState(() {
+      card.volume = vol;
+      card.error = null;
+    });
+  }
+
+  double get _grandTotal => _cards.fold<double>(0, (sum, card) => sum + card.volume);
+
+  String _firstFieldLabel(_ElementCardData card) =>
+      _isCircular(card.elementType) ? Ar.diameter : Ar.length;
+
+  String _assetPath(String type) {
+    switch (type) {
+      case 'column':
+        return 'assets/images/column.png';
+      case 'slab':
+        return 'assets/images/slab.png';
+      case 'footing':
+        return 'assets/images/footing.png';
+      case 'beam':
+        return 'assets/images/beam.png';
+      default:
+        return 'assets/images/column.png';
+    }
+  }
+
+  IconData _placeholderIcon(String type) {
+    switch (type) {
+      case 'column':
+        return Icons.view_column;
+      case 'slab':
+        return Icons.grid_on;
+      case 'circular_column':
+        return Icons.radio_button_unchecked;
+      case 'beam':
+        return Icons.view_headline;
+      case 'footing':
+        return Icons.square_foot;
+      default:
+        return Icons.architecture;
+    }
+  }
+
+  // --- simple calc methods ---
+
+  void _calculate() {
+    switch (widget.type) {
+      case 'steel':
+        _calcSteel();
+        break;
+      case 'brick':
+        _calcBrick();
+        break;
+    }
+  }
+
+  void _calcSteel() {
+    final l = double.tryParse(_lengthCtrl.text) ?? 0;
+    final q = double.tryParse(_qtyCtrl.text) ?? 0;
+    final d = double.tryParse(_diameterCtrl.text) ?? 0;
+    if (l <= 0 || q <= 0 || d <= 0) {
+      setState(() => _result = 'يرجى إدخال قيم موجبة');
+      return;
+    }
+    final w = l * q * 0.00617 * (d * d);
+    final display = w >= 1000
+        ? '${(w / 1000).toStringAsFixed(2)} ${Ar.tons}'
+        : '${w.toStringAsFixed(2)} ${Ar.kg}';
+    setState(() => _result = '${Ar.weight}: $display');
+  }
+
+  void _calcBrick() {
+    final l = double.tryParse(_lengthCtrl.text) ?? 0;
+    final h = double.tryParse(_heightCtrl.text) ?? 0;
+    if (l <= 0 || h <= 0) {
+      setState(() => _result = 'يرجى إدخال قيم موجبة');
+      return;
+    }
+    final parts = _brickSize.split('×');
+    final bL = double.tryParse(parts[2]) ?? 0.4;
+    final bH = double.tryParse(parts[0]) ?? 0.2;
+    final area = l * h;
+    final brickArea = (bL / 100) * (bH / 100);
+    final bricks = (area / brickArea).ceil();
+    final mortar = area * 0.02;
+    setState(
+      () => _result =
+          '${Ar.bricksCount}: $bricks\nكمية المونة: ${mortar.toStringAsFixed(2)} م³',
+    );
+  }
+
+  @override
+  void dispose() {
+    for (final card in _cards) {
+      card.dispose();
+    }
+    _lengthCtrl.dispose();
+    _widthCtrl.dispose();
+    _heightCtrl.dispose();
+    _qtyCtrl.dispose();
+    _diameterCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.type == 'concrete') return _buildConcreteScreen();
+    return _buildSimpleScreen();
+  }
+
+  // ───────────── multi-card concrete screen ─────────────
+
+  Widget _buildConcreteScreen() {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: _bgOffWhite,
+      appBar: AppBar(
+        title: Text(_title, style: const TextStyle(color: Colors.white)),
+        backgroundColor: _bronze,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: [
+          _buildInfoHeader(theme),
+          AppSpacing.gapLg,
+          ...List.generate(_cards.length, (i) => _buildCard(i, theme)),
+          AppSpacing.gapMd,
+          _buildAddButton(theme),
+          AppSpacing.gapXl,
+        ],
+      ),
+      bottomNavigationBar: _buildGrandTotalBar(theme),
+    );
+  }
+
+  Widget _buildInfoHeader(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: _bronze.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: _bronze.withValues(alpha: 0.12)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline, color: _bronze, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'أضف العناصر الخرسانية المطلوبة لحساب إجمالي حجم الخرسانة',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: _textSecondary,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard(int index, ThemeData theme) {
+    final card = _cards[index];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: _bronze.withValues(alpha: 0.15), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Illustration section
+            _buildIllustration(card),
+            // Divider
+            Container(height: 1, color: _bronze.withValues(alpha: 0.08)),
+            // Card body
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildCardHeader(index, theme),
+                  AppSpacing.gapMd,
+                  _buildTypeDropdown(card, theme),
+                  AppSpacing.gapMd,
+                  _buildCardField(_firstFieldLabel(card), card.lengthCtrl),
+                  if (!_isCircular(card.elementType)) ...[
+                    AppSpacing.gapSm,
+                    _buildCardField(Ar.width, card.widthCtrl),
+                  ],
+                  AppSpacing.gapSm,
+                  _buildCardField(Ar.height, card.heightCtrl),
+                  // Conditional "Number of Columns" field
+                  if (card.elementType == 'column') ...[
+                    AppSpacing.gapSm,
+                    _buildCardField(Ar.numberOfColumns, card.columnCountCtrl,
+                        isInteger: true),
+                  ],
+                  AppSpacing.gapMd,
+                  _buildCalcButton(index, theme),
+                  if (card.error != null) _buildErrorResult(card, theme),
+                  if (card.volume > 0 && card.error == null)
+                    _buildVolumeResult(card, theme),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIllustration(_ElementCardData card) {
+    return Container(
+      height: 160,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: _bgOffWhite,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Image.asset(
+        _assetPath(card.elementType),
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => Center(
+          child: Icon(
+            _placeholderIcon(card.elementType),
+            size: 64,
+            color: _bronze.withValues(alpha: 0.35),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardHeader(int index, ThemeData theme) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: _bronze.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+          ),
+          child: Text(
+            '${Ar.element} ${index + 1}',
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: _bronze,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const Spacer(),
+        InkWell(
+          onTap: () => _removeCard(index),
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(4),
+            child: Icon(Icons.close, size: 20, color: _textSecondary),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTypeDropdown(_ElementCardData card, ThemeData theme) {
+    return DropdownButtonFormField<String>(
+      value: card.elementType,
+      decoration: _inputDecoration('نوع العنصر'),
+      items: _elementTypes
+          .map(
+            (e) => DropdownMenuItem(
+              value: e['value'],
+              child: Text(e['label']!,
+                  style: const TextStyle(color: _textPrimary)),
+            ),
+          )
+          .toList(),
+      onChanged: (v) {
+        if (v != null) {
+          setState(() {
+            card.elementType = v;
+            card.lengthCtrl.clear();
+            card.widthCtrl.clear();
+            card.heightCtrl.clear();
+            card.columnCountCtrl.clear();
+            card.volume = 0;
+            card.error = null;
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildCalcButton(int index, ThemeData theme) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => _calcCard(index),
+        icon: const Icon(Icons.calculate, size: 20),
+        label: Text(Ar.calculate),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _bronze,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorResult(_ElementCardData card, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.error.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: theme.colorScheme.error.withValues(alpha: 0.12),
+          ),
+        ),
+        child: Text(
+          card.error!,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.error,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVolumeResult(_ElementCardData card, ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: _bronze.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _bronze.withValues(alpha: 0.12)),
+        ),
+        child: Text(
+          '${Ar.volume}: ${card.volume.toStringAsFixed(2)} م³',
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: _bronze,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAddButton(ThemeData theme) {
+    return OutlinedButton.icon(
+      onPressed: _addCard,
+      icon: Icon(Icons.add_circle_outline, size: 22, color: _bronze),
+      label: Text(Ar.addElement,
+          style: TextStyle(color: _bronze, fontWeight: FontWeight.w600)),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        side: BorderSide(color: _bronze.withValues(alpha: 0.3), width: 1.5),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGrandTotalBar(ThemeData theme) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          top: BorderSide(color: _bronze.withValues(alpha: 0.12), width: 1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: _bronze.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.calculate, color: _bronze, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'المجموع الكلي للخرسانة',
+                  style: TextStyle(
+                    color: _textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${_grandTotal.toStringAsFixed(2)} م³',
+                  style: const TextStyle(
+                    color: _textPrimary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _bronze.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '${_cards.length} ${Ar.element}',
+              style: TextStyle(
+                color: _bronze,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCardField(String label, TextEditingController ctrl,
+      {bool isInteger = false}) {
+    return TextField(
+      controller: ctrl,
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        if (isInteger)
+          FilteringTextInputFormatter.digitsOnly
+        else
+          FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
+      ],
+      textAlign: TextAlign.right,
+      style: const TextStyle(color: _textPrimary, fontSize: 15),
+      decoration: _inputDecoration(label),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: _textSecondary, fontSize: 14),
+      hintText: '0.0',
+      hintStyle: TextStyle(color: _textSecondary.withValues(alpha: 0.4)),
+      filled: true,
+      fillColor: _fieldFill,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: _bronze.withValues(alpha: 0.1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: _bronze.withValues(alpha: 0.1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: _bronze, width: 1.5),
+      ),
+    );
+  }
+
+  // ───────────── simple calc screen (steel / brick) ─────────────
+
+  Widget _buildSimpleScreen() {
+    return Scaffold(
+      appBar: AppBar(title: Text(_title)),
+      body: ListView(
+        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        children: [
+          CustomCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildField(Ar.length, _lengthCtrl),
+                if (widget.type != 'brick') _buildField(Ar.width, _widthCtrl),
+                _buildField(Ar.height, _heightCtrl),
+                if (widget.type == 'steel') ...[
+                  _buildField(Ar.quantity, _qtyCtrl),
+                  _buildField(Ar.diameter, _diameterCtrl),
+                ],
+                if (widget.type == 'brick') ...[
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: _brickSize,
+                    decoration: const InputDecoration(
+                      labelText: 'مقاس الطابوق',
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    ),
+                    items: _brickSizes
+                        .map((s) =>
+                            DropdownMenuItem(value: s, child: Text('$s سم')))
+                        .toList(),
+                    onChanged: (v) => setState(() => _brickSize = v!),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _calculate,
+                    child: Text(Ar.calculate),
+                  ),
+                ),
+                if (_result != null) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .primaryColor
+                          .withValues(alpha: 0.1),
+                      borderRadius:
+                          BorderRadius.circular(AppConstants.cardRadius),
+                    ),
+                    child: Text(
+                      _result!,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextField(
+        controller: controller,
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
+        textAlign: TextAlign.right,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: '0.0',
+        ),
+      ),
+    );
+  }
+}

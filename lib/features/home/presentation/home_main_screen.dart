@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../../core/services/connectivity_provider.dart';
+import '../../../core/widgets/search_bar_widget.dart';
+import '../../../core/widgets/shimmer_loading.dart';
+import '../../../core/widgets/section_header.dart';
+import '../../../core/theme/spacing.dart';
+import '../../../data/repositories/article_repository.dart';
+import '../../../localization/ar.dart';
+import '../../../features/auth/presentation/providers/auth_provider.dart';
+import 'widgets/ad_carousel_widget.dart';
+import 'widgets/quick_tools_section.dart';
+import 'widgets/categories_section.dart';
+import 'widgets/encyclopedia_section.dart';
+import 'widgets/articles_section.dart';
+
+class HomeMainScreen extends StatefulWidget {
+  const HomeMainScreen({super.key});
+
+  @override
+  State<HomeMainScreen> createState() => _HomeMainScreenState();
+}
+
+class _HomeMainScreenState extends State<HomeMainScreen> {
+  bool _isLoading = false;
+
+  Future<void> _onRefresh() async {
+    HapticFeedback.mediumImpact();
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final repo = ArticleRepository();
+    final auth = context.watch<AuthProvider>();
+    final connectivity = context.watch<ConnectivityProvider>();
+    return Scaffold(
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Theme.of(context).primaryColor,
+                    Theme.of(context).primaryColor.withValues(alpha: 0.7),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.white.withValues(
+                              alpha: 0.2,
+                            ),
+                            child: Text(
+                              auth.isLoggedIn
+                                  ? auth.userName[0].toUpperCase()
+                                  : 'Z',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  auth.isLoggedIn
+                                      ? 'مرحباً، ${auth.userName}'
+                                      : 'مرحباً',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      auth.isLoggedIn
+                                          ? auth.userEmail
+                                          : Ar.appName,
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.8,
+                                        ),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      connectivity.isOnline
+                                          ? Icons.wifi
+                                          : Icons.wifi_off,
+                                      size: 14,
+                                      color: connectivity.isOnline
+                                          ? Colors.greenAccent
+                                          : Colors.orange.shade300,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const SearchBarWidget(),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              height: 1,
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: AdCarouselWidget(),
+            ),
+            Container(
+              height: 1,
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            ),
+            SectionHeader(title: Ar.quickTools, actionLabel: 'عرض الكل'),
+            const QuickToolsSection(),
+            AppSpacing.gapSm,
+            SectionHeader(
+              title: Ar.categories,
+              actionLabel: 'عرض الكل',
+              onAction: () => context.push('/categories'),
+            ),
+            const CategoriesSection(),
+            SectionHeader(
+              title: 'الموسوعة الهندسية',
+              actionLabel: 'عرض الكل',
+              onAction: () => context.push('/categories'),
+            ),
+            const EncyclopediaSection(),
+            AppSpacing.gapSm,
+            if (_isLoading)
+              const ShimmerSection()
+            else ...[
+              ArticlesSection(
+                title: Ar.featuredArticles,
+                articles: repo.getFeaturedArticles(),
+              ),
+              const SizedBox(height: 8),
+              ArticlesSection(
+                title: Ar.latestArticles,
+                articles: repo.getLatestArticles(),
+              ),
+            ],
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
