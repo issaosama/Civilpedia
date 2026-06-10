@@ -10,7 +10,7 @@ import '../features/home/presentation/home_screen.dart';
 import '../features/home/presentation/home_main_screen.dart';
 import '../features/tools/presentation/screens/tools_screen.dart';
 import '../features/tools/presentation/screens/calculators/calculator_screen.dart';
-import '../features/tools/presentation/screens/calculators/checklist_screen.dart';
+import '../features/tools/presentation/screens/checklist/checklist_screen.dart';
 import '../features/tools/presentation/screens/calculators/tile_calculator_screen.dart';
 import '../features/articles/presentation/screens/articles_screen.dart';
 import '../features/articles/presentation/screens/article_details_screen.dart';

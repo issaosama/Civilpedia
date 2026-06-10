@@ -171,4 +171,174 @@ class Ar {
   static const String steelResults = 'النتائج';
   static const String steelInputSection = 'بيانات التسليح';
   static const String steelProcurementSection = 'المشتريات';
+
+  // Inspection Checklist - UI
+  static const String inspectionPass = 'ناجح';
+  static const String inspectionFail = 'راسب';
+  static const String inspectionPending = 'قيد الفحص';
+  static const String inspectionCritical = 'حرج';
+  static const String inspectionRequired = 'إلزامي';
+  static const String inspectionNotes = 'ملاحظات';
+  static const String inspectionCodeRef = 'مرجع الكود';
+  static const String inspectionResetAll = 'إعادة تعيين الكل';
+  static const String inspectionTotalItems = 'إجمالي البنود';
+
+  // Inspection Checklist - Categories
+  static const String inspectionCatConcrete = 'أعمال الخرسانة';
+  static const String inspectionCatReinforcement = 'أعمال التسليح';
+  static const String inspectionCatMasonry = 'أعمال الطابوق';
+  static const String inspectionCatPlastering = 'أعمال اللياسة';
+  static const String inspectionCatTiles = 'أعمال الكاشي';
+  static const String inspectionCatWaterproofing = 'العزل المائي';
+  static const String inspectionCatPainting = 'أعمال الدهان';
+  static const String inspectionCatExcavation = 'أعمال الحفر والتربة';
+  static const String inspectionCatAsphalt = 'أعمال الأسفلت';
+  static const String inspectionCatMep = 'أعمال MEP';
+  static const String inspectionCatSafety = 'متطلبات السلامة';
+
+  // Inspection Checklist - Concrete Works
+  static const String inspectionItemConc01 = 'فحص نتائج اختبار الهبوط (Slump)';
+  static const String inspectionItemConc01Desc = 'التأكد من أن الهبوط ضمن الحدود المسموحة حسب ASTM C143';
+  static const String inspectionItemConc02 = 'أخذ مكعبات اختبار الضغط';
+  static const String inspectionItemConc02Desc = 'أخذ 6 مكعبات على الأقل لكل 100 م³ حسب ASTM C39';
+  static const String inspectionItemConc03 = 'فحص جاهزية الهزاز الميكانيكي';
+  static const String inspectionItemConc03Desc = 'سرعة الهزاز 8000-12000 دورة/دقيقة حسب ACI 309R';
+  static const String inspectionItemConc04 = 'فحص نظافة الفرم من الأتربة والشوائب';
+  static const String inspectionItemConc05 = 'فحص تثبيت الكفرات البلاستيكية';
+  static const String inspectionItemConc05Desc = 'التأكد من التغطية الخرسانية حسب ACI 318 §20.6';
+  static const String inspectionItemConc06 = 'فحص ربط حديد التسليح وثباته';
+  static const String inspectionItemConc07 = 'فتح مسارات الصب (Pour Sequence)';
+  static const String inspectionItemConc07Desc = 'تجنب الفواصل الباردة (Cold Joints) حسب ACI 304R';
+  static const String inspectionItemConc08 = 'فحص توفر مصدر ماء للمعالجة';
+  static const String inspectionItemConc09 = 'فحص درجة حرارة الخرسانة عند الصب';
+  static const String inspectionItemConc09Desc = 'ألا تتجاوز 32°C في الجو الحار حسب ACI 305R';
+  static const String inspectionItemConc10 = 'فحص جاهزية الفرم للتسليح والتثبيت';
+  static const String inspectionItemConc11 = 'فحص دعامات الفرم (Shoring)';
+  static const String inspectionItemConc12 = 'فحص أخذ عينات إضافية للاختبار';
+  static const String inspectionItemConc13 = 'فحص مدة نقل الخرسانة';
+  static const String inspectionItemConc13Desc = 'ألا تزيد عن 90 دقيقة من الخلط إلى الصب حسب ACI 304R';
+  static const String inspectionItemConc14 = 'فحص تسوية سطح الخرسانة بعد الصب';
+
+  // Inspection Checklist - Reinforcement
+  static const String inspectionItemReinf01 = 'فحص شهادات المنشأ والمواصفات';
+  static const String inspectionItemReinf02 = 'قياس أقطار الحديد بالقدمة';
+  static const String inspectionItemReinf02Desc = 'مطابقة أقطار الحديد للمواصفات ASTM A615 §6';
+  static const String inspectionItemReinf03 = 'فحص عدد وتباعد الأسياخ';
+  static const String inspectionItemReinf03Desc = 'حسب ACI 318 §25.2';
+  static const String inspectionItemReinf04 = 'فحص أطوال الوصلات (Lap Splices)';
+  static const String inspectionItemReinf04Desc = 'لا تقل عن 60 قطر للسيخ حسب ACI 318 §25.5';
+  static const String inspectionItemReinf05 = 'فحص زوايا الثني والخطاطيف';
+  static const String inspectionItemReinf05Desc = 'ثني 135° للكانات المغلقة حسب ACI 318 §25.3';
+  static const String inspectionItemReinf06 = 'فحص التغطية الخرسانية (Concrete Cover)';
+  static const String inspectionItemReinf06Desc = 'حسب ACI 318 §20.6.1';
+  static const String inspectionItemReinf07 = 'فحص نظافة الحديد من الصدأ والأتربة';
+  static const String inspectionItemReinf08 = 'فحص أسياخ القص (Stirrups/Ties)';
+  static const String inspectionItemReinf08Desc = 'حسب ACI 318 §9.6';
+  static const String inspectionItemReinf09 = 'فحص توزيع الكانات والمسافات بينها';
+  static const String inspectionItemReinf09Desc = 'لا تزيد المسافة عن 16 قطر للسيخ الطولي حسب ACI 318 §25.7';
+  static const String inspectionItemReinf10 = 'فحص تطابق أقطار الحديد مع المخططات';
+  static const String inspectionItemReinf11 = 'فحص الحديد الإضافي عند الفتحات';
+  static const String inspectionItemReinf12 = 'فحص تأريض الحديد للاختبارات الكهربائية';
+
+  // Inspection Checklist - Masonry
+  static const String inspectionItemMas01 = 'فحص رأسية الجدار (Plumb)';
+  static const String inspectionItemMas02 = 'فحص خطية الجدار (Alignment)';
+  static const String inspectionItemMas03 = 'فحص خلطة المونة (Mortar Mix)';
+  static const String inspectionItemMas03Desc = 'مطابقة النسب للكود العراقي §9';
+  static const String inspectionItemMas04 = 'فحص ربطة الطابوق (Bond Pattern)';
+  static const String inspectionItemMas05 = 'فحص فواصل التمدد (Expansion Joints)';
+  static const String inspectionItemMas06 = 'فحص ربط الجدار بالعمود';
+  static const String inspectionItemMas07 = 'فحص استقامة الزوايا والقوائم';
+  static const String inspectionItemMas08 = 'فحص تطابق أبعاد الفتحات مع المخططات';
+
+  // Inspection Checklist - Plastering
+  static const String inspectionItemPlas01 = 'فحص تجهيز السطح ونظافته';
+  static const String inspectionItemPlas01Desc = 'حسب BS 5262';
+  static const String inspectionItemPlas02 = 'فحص نسبة خلطة المونة';
+  static const String inspectionItemPlas03 = 'فحص سماكة اللياسة';
+  static const String inspectionItemPlas04 = 'فحص استواء السطح (Flatness)';
+  static const String inspectionItemPlas05 = 'فحص الزوايا والحواف';
+  static const String inspectionItemPlas06 = 'فحص المعالجة (Curing)';
+  static const String inspectionItemPlas07 = 'فحص اللياسة للطبقة الثانية';
+  static const String inspectionItemPlas08 = 'فحص خلطة التليس للأسقف';
+
+  // Inspection Checklist - Tiles
+  static const String inspectionItemTile01 = 'فحص تسوية الأرضية (Levelness)';
+  static const String inspectionItemTile02 = 'تطابق نوع الكاشي مع المخططات';
+  static const String inspectionItemTile03 = 'فحص استقامة تركيب الكاشي';
+  static const String inspectionItemTile04 = 'فحص خلطة العجينة (Grout)';
+  static const String inspectionItemTile05 = 'فحص فواصل التمدد';
+  static const String inspectionItemTile06 = 'فحص زوايا القص والتخريم';
+  static const String inspectionItemTile07 = 'فحص تسوية السطح بالميزان';
+  static const String inspectionItemTile08 = 'فحص تنظيف السطح بعد التركيب';
+
+  // Inspection Checklist - Waterproofing
+  static const String inspectionItemWpr01 = 'فحص تجهيز السطح ونظافته وجفافه';
+  static const String inspectionItemWpr01Desc = 'حسب ACI 515.1R';
+  static const String inspectionItemWpr02 = 'فحص تداخل اللفات (Laps)';
+  static const String inspectionItemWpr03 = 'فحص تفاصيل الاختراقات والوصلات';
+  static const String inspectionItemWpr04 = 'فحص الزوايا الداخلية والحواف';
+  static const String inspectionItemWpr05 = 'فحص اختبار الملء (Ponding Test)';
+  static const String inspectionItemWpr06 = 'فحص الطبقة الحامية للعزل';
+  static const String inspectionItemWpr07 = 'فحص الظروف الجوية أثناء التركيب';
+  static const String inspectionItemWpr08 = 'فحص تغطية البتومين للأسطح';
+  static const String inspectionItemWpr09 = 'فحص العزل الرأسي للقواعد';
+
+  // Inspection Checklist - Painting
+  static const String inspectionItemPaint01 = 'فحص تجهيز السطح (صنفرة وتنظيف)';
+  static const String inspectionItemPaint01Desc = 'حسب BS 6150';
+  static const String inspectionItemPaint02 = 'فحص تطبيق الطبقة الأساسية (Primer)';
+  static const String inspectionItemPaint03 = 'فحص الظروف الجوية أثناء الدهان';
+  static const String inspectionItemPaint04 = 'فحص تغطية الدهان وتجانسه';
+  static const String inspectionItemPaint05 = 'فحص حماية الأعمال المجاورة';
+  static const String inspectionItemPaint06 = 'فحص تطابق اللون مع المخططات';
+
+  // Inspection Checklist - Excavation & Soil
+  static const String inspectionItemExc01 = 'فحص مناسيب الحفر (Excavation Levels)';
+  static const String inspectionItemExc01Desc = 'حسب ACI 336';
+  static const String inspectionItemExc02 = 'فحص تدعيم الجوانب (Shoring)';
+  static const String inspectionItemExc03 = 'فحص نظام سحب المياه (Dewatering)';
+  static const String inspectionItemExc04 = 'فحص قاع الحفر من التربة الرخوة';
+  static const String inspectionItemExc05 = 'فحص أبعاد الحفر بالنسبة للمخططات';
+  static const String inspectionItemExc06 = 'فحص تربة التأسيس والتقرير الجيوتقني';
+  static const String inspectionItemExc07 = 'فحص موقع مخلفات الحفر (Spoil)';
+  static const String inspectionItemExc08 = 'فحص تأمين الموقع وشرائط التحذير';
+  static const String inspectionItemExc09 = 'فحص منسوب الماء الجوفي';
+  static const String inspectionItemExc10 = 'فحص عمق الحفر للقواعد والأساسات';
+
+  // Inspection Checklist - Asphalt
+  static const String inspectionItemAsph01 = 'فحص درجة حرارة الخلطة الأسفلتية';
+  static const String inspectionItemAsph01Desc = 'حسب AASHTO T245';
+  static const String inspectionItemAsph02 = 'فحص الدمك (Compaction)';
+  static const String inspectionItemAsph02Desc = 'حسب ASTM D6927';
+  static const String inspectionItemAsph03 = 'فحص سمك الطبقة الأسفلتية';
+  static const String inspectionItemAsph04 = 'فحص استواء السطح (Levelness)';
+  static const String inspectionItemAsph05 = 'فحص وصلات التمدد والوصلات الطولية';
+  static const String inspectionItemAsph06 = 'فحص طبقة المادة الرابطة (Tack Coat)';
+  static const String inspectionItemAsph07 = 'فحص رش المياه للتبريد';
+  static const String inspectionItemAsph08 = 'فحص تنظيف السطح بعد الرش';
+
+  // Inspection Checklist - MEP
+  static const String inspectionItemMep01 = 'فحص مدخلات الكهرباء في الخرسانة (Conduits)';
+  static const String inspectionItemMep02 = 'فحص ميول مواسير الصرف الصحي';
+  static const String inspectionItemMep03 = 'فحص التمديدات الصحية قبل الردم';
+  static const String inspectionItemMep04 = 'فحص عزل المواسير الحارة والباردة';
+  static const String inspectionItemMep05 = 'فحص التأريض الكهربائي (Grounding)';
+  static const String inspectionItemMep06 = 'فحص عدادات الكهرباء والماء';
+  static const String inspectionItemMep07 = 'فحص فتحات التكييف والتهوية';
+  static const String inspectionItemMep08 = 'فحص مصبات الأمطار (Rainwater)';
+  static const String inspectionItemMep09 = 'فحص اختبار ضغط المواسير';
+  static const String inspectionItemMep10 = 'فحص عزل المواسير الحرارية';
+
+  // Inspection Checklist - Safety
+  static const String inspectionItemSafe01 = 'فحص معدات الوقاية الشخصية (PPE) للعمال';
+  static const String inspectionItemSafe02 = 'فحص سلامة السقالات';
+  static const String inspectionItemSafe03 = 'فحص توفر طفاية حريق صالحة';
+  static const String inspectionItemSafe04 = 'فحص وجود صندوق إسعافات أولية';
+  static const String inspectionItemSafe05 = 'فحص شرائط التحذير وإغلاق الموقع';
+  static const String inspectionItemSafe06 = 'فحص إضاءة الموقع';
+  static const String inspectionItemSafe07 = 'فحص اللوحات الإرشادية والتحذيرية';
+  static const String inspectionItemSafe08 = 'فحص تهوية الأماكن المغلقة';
+  static const String inspectionItemSafe09 = 'فحص ترتيب الموقع ونظافته';
+  static const String inspectionItemSafe10 = 'فحص تثبيت المواد في الأماكن المرتفعة';
 }

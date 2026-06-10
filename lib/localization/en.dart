@@ -168,4 +168,174 @@ class En {
   static const String steelResults = 'Results';
   static const String steelInputSection = 'Steel Data';
   static const String steelProcurementSection = 'Procurement';
+
+  // Inspection Checklist - UI
+  static const String inspectionPass = 'Pass';
+  static const String inspectionFail = 'Fail';
+  static const String inspectionPending = 'Pending';
+  static const String inspectionCritical = 'Critical';
+  static const String inspectionRequired = 'Required';
+  static const String inspectionNotes = 'Notes';
+  static const String inspectionCodeRef = 'Code Ref.';
+  static const String inspectionResetAll = 'Reset All';
+  static const String inspectionTotalItems = 'Total Items';
+
+  // Inspection Checklist - Categories
+  static const String inspectionCatConcrete = 'Concrete Works';
+  static const String inspectionCatReinforcement = 'Reinforcement Works';
+  static const String inspectionCatMasonry = 'Masonry Works';
+  static const String inspectionCatPlastering = 'Plastering Works';
+  static const String inspectionCatTiles = 'Tile Works';
+  static const String inspectionCatWaterproofing = 'Waterproofing Works';
+  static const String inspectionCatPainting = 'Painting Works';
+  static const String inspectionCatExcavation = 'Excavation & Soil Works';
+  static const String inspectionCatAsphalt = 'Asphalt Works';
+  static const String inspectionCatMep = 'MEP Works';
+  static const String inspectionCatSafety = 'Safety Requirements';
+
+  // Inspection Checklist - Concrete Works
+  static const String inspectionItemConc01 = 'Check slump test results';
+  static const String inspectionItemConc01Desc = 'Ensure slump is within spec per ASTM C143';
+  static const String inspectionItemConc02 = 'Take compressive strength cubes';
+  static const String inspectionItemConc02Desc = 'Min 6 cubes per 100m³ per ASTM C39';
+  static const String inspectionItemConc03 = 'Check mechanical vibrator readiness';
+  static const String inspectionItemConc03Desc = 'Speed 8,000-12,000 rpm per ACI 309R';
+  static const String inspectionItemConc04 = 'Check formwork cleanliness';
+  static const String inspectionItemConc05 = 'Check cover blocks/spacers';
+  static const String inspectionItemConc05Desc = 'Verify concrete cover per ACI 318 §20.6';
+  static const String inspectionItemConc06 = 'Check rebar tying and stability';
+  static const String inspectionItemConc07 = 'Verify pour sequence paths';
+  static const String inspectionItemConc07Desc = 'Avoid cold joints per ACI 304R';
+  static const String inspectionItemConc08 = 'Check water source for curing';
+  static const String inspectionItemConc09 = 'Check concrete temperature at pour';
+  static const String inspectionItemConc09Desc = 'Max 32°C in hot weather per ACI 305R';
+  static const String inspectionItemConc10 = 'Verify formwork alignment and bracing';
+  static const String inspectionItemConc11 = 'Check shoring supports';
+  static const String inspectionItemConc12 = 'Check additional test samples';
+  static const String inspectionItemConc13 = 'Check concrete transport time';
+  static const String inspectionItemConc13Desc = 'Max 90 minutes from mixing to pour per ACI 304R';
+  static const String inspectionItemConc14 = 'Check concrete surface finishing';
+
+  // Inspection Checklist - Reinforcement
+  static const String inspectionItemReinf01 = 'Check mill certificates and specs';
+  static const String inspectionItemReinf02 = 'Measure bar diameters with caliper';
+  static const String inspectionItemReinf02Desc = 'Verify diameters per ASTM A615 §6';
+  static const String inspectionItemReinf03 = 'Check bar count and spacing';
+  static const String inspectionItemReinf03Desc = 'Per ACI 318 §25.2';
+  static const String inspectionItemReinf04 = 'Check lap splice lengths';
+  static const String inspectionItemReinf04Desc = 'Min 60 bar diameters per ACI 318 §25.5';
+  static const String inspectionItemReinf05 = 'Check bend angles and hooks';
+  static const String inspectionItemReinf05Desc = '135° for closed ties per ACI 318 §25.3';
+  static const String inspectionItemReinf06 = 'Check concrete cover';
+  static const String inspectionItemReinf06Desc = 'Per ACI 318 §20.6.1';
+  static const String inspectionItemReinf07 = 'Check bar cleanliness (rust, dirt)';
+  static const String inspectionItemReinf08 = 'Check stirrups and ties';
+  static const String inspectionItemReinf08Desc = 'Per ACI 318 §9.6';
+  static const String inspectionItemReinf09 = 'Check tie spacing and distribution';
+  static const String inspectionItemReinf09Desc = 'Max 16 long. bar diameters per ACI 318 §25.7';
+  static const String inspectionItemReinf10 = 'Verify bar diameters match drawings';
+  static const String inspectionItemReinf11 = 'Check additional bars at openings';
+  static const String inspectionItemReinf12 = 'Check rebar grounding for electrical';
+
+  // Inspection Checklist - Masonry
+  static const String inspectionItemMas01 = 'Check wall plumbness';
+  static const String inspectionItemMas02 = 'Check wall alignment';
+  static const String inspectionItemMas03 = 'Check mortar mix proportion';
+  static const String inspectionItemMas03Desc = 'Verify ratios per Iraqi Code §9';
+  static const String inspectionItemMas04 = 'Check bond pattern';
+  static const String inspectionItemMas05 = 'Check expansion joints';
+  static const String inspectionItemMas06 = 'Check wall-to-column ties';
+  static const String inspectionItemMas07 = 'Check corner squareness';
+  static const String inspectionItemMas08 = 'Check opening dimensions match drawings';
+
+  // Inspection Checklist - Plastering
+  static const String inspectionItemPlas01 = 'Check surface preparation and cleanliness';
+  static const String inspectionItemPlas01Desc = 'Per BS 5262';
+  static const String inspectionItemPlas02 = 'Check mortar mix ratio';
+  static const String inspectionItemPlas03 = 'Check plaster thickness';
+  static const String inspectionItemPlas04 = 'Check surface flatness';
+  static const String inspectionItemPlas05 = 'Check corners and edges';
+  static const String inspectionItemPlas06 = 'Check curing';
+  static const String inspectionItemPlas07 = 'Check second coat application';
+  static const String inspectionItemPlas08 = 'Check ceiling plaster mix';
+
+  // Inspection Checklist - Tiles
+  static const String inspectionItemTile01 = 'Check floor levelness';
+  static const String inspectionItemTile02 = 'Verify tile type matches drawings';
+  static const String inspectionItemTile03 = 'Check tile alignment';
+  static const String inspectionItemTile04 = 'Check grout consistency';
+  static const String inspectionItemTile05 = 'Check expansion joints';
+  static const String inspectionItemTile06 = 'Check cut tile quality';
+  static const String inspectionItemTile07 = 'Check surface level with spirit level';
+  static const String inspectionItemTile08 = 'Check surface cleanliness after installation';
+
+  // Inspection Checklist - Waterproofing
+  static const String inspectionItemWpr01 = 'Check surface prep, cleanliness, dryness';
+  static const String inspectionItemWpr01Desc = 'Per ACI 515.1R';
+  static const String inspectionItemWpr02 = 'Check membrane lap width';
+  static const String inspectionItemWpr03 = 'Check penetration detailing';
+  static const String inspectionItemWpr04 = 'Check internal corners and coves';
+  static const String inspectionItemWpr05 = 'Verify ponding test';
+  static const String inspectionItemWpr06 = 'Check protective layer';
+  static const String inspectionItemWpr07 = 'Check weather during application';
+  static const String inspectionItemWpr08 = 'Check bitumen coverage';
+  static const String inspectionItemWpr09 = 'Check vertical waterproofing at footings';
+
+  // Inspection Checklist - Painting
+  static const String inspectionItemPaint01 = 'Check surface preparation (sanding, cleaning)';
+  static const String inspectionItemPaint01Desc = 'Per BS 6150';
+  static const String inspectionItemPaint02 = 'Check primer application';
+  static const String inspectionItemPaint03 = 'Check weather conditions during painting';
+  static const String inspectionItemPaint04 = 'Check paint coverage and consistency';
+  static const String inspectionItemPaint05 = 'Check protection of adjacent work';
+  static const String inspectionItemPaint06 = 'Verify color matches drawings';
+
+  // Inspection Checklist - Excavation & Soil
+  static const String inspectionItemExc01 = 'Check excavation levels';
+  static const String inspectionItemExc01Desc = 'Per ACI 336';
+  static const String inspectionItemExc02 = 'Check shoring stability';
+  static const String inspectionItemExc03 = 'Check dewatering system';
+  static const String inspectionItemExc04 = 'Check excavation bottom for soft soil';
+  static const String inspectionItemExc05 = 'Check excavation dimensions against drawings';
+  static const String inspectionItemExc06 = 'Check foundation soil and geotechnical report';
+  static const String inspectionItemExc07 = 'Check spoil location';
+  static const String inspectionItemExc08 = 'Check site barricading and warning tapes';
+  static const String inspectionItemExc09 = 'Check groundwater level';
+  static const String inspectionItemExc10 = 'Check foundation excavation depth';
+
+  // Inspection Checklist - Asphalt
+  static const String inspectionItemAsph01 = 'Check asphalt mix temperature';
+  static const String inspectionItemAsph01Desc = 'Per AASHTO T245';
+  static const String inspectionItemAsph02 = 'Check compaction';
+  static const String inspectionItemAsph02Desc = 'Per ASTM D6927';
+  static const String inspectionItemAsph03 = 'Check asphalt layer thickness';
+  static const String inspectionItemAsph04 = 'Check surface levelness';
+  static const String inspectionItemAsph05 = 'Check expansion and longitudinal joints';
+  static const String inspectionItemAsph06 = 'Check tack coat application';
+  static const String inspectionItemAsph07 = 'Check water spray for cooling';
+  static const String inspectionItemAsph08 = 'Check surface cleaning after spraying';
+
+  // Inspection Checklist - MEP
+  static const String inspectionItemMep01 = 'Check electrical conduits in concrete';
+  static const String inspectionItemMep02 = 'Check drainage pipe slopes';
+  static const String inspectionItemMep03 = 'Check plumbing before backfill';
+  static const String inspectionItemMep04 = 'Check hot/cold pipe insulation';
+  static const String inspectionItemMep05 = 'Check electrical grounding';
+  static const String inspectionItemMep06 = 'Check electricity and water meters';
+  static const String inspectionItemMep07 = 'Check HVAC openings';
+  static const String inspectionItemMep08 = 'Check rainwater downpipes';
+  static const String inspectionItemMep09 = 'Check pipe pressure test';
+  static const String inspectionItemMep10 = 'Check thermal pipe insulation';
+
+  // Inspection Checklist - Safety
+  static const String inspectionItemSafe01 = 'Check worker PPE compliance';
+  static const String inspectionItemSafe02 = 'Check scaffolding safety';
+  static const String inspectionItemSafe03 = 'Check fire extinguisher availability';
+  static const String inspectionItemSafe04 = 'Check first aid kit availability';
+  static const String inspectionItemSafe05 = 'Check warning tapes and site closure';
+  static const String inspectionItemSafe06 = 'Check site lighting';
+  static const String inspectionItemSafe07 = 'Check warning and information signs';
+  static const String inspectionItemSafe08 = 'Check confined space ventilation';
+  static const String inspectionItemSafe09 = 'Check site cleanliness and organization';
+  static const String inspectionItemSafe10 = 'Check material securing at height';
 }
