@@ -1,4 +1,4 @@
-package com.example.civilpedia
+package com.civilpedia.app
 
 import io.flutter.embedding.android.FlutterActivity
 
