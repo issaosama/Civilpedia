@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app.dart';
 
+import 'core/constants/sentry_config.dart';
 import 'core/services/theme_provider.dart';
 import 'core/services/language_provider.dart';
 import 'core/services/connectivity_provider.dart';
@@ -12,12 +14,28 @@ import 'features/encyclopedia/presentation/providers/encyclopedia_provider.dart'
 import 'data/local/hive_helper.dart';
 import 'data/local/preferences_helper.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await PreferencesHelper.init();
   await HiveHelper.init();
 
+  if (SentryConfig.isEnabled) {
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = SentryConfig.dsn;
+        options.tracesSampleRate = 0.0;
+        options.attachScreenshot = false;
+        options.attachViewHierarchy = false;
+      },
+      appRunner: () => _runApp(),
+    );
+  } else {
+    _runApp();
+  }
+}
+
+void _runApp() {
   runApp(
     MultiProvider(
       providers: [
