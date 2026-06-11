@@ -55,7 +55,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     _items.clear();
     for (final cat in kCategories) {
       for (final item in kItemsForCategory(cat.id)) {
-        _items[item.id] = item;
+        _items[item.id] = item.copyWith();
       }
     }
   }

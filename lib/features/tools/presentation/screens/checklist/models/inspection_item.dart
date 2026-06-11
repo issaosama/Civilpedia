@@ -23,4 +23,21 @@ class InspectionItem {
     this.status = InspectionStatus.pending,
     this.notes,
   });
+
+  InspectionItem copyWith({
+    InspectionStatus? status,
+    String? notes,
+  }) {
+    return InspectionItem(
+      id: id,
+      categoryId: categoryId,
+      titleKey: titleKey,
+      descriptionKey: descriptionKey,
+      isRequired: isRequired,
+      isCritical: isCritical,
+      codeRef: codeRef,
+      status: status ?? this.status,
+      notes: notes ?? this.notes,
+    );
+  }
 }
