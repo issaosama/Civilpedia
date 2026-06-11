@@ -246,7 +246,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
             ),
             child: const Icon(Icons.grid_on, color: Colors.white, size: 28),
           ),
@@ -430,7 +430,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
           AppSpacing.gapLg,
 
           // ── Divider ──
-          Divider(color: Colors.grey.shade200),
+          Divider(),
           AppSpacing.gapSm,
 
           // ── Tiles Per Box ──
@@ -553,7 +553,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
             ],
           ),
           AppSpacing.gapLg,
-          Divider(color: Colors.grey.shade200),
+          Divider(),
           AppSpacing.gapSm,
 
           // ── Coverage Section ──
@@ -568,7 +568,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
             theme,
           ),
           AppSpacing.gapSm,
-          Divider(color: Colors.grey.shade200),
+          Divider(),
           AppSpacing.gapSm,
 
           // ── Tile Count Section ──
@@ -612,7 +612,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
           // ── Cost Section ──
           if (r.materialCost != null) ...[
             AppSpacing.gapSm,
-            Divider(color: Colors.grey.shade200),
+            Divider(),
             AppSpacing.gapSm,
             _resultRow(
               Ar.materialCost,
@@ -794,7 +794,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
         textAlign: TextAlign.right,
-        style: const TextStyle(color: Color(0xFF1E293B), fontSize: 15),
+        style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
@@ -808,15 +808,15 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
           fillColor: const Color(0xFFF8FAFC),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
             borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
             borderSide: BorderSide(color: Colors.grey.shade200),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
             borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
           ),
         ),
@@ -834,15 +834,15 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
       fillColor: const Color(0xFFF8FAFC),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         borderSide: BorderSide(color: Colors.grey.shade200),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         borderSide: BorderSide(color: Colors.grey.shade200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
     );
