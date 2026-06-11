@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../data/repositories/article_repository.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class ToolsScreen extends StatelessWidget {
   const ToolsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final tools = ArticleRepository.tools;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -45,7 +50,7 @@ class ToolsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'الحاسبات والأدوات الهندسية',
+                    tr(Ar.engineeringTools, En.engineeringTools),
                     style: theme.textTheme.headlineMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -53,7 +58,7 @@ class ToolsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'أدوات تفاعلية صُممت خصيصاً لمساعدتك في العمليات الحسابية والتحقق الميداني السريع في الموقع.',
+                    tr(Ar.toolsDescription, En.toolsDescription),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: Colors.white70,
                       height: 1.5,

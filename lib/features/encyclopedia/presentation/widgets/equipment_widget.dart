@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../domain/entities/content_block.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class EquipmentWidget extends StatelessWidget {
   final EquipmentBlock block;
@@ -10,6 +14,8 @@ class EquipmentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -40,13 +46,13 @@ class EquipmentWidget extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-          ...block.items.map((item) => _itemCard(context, item)),
+          ...block.items.map((item) => _itemCard(context, item, tr)),
         ],
       ),
     );
   }
 
-  Widget _itemCard(BuildContext context, EquipmentItem item) {
+  Widget _itemCard(BuildContext context, EquipmentItem item, String Function(String ar, String en) tr) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -71,7 +77,7 @@ class EquipmentWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 14),
               child: Text(
-                'الغرض: ${item.purpose}',
+                '${tr(Ar.equipmentPurpose, En.equipmentPurpose)}: ${item.purpose}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),
@@ -83,7 +89,7 @@ class EquipmentWidget extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(left: 14),
               child: Text(
-                'المواصفات: ${item.specification}',
+                '${tr(Ar.equipmentSpecification, En.equipmentSpecification)}: ${item.specification}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppColors.textSecondary,
                     ),

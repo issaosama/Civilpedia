@@ -7,6 +7,9 @@ import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/services/language_provider.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class TopicListScreen extends StatefulWidget {
   final String categoryId;
@@ -30,21 +33,23 @@ class _TopicListScreenState extends State<TopicListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final provider = context.watch<EncyclopediaProvider>();
     return Scaffold(
-      appBar: AppBar(title: Text(_categoryLabel(widget.categoryId))),
+      appBar: AppBar(title: Text(_categoryLabel(widget.categoryId, tr))),
       body: AsyncValueWidget(
         isLoading: provider.isLoading,
         error: provider.error,
         isEmpty: provider.topics.isEmpty && provider.error == null,
         onRetry: () => provider.loadTopicsByCategory(widget.categoryId),
-        onEmpty: () => const Center(
+        onEmpty: () => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.menu_book, size: 48, color: AppColors.textSecondary),
               SizedBox(height: 12),
-              Text('لا توجد مواضيع في هذا التصنيف بعد',
+              Text(tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
                   style: TextStyle(color: AppColors.textSecondary)),
             ],
           ),
@@ -153,13 +158,21 @@ class _TopicListScreenState extends State<TopicListScreen> {
     );
   }
 
-  String _categoryLabel(String id) {
+  String _categoryLabel(String id, String Function(String ar, String en) tr) {
     const labels = {
-      'concrete': 'الخرسانة',
-      'steel': 'الحديد',
-      'soil': 'التربة',
-      'roads': 'الطرق',
+      'concrete': Ar.concreteCategory,
+      'steel': Ar.steelCategory,
+      'soil': Ar.soilCategory,
+      'roads': Ar.roadsCategory,
     };
-    return labels[id] ?? id;
+    final arLabel = labels[id] ?? id;
+    if (arLabel == id) return id;
+    final enLabels = {
+      'concrete': En.concreteCategory,
+      'steel': En.steelCategory,
+      'soil': En.soilCategory,
+      'roads': En.roadsCategory,
+    };
+    return tr(arLabel, enLabels[id] ?? id);
   }
 }

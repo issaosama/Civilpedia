@@ -6,6 +6,7 @@ import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
+import '../../../../../localization/en.dart';
 
 // ───────────── Enums ─────────────
 
@@ -318,7 +319,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
 
           // ── Area Dimensions ──
           Text(
-            '${Ar.areaCoverage} (م²)',
+            '${Ar.areaCoverage} (${Ar.squareMeters})',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -498,7 +499,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
                   ? Ar.pricePerTile
                   : Ar.pricePerBox,
               ctrl: _priceCtrl,
-              suffix: isRtl ? 'د.ع' : '\$',
+              suffix: isRtl ? Ar.currency : En.currency,
               theme: theme,
             ),
           ],

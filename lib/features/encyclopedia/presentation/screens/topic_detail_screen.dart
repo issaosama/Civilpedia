@@ -7,6 +7,9 @@ import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/services/language_provider.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class TopicDetailScreen extends StatefulWidget {
   final String topicId;
@@ -30,28 +33,30 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final provider = context.watch<EncyclopediaProvider>();
     final topic = provider.currentTopic;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(topic?.titleAr ?? ''),
+        title: Text(topic != null ? (isArabic ? topic.titleAr : (topic.titleEn ?? topic.titleAr)) : ''),
       ),
       body: AsyncValueWidget(
         isLoading: provider.isLoading,
         error: provider.error,
         isEmpty: topic == null && provider.error == null,
         onRetry: () => provider.loadTopicDetail(widget.topicId),
-        onEmpty: () => const Center(
-          child: Text('الموضوع غير موجود',
+        onEmpty: () => Center(
+          child: Text(tr(Ar.topicNotFound, En.topicNotFound),
               style: TextStyle(color: AppColors.textSecondary)),
         ),
-        onData: () => _content(context, provider, topic!),
+        onData: () => _content(context, provider, topic!, tr),
       ),
     );
   }
 
-  Widget _content(BuildContext context, EncyclopediaProvider provider, dynamic topic) {
+  Widget _content(BuildContext context, EncyclopediaProvider provider, dynamic topic, String Function(String ar, String en) tr) {
     final sections = provider.currentSections;
     return ListView(
       padding: AppSpacing.padLg,
@@ -59,10 +64,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         _summaryCard(context, topic),
         AppSpacing.gapLg,
         if (sections.isEmpty)
-          const Center(
+          Center(
             child: Padding(
               padding: EdgeInsets.all(32),
-              child: Text('لا توجد أقسام بعد',
+              child: Text(tr(Ar.noSectionsYet, En.noSectionsYet),
                   style: TextStyle(color: AppColors.textSecondary)),
             ),
           )
@@ -75,9 +80,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 SectionHeaderWidget(section: section),
                 AppSpacing.gapSm,
                 if (blocks.isEmpty)
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(right: 16),
-                    child: Text('لا توجد محتويات بعد',
+                    child: Text(tr(Ar.noContentYet, En.noContentYet),
                         style: TextStyle(color: AppColors.textSecondary)),
                   )
                 else
@@ -96,6 +101,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _summaryCard(BuildContext context, dynamic topic) {
+    final isArabicSummary = context.watch<LanguageProvider>().isArabic;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -115,17 +121,17 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            topic.titleAr,
+            isArabicSummary ? topic.titleAr : (topic.titleEn ?? topic.titleAr),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
           ),
-          if (topic.titleEn != null) ...[
+          if (topic.titleEn != null && isArabicSummary) ...[
             const SizedBox(height: 4),
             Text(
-              topic.titleEn,
+              topic.titleEn!,
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.7),
                 fontSize: 14,

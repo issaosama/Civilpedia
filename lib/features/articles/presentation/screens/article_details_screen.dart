@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../data/repositories/article_repository.dart';
 import '../../../../data/local/hive_helper.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class ArticleDetailsScreen extends StatefulWidget {
   final String articleId;
@@ -39,9 +42,12 @@ class _ArticleDetailsScreenState extends State<ArticleDetailsScreen> {
     await HiveHelper.toggleDownload(widget.articleId, article);
     setState(() => _isDownloaded = !_isDownloaded);
     if (mounted) {
+      final isArabic = context.read<LanguageProvider>().isArabic;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isDownloaded ? 'تم حفظ المقال للاستخدام بدون إنترنت' : 'تم إزالة المقال من المحفوظات'),
+          content: Text(_isDownloaded
+              ? (isArabic ? Ar.articleSaved : En.articleSaved)
+              : (isArabic ? Ar.articleRemoved : En.articleRemoved)),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -50,13 +56,15 @@ class _ArticleDetailsScreenState extends State<ArticleDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final repo = ArticleRepository();
     final article = HiveHelper.getOfflineArticle(widget.articleId) ?? repo.getArticleById(widget.articleId);
 
     if (article == null) {
       return Scaffold(
         appBar: AppBar(title: const Text(Ar.articleDetails)),
-        body: const Center(child: Text('المقال غير موجود')),
+        body: Center(child: Text(tr(Ar.articleNotFound, En.articleNotFound))),
       );
     }
 
@@ -67,10 +75,12 @@ class _ArticleDetailsScreenState extends State<ArticleDetailsScreen> {
           IconButton(
             icon: Icon(_isFavorite ? Icons.favorite : Icons.favorite_border),
             onPressed: _toggleFavorite,
+            tooltip: _isFavorite ? Ar.removeFromFavorites : Ar.addToFavorites,
           ),
           IconButton(
             icon: Icon(_isDownloaded ? Icons.download_done : Icons.download),
             onPressed: _toggleDownload,
+            tooltip: _isDownloaded ? Ar.downloaded : Ar.download,
           ),
         ],
       ),

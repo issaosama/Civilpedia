@@ -8,6 +8,7 @@ import '../../../core/theme/design_tokens.dart';
 import '../../../core/services/theme_provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../localization/ar.dart';
+import '../../../localization/en.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -83,6 +84,8 @@ class ProfileScreen extends StatelessWidget {
     final themeProvider = context.watch<ThemeProvider>();
     final auth = context.watch<AuthProvider>();
     final lang = context.watch<LanguageProvider>();
+    final isArabic = lang.isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -152,27 +155,25 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // ✅ FIX هنا
-                Text(
-                  auth.isLoggedIn && (auth.currentName?.isNotEmpty ?? false)
-                      ? auth.currentName!
-                      : 'زائر',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+    Text(
+      auth.isLoggedIn && (auth.currentName?.isNotEmpty ?? false)
+          ? auth.currentName!
+          : tr(Ar.visitor, En.visitor),
+      style: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
+    ),
 
-                const SizedBox(height: 4),
+    const SizedBox(height: 4),
 
-                // ✅ FIX هنا
-                Text(
-                  auth.isLoggedIn && (auth.currentEmail?.isNotEmpty ?? false)
-                      ? auth.currentEmail!
-                      : 'غير مسجل',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                ),
+    Text(
+      auth.isLoggedIn && (auth.currentEmail?.isNotEmpty ?? false)
+          ? auth.currentEmail!
+          : tr(Ar.notRegistered, En.notRegistered),
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: isDark ? Colors.white70 : Colors.black54,
+      ),
+    ),
 
                 const SizedBox(height: 20),
 
@@ -226,11 +227,13 @@ class ProfileScreen extends StatelessWidget {
 
           _buildSettingsGroup(
             context,
-            title: 'الإعدادات العامة',
+            title: tr(Ar.generalSettings, En.generalSettings),
             children: [
               SwitchListTile(
                 title: const Text(Ar.darkMode),
-                subtitle: Text(themeProvider.isDarkMode ? 'مفعل' : 'غير مفعل'),
+                subtitle: Text(themeProvider.isDarkMode
+                    ? tr(Ar.enabled, En.enabled)
+                    : tr(Ar.disabled, En.disabled)),
                 value: themeProvider.isDarkMode,
                 onChanged: (_) {
                   HapticFeedback.selectionClick();
@@ -249,7 +252,7 @@ class ProfileScreen extends StatelessWidget {
               ListTile(
                 leading: Icon(Icons.language, color: theme.primaryColor),
                 title: const Text(Ar.language),
-                subtitle: Text(lang.isArabic ? 'العربية' : 'English'),
+                subtitle: Text(lang.isArabic ? Ar.arabicLanguage : En.englishLanguage),
                 trailing: const Icon(Icons.chevron_left, size: 20),
                 onTap: () {
                   HapticFeedback.selectionClick();
@@ -263,7 +266,7 @@ class ProfileScreen extends StatelessWidget {
 
           _buildSettingsGroup(
             context,
-            title: 'الدعم والمشاركة',
+            title: tr(Ar.supportSharing, En.supportSharing),
             children: [
               ListTile(
                 leading: Icon(Icons.share, color: theme.primaryColor),
@@ -299,7 +302,7 @@ class ProfileScreen extends StatelessWidget {
 
           _buildSettingsGroup(
             context,
-            title: 'حول التطبيق',
+            title: tr(Ar.aboutApp, En.aboutApp),
             children: [
               ListTile(
                 leading: Icon(Icons.info_outline, color: theme.primaryColor),

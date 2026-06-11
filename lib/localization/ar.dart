@@ -341,4 +341,72 @@ class Ar {
   static const String inspectionItemSafe08 = 'فحص تهوية الأماكن المغلقة';
   static const String inspectionItemSafe09 = 'فحص ترتيب الموقع ونظافته';
   static const String inspectionItemSafe10 = 'فحص تثبيت المواد في الأماكن المرتفعة';
+
+  // UI Strings
+  static const String welcome = 'مرحباً';
+  static const String viewAll = 'عرض الكل';
+  static const String engineeringEncyclopedia = 'الموسوعة الهندسية';
+  static const String engineeringTools = 'الحاسبات والأدوات الهندسية';
+  static const String toolsDescription = 'أدوات تفاعلية صُممت خصيصاً لمساعدتك في العمليات الحسابية والتحقق الميداني السريع في الموقع.';
+  static const String splashSubtitle = 'الهندسة بين يديك';
+  static const String noTopicsInCategory = 'لا توجد مواضيع في هذا التصنيف بعد';
+  static const String topicNotFound = 'الموضوع غير موجود';
+  static const String noSectionsYet = 'لا توجد أقسام بعد';
+  static const String noContentYet = 'لا توجد محتويات بعد';
+
+  // Article strings
+  static const String articleSaved = 'تم حفظ المقال للاستخدام بدون إنترنت';
+  static const String articleRemoved = 'تم إزالة المقال من المحفوظات';
+  static const String articleNotFound = 'المقال غير موجود';
+
+  // Profile strings
+  static const String visitor = 'زائر';
+  static const String notRegistered = 'غير مسجل';
+  static const String enabled = 'مفعل';
+  static const String disabled = 'غير مفعل';
+  static const String generalSettings = 'الإعدادات العامة';
+  static const String supportSharing = 'الدعم والمشاركة';
+  static const String aboutApp = 'حول التطبيق';
+
+  // Auth validator messages
+  static const String enterEmail = 'يرجى إدخال البريد الإلكتروني';
+  static const String enterPassword = 'يرجى إدخال كلمة المرور';
+  static const String enterName = 'يرجى إدخال الاسم';
+  static const String confirmPasswordHint = 'يرجى تأكيد كلمة المرور';
+  static const String passwordsNotMatch = 'كلمة المرور غير متطابقة';
+
+  // Encyclopedia category labels
+  static const String concreteCategory = 'الخرسانة';
+  static const String steelCategory = 'الحديد';
+  static const String soilCategory = 'التربة';
+  static const String roadsCategory = 'الطرق';
+
+  // Inspection point labels
+  static const String allowedTolerance = 'التسامح المسموح';
+  static const String inspectionMethodLabel = 'طريقة الفحص';
+
+  // Calculator strings
+  static const String mortarQuantity = 'كمية المونة';
+  static const String brickSizeLabel = 'مقاس الطابوق';
+  static const String removeElement = 'إزالة العنصر';
+
+  // Equipment and code labels
+  static const String equipmentPurpose = 'الغرض';
+  static const String equipmentSpecification = 'المواصفات';
+  static const String codeSection = 'القسم';
+  static const String openingAd = 'جارٍ فتح';
+
+  // Unit symbols
+  static const String cubicMeters = 'م³';
+  static const String squareMeters = 'م²';
+
+  // Currency
+  static const String currency = 'د.ع';
+
+  // Calculator messages
+  static const String enterPositiveValues = 'يرجى إدخال قيم موجبة';
+
+  // Language names
+  static const String arabicLanguage = 'العربية';
+  static const String englishLanguage = 'الإنجليزية';
 }

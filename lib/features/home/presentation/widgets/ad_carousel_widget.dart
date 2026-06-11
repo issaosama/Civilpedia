@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:provider/provider.dart';
 import '../../data/datasources/ad_data_source.dart';
 import '../../data/models/ad_banner.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class AdCarouselWidget extends StatefulWidget {
   const AdCarouselWidget({super.key});
@@ -70,17 +74,14 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
           height: 170,
           child: Stack(
             children: [
-              Directionality(
-                textDirection: TextDirection.rtl,
-                child: PageView.builder(
-                  controller: _pageController,
-                  onPageChanged: (i) => setState(() => _currentPage = i),
-                  itemCount: _ads.length,
-                  itemBuilder: (context, index) {
-                    final ad = _ads[index];
-                    return _adCard(context, ad);
-                  },
-                ),
+              PageView.builder(
+                controller: _pageController,
+                onPageChanged: (i) => setState(() => _currentPage = i),
+                itemCount: _ads.length,
+                itemBuilder: (context, index) {
+                  final ad = _ads[index];
+                  return _adCard(context, ad);
+                },
               ),
             ],
           ),
@@ -92,6 +93,8 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
   }
 
   Widget _adCard(BuildContext context, AdBanner ad) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: ClipRRect(
@@ -176,7 +179,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
                     if (ad.actionUrl != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('جارٍ فتح: ${ad.title}'),
+                          content: Text('${tr(Ar.openingAd, En.openingAd)}: ${ad.title}'),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );

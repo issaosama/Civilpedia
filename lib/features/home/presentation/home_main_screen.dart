@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/connectivity_provider.dart';
+import '../../../core/services/language_provider.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../data/repositories/article_repository.dart';
 import '../../../localization/ar.dart';
+import '../../../localization/en.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import 'widgets/ad_carousel_widget.dart';
 import 'widgets/quick_tools_section.dart';
@@ -35,6 +37,8 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final repo = ArticleRepository();
     final auth = context.watch<AuthProvider>();
     final connectivity = context.watch<ConnectivityProvider>();
@@ -85,8 +89,8 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                               children: [
                                 Text(
                                   auth.isLoggedIn
-                                      ? 'مرحباً، ${auth.userName}'
-                                      : 'مرحباً',
+                                      ? '${tr(Ar.welcome, En.welcome)}، ${auth.userName}'
+                                      : tr(Ar.welcome, En.welcome),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -142,18 +146,18 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
               height: 1,
               color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
             ),
-            SectionHeader(title: Ar.quickTools, actionLabel: 'عرض الكل'),
+            SectionHeader(title: Ar.quickTools, actionLabel: tr(Ar.viewAll, En.viewAll)),
             const QuickToolsSection(),
             AppSpacing.gapSm,
             SectionHeader(
               title: Ar.categories,
-              actionLabel: 'عرض الكل',
+              actionLabel: tr(Ar.viewAll, En.viewAll),
               onAction: () => context.push('/categories'),
             ),
             const CategoriesSection(),
             SectionHeader(
-              title: 'الموسوعة الهندسية',
-              actionLabel: 'عرض الكل',
+              title: tr(Ar.engineeringEncyclopedia, En.engineeringEncyclopedia),
+              actionLabel: tr(Ar.viewAll, En.viewAll),
               onAction: () => context.push('/categories'),
             ),
             const EncyclopediaSection(),

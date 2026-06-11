@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../domain/entities/content_block.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class CodeReferenceWidget extends StatelessWidget {
   final CodeReferenceBlock block;
@@ -10,6 +14,8 @@ class CodeReferenceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final ref = block.reference;
     return Container(
       width: double.infinity,
@@ -50,7 +56,7 @@ class CodeReferenceWidget extends StatelessWidget {
                   borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
                 ),
                 child: Text(
-                  'القسم ${ref.section}',
+                  '${tr(Ar.codeSection, En.codeSection)} ${ref.section}',
                   style: const TextStyle(
                     color: Color(0xFFC62828),
                     fontSize: 11,

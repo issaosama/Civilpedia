@@ -238,12 +238,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     }
   }
 
+  // Legacy method kept intentionally for backward compatibility.
   void _calcSteel() {
     final l = double.tryParse(_lengthCtrl.text) ?? 0;
     final q = double.tryParse(_qtyCtrl.text) ?? 0;
     final d = double.tryParse(_diameterCtrl.text) ?? 0;
     if (l <= 0 || q <= 0 || d <= 0) {
-      setState(() => _result = 'يرجى إدخال قيم موجبة');
+      setState(() => _result = Ar.enterPositiveValues);
       return;
     }
     final w = l * q * 0.00617 * (d * d);
@@ -257,7 +258,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final l = double.tryParse(_lengthCtrl.text) ?? 0;
     final h = double.tryParse(_heightCtrl.text) ?? 0;
     if (l <= 0 || h <= 0) {
-      setState(() => _result = 'يرجى إدخال قيم موجبة');
+      setState(() => _result = Ar.invalidInputs);
       return;
     }
     final parts = _brickSize.split('×');
@@ -269,7 +270,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final mortar = area * 0.02;
     setState(
       () => _result =
-          '${Ar.bricksCount}: $bricks\nكمية المونة: ${mortar.toStringAsFixed(2)} م³',
+          '${Ar.bricksCount}: $bricks\n${Ar.mortarQuantity}: ${mortar.toStringAsFixed(2)} ${Ar.cubicMeters}',
     );
   }
 
@@ -578,7 +579,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           border: Border.all(color: _bronze.withValues(alpha: 0.12)),
         ),
         child: Text(
-          '${Ar.volume}: ${card.volume.toStringAsFixed(2)} م³',
+          '${Ar.volume}: ${card.volume.toStringAsFixed(2)} ${Ar.cubicMeters}',
           style: theme.textTheme.titleMedium?.copyWith(
             color: _bronze,
             fontWeight: FontWeight.bold,
@@ -774,7 +775,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_totalRequired.toStringAsFixed(2)} م³',
+                  '${_totalRequired.toStringAsFixed(2)} ${Ar.cubicMeters}',
                   style: const TextStyle(
                     color: _textPrimary,
                     fontSize: 22,
@@ -787,7 +788,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
-                        '${Ar.netVolume}: ${_netTotal.toStringAsFixed(2)} م³  |  ${Ar.wasteVolume} ($_wastePercent%): ${_wasteVolume.toStringAsFixed(2)} م³',
+                        '${Ar.netVolume}: ${_netTotal.toStringAsFixed(2)} ${Ar.cubicMeters}  |  ${Ar.wasteVolume} ($_wastePercent%): ${_wasteVolume.toStringAsFixed(2)} ${Ar.cubicMeters}',
                         style: TextStyle(
                           color: _textSecondary,
                           fontSize: 11,
@@ -1255,7 +1256,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         else
           FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
       ],
-      textAlign: TextAlign.right,
+      textAlign: TextAlign.start,
       style: const TextStyle(color: _textPrimary, fontSize: 15),
       decoration: _inputDecoration(label),
     );
@@ -1308,15 +1309,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _brickSize,
-                    decoration: const InputDecoration(
-                      labelText: 'مقاس الطابوق',
+                    decoration: InputDecoration(
+                      labelText: Ar.brickSizeLabel,
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                     ),
                     items: _brickSizes
                         .map((s) =>
-                            DropdownMenuItem(value: s, child: Text('$s سم')))
+                            DropdownMenuItem(value: s, child: Text('$s ${Ar.cm}')))
                         .toList(),
                     onChanged: (v) => setState(() => _brickSize = v!),
                   ),
@@ -1366,7 +1367,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         controller: controller,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
-        textAlign: TextAlign.right,
+        textAlign: TextAlign.start,
         decoration: InputDecoration(
           labelText: label,
           hintText: '0.0',

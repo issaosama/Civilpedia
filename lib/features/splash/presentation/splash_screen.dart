@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/logger_service.dart';
+import '../../../core/services/language_provider.dart';
 import '../../../data/local/preferences_helper.dart';
+import '../../../localization/ar.dart';
+import '../../../localization/en.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -45,6 +49,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: Center(
@@ -63,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Engineering at your fingertips',
+                  isArabic ? Ar.splashSubtitle : En.splashSubtitle,
                   style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.8)),
                 ),
                 const SizedBox(height: 48),

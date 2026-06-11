@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../domain/entities/content_block.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/services/language_provider.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 class InspectionPointWidget extends StatelessWidget {
   final InspectionPointBlock block;
@@ -10,6 +14,8 @@ class InspectionPointWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final point = block.point;
     return Container(
       width: double.infinity,
@@ -38,15 +44,15 @@ class InspectionPointWidget extends StatelessWidget {
                       ),
                 ),
               ),
-              if (point.isCritical)
+                if (point.isCritical)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.error.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
                   ),
-                  child: const Text(
-                    'حرج',
+                  child: Text(
+                    tr(Ar.inspectionCritical, En.inspectionCritical),
                     style: TextStyle(
                       color: AppColors.error,
                       fontSize: 11,
@@ -58,11 +64,11 @@ class InspectionPointWidget extends StatelessWidget {
           ),
           if (point.acceptableTolerance != null) ...[
             const SizedBox(height: 6),
-            _metaRow(context, Icons.straighten, 'التسامح المسموح', point.acceptableTolerance!),
+            _metaRow(context, Icons.straighten, tr(Ar.allowedTolerance, En.allowedTolerance), point.acceptableTolerance!),
           ],
           if (point.method != null) ...[
             const SizedBox(height: 4),
-            _metaRow(context, Icons.handyman, 'طريقة الفحص', point.method!),
+            _metaRow(context, Icons.handyman, tr(Ar.inspectionMethodLabel, En.inspectionMethodLabel), point.method!),
           ],
         ],
       ),

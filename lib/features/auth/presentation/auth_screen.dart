@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../../core/services/language_provider.dart';
 import '../../../localization/ar.dart';
+import '../../../localization/en.dart';
 import 'providers/auth_provider.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -52,6 +54,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     return Scaffold(
       appBar: AppBar(title: Text(Ar.appName)),
       body: Column(
@@ -67,8 +71,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildLoginForm(),
-                _buildRegisterForm(),
+                _buildLoginForm(tr),
+                _buildRegisterForm(tr),
               ],
             ),
           ),
@@ -77,7 +81,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildLoginForm() {
+  Widget _buildLoginForm(String Function(String ar, String en) tr) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Form(
@@ -100,7 +104,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 prefixIcon: Icon(Icons.email),
               ),
               keyboardType: TextInputType.emailAddress,
-              validator: (v) => (v == null || v.isEmpty) ? 'يرجى إدخال البريد الإلكتروني' : null,
+              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterEmail, En.enterEmail) : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -111,7 +115,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 prefixIcon: Icon(Icons.lock),
               ),
               obscureText: true,
-              validator: (v) => (v == null || v.isEmpty) ? 'يرجى إدخال كلمة المرور' : null,
+              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterPassword, En.enterPassword) : null,
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -128,7 +132,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
     );
   }
 
-  Widget _buildRegisterForm() {
+  Widget _buildRegisterForm(String Function(String ar, String en) tr) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Form(
@@ -150,7 +154,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.person),
               ),
-              validator: (v) => (v == null || v.isEmpty) ? 'يرجى إدخال الاسم' : null,
+              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterName, En.enterName) : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -161,7 +165,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 prefixIcon: Icon(Icons.email),
               ),
               keyboardType: TextInputType.emailAddress,
-              validator: (v) => (v == null || v.isEmpty) ? 'يرجى إدخال البريد الإلكتروني' : null,
+              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterEmail, En.enterEmail) : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -172,7 +176,7 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
                 prefixIcon: Icon(Icons.lock),
               ),
               obscureText: true,
-              validator: (v) => (v == null || v.isEmpty) ? 'يرجى إدخال كلمة المرور' : null,
+              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterPassword, En.enterPassword) : null,
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -184,8 +188,8 @@ class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateM
               ),
               obscureText: true,
               validator: (v) {
-                if (v == null || v.isEmpty) return 'يرجى تأكيد كلمة المرور';
-                if (v != _registerPassword.text) return 'كلمة المرور غير متطابقة';
+                if (v == null || v.isEmpty) return tr(Ar.confirmPasswordHint, En.confirmPasswordHint);
+                if (v != _registerPassword.text) return tr(Ar.passwordsNotMatch, En.passwordsNotMatch);
                 return null;
               },
             ),

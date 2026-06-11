@@ -338,4 +338,72 @@ class En {
   static const String inspectionItemSafe08 = 'Check confined space ventilation';
   static const String inspectionItemSafe09 = 'Check site cleanliness and organization';
   static const String inspectionItemSafe10 = 'Check material securing at height';
+
+  // UI Strings
+  static const String welcome = 'Welcome';
+  static const String viewAll = 'View All';
+  static const String engineeringEncyclopedia = 'Engineering Encyclopedia';
+  static const String engineeringTools = 'Engineering Calculators & Tools';
+  static const String toolsDescription = 'Interactive tools designed to help you with calculations and quick field inspections.';
+  static const String splashSubtitle = 'Engineering at your fingertips';
+  static const String noTopicsInCategory = 'No topics in this category yet';
+  static const String topicNotFound = 'Topic not found';
+  static const String noSectionsYet = 'No sections yet';
+  static const String noContentYet = 'No content yet';
+
+  // Article strings
+  static const String articleSaved = 'Article saved for offline use';
+  static const String articleRemoved = 'Article removed from saved';
+  static const String articleNotFound = 'Article not found';
+
+  // Profile strings
+  static const String visitor = 'Visitor';
+  static const String notRegistered = 'Not registered';
+  static const String enabled = 'Enabled';
+  static const String disabled = 'Disabled';
+  static const String generalSettings = 'General Settings';
+  static const String supportSharing = 'Support & Sharing';
+  static const String aboutApp = 'About App';
+
+  // Auth validator messages
+  static const String enterEmail = 'Please enter your email';
+  static const String enterPassword = 'Please enter your password';
+  static const String enterName = 'Please enter your name';
+  static const String confirmPasswordHint = 'Please confirm your password';
+  static const String passwordsNotMatch = 'Passwords do not match';
+
+  // Encyclopedia category labels
+  static const String concreteCategory = 'Concrete';
+  static const String steelCategory = 'Steel';
+  static const String soilCategory = 'Soil';
+  static const String roadsCategory = 'Roads';
+
+  // Inspection point labels
+  static const String allowedTolerance = 'Allowed Tolerance';
+  static const String inspectionMethodLabel = 'Inspection Method';
+
+  // Calculator strings
+  static const String mortarQuantity = 'Mortar Quantity';
+  static const String brickSizeLabel = 'Brick Size';
+  static const String removeElement = 'Remove element';
+
+  // Equipment and code labels
+  static const String equipmentPurpose = 'Purpose';
+  static const String equipmentSpecification = 'Specification';
+  static const String codeSection = 'Section';
+  static const String openingAd = 'Opening';
+
+  // Unit symbols
+  static const String cubicMeters = 'm³';
+  static const String squareMeters = 'm²';
+
+  // Currency
+  static const String currency = '\$';
+
+  // Calculator messages
+  static const String enterPositiveValues = 'Please enter positive values';
+
+  // Language names
+  static const String arabicLanguage = 'Arabic';
+  static const String englishLanguage = 'English';
 }
