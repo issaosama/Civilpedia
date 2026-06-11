@@ -7,6 +7,8 @@ import 'models/inspection_summary.dart';
 import 'inspection_localization.dart';
 import 'widgets/inspection_summary_card.dart';
 import 'widgets/inspection_category_card.dart';
+import 'checklist_category_detail_screen.dart';
+import 'models/inspection_category.dart';
 import '../../../../../core/services/language_provider.dart';
 
 import '../../../../../localization/ar.dart';
@@ -21,7 +23,6 @@ class ChecklistScreen extends StatefulWidget {
 
 class _ChecklistScreenState extends State<ChecklistScreen> {
   final Map<String, InspectionItem> _items = {};
-  final Set<String> _expandedCategories = {};
 
   @override
   void initState() {
@@ -88,16 +89,6 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     setState(() => item.notes = notes);
   }
 
-  void _toggleCategory(String categoryId) {
-    setState(() {
-      if (_expandedCategories.contains(categoryId)) {
-        _expandedCategories.remove(categoryId);
-      } else {
-        _expandedCategories.add(categoryId);
-      }
-    });
-  }
-
   void _resetAll() {
     setState(() {
       for (final item in _items.values) {
@@ -107,6 +98,34 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     });
   }
 
+  void _navigateToCategory(InspectionCategory category, L10n l10n,
+      String passLabel, String failLabel, String pendingLabel,
+      String criticalLabel, String requiredLabel, String notesHint,
+      String codeRefLabel) {
+    final items = kItemsForCategory(category.id)
+        .map((seed) => _items[seed.id]!)
+        .toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChecklistCategoryDetailScreen(
+          category: category,
+          items: items,
+          l10n: l10n,
+          passLabel: passLabel,
+          failLabel: failLabel,
+          pendingLabel: pendingLabel,
+          criticalLabel: criticalLabel,
+          requiredLabel: requiredLabel,
+          notesHint: notesHint,
+          codeRefLabel: codeRefLabel,
+          onItemStatusChanged: _toggleItemStatus,
+          onItemNotesChanged: _updateItemNotes,
+        ),
+      ),
+    ).then((_) => setState(() {}));
+  }
+
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
@@ -114,6 +133,14 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final summary = _summary;
 
     String tr(String ar, String en) => isArabic ? ar : en;
+
+    final passLabel = tr(Ar.inspectionPass, En.inspectionPass);
+    final failLabel = tr(Ar.inspectionFail, En.inspectionFail);
+    final pendingLabel = tr(Ar.inspectionPending, En.inspectionPending);
+    final criticalLabel = tr(Ar.inspectionCritical, En.inspectionCritical);
+    final requiredLabel = tr(Ar.inspectionRequired, En.inspectionRequired);
+    final notesHint = tr(Ar.inspectionNotes, En.inspectionNotes);
+    final codeRefLabel = tr(Ar.inspectionCodeRef, En.inspectionCodeRef);
 
     return Scaffold(
       appBar: AppBar(
@@ -126,37 +153,28 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
             summary: summary,
             isArabic: isArabic,
             title: tr(Ar.siteChecklist, En.siteChecklist),
-            passLabel: tr(Ar.inspectionPass, En.inspectionPass),
-            failLabel: tr(Ar.inspectionFail, En.inspectionFail),
-            pendingLabel: tr(Ar.inspectionPending, En.inspectionPending),
-            criticalLabel: tr(Ar.inspectionCritical, En.inspectionCritical),
-            requiredLabel: tr(Ar.inspectionRequired, En.inspectionRequired),
+            passLabel: passLabel,
+            failLabel: failLabel,
+            pendingLabel: pendingLabel,
+            criticalLabel: criticalLabel,
+            requiredLabel: requiredLabel,
             totalItemsLabel: tr(Ar.inspectionTotalItems, En.inspectionTotalItems),
             resetLabel: tr(Ar.inspectionResetAll, En.inspectionResetAll),
             onReset: _resetAll,
           ),
           const SizedBox(height: 16),
           ...kCategories.map((cat) {
-            final items = kItemsForCategory(cat.id)
-                .map((seed) => _items[seed.id]!)
-                .toList();
             return Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: InspectionCategoryCard(
                 category: cat,
-                items: items,
-                isExpanded: _expandedCategories.contains(cat.id),
+                items: kItemsForCategory(cat.id)
+                    .map((seed) => _items[seed.id]!)
+                    .toList(),
                 l10n: l10n,
-                passLabel: tr(Ar.inspectionPass, En.inspectionPass),
-                failLabel: tr(Ar.inspectionFail, En.inspectionFail),
-                pendingLabel: tr(Ar.inspectionPending, En.inspectionPending),
-                criticalLabel: tr(Ar.inspectionCritical, En.inspectionCritical),
-                requiredLabel: tr(Ar.inspectionRequired, En.inspectionRequired),
-                notesHint: tr(Ar.inspectionNotes, En.inspectionNotes),
-                codeRefLabel: tr(Ar.inspectionCodeRef, En.inspectionCodeRef),
-                onToggle: () => _toggleCategory(cat.id),
-                onItemStatusChanged: _toggleItemStatus,
-                onItemNotesChanged: _updateItemNotes,
+                onTap: () => _navigateToCategory(cat, l10n, passLabel,
+                    failLabel, pendingLabel, criticalLabel, requiredLabel,
+                    notesHint, codeRefLabel),
               ),
             );
           }),
