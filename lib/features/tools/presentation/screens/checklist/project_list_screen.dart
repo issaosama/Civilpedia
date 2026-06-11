@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../domain/checklist/entities/project.dart';
 import '../../../domain/checklist/project_repository.dart';
+import '../../../data/checklist/checklist_local_data_source.dart';
+import '../../../data/checklist/local_checklist_repository.dart';
 import '../../../data/checklist/project_local_data_source.dart';
 import '../../../data/checklist/local_project_repository.dart';
+import 'checklist_screen.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -76,6 +79,8 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       ),
     );
     if (confirm != true) return;
+    final checklistRepo = LocalChecklistRepository(ChecklistLocalDataSource());
+    await checklistRepo.clearProject(project.id);
     await _repository.deleteProject(project.id);
     await _loadProjects();
   }
@@ -149,9 +154,10 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                         child: InkWell(
                           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Project checklist linking will be added in the next phase.'),
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ChecklistScreen(project: project),
                               ),
                             );
                           },

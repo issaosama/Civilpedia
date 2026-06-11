@@ -8,6 +8,7 @@ import 'checklist_local_data_source.dart';
 class LocalChecklistRepository implements ChecklistRepository {
   final ChecklistLocalDataSource _dataSource;
   Map<String, ChecklistItemState>? _cache;
+  Map<String, Map<String, ChecklistItemState>>? _projectCaches;
 
   LocalChecklistRepository(this._dataSource);
 
@@ -47,8 +48,56 @@ class LocalChecklistRepository implements ChecklistRepository {
     await _dataSource.clearChecklistData();
   }
 
+  @override
+  Future<Map<String, ChecklistItemData>> loadProjectItemStates(
+      String projectId) async {
+    if (_projectCaches != null && _projectCaches!.containsKey(projectId)) {
+      return _convertCache(_projectCaches![projectId]!);
+    }
+    final json = await _dataSource.readProjectChecklistData(projectId);
+    final cache = json != null ? _deserialize(json) : <String, ChecklistItemState>{};
+    _projectCaches ??= <String, Map<String, ChecklistItemState>>{};
+    _projectCaches![projectId] = cache;
+    return _convertCache(cache);
+  }
+
+  @override
+  Future<void> saveProjectItemStatus(
+      String projectId, String itemId, InspectionStatus status) async {
+    await _ensureProjectCache(projectId);
+    _projectCaches![projectId]![itemId] = ChecklistItemState(
+      status: status.name,
+      notes: _projectCaches![projectId]![itemId]?.notes,
+    );
+    await _flushProject(projectId);
+  }
+
+  @override
+  Future<void> saveProjectItemNotes(
+      String projectId, String itemId, String? notes) async {
+    await _ensureProjectCache(projectId);
+    final existingStatus =
+        _projectCaches![projectId]![itemId]?.status ?? 'pending';
+    _projectCaches![projectId]![itemId] = ChecklistItemState(
+      status: existingStatus,
+      notes: notes,
+    );
+    await _flushProject(projectId);
+  }
+
+  @override
+  Future<void> clearProject(String projectId) async {
+    _projectCaches?.remove(projectId);
+    await _dataSource.clearProjectChecklistData(projectId);
+  }
+
   Map<String, ChecklistItemData> _fromCache() {
-    return (_cache ?? {}).map((k, v) => MapEntry(
+    return _convertCache(_cache ?? {});
+  }
+
+  Map<String, ChecklistItemData> _convertCache(
+      Map<String, ChecklistItemState> cache) {
+    return cache.map((k, v) => MapEntry(
           k,
           ChecklistItemData(
             status: InspectionStatus.values.firstWhere(
@@ -66,9 +115,24 @@ class LocalChecklistRepository implements ChecklistRepository {
     _cache = json != null ? _deserialize(json) : {};
   }
 
+  Future<void> _ensureProjectCache(String projectId) async {
+    if (_projectCaches != null && _projectCaches!.containsKey(projectId)) return;
+    final json = await _dataSource.readProjectChecklistData(projectId);
+    final cache = json != null ? _deserialize(json) : <String, ChecklistItemState>{};
+    _projectCaches ??= <String, Map<String, ChecklistItemState>>{};
+    _projectCaches![projectId] = cache;
+  }
+
   Future<void> _flush() async {
     final json = _serialize(_cache ?? {});
     await _dataSource.writeChecklistData(json);
+  }
+
+  Future<void> _flushProject(String projectId) async {
+    final cache = _projectCaches?[projectId];
+    if (cache == null) return;
+    final json = _serialize(cache);
+    await _dataSource.writeProjectChecklistData(projectId, json);
   }
 
   Map<String, ChecklistItemState> _deserialize(String json) {

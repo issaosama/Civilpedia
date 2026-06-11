@@ -18,4 +18,13 @@ abstract class ChecklistRepository {
   Future<void> saveItemNotes(String itemId, String? notes);
 
   Future<void> clearAll();
+
+  /// Project-scoped methods
+  Future<Map<String, ChecklistItemData>> loadProjectItemStates(String projectId);
+
+  Future<void> saveProjectItemStatus(String projectId, String itemId, InspectionStatus status);
+
+  Future<void> saveProjectItemNotes(String projectId, String itemId, String? notes);
+
+  Future<void> clearProject(String projectId);
 }

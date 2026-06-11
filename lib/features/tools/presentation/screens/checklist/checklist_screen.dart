@@ -12,6 +12,7 @@ import 'widgets/inspection_category_card.dart';
 import 'checklist_category_detail_screen.dart';
 import 'models/inspection_category.dart';
 import 'project_list_screen.dart';
+import '../../../domain/checklist/entities/project.dart';
 import '../../../../../core/services/language_provider.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/design_tokens.dart';
@@ -24,7 +25,9 @@ import '../../../../../localization/ar.dart';
 import '../../../../../localization/en.dart';
 
 class ChecklistScreen extends StatefulWidget {
-  const ChecklistScreen({super.key});
+  final Project? project;
+
+  const ChecklistScreen({super.key, this.project});
 
   @override
   State<ChecklistScreen> createState() => _ChecklistScreenState();
@@ -37,6 +40,9 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   );
   Timer? _notesDebounceTimer;
   String? _pendingNotesItemId;
+  bool get _isProject => widget.project != null;
+  String? get _projectId => widget.project?.id;
+  String? get _projectName => widget.project?.name;
 
   @override
   void initState() {
@@ -56,7 +62,9 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
 
   Future<void> _loadPersistedStates() async {
     try {
-      final states = await _repository.loadItemStates();
+      final states = _isProject
+          ? await _repository.loadProjectItemStates(_projectId!)
+          : await _repository.loadItemStates();
       for (final entry in states.entries) {
         final item = _items[entry.key];
         if (item != null) {
@@ -118,7 +126,11 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         InspectionStatus.fail => InspectionStatus.pending,
       };
     });
-    _repository.saveItemStatus(itemId, item.status);
+    if (_isProject) {
+      _repository.saveProjectItemStatus(_projectId!, itemId, item.status);
+    } else {
+      _repository.saveItemStatus(itemId, item.status);
+    }
   }
 
   void _updateItemNotes(String itemId, String notes) {
@@ -132,7 +144,11 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
       () {
         final id = _pendingNotesItemId;
         if (id != null) {
-          _repository.saveItemNotes(id, _items[id]?.notes);
+          if (_isProject) {
+            _repository.saveProjectItemNotes(_projectId!, id, _items[id]?.notes);
+          } else {
+            _repository.saveItemNotes(id, _items[id]?.notes);
+          }
           _pendingNotesItemId = null;
         }
       },
@@ -146,7 +162,11 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         item.notes = null;
       }
     });
-    _repository.clearAll();
+    if (_isProject) {
+      _repository.clearProject(_projectId!);
+    } else {
+      _repository.clearAll();
+    }
   }
 
   void _navigateToCategory(InspectionCategory category, L10n l10n,
@@ -196,7 +216,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(tr(Ar.siteChecklist, En.siteChecklist)),
+        title: Text(_isProject ? _projectName! : tr(Ar.siteChecklist, En.siteChecklist)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -204,7 +224,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
           InspectionSummaryCard(
             summary: summary,
             isArabic: isArabic,
-            title: tr(Ar.siteChecklist, En.siteChecklist),
+            title: _isProject ? _projectName! : tr(Ar.siteChecklist, En.siteChecklist),
             passLabel: passLabel,
             failLabel: failLabel,
             pendingLabel: pendingLabel,
