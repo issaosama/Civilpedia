@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../core/constants/app_constants.dart';
 import '../../../../../core/theme/design_tokens.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
 
-const Color _bronze = Color(0xFFB8860B);
-const Color _bgOffWhite = Color(0xFFF5F7FA);
-const Color _textPrimary = Color(0xFF1E293B);
-const Color _textSecondary = Color(0xFF64748B);
 const Color _fieldFill = Color(0xFFF8FAFC);
 
 class CalculatorScreen extends StatefulWidget {
@@ -319,10 +316,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: _bgOffWhite,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(_title, style: const TextStyle(color: Colors.white)),
-        backgroundColor: _bronze,
+        backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView(
@@ -346,19 +343,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _bronze.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _bronze.withValues(alpha: 0.12)),
+        color: AppColors.primary.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline, color: _bronze, size: 20),
+          Icon(Icons.info_outline, color: AppColors.primary, size: 20),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               Ar.addElementsInfo,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: _textSecondary,
+                color: AppColors.textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -376,8 +373,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _bronze.withValues(alpha: 0.15), width: 1),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.15), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.04),
@@ -397,7 +394,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             // Illustration section
             _buildIllustration(card),
             // Divider
-            Container(height: 1, color: _bronze.withValues(alpha: 0.08)),
+            Container(height: 1, color: AppColors.primary.withValues(alpha: 0.08)),
             // Card body
             Padding(
               padding: const EdgeInsets.all(16),
@@ -443,10 +440,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       height: 160,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: _bgOffWhite,
+        color: AppColors.background,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+          topLeft: Radius.circular(DesignTokens.radiusMd),
+          topRight: Radius.circular(DesignTokens.radiusMd),
         ),
       ),
       clipBehavior: Clip.antiAlias,
@@ -457,7 +454,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           child: Icon(
             _placeholderIcon(card.elementType),
             size: 64,
-            color: _bronze.withValues(alpha: 0.35),
+            color: AppColors.primary.withValues(alpha: 0.35),
           ),
         ),
       ),
@@ -470,13 +467,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: _bronze.withValues(alpha: 0.1),
+            color: AppColors.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
           ),
           child: Text(
             '${Ar.element} ${index + 1}',
             style: theme.textTheme.labelMedium?.copyWith(
-              color: _bronze,
+              color: AppColors.primary,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -484,10 +481,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         const Spacer(),
         InkWell(
           onTap: () => _removeCard(index),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: Icon(Icons.close, size: 20, color: _textSecondary),
+            child: Icon(Icons.close, size: 20, color: AppColors.textSecondary),
           ),
         ),
       ],
@@ -503,7 +500,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             (e) => DropdownMenuItem(
               value: e['value'],
               child: Text(e['label']!,
-                  style: const TextStyle(color: _textPrimary)),
+                  style: const TextStyle(color: AppColors.textPrimary)),
             ),
           )
           .toList(),
@@ -531,12 +528,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         icon: const Icon(Icons.calculate, size: 20),
         label: Text(Ar.calculate),
         style: ElevatedButton.styleFrom(
-          backgroundColor: _bronze,
+          backgroundColor: AppColors.primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(vertical: 14),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
           ),
         ),
       ),
@@ -551,7 +548,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: theme.colorScheme.error.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
           border: Border.all(
             color: theme.colorScheme.error.withValues(alpha: 0.12),
           ),
@@ -574,14 +571,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: _bronze.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _bronze.withValues(alpha: 0.12)),
+          color: AppColors.primary.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+          border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
         ),
         child: Text(
           '${Ar.volume}: ${card.volume.toStringAsFixed(2)} ${Ar.cubicMeters}',
           style: theme.textTheme.titleMedium?.copyWith(
-            color: _bronze,
+            color: AppColors.primary,
             fontWeight: FontWeight.bold,
           ),
           textAlign: TextAlign.center,
@@ -593,14 +590,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget _buildAddButton(ThemeData theme) {
     return OutlinedButton.icon(
       onPressed: _addCard,
-      icon: Icon(Icons.add_circle_outline, size: 22, color: _bronze),
+      icon: Icon(Icons.add_circle_outline, size: 22, color: AppColors.primary),
       label: Text(Ar.addElement,
-          style: TextStyle(color: _bronze, fontWeight: FontWeight.w600)),
+          style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
       style: OutlinedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 16),
-        side: BorderSide(color: _bronze.withValues(alpha: 0.3), width: 1.5),
+        side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         ),
       ),
     );
@@ -616,7 +613,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.options,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: _textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -625,7 +622,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.wasteFactor,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: _textSecondary,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -642,11 +639,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       _wastePercent = pct.toDouble();
                       _isCustomWaste = false;
                     }),
-                    selectedColor: _bronze.withValues(alpha: 0.15),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
                     labelStyle: TextStyle(
                       color: !_isCustomWaste && _wastePercent == pct
-                          ? _bronze
-                          : _textPrimary,
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -655,9 +652,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   label: Text(Ar.wasteCustom),
                   selected: _isCustomWaste,
                   onSelected: (_) => setState(() => _isCustomWaste = true),
-                  selectedColor: _bronze.withValues(alpha: 0.15),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
                   labelStyle: TextStyle(
-                    color: _isCustomWaste ? _bronze : _textPrimary,
+                    color: _isCustomWaste ? AppColors.primary : AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -673,7 +670,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.truckCapacity,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: _textSecondary,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -687,9 +684,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     selected: _truckCapacity == cap,
                     onSelected: (_) =>
                         setState(() => _truckCapacity = cap.toDouble()),
-                    selectedColor: _bronze.withValues(alpha: 0.15),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
                     labelStyle: TextStyle(
-                      color: _truckCapacity == cap ? _bronze : _textPrimary,
+                      color: _truckCapacity == cap ? AppColors.primary : AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -704,14 +701,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: Text(
                     Ar.costPerCubic,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: _textSecondary,
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 Switch(
                   value: _showCost,
-                  activeColor: _bronze,
+                  activeColor: AppColors.primary,
                   onChanged: (v) => setState(() => _showCost = v),
                 ),
               ],
@@ -739,7 +736,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          top: BorderSide(color: _bronze.withValues(alpha: 0.12), width: 1),
+          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
         ),
         boxShadow: [
           BoxShadow(
@@ -754,10 +751,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: _bronze.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
             ),
-            child: Icon(Icons.calculate, color: _bronze, size: 24),
+            child: Icon(Icons.calculate, color: AppColors.primary, size: 24),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -768,7 +765,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 Text(
                   Ar.grandTotal,
                   style: TextStyle(
-                    color: _textSecondary,
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -777,7 +774,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 Text(
                   '${_totalRequired.toStringAsFixed(2)} ${Ar.cubicMeters}',
                   style: const TextStyle(
-                    color: _textPrimary,
+                    color: AppColors.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -790,7 +787,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       child: Text(
                         '${Ar.netVolume}: ${_netTotal.toStringAsFixed(2)} ${Ar.cubicMeters}  |  ${Ar.wasteVolume} ($_wastePercent%): ${_wasteVolume.toStringAsFixed(2)} ${Ar.cubicMeters}',
                         style: TextStyle(
-                          color: _textSecondary,
+                          color: AppColors.textSecondary,
                           fontSize: 11,
                         ),
                       ),
@@ -800,7 +797,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         ? '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount  |  ${Ar.concreteCost}: ${_totalConcreteCost!.toStringAsFixed(0)}'
                         : '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount',
                     style: TextStyle(
-                      color: _textSecondary,
+                      color: AppColors.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -812,13 +809,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _bronze.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
             ),
             child: Text(
               '${_cards.length} ${Ar.element}',
               style: TextStyle(
-                color: _bronze,
+                color: AppColors.primary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -835,10 +832,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: _bgOffWhite,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text(_title, style: const TextStyle(color: Colors.white)),
-        backgroundColor: _bronze,
+        backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: ListView(
@@ -872,7 +869,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.steelInputSection,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: _textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -904,18 +901,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _bronze.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(8),
+                color: AppColors.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: _bronze),
+                  Icon(Icons.info_outline, size: 16, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Flexible(
                     child: Text(
                       '${Ar.steelWeightPerMeter}: ${_steelWPM.toStringAsFixed(3)} ${Ar.kg}/${Ar.meters}',
                       style: TextStyle(
-                        color: _bronze,
+                        color: AppColors.primary,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -932,12 +929,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 icon: const Icon(Icons.calculate, size: 20),
                 label: Text(Ar.calculate),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _bronze,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
                   ),
                 ),
               ),
@@ -958,7 +955,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.options,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: _textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -966,7 +963,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.wasteFactor,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: _textSecondary,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -984,11 +981,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       _steelWastePercent = pct.toDouble();
                       _steelIsCustomWaste = false;
                     }),
-                    selectedColor: _bronze.withValues(alpha: 0.15),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
                     labelStyle: TextStyle(
                       color: !_steelIsCustomWaste && _steelWastePercent == pct
-                          ? _bronze
-                          : _textPrimary,
+                          ? AppColors.primary
+                          : AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -998,9 +995,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   selected: _steelIsCustomWaste,
                   onSelected: (_) =>
                       setState(() => _steelIsCustomWaste = true),
-                  selectedColor: _bronze.withValues(alpha: 0.15),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
                   labelStyle: TextStyle(
-                    color: _steelIsCustomWaste ? _bronze : _textPrimary,
+                    color: _steelIsCustomWaste ? AppColors.primary : AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -1018,14 +1015,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: Text(
                     Ar.steelPricePerKg,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: _textSecondary,
+                      color: AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
                 Switch(
                   value: _showSteelCost,
-                  activeColor: _bronze,
+                  activeColor: AppColors.primary,
                   onChanged: (v) => setState(() => _showSteelCost = v),
                 ),
               ],
@@ -1038,7 +1035,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.steelProcurementSection,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: _textSecondary,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1060,7 +1057,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.steelResults,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: _textPrimary,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1102,7 +1099,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               Text(
                 Ar.steelProcurementSection,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: _bronze,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -1132,7 +1129,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: theme.colorScheme.error.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
         border: Border.all(
           color: theme.colorScheme.error.withValues(alpha: 0.12),
         ),
@@ -1158,7 +1155,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          top: BorderSide(color: _bronze.withValues(alpha: 0.12), width: 1),
+          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
         ),
         boxShadow: [
           BoxShadow(
@@ -1173,10 +1170,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: _bronze.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
             ),
-            child: Icon(Icons.build, color: _bronze, size: 24),
+            child: Icon(Icons.build, color: AppColors.primary, size: 24),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1187,7 +1184,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 Text(
                   Ar.weight,
                   style: TextStyle(
-                    color: _textSecondary,
+                    color: AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1198,7 +1195,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       ? '${_steelTotalW.toStringAsFixed(2)} ${Ar.kg} / ${(_steelTotalW / 1000).toStringAsFixed(3)} ${Ar.tons}'
                       : '0.00 ${Ar.kg} / 0.000 ${Ar.tons}',
                   style: const TextStyle(
-                    color: _textPrimary,
+                    color: AppColors.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1209,13 +1206,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: _bronze.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(10),
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
             ),
             child: Text(
               '$_steelDiameter ${Ar.unitMm}',
               style: TextStyle(
-                color: _bronze,
+                color: AppColors.primary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -1233,10 +1230,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: TextStyle(color: _textSecondary, fontSize: 14)),
+              style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
           Text(value,
               style: TextStyle(
-                color: _textPrimary,
+                color: AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               )),
@@ -1257,7 +1254,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
       ],
       textAlign: TextAlign.start,
-      style: const TextStyle(color: _textPrimary, fontSize: 15),
+      style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
       decoration: _inputDecoration(label),
     );
   }
@@ -1265,23 +1262,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   InputDecoration _inputDecoration(String label) {
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: _textSecondary, fontSize: 14),
+      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
       hintText: '0.0',
-      hintStyle: TextStyle(color: _textSecondary.withValues(alpha: 0.4)),
+      hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.4)),
       filled: true,
       fillColor: _fieldFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _bronze.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+        borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: _bronze.withValues(alpha: 0.1)),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+        borderSide: BorderSide(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: _bronze, width: 1.5),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
     );
   }
