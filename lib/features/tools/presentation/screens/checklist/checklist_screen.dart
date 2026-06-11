@@ -11,7 +11,11 @@ import 'widgets/inspection_summary_card.dart';
 import 'widgets/inspection_category_card.dart';
 import 'checklist_category_detail_screen.dart';
 import 'models/inspection_category.dart';
+import 'project_list_screen.dart';
 import '../../../../../core/services/language_provider.dart';
+import '../../../../../core/theme/app_colors.dart';
+import '../../../../../core/theme/design_tokens.dart';
+import '../../../../../core/theme/spacing.dart';
 import '../../../domain/checklist/checklist_repository.dart';
 import '../../../data/checklist/local_checklist_repository.dart';
 import '../../../data/checklist/checklist_local_data_source.dart';
@@ -177,6 +181,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final l10n = L10n(isArabic);
+    final theme = Theme.of(context);
     final summary = _summary;
 
     String tr(String ar, String en) => isArabic ? ar : en;
@@ -208,6 +213,37 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
             totalItemsLabel: tr(Ar.inspectionTotalItems, En.inspectionTotalItems),
             resetLabel: tr(Ar.inspectionResetAll, En.inspectionResetAll),
             onReset: _resetAll,
+          ),
+          const SizedBox(height: 12),
+          Card(
+            margin: EdgeInsets.zero,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProjectListScreen()),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    Icon(Icons.folder, size: 20, color: AppColors.primary),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'My Projects',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, size: 20, color: AppColors.textSecondary),
+                  ],
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           ...kCategories.map((cat) {
