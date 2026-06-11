@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'data/inspection_seed_data.dart';
@@ -29,6 +31,8 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   final ChecklistRepository _repository = LocalChecklistRepository(
     ChecklistLocalDataSource(),
   );
+  Timer? _notesDebounceTimer;
+  String? _pendingNotesItemId;
 
   @override
   void initState() {
@@ -60,6 +64,12 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     } catch (_) {
       // Persistence failure must not crash the checklist.
     }
+  }
+
+  @override
+  void dispose() {
+    _notesDebounceTimer?.cancel();
+    super.dispose();
   }
 
   InspectionSummary get _summary {
@@ -111,7 +121,18 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final item = _items[itemId];
     if (item == null) return;
     setState(() => item.notes = notes);
-    _repository.saveItemNotes(itemId, notes);
+    _pendingNotesItemId = itemId;
+    _notesDebounceTimer?.cancel();
+    _notesDebounceTimer = Timer(
+      const Duration(milliseconds: 400),
+      () {
+        final id = _pendingNotesItemId;
+        if (id != null) {
+          _repository.saveItemNotes(id, _items[id]?.notes);
+          _pendingNotesItemId = null;
+        }
+      },
+    );
   }
 
   void _resetAll() {
