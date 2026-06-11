@@ -14,14 +14,16 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
-        secondary: AppColors.primaryLight,
+        onPrimary: AppColors.onPrimary,
+        secondary: AppColors.brandSecondary,
+        onSecondary: AppColors.onSecondary,
         surface: AppColors.surface,
         error: AppColors.error,
       ),
       textTheme: AppTypography.textTheme,
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.secondary,
+        foregroundColor: AppColors.onPrimary,
         centerTitle: true,
         elevation: 0,
       ),
@@ -40,7 +42,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.secondary,
+          foregroundColor: AppColors.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
         ),
@@ -71,7 +73,9 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.darkBackground,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryLight,
-        secondary: AppColors.primaryLight,
+        onPrimary: AppColors.onPrimary,
+        secondary: AppColors.brandSecondary,
+        onSecondary: AppColors.onSecondary,
         surface: AppColors.darkSurface,
         error: AppColors.error,
       ),
@@ -98,7 +102,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryLight,
-          foregroundColor: AppColors.secondary,
+          foregroundColor: AppColors.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
         ),
