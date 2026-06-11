@@ -10,6 +10,9 @@ import 'widgets/inspection_category_card.dart';
 import 'checklist_category_detail_screen.dart';
 import 'models/inspection_category.dart';
 import '../../../../../core/services/language_provider.dart';
+import '../../../domain/checklist/checklist_repository.dart';
+import '../../../data/checklist/local_checklist_repository.dart';
+import '../../../data/checklist/checklist_local_data_source.dart';
 
 import '../../../../../localization/ar.dart';
 import '../../../../../localization/en.dart';
@@ -23,11 +26,15 @@ class ChecklistScreen extends StatefulWidget {
 
 class _ChecklistScreenState extends State<ChecklistScreen> {
   final Map<String, InspectionItem> _items = {};
+  final ChecklistRepository _repository = LocalChecklistRepository(
+    ChecklistLocalDataSource(),
+  );
 
   @override
   void initState() {
     super.initState();
     _initItems();
+    _loadPersistedStates();
   }
 
   void _initItems() {
@@ -36,6 +43,22 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
       for (final item in kItemsForCategory(cat.id)) {
         _items[item.id] = item;
       }
+    }
+  }
+
+  Future<void> _loadPersistedStates() async {
+    try {
+      final states = await _repository.loadItemStates();
+      for (final entry in states.entries) {
+        final item = _items[entry.key];
+        if (item != null) {
+          item.status = entry.value.status;
+          item.notes = entry.value.notes;
+        }
+      }
+      if (mounted) setState(() {});
+    } catch (_) {
+      // Persistence failure must not crash the checklist.
     }
   }
 
@@ -81,12 +104,14 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         InspectionStatus.fail => InspectionStatus.pending,
       };
     });
+    _repository.saveItemStatus(itemId, item.status);
   }
 
   void _updateItemNotes(String itemId, String notes) {
     final item = _items[itemId];
     if (item == null) return;
     setState(() => item.notes = notes);
+    _repository.saveItemNotes(itemId, notes);
   }
 
   void _resetAll() {
@@ -96,6 +121,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
         item.notes = null;
       }
     });
+    _repository.clearAll();
   }
 
   void _navigateToCategory(InspectionCategory category, L10n l10n,
