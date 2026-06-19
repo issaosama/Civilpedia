@@ -5,6 +5,9 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../data/local/preferences_helper.dart';
+import '../../../core/location/baghdad_area.dart';
+import '../../../features/profile/domain/user_profile.dart';
+import '../../../features/profile/presentation/providers/user_profile_provider.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 
@@ -33,12 +36,24 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Future<void> _navigate() async {
     await Future.delayed(AppConstants.splashDuration);
     if (!mounted) return;
-    if (PreferencesHelper.isOnboardingSeen) {
-      context.go('/home');
-    } else {
+    if (!PreferencesHelper.isOnboardingSeen) {
       context.go('/onboarding');
+      LoggerService.info('Splash → onboarding');
+      return;
     }
-    LoggerService.info('Splash navigation completed');
+    final profileProvider = context.read<UserProfileProvider>();
+    await profileProvider.loadProfile();
+    if (!mounted) return;
+    final profile = profileProvider.profile;
+    if (profile == null ||
+        profile.userType == CivilUserType.generalUser ||
+        profile.baghdadArea == BaghdadArea.unknown) {
+      context.go('/profile-setup');
+      LoggerService.info('Splash → profile-setup');
+    } else {
+      context.go('/home');
+      LoggerService.info('Splash → home');
+    }
   }
 
   @override

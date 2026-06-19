@@ -10,6 +10,7 @@ import 'core/services/language_provider.dart';
 import 'core/services/connectivity_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
+import 'features/profile/presentation/providers/user_profile_provider.dart';
 
 import 'core/di/app_dependencies.dart';
 import 'data/local/hive_helper.dart';
@@ -51,6 +52,10 @@ void _runApp() {
 
         ChangeNotifierProvider(create: (_) => EncyclopediaProvider(
           repository: AppDependencies.encyclopediaRepo,
+        )),
+
+        ChangeNotifierProvider(create: (_) => UserProfileProvider(
+          repository: AppDependencies.userProfileRepo,
         )),
       ],
 

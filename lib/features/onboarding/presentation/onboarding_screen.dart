@@ -46,7 +46,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
     await PreferencesHelper.setOnboardingSeen();
     if (!mounted) return;
     LoggerService.info('Onboarding completed');
-    context.go('/home');
+    context.go('/profile-setup');
   }
 
   @override

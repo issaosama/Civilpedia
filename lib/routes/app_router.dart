@@ -16,6 +16,7 @@ import '../features/articles/presentation/screens/articles_screen.dart';
 import '../features/articles/presentation/screens/article_details_screen.dart';
 import '../features/saved/presentation/saved_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/profile/presentation/screens/profile_setup_screen.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
@@ -33,6 +34,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/onboarding',
       builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      path: '/profile-setup',
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const ProfileSetupScreen(),
     ),
     GoRoute(
       path: '/auth',

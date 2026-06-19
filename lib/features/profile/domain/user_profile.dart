@@ -1,11 +1,23 @@
 import '../../../core/location/baghdad_area.dart';
 import '../../../core/schema/schema_constants.dart';
 
-enum UserType { visitor, engineer, supplier, company }
+enum CivilUserType {
+  siteEngineer,
+  consultantEngineer,
+  structuralEngineer,
+  contractor,
+  engineeringStudent,
+  technicianSupervisor,
+  supplierShopOwner,
+  engineeringOffice,
+  constructionCompany,
+  buildingOffice,
+  generalUser;
+}
 
 class LocalUserProfile {
   final String anonymousInstallId;
-  final UserType userType;
+  final CivilUserType userType;
   final BaghdadArea baghdadArea;
   final String? name;
   final String? title;
@@ -20,7 +32,7 @@ class LocalUserProfile {
 
   LocalUserProfile({
     required this.anonymousInstallId,
-    this.userType = UserType.visitor,
+    this.userType = CivilUserType.generalUser,
     this.baghdadArea = BaghdadArea.unknown,
     this.name,
     this.title,
@@ -37,7 +49,7 @@ class LocalUserProfile {
 
   LocalUserProfile copyWith({
     String? anonymousInstallId,
-    UserType? userType,
+    CivilUserType? userType,
     BaghdadArea? baghdadArea,
     String? name,
     String? title,
@@ -86,9 +98,9 @@ class LocalUserProfile {
   factory LocalUserProfile.fromJson(Map<String, dynamic> json) {
     return LocalUserProfile(
       anonymousInstallId: json['anonymousInstallId'] as String? ?? '',
-      userType: UserType.values.firstWhere(
+      userType: CivilUserType.values.firstWhere(
         (e) => e.name == json['userType'],
-        orElse: () => UserType.visitor,
+        orElse: () => CivilUserType.generalUser,
       ),
       baghdadArea: BaghdadArea.values.firstWhere(
         (e) => e.name == json['baghdadArea'],

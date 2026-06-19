@@ -406,4 +406,28 @@ class En {
   // Language names
   static const String arabicLanguage = 'Arabic';
   static const String englishLanguage = 'English';
+
+  // USER-1: Profile Setup
+  static const String profileSetupTitle = 'Help us customize Civilpedia for you';
+  static const String profileSetupSubtitle = 'You can change this later';
+  static const String profileStep1Title = 'What best describes you?';
+  static const String profileStep2Title = 'Where do you mainly work?';
+  static const String profileStep2Subtitle = 'in Baghdad';
+  static const String profileContinue = 'Continue';
+  static const String profileComplete = 'Complete';
+  static const String profileStep1Of2 = 'Step 1 of 2';
+  static const String profileStep2Of2 = 'Step 2 of 2';
+
+  // CivilUserType display names
+  static const String siteEngineer = 'Site Engineer';
+  static const String consultantEngineer = 'Consultant Engineer';
+  static const String structuralEngineer = 'Structural Engineer';
+  static const String contractorName = 'Contractor';
+  static const String engineeringStudent = 'Engineering Student';
+  static const String technicianSupervisor = 'Technician / Supervisor';
+  static const String supplierShopOwner = 'Supplier / Shop Owner';
+  static const String engineeringOffice = 'Engineering Office';
+  static const String constructionCompany = 'Construction Company';
+  static const String buildingOffice = 'Building Office';
+  static const String generalUser = 'General User';
 }

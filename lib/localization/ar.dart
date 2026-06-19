@@ -409,4 +409,28 @@ class Ar {
   // Language names
   static const String arabicLanguage = 'العربية';
   static const String englishLanguage = 'الإنجليزية';
+
+  // USER-1: Profile Setup
+  static const String profileSetupTitle = 'ساعدنا في تخصيص Civilpedia لك';
+  static const String profileSetupSubtitle = 'يمكنك تغيير هذا لاحقًا';
+  static const String profileStep1Title = 'ما الذي يصفك بشكل أفضل؟';
+  static const String profileStep2Title = 'أين تعمل بشكل أساسي؟';
+  static const String profileStep2Subtitle = 'في بغداد';
+  static const String profileContinue = 'متابعة';
+  static const String profileComplete = 'إكمال';
+  static const String profileStep1Of2 = 'الخطوة 1 من 2';
+  static const String profileStep2Of2 = 'الخطوة 2 من 2';
+
+  // CivilUserType display names
+  static const String siteEngineer = 'مهندس موقع';
+  static const String consultantEngineer = 'مهندس استشاري';
+  static const String structuralEngineer = 'مهندس إنشائي';
+  static const String contractorName = 'مقاول';
+  static const String engineeringStudent = 'طالب هندسة';
+  static const String technicianSupervisor = 'فني / مشرف';
+  static const String supplierShopOwner = 'مورد / صاحب محل';
+  static const String engineeringOffice = 'مكتب هندسي';
+  static const String constructionCompany = 'شركة مقاولات';
+  static const String buildingOffice = 'مكتب بناء';
+  static const String generalUser = 'مستخدم عام';
 }
