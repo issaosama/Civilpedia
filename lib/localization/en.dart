@@ -430,4 +430,15 @@ class En {
   static const String constructionCompany = 'Construction Company';
   static const String buildingOffice = 'Building Office';
   static const String generalUser = 'General User';
+
+  // USER-2: Profile Edit
+  static const String profileMyCivilpediaProfile = 'My Civilpedia Profile';
+  static const String profileRole = 'Role';
+  static const String profileMainWorkArea = 'Main work area';
+  static const String profileEditPreferences = 'Edit';
+  static const String profileSaveChanges = 'Save changes';
+  static const String profileUpdated = 'Profile updated';
+  static const String profileNotSet = 'Not set';
+  static const String profileChangeRole = 'Change role';
+  static const String profileChangeWorkArea = 'Change work area';
 }

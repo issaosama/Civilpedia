@@ -4,12 +4,17 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/spacing.dart';
 import '../../../core/services/theme_provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../profile/domain/user_profile.dart';
+import '../../profile/presentation/providers/user_profile_provider.dart';
+import '../../profile/presentation/screens/profile_edit_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -83,6 +88,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
     final auth = context.watch<AuthProvider>();
+    final profileProvider = context.watch<UserProfileProvider>();
     final lang = context.watch<LanguageProvider>();
     final isArabic = lang.isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
@@ -225,6 +231,10 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
+          _buildProfileCard(context, profileProvider, isArabic, isDark, theme),
+
+          const SizedBox(height: 24),
+
           _buildSettingsGroup(
             context,
             title: tr(Ar.generalSettings, En.generalSettings),
@@ -352,6 +362,120 @@ class ProfileScreen extends StatelessWidget {
             boxShadow: DesignTokens.softShadow(Theme.of(context).shadowColor),
           ),
           child: Column(children: children),
+        ),
+      ],
+    );
+  }
+
+  String _userTypeName(bool isArabic, CivilUserType type) {
+    String tr(String ar, String en) => isArabic ? ar : en;
+    switch (type) {
+      case CivilUserType.siteEngineer:
+        return tr(Ar.siteEngineer, En.siteEngineer);
+      case CivilUserType.consultantEngineer:
+        return tr(Ar.consultantEngineer, En.consultantEngineer);
+      case CivilUserType.structuralEngineer:
+        return tr(Ar.structuralEngineer, En.structuralEngineer);
+      case CivilUserType.contractor:
+        return tr(Ar.contractorName, En.contractorName);
+      case CivilUserType.engineeringStudent:
+        return tr(Ar.engineeringStudent, En.engineeringStudent);
+      case CivilUserType.technicianSupervisor:
+        return tr(Ar.technicianSupervisor, En.technicianSupervisor);
+      case CivilUserType.supplierShopOwner:
+        return tr(Ar.supplierShopOwner, En.supplierShopOwner);
+      case CivilUserType.engineeringOffice:
+        return tr(Ar.engineeringOffice, En.engineeringOffice);
+      case CivilUserType.constructionCompany:
+        return tr(Ar.constructionCompany, En.constructionCompany);
+      case CivilUserType.buildingOffice:
+        return tr(Ar.buildingOffice, En.buildingOffice);
+      case CivilUserType.generalUser:
+        return tr(Ar.generalUser, En.generalUser);
+    }
+  }
+
+  Widget _buildProfileCard(
+    BuildContext context,
+    UserProfileProvider profileProvider,
+    bool isArabic,
+    bool isDark,
+    ThemeData theme,
+  ) {
+    String tr(String ar, String en) => isArabic ? ar : en;
+    final profile = profileProvider.profile;
+    if (profile == null) {
+      return Container(
+        padding: AppSpacing.padLg,
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkCard : Colors.white,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+          border: Border.all(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.08)
+                : Colors.black.withValues(alpha: 0.06),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.person_outline, color: AppColors.textSecondary),
+            AppSpacing.gapMd,
+            Expanded(
+              child: Text(
+                tr(Ar.profileNotSet, En.profileNotSet),
+                style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final role = _userTypeName(isArabic, profile.userType);
+    final area = isArabic ? profile.baghdadArea.arName : profile.baghdadArea.enName;
+
+    return _buildSettingsGroup(
+      context,
+      title: tr(Ar.profileMyCivilpediaProfile, En.profileMyCivilpediaProfile),
+      children: [
+        ListTile(
+          leading: Icon(Icons.badge_outlined, color: theme.primaryColor),
+          title: Text(tr(Ar.profileRole, En.profileRole)),
+          subtitle: Text(role),
+          trailing: Text(
+            tr(Ar.profileEditPreferences, En.profileEditPreferences),
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProfileEditScreen(profile: profile),
+            ),
+          ),
+        ),
+        const Divider(height: 1),
+        ListTile(
+          leading: Icon(Icons.location_on_outlined, color: theme.primaryColor),
+          title: Text(tr(Ar.profileMainWorkArea, En.profileMainWorkArea)),
+          subtitle: Text(area),
+          trailing: Text(
+            tr(Ar.profileEditPreferences, En.profileEditPreferences),
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ProfileEditScreen(profile: profile),
+            ),
+          ),
         ),
       ],
     );

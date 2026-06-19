@@ -433,4 +433,15 @@ class Ar {
   static const String constructionCompany = 'شركة مقاولات';
   static const String buildingOffice = 'مكتب بناء';
   static const String generalUser = 'مستخدم عام';
+
+  // USER-2: Profile Edit
+  static const String profileMyCivilpediaProfile = 'ملفي في Civilpedia';
+  static const String profileRole = 'الدور';
+  static const String profileMainWorkArea = 'منطقة العمل الرئيسية';
+  static const String profileEditPreferences = 'تعديل';
+  static const String profileSaveChanges = 'حفظ التغييرات';
+  static const String profileUpdated = 'تم تحديث الملف الشخصي';
+  static const String profileNotSet = 'غير محدد';
+  static const String profileChangeRole = 'تغيير الدور';
+  static const String profileChangeWorkArea = 'تغيير منطقة العمل';
 }
