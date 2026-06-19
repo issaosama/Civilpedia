@@ -200,6 +200,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         return 'assets/images/footing.png';
       case 'beam':
         return 'assets/images/beam.png';
+      case 'circular_column':
+        return 'assets/images/circular_column.png';
       default:
         return 'assets/images/column.png';
     }
