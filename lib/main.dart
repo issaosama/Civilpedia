@@ -49,7 +49,9 @@ void _runApp() {
 
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
 
-        ChangeNotifierProvider(create: (_) => EncyclopediaProvider()),
+        ChangeNotifierProvider(create: (_) => EncyclopediaProvider(
+          repository: AppDependencies.encyclopediaRepo,
+        )),
       ],
 
       child: CivilpediaApp(),

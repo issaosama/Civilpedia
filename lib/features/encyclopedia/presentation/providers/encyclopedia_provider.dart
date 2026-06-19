@@ -2,12 +2,14 @@ import 'package:flutter/foundation.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/content_block.dart';
 import '../../domain/entities/topic_section.dart';
-import '../../data/datasources/encyclopedia_local_datasource.dart';
-import '../../data/repositories/encyclopedia_repository_impl.dart';
+import '../../domain/repositories/encyclopedia_repository.dart';
+import '../../../../core/di/app_dependencies.dart';
 
 class EncyclopediaProvider extends ChangeNotifier {
-  final _repository =
-      EncyclopediaRepositoryImpl(EncyclopediaLocalDataSource());
+  final EncyclopediaRepository _repository;
+
+  EncyclopediaProvider({EncyclopediaRepository? repository})
+      : _repository = repository ?? AppDependencies.encyclopediaRepo;
 
   List<EngineeringTopic> _topics = [];
   EngineeringTopic? _currentTopic;
