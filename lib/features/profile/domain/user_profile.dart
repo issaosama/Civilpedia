@@ -1,4 +1,5 @@
 import '../../../core/location/baghdad_area.dart';
+import '../../../core/schema/schema_constants.dart';
 
 enum UserType { visitor, engineer, supplier, company }
 
@@ -28,7 +29,7 @@ class LocalUserProfile {
     this.email,
     this.logoPath,
     this.futureCloudUserId,
-    this.schemaVersion = 1,
+    this.schemaVersion = SchemaConstants.currentDataSchemaVersion,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : createdAt = createdAt ?? DateTime.now(),
@@ -100,7 +101,8 @@ class LocalUserProfile {
       email: json['email'] as String?,
       logoPath: json['logoPath'] as String?,
       futureCloudUserId: json['futureCloudUserId'] as String?,
-      schemaVersion: json['schemaVersion'] as int? ?? 1,
+      schemaVersion: json['schemaVersion'] as int? ??
+          SchemaConstants.currentDataSchemaVersion,
       createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
       updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??

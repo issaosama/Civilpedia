@@ -1,4 +1,5 @@
 import '../../../core/location/baghdad_area.dart';
+import '../../../core/schema/schema_constants.dart';
 
 enum BusinessType {
   supplier,
@@ -91,7 +92,7 @@ class ServiceBusinessProfile {
     DateTime? updatedAt,
     this.futureOwnerUserId,
     this.planType,
-    this.schemaVersion = 1,
+    this.schemaVersion = SchemaConstants.currentDataSchemaVersion,
   })  : createdAt = createdAt ?? DateTime.now(),
         updatedAt = updatedAt ?? DateTime.now();
 
@@ -190,7 +191,8 @@ class ServiceBusinessProfile {
           DateTime.now(),
       futureOwnerUserId: json['futureOwnerUserId'] as String?,
       planType: json['planType'] as String?,
-      schemaVersion: json['schemaVersion'] as int? ?? 1,
+      schemaVersion: json['schemaVersion'] as int? ??
+          SchemaConstants.currentDataSchemaVersion,
     );
   }
 }
