@@ -11,6 +11,7 @@ import 'core/services/connectivity_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 
+import 'core/di/app_dependencies.dart';
 import 'data/local/hive_helper.dart';
 import 'data/local/preferences_helper.dart';
 
@@ -19,6 +20,7 @@ Future<void> main() async {
 
   await PreferencesHelper.init();
   await HiveHelper.init();
+  await AppDependencies.init();
 
   if (SentryConfig.isEnabled) {
     await SentryFlutter.init(
