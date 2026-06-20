@@ -431,6 +431,16 @@ class En {
   static const String buildingOffice = 'Building Office';
   static const String generalUser = 'General User';
 
+  // BACKUP-1B: Backup & Restore
+  static const String backupAndRestore = 'Backup & Restore';
+  static const String backupExportButton = 'Export Backup';
+  static const String backupExportConfirm = 'This will create a backup of your profile, projects, checklists, preferences, and bookmarks.';
+  static const String backupExportSuccess = 'Backup created successfully';
+  static const String backupExportFailed = 'Backup failed';
+  static const String backupExporting = 'Creating backup...';
+  static const String backupConfirmExport = 'Export';
+  static const String backupCancel = 'Cancel';
+
   // USER-2: Profile Edit
   static const String profileMyCivilpediaProfile = 'My Civilpedia Profile';
   static const String profileRole = 'Role';

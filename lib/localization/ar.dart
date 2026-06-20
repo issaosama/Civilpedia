@@ -434,6 +434,16 @@ class Ar {
   static const String buildingOffice = 'مكتب بناء';
   static const String generalUser = 'مستخدم عام';
 
+  // BACKUP-1B: Backup & Restore
+  static const String backupAndRestore = 'النسخ الاحتياطي والاستعادة';
+  static const String backupExportButton = 'تصدير نسخة احتياطية';
+  static const String backupExportConfirm = 'سيؤدي هذا إلى إنشاء نسخة احتياطية من ملفك الشخصي والمشاريع وقوائم التفتيش والإعدادات والمراجع.';
+  static const String backupExportSuccess = 'تم إنشاء النسخة الاحتياطية بنجاح';
+  static const String backupExportFailed = 'فشل النسخ الاحتياطي';
+  static const String backupExporting = 'جاري إنشاء النسخة الاحتياطية...';
+  static const String backupConfirmExport = 'تصدير';
+  static const String backupCancel = 'إلغاء';
+
   // USER-2: Profile Edit
   static const String profileMyCivilpediaProfile = 'ملفي في Civilpedia';
   static const String profileRole = 'الدور';

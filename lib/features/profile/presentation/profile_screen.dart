@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/di/app_dependencies.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
@@ -232,6 +233,10 @@ class ProfileScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           _buildProfileCard(context, profileProvider, isArabic, isDark, theme),
+
+          const SizedBox(height: 24),
+
+          _buildBackupCard(context, isArabic, isDark, theme),
 
           const SizedBox(height: 24),
 
@@ -479,5 +484,92 @@ class ProfileScreen extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildBackupCard(
+    BuildContext context,
+    bool isArabic,
+    bool isDark,
+    ThemeData theme,
+  ) {
+    String tr(String ar, String en) => isArabic ? ar : en;
+
+    return _buildSettingsGroup(
+      context,
+      title: tr(Ar.backupAndRestore, En.backupAndRestore),
+      children: [
+        ListTile(
+          leading: Icon(Icons.backup, color: theme.primaryColor),
+          title: Text(tr(Ar.backupExportButton, En.backupExportButton)),
+          trailing: const Icon(Icons.chevron_left, size: 20),
+          onTap: () => _exportBackup(context, isArabic),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _exportBackup(BuildContext context, bool isArabic) async {
+    String tr(String ar, String en) => isArabic ? ar : en;
+    final messenger = ScaffoldMessenger.of(context);
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr(Ar.backupExportButton, En.backupExportButton)),
+        content:
+            Text(tr(Ar.backupExportConfirm, En.backupExportConfirm)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr(Ar.backupCancel, En.backupCancel)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child:
+                Text(tr(Ar.backupConfirmExport, En.backupConfirmExport)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(tr(Ar.backupExporting, En.backupExporting)),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    try {
+      final now = DateTime.now();
+      final dateStr =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final timeStr =
+          '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
+      final fileName =
+          'Civilpedia_Backup_${dateStr}_$timeStr.json';
+
+      await AppDependencies.backupService.exportToFile(fileName);
+
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+              '${tr(Ar.backupExportSuccess, En.backupExportSuccess)} ($dateStr)'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+              '${tr(Ar.backupExportFailed, En.backupExportFailed)}: $e'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 }
