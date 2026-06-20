@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/encyclopedia_provider.dart';
 import '../widgets/section_header_widget.dart';
 import '../widgets/content_block_widget.dart';
+import '../../domain/entities/engineering_topic.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -56,7 +57,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _content(BuildContext context, EncyclopediaProvider provider, dynamic topic, String Function(String ar, String en) tr) {
+  Widget _content(BuildContext context, EncyclopediaProvider provider, EngineeringTopic topic, String Function(String ar, String en) tr) {
     final sections = provider.currentSections;
     return ListView(
       padding: AppSpacing.padLg,
@@ -100,7 +101,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _summaryCard(BuildContext context, dynamic topic) {
+  Widget _summaryCard(BuildContext context, EngineeringTopic topic) {
     final isArabicSummary = context.watch<LanguageProvider>().isArabic;
     return Container(
       width: double.infinity,

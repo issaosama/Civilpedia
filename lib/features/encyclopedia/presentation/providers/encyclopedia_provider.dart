@@ -25,7 +25,7 @@ class EncyclopediaProvider extends ChangeNotifier {
   String? get error => _error;
 
   List<ContentBlock> blocksForSection(String sectionId) =>
-      _blocksBySection[sectionId] ?? [];
+      _blocksBySection[sectionId] ?? <ContentBlock>[];
 
   bool blocksLoadedForSection(String sectionId) =>
       _blocksBySection.containsKey(sectionId);

@@ -77,11 +77,11 @@ class EncyclopediaJsonDataSource {
 
   Future<List<TopicSection>> fetchSectionsForTopic(String topicId) async {
     await _ensureLoaded();
-    return _sections![topicId] ?? [];
+    return _sections![topicId] ?? <TopicSection>[];
   }
 
   Future<List<ContentBlock>> fetchBlocksForSection(String sectionId) async {
     await _ensureLoaded();
-    return _blocks![sectionId] ?? [];
+    return _blocks![sectionId] ?? <ContentBlock>[];
   }
 }
