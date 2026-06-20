@@ -9,7 +9,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/services/theme_provider.dart';
-import '../../../core/services/language_provider.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
@@ -90,9 +89,7 @@ class ProfileScreen extends StatelessWidget {
     final themeProvider = context.watch<ThemeProvider>();
     final auth = context.watch<AuthProvider>();
     final profileProvider = context.watch<UserProfileProvider>();
-    final lang = context.watch<LanguageProvider>();
-    final isArabic = lang.isArabic;
-    String tr(String ar, String en) => isArabic ? ar : en;
+    String tr(String ar, String en) => ar;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -232,11 +229,11 @@ class ProfileScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          _buildProfileCard(context, profileProvider, isArabic, isDark, theme),
+          _buildProfileCard(context, profileProvider, true, isDark, theme),
 
           const SizedBox(height: 24),
 
-          _buildBackupCard(context, isArabic, isDark, theme),
+          _buildBackupCard(context, true, isDark, theme),
 
           const SizedBox(height: 24),
 
@@ -262,17 +259,6 @@ class ProfileScreen extends StatelessWidget {
                   horizontal: 16,
                   vertical: 4,
                 ),
-              ),
-              const Divider(height: 1),
-              ListTile(
-                leading: Icon(Icons.language, color: theme.primaryColor),
-                title: const Text(Ar.language),
-                subtitle: Text(lang.isArabic ? Ar.arabicLanguage : En.englishLanguage),
-                trailing: const Icon(Icons.chevron_left, size: 20),
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  lang.toggleLanguage();
-                },
               ),
             ],
           ),

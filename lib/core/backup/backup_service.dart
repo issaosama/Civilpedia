@@ -72,10 +72,9 @@ class BackupService {
       }
     }
 
-    final prefs = await SharedPreferences.getInstance();
     final preferences = <String, dynamic>{
       'isDarkMode': PreferencesHelper.isDarkMode,
-      'appLanguage': prefs.getString('app_language') ?? 'ar',
+      'appLanguage': 'ar',
       'onboardingSeen': PreferencesHelper.isOnboardingSeen,
     };
 
@@ -234,10 +233,8 @@ class BackupService {
         if (prefs['isDarkMode'] is bool) {
           await PreferencesHelper.setDarkMode(prefs['isDarkMode'] as bool);
         }
-        if (prefs['appLanguage'] is String) {
-          final sp = await SharedPreferences.getInstance();
-          await sp.setString('app_language', prefs['appLanguage'] as String);
-        }
+        final sp = await SharedPreferences.getInstance();
+        await sp.setString('app_language', 'ar');
         // onboardingSeen is restored on next app launch when user
         // already completed onboarding; skip explicit set.
         restored++;

@@ -27,7 +27,7 @@ class CivilpediaApp extends StatelessWidget {
           themeMode: themeProvider.themeMode,
           routerConfig: appRouter,
           locale: languageProvider.locale,
-          supportedLocales: const [Locale('ar'), Locale('en')],
+          supportedLocales: const [Locale('ar')],
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
