@@ -1,5 +1,6 @@
 import 'package:path_provider/path_provider.dart';
 
+import '../../features/encyclopedia/data/datasources/encyclopedia_json_datasource.dart';
 import '../../features/encyclopedia/data/datasources/encyclopedia_local_datasource.dart';
 import '../../features/encyclopedia/data/repositories/encyclopedia_repository_impl.dart';
 import '../../features/encyclopedia/domain/repositories/encyclopedia_repository.dart';
@@ -22,6 +23,7 @@ class AppDependencies {
   AppDependencies._();
 
   static late final EncyclopediaLocalDataSource _encyclopediaDataSource;
+  static late final EncyclopediaJsonDataSource _encyclopediaJsonDataSource;
   static late final EncyclopediaRepository _encyclopediaRepo;
 
   static late final LocalUserProfileDataSource _userProfileDataSource;
@@ -41,7 +43,11 @@ class AppDependencies {
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
-    _encyclopediaRepo = EncyclopediaRepositoryImpl(_encyclopediaDataSource);
+    _encyclopediaJsonDataSource = EncyclopediaJsonDataSource();
+    _encyclopediaRepo = EncyclopediaRepositoryImpl(
+      _encyclopediaJsonDataSource,
+      _encyclopediaDataSource,
+    );
 
     _userProfileDataSource = LocalUserProfileDataSource();
     _userProfileRepo = LocalUserProfileRepository(_userProfileDataSource);

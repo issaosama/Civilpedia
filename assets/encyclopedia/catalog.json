@@ -1,0 +1,80 @@
+{
+  "topics": [
+    {
+      "id": "slump-test",
+      "titleAr": "اختبار الهبوط للخرسانة",
+      "titleEn": "Concrete Slump Test",
+      "categoryId": "concrete",
+      "summary": "اختبار قياس قابلية تشغيل الخرسانة الطازجة لتحديد مدى سيولتها قبل الصب حسب ASTM C143.",
+      "tags": ["خرسانة", "هبوط", "اختبار", "ASTM C143"],
+      "relatedTopicIds": ["concrete-casting"],
+      "createdAt": "2026-06-20T00:00:00.000",
+      "updatedAt": "2026-06-20T00:00:00.000",
+      "level": "basic",
+      "planKey": null,
+      "simpleExplanation": {
+        "ar": "اختبار بسيط نقيس به مدى سيولة الخرسانة الطازجة باستخدام مخروط قياسي قبل صبها في العناصر الخرسانية.",
+        "en": "A simple test to measure the workability of fresh concrete using a standard cone before placing it in structural elements."
+      },
+      "commonMistakes": [
+        { "ar": "عدم دمك الطبقات بشكل كافٍ داخل المخروط", "en": "Insufficient rodding of layers inside the cone" },
+        { "ar": "رفع المخروط بشكل بطيء يؤثر على قراءة الهبوط", "en": "Slow cone lifting affects the slump reading" }
+      ],
+      "acceptRejectItems": [
+        {
+          "criteriaAr": "هبوط الخرسانة",
+          "criteriaEn": "Concrete slump",
+          "acceptanceLimitAr": "75-100 مم للعناصر العادية",
+          "acceptanceLimitEn": "75-100 mm for normal elements",
+          "methodAr": "المخروط القياسي ASTM C143",
+          "methodEn": "Standard slump cone ASTM C143",
+          "isCritical": true
+        }
+      ]
+    },
+    {
+      "id": "concrete-casting",
+      "titleAr": "صب الخرسانة",
+      "titleEn": "Concrete Casting",
+      "categoryId": "concrete",
+      "summary": "إجراءات صب الخرسانة الطازجة في العناصر الخرسانية المسلحة وفقاً لمتطلبات ACI 304R.",
+      "tags": ["خرسانة", "صب", "دمك", "معالجة", "ACI 304"],
+      "relatedTopicIds": ["slump-test"],
+      "createdAt": "2026-06-20T00:00:00.000",
+      "updatedAt": "2026-06-20T00:00:00.000",
+      "level": "basic",
+      "planKey": null
+    }
+  ],
+  "sections": {
+    "slump-test": [
+      { "id": "st-inspection", "title": "نقاط الفحص", "type": "inspection", "order": 1 },
+      { "id": "st-codes", "title": "المراجع", "type": "codeReference", "order": 2 }
+    ],
+    "concrete-casting": [
+      { "id": "cc-execution", "title": "خطوات الصب", "type": "execution", "order": 1 },
+      { "id": "cc-safety", "title": "السلامة", "type": "safety", "order": 2 }
+    ]
+  },
+  "blocks": {
+    "st-inspection": [
+      { "type": "text", "content": "يتم إجراء اختبار الهبوط للخرسانة الطازجة للتأكد من قابلية التشغيل قبل الصب.", "variant": "paragraph" },
+      { "type": "inspection_point", "point": { "criteria": "هبوط الخرسانة", "acceptableTolerance": "75-100 مم", "method": "المخروط القياسي ASTM C143", "isCritical": true } },
+      { "type": "inspection_point", "point": { "criteria": "درجة حرارة الخرسانة", "acceptableTolerance": "10-32 °C", "method": "مقياس حرارة", "isCritical": true } }
+    ],
+    "st-codes": [
+      { "type": "code_reference", "reference": { "code": "ASTM C143", "section": "", "title": "Standard Test Method for Slump of Hydraulic-Cement Concrete", "description": "الطريقة القياسية لقياس هبوط الخرسانة الطازجة" } },
+      { "type": "code_reference", "reference": { "code": "ACI 304R-00", "section": "4.2", "title": "Guide for Measuring, Mixing, Transporting, and Placing Concrete", "description": "إرشادات صب الخرسانة واختبار الهبوط" } }
+    ],
+    "cc-execution": [
+      { "type": "text", "content": "عملية صب الخرسانة تتطلب تنسيقاً بين محطة الخلط وفريق الصب.", "variant": "paragraph" },
+      { "type": "execution_step", "step": { "stepNumber": 1, "description": "التحقق من جاهزية الفرم والشدات", "notes": "يفضل غسل الفرم بالماء قبل الصب" } },
+      { "type": "execution_step", "step": { "stepNumber": 2, "description": "صب الخرسانة على دفعات منتظمة", "notes": "ارتفاع لا يتجاوز 1.5 متر" } },
+      { "type": "execution_step", "step": { "stepNumber": 3, "description": "دمك الخرسانة بالهزاز الميكانيكي", "notes": "سرعة 8000-12000 دورة/دقيقة" } }
+    ],
+    "cc-safety": [
+      { "type": "safety_note", "note": { "message": "تأكد من سلامة الشدات والدعامات قبل الصب", "severity": "critical" } },
+      { "type": "safety_note", "note": { "message": "جميع العاملين يرتدون مهمات الوقاية الشخصية", "severity": "high" } }
+    ]
+  }
+}
