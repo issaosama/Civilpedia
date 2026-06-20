@@ -549,15 +549,19 @@ class ProfileScreen extends StatelessWidget {
       final fileName =
           'Civilpedia_Backup_${dateStr}_$timeStr.json';
 
-      await AppDependencies.backupService.exportToFile(fileName);
+      final fullPath =
+          await AppDependencies.backupService.exportToFile(fileName);
+      debugPrint('Backup exported: $fullPath');
 
       messenger.hideCurrentSnackBar();
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-              '${tr(Ar.backupExportSuccess, En.backupExportSuccess)} ($dateStr)'),
+            '${tr(Ar.backupExportSuccess, En.backupExportSuccess)}\n$fileName\n$fullPath',
+          ),
           behavior: SnackBarBehavior.floating,
           backgroundColor: Colors.green,
+          duration: const Duration(seconds: 5),
         ),
       );
     } catch (e) {

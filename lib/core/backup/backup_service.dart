@@ -113,7 +113,7 @@ class BackupService {
     final backup = await buildBackup();
     final json = jsonEncode(backup.toJson());
     await _fileService.saveBackup(fileName, json);
-    return fileName;
+    return '${_fileService.backupDirPath}/$fileName';
   }
 
   Future<BackupValidationResult> validateBackup(String fileName) async {
