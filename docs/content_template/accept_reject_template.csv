@@ -1,0 +1,4 @@
+topicId,criteriaAr,criteriaEn,acceptanceLimitAr,acceptanceLimitEn,methodAr,methodEn,isCritical,reviewRequired,planKey,codeReference
+slump-test,هبوط الخرسانة,Concrete slump,75-100 مم للعناصر العادية,75-100 mm for normal elements,مخروط الهبوط القياسي ASTM C143,Standard slump cone ASTM C143,TRUE,FALSE,,ASTM C143
+slump-test,محتوى الهواء,Air content,2-6%,2-6%,مقياس محتوى الهواء,Air content meter,FALSE,FALSE,,ASTM C231
+slump-test,درجة حرارة الخرسانة,Concrete temperature,10-32°C,10-32°C,مقياس حرارة,Thermometer,FALSE,FALSE,,ACI 301

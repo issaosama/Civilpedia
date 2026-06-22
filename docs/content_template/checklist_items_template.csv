@@ -1,0 +1,4 @@
+itemId,sectionId,textAr,textEn,isRequired,category
+cc-prep1,st-execution,فحص نظافة الفرم من المخلفات,Check form cleanliness,TRUE,
+cc-prep2,st-execution,التأكد من وصول جميع مواد الصب,Verify all casting materials arrived,TRUE,
+cc-prep3,st-execution,فحص جاهزية مضخة الخرسانة,Check concrete pump readiness,FALSE,

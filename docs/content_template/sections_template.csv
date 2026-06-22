@@ -1,0 +1,6 @@
+sectionId,topicId,title,type,order
+st-equipment,slump-test,المعدات المطلوبة,equipment,1
+st-execution,slump-test,خطوات الاختبار,execution,2
+st-inspection,slump-test,نقاط التفتيش,inspection,3
+st-safety,slump-test,السلامة العامة,safety,4
+st-codes,slump-test,المراجع والكودات,codeReference,5
