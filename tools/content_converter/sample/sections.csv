@@ -1,0 +1,15 @@
+sectionId,topicId,title,type,order
+st-equipment,slump-test,المعدات المطلوبة,equipment,1
+st-execution,slump-test,خطوات الاختبار,execution,2
+st-inspection,slump-test,نقاط الفحص,inspection,3
+st-codes,slump-test,المراجع,codeReference,4
+cc-preparation,concrete-casting,التحضير قبل الصب,general,1
+cc-execution,concrete-casting,خطوات الصب,execution,2
+cc-inspection,concrete-casting,فحص الجودة,inspection,3
+cc-safety,concrete-casting,السلامة,safety,4
+cc-codes,concrete-casting,المراجع,codeReference,5
+rb-documents,rebar-inspection,فحص المستندات,general,1
+rb-execution,rebar-inspection,خطوات الاستلام,execution,2
+rb-inspection,rebar-inspection,نقاط الفحص,inspection,3
+rb-tables,rebar-inspection,جداول التسليح,general,4
+rb-codes,rebar-inspection,المراجع,codeReference,5

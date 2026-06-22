@@ -6,8 +6,15 @@
       "titleEn": "Concrete Slump Test",
       "categoryId": "concrete",
       "summary": "اختبار قياس قابلية تشغيل الخرسانة الطازجة لتحديد مدى سيولتها قبل الصب حسب ASTM C143.",
-      "tags": ["خرسانة", "هبوط", "اختبار", "ASTM C143"],
-      "relatedTopicIds": ["concrete-casting"],
+      "tags": [
+        "خرسانة",
+        "هبوط",
+        "اختبار",
+        "ASTM C143"
+      ],
+      "relatedTopicIds": [
+        "concrete-casting"
+      ],
       "createdAt": "2026-06-20T00:00:00.000",
       "updatedAt": "2026-06-20T00:00:00.000",
       "level": "basic",
@@ -54,7 +61,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] 75-100 mm for normal elements",
           "methodAr": "المخروط القياسي ASTM C143",
           "methodEn": "Standard slump cone ASTM C143",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         },
         {
           "criteriaAr": "[DRAFT - REVIEW REQUIRED] درجة حرارة الخرسانة",
@@ -63,7 +73,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] 10-32 °C",
           "methodAr": "مقياس حرارة",
           "methodEn": "Thermometer",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         },
         {
           "criteriaAr": "[DRAFT - REVIEW REQUIRED] زمن إجراء الاختبار من لحظة الخلط",
@@ -72,7 +85,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] Not exceeding 30 minutes",
           "methodAr": "ساعة توقيت",
           "methodEn": "Stopwatch",
-          "isCritical": false
+          "isCritical": false,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         }
       ],
       "codeNotes": {
@@ -87,7 +103,9 @@
         "ar": "تم إجراء اختبار الهبوط للخرسانة الطازجة وفق ASTM C143 وكانت نتيجة الهبوط (X) مم ضمن الحدود المسموح بها.",
         "en": "The concrete slump test was performed per ASTM C143. The slump reading was (X) mm, within the acceptable limits."
       },
-      "relatedToolRoutes": ["/calculator/concrete"],
+      "relatedToolRoutes": [
+        "/calculator/concrete"
+      ],
       "relatedChecklistIds": []
     },
     {
@@ -96,8 +114,17 @@
       "titleEn": "Concrete Casting",
       "categoryId": "concrete",
       "summary": "إجراءات صب الخرسانة الطازجة في العناصر الخرسانية المسلحة وفقاً لمتطلبات ACI 304R.",
-      "tags": ["خرسانة", "صب", "دمك", "معالجة", "ACI 304"],
-      "relatedTopicIds": ["slump-test", "rebar-inspection"],
+      "tags": [
+        "خرسانة",
+        "صب",
+        "دمك",
+        "معالجة",
+        "ACI 304"
+      ],
+      "relatedTopicIds": [
+        "slump-test",
+        "rebar-inspection"
+      ],
       "createdAt": "2026-06-20T00:00:00.000",
       "updatedAt": "2026-06-20T00:00:00.000",
       "level": "basic",
@@ -144,7 +171,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] Per specification (typically 75-150 mm)",
           "methodAr": "اختبار الهبوط ASTM C143",
           "methodEn": "Slump test ASTM C143",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         },
         {
           "criteriaAr": "[DRAFT - REVIEW REQUIRED] مقاومة الخرسانة للضغط (مكعبات)",
@@ -153,7 +183,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] Not less than design strength at 7 and 28 days",
           "methodAr": "اختبار الضغط ASTM C39",
           "methodEn": "Compression test ASTM C39",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         },
         {
           "criteriaAr": "[DRAFT - REVIEW REQUIRED] درجة حرارة الخرسانة عند الصب",
@@ -162,7 +195,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] 10-32 °C (ACI 305R)",
           "methodAr": "مقياس حرارة",
           "methodEn": "Thermometer",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         }
       ],
       "codeNotes": {
@@ -177,7 +213,9 @@
         "ar": "تم صب (X) م³ من الخرسانة بدرجة (CXX) في العنصر (Y). تم إجراء اختبار الهبوط والنتيجة ضمن الحدود المسموح بها. تم أخذ (Z) مكعبات للاختبار.",
         "en": "A quantity of (X) m³ of concrete grade (CXX) was placed in element (Y). The slump test result was within acceptable limits. (Z) test cubes were taken."
       },
-      "relatedToolRoutes": ["/calculator/concrete"],
+      "relatedToolRoutes": [
+        "/calculator/concrete"
+      ],
       "relatedChecklistIds": []
     },
     {
@@ -186,8 +224,16 @@
       "titleEn": "Rebar Inspection",
       "categoryId": "concrete",
       "summary": "إجراءات فحص واستلام حديد التسليح قبل الصب وفقاً لمتطلبات ACI 318-19 للتأكد من المطابقة للمخططات والمواصفات.",
-      "tags": ["حديد تسليح", "استلام", "تغطية", "ACI 318", "كانات"],
-      "relatedTopicIds": ["concrete-casting"],
+      "tags": [
+        "حديد تسليح",
+        "استلام",
+        "تغطية",
+        "ACI 318",
+        "كانات"
+      ],
+      "relatedTopicIds": [
+        "concrete-casting"
+      ],
       "createdAt": "2026-06-20T00:00:00.000",
       "updatedAt": "2026-06-20T00:00:00.000",
       "level": "basic",
@@ -234,7 +280,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] ± 0.5 mm from nominal diameter",
           "methodAr": "القدمة (Vernier Caliper)",
           "methodEn": "Vernier caliper",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         },
         {
           "criteriaAr": "[DRAFT - REVIEW REQUIRED] التغطية الخرسانية (Cover)",
@@ -243,7 +292,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] Not less than design value (per ACI 318-19 Table 20.6.1)",
           "methodAr": "قياس الكفرات البلاستيكية ومسافة الحديد عن الفرم",
           "methodEn": "Measure plastic spacers and bar distance from formwork",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         },
         {
           "criteriaAr": "[DRAFT - REVIEW REQUIRED] المسافة بين الأسياخ الطولية",
@@ -252,7 +304,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] ± 10 mm from drawings",
           "methodAr": "شريط قياس",
           "methodEn": "Measuring tape",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         },
         {
           "criteriaAr": "[DRAFT - REVIEW REQUIRED] طول الوصلة (Lap Splice)",
@@ -261,7 +316,10 @@
           "acceptanceLimitEn": "[DRAFT - REVIEW REQUIRED] Not less than 60 bar diameters for Class B tension splices (ACI 318-19 25.5.2)",
           "methodAr": "شريط قياس",
           "methodEn": "Measuring tape",
-          "isCritical": true
+          "isCritical": true,
+          "reviewRequired": false,
+          "planKey": "",
+          "codeReference": ""
         }
       ],
       "codeNotes": {
@@ -276,30 +334,102 @@
         "ar": "تم فحص حديد التسليح للعنصر (Y) والتأكد من مطابقة الأقطار والأعداد والمسافات والتغطية للمخططات والكود ACI 318-19. تمت الموافقة على الصب.",
         "en": "Reinforcement of element (Y) was inspected. Bar diameters, quantities, spacing, and cover comply with drawings and ACI 318-19. Pour approved."
       },
-      "relatedToolRoutes": ["/calculator/steel"],
+      "relatedToolRoutes": [
+        "/calculator/steel"
+      ],
       "relatedChecklistIds": []
     }
   ],
   "sections": {
     "slump-test": [
-      { "id": "st-equipment", "title": "المعدات المطلوبة", "type": "equipment", "order": 1 },
-      { "id": "st-execution", "title": "خطوات الاختبار", "type": "execution", "order": 2 },
-      { "id": "st-inspection", "title": "نقاط الفحص", "type": "inspection", "order": 3 },
-      { "id": "st-codes", "title": "المراجع", "type": "codeReference", "order": 4 }
+      {
+        "id": "st-equipment",
+        "title": "المعدات المطلوبة",
+        "type": "equipment",
+        "order": 1
+      },
+      {
+        "id": "st-execution",
+        "title": "خطوات الاختبار",
+        "type": "execution",
+        "order": 2
+      },
+      {
+        "id": "st-inspection",
+        "title": "نقاط الفحص",
+        "type": "inspection",
+        "order": 3
+      },
+      {
+        "id": "st-codes",
+        "title": "المراجع",
+        "type": "codeReference",
+        "order": 4
+      }
     ],
     "concrete-casting": [
-      { "id": "cc-preparation", "title": "التحضير قبل الصب", "type": "general", "order": 1 },
-      { "id": "cc-execution", "title": "خطوات الصب", "type": "execution", "order": 2 },
-      { "id": "cc-inspection", "title": "فحص الجودة", "type": "inspection", "order": 3 },
-      { "id": "cc-safety", "title": "السلامة", "type": "safety", "order": 4 },
-      { "id": "cc-codes", "title": "المراجع", "type": "codeReference", "order": 5 }
+      {
+        "id": "cc-preparation",
+        "title": "التحضير قبل الصب",
+        "type": "general",
+        "order": 1
+      },
+      {
+        "id": "cc-execution",
+        "title": "خطوات الصب",
+        "type": "execution",
+        "order": 2
+      },
+      {
+        "id": "cc-inspection",
+        "title": "فحص الجودة",
+        "type": "inspection",
+        "order": 3
+      },
+      {
+        "id": "cc-safety",
+        "title": "السلامة",
+        "type": "safety",
+        "order": 4
+      },
+      {
+        "id": "cc-codes",
+        "title": "المراجع",
+        "type": "codeReference",
+        "order": 5
+      }
     ],
     "rebar-inspection": [
-      { "id": "rb-documents", "title": "فحص المستندات", "type": "general", "order": 1 },
-      { "id": "rb-execution", "title": "خطوات الاستلام", "type": "execution", "order": 2 },
-      { "id": "rb-inspection", "title": "نقاط الفحص", "type": "inspection", "order": 3 },
-      { "id": "rb-tables", "title": "جداول التسليح", "type": "general", "order": 4 },
-      { "id": "rb-codes", "title": "المراجع", "type": "codeReference", "order": 5 }
+      {
+        "id": "rb-documents",
+        "title": "فحص المستندات",
+        "type": "general",
+        "order": 1
+      },
+      {
+        "id": "rb-execution",
+        "title": "خطوات الاستلام",
+        "type": "execution",
+        "order": 2
+      },
+      {
+        "id": "rb-inspection",
+        "title": "نقاط الفحص",
+        "type": "inspection",
+        "order": 3
+      },
+      {
+        "id": "rb-tables",
+        "title": "جداول التسليح",
+        "type": "general",
+        "order": 4
+      },
+      {
+        "id": "rb-codes",
+        "title": "المراجع",
+        "type": "codeReference",
+        "order": 5
+      }
     ]
   },
   "blocks": {
@@ -308,10 +438,26 @@
         "type": "equipment",
         "title": "معدات اختبار الهبوط",
         "items": [
-          { "name": "مخروط الهبوط القياسي (Slump Cone)", "purpose": "قالب مخروطي لقياس الهبوط", "specification": "قاعدة 200 مم، قمة 100 مم، ارتفاع 300 مم" },
-          { "name": "قضيب الدمك (Tamping Rod)", "purpose": "دمك الخرسانة داخل المخروط", "specification": "قطر 16 مم، طول 600 مم، طرف نصف كري" },
-          { "name": "مسطرة قياس", "purpose": "قياس الهبوط بالملليمتر" },
-          { "name": "سطح مستو غير نافذ", "purpose": "قاعدة الاختبار" }
+          {
+            "name": "مخروط الهبوط القياسي (Slump Cone)",
+            "purpose": "قالب مخروطي لقياس الهبوط",
+            "specification": "قاعدة 200 مم، قمة 100 مم، ارتفاع 300 مم"
+          },
+          {
+            "name": "قضيب الدمك (Tamping Rod)",
+            "purpose": "دمك الخرسانة داخل المخروط",
+            "specification": "قطر 16 مم، طول 600 مم، طرف نصف كري"
+          },
+          {
+            "name": "مسطرة قياس",
+            "purpose": "قياس الهبوط بالملليمتر",
+            "specification": ""
+          },
+          {
+            "name": "سطح مستو غير نافذ",
+            "purpose": "قاعدة الاختبار",
+            "specification": ""
+          }
         ]
       }
     ],
@@ -323,47 +469,93 @@
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 1, "description": "ترطيب المخروط بالماء ووضعه على السطح المستوي", "notes": "تثبيت المخروط بالقدم على اللوحين السفليين" }
+        "step": {
+          "stepNumber": 1,
+          "description": "ترطيب المخروط بالماء ووضعه على السطح المستوي",
+          "notes": "تثبيت المخروط بالقدم على اللوحين السفليين"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 2, "description": "ملء المخروط بثلاث طبقات متساوية، كل طبقة تدك 25 مرة بقضيب الدمك", "notes": "توزيع الضربات بالتساوي على مساحة المقطع" }
+        "step": {
+          "stepNumber": 2,
+          "description": "ملء المخروط بثلاث طبقات متساوية، كل طبقة تدك 25 مرة بقضيب الدمك",
+          "notes": "توزيع الضربات بالتساوي على مساحة المقطع"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 3, "description": "تسوية سطح الخرسانة بقضيب الدمك وإزالة المخروط برفع رأسي بطيء وثابت", "notes": "مدة الرفع 3-5 ثوانٍ" }
+        "step": {
+          "stepNumber": 3,
+          "description": "تسوية سطح الخرسانة بقضيب الدمك وإزالة المخروط برفع رأسي بطيء وثابت",
+          "notes": "مدة الرفع 3-5 ثوانٍ"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 4, "description": "قياس الهبوط عند أدنى نقطة من قمة المخروط باستخدام المسطرة", "notes": "تسجيل القراءة لأقرب 5 مم" }
+        "step": {
+          "stepNumber": 4,
+          "description": "قياس الهبوط عند أدنى نقطة من قمة المخروط باستخدام المسطرة",
+          "notes": "تسجيل القراءة لأقرب 5 مم"
+        }
       }
     ],
     "st-inspection": [
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] هبوط الخرسانة", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 75-100 مم", "method": "المخروط القياسي ASTM C143", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] هبوط الخرسانة",
+          "method": "المخروط القياسي ASTM C143",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 75-100 مم"
+        }
       },
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] درجة حرارة الخرسانة", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 10-32 °C", "method": "مقياس حرارة", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] درجة حرارة الخرسانة",
+          "method": "مقياس حرارة",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 10-32 °C"
+        }
       },
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] زمن الاختبار", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] خلال 30 دقيقة من الخلط", "method": "ساعة توقيت", "isCritical": false }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] زمن الاختبار",
+          "method": "ساعة توقيت",
+          "isCritical": false,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] خلال 30 دقيقة من الخلط"
+        }
       }
     ],
     "st-codes": [
       {
         "type": "code_reference",
-        "reference": { "code": "ASTM C143", "section": "", "title": "Standard Test Method for Slump of Hydraulic-Cement Concrete", "description": "[DRAFT - REVIEW REQUIRED] الطريقة القياسية لقياس هبوط الخرسانة الطازجة" }
+        "reference": {
+          "code": "ASTM C143",
+          "title": "Standard Test Method for Slump of Hydraulic-Cement Concrete",
+          "section": "",
+          "description": "[DRAFT - REVIEW REQUIRED] الطريقة القياسية لقياس هبوط الخرسانة الطازجة"
+        }
       },
       {
         "type": "code_reference",
-        "reference": { "code": "ACI 304R-00", "section": "4.2", "title": "Guide for Measuring, Mixing, Transporting, and Placing Concrete", "description": "[DRAFT - REVIEW REQUIRED] إرشادات صب الخرسانة واختبار الهبوط" }
+        "reference": {
+          "code": "ACI 304R-00",
+          "title": "Guide for Measuring, Mixing, Transporting, and Placing Concrete",
+          "section": "4.2",
+          "description": "[DRAFT - REVIEW REQUIRED] إرشادات صب الخرسانة واختبار الهبوط"
+        }
       },
       {
         "type": "code_reference",
-        "reference": { "code": "BS 1881-102", "section": "", "title": "Testing Concrete — Method for Determination of Slump", "description": "[DRAFT - REVIEW REQUIRED] المواصفة البريطانية لاختبار الهبوط" }
+        "reference": {
+          "code": "BS 1881-102",
+          "title": "Testing Concrete — Method for Determination of Slump",
+          "section": "",
+          "description": "[DRAFT - REVIEW REQUIRED] المواصفة البريطانية لاختبار الهبوط"
+        }
       }
     ],
     "cc-preparation": [
@@ -376,11 +568,31 @@
         "type": "checklist",
         "title": "قائمة التحضير قبل الصب",
         "items": [
-          { "id": "cc-prep1", "text": "فحص نظافة الفرم من المخلفات", "isRequired": true },
-          { "id": "cc-prep2", "text": "ترطيب الفرم الخشبية بالماء", "isRequired": true },
-          { "id": "cc-prep3", "text": "التأكد من تثبيت حديد التسليح والكفرات", "isRequired": true },
-          { "id": "cc-prep4", "text": "فحص جاهزية مضخة الخرسانة والهزاز", "isRequired": true },
-          { "id": "cc-prep5", "text": "تجهيز عدد كافٍ من المكعبات لاختبار الضغط", "isRequired": true }
+          {
+            "id": "cc-prep1",
+            "text": "فحص نظافة الفرم من المخلفات",
+            "isRequired": true
+          },
+          {
+            "id": "cc-prep2",
+            "text": "ترطيب الفرم الخشبية بالماء",
+            "isRequired": true
+          },
+          {
+            "id": "cc-prep3",
+            "text": "التأكد من تثبيت حديد التسليح والكفرات",
+            "isRequired": true
+          },
+          {
+            "id": "cc-prep4",
+            "text": "فحص جاهزية مضخة الخرسانة والهزاز",
+            "isRequired": true
+          },
+          {
+            "id": "cc-prep5",
+            "text": "تجهيز عدد كافٍ من المكعبات لاختبار الضغط",
+            "isRequired": true
+          }
         ]
       }
     ],
@@ -392,61 +604,116 @@
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 1, "description": "صب الخرسانة على دفعات منتظمة", "notes": "ارتفاع الحرة لا يتجاوز 1.5 متر لتجنب انفصال الحبيبات" }
+        "step": {
+          "stepNumber": 1,
+          "description": "صب الخرسانة على دفعات منتظمة",
+          "notes": "ارتفاع الحرة لا يتجاوز 1.5 متر لتجنب انفصال الحبيبات"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 2, "description": "دمك الخرسانة بالهزاز الميكانيكي الغاطس فور الصب", "notes": "سرعة الهزاز [DRAFT - REVIEW REQUIRED] 8000-12000 دورة/دقيقة، مدة الدمك 5-15 ثانية" }
+        "step": {
+          "stepNumber": 2,
+          "description": "دمك الخرسانة بالهزاز الميكانيكي الغاطس فور الصب",
+          "notes": "سرعة الهزاز [DRAFT - REVIEW REQUIRED] 8000-12000 دورة/دقيقة، مدة الدمك 5-15 ثانية"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 3, "description": "تسوية السطح العلوي للخرسانة بالفرمجة (Screeding)", "notes": "استخدام قطعة خشبية مستقيمة أو فرمجة آلية" }
+        "step": {
+          "stepNumber": 3,
+          "description": "تسوية السطح العلوي للخرسانة بالفرمجة (Screeding)",
+          "notes": "استخدام قطعة خشبية مستقيمة أو فرمجة آلية"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 4, "description": "تنعيم السطح بالقادوم (Trowel) للأسقف والأرضيات", "notes": "ينتظر حتى تبدأ الخرسانة بالتماسك قبل التنعيم" }
+        "step": {
+          "stepNumber": 4,
+          "description": "تنعيم السطح بالقادوم (Trowel) للأسقف والأرضيات",
+          "notes": "ينتظر حتى تبدأ الخرسانة بالتماسك قبل التنعيم"
+        }
       }
     ],
     "cc-inspection": [
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] هبوط الخرسانة", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] حسب المواصفات", "method": "اختبار الهبوط ASTM C143", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] هبوط الخرسانة",
+          "method": "اختبار الهبوط ASTM C143",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] حسب المواصفات"
+        }
       },
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] درجة حرارة الخرسانة", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 10-32 °C", "method": "مقياس حرارة", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] درجة حرارة الخرسانة",
+          "method": "مقياس حرارة",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 10-32 °C"
+        }
       },
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] أخذ مكعبات اختبار الضغط", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 6 مكعبات لكل 100 م³", "method": "مكعبات قياسية 150×150×150 مم", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] أخذ مكعبات اختبار الضغط",
+          "method": "مكعبات قياسية 150×150×150 مم",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 6 مكعبات لكل 100 م³"
+        }
       }
     ],
     "cc-safety": [
       {
         "type": "safety_note",
-        "note": { "message": "تأكد من سلامة الشدات والدعامات قبل وأثناء الصب - خطر انهيار الفرم", "severity": "critical" }
+        "note": {
+          "message": "تأكد من سلامة الشدات والدعامات قبل وأثناء الصب - خطر انهيار الفرم",
+          "severity": "critical"
+        }
       },
       {
         "type": "safety_note",
-        "note": { "message": "فحص الكابلات الكهربائية للهزازات والتأكد من عدم ملامستها للماء", "severity": "high" }
+        "note": {
+          "message": "فحص الكابلات الكهربائية للهزازات والتأكد من عدم ملامستها للماء",
+          "severity": "high"
+        }
       },
       {
         "type": "safety_note",
-        "note": { "message": "جميع العاملين يجب أن يرتدوا الخوذ وأحذية السلامة", "severity": "high" }
+        "note": {
+          "message": "جميع العاملين يجب أن يرتدوا الخوذ وأحذية السلامة",
+          "severity": "high"
+        }
       }
     ],
     "cc-codes": [
       {
         "type": "code_reference",
-        "reference": { "code": "ACI 304R-00", "section": "4.0-5.0", "title": "Guide for Measuring, Mixing, Transporting, and Placing Concrete", "description": "[DRAFT - REVIEW REQUIRED] إرشادات صب ودمك الخرسانة" }
+        "reference": {
+          "code": "ACI 304R-00",
+          "title": "Guide for Measuring, Mixing, Transporting, and Placing Concrete",
+          "section": "4.0-5.0",
+          "description": "[DRAFT - REVIEW REQUIRED] إرشادات صب ودمك الخرسانة"
+        }
       },
       {
         "type": "code_reference",
-        "reference": { "code": "ACI 305R-20", "section": "2.3", "title": "Hot Weather Concreting", "description": "[DRAFT - REVIEW REQUIRED] إرشادات الصب في الأجواء الحارة" }
+        "reference": {
+          "code": "ACI 305R-20",
+          "title": "Hot Weather Concreting",
+          "section": "2.3",
+          "description": "[DRAFT - REVIEW REQUIRED] إرشادات الصب في الأجواء الحارة"
+        }
       },
       {
         "type": "code_reference",
-        "reference": { "code": "ACI 308R-16", "section": "4.1", "title": "Curing Concrete", "description": "[DRAFT - REVIEW REQUIRED] المعالجة تبدأ فور انتهاء الصب لمدة 7 أيام على الأقل" }
+        "reference": {
+          "code": "ACI 308R-16",
+          "title": "Curing Concrete",
+          "section": "4.1",
+          "description": "[DRAFT - REVIEW REQUIRED] المعالجة تبدأ فور انتهاء الصب لمدة 7 أيام على الأقل"
+        }
       }
     ],
     "rb-documents": [
@@ -459,10 +726,26 @@
         "type": "checklist",
         "title": "قائمة فحص المستندات",
         "items": [
-          { "id": "rb-doc1", "text": "شهادات المنشأ (Mill Certificates) مختومة ومصدقة", "isRequired": true },
-          { "id": "rb-doc2", "text": "مخططات التسليح و جدول التسليح (Bar Bending Schedule)", "isRequired": true },
-          { "id": "rb-doc3", "text": "نتائج اختبارات الحديد (شد وثني) من المختبر", "isRequired": true },
-          { "id": "rb-doc4", "text": "تقارير الفحص السابقة إن وجدت", "isRequired": false }
+          {
+            "id": "rb-doc1",
+            "text": "شهادات المنشأ (Mill Certificates) مختومة ومصدقة",
+            "isRequired": true
+          },
+          {
+            "id": "rb-doc2",
+            "text": "مخططات التسليح و جدول التسليح (Bar Bending Schedule)",
+            "isRequired": true
+          },
+          {
+            "id": "rb-doc3",
+            "text": "نتائج اختبارات الحديد (شد وثني) من المختبر",
+            "isRequired": true
+          },
+          {
+            "id": "rb-doc4",
+            "text": "تقارير الفحص السابقة إن وجدت",
+            "isRequired": false
+          }
         ]
       }
     ],
@@ -474,37 +757,73 @@
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 1, "description": "فحص شهادات المنشأ والتأكد من مطابقة الأقطار والدرجات", "notes": "مطابقة الشهادات مع متطلبات المواصفات ASTM A615 / ACI 318" }
+        "step": {
+          "stepNumber": 1,
+          "description": "فحص شهادات المنشأ والتأكد من مطابقة الأقطار والدرجات",
+          "notes": "مطابقة الشهادات مع متطلبات المواصفات ASTM A615 / ACI 318"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 2, "description": "قياس أقطار أسياخ الحديد بالقدمة ومقارنتها مع الشهادات", "notes": "[DRAFT - REVIEW REQUIRED] التسامح المسموح به ± 0.5 مم" }
+        "step": {
+          "stepNumber": 2,
+          "description": "قياس أقطار أسياخ الحديد بالقدمة ومقارنتها مع الشهادات",
+          "notes": "[DRAFT - REVIEW REQUIRED] التسامح المسموح به ± 0.5 مم"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 3, "description": "التحقق من عدد الأسياخ في المقطع والمسافات بينها حسب المخططات", "notes": "العد المباشر وقياس المسافات بشريط القياس" }
+        "step": {
+          "stepNumber": 3,
+          "description": "التحقق من عدد الأسياخ في المقطع والمسافات بينها حسب المخططات",
+          "notes": "العد المباشر وقياس المسافات بشريط القياس"
+        }
       },
       {
         "type": "execution_step",
-        "step": { "stepNumber": 4, "description": "فحص التغطية الخرسانية والكفرات البلاستيكية وأطوال الوصلات", "notes": "[DRAFT - REVIEW REQUIRED] التغطية لا تقل عن القيم التصميمية حسب ACI 318-19" }
+        "step": {
+          "stepNumber": 4,
+          "description": "فحص التغطية الخرسانية والكفرات البلاستيكية وأطوال الوصلات",
+          "notes": "[DRAFT - REVIEW REQUIRED] التغطية لا تقل عن القيم التصميمية حسب ACI 318-19"
+        }
       }
     ],
     "rb-inspection": [
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] قطر حديد التسليح", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] ± 0.5 مم عن القطر الاسمي", "method": "القدمة (Vernier Caliper)", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] قطر حديد التسليح",
+          "method": "القدمة (Vernier Caliper)",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] ± 0.5 مم عن القطر الاسمي"
+        }
       },
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] المسافة بين الأسياخ الطولية", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] ± 10 مم عن المخططات", "method": "شريط قياس", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] المسافة بين الأسياخ الطولية",
+          "method": "شريط قياس",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] ± 10 مم عن المخططات"
+        }
       },
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] التغطية الخرسانية (Cover)", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] لا تقل عن القيمة التصميمية", "method": "قياس الكفرات البلاستيكية", "isCritical": true }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] التغطية الخرسانية (Cover)",
+          "method": "قياس الكفرات البلاستيكية",
+          "isCritical": true,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] لا تقل عن القيمة التصميمية"
+        }
       },
       {
         "type": "inspection_point",
-        "point": { "criteria": "[DRAFT - REVIEW REQUIRED] زاوية ثني الكانات", "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 135° للكانات المغلقة الزلزالية", "method": "منقلة (Protractor)", "isCritical": false }
+        "point": {
+          "criteria": "[DRAFT - REVIEW REQUIRED] زاوية ثني الكانات",
+          "method": "منقلة (Protractor)",
+          "isCritical": false,
+          "acceptableTolerance": "[DRAFT - REVIEW REQUIRED] 135° للكانات المغلقة الزلزالية"
+        }
       }
     ],
     "rb-tables": [
@@ -512,15 +831,61 @@
         "type": "table",
         "data": {
           "caption": "[DRAFT - REVIEW REQUIRED] أقطار وأوزان حديد التسليح الشائعة",
-          "headers": ["القطر (مم)", "الوزن (كجم/م)", "مساحة المقطع (مم²)"],
+          "headers": [
+            "القطر (مم)",
+            "الوزن (كجم/م)",
+            "مساحة المقطع (مم²)"
+          ],
           "rows": [
-            { "cells": ["10", "0.617", "78.5"] },
-            { "cells": ["12", "0.888", "113.1"] },
-            { "cells": ["14", "1.21", "153.9"] },
-            { "cells": ["16", "1.58", "201.1"] },
-            { "cells": ["18", "2.00", "254.5"] },
-            { "cells": ["20", "2.47", "314.2"] },
-            { "cells": ["25", "3.85", "490.9"] }
+            {
+              "cells": [
+                "10",
+                "0.617",
+                "78.5"
+              ]
+            },
+            {
+              "cells": [
+                "12",
+                "0.888",
+                "113.1"
+              ]
+            },
+            {
+              "cells": [
+                "14",
+                "1.21",
+                "153.9"
+              ]
+            },
+            {
+              "cells": [
+                "16",
+                "1.58",
+                "201.1"
+              ]
+            },
+            {
+              "cells": [
+                "18",
+                "2.00",
+                "254.5"
+              ]
+            },
+            {
+              "cells": [
+                "20",
+                "2.47",
+                "314.2"
+              ]
+            },
+            {
+              "cells": [
+                "25",
+                "3.85",
+                "490.9"
+              ]
+            }
           ]
         }
       },
@@ -528,13 +893,47 @@
         "type": "table",
         "data": {
           "caption": "[DRAFT - REVIEW REQUIRED] أقل تغطية خرسانية حسب ACI 318-19 (الجدول 20.6.1)",
-          "headers": ["نوع العنصر", "التغطية (مم)", "شرط إضافي"],
+          "headers": [
+            "نوع العنصر",
+            "التغطية (مم)",
+            "شرط إضافي"
+          ],
           "rows": [
-            { "cells": ["قواعد وأساسات", "75", "تصب على التربة"] },
-            { "cells": ["جدران وأسقف داخلية", "20", "لا تتعرض للعوامل الجوية"] },
-            { "cells": ["جدران وأسقف خارجية", "40", "تتعرض للعوامل الجوية"] },
-            { "cells": ["أعمدة", "40", "حديد رئيسي"] },
-            { "cells": ["كمرات", "25", "حديد رئيسي"] }
+            {
+              "cells": [
+                "قواعد وأساسات",
+                "75",
+                "تصب على التربة"
+              ]
+            },
+            {
+              "cells": [
+                "جدران وأسقف داخلية",
+                "20",
+                "لا تتعرض للعوامل الجوية"
+              ]
+            },
+            {
+              "cells": [
+                "جدران وأسقف خارجية",
+                "40",
+                "تتعرض للعوامل الجوية"
+              ]
+            },
+            {
+              "cells": [
+                "أعمدة",
+                "40",
+                "حديد رئيسي"
+              ]
+            },
+            {
+              "cells": [
+                "كمرات",
+                "25",
+                "حديد رئيسي"
+              ]
+            }
           ]
         }
       }
@@ -542,15 +941,30 @@
     "rb-codes": [
       {
         "type": "code_reference",
-        "reference": { "code": "ACI 318-19", "section": "25.2.1", "title": "Minimum Bend Diameters", "description": "[DRAFT - REVIEW REQUIRED] أقل قطر للثني: 6 أقطار للسيخ لأسياخ رقم 3-8" }
+        "reference": {
+          "code": "ACI 318-19",
+          "title": "Minimum Bend Diameters",
+          "section": "25.2.1",
+          "description": "[DRAFT - REVIEW REQUIRED] أقل قطر للثني: 6 أقطار للسيخ لأسياخ رقم 3-8"
+        }
       },
       {
         "type": "code_reference",
-        "reference": { "code": "ACI 318-19", "section": "20.6.1", "title": "Concrete Cover Requirements", "description": "[DRAFT - REVIEW REQUIRED] متطلبات التغطية الدنيا للخرسانة" }
+        "reference": {
+          "code": "ACI 318-19",
+          "title": "Concrete Cover Requirements",
+          "section": "20.6.1",
+          "description": "[DRAFT - REVIEW REQUIRED] متطلبات التغطية الدنيا للخرسانة"
+        }
       },
       {
         "type": "code_reference",
-        "reference": { "code": "ACI 318-19", "section": "25.5.2", "title": "Lap Splice Lengths", "description": "[DRAFT - REVIEW REQUIRED] طول الوصلة لا يقل عن 60 قطر للسيخ في وصلات الشد Class B" }
+        "reference": {
+          "code": "ACI 318-19",
+          "title": "Lap Splice Lengths",
+          "section": "25.5.2",
+          "description": "[DRAFT - REVIEW REQUIRED] طول الوصلة لا يقل عن 60 قطر للسيخ في وصلات الشد Class B"
+        }
       }
     ]
   }

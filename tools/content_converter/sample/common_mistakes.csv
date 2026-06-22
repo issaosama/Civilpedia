@@ -1,0 +1,13 @@
+topicId,issueAr,issueEn,correctionAr,correctionEn,severity,codeReference
+slump-test,عدم دمك الطبقات بشكل كافٍ داخل المخروط,Insufficient rodding of layers inside the cone,,,medium,
+slump-test,رفع المخروط بشكل بطيء أو مائل يؤثر على قراءة الهبوط,Slow or tilted cone lifting affects the slump reading,,,medium,
+slump-test,استخدام خرسانة قديمة بدأت بالتصلب,Using concrete that has begun to set,,,medium,
+slump-test,عدم ترطيب المخروط قبل الاختبار يسبب التصاق الخرسانة,Failing to dampen the cone causes concrete adhesion,,,medium,
+concrete-casting,عدم دمك الخرسانة بشكل كافٍ يؤدي إلى وجود فراغات,Insufficient vibration causes voids in concrete,,,medium,
+concrete-casting,إضافة ماء للخلطة في الموقع لزيادة السيولة,Adding water to the mix on site to increase workability,,,medium,
+concrete-casting,إهمال المعالجة يؤدي إلى تشقق وضعف المقاومة,Neglecting curing causes cracking and strength loss,,,medium,
+concrete-casting,الصب من ارتفاع كبير يسبب انفصال الحبيبات,Pouring from excessive height causes segregation,,,medium,
+rebar-inspection,عدم فحص أقطار الحديد بالقدمة والاكتفاء بالفحص البصري,Skipping caliper measurement and relying on visual check only,,,medium,
+rebar-inspection,استخدام كفرات بلاستيكية بأعداد غير كافية مما يقلل التغطية,"Using insufficient plastic spacers, reducing concrete cover",,,medium,
+rebar-inspection,عدم التحقق من زوايا ثني الكانات (خاصة 135° للكانات الزلزالية),Not checking stirrup bend angles (especially 135° for seismic hooks),,,medium,
+rebar-inspection,إهمال فحص أطوال الوصلات (Lap Splice) وتطابقها مع المخططات,Neglecting to check lap splice lengths against drawings,,,medium,

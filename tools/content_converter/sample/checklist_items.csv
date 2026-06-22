@@ -1,0 +1,10 @@
+itemId,sectionId,textAr,textEn,isRequired,category
+cc-prep1,cc-preparation,فحص نظافة الفرم من المخلفات,,TRUE,
+cc-prep2,cc-preparation,ترطيب الفرم الخشبية بالماء,,TRUE,
+cc-prep3,cc-preparation,التأكد من تثبيت حديد التسليح والكفرات,,TRUE,
+cc-prep4,cc-preparation,فحص جاهزية مضخة الخرسانة والهزاز,,TRUE,
+cc-prep5,cc-preparation,تجهيز عدد كافٍ من المكعبات لاختبار الضغط,,TRUE,
+rb-doc1,rb-documents,شهادات المنشأ (Mill Certificates) مختومة ومصدقة,,TRUE,
+rb-doc2,rb-documents,مخططات التسليح و جدول التسليح (Bar Bending Schedule),,TRUE,
+rb-doc3,rb-documents,نتائج اختبارات الحديد (شد وثني) من المختبر,,TRUE,
+rb-doc4,rb-documents,تقارير الفحص السابقة إن وجدت,,FALSE,

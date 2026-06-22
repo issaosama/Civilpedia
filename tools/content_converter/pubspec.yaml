@@ -1,0 +1,6 @@
+name: content_converter
+description: Converts CSV engineering content to catalog.json for Civilpedia.
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+dependencies:
+  csv: ^6.0.0
