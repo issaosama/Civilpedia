@@ -1,20 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/encyclopedia_provider.dart';
-import '../widgets/section_header_widget.dart';
-import '../widgets/content_block_widget.dart';
 import '../../domain/entities/engineering_topic.dart';
+import '../../domain/entities/content_block.dart';
+import '../../domain/entities/topic_section.dart';
 import '../../../../core/widgets/async_value_widget.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/design_tokens.dart';
-import '../../../../core/theme/spacing.dart';
-import '../../../../core/services/language_provider.dart';
 import '../../../../localization/ar.dart';
-import '../../../../localization/en.dart';
+
+const Color _pageBg = Color(0xFFFAF7F2);
+const Color _paperBg = Color(0xFFFFFEFB);
+const Color _textPrimary = Color(0xFF171411);
+const Color _textSecondary = Color(0xFF6D6258);
+const Color _textMuted = Color(0xFF9A8E84);
+const Color _border = Color(0xFFE8DCD3);
+const Color _softPanel = Color(0xFFF7EFEA);
+const Color _accent = Color(0xFF8A3030);
+const Color _accentSoft = Color(0xFFF5E9E5);
+const Color _dangerText = Color(0xFFA23A36);
+const Color _tableHeaderBg = Color(0xFFF3E8E3);
 
 class TopicDetailScreen extends StatefulWidget {
   final String topicId;
-
   const TopicDetailScreen({super.key, required this.topicId});
 
   @override
@@ -26,156 +34,913 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<EncyclopediaProvider>()
-          .loadTopicDetail(widget.topicId);
+      context.read<EncyclopediaProvider>().loadTopicDetail(widget.topicId);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = context.watch<LanguageProvider>().isArabic;
-    String tr(String ar, String en) => isArabic ? ar : en;
     final provider = context.watch<EncyclopediaProvider>();
     final topic = provider.currentTopic;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(topic != null ? (isArabic ? topic.titleAr : (topic.titleEn ?? topic.titleAr)) : ''),
-      ),
-      body: AsyncValueWidget(
-        isLoading: provider.isLoading,
-        error: provider.error,
-        isEmpty: topic == null && provider.error == null,
-        onRetry: () => provider.loadTopicDetail(widget.topicId),
-        onEmpty: () => Center(
-          child: Text(tr(Ar.topicNotFound, En.topicNotFound),
-              style: TextStyle(color: AppColors.textSecondary)),
+      backgroundColor: _pageBg,
+      body: SafeArea(
+        child: AsyncValueWidget(
+          isLoading: provider.isLoading,
+          error: provider.error,
+          isEmpty: topic == null && provider.error == null,
+          onRetry: () => provider.loadTopicDetail(widget.topicId),
+          onEmpty: () => const Center(
+            child: Text(Ar.topicNotFound, style: TextStyle(color: _textSecondary)),
+          ),
+          onData: () => _buildArticle(context, provider, topic!),
         ),
-        onData: () => _content(context, provider, topic!, tr),
       ),
     );
   }
 
-  Widget _content(BuildContext context, EncyclopediaProvider provider, EngineeringTopic topic, String Function(String ar, String en) tr) {
-    final sections = provider.currentSections;
-    return ListView(
-      padding: AppSpacing.padLg,
-      children: [
-        _summaryCard(context, topic),
-        AppSpacing.gapLg,
-        if (sections.isEmpty)
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(32),
-              child: Text(tr(Ar.noSectionsYet, En.noSectionsYet),
-                  style: TextStyle(color: AppColors.textSecondary)),
-            ),
-          )
-        else
-          ...sections.map((section) {
-            final blocks = provider.blocksForSection(section.id);
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SectionHeaderWidget(section: section),
-                AppSpacing.gapSm,
-                if (blocks.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.only(right: 16),
-                    child: Text(tr(Ar.noContentYet, En.noContentYet),
-                        style: TextStyle(color: AppColors.textSecondary)),
-                  )
-                else
-                  ...blocks.map(
-                    (block) => Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: ContentBlockWidget(block: block),
-                    ),
-                  ),
-              ],
-            );
-          }),
-        AppSpacing.gapXl,
-      ],
-    );
-  }
+  // ───────────── Main article column ─────────────
 
-  Widget _summaryCard(BuildContext context, EngineeringTopic topic) {
-    final isArabicSummary = context.watch<LanguageProvider>().isArabic;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primary,
-            AppColors.primaryLight,
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
-        boxShadow: DesignTokens.softShadow(AppColors.primary),
-      ),
+  Widget _buildArticle(BuildContext context, EncyclopediaProvider provider, EngineeringTopic topic) {
+    final blocksByType = _collectBlocksByType(provider);
+
+    return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            isArabicSummary ? topic.titleAr : (topic.titleEn ?? topic.titleAr),
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (topic.titleEn != null && isArabicSummary) ...[
-            const SizedBox(height: 4),
-            Text(
-              topic.titleEn!,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 14,
-              ),
-            ),
-          ],
-          const SizedBox(height: 14),
-          Text(
-            topic.summary,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
-              fontSize: 14,
-              height: 1.6,
-            ),
-          ),
-          if (topic.tags.isNotEmpty) ...[
-            const SizedBox(height: 14),
-            Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: topic.tags.map((tag) {
-                return Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius:
-                        BorderRadius.circular(DesignTokens.radiusFull),
-                  ),
-                  child: Text(
-                    tag,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ],
+          _buildTopBar(context),
+          _buildDivider(),
+          _buildBrandPill(),
+          _buildHeroSection(topic),
+          const SizedBox(height: 8),
+          _buildOverviewSection(topic, blocksByType),
+          if (_hasImportanceData(topic, blocksByType))
+            _buildImportanceSection(topic, blocksByType),
+          if (_hasTableData(blocksByType))
+            _buildDimensionsSection(blocksByType),
+          if (_hasApplicationData(topic, blocksByType))
+            _buildApplicationSection(topic, blocksByType),
+          if (_hasInspectionData(topic, blocksByType))
+            _buildInspectionSection(topic, blocksByType),
+          if (_hasCommonMistakes(topic, blocksByType))
+            _buildCommonMistakesSection(topic, blocksByType),
+          if (topic.reportWording != null)
+            _buildReportWordingSection(topic),
+          if (topic.relatedToolRoutes.isNotEmpty)
+            _buildRelatedToolsSection(context, topic),
+          const SizedBox(height: 48),
         ],
       ),
     );
   }
+
+  // ───────────── Data helpers ─────────────
+
+  Map<SectionType, List<ContentBlock>> _collectBlocksByType(EncyclopediaProvider provider) {
+    final map = <SectionType, List<ContentBlock>>{};
+    for (final section in provider.currentSections) {
+      final blocks = provider.blocksForSection(section.id);
+      if (blocks.isNotEmpty) {
+        map.putIfAbsent(section.type, () => []);
+        map[section.type]!.addAll(blocks);
+      }
+    }
+    return map;
+  }
+
+  bool _hasImportanceData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    if (topic.siteNotes != null || topic.codeNotes != null) return true;
+    return false;
+  }
+
+  bool _hasTableData(Map<SectionType, List<ContentBlock>> blocksByType) {
+    for (final blocks in blocksByType.values) {
+      if (blocks.any((b) => b is TableBlock)) return true;
+    }
+    return false;
+  }
+
+  bool _hasApplicationData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    if (topic.beforeWork != null || topic.duringWork != null || topic.afterWork != null) return true;
+    if (blocksByType.containsKey(SectionType.execution)) return true;
+    return false;
+  }
+
+  bool _hasInspectionData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    if (topic.acceptRejectItems.isNotEmpty) return true;
+    if (blocksByType.containsKey(SectionType.inspection)) return true;
+    return false;
+  }
+
+  bool _hasCommonMistakes(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    if (topic.commonMistakes.isNotEmpty) return true;
+    if (blocksByType.containsKey(SectionType.safety)) return true;
+    return false;
+  }
+
+  // ───────────── Section header ─────────────
+
+  Widget _buildSectionHeader(String kicker, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(width: 36, height: 2, color: _accent),
+              const SizedBox(width: 12),
+              Text(
+                kicker,
+                style: const TextStyle(
+                  fontSize: 11,
+                  letterSpacing: 1.5,
+                  color: _accent,
+                  fontWeight: FontWeight.w600,
+                ),
+                textDirection: TextDirection.ltr,
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: _textPrimary,
+              height: 1.3,
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+      ),
+    );
+  }
+
+  // ───────────── Top Bar ─────────────
+
+  Widget _buildTopBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: _textPrimary),
+            onPressed: () => Navigator.of(context).pop(),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          ),
+          const Spacer(),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                'CIVIL PEDIA',
+                style: TextStyle(
+                  fontSize: 10,
+                  letterSpacing: 2.5,
+                  color: _textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                'سيڤل بيديا',
+                style: TextStyle(fontSize: 8, color: _textSecondary, height: 1),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Container(height: 1, color: _border, margin: const EdgeInsets.symmetric(horizontal: 16));
+  }
+
+  Widget _buildBrandPill() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: _accentSoft,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Text(
+          'الموسوعة الهندسية',
+          style: TextStyle(fontSize: 10, color: _accent, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+
+  // ───────────── Hero Section ─────────────
+
+  Widget _buildHeroSection(EngineeringTopic topic) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            _categoryName(topic.categoryId),
+            style: const TextStyle(
+              fontSize: 12,
+              color: _accent,
+              fontWeight: FontWeight.w500,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            topic.titleAr,
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: _textPrimary,
+              height: 1.3,
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        if (topic.simpleExplanation != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              topic.simpleExplanation!.ar,
+              style: const TextStyle(
+                fontSize: 15,
+                color: _textSecondary,
+                height: 1.7,
+              ),
+            ),
+          )
+        else if (topic.summary.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              topic.summary,
+              style: const TextStyle(
+                fontSize: 15,
+                color: _textSecondary,
+                height: 1.7,
+              ),
+            ),
+          ),
+        const SizedBox(height: 14),
+        if (topic.tags.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: topic.tags.map((tag) => Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: _border.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(tag, style: const TextStyle(fontSize: 11, color: _textSecondary)),
+              )).toList(),
+            ),
+          ),
+        const SizedBox(height: 16),
+        _buildHeroImage(topic),
+      ],
+    );
+  }
+
+  Widget _buildHeroImage(EngineeringTopic topic) {
+    final hasImage = topic.featuredImageUrl != null && topic.featuredImageUrl!.isNotEmpty;
+    return Container(
+      height: 200,
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _border.withValues(alpha: 0.5)),
+        gradient: LinearGradient(
+          colors: [_softPanel, _pageBg],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: hasImage
+          ? _buildPlaceholderContent()
+          : Stack(
+              fit: StackFit.expand,
+              children: [
+                const CustomPaint(
+                  painter: _DiagonalPatternPainter(),
+                  size: Size.infinite,
+                ),
+                _buildPlaceholderContent(),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildPlaceholderContent() {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.image_outlined, size: 32, color: _textMuted),
+          SizedBox(height: 8),
+          Text('صورة الغلاف', style: TextStyle(color: _textMuted, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
+  String _categoryName(String id) {
+    switch (id) {
+      case 'concrete':
+        return 'الخرسانة';
+      case 'steel':
+        return 'الحديد';
+      case 'soil':
+        return 'التربة';
+      default:
+        return id;
+    }
+  }
+
+  // ───────────── OVERVIEW · 01 ─────────────
+
+  Widget _buildOverviewSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('OVERVIEW · 01', 'نظرة عامة'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            topic.simpleExplanation?.ar ?? topic.summary,
+            style: const TextStyle(fontSize: 15, color: _textPrimary, height: 1.8),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  // ───────────── IMPORTANCE · 02 ─────────────
+
+  Widget _buildImportanceSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('IMPORTANCE · 02', 'الأهمية الهندسية'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _softPanel,
+              borderRadius: BorderRadius.circular(10),
+              border: const Border(
+                right: BorderSide(color: _accent, width: 3),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (topic.siteNotes != null)
+                  _buildImportanceItem(topic.siteNotes!.ar),
+                if (topic.codeNotes != null)
+                  _buildImportanceItem(topic.codeNotes!.ar),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildImportanceItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Icon(Icons.diamond, size: 8, color: _accent),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────── DIMENSIONS · 05 ─────────────
+
+  Widget _buildDimensionsSection(Map<SectionType, List<ContentBlock>> blocksByType) {
+    final tables = <TableBlock>[];
+    for (final blocks in blocksByType.values) {
+      for (final block in blocks) {
+        if (block is TableBlock) tables.add(block);
+      }
+    }
+    if (tables.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('DIMENSIONS · 05', 'القياسات والسماكات المتداولة'),
+        ...tables.map((t) => _buildEditorialTable(t)),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildEditorialTable(TableBlock tableBlock) {
+    final data = tableBlock.data;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (data.caption != null && data.caption!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                data.caption!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: _textSecondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: _border),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: DataTable(
+                headingRowColor: WidgetStateProperty.all(_tableHeaderBg),
+                headingTextStyle: const TextStyle(
+                  color: _textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+                dataTextStyle: const TextStyle(
+                  color: _textPrimary,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+                columnSpacing: 24,
+                horizontalMargin: 14,
+                columns: data.headers.map((h) => DataColumn(label: Text(h))).toList(),
+                rows: data.rows
+                    .map((row) => DataRow(
+                          cells: row.cells.map((c) => DataCell(Text(c))).toList(),
+                        ))
+                    .toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────── APPLICATION · 06 ─────────────
+
+  Widget _buildApplicationSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    final executionBlocks = blocksByType[SectionType.execution] ?? <ContentBlock>[];
+    final steps = executionBlocks.whereType<ExecutionStepBlock>().toList()
+      ..sort((a, b) => a.step.stepNumber.compareTo(b.step.stepNumber));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('APPLICATION · 06', 'طرق التنفيذ'),
+        if (topic.beforeWork != null)
+          _buildSubSection('قبل العمل', topic.beforeWork!.ar),
+        if (topic.duringWork != null)
+          _buildSubSection('أثناء العمل', topic.duringWork!.ar),
+        if (topic.afterWork != null)
+          _buildSubSection('بعد العمل', topic.afterWork!.ar),
+        if (steps.isNotEmpty) ...[
+          if (topic.beforeWork?.ar == null && topic.duringWork?.ar == null && topic.afterWork?.ar == null)
+            const SizedBox(height: 4)
+          else
+            const SizedBox(height: 8),
+          ...steps.map((s) => _buildStepCard(s)),
+        ],
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildSubSection(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+              color: _textPrimary,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            content,
+            style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.7),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepCard(ExecutionStepBlock stepBlock) {
+    final step = stepBlock.step;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: _accent,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              '${step.stepNumber}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  step.description,
+                  style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+                ),
+                if (step.notes != null && step.notes!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    step.notes!,
+                    style: const TextStyle(fontSize: 12, color: _textSecondary, height: 1.5),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────── INSPECTION · 07 ─────────────
+
+  Widget _buildInspectionSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    final inspBlocks = blocksByType[SectionType.inspection] ?? <ContentBlock>[];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('INSPECTION · 07', 'فحص الأعمال بعد الإنجاز'),
+        if (topic.acceptRejectItems.isNotEmpty)
+          ...topic.acceptRejectItems.map((item) => _buildInspectionRow(
+                item.criteriaAr,
+                item.acceptanceLimitAr,
+                item.methodAr,
+                item.isCritical,
+              )),
+        ...inspBlocks.whereType<InspectionPointBlock>().map((b) => _buildInspectionRow(
+              b.point.criteria,
+              b.point.acceptableTolerance,
+              b.point.method,
+              b.point.isCritical,
+            )),
+        ...inspBlocks.whereType<ChecklistBlock>().map(_buildChecklistBlock),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildInspectionRow(String criteria, String? limit, String? method, bool isCritical) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              isCritical ? Icons.check_circle_outline : Icons.radio_button_unchecked,
+              size: 18,
+              color: isCritical ? _dangerText : _textMuted,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+                children: [
+                  TextSpan(
+                    text: criteria,
+                    style: TextStyle(fontWeight: isCritical ? FontWeight.w600 : FontWeight.normal),
+                  ),
+                  if (limit != null && limit.isNotEmpty)
+                    TextSpan(
+                      text: ' — $limit',
+                      style: const TextStyle(color: _textSecondary),
+                    ),
+                  if (method != null && method.isNotEmpty)
+                    TextSpan(
+                      text: ' | $method',
+                      style: const TextStyle(color: _textMuted, fontSize: 12),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChecklistBlock(ChecklistBlock block) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 12),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: _border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (block.title != null) ...[
+              Text(
+                block.title!,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _textPrimary),
+              ),
+              const SizedBox(height: 10),
+            ],
+            ...block.items.map((item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.check_box_outline_blank, size: 18, color: _textMuted),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          item.text,
+                          style: const TextStyle(fontSize: 13, color: _textPrimary, height: 1.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ───────────── COMMON MISTAKES · 08 ─────────────
+
+  Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('COMMON MISTAKES · 08', 'أخطاء شائعة يجب تجنبها'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: _accentSoft.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: _dangerText.withValues(alpha: 0.15)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...topic.commonMistakes.map((m) => _buildMistakeItem(m.ar)),
+                ...safetyBlocks.whereType<SafetyNoteBlock>().map((s) => Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('×', style: TextStyle(fontSize: 16, color: _dangerText, fontWeight: FontWeight.bold)),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              s.note.message,
+                              style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildMistakeItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('×', style: TextStyle(fontSize: 16, color: _dangerText, fontWeight: FontWeight.bold)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────── Report Wording ─────────────
+
+  Widget _buildReportWordingSection(EngineeringTopic topic) {
+    final wording = topic.reportWording!.ar;
+    if (wording.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('', 'صياغة تقرير'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: _border),
+              color: _paperBg,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  wording,
+                  style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.7),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(text: wording));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('تم نسخ الصياغة'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: _accentSoft,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.copy, size: 14, color: _accent),
+                            SizedBox(width: 6),
+                            Text(
+                              'نسخ',
+                              style: TextStyle(fontSize: 12, color: _accent, fontWeight: FontWeight.w600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  // ───────────── Related Tools ─────────────
+
+  Widget _buildRelatedToolsSection(BuildContext context, EngineeringTopic topic) {
+    const toolNames = <String, String>{
+      '/calculator/concrete': 'حاسبة الخرسانة',
+      '/calculator/steel': 'حاسبة الحديد',
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('', 'أدوات ذات صلة'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            children: topic.relatedToolRoutes.map((route) {
+              final name = toolNames[route] ?? route;
+              return GestureDetector(
+                onTap: () {
+                  try {
+                    context.go(route);
+                  } catch (_) {}
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _accentSoft,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    name,
+                    style: const TextStyle(fontSize: 13, color: _accent, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+class _DiagonalPatternPainter extends CustomPainter {
+  const _DiagonalPatternPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = _border.withValues(alpha: 0.2)
+      ..strokeWidth = 1;
+    const double spacing = 24;
+    for (double i = -size.height; i < size.width + size.height; i += spacing) {
+      canvas.drawLine(
+        Offset(i, 0),
+        Offset(i + size.height, size.height),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
