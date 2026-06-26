@@ -119,8 +119,8 @@
       "relatedTopicIds": [
         "concrete-casting"
       ],
-      "createdAt": "2026-06-26T22:58:27.751186",
-      "updatedAt": "2026-06-26T22:58:27.752458",
+      "createdAt": "2026-06-26T23:24:21.274412",
+      "updatedAt": "2026-06-26T23:24:21.275411",
       "level": "basic",
       "planKey": null,
       "featuredImageUrl": null,
@@ -402,7 +402,7 @@
     "iraqi-tiles-types": [
       {
         "id": "tile-tables",
-        "title": "مقارنة الأنواع والأبعاد",
+        "title": "جداول المقارنة والقياسات",
         "type": "general",
         "order": 1
       },
@@ -724,102 +724,9 @@
     ],
     "tile-inspection": [
       {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "التطبيل (Hollow Sound)",
-          "method": "الطرق بمطرقة خشبية أو قضيب معدني خفيف",
-          "isCritical": true,
-          "acceptableTolerance": "لا يزيد عن 5% من مساحة البلاط"
-        }
-      },
-      {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "الاستواء (Leveling)",
-          "method": "ميزان الماء أو مسطرة الألمنيوم",
-          "isCritical": true,
-          "acceptableTolerance": "±2 مم على طول 2 متر"
-        }
-      },
-      {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "الميول (Slopes)",
-          "method": "ميزان الماء",
-          "isCritical": true,
-          "acceptableTolerance": "1-2% في الحمامات والسطوح"
-        }
-      },
-      {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "عرض الفواصل (Joint Width)",
-          "method": "مسطرة أو شبلون",
-          "isCritical": false,
-          "acceptableTolerance": "±0.5 مم عن العرض المطلوب"
-        }
-      },
-      {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "المظهر العام (Appearance)",
-          "method": "فحص بصري",
-          "isCritical": true,
-          "acceptableTolerance": "لا توجد خدوش أو كسر أو تغير في اللون"
-        }
-      },
-      {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "القص والتفصيل (Cutting)",
-          "method": "فحص بصري",
-          "isCritical": false,
-          "acceptableTolerance": "قصصات نظيفة بدون تشقق أو تكسر"
-        }
-      },
-      {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "النهايات (Edges/Ends)",
-          "method": "فحص بصري وشريط قياس",
-          "isCritical": false,
-          "acceptableTolerance": "محاذاة النهايات مع الحوائط والزوايا بشكل نظيف"
-        }
-      },
-      {
-        "type": "inspection_point",
-        "point": {
-          "criteria": "الفواصل الحرارية (Expansion Joints)",
-          "method": "قياس المسافات",
-          "isCritical": true,
-          "acceptableTolerance": "تترك كل 5-6 متر في المساحات الكبيرة"
-        }
-      },
-      {
         "type": "checklist",
         "title": "",
-        "items": [
-          {
-            "id": "tile-check-01",
-            "text": "تأكد من نظافة السطح قبل التبليط",
-            "isRequired": true
-          },
-          {
-            "id": "tile-check-02",
-            "text": "تأكد من استخدام المسنن المناسب لنوع البلاط",
-            "isRequired": true
-          },
-          {
-            "id": "tile-check-03",
-            "text": "تأكد من وجود صلبان الفواصل بين البلاطات",
-            "isRequired": true
-          },
-          {
-            "id": "tile-check-04",
-            "text": "تأكد من جفاف المونة قبل الترويب (24-48 ساعة)",
-            "isRequired": true
-          }
-        ]
+        "items": []
       }
     ],
     "tile-safety": [

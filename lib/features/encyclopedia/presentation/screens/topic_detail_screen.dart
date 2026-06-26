@@ -146,14 +146,16 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   bool _hasCommonMistakes(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
     if (topic.commonMistakes.any((m) => _hasText(m.ar) || _hasText(m.en))) { return true; }
-    if (blocksByType.containsKey(SectionType.safety) &&
-        blocksByType[SectionType.safety]!.any((b) => b is SafetyNoteBlock && _hasText(b.note.message))) { return true; }
     return false;
   }
 
   bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
 
   bool _localizedHasText(LocalizedText? value) => _hasText(value?.ar) || _hasText(value?.en);
+
+  String _cleanDisplayText(String text) {
+    return text.replaceAll('[DRAFT - REVIEW REQUIRED]', '').trim();
+  }
 
   // ───────────── Section header ─────────────
 
@@ -425,6 +427,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildImportanceItem(String text) {
+    final display = _cleanDisplayText(text);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -437,7 +440,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              text,
+              display,
               style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.7),
             ),
           ),
@@ -796,12 +799,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   // ───────────── COMMON MISTAKES · 08 ─────────────
 
   Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
-    final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
-
     final validMistakes = topic.commonMistakes.where((m) => _hasText(m.ar) || _hasText(m.en)).toList();
-    final validSafetyNotes = safetyBlocks.whereType<SafetyNoteBlock>().where((s) => _hasText(s.note.message)).toList();
 
-    if (validMistakes.isEmpty && validSafetyNotes.isEmpty) return const SizedBox.shrink();
+    if (validMistakes.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -821,27 +821,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ...validMistakes.map((m) => _buildMistakeItem(m.ar)),
-                ...validSafetyNotes.map((s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('×', style: TextStyle(fontSize: 16, color: _dangerText, fontWeight: FontWeight.bold)),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              s.note.message,
-                              style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )),
               ],
             ),
           ),
         ),
-        ..._imageBlocksFrom(safetyBlocks),
         const SizedBox(height: 8),
       ],
     );
@@ -870,7 +853,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   // ───────────── Report Wording ─────────────
 
   Widget _buildReportWordingSection(EngineeringTopic topic) {
-    final wording = topic.reportWording!.ar;
+    final wording = _cleanDisplayText(topic.reportWording!.ar);
     if (wording.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -944,6 +927,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     const toolNames = <String, String>{
       '/calculator/concrete': 'حاسبة الخرسانة',
       '/calculator/steel': 'حاسبة الحديد',
+      '/calculator/tile': 'حاسبة البلاط',
     };
 
     return Column(

@@ -28,13 +28,16 @@ class TableBlockWidget extends StatelessWidget {
             headingRowColor: WidgetStateProperty.all(
               AppColors.primary.withValues(alpha: 0.06),
             ),
-            headingTextStyle: textTheme.labelLarge?.copyWith(
+            headingTextStyle: textTheme.bodySmall?.copyWith(
               color: AppColors.primary,
               fontWeight: FontWeight.bold,
+              height: 1.3,
             ),
-            dataTextStyle: textTheme.bodySmall?.copyWith(height: 1.5),
-            columnSpacing: 24,
-            horizontalMargin: 14,
+            dataTextStyle: textTheme.bodySmall?.copyWith(height: 1.4),
+            columnSpacing: 16,
+            horizontalMargin: 10,
+            dataRowMinHeight: 36,
+            dataRowMaxHeight: 80,
             columns: data.headers
                 .map((h) => DataColumn(label: Text(h)))
                 .toList(),
@@ -42,7 +45,12 @@ class TableBlockWidget extends StatelessWidget {
                 .map(
                   (row) => DataRow(
                     cells: row.cells
-                        .map((c) => DataCell(Text(c)))
+                        .map((c) => DataCell(
+                              ConstrainedBox(
+                                constraints: const BoxConstraints(maxWidth: 160),
+                                child: Text(c, softWrap: true),
+                              ),
+                            ))
                         .toList(),
                   ),
                 )
