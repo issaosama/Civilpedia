@@ -38,16 +38,16 @@
       },
       "commonMistakes": [
         {
-          "ar": "",
-          "en": ""
+          "ar": "عدم ترطيب المخروط قبل الفحص",
+          "en": "Not wetting the cone before testing"
         },
         {
-          "ar": "",
-          "en": ""
+          "ar": "رفع المخروط بسرعة أو بشكل مائل",
+          "en": "Lifting the cone too fast or unevenly"
         },
         {
-          "ar": "",
-          "en": ""
+          "ar": "عدم تسجيل النتيجة مباشرة",
+          "en": "Not recording the result immediately"
         }
       ],
       "acceptRejectItems": [
@@ -97,8 +97,8 @@
         "en": "Preferably test each truck before allowing casting."
       },
       "reportWording": {
-        "ar": "",
-        "en": ""
+        "ar": "تم إجراء اختبار الهبوط للخرسانة الطازجة وكانت النتيجة ضمن/خارج الحدود المطلوبة.",
+        "en": "The slump test was performed and the result was within/outside the required limits."
       },
       "relatedToolRoutes": [
         "/calculator/concrete"
@@ -119,8 +119,8 @@
       "relatedTopicIds": [
         "concrete-casting"
       ],
-      "createdAt": "2026-06-26T21:43:35.600184",
-      "updatedAt": "2026-06-26T21:43:35.601193",
+      "createdAt": "2026-06-26T21:52:55.424310",
+      "updatedAt": "2026-06-26T21:52:55.424310",
       "level": "basic",
       "planKey": null,
       "featuredImageUrl": null,
@@ -142,8 +142,8 @@
       },
       "commonMistakes": [
         {
-          "ar": "",
-          "en": ""
+          "ar": "ترك الخرسانة بدون معالجة في الأجواء الحارة.",
+          "en": "Leaving concrete without curing in hot weather."
         }
       ],
       "acceptRejectItems": [

@@ -1,4 +1,4 @@
-topicId,issueAr,issueEn,correctionAr,correctionEn,severity,codeReference
+topicId,mistakeAr,mistakeEn,correctionAr,correctionEn,severity,codeReference
 slump-test,عدم دمك الطبقات بشكل كافٍ,Insufficient rodding of layers,يجب توزيع 25 ضربة لكل طبقة بالتساوي,Distribute 25 rodding strokes evenly per layer,high,ASTM C143
 slump-test,رفع المخروط بحركة جانبية,Raising the cone with lateral movement,يجب رفع المخروط رأسياً بثبات في 5 ± 2 ثوان,Raise the cone steadily in 5 ± 2 s,medium,ASTM C143
 slump-test,استخدام خرسانة غير ممثلة للحمولة,Using unrepresentative concrete,يجب أخذ العينة وفق ASTM C172 من وسط الحمولة,Take sample per ASTM C172 from mid-load,high,ASTM C172

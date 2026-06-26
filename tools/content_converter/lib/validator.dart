@@ -41,15 +41,22 @@ ValidationResult validateAll({
   // ── Topics validation ──
   final topicIds = <String>{};
   final duplicateTopicIds = <String>{};
+  final topicStatuses = <String, String>{};
+  int topicRow = 0;
   for (final row in topics) {
+    topicRow++;
     final tid = row['topicId'] ?? '';
     if (tid.isEmpty) {
-      issues.add(ValidationIssue('topics.csv: row with empty topicId'));
+      issues.add(ValidationIssue('topics.csv row $topicRow: empty topicId'));
       continue;
     }
     if (!topicIds.add(tid)) {
       duplicateTopicIds.add(tid);
     }
+    final status = row['status'] ?? '';
+    final isDraft = status == 'Draft';
+    topicStatuses[tid] = status;
+
     // categoryId
     final catId = row['categoryId'] ?? '';
     if (catId.isEmpty) {
@@ -65,7 +72,6 @@ ValidationResult validateAll({
       issues.add(ValidationIssue('topics.csv: topic "$tid" has unsupported level "$level"'));
     }
     // status
-    final status = row['status'] ?? '';
     if (status.isEmpty) {
       issues.add(ValidationIssue('topics.csv: topic "$tid" has empty status'));
     } else if (!supportedStatuses.contains(status)) {
@@ -101,11 +107,14 @@ ValidationResult validateAll({
     if (updatedAt.isEmpty) {
       issues.add(ValidationIssue('topics.csv: topic "$tid" has empty updatedAt — will use current timestamp as fallback', isError: false));
     }
-    // Required text fields
+    // Required text fields — status-aware
     for (final field in ['titleAr', 'titleEn', 'summary', 'simpleExplanation_ar', 'simpleExplanation_en']) {
       final val = row[field] ?? '';
       if (val.isEmpty) {
-        issues.add(ValidationIssue('topics.csv: topic "$tid" has empty required field "$field"'));
+        issues.add(ValidationIssue(
+          'topics.csv: topic "$tid" is "$status" but has empty field "$field"',
+          isError: !isDraft,
+        ));
       }
     }
     // relatedToolRoutes
@@ -134,10 +143,12 @@ ValidationResult validateAll({
   final sectionIds = <String>{};
   final duplicateSectionIds = <String>{};
   final topicWithSections = <String>{};
+  int sectionRow = 0;
   for (final row in sections) {
+    sectionRow++;
     final sid = row['sectionId'] ?? '';
     if (sid.isEmpty) {
-      issues.add(ValidationIssue('sections.csv: row with empty sectionId'));
+      issues.add(ValidationIssue('sections.csv row $sectionRow: empty sectionId'));
       continue;
     }
     if (!sectionIds.add(sid)) {
@@ -164,56 +175,75 @@ ValidationResult validateAll({
   for (final sid in duplicateSectionIds) {
     issues.add(ValidationIssue('sections.csv: duplicate sectionId "$sid"'));
   }
-  // Check topics without sections
+  // Check topics without sections — status-aware
   for (final tid in topicIds) {
     if (!topicWithSections.contains(tid)) {
-      issues.add(ValidationIssue('topics.csv: topic "$tid" has no sections', isError: false));
+      final isDraft = topicStatuses[tid] == 'Draft';
+      issues.add(ValidationIssue(
+        'topics.csv: topic "$tid" (status="${topicStatuses[tid] ?? '?'}") has no sections',
+        isError: !isDraft,
+      ));
     }
   }
 
   // ── Blocks validation ──
   final blocksBySection = <String, int>{};
+  final blockSectionTypes = <String, String>{};
+  int blockRow = 0;
   for (final row in blocks) {
+    blockRow++;
     final sid = row['sectionId'] ?? '';
     if (sid.isEmpty) {
-      issues.add(ValidationIssue('blocks.csv: row with empty sectionId'));
+      issues.add(ValidationIssue('blocks.csv row $blockRow: empty sectionId'));
       continue;
     }
     blocksBySection.update(sid, (v) => v + 1, ifAbsent: () => 1);
     if (!sectionIds.contains(sid)) {
-      issues.add(ValidationIssue('blocks.csv: block references unknown sectionId "$sid"'));
+      issues.add(ValidationIssue('blocks.csv row $blockRow: references unknown sectionId "$sid"'));
     }
     final type = row['type'] ?? '';
     if (type.isEmpty) {
-      issues.add(ValidationIssue('blocks.csv: block in section "$sid" has empty type'));
+      issues.add(ValidationIssue('blocks.csv row $blockRow: empty type'));
     } else if (!supportedBlockTypes.contains(type)) {
-      issues.add(ValidationIssue('blocks.csv: block in section "$sid" has unsupported type "$type"'));
+      issues.add(ValidationIssue('blocks.csv row $blockRow: unsupported type "$type"'));
     } else {
       final required = blockRequiredFields[type] ?? [];
       for (final field in required) {
         final val = row[field] ?? '';
         if (val.isEmpty) {
-          issues.add(ValidationIssue('blocks.csv: block in section "$sid" type "$type" missing required field "$field"'));
+          issues.add(ValidationIssue('blocks.csv row $blockRow: block type "$type" in section "$sid" missing required field "$field"'));
         }
       }
       // Type-specific validation
       if (type == 'text') {
         final variant = row['text_variant'] ?? '';
         if (variant.isNotEmpty && !supportedTextVariants.contains(variant)) {
-          issues.add(ValidationIssue('blocks.csv: block in section "$sid" has unsupported text_variant "$variant"'));
+          issues.add(ValidationIssue('blocks.csv row $blockRow: block in section "$sid" has unsupported text_variant "$variant"'));
         }
       }
       if (type == 'safety_note') {
         final severity = row['safety_severity'] ?? '';
         if (severity.isNotEmpty && !supportedSafetySeverities.contains(severity)) {
-          issues.add(ValidationIssue('blocks.csv: block in section "$sid" has unsupported safety_severity "$severity"'));
+          issues.add(ValidationIssue('blocks.csv row $blockRow: block in section "$sid" has unsupported safety_severity "$severity"'));
         }
       }
       if (type == 'inspection_point') {
         final critical = row['point_critical'] ?? '';
         if (critical.isNotEmpty && !validTrueFalse.contains(critical.toUpperCase())) {
-          issues.add(ValidationIssue('blocks.csv: block in section "$sid" has invalid point_critical "$critical" (must be TRUE/FALSE)'));
+          issues.add(ValidationIssue('blocks.csv row $blockRow: block in section "$sid" has invalid point_critical "$critical" (must be TRUE/FALSE)'));
         }
+      }
+      if (type == 'image') {
+        final imageUrl = row['image_url'] ?? '';
+        if (imageUrl.isEmpty) {
+          issues.add(ValidationIssue('blocks.csv row $blockRow: image block in section "$sid" has empty image_url'));
+        }
+      }
+      if (type == 'checklist') {
+        blockSectionTypes[sid] = type;
+      }
+      if (type == 'table') {
+        blockSectionTypes[sid] = type;
       }
     }
   }
@@ -225,10 +255,18 @@ ValidationResult validateAll({
   }
 
   // ── Checklist items validation ──
+  final sectionsWithChecklistItems = <String>{};
   for (final row in checklistItems) {
     final sid = row['sectionId'] ?? '';
-    if (sid.isNotEmpty && !sectionIds.contains(sid)) {
-      issues.add(ValidationIssue('checklist_items.csv: references unknown sectionId "$sid"'));
+    if (sid.isNotEmpty) {
+      sectionsWithChecklistItems.add(sid);
+      if (!sectionIds.contains(sid)) {
+        issues.add(ValidationIssue('checklist_items.csv: references unknown sectionId "$sid"'));
+      }
+      final text = row['itemText'] ?? '';
+      if (text.isEmpty) {
+        issues.add(ValidationIssue('checklist_items.csv: section "$sid" has checklist item with empty text'));
+      }
     }
     final isReq = row['isRequired'] ?? '';
     if (isReq.isNotEmpty && !validTrueFalse.contains(isReq.toUpperCase())) {
@@ -237,10 +275,24 @@ ValidationResult validateAll({
   }
 
   // ── Table rows validation ──
+  final sectionsWithTableRows = <String>{};
   for (final row in tableRows) {
     final sid = row['sectionId'] ?? '';
-    if (sid.isNotEmpty && !sectionIds.contains(sid)) {
-      issues.add(ValidationIssue('table_rows.csv: references unknown sectionId "$sid"'));
+    if (sid.isNotEmpty) {
+      sectionsWithTableRows.add(sid);
+      if (!sectionIds.contains(sid)) {
+        issues.add(ValidationIssue('table_rows.csv: references unknown sectionId "$sid"'));
+      }
+    }
+  }
+
+  // Warn if checklist block has no linked checklist items
+  for (final sid in blockSectionTypes.keys) {
+    if (blockSectionTypes[sid] == 'checklist' && !sectionsWithChecklistItems.contains(sid)) {
+      issues.add(ValidationIssue('blocks.csv: checklist block in section "$sid" has no linked checklist items', isError: false));
+    }
+    if (blockSectionTypes[sid] == 'table' && !sectionsWithTableRows.contains(sid)) {
+      issues.add(ValidationIssue('blocks.csv: table block in section "$sid" has no linked table rows', isError: false));
     }
   }
 

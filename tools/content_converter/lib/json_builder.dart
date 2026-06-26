@@ -70,8 +70,8 @@ class CatalogBuilder {
           'en': t['siteNotes_en'] ?? '',
         },
         'reportWording': {
-          'ar': t['reportWordingAr'] ?? '',
-          'en': t['reportWordingEn'] ?? '',
+          'ar': t['reportWording_ar'] ?? '',
+          'en': t['reportWording_en'] ?? '',
         },
         'relatedToolRoutes': (t['relatedToolRoutes'] ?? '').split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
         'relatedChecklistIds': (t['relatedChecklistIds'] ?? '').split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
@@ -254,8 +254,8 @@ class CatalogBuilder {
     // If we have explicit commonMistakes CSV rows, use them
     if (items.isNotEmpty) {
       return items.map((m) => <String, dynamic>{
-        'ar': m['issueAr'] ?? '',
-        'en': m['issueEn'] ?? '',
+        'ar': m['mistakeAr'] ?? '',
+        'en': m['mistakeEn'] ?? '',
       }).toList();
     }
     // Fallback: return empty list, errors populated from CSV if present
