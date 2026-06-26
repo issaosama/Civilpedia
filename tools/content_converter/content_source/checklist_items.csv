@@ -1,0 +1,4 @@
+sectionId,blockOrder,itemId,itemText,isRequired
+st-inspection,2,st-check-01,تأكد من نظافة المخروط والصفيحة قبل الاختبار,TRUE
+st-inspection,2,st-check-02,تأكد من دمك كل طبقة بعدد الضربات المطلوب,TRUE
+st-inspection,2,st-check-03,سجل قراءة الهبوط مباشرة بعد رفع المخروط,TRUE

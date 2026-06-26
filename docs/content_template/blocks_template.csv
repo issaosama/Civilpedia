@@ -1,4 +1,4 @@
-﻿sectionId,blockOrder,type,text_content,text_variant,step_number,step_description,step_image,step_note,point_criteria,point_method,point_critical,point_acceptableTolerance,point_tool,safety_message,safety_severity,safety_code,safety_action,code_code,code_title,code_section,code_excerpt,checklist_title,table_title,table_headers,equipment_title,image_url,image_caption
+﻿sectionId,order,type,text_content,text_variant,step_number,step_description,step_image,step_notes,point_criteria,point_method,point_critical,point_tolerance,point_tool,safety_message,safety_severity,safety_code,safety_action,code_code,code_title,code_section,code_description,checklist_title,table_caption,table_headers,equipment_title,image_url,image_caption
 st-equipment,1,equipment,,,,,,,,,,,,,,,,,,,,,,,معدات اختبار الهبوط,,
 st-execution,1,execution_step,,,1,ترطيب المخروط بالماء ووضعه على سطح مستو رطب غير ماص,,تثبيت المخروط بالقدم على اللوحين السفليين,,,,,,,,,,,,,,,,,,,
 st-execution,2,execution_step,,,2,تعبئة المخروط بالخرسانة على ثلاث طبقات متساوية,,كل طبقة حوالي ثلث ارتفاع المخروط,,,,,,,,,,,,,,,,,,,

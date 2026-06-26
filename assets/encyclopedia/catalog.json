@@ -119,8 +119,8 @@
       "relatedTopicIds": [
         "concrete-casting"
       ],
-      "createdAt": "2026-06-26T21:52:55.424310",
-      "updatedAt": "2026-06-26T21:52:55.424310",
+      "createdAt": "2026-06-26T22:05:30.119259",
+      "updatedAt": "2026-06-26T22:05:30.120259",
       "level": "basic",
       "planKey": null,
       "featuredImageUrl": null,
@@ -261,7 +261,8 @@
         "type": "execution_step",
         "step": {
           "stepNumber": 1,
-          "description": "ضع المخروط على سطح مستوٍ ونظيف."
+          "description": "ضع المخروط على سطح مستوٍ ونظيف.",
+          "notes": "ثبّت المخروط جيداً بالقدم."
         }
       }
     ],
@@ -271,7 +272,8 @@
         "point": {
           "criteria": "هبوط الخرسانة",
           "method": "Slump Cone",
-          "isCritical": true
+          "isCritical": true,
+          "acceptableTolerance": "حسب مواصفات المشروع"
         }
       },
       {
@@ -311,7 +313,8 @@
         "reference": {
           "code": "ASTM C143",
           "title": "Standard Test Method for Slump of Hydraulic-Cement Concrete",
-          "section": ""
+          "section": "",
+          "description": "مرجع شائع لاختبار الهبوط."
         }
       },
       {
@@ -319,7 +322,8 @@
         "reference": {
           "code": "ASTM C143",
           "title": "Standard Test Method for Slump of Hydraulic-Cement Concrete",
-          "section": ""
+          "section": "",
+          "description": "مرجع شائع لاختبار الهبوط."
         }
       }
     ],
@@ -338,7 +342,8 @@
         "type": "execution_step",
         "step": {
           "stepNumber": 1,
-          "description": "ابدأ المعالجة بعد انتهاء التشطيب الأولي للسطح."
+          "description": "ابدأ المعالجة بعد انتهاء التشطيب الأولي للسطح.",
+          "notes": "لا تنتظر إلى أن يجف سطح الخرسانة بالكامل."
         }
       }
     ]

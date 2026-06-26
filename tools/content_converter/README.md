@@ -2,22 +2,75 @@
 
 A Dart CLI tool that converts civil engineering topic content from CSV files into `catalog.json` for the Civilpedia mobile app.
 
-## Usage
+## Quick Start (Production)
 
 ```bash
 cd tools/content_converter
 dart pub get
+dart run bin/convert.dart content_source ../../assets/encyclopedia/catalog.json
+```
 
-# Convert CSV directory → catalog.json
+## Canonical Content Source
+
+The **only** folder used to generate the production `catalog.json` is:
+
+**`tools/content_converter/content_source/`** — contains the 8 canonical CSV files tracked by Git.
+
+## Folder Roles
+
+| Folder | Tracked by Git | Purpose |
+|--------|---------------|---------|
+| `content_source/` | **Yes** | **Official canonical source** — the 8 CSVs used to generate `catalog.json`. This is the single source of truth for production content. |
+| `from_google_sheet/` | **No** (`.gitignore`) | Temporary local export folder for testing or ad-hoc Google Sheet exports. Never commit. |
+| `sample/` | **Yes** | Developer sample/test data. Contains 3 pilot topics for converter development and testing. **Do not generate production `catalog.json` from this folder.** |
+| `assets/encyclopedia/catalog.json` | **Yes** | Generated app output — the JSON catalog consumed by the Flutter app. |
+
+## Workflow
+
+```
+[Google Sheet — Engineering Workspace]  →  Export CSVs
+         ↓
+[content_source/ folder]  ←  Place the exported CSV files here
+         ↓
+[Converter]  (dart run bin/convert.dart content_source ...)
+         ↓
+[catalog.json]  ←  Generated, review diff, commit
+         ↓
+[Flutter App]  ←  Loads catalog.json at runtime
+```
+
+### Step-by-step
+
+1. **Author content** in Google Sheets using the templates at `docs/content_template/`.
+2. **Export each sheet as CSV** and place the 8 CSV files into `tools/content_converter/content_source/`.
+3. **Run the converter** from `tools/content_converter/`:
+   ```bash
+   dart run bin/convert.dart content_source ../../assets/encyclopedia/catalog.json
+   ```
+4. **Review** the output `catalog.json` changes with `git diff`.
+5. **Commit** `content_source/` changes AND `catalog.json` together.
+
+> ⚠ **WARNING**: Always verify the input folder. Running with `sample/` will overwrite `catalog.json` with sample/developer data. Production catalog must be generated from `content_source/`.
+
+## CLI Reference
+
+```bash
 dart run bin/convert.dart <input-dir> <output-path>
 
-# Reverse: catalog.json → CSV directory
-dart run bin/export_csvs.dart <output-dir>
+# Examples:
+dart run bin/convert.dart content_source ../../assets/encyclopedia/catalog.json   # Production
+dart run bin/convert.dart sample ../../assets/encyclopedia/catalog.json           # Developer test
+dart run bin/convert.dart from_google_sheet ../../assets/encyclopedia/catalog.json # Ad-hoc
 ```
 
 **Default paths** (no arguments):
-- `convert.dart` → reads from `sample/`, writes to `../../assets/encyclopedia/catalog.json`
-- `export_csvs.dart` → reads `../../assets/encyclopedia/catalog.json`, writes to `sample/`
+- `input-dir` defaults to `sample/`
+- `output-path` defaults to `../../assets/encyclopedia/catalog.json`
+
+Available reverse tool:
+```bash
+dart run bin/export_csvs.dart <output-dir>
+```
 
 ## Input: 8 CSV Files
 

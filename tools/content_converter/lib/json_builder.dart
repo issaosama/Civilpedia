@@ -113,8 +113,8 @@ class CatalogBuilder {
     final result = <Map<String, dynamic>>[];
     final sectionBlocks = blocks.where((b) => b['sectionId'] == sectionId).toList();
     sectionBlocks.sort((a, b) {
-      final ao = _parseInt(a['blockOrder'] ?? '0');
-      final bo = _parseInt(b['blockOrder'] ?? '0');
+      final ao = _parseInt(a['order'] ?? '0');
+      final bo = _parseInt(b['order'] ?? '0');
       return ao.compareTo(bo);
     });
 
@@ -137,8 +137,8 @@ class CatalogBuilder {
           if ((b['step_image'] ?? '').isNotEmpty) {
             (blockJson['step'] as Map<String, dynamic>)['imageUrl'] = b['step_image'];
           }
-          if ((b['step_note'] ?? '').isNotEmpty) {
-            (blockJson['step'] as Map<String, dynamic>)['notes'] = b['step_note'];
+          if ((b['step_notes'] ?? '').isNotEmpty) {
+            (blockJson['step'] as Map<String, dynamic>)['notes'] = b['step_notes'];
           }
           break;
         case 'inspection_point':
@@ -147,8 +147,8 @@ class CatalogBuilder {
             'method': b['point_method'] ?? '',
             'isCritical': (b['point_critical'] ?? '').toUpperCase() == 'TRUE',
           };
-          if ((b['point_acceptableTolerance'] ?? '').isNotEmpty) {
-            (blockJson['point'] as Map<String, dynamic>)['acceptableTolerance'] = b['point_acceptableTolerance'];
+          if ((b['point_tolerance'] ?? '').isNotEmpty) {
+            (blockJson['point'] as Map<String, dynamic>)['acceptableTolerance'] = b['point_tolerance'];
           }
           if ((b['point_tool'] ?? '').isNotEmpty) {
             (blockJson['point'] as Map<String, dynamic>)['tool'] = b['point_tool'];
@@ -172,8 +172,8 @@ class CatalogBuilder {
             'title': b['code_title'] ?? '',
             'section': b['code_section'] ?? '',
           };
-          if ((b['code_excerpt'] ?? '').isNotEmpty) {
-            (blockJson['reference'] as Map<String, dynamic>)['description'] = b['code_excerpt'];
+          if ((b['code_description'] ?? '').isNotEmpty) {
+            (blockJson['reference'] as Map<String, dynamic>)['description'] = b['code_description'];
           }
           break;
         case 'checklist': {
@@ -187,14 +187,14 @@ class CatalogBuilder {
           break;
         }
         case 'table': {
-          final blockOrder = b['blockOrder'] ?? '';
+          final blockOrder = b['order'] ?? '';
           final rows = tableRows.where((r) =>
             r['sectionId'] == sectionId &&
-            (blockOrder.isEmpty || r['blockOrder'] == blockOrder)
+            (blockOrder.isEmpty || r['order'] == blockOrder)
           ).toList();
           final headers = (b['table_headers'] ?? '').split(',').map((h) => h.trim()).where((h) => h.isNotEmpty).toList();
           blockJson['data'] = {
-            'caption': b['table_title'] ?? '',
+            'caption': b['table_caption'] ?? '',
             'headers': headers,
             'rows': rows.map((r) {
               // Build cells array from column_1, column_2, etc.

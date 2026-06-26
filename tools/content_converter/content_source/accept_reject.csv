@@ -1,0 +1,5 @@
+topicId,order,criteriaAr,criteriaEn,acceptanceLimitAr,acceptanceLimitEn,methodAr,methodEn,isCritical,reviewRequired
+slump-test,1,قوام الخرسانة,Concrete workability,حسب مواصفات المشروع,As per project specs,اختبار الهبوط,Slump cone test,TRUE,TRUE
+slump-test,2,زمن الاختبار,Testing time,مباشرة بعد أخذ العينة,Immediately after sampling,قياس وتسجيل,Measure and record,FALSE,TRUE
+slump-test,3,تجانس العينة,Sample consistency,بدون انفصال حبيبي واضح,No visible segregation,ملاحظة بصرية,Visual inspection,TRUE,TRUE
+concrete-curing,1,استمرار رطوبة سطح الخرسانة,Maintaining concrete surface moisture,يجب أن لا يجف السطح خلال فترة المعالجة المطلوبة,Surface should not dry during the required curing period,فحص بصري ومتابعة دورية,Visual inspection and periodic monitoring,TRUE,TRUE

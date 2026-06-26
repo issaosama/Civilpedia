@@ -1,0 +1,7 @@
+topicId,sectionId,order,title,type
+slump-test,st-equipment,1,المعدات المطلوبة,equipment
+slump-test,st-steps,2,خطوات الاختبار,execution
+slump-test,st-inspection,3,نقاط الفحص,inspection
+slump-test,st-safety,4,ملاحظات السلامة,safety
+slump-test,st-code,5,مراجع الكود,codeReference
+concrete-curing,curing-overview,1,ملاحظات عملية حول معالجة الخرسانة,general

@@ -67,12 +67,22 @@ tools/content_converter/
 
 ## Running the Converter
 
+### Production (Canonical Source)
+
 From `tools/content_converter/`:
 
 ```bash
 dart pub get
+dart run bin/convert.dart content_source ../../assets/encyclopedia/catalog.json
+```
+
+### Developer Testing
+
+```bash
 dart run bin/convert.dart sample ../../assets/encyclopedia/catalog.json
 ```
+
+> ⚠ **Always use `content_source/` for production.** The `sample/` folder contains developer test data, not production content.
 
 To regenerate CSVs from an existing catalog (reverse direction):
 

@@ -1,0 +1,13 @@
+﻿"sectionId","order","type","text_content","text_variant","step_number","step_description","step_notes","point_criteria","point_tolerance","point_method","point_critical","safety_message","safety_severity","equipment_title","code_code","code_section","code_title","code_description","checklist_title","table_caption","image_url","image_caption"
+"st-equipment","1","text","تُستخدم معدات بسيطة ومحددة لإجراء الاختبار في الموقع.","paragraph","","","","","","","","","","","","","","","","","",""
+"st-steps","1","execution_step","","","1","ضع المخروط على سطح مستوٍ ونظيف.","ثبّت المخروط جيداً بالقدم.","","","","","","","","","","","","","","",""
+"st-inspection","1","inspection_point","","","","","هبوط الخرسانة","هبوط الخرسانة","حسب مواصفات المشروع","Slump Cone","TRUE","","","","","","","","","","",""
+"st-safety","1","safety_note","","","","","","","","","ارتدِ معدات الوقاية الشخصية أثناء الفحص.","ارتدِ معدات الوقاية الشخصية أثناء الفحص.","medium","","","","","","","","",""
+"st-code","1","code_reference","","","","","","","","","","","ASTM C143","","ASTM C143","","Standard Test Method for Slump of Hydraulic-Cement Concrete","مرجع شائع لاختبار الهبوط.","","","",""
+"st-inspection","2","checklist","","","","","","","","","","","","","","","قائمة فحص قبل الصب","","","","",""
+"st-code","1","code_reference","","","","","","","","","","","","","ASTM C143","","Standard Test Method for Slump of Hydraulic-Cement Concrete","مرجع شائع لاختبار الهبوط.","","","",""
+"st-equipment","2","equipment","","","","","","","","","","","معدات اختبار الهبوط","","","","","","","","",""
+"st-equipment","3","image","","","","","","","","","","","","","","","","","","https://example.com/slump-cone.jpg","مخروط الهبوط القياسي",""
+"curing-overview","1","text","الغرض من المعالجة هو تقليل فقدان الرطوبة من الخرسانة في الأيام الأولى بعد الصب.","paragraph","","","","","","","","","","","","","","","","","",""
+"curing-overview","2","text","إهمال المعالجة قد يؤدي إلى تشققات سطحية وضعف في مقاومة الخرسانة.","warning","","","","","","","","","","","","","","","","","",""
+"curing-overview","3","execution_step","","","1","ابدأ المعالجة بعد انتهاء التشطيب الأولي للسطح.","لا تنتظر إلى أن يجف سطح الخرسانة بالكامل.","","","","","","","","","","","","","","",

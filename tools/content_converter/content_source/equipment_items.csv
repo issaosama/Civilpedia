@@ -1,0 +1,5 @@
+sectionId,blockOrder,itemOrder,name,purpose,specification
+st-equipment,2,1,مخروط الهبوط القياسي (Slump Cone),قالب قياس الهبوط,قاعدة 200 مم، قمة 100 مم، ارتفاع 300 مم
+st-equipment,2,2,قضيب الدمك,دمك طبقات الخرسانة,قطر 16 مم وطول 600 مم تقريباً
+st-equipment,2,3,صفيحة قاعدة,تثبيت المخروط,سطح مستوٍ وغير ماص
+st-equipment,2,4,مسطرة قياس,قراءة الهبوط,قراءة بالملليمتر

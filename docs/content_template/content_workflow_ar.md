@@ -45,11 +45,12 @@
 
 1. تأكد من استلام جميع ملفات CSV مكتملة.
 2. شغل أداة التحويل:
-   ```bash
-   cd tools/content_converter
-   dart pub get
-   dart run bin/convert.dart <input-dir> ../../assets/encyclopedia/catalog.json
-   ```
+    ```bash
+    cd tools/content_converter
+    dart pub get
+    dart run bin/convert.dart content_source ../../assets/encyclopedia/catalog.json
+    ```
+    (ملف `content_source/` هو المصدر الرسمي المعتمد — لا تستخدم `sample/` للمحتوى الإنتاجي)
 3. راجع التغييرات في `catalog.json` باستخدام `git diff`.
 4. تأكد من عدم وجود أخطاء في التحويل.
 

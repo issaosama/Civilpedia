@@ -1,0 +1,5 @@
+topicId,order,mistakeAr,mistakeEn
+slump-test,1,عدم ترطيب المخروط قبل الفحص,Not wetting the cone before testing
+slump-test,2,رفع المخروط بسرعة أو بشكل مائل,Lifting the cone too fast or unevenly
+slump-test,3,عدم تسجيل النتيجة مباشرة,Not recording the result immediately
+concrete-curing,1,ترك الخرسانة بدون معالجة في الأجواء الحارة.,Leaving concrete without curing in hot weather.
