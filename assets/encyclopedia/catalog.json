@@ -6,6 +6,7 @@
       "titleEn": "Concrete Slump Test",
       "categoryId": "concrete",
       "summary": "اختبار موقعي لقياس قابلية تشغيل الخرسانة الطازجة قبل الصب.",
+      "featuredImageUrl": "assets/images/rebar_cover.png",
       "tags": [
         "خرسانة",
         "هبوط",
@@ -251,7 +252,8 @@
       },
       {
         "type": "image",
-        "imageUrl": "مخروط الهبوط القياسي"
+        "imageUrl": "assets/images/rebar_cover.png",
+        "caption": "مخروط الهبوط القياسي"
       }
     ],
     "st-steps": [

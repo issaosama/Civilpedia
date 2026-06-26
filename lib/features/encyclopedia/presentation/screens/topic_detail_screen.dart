@@ -334,44 +334,21 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildHeroImage(EngineeringTopic topic) {
-    final hasImage = topic.featuredImageUrl != null && topic.featuredImageUrl!.isNotEmpty;
+    final url = topic.featuredImageUrl;
+    if (url == null || url.isEmpty) return const SizedBox.shrink();
     return Container(
       height: 200,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: _border.withValues(alpha: 0.5)),
-        gradient: LinearGradient(
-          colors: [_softPanel, _pageBg],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: hasImage
-          ? _buildPlaceholderContent()
-          : Stack(
-              fit: StackFit.expand,
-              children: [
-                const CustomPaint(
-                  painter: _DiagonalPatternPainter(),
-                  size: Size.infinite,
-                ),
-                _buildPlaceholderContent(),
-              ],
-            ),
-    );
-  }
-
-  Widget _buildPlaceholderContent() {
-    return const Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.image_outlined, size: 32, color: _textMuted),
-          SizedBox(height: 8),
-          Text('صورة الغلاف', style: TextStyle(color: _textMuted, fontSize: 13)),
-        ],
+      child: Image.asset(
+        url,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
       ),
     );
   }
@@ -471,18 +448,21 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   Widget _buildDimensionsSection(Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     final tables = <TableBlock>[];
+    final images = <Widget>[];
     for (final blocks in blocksByType.values) {
       for (final block in blocks) {
         if (block is TableBlock && block.data.rows.isNotEmpty) tables.add(block);
       }
+      images.addAll(_imageBlocksFrom(blocks));
     }
-    if (tables.isEmpty) return const SizedBox.shrink();
+    if (tables.isEmpty && images.isEmpty) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader('DIMENSIONS', 'القياسات والسماكات المتداولة', number: number),
         ...tables.map((t) => _buildEditorialTable(t)),
+        ...images,
         const SizedBox(height: 8),
       ],
     );
@@ -569,6 +549,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             const SizedBox(height: 8),
           ...steps.map((s) => _buildStepCard(s)),
         ],
+        ..._imageBlocksFrom(executionBlocks),
         const SizedBox(height: 8),
       ],
     );
@@ -676,6 +657,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               b.point.isCritical,
             )),
         ...validChecklists.map(_buildChecklistBlock),
+        ..._imageBlocksFrom(inspBlocks),
         const SizedBox(height: 8),
       ],
     );
@@ -768,6 +750,47 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
+  // ───────────── Image Block ─────────────
+
+  Widget _buildImageBlock(ImageBlock block) {
+    if (block.imageUrl.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              block.imageUrl,
+              fit: BoxFit.contain,
+              width: double.infinity,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+          if (_hasText(block.caption))
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Center(
+                child: Text(
+                  block.caption!,
+                  style: const TextStyle(fontSize: 12, color: _textSecondary),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _imageBlocksFrom(List<ContentBlock> blocks) {
+    return blocks
+        .whereType<ImageBlock>()
+        .where((b) => b.imageUrl.isNotEmpty)
+        .map(_buildImageBlock)
+        .toList();
+  }
+
   // ───────────── COMMON MISTAKES · 08 ─────────────
 
   Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
@@ -816,6 +839,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             ),
           ),
         ),
+        ..._imageBlocksFrom(safetyBlocks),
         const SizedBox(height: 8),
       ],
     );
@@ -956,26 +980,4 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       ],
     );
   }
-}
-
-class _DiagonalPatternPainter extends CustomPainter {
-  const _DiagonalPatternPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = _border.withValues(alpha: 0.2)
-      ..strokeWidth = 1;
-    const double spacing = 24;
-    for (double i = -size.height; i < size.width + size.height; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(i + size.height, size.height),
-        paint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
