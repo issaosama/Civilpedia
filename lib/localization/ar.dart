@@ -380,6 +380,7 @@ class Ar {
   static const String steelCategory = 'الحديد';
   static const String soilCategory = 'التربة';
   static const String roadsCategory = 'الطرق';
+  static const String finishingCategory = 'أعمال الإنهاءات';
 
   // Inspection point labels
   static const String allowedTolerance = 'التسامح المسموح';

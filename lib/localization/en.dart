@@ -377,6 +377,7 @@ class En {
   static const String steelCategory = 'Steel';
   static const String soilCategory = 'Soil';
   static const String roadsCategory = 'Roads';
+  static const String finishingCategory = 'Finishing Works';
 
   // Inspection point labels
   static const String allowedTolerance = 'Allowed Tolerance';

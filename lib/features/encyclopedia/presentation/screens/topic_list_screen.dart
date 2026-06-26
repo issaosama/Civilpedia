@@ -164,6 +164,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
       'steel': Ar.steelCategory,
       'soil': Ar.soilCategory,
       'roads': Ar.roadsCategory,
+      'finishing': Ar.finishingCategory,
     };
     final arLabel = labels[id] ?? id;
     if (arLabel == id) return id;
@@ -172,6 +173,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
       'steel': En.steelCategory,
       'soil': En.soilCategory,
       'roads': En.roadsCategory,
+      'finishing': En.finishingCategory,
     };
     return tr(arLabel, enLabels[id] ?? id);
   }

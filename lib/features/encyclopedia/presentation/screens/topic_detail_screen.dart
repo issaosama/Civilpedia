@@ -361,6 +361,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         return 'الحديد';
       case 'soil':
         return 'التربة';
+      case 'finishing':
+        return 'أعمال الإنهاءات';
       default:
         return id;
     }
