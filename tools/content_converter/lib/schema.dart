@@ -66,6 +66,7 @@ const allowedCategories = <String>{
   'soil',
   'asphalt',
   'general',
+  'finishing',
 };
 
 const validTrueFalse = <String>{'TRUE', 'FALSE'};

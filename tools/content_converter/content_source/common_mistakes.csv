@@ -3,3 +3,10 @@ slump-test,1,عدم ترطيب المخروط قبل الفحص,Not wetting the 
 slump-test,2,رفع المخروط بسرعة أو بشكل مائل,Lifting the cone too fast or unevenly
 slump-test,3,عدم تسجيل النتيجة مباشرة,Not recording the result immediately
 concrete-curing,1,ترك الخرسانة بدون معالجة في الأجواء الحارة.,Leaving concrete without curing in hot weather.
+iraqi-tiles-types,1,لصق البورسلين بطريقة النقاط بدل الفرش الكامل.,Spot-bonding porcelain tiles instead of full-bed application.
+iraqi-tiles-types,2,استخدام سيراميك جدران للأرضيات.,Using wall tiles on floors.
+iraqi-tiles-types,3,إهمال الميول في الحمامات والسطوح.,Neglecting proper slopes in bathrooms and roofs.
+iraqi-tiles-types,4,التبليط بدون فواصل تمدد.,Tiling without expansion joints.
+iraqi-tiles-types,5,خلط دفعات إنتاج مختلفة من البلاط.,Mixing tiles from different production batches.
+iraqi-tiles-types,6,ترويب المرمر الفاتح بروبة رمادية.,Grouting light marble with grey grout.
+iraqi-tiles-types,7,عدم ترك وقت كاف لجفاف المونة قبل الترويب.,Not allowing enough adhesive curing time before grouting.

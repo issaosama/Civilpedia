@@ -5,3 +5,7 @@ slump-test,st-inspection,3,نقاط الفحص,inspection
 slump-test,st-safety,4,ملاحظات السلامة,safety
 slump-test,st-code,5,مراجع الكود,codeReference
 concrete-curing,curing-overview,1,ملاحظات عملية حول معالجة الخرسانة,general
+iraqi-tiles-types,tile-tables,1,مقارنة الأنواع والأبعاد,general
+iraqi-tiles-types,tile-application,2,خطوات التبليط التنفيذية,execution
+iraqi-tiles-types,tile-inspection,3,نقاط فحص التبليط,inspection
+iraqi-tiles-types,tile-safety,4,ملاحظات السلامة,safety

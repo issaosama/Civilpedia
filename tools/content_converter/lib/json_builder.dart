@@ -177,11 +177,15 @@ class CatalogBuilder {
           }
           break;
         case 'checklist': {
-          final items = checklistItems.where((c) => c['sectionId'] == sectionId).toList();
+          final blockOrder = b['order'] ?? '';
+          final items = checklistItems.where((c) =>
+            c['sectionId'] == sectionId &&
+            (blockOrder.isEmpty || c['blockOrder'] == blockOrder)
+          ).toList();
           blockJson['title'] = b['checklist_title'] ?? '';
           blockJson['items'] = items.map((c) => <String, dynamic>{
             'id': c['itemId'] ?? '',
-            'text': c['textAr'] ?? '',
+            'text': c['itemText'] ?? '',
             'isRequired': (c['isRequired'] ?? '').toUpperCase() == 'TRUE',
           }).toList();
           break;
@@ -190,17 +194,17 @@ class CatalogBuilder {
           final blockOrder = b['order'] ?? '';
           final rows = tableRows.where((r) =>
             r['sectionId'] == sectionId &&
-            (blockOrder.isEmpty || r['order'] == blockOrder)
+            (blockOrder.isEmpty || r['blockOrder'] == blockOrder)
           ).toList();
           final headers = (b['table_headers'] ?? '').split(',').map((h) => h.trim()).where((h) => h.isNotEmpty).toList();
           blockJson['data'] = {
             'caption': b['table_caption'] ?? '',
             'headers': headers,
             'rows': rows.map((r) {
-              // Build cells array from column_1, column_2, etc.
+              final cellValues = (r['cells'] ?? '').split(',').map((c) => c.trim()).toList();
               final cells = <String>[];
-              for (int i = 1; i <= headers.length; i++) {
-                cells.add(r['column_$i'] ?? '');
+              for (int i = 0; i < headers.length; i++) {
+                cells.add(i < cellValues.length ? cellValues[i] : '');
               }
               return {'cells': cells};
             }).toList(),
@@ -208,10 +212,14 @@ class CatalogBuilder {
           break;
         }
         case 'equipment': {
-          final items = equipmentItems.where((e) => e['sectionId'] == sectionId).toList();
+          final blockOrder = b['order'] ?? '';
+          final items = equipmentItems.where((e) =>
+            e['sectionId'] == sectionId &&
+            (blockOrder.isEmpty || e['blockOrder'] == blockOrder)
+          ).toList();
           blockJson['title'] = b['equipment_title'] ?? '';
           blockJson['items'] = items.map((e) => <String, dynamic>{
-            'name': e['nameAr'] ?? '',
+            'name': e['name'] ?? '',
             'purpose': e['purpose'] ?? '',
             'specification': e['specification'] ?? '',
           }).toList();

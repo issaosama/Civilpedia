@@ -3,3 +3,11 @@ slump-test,1,قوام الخرسانة,Concrete workability,حسب مواصفا�
 slump-test,2,زمن الاختبار,Testing time,مباشرة بعد أخذ العينة,Immediately after sampling,قياس وتسجيل,Measure and record,FALSE,TRUE
 slump-test,3,تجانس العينة,Sample consistency,بدون انفصال حبيبي واضح,No visible segregation,ملاحظة بصرية,Visual inspection,TRUE,TRUE
 concrete-curing,1,استمرار رطوبة سطح الخرسانة,Maintaining concrete surface moisture,يجب أن لا يجف السطح خلال فترة المعالجة المطلوبة,Surface should not dry during the required curing period,فحص بصري ومتابعة دورية,Visual inspection and periodic monitoring,TRUE,TRUE
+iraqi-tiles-types,1,التطبيل (Hollow Sound),Hollow sound test,لا يزيد عن 5% من مساحة البلاط,Not more than 5% of tile area,الطرق بمطرقة خشبية,Light wooden mallet tapping,TRUE,TRUE
+iraqi-tiles-types,2,الاستواء (Leveling),Leveling,±2 مم على طول 2 متر,±2mm over 2m,ميزان الماء أو مسطرة ألمنيوم,Spirit level or aluminum straightedge,TRUE,TRUE
+iraqi-tiles-types,3,الميول (Slopes),Slopes,1-2% في الحمامات والسطوح,1-2% in bathrooms and roofs,ميزان الماء,Spirit level,TRUE,TRUE
+iraqi-tiles-types,4,عرض الفواصل (Joint Width),Joint width,±0.5 مم عن العرض المطلوب,±0.5mm from specified width,مسطرة أو شبلون,Ruler or gauge,FALSE,TRUE
+iraqi-tiles-types,5,المظهر العام (Appearance),Appearance,لا توجد خدوش أو كسر أو تغير في اللون,No scratches cracks or color variation,فحص بصري,Visual inspection,TRUE,TRUE
+iraqi-tiles-types,6,القص والتفصيل (Cutting quality),Cutting quality,قصصات نظيفة بدون تشقق,Cuts clean without chipping,فحص بصري,Visual inspection,FALSE,TRUE
+iraqi-tiles-types,7,النهايات (Edges/Ends),Edges and ends,محاذاة النهايات مع الحوائط بشكل نظيف,Edges aligned neatly with walls,فحص بصري وشريط قياس,Visual inspection and tape measure,FALSE,TRUE
+iraqi-tiles-types,8,الفواصل الحرارية (Expansion Joints),Expansion joints,تترك كل 5-6 متر في المساحات الكبيرة,Every 5-6m in large areas,قياس المسافات,Distance measurement,TRUE,TRUE
