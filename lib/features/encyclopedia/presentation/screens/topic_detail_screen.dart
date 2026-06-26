@@ -66,6 +66,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildArticle(BuildContext context, EncyclopediaProvider provider, EngineeringTopic topic) {
     final blocksByType = _collectBlocksByType(provider);
 
+    int seq = 0;
+
+    Widget numbered(Widget Function(int n) builder) {
+      seq++;
+      return builder(seq);
+    }
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,17 +82,17 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           _buildBrandPill(),
           _buildHeroSection(topic),
           const SizedBox(height: 8),
-          _buildOverviewSection(topic, blocksByType),
+          numbered((n) => _buildOverviewSection(topic, blocksByType, number: n)),
           if (_hasImportanceData(topic, blocksByType))
-            _buildImportanceSection(topic, blocksByType),
+            numbered((n) => _buildImportanceSection(topic, blocksByType, number: n)),
           if (_hasTableData(blocksByType))
-            _buildDimensionsSection(blocksByType),
+            numbered((n) => _buildDimensionsSection(blocksByType, number: n)),
           if (_hasApplicationData(topic, blocksByType))
-            _buildApplicationSection(topic, blocksByType),
+            numbered((n) => _buildApplicationSection(topic, blocksByType, number: n)),
           if (_hasInspectionData(topic, blocksByType))
-            _buildInspectionSection(topic, blocksByType),
+            numbered((n) => _buildInspectionSection(topic, blocksByType, number: n)),
           if (_hasCommonMistakes(topic, blocksByType))
-            _buildCommonMistakesSection(topic, blocksByType),
+            numbered((n) => _buildCommonMistakesSection(topic, blocksByType, number: n)),
           if (topic.reportWording != null)
             _buildReportWordingSection(topic),
           if (topic.relatedToolRoutes.isNotEmpty)
@@ -150,7 +157,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Section header ─────────────
 
-  Widget _buildSectionHeader(String kicker, String title) {
+  Widget _buildSectionHeader(String kicker, String title, {int? number}) {
+    final displayKicker = number != null ? '$kicker · ${number.toString().padLeft(2, '0')}' : kicker;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -161,7 +169,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               Container(width: 36, height: 2, color: _accent),
               const SizedBox(width: 12),
               Text(
-                kicker,
+                displayKicker,
                 style: const TextStyle(
                   fontSize: 11,
                   letterSpacing: 1.5,
@@ -383,13 +391,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── OVERVIEW · 01 ─────────────
 
-  Widget _buildOverviewSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+  Widget _buildOverviewSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     final overviewText = topic.simpleExplanation?.ar ?? topic.summary;
     if (!_hasText(overviewText)) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('OVERVIEW · 01', 'نظرة عامة'),
+        _buildSectionHeader('OVERVIEW', 'نظرة عامة', number: number),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
@@ -404,11 +412,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── IMPORTANCE · 02 ─────────────
 
-  Widget _buildImportanceSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+  Widget _buildImportanceSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('IMPORTANCE · 02', 'الأهمية الهندسية'),
+        _buildSectionHeader('IMPORTANCE', 'الأهمية الهندسية', number: number),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
@@ -461,7 +469,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── DIMENSIONS · 05 ─────────────
 
-  Widget _buildDimensionsSection(Map<SectionType, List<ContentBlock>> blocksByType) {
+  Widget _buildDimensionsSection(Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     final tables = <TableBlock>[];
     for (final blocks in blocksByType.values) {
       for (final block in blocks) {
@@ -473,7 +481,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('DIMENSIONS · 05', 'القياسات والسماكات المتداولة'),
+        _buildSectionHeader('DIMENSIONS', 'القياسات والسماكات المتداولة', number: number),
         ...tables.map((t) => _buildEditorialTable(t)),
         const SizedBox(height: 8),
       ],
@@ -539,7 +547,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── APPLICATION · 06 ─────────────
 
-  Widget _buildApplicationSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+  Widget _buildApplicationSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     final executionBlocks = blocksByType[SectionType.execution] ?? <ContentBlock>[];
     final steps = executionBlocks.whereType<ExecutionStepBlock>().toList()
       ..sort((a, b) => a.step.stepNumber.compareTo(b.step.stepNumber));
@@ -547,7 +555,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('APPLICATION · 06', 'طرق التنفيذ'),
+        _buildSectionHeader('APPLICATION', 'طرق التنفيذ', number: number),
         if (_hasText(topic.beforeWork?.ar))
           _buildSubSection('قبل العمل', topic.beforeWork!.ar),
         if (_hasText(topic.duringWork?.ar))
@@ -640,7 +648,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── INSPECTION · 07 ─────────────
 
-  Widget _buildInspectionSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+  Widget _buildInspectionSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     final inspBlocks = blocksByType[SectionType.inspection] ?? <ContentBlock>[];
 
     final validAcceptReject = topic.acceptRejectItems.where((item) => _hasText(item.criteriaAr)).toList();
@@ -654,7 +662,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('INSPECTION · 07', 'فحص الأعمال بعد الإنجاز'),
+        _buildSectionHeader('INSPECTION', 'فحص الأعمال بعد الإنجاز', number: number),
         ...validAcceptReject.map((item) => _buildInspectionRow(
               item.criteriaAr,
               item.acceptanceLimitAr,
@@ -762,7 +770,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── COMMON MISTAKES · 08 ─────────────
 
-  Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+  Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
 
     final validMistakes = topic.commonMistakes.where((m) => _hasText(m.ar) || _hasText(m.en)).toList();
@@ -773,7 +781,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('COMMON MISTAKES · 08', 'أخطاء شائعة يجب تجنبها'),
+        _buildSectionHeader('COMMON MISTAKES', 'أخطاء شائعة يجب تجنبها', number: number),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
