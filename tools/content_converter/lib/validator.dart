@@ -244,6 +244,18 @@ ValidationResult validateAll({
       }
       if (type == 'table') {
         blockSectionTypes[sid] = type;
+        final blockOrder = row['order'] ?? '';
+        final tblHeaders = (row['table_headers'] ?? '').split(',').map((h) => h.trim()).where((h) => h.isNotEmpty).toList();
+        final tblRows = tableRows.where((r) =>
+          r['sectionId'] == sid &&
+          (blockOrder.isEmpty || r['blockOrder'] == blockOrder)
+        ).toList();
+        // Check if headers come from row data
+        final rowHeaders = tblRows.isNotEmpty ? (tblRows.first['headers'] ?? '') : '';
+        final allHeaders = tblHeaders.isNotEmpty ? tblHeaders : rowHeaders.split(',').map((h) => h.trim()).where((h) => h.isNotEmpty).toList();
+        if (allHeaders.isEmpty && tblRows.isNotEmpty) {
+          issues.add(ValidationIssue('blocks.csv row $blockRow: table block in section "$sid" has no headers (add table_headers column or populate headers in table_rows.csv)', isError: false));
+        }
       }
     }
   }

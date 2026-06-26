@@ -11,6 +11,7 @@ class TableBlockWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = block.data;
+    if (data.headers.isEmpty || data.rows.isEmpty) return const SizedBox.shrink();
     final textTheme = Theme.of(context).textTheme;
     return Container(
       width: double.infinity,

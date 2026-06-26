@@ -196,7 +196,11 @@ class CatalogBuilder {
             r['sectionId'] == sectionId &&
             (blockOrder.isEmpty || r['blockOrder'] == blockOrder)
           ).toList();
-          final headers = (b['table_headers'] ?? '').split(',').map((h) => h.trim()).where((h) => h.isNotEmpty).toList();
+          var headers = (b['table_headers'] ?? '').split(',').map((h) => h.trim()).where((h) => h.isNotEmpty).toList();
+          // Fallback: read headers from first table row's 'headers' column when block-level column is absent
+          if (headers.isEmpty && rows.isNotEmpty) {
+            headers = (rows.first['headers'] ?? '').split(',').map((h) => h.trim()).where((h) => h.isNotEmpty).toList();
+          }
           blockJson['data'] = {
             'caption': b['table_caption'] ?? '',
             'headers': headers,
