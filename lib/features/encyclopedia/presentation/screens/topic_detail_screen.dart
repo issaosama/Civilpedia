@@ -6,6 +6,7 @@ import '../providers/encyclopedia_provider.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/content_block.dart';
 import '../../domain/entities/topic_section.dart';
+import '../../domain/entities/localized_text.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../localization/ar.dart';
 
@@ -110,34 +111,42 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   bool _hasImportanceData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (topic.siteNotes != null || topic.codeNotes != null) return true;
+    if (_hasText(topic.siteNotes?.ar) || _hasText(topic.codeNotes?.ar)) return true;
     return false;
   }
 
   bool _hasTableData(Map<SectionType, List<ContentBlock>> blocksByType) {
     for (final blocks in blocksByType.values) {
-      if (blocks.any((b) => b is TableBlock)) return true;
+      if (blocks.any((b) => b is TableBlock && b.data.rows.isNotEmpty)) return true;
     }
     return false;
   }
 
   bool _hasApplicationData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (topic.beforeWork != null || topic.duringWork != null || topic.afterWork != null) return true;
+    if (_localizedHasText(topic.beforeWork) || _localizedHasText(topic.duringWork) || _localizedHasText(topic.afterWork)) return true;
     if (blocksByType.containsKey(SectionType.execution)) return true;
     return false;
   }
 
   bool _hasInspectionData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (topic.acceptRejectItems.isNotEmpty) return true;
-    if (blocksByType.containsKey(SectionType.inspection)) return true;
+    if (topic.acceptRejectItems.any((item) => _hasText(item.criteriaAr))) { return true; }
+    if (blocksByType.containsKey(SectionType.inspection) &&
+        blocksByType[SectionType.inspection]!.any((b) =>
+            (b is InspectionPointBlock && _hasText(b.point.criteria)) ||
+            (b is ChecklistBlock && b.items.any((i) => _hasText(i.text))))) { return true; }
     return false;
   }
 
   bool _hasCommonMistakes(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (topic.commonMistakes.isNotEmpty) return true;
-    if (blocksByType.containsKey(SectionType.safety)) return true;
+    if (topic.commonMistakes.any((m) => _hasText(m.ar) || _hasText(m.en))) { return true; }
+    if (blocksByType.containsKey(SectionType.safety) &&
+        blocksByType[SectionType.safety]!.any((b) => b is SafetyNoteBlock && _hasText(b.note.message))) { return true; }
     return false;
   }
+
+  bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
+
+  bool _localizedHasText(LocalizedText? value) => _hasText(value?.ar) || _hasText(value?.en);
 
   // ───────────── Section header ─────────────
 
@@ -311,7 +320,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             ),
           ),
         const SizedBox(height: 16),
-        _buildHeroImage(topic),
+        if (_hasText(topic.featuredImageUrl)) _buildHeroImage(topic),
       ],
     );
   }
@@ -375,6 +384,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   // ───────────── OVERVIEW · 01 ─────────────
 
   Widget _buildOverviewSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
+    final overviewText = topic.simpleExplanation?.ar ?? topic.summary;
+    if (!_hasText(overviewText)) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -382,7 +393,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
-            topic.simpleExplanation?.ar ?? topic.summary,
+            overviewText,
             style: const TextStyle(fontSize: 15, color: _textPrimary, height: 1.8),
           ),
         ),
@@ -413,9 +424,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (topic.siteNotes != null)
+                if (_hasText(topic.siteNotes?.ar))
                   _buildImportanceItem(topic.siteNotes!.ar),
-                if (topic.codeNotes != null)
+                if (_hasText(topic.codeNotes?.ar))
                   _buildImportanceItem(topic.codeNotes!.ar),
               ],
             ),
@@ -454,7 +465,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     final tables = <TableBlock>[];
     for (final blocks in blocksByType.values) {
       for (final block in blocks) {
-        if (block is TableBlock) tables.add(block);
+        if (block is TableBlock && block.data.rows.isNotEmpty) tables.add(block);
       }
     }
     if (tables.isEmpty) return const SizedBox.shrink();
@@ -471,6 +482,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   Widget _buildEditorialTable(TableBlock tableBlock) {
     final data = tableBlock.data;
+    if (data.rows.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 16),
       child: Column(
@@ -536,14 +548,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader('APPLICATION · 06', 'طرق التنفيذ'),
-        if (topic.beforeWork != null)
+        if (_hasText(topic.beforeWork?.ar))
           _buildSubSection('قبل العمل', topic.beforeWork!.ar),
-        if (topic.duringWork != null)
+        if (_hasText(topic.duringWork?.ar))
           _buildSubSection('أثناء العمل', topic.duringWork!.ar),
-        if (topic.afterWork != null)
+        if (_hasText(topic.afterWork?.ar))
           _buildSubSection('بعد العمل', topic.afterWork!.ar),
         if (steps.isNotEmpty) ...[
-          if (topic.beforeWork?.ar == null && topic.duringWork?.ar == null && topic.afterWork?.ar == null)
+          if (!_localizedHasText(topic.beforeWork) && !_localizedHasText(topic.duringWork) && !_localizedHasText(topic.afterWork))
             const SizedBox(height: 4)
           else
             const SizedBox(height: 8),
@@ -631,24 +643,31 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildInspectionSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
     final inspBlocks = blocksByType[SectionType.inspection] ?? <ContentBlock>[];
 
+    final validAcceptReject = topic.acceptRejectItems.where((item) => _hasText(item.criteriaAr)).toList();
+    final validInspPoints = inspBlocks.whereType<InspectionPointBlock>().where((b) => _hasText(b.point.criteria)).toList();
+    final validChecklists = inspBlocks.whereType<ChecklistBlock>().where((b) => b.items.any((i) => _hasText(i.text))).toList();
+
+    if (validAcceptReject.isEmpty && validInspPoints.isEmpty && validChecklists.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader('INSPECTION · 07', 'فحص الأعمال بعد الإنجاز'),
-        if (topic.acceptRejectItems.isNotEmpty)
-          ...topic.acceptRejectItems.map((item) => _buildInspectionRow(
-                item.criteriaAr,
-                item.acceptanceLimitAr,
-                item.methodAr,
-                item.isCritical,
-              )),
-        ...inspBlocks.whereType<InspectionPointBlock>().map((b) => _buildInspectionRow(
+        ...validAcceptReject.map((item) => _buildInspectionRow(
+              item.criteriaAr,
+              item.acceptanceLimitAr,
+              item.methodAr,
+              item.isCritical,
+            )),
+        ...validInspPoints.map((b) => _buildInspectionRow(
               b.point.criteria,
               b.point.acceptableTolerance,
               b.point.method,
               b.point.isCritical,
             )),
-        ...inspBlocks.whereType<ChecklistBlock>().map(_buildChecklistBlock),
+        ...validChecklists.map(_buildChecklistBlock),
         const SizedBox(height: 8),
       ],
     );
@@ -698,6 +717,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildChecklistBlock(ChecklistBlock block) {
+    final validItems = block.items.where((i) => _hasText(i.text)).toList();
+    if (validItems.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 12),
       child: Container(
@@ -710,14 +731,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (block.title != null) ...[
+            if (_hasText(block.title)) ...[
               Text(
                 block.title!,
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _textPrimary),
               ),
               const SizedBox(height: 10),
             ],
-            ...block.items.map((item) => Padding(
+            ...validItems.map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -744,6 +765,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
     final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
 
+    final validMistakes = topic.commonMistakes.where((m) => _hasText(m.ar) || _hasText(m.en)).toList();
+    final validSafetyNotes = safetyBlocks.whereType<SafetyNoteBlock>().where((s) => _hasText(s.note.message)).toList();
+
+    if (validMistakes.isEmpty && validSafetyNotes.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -761,8 +787,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...topic.commonMistakes.map((m) => _buildMistakeItem(m.ar)),
-                ...safetyBlocks.whereType<SafetyNoteBlock>().map((s) => Padding(
+                ...validMistakes.map((m) => _buildMistakeItem(m.ar)),
+                ...validSafetyNotes.map((s) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -788,6 +814,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildMistakeItem(String text) {
+    if (!_hasText(text)) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
