@@ -38,8 +38,8 @@ class CatalogBuilder {
         'summary': t['summary'] ?? '',
         'tags': (t['tags'] ?? '').split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
         'relatedTopicIds': (t['relatedTopicIds'] ?? '').split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList(),
-        'createdAt': t['createdAt'] ?? '2026-06-20T00:00:00.000',
-        'updatedAt': t['updatedAt'] ?? '2026-06-20T00:00:00.000',
+        'createdAt': _nullIfEmpty(t['createdAt'] ?? '') ?? DateTime.now().toIso8601String(),
+        'updatedAt': _nullIfEmpty(t['updatedAt'] ?? '') ?? DateTime.now().toIso8601String(),
         'level': t['level'] ?? 'basic',
         'planKey': _nullIfEmpty(t['planKey'] ?? ''),
         'simpleExplanation': {
@@ -217,7 +217,7 @@ class CatalogBuilder {
           break;
         }
         case 'image':
-          blockJson['url'] = b['image_url'] ?? '';
+          blockJson['imageUrl'] = b['image_url'] ?? '';
           if ((b['image_caption'] ?? '').isNotEmpty) {
             blockJson['caption'] = b['image_caption'];
           }

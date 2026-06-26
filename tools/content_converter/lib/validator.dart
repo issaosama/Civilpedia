@@ -81,6 +81,15 @@ ValidationResult validateAll({
     if (tags.isEmpty) {
       issues.add(ValidationIssue('topics.csv: topic "$tid" has empty tags', isError: false));
     }
+    // createdAt / updatedAt
+    final createdAt = row['createdAt'] ?? '';
+    if (createdAt.isEmpty) {
+      issues.add(ValidationIssue('topics.csv: topic "$tid" has empty createdAt — will use current timestamp as fallback', isError: false));
+    }
+    final updatedAt = row['updatedAt'] ?? '';
+    if (updatedAt.isEmpty) {
+      issues.add(ValidationIssue('topics.csv: topic "$tid" has empty updatedAt — will use current timestamp as fallback', isError: false));
+    }
     // Required text fields
     for (final field in ['titleAr', 'titleEn', 'summary', 'simpleExplanation_ar', 'simpleExplanation_en']) {
       final val = row[field] ?? '';
