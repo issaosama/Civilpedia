@@ -89,6 +89,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             numbered((n) => _buildDimensionsSection(blocksByType, number: n)),
           if (_hasApplicationData(topic, blocksByType))
             numbered((n) => _buildApplicationSection(topic, blocksByType, number: n)),
+          if (_hasSafetyData(blocksByType))
+            numbered((n) => _buildSafetySection(blocksByType, number: n)),
           if (_hasInspectionData(topic, blocksByType))
             numbered((n) => _buildInspectionSection(topic, blocksByType, number: n)),
           if (_hasCommonMistakes(topic, blocksByType))
@@ -147,6 +149,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   bool _hasCommonMistakes(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
     if (topic.commonMistakes.any((m) => _hasText(m.ar) || _hasText(m.en))) { return true; }
     return false;
+  }
+
+  bool _hasSafetyData(Map<SectionType, List<ContentBlock>> blocksByType) {
+    final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
+    return safetyBlocks.any((b) => b is SafetyNoteBlock && _hasText(b.note.message));
   }
 
   bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
@@ -797,6 +804,56 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   // ───────────── COMMON MISTAKES · 08 ─────────────
+
+  Widget _buildSafetySection(Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+    final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
+    final validNotes = safetyBlocks.whereType<SafetyNoteBlock>().where((s) => _hasText(s.note.message)).toList();
+    if (validNotes.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('SAFETY', 'تنبيهات السلامة', number: number),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _softPanel,
+              borderRadius: BorderRadius.circular(10),
+              border: const Border(
+                right: BorderSide(color: Color(0xFFD4A017), width: 3),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: validNotes.map((s) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.only(top: 2),
+                      child: Icon(Icons.warning_amber_rounded, size: 18, color: Color(0xFFB8860B)),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        s.note.message,
+                        style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+                      ),
+                    ),
+                  ],
+                ),
+              )).toList(),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
 
   Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
     final validMistakes = topic.commonMistakes.where((m) => _hasText(m.ar) || _hasText(m.en)).toList();
