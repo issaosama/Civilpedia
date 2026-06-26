@@ -6,7 +6,6 @@
       "titleEn": "Concrete Slump Test",
       "categoryId": "concrete",
       "summary": "اختبار موقعي لقياس قابلية تشغيل الخرسانة الطازجة قبل الصب.",
-      "featuredImageUrl": "assets/images/rebar_cover.png",
       "tags": [
         "خرسانة",
         "هبوط",
@@ -20,6 +19,7 @@
       "updatedAt": "2026-06-20T00:00:00.000",
       "level": "basic",
       "planKey": null,
+      "featuredImageUrl": "assets/images/rebar_cover.png",
       "simpleExplanation": {
         "ar": "اختبار بسيط يساعد مهندس الموقع على التأكد من قوام الخرسانة قبل الصب.",
         "en": "A simple field test to check concrete workability before casting."
@@ -119,13 +119,14 @@
       "relatedTopicIds": [
         "concrete-casting"
       ],
-      "createdAt": "2026-06-26T17:10:47.126189",
-      "updatedAt": "2026-06-26T17:10:47.127188",
+      "createdAt": "2026-06-26T21:43:35.600184",
+      "updatedAt": "2026-06-26T21:43:35.601193",
       "level": "basic",
       "planKey": null,
+      "featuredImageUrl": null,
       "simpleExplanation": {
-        "ar": "معالجة الخرسانة هي المحافظة على رطوبة وحرارة الخرسانة بعد الصب حتى تستمر عملية الإماهة وتتحسن مقاومة الخرسانة.",
-        "en": "Concrete curing means maintaining moisture and temperature after casting to support hydration and strength gain."
+        "ar": "المحافظة على رطوبة الخرسانة بعد الصب حتى تستمر عملية الإماهة.",
+        "en": "Maintaining moisture after casting to continue hydration."
       },
       "beforeWork": {
         "ar": "",
@@ -252,8 +253,7 @@
       },
       {
         "type": "image",
-        "imageUrl": "assets/images/rebar_cover.png",
-        "caption": "مخروط الهبوط القياسي"
+        "imageUrl": "مخروط الهبوط القياسي"
       }
     ],
     "st-steps": [

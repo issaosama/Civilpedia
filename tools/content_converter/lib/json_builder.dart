@@ -42,6 +42,7 @@ class CatalogBuilder {
         'updatedAt': _nullIfEmpty(t['updatedAt'] ?? '') ?? DateTime.now().toIso8601String(),
         'level': t['level'] ?? 'basic',
         'planKey': _nullIfEmpty(t['planKey'] ?? ''),
+        'featuredImageUrl': _nullIfEmpty(t['featuredImageUrl'] ?? ''),
         'simpleExplanation': {
           'ar': t['simpleExplanation_ar'] ?? '',
           'en': t['simpleExplanation_en'] ?? '',

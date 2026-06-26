@@ -76,6 +76,17 @@ ValidationResult validateAll({
     if (planKey.isNotEmpty && !supportedPlanKeys.contains(planKey)) {
       issues.add(ValidationIssue('topics.csv: topic "$tid" has unsupported planKey "$planKey"', isError: false));
     }
+    // featuredImageUrl
+    final featuredImageUrl = row['featuredImageUrl'] ?? '';
+    if (featuredImageUrl.isNotEmpty) {
+      if (!featuredImageUrl.startsWith('assets/')) {
+        issues.add(ValidationIssue('topics.csv: topic "$tid" featuredImageUrl should start with "assets/", got "$featuredImageUrl"', isError: false));
+      }
+      final ext = featuredImageUrl.split('.').last.toLowerCase();
+      if (!['png', 'jpg', 'jpeg', 'webp'].contains(ext)) {
+        issues.add(ValidationIssue('topics.csv: topic "$tid" featuredImageUrl should end with .png, .jpg, .jpeg, or .webp, got ".$ext"', isError: false));
+      }
+    }
     // tags
     final tags = row['tags'] ?? '';
     if (tags.isEmpty) {
