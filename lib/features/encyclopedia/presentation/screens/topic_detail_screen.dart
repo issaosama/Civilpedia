@@ -472,7 +472,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('DIMENSIONS', 'القياسات والسماكات المتداولة', number: number),
+        _buildSectionHeader('TABLES', 'القياسات والسماكات المتداولة', number: number),
         ...tables.map((t) => _buildEditorialTable(t)),
         ...images,
         const SizedBox(height: 8),
@@ -500,41 +500,71 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 ),
               ),
             ),
-          Container(
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: _border),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: DataTable(
-                headingRowColor: WidgetStateProperty.all(_tableHeaderBg),
-                headingTextStyle: const TextStyle(
-                  color: _textPrimary,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-                dataTextStyle: const TextStyle(
-                  color: _textPrimary,
-                  fontSize: 13,
-                  height: 1.4,
-                ),
-                columnSpacing: 24,
-                horizontalMargin: 14,
-                columns: data.headers.map((h) => DataColumn(label: Text(h))).toList(),
-                rows: data.rows
-                    .map((row) => DataRow(
-                          cells: row.cells.map((c) => DataCell(Text(c))).toList(),
-                        ))
-                    .toList(),
-              ),
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: _border),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: DataTable(
+                        headingRowColor: WidgetStateProperty.all(_tableHeaderBg),
+                        headingTextStyle: const TextStyle(
+                          color: _textPrimary,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        dataTextStyle: const TextStyle(
+                          color: _textPrimary,
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                        columnSpacing: 24,
+                        horizontalMargin: 14,
+                        columns: data.headers.map((h) => DataColumn(label: Text(h))).toList(),
+                        rows: data.rows
+                            .map((row) => DataRow(
+                                  cells: row.cells.map((c) => DataCell(Text(c))).toList(),
+                                ))
+                            .toList(),
+                      ),
+                    ),
+                  ),
+                  if (constraints.maxWidth < _tableTotalWidth(data))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6),
+                      child: Row(
+                        children: [
+                          Icon(Icons.swipe, size: 12, color: _textMuted),
+                          const SizedBox(width: 4),
+                          Text(
+                            'اسحب الجدول أفقياً لعرض جميع الأعمدة',
+                            style: TextStyle(fontSize: 11, color: _textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ],
       ),
     );
+  }
+
+  double _tableTotalWidth(TableData data) {
+    const colSpacing = 24.0;
+    const horizMargin = 14.0;
+    final colCount = data.headers.length;
+    final totalWidth = colCount * 120.0 + (colCount - 1) * colSpacing + 2 * horizMargin;
+    return totalWidth;
   }
 
   // ───────────── APPLICATION · 06 ─────────────
@@ -707,7 +737,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   if (method != null && method.isNotEmpty)
                     TextSpan(
                       text: ' | $method',
-                      style: const TextStyle(color: _textMuted, fontSize: 12),
+                      style: const TextStyle(color: _textSecondary, fontSize: 12),
                     ),
                 ],
               ),
