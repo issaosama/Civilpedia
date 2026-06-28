@@ -8,15 +8,16 @@ class AppExporter {
     const source = draft.toJSON();
     const draftTopic = source.topic || {};
     const draftSections = source.sections || [];
+    const draftMeta = source._meta || {};
 
-    const topic = this._exportTopic(draftTopic);
+    const topic = this._exportTopic(draftTopic, draftMeta);
     const sections = this._exportSections(draftSections);
     const blocks = this._exportBlocks(draftSections);
 
     return { topic, sections, blocks };
   }
 
-  _exportTopic(src) {
+  _exportTopic(src, meta) {
     return {
       id: src.id || '',
       titleAr: src.titleAr || '',
@@ -25,8 +26,8 @@ class AppExporter {
       summary: src.summaryAr || src.summary || '',
       tags: src.tags || [],
       relatedTopicIds: src.relatedTopicIds || [],
-      createdAt: src.createdAt || null,
-      updatedAt: src.updatedAt || null,
+      createdAt: src.createdAt || (meta ? meta.createdAt || null : null),
+      updatedAt: src.updatedAt || (meta ? meta.updatedAt || null : null),
       level: src.level || 'basic',
       planKey: src.planKey || null,
       featuredImageUrl: src.featuredImageUrl || null,
@@ -134,25 +135,20 @@ class AppExporter {
       case 'checklist': {
         const title = src.title || {};
         block.title = title.ar || '';
-        block.items = (src.items || []).map(item => ({
-          textAr: item.textAr || '',
-          textEn: item.textEn || '',
-          isRequired: item.isRequired !== false,
-          category: item.category || ''
+        block.items = (src.items || []).map((item, idx) => ({
+          id: item.id || `item-${String(idx + 1).padStart(2, '0')}`,
+          text: item.textAr || '',
+          isRequired: item.isRequired !== false
         }));
         break;
       }
       case 'inspection_point': {
-        block.criteria = src.criteriaAr || '';
-        block.criteriaAr = src.criteriaAr || '';
-        block.criteriaEn = src.criteriaEn || '';
-        block.acceptanceLimitAr = src.acceptanceLimitAr || '';
-        block.acceptanceLimitEn = src.acceptanceLimitEn || '';
-        block.method = src.methodAr || '';
-        block.methodAr = src.methodAr || '';
-        block.methodEn = src.methodEn || '';
-        block.isCritical = !!src.isCritical;
-        if (src.acceptableTolerance) block.acceptableTolerance = src.acceptableTolerance;
+        block.point = {
+          criteria: src.criteriaAr || '',
+          method: src.methodAr || '',
+          isCritical: !!src.isCritical,
+          acceptableTolerance: src.acceptableTolerance || ''
+        };
         break;
       }
       case 'code_reference': {
@@ -165,16 +161,16 @@ class AppExporter {
         break;
       }
       case 'equipment': {
+        block.title = src.title || '';
         block.items = (src.items || []).map(item => ({
-          nameAr: item.nameAr || '',
-          nameEn: item.nameEn || '',
-          specification: item.specification || '',
-          purpose: item.purpose || ''
+          name: item.nameAr || item.name || '',
+          purpose: item.purpose || '',
+          specification: item.specification || ''
         }));
         break;
       }
       case 'image': {
-        block.url = src.url || '';
+        block.imageUrl = src.url || src.imageUrl || '';
         const caption = src.caption || {};
         block.caption = caption.ar || '';
         break;

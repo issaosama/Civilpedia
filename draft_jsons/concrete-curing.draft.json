@@ -1,0 +1,132 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-06-26T23:24:21.274412Z",
+    "updatedAt": "2026-06-26T23:24:21.275411Z",
+    "createdBy": null,
+    "updatedBy": null,
+    "source": "catalog-migration",
+    "id": "concrete-curing"
+  },
+  "topic": {
+    "id": "concrete-curing",
+    "titleAr": "معالجة الخرسانة",
+    "titleEn": "Concrete Curing",
+    "categoryId": "concrete",
+    "summaryAr": "موضوع يشرح أهمية معالجة الخرسانة بعد الصب للحفاظ على الرطوبة وتحسين المقاومة.",
+    "summaryEn": "A topic explaining the importance of concrete curing after casting to maintain moisture and improve strength.",
+    "tags": [
+      "خرسانة",
+      "معالجة",
+      "صب"
+    ],
+    "relatedTopicIds": [
+      "concrete-casting"
+    ],
+    "level": "basic",
+    "planKey": null,
+    "status": "draft",
+    "featuredImageUrl": null,
+    "simpleExplanation": {
+      "ar": "المحافظة على رطوبة الخرسانة بعد الصب حتى تستمر عملية الإماهة.",
+      "en": "Maintaining moisture after casting to continue hydration."
+    },
+    "beforeWork": {
+      "ar": "",
+      "en": ""
+    },
+    "duringWork": {
+      "ar": "",
+      "en": ""
+    },
+    "afterWork": {
+      "ar": "",
+      "en": ""
+    },
+    "commonMistakes": [
+      {
+        "ar": "ترك الخرسانة بدون معالجة في الأجواء الحارة.",
+        "en": "Leaving concrete without curing in hot weather.",
+        "severity": "high"
+      }
+    ],
+    "acceptRejectItems": [
+      {
+        "criteriaAr": "استمرار رطوبة سطح الخرسانة",
+        "criteriaEn": "Maintaining concrete surface moisture",
+        "acceptanceLimitAr": "يجب أن لا يجف السطح خلال فترة المعالجة المطلوبة",
+        "acceptanceLimitEn": "Surface should not dry during the required curing period",
+        "methodAr": "فحص بصري ومتابعة دورية",
+        "methodEn": "Visual inspection and periodic monitoring",
+        "isCritical": true,
+        "reviewRequired": true,
+        "planKey": "",
+        "codeReference": ""
+      }
+    ],
+    "codeNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "siteNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "reportWording": {
+      "ar": "",
+      "en": ""
+    },
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "curing-overview",
+      "title": "ملاحظات عملية حول معالجة الخرسانة",
+      "titleEn": "Practical Notes on Concrete Curing",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "الغرض من المعالجة هو تقليل فقدان الرطوبة من الخرسانة في الأيام الأولى بعد الصب.",
+            "en": "The purpose of curing is to minimize moisture loss from concrete in the early days after casting."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "إهمال المعالجة قد يؤدي إلى تشققات سطحية وضعف في مقاومة الخرسانة.",
+            "en": "Neglecting curing may lead to surface cracks and reduced concrete strength."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 1,
+          "description": {
+            "ar": "ابدأ المعالجة بعد انتهاء التشطيب الأولي للسطح.",
+            "en": "Start curing after initial surface finishing is complete."
+          },
+          "notes": {
+            "ar": "لا تنتظر إلى أن يجف سطح الخرسانة بالكامل.",
+            "en": "Do not wait until the concrete surface is completely dry."
+          }
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "Migrated from official catalog. Topic has empty beforeWork, duringWork, afterWork, codeNotes, siteNotes, reportWording.",
+    "approvalStatus": null
+  }
+}

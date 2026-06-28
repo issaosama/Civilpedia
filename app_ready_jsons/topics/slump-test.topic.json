@@ -1,0 +1,247 @@
+{
+  "topic": {
+    "id": "slump-test",
+    "titleAr": "اختبار الهبوط للخرسانة الطازجة",
+    "titleEn": "Concrete Slump Test",
+    "categoryId": "concrete",
+    "summary": "اختبار موقعي لقياس قابلية تشغيل الخرسانة الطازجة قبل الصب.",
+    "tags": [
+      "خرسانة",
+      "هبوط",
+      "اختبار",
+      "ASTM C143"
+    ],
+    "relatedTopicIds": [
+      "concrete-casting"
+    ],
+    "createdAt": "2026-06-20T00:00:00.000Z",
+    "updatedAt": "2026-06-20T00:00:00.000Z",
+    "level": "basic",
+    "planKey": null,
+    "featuredImageUrl": "assets/images/rebar_cover.png",
+    "simpleExplanation": {
+      "ar": "اختبار بسيط يساعد مهندس الموقع على التأكد من قوام الخرسانة قبل الصب.",
+      "en": "A simple field test to check concrete workability before casting."
+    },
+    "beforeWork": {
+      "ar": "تجهيز المخروط، الصفيحة، القضيب، وتنظيف مكان الفحص.",
+      "en": "Prepare the cone, base plate, tamping rod, and test area."
+    },
+    "duringWork": {
+      "ar": "ملء المخروط بثلاث طبقات مع الدمك المنتظم لكل طبقة.",
+      "en": "Fill the cone in three layers with proper rodding."
+    },
+    "afterWork": {
+      "ar": "قياس الهبوط وتسجيل النتيجة ومقارنتها بالمواصفات.",
+      "en": "Measure, record, and compare the slump with project requirements."
+    },
+    "commonMistakes": [
+      {
+        "ar": "عدم ترطيب المخروط قبل الفحص",
+        "en": "Not wetting the cone before testing"
+      },
+      {
+        "ar": "رفع المخروط بسرعة أو بشكل مائل",
+        "en": "Lifting the cone too fast or unevenly"
+      },
+      {
+        "ar": "عدم تسجيل النتيجة مباشرة",
+        "en": "Not recording the result immediately"
+      }
+    ],
+    "acceptRejectItems": [
+      {
+        "criteriaAr": "قوام الخرسانة",
+        "criteriaEn": "Concrete workability",
+        "acceptanceLimitAr": "حسب مواصفات المشروع",
+        "acceptanceLimitEn": "As per project specs",
+        "methodAr": "اختبار الهبوط",
+        "methodEn": "Slump cone test",
+        "isCritical": true,
+        "reviewRequired": true,
+        "planKey": "",
+        "codeReference": ""
+      },
+      {
+        "criteriaAr": "زمن الاختبار",
+        "criteriaEn": "Testing time",
+        "acceptanceLimitAr": "مباشرة بعد أخذ العينة",
+        "acceptanceLimitEn": "Immediately after sampling",
+        "methodAr": "قياس وتسجيل",
+        "methodEn": "Measure and record",
+        "isCritical": false,
+        "reviewRequired": true,
+        "planKey": "",
+        "codeReference": ""
+      },
+      {
+        "criteriaAr": "تجانس العينة",
+        "criteriaEn": "Sample consistency",
+        "acceptanceLimitAr": "بدون انفصال حبيبي واضح",
+        "acceptanceLimitEn": "No visible segregation",
+        "methodAr": "ملاحظة بصرية",
+        "methodEn": "Visual inspection",
+        "isCritical": true,
+        "reviewRequired": true,
+        "planKey": "",
+        "codeReference": ""
+      }
+    ],
+    "codeNotes": {
+      "ar": "راجع حدود القبول حسب مواصفات المشروع والكود المعتمد.",
+      "en": "Check acceptance limits per project specs and applicable code."
+    },
+    "siteNotes": {
+      "ar": "يفضل إجراء الاختبار عند وصول كل خلاطة وقبل السماح بالصب.",
+      "en": "Preferably test each truck before allowing casting."
+    },
+    "reportWording": {
+      "ar": "تم إجراء اختبار الهبوط للخرسانة الطازجة وكانت النتيجة ضمن/خارج الحدود المطلوبة.",
+      "en": "The slump test was performed and the result was within/outside the required limits."
+    },
+    "relatedToolRoutes": [
+      "/calculator/concrete"
+    ],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "st-equipment",
+      "title": "المعدات المطلوبة",
+      "type": "equipment",
+      "order": 1
+    },
+    {
+      "id": "st-steps",
+      "title": "خطوات الاختبار",
+      "type": "execution",
+      "order": 2
+    },
+    {
+      "id": "st-inspection",
+      "title": "نقاط الفحص",
+      "type": "inspection",
+      "order": 3
+    },
+    {
+      "id": "st-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 4
+    },
+    {
+      "id": "st-code",
+      "title": "مراجع الكود",
+      "type": "codeReference",
+      "order": 5
+    }
+  ],
+  "blocks": {
+    "st-equipment": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "تُستخدم معدات بسيطة ومحددة لإجراء الاختبار في الموقع.",
+        "variant": "paragraph"
+      },
+      {
+        "type": "equipment",
+        "order": 2,
+        "title": "",
+        "items": [
+          {
+            "name": "مخروط الهبوط القياسي (Slump Cone)",
+            "purpose": "قالب قياس الهبوط",
+            "specification": "قاعدة 200 مم، قمة 100 مم، ارتفاع 300 مم"
+          },
+          {
+            "name": "قضيب الدمك",
+            "purpose": "دمك طبقات الخرسانة",
+            "specification": "قطر 16 مم وطول 600 مم تقريباً"
+          },
+          {
+            "name": "صفيحة قاعدة",
+            "purpose": "تثبيت المخروط",
+            "specification": "سطح مستوٍ وغير ماص"
+          },
+          {
+            "name": "مسطرة قياس",
+            "purpose": "قراءة الهبوط",
+            "specification": "قراءة بالملليمتر"
+          }
+        ]
+      },
+      {
+        "type": "image",
+        "order": 3,
+        "imageUrl": "مخروط الهبوط القياسي",
+        "caption": "مخروط الهبوط القياسي"
+      }
+    ],
+    "st-steps": [
+      {
+        "type": "execution_step",
+        "order": 1,
+        "step": {
+          "stepNumber": 1,
+          "description": "ضع المخروط على سطح مستوٍ ونظيف.",
+          "notes": "ثبّت المخروط جيداً بالقدم."
+        }
+      }
+    ],
+    "st-inspection": [
+      {
+        "type": "inspection_point",
+        "order": 1,
+        "point": {
+          "criteria": "هبوط الخرسانة",
+          "method": "Slump Cone",
+          "isCritical": true,
+          "acceptableTolerance": "حسب مواصفات المشروع"
+        }
+      },
+      {
+        "type": "checklist",
+        "order": 2,
+        "title": "قائمة فحص اختبار الهبوط",
+        "items": [
+          {
+            "id": "st-check-01",
+            "text": "تأكد من نظافة المخروط والصفيحة قبل الاختبار",
+            "isRequired": true
+          },
+          {
+            "id": "st-check-02",
+            "text": "تأكد من دمك كل طبقة بعدد الضربات المطلوب",
+            "isRequired": true
+          },
+          {
+            "id": "st-check-03",
+            "text": "سجل قراءة الهبوط مباشرة بعد رفع المخروط",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "st-safety": [
+      {
+        "type": "safety_note",
+        "order": 1,
+        "note": {
+          "message": "ارتدِ معدات الوقاية الشخصية أثناء الفحص.",
+          "severity": "medium"
+        }
+      }
+    ],
+    "st-code": [
+      {
+        "type": "code_reference",
+        "order": 1,
+        "code": "ASTM C143",
+        "code_title": "Standard Test Method for Slump of Hydraulic-Cement Concrete",
+        "code_section": "",
+        "code_excerpt": "مرجع شائع لاختبار الهبوط."
+      }
+    ]
+  }
+}

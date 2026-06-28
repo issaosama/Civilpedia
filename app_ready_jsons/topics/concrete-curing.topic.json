@@ -1,0 +1,105 @@
+{
+  "topic": {
+    "id": "concrete-curing",
+    "titleAr": "معالجة الخرسانة",
+    "titleEn": "Concrete Curing",
+    "categoryId": "concrete",
+    "summary": "موضوع يشرح أهمية معالجة الخرسانة بعد الصب للحفاظ على الرطوبة وتحسين المقاومة.",
+    "tags": [
+      "خرسانة",
+      "معالجة",
+      "صب"
+    ],
+    "relatedTopicIds": [
+      "concrete-casting"
+    ],
+    "createdAt": "2026-06-26T23:24:21.274412Z",
+    "updatedAt": "2026-06-26T23:24:21.275411Z",
+    "level": "basic",
+    "planKey": null,
+    "featuredImageUrl": null,
+    "simpleExplanation": {
+      "ar": "المحافظة على رطوبة الخرسانة بعد الصب حتى تستمر عملية الإماهة.",
+      "en": "Maintaining moisture after casting to continue hydration."
+    },
+    "beforeWork": {
+      "ar": "",
+      "en": ""
+    },
+    "duringWork": {
+      "ar": "",
+      "en": ""
+    },
+    "afterWork": {
+      "ar": "",
+      "en": ""
+    },
+    "commonMistakes": [
+      {
+        "ar": "ترك الخرسانة بدون معالجة في الأجواء الحارة.",
+        "en": "Leaving concrete without curing in hot weather."
+      }
+    ],
+    "acceptRejectItems": [
+      {
+        "criteriaAr": "استمرار رطوبة سطح الخرسانة",
+        "criteriaEn": "Maintaining concrete surface moisture",
+        "acceptanceLimitAr": "يجب أن لا يجف السطح خلال فترة المعالجة المطلوبة",
+        "acceptanceLimitEn": "Surface should not dry during the required curing period",
+        "methodAr": "فحص بصري ومتابعة دورية",
+        "methodEn": "Visual inspection and periodic monitoring",
+        "isCritical": true,
+        "reviewRequired": true,
+        "planKey": "",
+        "codeReference": ""
+      }
+    ],
+    "codeNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "siteNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "reportWording": {
+      "ar": "",
+      "en": ""
+    },
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "curing-overview",
+      "title": "ملاحظات عملية حول معالجة الخرسانة",
+      "type": "general",
+      "order": 1
+    }
+  ],
+  "blocks": {
+    "curing-overview": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "الغرض من المعالجة هو تقليل فقدان الرطوبة من الخرسانة في الأيام الأولى بعد الصب.",
+        "variant": "paragraph"
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "إهمال المعالجة قد يؤدي إلى تشققات سطحية وضعف في مقاومة الخرسانة.",
+        "variant": "warning"
+      },
+      {
+        "type": "execution_step",
+        "order": 3,
+        "step": {
+          "stepNumber": 1,
+          "description": "ابدأ المعالجة بعد انتهاء التشطيب الأولي للسطح.",
+          "notes": "لا تنتظر إلى أن يجف سطح الخرسانة بالكامل."
+        }
+      }
+    ]
+  }
+}
