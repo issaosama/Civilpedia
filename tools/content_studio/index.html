@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Studio Lite — Civilpedia</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <div>
+      <h1>Content Studio Lite</h1>
+      <div class="subtitle">Civilpedia — محرر محتوى الموسوعة</div>
+    </div>
+    <div class="toolbar">
+      <button class="btn btn-primary" id="load-btn">📂 Load Draft JSON</button>
+      <input type="file" id="file-input" accept=".json">
+      <span id="file-name"></span>
+    </div>
+  </header>
+
+  <div class="app-layout">
+
+    <!-- LEFT: Editor Panel -->
+    <div class="editor-panel">
+      <div class="panel-header">
+        <span>✏️ المحرر</span>
+        <button class="btn btn-success" id="validate-btn" style="margin-right:auto;padding:4px 12px;font-size:12px;">✅ Validate</button>
+        <button class="btn btn-outline" id="preview-btn" style="padding:4px 12px;font-size:12px;">👁️ تحديث المعاينة</button>
+      </div>
+      <div class="panel-body" id="topic-metadata">
+        <!-- Metadata form rendered here by app.js -->
+      </div>
+
+      <div class="panel-body" style="border-top:1px solid var(--border-light);padding-top:12px;">
+        <h3 style="font-size:14px;margin-bottom:8px;color:var(--text-secondary);">الأقسام والكتل</h3>
+        <div id="sections-container">
+          <div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn btn-success" id="download-btn" disabled>⬇️ Download Draft JSON</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: Preview Panel -->
+    <div class="preview-panel">
+      <div class="panel-header">
+        <span>👁️ المعاينة</span>
+      </div>
+      <div class="panel-body" id="preview-container">
+        <div class="preview-empty">قم بتحميل ملف Draft لعرض المعاينة</div>
+      </div>
+      <div class="panel-body" id="validation-results" style="border-top:1px solid var(--border-light);"></div>
+    </div>
+
+  </div>
+
+  <script src="js/schema.js"></script>
+  <script src="js/draft.js"></script>
+  <script src="js/validation.js"></script>
+  <script src="js/preview.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

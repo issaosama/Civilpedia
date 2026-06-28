@@ -1,0 +1,55 @@
+const SCHEMA_VERSION = '1.0.0';
+
+const VALID_LEVELS = ['basic', 'intermediate', 'advanced'];
+
+const VALID_PLAN_KEYS = ['free', 'pro'];
+
+const VALID_TOPIC_STATUSES = ['draft', 'review', 'approved', 'published', 'archived'];
+
+const VALID_REVIEW_STATUSES = ['draft', 'in_review', 'changes_requested', 'approved', 'rejected'];
+
+const VALID_SECTION_TYPES = ['general', 'execution', 'inspection', 'safety', 'equipment', 'codeReference'];
+
+const VALID_BLOCK_TYPES = ['text', 'execution_step', 'safety_note', 'table', 'checklist', 'inspection_point', 'code_reference', 'equipment', 'image'];
+
+const VALID_TEXT_VARIANTS = ['paragraph', 'note', 'warning', 'tip'];
+
+const VALID_SEVERITIES = ['low', 'medium', 'high', 'critical'];
+
+const REQUIRED_TOP_LEVEL = ['_meta', 'topic', 'sections', 'review'];
+
+const REQUIRED_META = ['schemaVersion', 'version', 'createdAt', 'updatedAt', 'source', 'id'];
+
+const REQUIRED_TOPIC = ['id', 'titleAr', 'titleEn', 'categoryId', 'summaryAr', 'summaryEn', 'level', 'planKey', 'status'];
+
+const REQUIRED_SECTION = ['id', 'title', 'type', 'order', 'blocks'];
+
+const REQUIRED_BLOCK = ['type', 'order'];
+
+const BLOCK_DISPLAY_NAMES = {
+  text: 'نص',
+  execution_step: 'خطوة تنفيذية',
+  safety_note: 'ملاحظة سلامة',
+  table: 'جدول',
+  checklist: 'قائمة فحص',
+  inspection_point: 'نقطة فحص',
+  code_reference: 'مرجع كود',
+  equipment: 'معدات',
+  image: 'صورة'
+};
+
+const SECTION_TYPE_LABELS = {
+  general: 'عام',
+  execution: 'تنفيذي',
+  inspection: 'فحص',
+  safety: 'سلامة',
+  equipment: 'معدات',
+  codeReference: 'مرجع كود'
+};
+
+const SEVERITY_LABELS = {
+  low: 'منخفضة',
+  medium: 'متوسطة',
+  high: 'عالية',
+  critical: 'حرجة'
+};
