@@ -32,6 +32,10 @@ Then open: http://localhost:8080
    - Export is blocked if validation has errors.
    - Warnings are displayed but export proceeds.
    - The exported file can be placed in `app_ready_jsons/topics/`.
+8. **Build combined catalog**: After exporting topic files, run the build script to generate `catalog.generated.json`:
+   ```bash
+   dart run tools/content_studio/scripts/build_catalog.dart
+   ```
 
 ## V1 Features
 
@@ -69,13 +73,17 @@ tools/content_studio/
 ├── README.md          ← This file
 ├── css/
 │   └── style.css      ← Styling
-└── js/
-    ├── schema.js      ← Schema constants and enums
-    ├── draft.js       ← Draft data model
-    ├── validation.js  ← Schema validation engine
-    ├── preview.js     ← Preview renderer
-    ├── exporter.js    ← Draft JSON → app-ready JSON converter
-    └── app.js         ← Main app logic
+├── js/
+│   ├── schema.js      ← Schema constants and enums
+│   ├── draft.js       ← Draft data model
+│   ├── validation.js  ← Schema validation engine
+│   ├── preview.js     ← Preview renderer
+│   ├── exporter.js    ← Draft JSON → app-ready JSON converter
+│   └── app.js         ← Main app logic
+└── scripts/
+    ├── README.md                        ← Build script docs
+    ├── build_catalog.dart               ← Dart: combine topic files → catalog
+    └── build_catalog_from_topics.js      ← Node.js equivalent (reference)
 ```
 
 ## Future Phases
