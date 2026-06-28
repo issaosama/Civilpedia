@@ -11,12 +11,14 @@
     $('file-input').addEventListener('change', handleFileLoad);
     $('validate-btn').addEventListener('click', runValidation);
     $('download-btn').addEventListener('click', downloadDraft);
+    $('export-btn').addEventListener('click', exportAppReady);
     $('preview-btn').addEventListener('click', updatePreview);
 
     previewRenderer.clear();
     $('sections-container').innerHTML = '<div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>';
     $('validation-results').innerHTML = '';
     $('download-btn').disabled = true;
+    $('export-btn').disabled = true;
   }
 
   function handleFileLoad(e) {
@@ -31,6 +33,7 @@
         renderSections();
         updatePreview();
         $('download-btn').disabled = false;
+        $('export-btn').disabled = false;
         showToast('✅ تم تحميل الملف بنجاح', 'success');
       } catch (err) {
         showToast('❌ خطأ في قراءة الملف: ' + err.message, 'error');
@@ -39,6 +42,8 @@
         $('sections-container').innerHTML = '';
         $('validation-results').innerHTML = '';
         $('download-btn').disabled = true;
+        $('export-btn').disabled = true;
+        $('export-warning').innerHTML = '';
       }
     };
     reader.readAsText(file);
@@ -284,19 +289,59 @@
     if (!draft.isValid()) return;
     try {
       const json = draft.serialize(true);
-      const blob = new Blob([json], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = draft.fileName || 'draft.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast('✅ تم تحميل الملف بنجاح', 'success');
+      downloadBlob(json, draft.fileName || 'draft.json', 'application/json');
+      showToast('✅ تم تحميل ملف Draft JSON بنجاح', 'success');
     } catch (err) {
       showToast('❌ فشل التحميل: ' + err.message, 'error');
     }
+  }
+
+  function exportAppReady() {
+    if (!draft.isValid()) {
+      showToast('❌ يرجى تحميل ملف Draft JSON أولاً', 'error');
+      return;
+    }
+
+    const engine = new ValidationEngine(draft);
+    const result = engine.validate();
+    renderValidationResults(result);
+
+    if (result.hasErrors) {
+      showToast('❌ التصدير محظور — يوجد أخطاء في التحقق. راجع لوحة التحقق.', 'error');
+      $('export-warning').innerHTML = '';
+      return;
+    }
+
+    if (result.hasWarnings) {
+      $('export-warning').innerHTML =
+        '<div class="export-warning-banner">⚠️ يوجد تحذيرات — يرجى مراجعتها قبل الاعتماد على الملف المُصدر.</div>';
+    } else {
+      $('export-warning').innerHTML = '';
+    }
+
+    try {
+      const exporter = new AppExporter();
+      const exportData = exporter.export(draft);
+      const json = JSON.stringify(exportData, null, 2);
+      const topicId = exportData.topic.id || 'exported';
+      const fileName = topicId + '.topic.json';
+      downloadBlob(json, fileName, 'application/json');
+      showToast('✅ تم تصدير الملف بنجاح: ' + fileName, 'success');
+    } catch (err) {
+      showToast('❌ فشل التصدير: ' + err.message, 'error');
+    }
+  }
+
+  function downloadBlob(content, fileName, mimeType) {
+    const blob = new Blob([content], { type: mimeType || 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   function showToast(msg, type) {
