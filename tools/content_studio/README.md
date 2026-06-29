@@ -40,9 +40,11 @@ Then open: http://localhost:8080
 ## V1 Features
 
 - Load any `.draft.json` file via file picker
-- Edit topic metadata: id, titleAr, titleEn, categoryId, summaryAr, summaryEn, level, planKey, status, reportWording, _meta fields, review.status
+- Edit topic metadata: id, titleAr, categoryId, summaryAr, level, planKey, status, reportWording, _meta fields, review.status
 - Browse sections (ordered) with block counts
 - View block cards with type labels and Arabic content preview
+- Inline editing: click any text, execution_step, or safety_note block to edit its Arabic content
+- Topic-level editing: common mistakes, accept/reject items, and report wording
 - Validate against Draft JSON schema v1.0.0
 - Preview the article as rendered content (text, tables, steps, safety notes, checklists, mistakes, accept/reject items)
 - Download edited draft as formatted JSON
@@ -52,15 +54,19 @@ Then open: http://localhost:8080
   - Blocked if validation has errors
   - Warning banner if validation has warnings
 
+## Arabic-Only Editing
+
+The writer-facing editor is **Arabic-only**. English content fields (`titleEn`, `summaryEn`, `content.en`, `description.en`, `notes.en`, `message.en`, `reportWording.en`, `commonMistakes[].en`, `acceptRejectItems[].*En`) are not shown in the editing UI.
+
+English values are **preserved** in memory and in downloaded/exported files. The data model remains bilingual-compatible internally. English technical terms can be written inline within Arabic text (e.g., "اختبار الهبوط Slump Test").
+
 ## What V1 Does NOT Support (Yet)
 
 - Adding / removing sections
 - Adding / removing blocks
-- Editing block content inline (metadata only)
 - Table editing (cell values)
 - Drag-and-drop reordering
 - Image upload
-- Multiple language toggles
 - Full WYSIWYG editor
 - Undo/redo
 - Saving to disk automatically (manual download only)

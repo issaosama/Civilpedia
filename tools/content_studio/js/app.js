@@ -71,20 +71,12 @@
             <input type="text" data-path="topic.titleAr" value="${esc(topic.titleAr || '')}" class="form-input" dir="rtl">
           </div>
           <div class="form-group">
-            <label>topic.titleEn</label>
-            <input type="text" data-path="topic.titleEn" value="${esc(topic.titleEn || '')}" class="form-input" dir="ltr">
-          </div>
-          <div class="form-group">
             <label>topic.categoryId</label>
             <input type="text" data-path="topic.categoryId" value="${esc(topic.categoryId || '')}" class="form-input" dir="ltr">
           </div>
           <div class="form-group form-group-full">
             <label>topic.summaryAr</label>
             <textarea data-path="topic.summaryAr" class="form-textarea" dir="rtl" rows="2">${esc(topic.summaryAr || '')}</textarea>
-          </div>
-          <div class="form-group form-group-full">
-            <label>topic.summaryEn</label>
-            <textarea data-path="topic.summaryEn" class="form-textarea" dir="ltr" rows="2">${esc(topic.summaryEn || '')}</textarea>
           </div>
           <div class="form-group">
             <label>topic.level</label>
@@ -113,14 +105,10 @@
         </div>
       </div>
       <div class="form-section">
-        <h3>نص التقرير اليومي (Report Wording)</h3>
+        <h3>نص التقرير اليومي</h3>
         <div class="form-group form-group-full">
           <label>reportWording.ar</label>
           <textarea data-path="topic.reportWording.ar" class="form-textarea" dir="rtl" rows="3">${esc((topic.reportWording && topic.reportWording.ar) || '')}</textarea>
-        </div>
-        <div class="form-group form-group-full">
-          <label>reportWording.en</label>
-          <textarea data-path="topic.reportWording.en" class="form-textarea" dir="ltr" rows="3">${esc((topic.reportWording && topic.reportWording.en) || '')}</textarea>
         </div>
       </div>
       <div class="form-section">

@@ -78,9 +78,6 @@ class ValidationEngine {
       if (topic.simpleExplanation.ar === undefined || topic.simpleExplanation.ar === null) {
         this.warnings.push('simpleExplanation.ar مفقود');
       }
-      if (topic.simpleExplanation.en === undefined || topic.simpleExplanation.en === null) {
-        this.warnings.push('simpleExplanation.en مفقود');
-      }
     }
   }
 

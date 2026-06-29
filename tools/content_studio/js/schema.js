@@ -33,7 +33,7 @@ const REQUIRED_TOP_LEVEL = ['_meta', 'topic', 'sections', 'review'];
 
 const REQUIRED_META = ['schemaVersion', 'version', 'createdAt', 'updatedAt', 'source', 'id'];
 
-const REQUIRED_TOPIC = ['id', 'titleAr', 'titleEn', 'categoryId', 'summaryAr', 'summaryEn', 'level', 'planKey', 'status'];
+const REQUIRED_TOPIC = ['id', 'titleAr', 'categoryId', 'summaryAr', 'level', 'planKey', 'status'];
 
 const REQUIRED_SECTION = ['id', 'title', 'type', 'order', 'blocks'];
 
