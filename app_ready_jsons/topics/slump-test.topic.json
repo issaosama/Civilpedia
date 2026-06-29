@@ -237,10 +237,12 @@
       {
         "type": "code_reference",
         "order": 1,
-        "code": "ASTM C143",
-        "code_title": "Standard Test Method for Slump of Hydraulic-Cement Concrete",
-        "code_section": "",
-        "code_excerpt": "مرجع شائع لاختبار الهبوط."
+        "reference": {
+          "code": "ASTM C143",
+          "title": "Standard Test Method for Slump of Hydraulic-Cement Concrete",
+          "section": "",
+          "description": "مرجع شائع لاختبار الهبوط."
+        }
       }
     ]
   }

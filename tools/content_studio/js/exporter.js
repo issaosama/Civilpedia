@@ -154,10 +154,12 @@ class AppExporter {
       case 'code_reference': {
         const title = src.title || {};
         const excerpt = src.excerpt || {};
-        block.code = src.code || '';
-        block.code_title = title.ar || title.en || '';
-        block.code_section = src.section || '';
-        block.code_excerpt = excerpt.ar || excerpt.en || '';
+        block.reference = {
+          code: src.code || '',
+          title: title.ar || title.en || '',
+          section: src.section || '',
+          description: excerpt.ar || excerpt.en || ''
+        };
         break;
       }
       case 'equipment': {

@@ -148,10 +148,12 @@ Map<String, dynamic> _exportBlock(Map<String, dynamic> src) {
     case 'code_reference': {
       final title = src['title'] as Map<String, dynamic>? ?? {};
       final excerpt = src['excerpt'] as Map<String, dynamic>? ?? {};
-      block['code'] = (src['code'] as String?) ?? '';
-      block['code_title'] = (title['ar'] as String?) ?? (title['en'] as String?) ?? '';
-      block['code_section'] = (src['section'] as String?) ?? '';
-      block['code_excerpt'] = (excerpt['ar'] as String?) ?? (excerpt['en'] as String?) ?? '';
+      block['reference'] = {
+        'code': (src['code'] as String?) ?? '',
+        'title': (title['ar'] as String?) ?? (title['en'] as String?) ?? '',
+        'section': (src['section'] as String?) ?? '',
+        'description': (excerpt['ar'] as String?) ?? (excerpt['en'] as String?) ?? '',
+      };
       break;
     }
     case 'equipment': {
