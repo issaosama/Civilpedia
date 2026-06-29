@@ -11,12 +11,23 @@ class EncyclopediaJsonDataSource {
   Map<String, List<TopicSection>>? _sections;
   Map<String, List<ContentBlock>>? _blocks;
   bool _loaded = false;
+  bool _usingGeneratedCatalog = false;
+
+  bool get usingGeneratedCatalog => _usingGeneratedCatalog;
 
   Future<void> _ensureLoaded() async {
     if (_loaded) return;
-    final jsonString =
-        await rootBundle.loadString('assets/encyclopedia/catalog.json');
-    final json = jsonDecode(jsonString) as Map<String, dynamic>;
+
+    Map<String, dynamic> json;
+
+    try {
+      json = await _loadCatalog(
+          'assets/encyclopedia/catalog.generated.json');
+      _usingGeneratedCatalog = true;
+    } catch (_) {
+      json = await _loadCatalog('assets/encyclopedia/catalog.json');
+      _usingGeneratedCatalog = false;
+    }
 
     _topics = (json['topics'] as List<dynamic>)
         .map((t) => EngineeringTopic.fromJson(t as Map<String, dynamic>))
@@ -41,6 +52,11 @@ class EncyclopediaJsonDataSource {
     );
 
     _loaded = true;
+  }
+
+  Future<Map<String, dynamic>> _loadCatalog(String path) async {
+    final jsonString = await rootBundle.loadString(path);
+    return jsonDecode(jsonString) as Map<String, dynamic>;
   }
 
   Future<List<EngineeringTopic>> fetchAllTopics() async {
