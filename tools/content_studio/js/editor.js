@@ -20,10 +20,6 @@ class InlineBlockEditor {
             <label>المحتوى</label>
             <textarea class="form-textarea ie-input" data-field="content.ar" dir="rtl" rows="4">${esc(content.ar || '')}</textarea>
           </div>
-          <div class="inline-field">
-            <label>النمط</label>
-            <select class="form-select ie-input" data-field="variant">${options(VALID_TEXT_VARIANTS, block.variant)}</select>
-          </div>
         </div>
         <div class="inline-actions">
           <button class="btn btn-success ie-save" type="button">💾 حفظ</button>
@@ -71,10 +67,6 @@ class InlineBlockEditor {
             <label>الرسالة</label>
             <textarea class="form-textarea ie-input" data-field="message.ar" dir="rtl" rows="3">${esc(msg.ar || '')}</textarea>
           </div>
-          <div class="inline-field">
-            <label>مستوى الخطورة</label>
-            <select class="form-select ie-input" data-field="severity">${options(VALID_SEVERITIES, block.severity)}</select>
-          </div>
         </div>
         <div class="inline-actions">
           <button class="btn btn-success ie-save" type="button">💾 حفظ</button>
@@ -95,10 +87,6 @@ class InlineTopicEditor {
         <div class="inline-field">
           <label>الخطأ #${i + 1}</label>
           <textarea class="form-textarea ie-topic-field" data-outer="topic.commonMistakes.${i}" data-field="ar" dir="rtl" rows="2">${esc(m.ar || '')}</textarea>
-        </div>
-        <div class="inline-field">
-          <label>severity</label>
-          <select class="form-select ie-topic-field" data-outer="topic.commonMistakes.${i}" data-field="severity">${options(['low', 'medium', 'high', 'critical'], m.severity)}</select>
         </div>
         <button class="btn btn-outline ie-remove-item" data-target="topic.commonMistakes" data-idx="${i}" type="button" style="font-size:12px;padding:4px 8px;margin-top:4px;">🗑️ حذف</button>
       </div>
