@@ -16,6 +16,7 @@
 
     previewRenderer.clear();
     $('sections-container').innerHTML = '<div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>';
+    $('sections-container').addEventListener('click', handleSectionContainerClick);
     $('validation-results').innerHTML = '';
     $('download-btn').disabled = true;
     $('export-btn').disabled = true;
@@ -155,21 +156,23 @@
     if (!draft.isValid()) return;
     const data = draft.toJSON();
     const sections = data.sections || [];
-    if (sections.length === 0) {
-      $('sections-container').innerHTML = '<div class="empty-state">لا توجد أقسام في هذا الموضوع</div>';
-      return;
-    }
     let html = '';
-    for (let i = 0; i < sections.length; i++) {
-      html += renderSectionCard(sections[i], i);
+    if (sections.length === 0) {
+      html = '<div class="empty-state">لا توجد أقسام في هذا الموضوع</div>';
+    } else {
+      for (let i = 0; i < sections.length; i++) {
+        html += renderSectionCard(sections[i], i);
+      }
     }
+    html += InlineTopicEditor.renderMistakesEditor(draft);
+    html += InlineTopicEditor.renderAcceptRejectEditor(draft);
     $('sections-container').innerHTML = html;
   }
 
   function renderSectionCard(section, index) {
     const blocks = section.blocks || [];
     const typeLabel = SECTION_TYPE_LABELS[section.type] || section.type;
-    let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, section.id)).join('');
+    let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index)).join('');
     if (!blocksHtml) blocksHtml = '<div class="empty-state">لا توجد كتل في هذا القسم</div>';
 
     return `
@@ -187,7 +190,7 @@
     `;
   }
 
-  function renderBlockMini(block, index, sectionId) {
+  function renderBlockMini(block, index, sectionIdx) {
     const typeLabel = BLOCK_DISPLAY_NAMES[block.type] || block.type;
     const order = block.order || '-';
     let summary = '';
@@ -231,7 +234,7 @@
     }
 
     return `
-      <div class="block-mini block-mini-${block.type}">
+      <div class="block-mini block-mini-${block.type}" data-section-idx="${sectionIdx}" data-block-idx="${index}">
         <div class="block-mini-header">
           <span class="block-type-label">${esc(typeLabel)}</span>
           <span class="block-order">ترتيب ${order}</span>
@@ -355,17 +358,155 @@
     }, 2500);
   }
 
-  function esc(str) {
-    if (str === null || str === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = String(str);
-    return div.innerHTML;
+  function handleSectionContainerClick(e) {
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item');
+    if (!target) return;
+
+    if (target.classList.contains('ie-save')) {
+      handleBlockSave(target);
+    } else if (target.classList.contains('ie-cancel')) {
+      handleBlockCancel();
+    } else if (target.classList.contains('ie-save-topic')) {
+      handleTopicSave(target);
+    } else if (target.classList.contains('ie-add-item')) {
+      handleAddItem(target);
+    } else if (target.classList.contains('ie-remove-item')) {
+      handleRemoveItem(target);
+    } else if (target.classList.contains('block-mini')) {
+      handleBlockEdit(target);
+    }
   }
 
-  function options(values, selected) {
-    return values.map(v =>
-      `<option value="${esc(v)}"${v === selected ? ' selected' : ''}>${esc(v)}</option>`
-    ).join('');
+  function handleBlockEdit(blockMini) {
+    const sectionIdx = parseInt(blockMini.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(blockMini.dataset.blockIdx, 10);
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const block = sections[sectionIdx].blocks[blockIdx];
+    if (!block) return;
+    const editorHtml = InlineBlockEditor.getEditorHtml(sectionIdx, blockIdx, block);
+    if (!editorHtml) return;
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = editorHtml;
+    blockMini.replaceWith(wrapper.firstElementChild);
+  }
+
+  function handleBlockSave(saveBtn) {
+    if (!draft.isValid()) return;
+    const editor = saveBtn.closest('.inline-editor');
+    if (!editor) return;
+    const sectionIdx = parseInt(editor.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(editor.dataset.blockIdx, 10);
+    const path = `sections.${sectionIdx}.blocks.${blockIdx}`;
+
+    // Read all fields from the editor form
+    const inputs = editor.querySelectorAll('.ie-input');
+    inputs.forEach(input => {
+      const field = input.dataset.field;
+      if (!field) return;
+      const fullPath = `${path}.${field}`;
+      let value = input.value;
+      if (input.type === 'number') value = parseInt(value, 10);
+      draft.setField(fullPath, value);
+    });
+
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حفظ التعديلات', 'success');
+  }
+
+  function handleBlockCancel() {
+    renderSections();
+    updatePreview();
+  }
+
+  function handleTopicSave(saveBtn) {
+    if (!draft.isValid()) return;
+    const targetPath = saveBtn.dataset.target;
+    if (!targetPath) return;
+
+    const items = saveBtn.closest('.section-card-body').querySelectorAll('.inline-topic-item');
+    items.forEach(item => {
+      const fields = item.querySelectorAll('.ie-topic-field');
+      fields.forEach(field => {
+        const outerPath = field.dataset.outer;
+        const fieldName = field.dataset.field;
+        if (!outerPath || !fieldName) return;
+        const fullPath = `${outerPath}.${fieldName}`;
+        let value;
+        if (field.type === 'checkbox') {
+          value = field.checked;
+        } else if (field.type === 'number') {
+          value = parseInt(field.value, 10);
+        } else {
+          value = field.value;
+        }
+        draft.setField(fullPath, value);
+      });
+    });
+
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حفظ التعديلات', 'success');
+  }
+
+  function handleAddItem(btn) {
+    if (!draft.isValid()) return;
+    const targetPath = btn.dataset.target;
+    if (!targetPath) return;
+
+    const data = draft.toJSON();
+    let arr = getNested(data, targetPath);
+    if (!Array.isArray(arr)) arr = [];
+
+    let newItem;
+    if (targetPath === 'topic.commonMistakes') {
+      newItem = { ar: '', en: '', severity: 'medium' };
+    } else if (targetPath === 'topic.acceptRejectItems') {
+      newItem = { criteriaAr: '', criteriaEn: '', acceptanceLimitAr: '', acceptanceLimitEn: '', methodAr: '', methodEn: '', isCritical: false, reviewRequired: true, planKey: '', codeReference: '' };
+    } else {
+      return;
+    }
+
+    arr.push(newItem);
+    draft.setField(targetPath, arr);
+    renderSections();
+    updatePreview();
+  }
+
+  function handleRemoveItem(btn) {
+    if (!draft.isValid()) return;
+    const targetPath = btn.dataset.target;
+    const idx = parseInt(btn.dataset.idx, 10);
+    if (!targetPath || isNaN(idx)) return;
+
+    const data = draft.toJSON();
+    let arr = getNested(data, targetPath);
+    if (!Array.isArray(arr) || idx < 0 || idx >= arr.length) return;
+
+    arr.splice(idx, 1);
+    draft.setField(targetPath, arr);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حذف البند', 'success');
+  }
+
+  function getNested(obj, path) {
+    const parts = path.split('.');
+    let current = obj;
+    for (const part of parts) {
+      if (current === null || current === undefined || typeof current !== 'object') return undefined;
+      if (Array.isArray(current)) {
+        const idx = parseInt(part, 10);
+        if (isNaN(idx) || idx < 0 || idx >= current.length) return undefined;
+        current = current[idx];
+      } else {
+        if (!(part in current)) return undefined;
+        current = current[part];
+      }
+    }
+    return current;
   }
 
   document.addEventListener('DOMContentLoaded', init);

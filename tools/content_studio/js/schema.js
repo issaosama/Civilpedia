@@ -1,3 +1,16 @@
+function esc(str) {
+  if (str === null || str === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+function options(values, selected) {
+  return values.map(v =>
+    `<option value="${esc(v)}"${v === selected ? ' selected' : ''}>${esc(v)}</option>`
+  ).join('');
+}
+
 const SCHEMA_VERSION = '1.0.0';
 
 const VALID_LEVELS = ['basic', 'intermediate', 'advanced'];
