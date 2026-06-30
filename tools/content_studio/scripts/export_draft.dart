@@ -32,9 +32,17 @@ Map<String, dynamic> _exportTopic(Map<String, dynamic> src, Map<String, dynamic>
     'codeNotes': _localized(src['codeNotes']),
     'siteNotes': _localized(src['siteNotes']),
     'reportWording': _localized(src['reportWording']),
+    'visualTheme': _exportVisualTheme(src['visualTheme']),
     'relatedToolRoutes': (src['relatedToolRoutes'] as List?)?.cast<String>() ?? [],
     'relatedChecklistIds': (src['relatedChecklistIds'] as List?)?.cast<String>() ?? [],
   };
+}
+
+const _validThemeKeys = ['cement_gray', 'navy', 'teal', 'olive', 'amber', 'maroon'];
+
+Map<String, dynamic> _exportVisualTheme(dynamic vt) {
+  final accent = (vt is Map) ? vt['accent'] : null;
+  return {'accent': (accent is String && _validThemeKeys.contains(accent)) ? accent : 'cement_gray'};
 }
 
 List<Map<String, dynamic>> _exportCommonMistakes(dynamic mistakes) {

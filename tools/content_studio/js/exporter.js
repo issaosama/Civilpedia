@@ -40,6 +40,7 @@ class AppExporter {
       codeNotes: this._localized(src.codeNotes),
       siteNotes: this._localized(src.siteNotes),
       reportWording: this._localized(src.reportWording),
+      visualTheme: this._exportVisualTheme(src.visualTheme),
       relatedToolRoutes: src.relatedToolRoutes || [],
       relatedChecklistIds: src.relatedChecklistIds || []
     };
@@ -51,6 +52,11 @@ class AppExporter {
       ar: m.ar || '',
       en: m.en || ''
     }));
+  }
+
+  _exportVisualTheme(vt) {
+    const accent = vt && vt.accent;
+    return { accent: VALID_THEME_KEYS.includes(accent) ? accent : 'cement_gray' };
   }
 
   _exportAcceptReject(items) {

@@ -66,3 +66,21 @@ const SEVERITY_LABELS = {
   high: 'عالية',
   critical: 'حرجة'
 };
+
+const THEME_OPTIONS = [
+  { label: 'افتراضي / رصاصي أسمنتي', value: 'cement_gray' },
+  { label: 'كحلي هندسي', value: 'navy' },
+  { label: 'بترولي', value: 'teal' },
+  { label: 'زيتي', value: 'olive' },
+  { label: 'كهرماني ترابي', value: 'amber' },
+  { label: 'عنابي', value: 'maroon' },
+];
+
+const VALID_THEME_KEYS = THEME_OPTIONS.map(o => o.value);
+
+function themeOptions(selectedKey) {
+  const sel = selectedKey || 'cement_gray';
+  return THEME_OPTIONS.map(o =>
+    `<option value="${esc(o.value)}"${o.value === sel ? ' selected' : ''}>${esc(o.label)}</option>`
+  ).join('');
+}

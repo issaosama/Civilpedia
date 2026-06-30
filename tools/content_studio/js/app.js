@@ -97,6 +97,12 @@
             </select>
           </div>
           <div class="form-group">
+            <label>السمة البصرية</label>
+            <select data-path="topic.visualTheme.accent" class="form-select">
+              ${themeOptions((topic.visualTheme && topic.visualTheme.accent) || 'cement_gray')}
+            </select>
+          </div>
+          <div class="form-group">
             <label>review.status</label>
             <select data-path="review.status" class="form-select">
               ${options(VALID_REVIEW_STATUSES, review.status)}
