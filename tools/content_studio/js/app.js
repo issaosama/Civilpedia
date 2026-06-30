@@ -279,6 +279,11 @@
   }
 
   function updatePreview() {
+    if (draft && draft.isValid()) {
+      const data = draft.toJSON();
+      const accent = (data.topic && data.topic.visual_theme && data.topic.visual_theme.accent) || 'cement_gray';
+      $('preview-container').setAttribute('data-theme', accent);
+    }
     previewRenderer.render(draft);
   }
 

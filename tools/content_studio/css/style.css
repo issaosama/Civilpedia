@@ -21,6 +21,41 @@
   --shadow-lg: 0 4px 12px rgba(0,0,0,0.15);
   --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
   --font-ar: 'Segoe UI', 'Tahoma', 'Arial', sans-serif;
+  --topic-accent: #8A8F9A;
+  --topic-accent-soft: #F0F1F3;
+  --topic-accent-chip: #E2E4E8;
+  --topic-accent-dark: #5C6068;
+}
+
+#preview-container[data-theme="navy"] {
+  --topic-accent: #1B2A4A;
+  --topic-accent-soft: #EBEDF2;
+  --topic-accent-chip: #DDE0EA;
+  --topic-accent-dark: #0E1A33;
+}
+#preview-container[data-theme="teal"] {
+  --topic-accent: #1A7A6E;
+  --topic-accent-soft: #E6F2F0;
+  --topic-accent-chip: #D4E8E4;
+  --topic-accent-dark: #0F5C52;
+}
+#preview-container[data-theme="olive"] {
+  --topic-accent: #6B8E23;
+  --topic-accent-soft: #F5F7EE;
+  --topic-accent-chip: #EFF3E0;
+  --topic-accent-dark: #4A6625;
+}
+#preview-container[data-theme="amber"] {
+  --topic-accent: #C8913A;
+  --topic-accent-soft: #F8F0E0;
+  --topic-accent-chip: #F2E8D0;
+  --topic-accent-dark: #A07128;
+}
+#preview-container[data-theme="maroon"] {
+  --topic-accent: #7A2834;
+  --topic-accent-soft: #F2E8EA;
+  --topic-accent-chip: #E8D8DC;
+  --topic-accent-dark: #5A1E26;
 }
 
 body {
@@ -467,10 +502,6 @@ body {
   opacity: 0.9;
 }
 
-.preview-section-block {
-  margin-bottom: 12px;
-}
-
 .preview-section-header {
   display: flex;
   align-items: center;
@@ -478,13 +509,21 @@ body {
   margin-bottom: 10px;
 }
 
+.preview-section-block {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  border-right: 3px solid var(--topic-accent);
+  overflow: hidden;
+}
+
 .preview-section-type {
-  background: #e5e7eb;
+  background: var(--topic-accent-chip);
   border-radius: 4px;
   padding: 2px 8px;
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--topic-accent-dark);
 }
 
 .preview-section-title {
@@ -499,8 +538,8 @@ body {
 }
 
 .preview-text-note {
-  background: #eff6ff;
-  border-right: 3px solid var(--primary);
+  background: var(--topic-accent-soft);
+  border-right: 3px solid var(--topic-accent);
   padding: 10px 14px;
   border-radius: 4px;
 }
@@ -528,7 +567,7 @@ body {
 .preview-step:last-child { border-bottom: none; }
 
 .preview-step-number {
-  background: var(--primary);
+  background: var(--topic-accent);
   color: white;
   border-radius: 50%;
   width: 28px;
@@ -673,7 +712,7 @@ body {
 
 .preview-code-ref {
   padding: 6px 12px;
-  background: #f0fdf4;
+  background: var(--topic-accent-soft);
   border-radius: 4px;
   font-size: 13px;
   margin-bottom: 4px;
