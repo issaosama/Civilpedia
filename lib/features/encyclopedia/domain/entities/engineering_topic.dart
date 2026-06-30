@@ -40,6 +40,7 @@ class EngineeringTopic {
   final LocalizedText? codeNotes;
   final LocalizedText? siteNotes;
   final LocalizedText? reportWording;
+  final String? visualTheme;
   final List<String> relatedToolRoutes;
   final List<String> relatedChecklistIds;
   final List<AcceptRejectItem> acceptRejectItems;
@@ -65,6 +66,7 @@ class EngineeringTopic {
     this.codeNotes,
     this.siteNotes,
     this.reportWording,
+    this.visualTheme,
     this.relatedToolRoutes = const [],
     this.relatedChecklistIds = const [],
     this.acceptRejectItems = const [],
@@ -91,6 +93,7 @@ class EngineeringTopic {
         'codeNotes': codeNotes?.toJson(),
         'siteNotes': siteNotes?.toJson(),
         'reportWording': reportWording?.toJson(),
+        'visualTheme': visualTheme != null ? {'accent': visualTheme} : null,
         'relatedToolRoutes': relatedToolRoutes,
         'relatedChecklistIds': relatedChecklistIds,
         'acceptRejectItems':
@@ -139,6 +142,9 @@ class EngineeringTopic {
         reportWording: json['reportWording'] != null
             ? LocalizedText.fromJson(
                 json['reportWording'] as Map<String, dynamic>)
+            : null,
+        visualTheme: json['visual_theme'] != null
+            ? (json['visual_theme'] as Map<String, dynamic>)['accent'] as String?
             : null,
         relatedToolRoutes: (json['relatedToolRoutes'] as List<dynamic>?)
                 ?.cast<String>() ??

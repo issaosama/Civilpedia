@@ -10,6 +10,7 @@ import '../../domain/entities/localized_text.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../localization/ar.dart';
 import '../theme/encyclopedia_card_colors.dart';
+import '../theme/encyclopedia_topic_theme.dart';
 
 class TopicDetailScreen extends StatefulWidget {
   final String topicId;
@@ -54,6 +55,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   Widget _buildArticle(BuildContext context, EncyclopediaProvider provider, EngineeringTopic topic) {
     final blocksByType = _collectBlocksByType(provider);
+    EncyclopediaCardColors.apply(EncyclopediaTopicTheme.fromKey(topic.visualTheme));
 
     int seq = 0;
 
@@ -168,7 +170,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               const SizedBox(width: 12),
               Text(
                 displayKicker,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   letterSpacing: 1.5,
                   color: EncyclopediaCardColors.accent,
@@ -244,7 +246,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           color: EncyclopediaCardColors.accentSoft,
           borderRadius: BorderRadius.circular(4),
         ),
-        child: const Text(
+        child: Text(
           'الموسوعة الهندسية',
           style: TextStyle(fontSize: 10, color: EncyclopediaCardColors.accent, fontWeight: FontWeight.w600),
         ),
@@ -262,7 +264,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             _categoryName(topic.categoryId),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               color: EncyclopediaCardColors.accent,
               fontWeight: FontWeight.w500,
@@ -402,7 +404,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             decoration: BoxDecoration(
               color: EncyclopediaCardColors.softPanel,
               borderRadius: BorderRadius.circular(10),
-              border: const Border(
+              border: Border(
                 right: BorderSide(color: EncyclopediaCardColors.accent, width: 3),
               ),
             ),
@@ -973,11 +975,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                           color: EncyclopediaCardColors.accentSoft,
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        child: const Row(
+                        child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(Icons.copy, size: 14, color: EncyclopediaCardColors.accent),
-                            SizedBox(width: 6),
+                            const SizedBox(width: 6),
                             Text(
                               'نسخ',
                               style: TextStyle(fontSize: 12, color: EncyclopediaCardColors.accent, fontWeight: FontWeight.w600),
@@ -1031,7 +1033,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   ),
                   child: Text(
                     name,
-                    style: const TextStyle(fontSize: 13, color: EncyclopediaCardColors.accent, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 13, color: EncyclopediaCardColors.accent, fontWeight: FontWeight.w500),
                   ),
                 ),
               );

@@ -65,4 +65,15 @@ class EncyclopediaTopicTheme {
   ];
 
   static const EncyclopediaTopicTheme defaultTheme = cementGray;
+
+  static EncyclopediaTopicTheme fromKey(String? key) {
+    return switch (key) {
+      'navy' => navy,
+      'teal' => teal,
+      'olive' => olive,
+      'amber' => amber,
+      'maroon' => maroon,
+      _ => cementGray,
+    };
+  }
 }

@@ -15,17 +15,14 @@ class EncyclopediaCardColors {
   static const Color tableHeaderBg = Color(0xFFF3E8E3);
   static const Color dangerText = Color(0xFFA23A36);
 
-  // ── Topic accent (Cement Gray) ──
-  // These match the current default preset. When a topic theme is applied
-  // at runtime, consumers should switch to using [current] instead.
-  static const Color accent = Color(0xFF8A8F9A);
-  static const Color accentSoft = Color(0xFFF0F1F3);
-  static const Color accentChip = Color(0xFFE2E4E8);
-  static const Color accentDark = Color(0xFF5C6068);
+  // ── Topic accent (default: Cement Gray) ──
+  // These delegate to the active theme preset. Call [apply] to switch at
+  // runtime, e.g. when a topic's visual_theme key is read from JSON.
+  static Color get accent => _current.accent;
+  static Color get accentSoft => _current.accentSoft;
+  static Color get accentChip => _current.accentChip;
+  static Color get accentDark => _current.accentDark;
 
-  // ── Current theme preset (default: Cement Gray) ──
-  // TODO: Wire up from topic JSON visual_theme key in a future phase.
-  // Call [apply] to switch the active preset at runtime.
   static EncyclopediaTopicTheme _current = EncyclopediaTopicTheme.defaultTheme;
   static EncyclopediaTopicTheme get current => _current;
 
