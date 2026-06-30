@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام ألوان كروت الموسوعة — Civilpedia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --page-bg: #FAF7F2;
+  --white: #FFFFFF;
+  --text-primary: #171411;
+  --text-secondary: #6D6258;
+  --text-muted: #9A8E84;
+  --border-light: #E8DCD3;
+  --shadow-card: 0 2px 12px rgba(23,20,17,0.06), 0 1px 4px rgba(23,20,17,0.04);
+  --shadow-elevated: 0 8px 30px rgba(23,20,17,0.08), 0 2px 8px rgba(23,20,17,0.04);
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 999px;
+
+  --safety-bg: #FDF3E0;
+  --safety-border: #F0D398;
+  --safety-accent: #D4A017;
+  --safety-icon: #C8912E;
+  --safety-text: #8B6914;
+
+  --mistake-bg: #FDECEA;
+  --mistake-border: #E8B4B0;
+  --mistake-accent: #C0392B;
+  --mistake-icon: #A8322A;
+  --mistake-text: #8B2A22;
+}
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--page-bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.container { max-width: 1280px; margin: 0 auto; padding: 40px 32px 60px; }
+
+/* ─── HEADER ─── */
+.header { text-align: center; margin-bottom: 56px; }
+.header::after { content: ''; display: block; width: 60px; height: 3px; background: var(--text-primary); margin: 20px auto 0; border-radius: 2px; opacity: 0.15; }
+.header h1 { font-size: 36px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+.header .subtitle { font-size: 16px; color: var(--text-secondary); margin-top: 8px; font-weight: 400; }
+
+/* ─── SYSTEM OVERVIEW BADGES ─── */
+.system-overview { display: flex; justify-content: center; gap: 24px; margin-bottom: 48px; flex-wrap: wrap; }
+.system-badge { display: flex; align-items: center; gap: 10px; background: var(--white); padding: 10px 18px; border-radius: var(--radius-full); box-shadow: var(--shadow-card); font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.system-badge .badge-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.badge-dot.theme-dot { background: #6B8E23; }
+.badge-dot.safety-dot { background: var(--safety-accent); }
+.badge-dot.mistake-dot { background: var(--mistake-accent); }
+
+/* ─── THEME GALLERY ─── */
+.section-label { font-size: 14px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+.gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 56px; }
+.theme-card {
+  background: var(--white); border-radius: var(--radius-md); box-shadow: var(--shadow-card);
+  overflow: hidden; cursor: pointer; transition: all 0.3s ease; border: 2px solid transparent;
+  position: relative;
+}
+.theme-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-elevated); }
+.theme-card.active { border-color: var(--text-primary); }
+.theme-card.active::after { content: 'مُحدد'; position: absolute; top: 12px; left: 12px; background: var(--text-primary); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: var(--radius-full); letter-spacing: 0.5px; }
+.theme-preview { padding: 20px 16px 16px; }
+.theme-preview .theme-name { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.theme-preview .theme-name-en { font-size: 11px; color: var(--text-muted); font-weight: 400; margin-bottom: 14px; display: block; }
+.theme-preview .mini-kicker { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.theme-preview .mini-kicker .kicker-line { width: 20px; height: 2px; border-radius: 1px; }
+.theme-preview .mini-kicker .kicker-text { font-size: 9px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; opacity: 0.7; }
+.theme-preview .mini-card { padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid; margin-bottom: 8px; }
+.theme-preview .mini-card .mini-title { font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+.theme-preview .mini-card .mini-line { height: 3px; border-radius: 2px; width: 60%; opacity: 0.4; }
+.theme-preview .mini-chips { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.theme-preview .mini-chip { font-size: 9px; font-weight: 500; padding: 2px 8px; border-radius: var(--radius-full); }
+.theme-preview .mini-accent-line { height: 3px; border-radius: 2px; width: 100%; margin-bottom: 8px; }
+.theme-preview .mini-icons { display: flex; gap: 8px; }
+.theme-preview .mini-icons .mi { width: 22px; height: 22px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+
+/* ─── THEME-SPECIFIC COLORS ─── */
+.theme-card[data-theme="olive"] .kicker-line,
+.theme-card[data-theme="olive"] .mini-accent-line { background: #6B8E23; }
+.theme-card[data-theme="olive"] .kicker-text { color: #6B8E23; }
+.theme-card[data-theme="olive"] .mini-card { background: #F5F7EE; border-color: #D5DFB0; }
+.theme-card[data-theme="olive"] .mini-card .mini-title { color: #4A6625; }
+.theme-card[data-theme="olive"] .mini-card .mini-line { background: #6B8E23; }
+.theme-card[data-theme="olive"] .mini-chip { background: #EFF3E0; color: #4A6625; }
+.theme-card[data-theme="olive"] .mi { background: #6B8E23; color: #fff; }
+.theme-card[data-theme="olive"] .theme-name { color: #6B8E23; }
+
+.theme-card[data-theme="amber"] .kicker-line,
+.theme-card[data-theme="amber"] .mini-accent-line { background: #C8913A; }
+.theme-card[data-theme="amber"] .kicker-text { color: #C8913A; }
+.theme-card[data-theme="amber"] .mini-card { background: #F8F0E0; border-color: #E8D4A8; }
+.theme-card[data-theme="amber"] .mini-card .mini-title { color: #A07128; }
+.theme-card[data-theme="amber"] .mini-card .mini-line { background: #C8913A; }
+.theme-card[data-theme="amber"] .mini-chip { background: #F2E8D0; color: #A07128; }
+.theme-card[data-theme="amber"] .mi { background: #C8913A; color: #fff; }
+.theme-card[data-theme="amber"] .theme-name { color: #C8913A; }
+
+.theme-card[data-theme="navy"] .kicker-line,
+.theme-card[data-theme="navy"] .mini-accent-line { background: #1B2A4A; }
+.theme-card[data-theme="navy"] .kicker-text { color: #1B2A4A; }
+.theme-card[data-theme="navy"] .mini-card { background: #EBEDF2; border-color: #B8C0D0; }
+.theme-card[data-theme="navy"] .mini-card .mini-title { color: #0E1A33; }
+.theme-card[data-theme="navy"] .mini-card .mini-line { background: #1B2A4A; }
+.theme-card[data-theme="navy"] .mini-chip { background: #DDE0EA; color: #0E1A33; }
+.theme-card[data-theme="navy"] .mi { background: #1B2A4A; color: #fff; }
+.theme-card[data-theme="navy"] .theme-name { color: #1B2A4A; }
+
+.theme-card[data-theme="teal"] .kicker-line,
+.theme-card[data-theme="teal"] .mini-accent-line { background: #1A7A6E; }
+.theme-card[data-theme="teal"] .kicker-text { color: #1A7A6E; }
+.theme-card[data-theme="teal"] .mini-card { background: #E6F2F0; border-color: #A8D0CA; }
+.theme-card[data-theme="teal"] .mini-card .mini-title { color: #0F5C52; }
+.theme-card[data-theme="teal"] .mini-card .mini-line { background: #1A7A6E; }
+.theme-card[data-theme="teal"] .mini-chip { background: #D4E8E4; color: #0F5C52; }
+.theme-card[data-theme="teal"] .mi { background: #1A7A6E; color: #fff; }
+.theme-card[data-theme="teal"] .theme-name { color: #1A7A6E; }
+
+.theme-card[data-theme="maroon"] .kicker-line,
+.theme-card[data-theme="maroon"] .mini-accent-line { background: #7A2834; }
+.theme-card[data-theme="maroon"] .kicker-text { color: #7A2834; }
+.theme-card[data-theme="maroon"] .mini-card { background: #F2E8EA; border-color: #D0B8BD; }
+.theme-card[data-theme="maroon"] .mini-card .mini-title { color: #5A1E26; }
+.theme-card[data-theme="maroon"] .mini-card .mini-line { background: #7A2834; }
+.theme-card[data-theme="maroon"] .mini-chip { background: #E8D8DC; color: #5A1E26; }
+.theme-card[data-theme="maroon"] .mi { background: #7A2834; color: #fff; }
+.theme-card[data-theme="maroon"] .theme-name { color: #7A2834; }
+
+.theme-card[data-theme="cement"] .kicker-line,
+.theme-card[data-theme="cement"] .mini-accent-line { background: #8A8F9A; }
+.theme-card[data-theme="cement"] .kicker-text { color: #8A8F9A; }
+.theme-card[data-theme="cement"] .mini-card { background: #F0F1F3; border-color: #C8CBD0; }
+.theme-card[data-theme="cement"] .mini-card .mini-title { color: #5C6068; }
+.theme-card[data-theme="cement"] .mini-card .mini-line { background: #8A8F9A; }
+.theme-card[data-theme="cement"] .mini-chip { background: #E2E4E8; color: #5C6068; }
+.theme-card[data-theme="cement"] .mi { background: #8A8F9A; color: #fff; }
+.theme-card[data-theme="cement"] .theme-name { color: #8A8F9A; }
+
+/* ─── MAIN ARTICLE MOCKUP ─── */
+.mockup-section { margin-bottom: 40px; }
+.mockup-header { text-align: center; margin-bottom: 32px; }
+.mockup-header h2 { font-size: 22px; font-weight: 700; }
+.mockup-header .mockup-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+
+.article-mockup {
+  max-width: 780px; margin: 0 auto; background: var(--page-bg);
+  border-radius: var(--radius-lg); box-shadow: 0 0 0 1px var(--border-light), var(--shadow-elevated);
+  overflow: hidden; position: relative;
+}
+
+/* Article Badge */
+.article-badge-wrap { padding: 24px 28px 0; }
+.article-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--white); padding: 6px 14px 6px 10px; border-radius: var(--radius-full); box-shadow: 0 1px 4px rgba(23,20,17,0.04); font-size: 11px; font-weight: 600; color: var(--text-secondary); border: 1px solid var(--border-light); }
+.article-badge .badge-icon { width: 20px; height: 20px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+.article-badge .badge-icon[data-theme-icon] { color: #fff; }
+
+.article-title-wrap { padding: 12px 28px 20px; }
+.article-title { font-size: 28px; font-weight: 800; line-height: 1.3; }
+
+/* Article Body */
+.article-body { padding: 0 28px 28px; }
+
+/* Section Kicker */
+.section-kicker { display: flex; align-items: center; gap: 12px; margin: 24px 0 12px; }
+.section-kicker .sk-line { width: 36px; height: 2px; border-radius: 1px; flex-shrink: 0; }
+.section-kicker .sk-text { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; opacity: 0.8; }
+.section-kicker .sk-number { font-size: 11px; font-weight: 400; opacity: 0.4; margin-right: auto; }
+
+/* Article Card */
+.article-card {
+  background: var(--white); border-radius: var(--radius-sm); padding: 18px 20px;
+  border: 1px solid var(--border-light); box-shadow: var(--shadow-card);
+  margin-bottom: 8px; position: relative;
+}
+.article-card .card-inner {}
+
+/* Text content */
+.article-text { font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+.article-text strong { color: var(--text-primary); font-weight: 600; }
+
+/* Importance Card - with right accent border */
+.card-importance { border-right: 4px solid; padding-right: 18px; }
+.card-importance p { margin-bottom: 8px; }
+.card-importance p:last-child { margin-bottom: 0; }
+
+/* Diamond bullet */
+.diamond-list { list-style: none; padding: 0; }
+.diamond-list li { position: relative; padding-right: 22px; margin-bottom: 6px; font-size: 14px; line-height: 1.7; color: var(--text-secondary); }
+.diamond-list li::before { content: '◆'; position: absolute; right: 0; font-size: 8px; top: 4px; }
+
+/* Table Card */
+.card-table { padding: 0; overflow: hidden; }
+.table-wrap { width: 100%; border-collapse: collapse; font-size: 13px; }
+.table-wrap th { padding: 12px 16px; text-align: right; font-weight: 600; font-size: 12px; border-bottom: 1px solid; }
+.table-wrap td { padding: 10px 16px; border-bottom: 1px solid; color: var(--text-secondary); }
+.table-wrap tr:last-child td { border-bottom: none; }
+
+/* Step Card */
+.step-card { display: flex; gap: 14px; align-items: flex-start; }
+.step-number { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: #fff; flex-shrink: 0; }
+.step-content { flex: 1; }
+.step-content .step-title { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+.step-content .step-desc { font-size: 13px; line-height: 1.7; color: var(--text-secondary); }
+.step-content .step-note { font-size: 12px; color: var(--text-muted); margin-top: 4px; padding-top: 4px; border-top: 1px dashed; }
+
+/* Inspection Card */
+.inspection-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid; }
+.inspection-row:last-child { border-bottom: none; }
+.inspection-row .ins-icon { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.inspection-row .ins-text { font-size: 13px; color: var(--text-secondary); flex: 1; }
+.inspection-row .ins-method { font-size: 11px; padding: 2px 10px; border-radius: var(--radius-full); font-weight: 500; }
+
+/* Safety Card */
+.card-safety { background: var(--safety-bg); border: 1px solid var(--safety-border); }
+.card-safety .safety-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.card-safety .safety-header .safety-icon { color: var(--safety-icon); font-size: 18px; }
+.card-safety .safety-header .safety-label { font-size: 12px; font-weight: 700; color: var(--safety-text); }
+.card-safety .safety-text { font-size: 13px; line-height: 1.7; color: var(--safety-text); }
+.card-safety .safety-chip { display: inline-block; background: var(--safety-accent); color: #fff; font-size: 10px; font-weight: 700; padding: 2px 10px; border-radius: var(--radius-full); margin-top: 6px; }
+
+/* Common Mistakes Card */
+.card-mistake { background: var(--mistake-bg); border: 1px solid var(--mistake-border); }
+.card-mistake .mistake-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.card-mistake .mistake-header .mistake-icon { color: var(--mistake-icon); font-size: 16px; font-weight: 700; }
+.card-mistake .mistake-header .mistake-label { font-size: 12px; font-weight: 700; color: var(--mistake-text); }
+.card-mistake .mistake-item { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; font-size: 13px; color: var(--mistake-text); line-height: 1.6; }
+.card-mistake .mistake-item .x-icon { color: var(--mistake-icon); font-weight: 700; font-size: 14px; flex-shrink: 0; }
+
+/* Report Card */
+.card-report { background: #FFFFFB; }
+.card-report .report-text { font-size: 13px; line-height: 1.8; color: var(--text-secondary); padding: 8px 12px; background: var(--page-bg); border-radius: 8px; border: 1px solid var(--border-light); direction: ltr; text-align: left; font-family: 'Cairo', monospace; }
+.card-report .report-label { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; display: block; }
+
+/* Tools Card */
+.card-tools .tools-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.card-tools .tool-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--radius-full); font-size: 13px; font-weight: 500; cursor: default; }
+.card-tools .tool-chip .tc-icon { font-size: 14px; }
+
+/* Theme color application via CSS variable system */
+.article-mockup[data-active-theme="olive"] { --theme: #6B8E23; --theme-light: #F5F7EE; --theme-border: #D5DFB0; --theme-dark: #4A6625; --theme-chip: #EFF3E0; --theme-soft: rgba(107,142,35,0.06); }
+.article-mockup[data-active-theme="amber"] { --theme: #C8913A; --theme-light: #F8F0E0; --theme-border: #E8D4A8; --theme-dark: #A07128; --theme-chip: #F2E8D0; --theme-soft: rgba(200,145,58,0.06); }
+.article-mockup[data-active-theme="navy"] { --theme: #1B2A4A; --theme-light: #EBEDF2; --theme-border: #B8C0D0; --theme-dark: #0E1A33; --theme-chip: #DDE0EA; --theme-soft: rgba(27,42,74,0.06); }
+.article-mockup[data-active-theme="teal"] { --theme: #1A7A6E; --theme-light: #E6F2F0; --theme-border: #A8D0CA; --theme-dark: #0F5C52; --theme-chip: #D4E8E4; --theme-soft: rgba(26,122,110,0.06); }
+.article-mockup[data-active-theme="maroon"] { --theme: #7A2834; --theme-light: #F2E8EA; --theme-border: #D0B8BD; --theme-dark: #5A1E26; --theme-chip: #E8D8DC; --theme-soft: rgba(122,40,52,0.06); }
+.article-mockup[data-active-theme="cement"] { --theme: #8A8F9A; --theme-light: #F0F1F3; --theme-border: #C8CBD0; --theme-dark: #5C6068; --theme-chip: #E2E4E8; --theme-soft: rgba(138,143,154,0.06); }
+
+.sk-line, .card-importance { background: var(--theme) !important; }
+.sk-text { color: var(--theme) !important; }
+.article-badge .badge-icon[data-theme-icon] { background: var(--theme) !important; }
+.step-number { background: var(--theme) !important; }
+.table-wrap th { background: var(--theme-light) !important; color: var(--theme-dark) !important; border-bottom-color: var(--theme-border) !important; }
+.table-wrap td { border-bottom-color: var(--theme-border) !important; }
+.card-table { border-color: var(--theme-border) !important; }
+.inspection-row { border-bottom-color: var(--theme-border) !important; }
+.article-card.card-importance { border-right-color: var(--theme) !important; }
+.tool-chip { background: var(--theme-chip) !important; color: var(--theme-dark) !important; }
+.tool-chip .tc-icon { color: var(--theme) !important; }
+.step-content .step-note { border-top-color: var(--theme-border) !important; }
+.ins-method { background: var(--theme-soft) !important; color: var(--theme-dark) !important; }
+.report-text { border-color: var(--theme-border) !important; }
+
+/* Semantic card borders stay fixed */
+.card-safety { border-color: var(--safety-border) !important; background: var(--safety-bg) !important; }
+.card-mistake { border-color: var(--mistake-border) !important; background: var(--mistake-bg) !important; }
+
+/* Cement Theme Special Touches */
+.article-mockup[data-active-theme="cement"] {
+  --theme-letter-spacing: 0.3px;
+}
+.article-mockup[data-active-theme="cement"] .section-kicker .sk-text {
+  letter-spacing: 2px;
+}
+
+/* ─── LEGEND BOX ─── */
+.legend-box { max-width: 780px; margin: 20px auto 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.legend-item { background: var(--white); border-radius: var(--radius-sm); padding: 14px 16px; box-shadow: var(--shadow-card); display: flex; align-items: center; gap: 12px; }
+.legend-item .legend-swatch { width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; }
+.legend-item .legend-info { flex: 1; }
+.legend-item .legend-title { font-size: 13px; font-weight: 600; }
+.legend-item .legend-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+/* ─── FOOTER ─── */
+.footer { text-align: center; padding: 40px 0 0; border-top: 1px solid var(--border-light); margin-top: 48px; }
+.footer p { font-size: 12px; color: var(--text-muted); }
+.footer .footer-logo { font-weight: 700; color: var(--text-primary); font-size: 14px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1024px) { .gallery { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) {
+  .container { padding: 24px 16px 40px; }
+  .gallery { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .header h1 { font-size: 26px; }
+  .legend-box { grid-template-columns: 1fr; }
+  .article-title { font-size: 22px; }
+  .article-body { padding: 0 16px 20px; }
+  .article-title-wrap { padding: 8px 16px 16px; }
+  .article-badge-wrap { padding: 16px 16px 0; }
+}
+@media (max-width: 480px) { .gallery { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="header">
+    <h1>نظام ألوان كروت الموسوعة</h1>
+    <p class="subtitle">لون عام موحد للصفحة + ألوان دلالية مستقلة للتنبيهات والأخطاء</p>
+  </div>
+
+  <!-- ═══ SYSTEM OVERVIEW ═══ -->
+  <div class="system-overview">
+    <div class="system-badge"><span class="badge-dot theme-dot"></span> لون الصفحة الموحد (حسب الموضوع)</div>
+    <div class="system-badge"><span class="badge-dot safety-dot"></span> تنبيهات السلامة — كهرماني ثابت</div>
+    <div class="system-badge"><span class="badge-dot mistake-dot"></span> أخطاء شائعة — أحمر دلالي ثابت</div>
+  </div>
+
+  <!-- ═══ THEME GALLERY ═══ -->
+  <div class="section-label">معرض الألوان</div>
+  <div class="gallery" id="themeGallery">
+
+    <!-- Olive -->
+    <div class="theme-card active" data-theme="olive" onclick="setTheme('olive')">
+      <div class="theme-preview">
+        <div class="theme-name">زيتي</div>
+        <span class="theme-name-en">Olive</span>
+        <div class="mini-kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">نظرة عامة</span>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">نبذة تعريفية</div>
+          <div class="mini-line"></div>
+        </div>
+        <div class="mini-chips">
+          <span class="mini-chip">خرسانة</span>
+          <span class="mini-chip">اختبار</span>
+        </div>
+        <div class="mini-accent-line"></div>
+        <div class="mini-icons">
+          <span class="mi">🔧</span>
+          <span class="mi">📐</span>
+          <span class="mi">📋</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Amber -->
+    <div class="theme-card" data-theme="amber" onclick="setTheme('amber')">
+      <div class="theme-preview">
+        <div class="theme-name">كهرماني ترابي</div>
+        <span class="theme-name-en">Earthy Amber</span>
+        <div class="mini-kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">الأهمية</span>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">الأهمية الهندسية</div>
+          <div class="mini-line"></div>
+        </div>
+        <div class="mini-chips">
+          <span class="mini-chip">تربة</span>
+          <span class="mini-chip">أساسات</span>
+        </div>
+        <div class="mini-accent-line"></div>
+        <div class="mini-icons">
+          <span class="mi">🔧</span>
+          <span class="mi">📐</span>
+          <span class="mi">📋</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navy -->
+    <div class="theme-card" data-theme="navy" onclick="setTheme('navy')">
+      <div class="theme-preview">
+        <div class="theme-name">كحلي هندسي</div>
+        <span class="theme-name-en">Engineering Navy</span>
+        <div class="mini-kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">الجداول</span>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">القياسات والأبعاد</div>
+          <div class="mini-line"></div>
+        </div>
+        <div class="mini-chips">
+          <span class="mini-chip">حديد</span>
+          <span class="mini-chip">تصميم</span>
+        </div>
+        <div class="mini-accent-line"></div>
+        <div class="mini-icons">
+          <span class="mi">🔧</span>
+          <span class="mi">📐</span>
+          <span class="mi">📋</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teal -->
+    <div class="theme-card" data-theme="teal" onclick="setTheme('teal')">
+      <div class="theme-preview">
+        <div class="theme-name">بترولي</div>
+        <span class="theme-name-en">Teal</span>
+        <div class="mini-kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">التنفيذ</span>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">طرق التنفيذ</div>
+          <div class="mini-line"></div>
+        </div>
+        <div class="mini-chips">
+          <span class="mini-chip">صب</span>
+          <span class="mini-chip">معالجة</span>
+        </div>
+        <div class="mini-accent-line"></div>
+        <div class="mini-icons">
+          <span class="mi">🔧</span>
+          <span class="mi">📐</span>
+          <span class="mi">📋</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maroon -->
+    <div class="theme-card" data-theme="maroon" onclick="setTheme('maroon')">
+      <div class="theme-preview">
+        <div class="theme-name">عنابي</div>
+        <span class="theme-name-en">Maroon</span>
+        <div class="mini-kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">الفحص</span>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">فحص الأعمال</div>
+          <div class="mini-line"></div>
+        </div>
+        <div class="mini-chips">
+          <span class="mini-chip">جودة</span>
+          <span class="mini-chip">اختبار</span>
+        </div>
+        <div class="mini-accent-line"></div>
+        <div class="mini-icons">
+          <span class="mi">🔧</span>
+          <span class="mi">📐</span>
+          <span class="mi">📋</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cement Gray -->
+    <div class="theme-card" data-theme="cement" onclick="setTheme('cement')">
+      <div class="theme-preview">
+        <div class="theme-name">رصاصي / أسمنتي</div>
+        <span class="theme-name-en">Cement Gray</span>
+        <div class="mini-kicker">
+          <span class="kicker-line"></span>
+          <span class="kicker-text">مواصفات</span>
+        </div>
+        <div class="mini-card">
+          <div class="mini-title">المواصفات الفنية</div>
+          <div class="mini-line"></div>
+        </div>
+        <div class="mini-chips">
+          <span class="mini-chip">أسمنت</span>
+          <span class="mini-chip">خرسانة</span>
+        </div>
+        <div class="mini-accent-line"></div>
+        <div class="mini-icons">
+          <span class="mi">🔧</span>
+          <span class="mi">📐</span>
+          <span class="mi">📋</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ MAIN ARTICLE MOCKUP ═══ -->
+  <div class="mockup-section">
+    <div class="mockup-header">
+      <h2>معاينة المقال — نظام الألوان الموحد</h2>
+      <p class="mockup-sub">اضغط على أي لون في المعرض أعلاه لتطبيقه على المقال</p>
+    </div>
+
+    <div class="article-mockup" id="articleMockup" data-active-theme="olive">
+
+      <!-- Article Badge -->
+      <div class="article-badge-wrap">
+        <div class="article-badge">
+          <span class="badge-icon" data-theme-icon>📖</span>
+          <span>خرسانة / اختبار الهبوط</span>
+          <span style="opacity:0.4;margin:0 4px;">·</span>
+          <span>Slump Test</span>
+        </div>
+      </div>
+
+      <!-- Article Title -->
+      <div class="article-title-wrap">
+        <div class="article-title">اختبار هبوط الخرسانة<br><span style="font-size:16px;font-weight:400;color:var(--text-muted);">Slump Test — Concrete Workability</span></div>
+      </div>
+
+      <!-- Article Body -->
+      <div class="article-body">
+
+        <!-- Section 1: Overview -->
+        <div class="section-kicker">
+          <span class="sk-line"></span>
+          <span class="sk-text">نظرة عامة</span>
+          <span class="sk-number">· 01</span>
+        </div>
+        <div class="article-card">
+          <div class="article-text">
+            <strong>اختبار الهبوط</strong> هو أحد اختبارات الخرسانة الطازجة التي تجرى في الموقع لتحديد قابلية تشغيل الخرسانة ودرجة سيولتها قبل صبها. يُجرى الاختبار باستخدام قالب مخروطي الشكل (قمع هبوط) قياسي.
+          </div>
+        </div>
+
+        <!-- Section 2: Importance -->
+        <div class="section-kicker">
+          <span class="sk-line"></span>
+          <span class="sk-text">الأهمية الهندسية</span>
+          <span class="sk-number">· 02</span>
+        </div>
+        <div class="article-card card-importance">
+          <div class="card-inner">
+            <div class="article-text">يُعتبر اختبار الهبوط مقياساً رئيسياً لمراقبة جودة الخرسانة الطازجة في الموقع:</div>
+            <ul class="diamond-list">
+              <li>يضمن سهولة صب الخرسانة وتشغيلها دون انفصال حبيبي</li>
+              <li>يساعد في الكشف المبكر عن مشاكل الخلطة الخرسانية قبل الصب</li>
+              <li>مرجع أساسي في المواصفات القياسية (ACI 211, Iraqi Code)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Section 3: Tables -->
+        <div class="section-kicker">
+          <span class="sk-line"></span>
+          <span class="sk-text">الجداول / القياسات</span>
+          <span class="sk-number">· 03</span>
+        </div>
+        <div class="article-card card-table">
+          <table class="table-wrap">
+            <thead>
+              <tr><th>نوع الهبوط</th><th>مقدار الهبوط (مم)</th><th>الاستخدام</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>هبوط صفري (0)</td><td>0 — 25</td><td>قواعد وأساسات مسلحة</td></tr>
+              <tr><td>هبوط حقيقي (True)</td><td>25 — 75</td><td>أعمدة وجسور</td></tr>
+              <tr><td>هبوط قص (Shear)</td><td>—</td><td>غير مقبول — يعاد الاختبار</td></tr>
+              <tr><td>هبوط انهياري (Collapse)</td><td>> 150</td><td>مقبول للخرسانة عالية السيولة</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Section 4: Execution -->
+        <div class="section-kicker">
+          <span class="sk-line"></span>
+          <span class="sk-text">طرق التنفيذ</span>
+          <span class="sk-number">· 04</span>
+        </div>
+        <div class="article-card">
+          <div class="step-card">
+            <span class="step-number">١</span>
+            <div class="step-content">
+              <div class="step-title">تحضير القالب</div>
+              <div class="step-desc">يُوضع القالب المخروطي على سطح مستوٍ غير نـفاذ، وتُثبّت قاعدة القالب بشكل محكم.</div>
+              <div class="step-note">ملاحظة: يُفضل ترطيب السطح والقالب قبل البدء.</div>
+            </div>
+          </div>
+        </div>
+        <div class="article-card">
+          <div class="step-card">
+            <span class="step-number">٢</span>
+            <div class="step-content">
+              <div class="step-title">صب الخرسانة على ثلاث طبقات</div>
+              <div class="step-desc">تُملأ الخرسانة في ثلاث طبقات متساوية، كل طبقة تُدمك بقضيب الدمك 25 مرة.</div>
+            </div>
+          </div>
+        </div>
+        <div class="article-card">
+          <div class="step-card">
+            <span class="step-number">٣</span>
+            <div class="step-content">
+              <div class="step-title">رفع القالب وقياس الهبوط</div>
+              <div class="step-desc">يُرفع القالب بحركة رأسية سريعة، ويُقاس الفرق بين ارتفاع القالب وأعلى نقطة في العينة.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Inspection -->
+        <div class="section-kicker">
+          <span class="sk-line"></span>
+          <span class="sk-text">فحص الأعمال بعد الإنجاز</span>
+          <span class="sk-number">· 05</span>
+        </div>
+        <div class="article-card">
+          <div class="inspection-row">
+            <span class="ins-icon" style="background:#E53935;"></span>
+            <span class="ins-text">الهبوط ضمن الحدود المسموحة حسب المواصفات</span>
+            <span class="ins-method">± 25 مم</span>
+          </div>
+          <div class="inspection-row">
+            <span class="ins-icon" style="background:#757575;"></span>
+            <span class="ins-text">شكل هبوط الخرسانة (متماثل / قص / انهياري)</span>
+            <span class="ins-method">فحص بصري</span>
+          </div>
+          <div class="inspection-row">
+            <span class="ins-icon" style="background:#757575;"></span>
+            <span class="ins-text">درجة حرارة الخرسانة وقت الاختبار</span>
+            <span class="ins-method">مقياس حرارة</span>
+          </div>
+        </div>
+
+        <!-- Section 6: Safety -->
+        <div class="section-kicker">
+          <span class="sk-line" style="background:var(--safety-accent)!important;"></span>
+          <span class="sk-text" style="color:var(--safety-accent)!important;">تنبيهات السلامة</span>
+          <span class="sk-number">· 06</span>
+        </div>
+        <div class="article-card card-safety">
+          <div class="safety-header">
+            <span class="safety-icon">⚠️</span>
+            <span class="safety-label">تنبيه السلامة</span>
+          </div>
+          <div class="safety-text">
+            يجب ارتداء القفازات والنظارات الواقية أثناء التعامل مع الخرسانة الطازجة لتجنب الحروق الكيميائية الناتجة عن تفاعل الإسمنت مع الجلد.
+          </div>
+          <span class="safety-chip">متوسط الخطورة</span>
+        </div>
+
+        <!-- Section 7: Common Mistakes -->
+        <div class="section-kicker">
+          <span class="sk-line" style="background:var(--mistake-accent)!important;"></span>
+          <span class="sk-text" style="color:var(--mistake-accent)!important;">أخطاء شائعة يجب تجنبها</span>
+          <span class="sk-number">· 07</span>
+        </div>
+        <div class="article-card card-mistake">
+          <div class="mistake-header">
+            <span class="mistake-icon">✕</span>
+            <span class="mistake-label">أخطاء شائعة في اختبار الهبوط</span>
+          </div>
+          <div class="mistake-item">
+            <span class="x-icon">✕</span>
+            <span>عدم تنظيف القالب من بقايا الخرسانة السابقة يؤثر على دقة القراءة</span>
+          </div>
+          <div class="mistake-item">
+            <span class="x-icon">✕</span>
+            <span>الرفع البطيء أو المائل للقالب يؤدي إلى هبوط غير دقيق</span>
+          </div>
+          <div class="mistake-item">
+            <span class="x-icon">✕</span>
+            <span>أخذ العينة من بداية الخلطة أو نهايتها فقط وليس من الوسط</span>
+          </div>
+        </div>
+
+        <!-- Section 8: Report -->
+        <div class="section-kicker">
+          <span class="sk-line"></span>
+          <span class="sk-text">صياغة تقرير</span>
+          <span class="sk-number">· 08</span>
+        </div>
+        <div class="article-card card-report">
+          <span class="report-label">نموذج صياغة تقرير الفحص:</span>
+          <div class="report-text">
+            تم إجراء اختبار هبوط الخرسانة الطازجة وفق المواصفة ASTM C143 / ACI 211.1. بلغ مقدار الهبوط 65 مم (هبوط حقيقي). الخلطة مطابقة للمواصفات — النتيجة مقبولة.
+          </div>
+        </div>
+
+        <!-- Section 9: Tools -->
+        <div class="section-kicker">
+          <span class="sk-line"></span>
+          <span class="sk-text">أدوات ذات صلة</span>
+          <span class="sk-number">· 09</span>
+        </div>
+        <div class="article-card card-tools">
+          <div class="tools-chips">
+            <span class="tool-chip"><span class="tc-icon">📐</span> قمع هبوط</span>
+            <span class="tool-chip"><span class="tc-icon">⚙️</span> قضيب دمك</span>
+            <span class="tool-chip"><span class="tc-icon">📏</span> مسطرة قياس</span>
+            <span class="tool-chip"><span class="tc-icon">🧪</span> مقياس حرارة</span>
+            <span class="tool-chip"><span class="tc-icon">🧤</span> قفازات واقية</span>
+          </div>
+        </div>
+
+      </div><!-- /article-body -->
+    </div><!-- /article-mockup -->
+  </div>
+
+  <!-- ═══ LEGEND ═══ -->
+  <div class="legend-box">
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:#6B8E23;">ع</div>
+      <div class="legend-info">
+        <div class="legend-title">لون الصفحة الموحد</div>
+        <div class="legend-desc">جميع الكروت العادية تتبع لون الموضوع الأساسي — يتغير حسب القسم</div>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--safety-accent);">⚠</div>
+      <div class="legend-info">
+        <div class="legend-title">تنبيهات السلامة</div>
+        <div class="legend-desc">لون كهرماني دلالي ثابت — لا يتغير بتغير لون الصفحة</div>
+      </div>
+    </div>
+    <div class="legend-item">
+      <div class="legend-swatch" style="background:var(--mistake-accent);">✕</div>
+      <div class="legend-info">
+        <div class="legend-title">الأخطاء الشائعة</div>
+        <div class="legend-desc">لون أحمر دلالي ثابت — لا يتغير بتغير لون الصفحة</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FOOTER ═══ -->
+  <div class="footer">
+    <p class="footer-logo">Civilpedia — نظام ألوان الموسوعة</p>
+    <p>Concept Board v1.0 &middot; تصاميم واجهات المقالات &middot; RTL / Arabic-First</p>
+  </div>
+
+</div>
+
+<script>
+function setTheme(theme) {
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.theme-card[data-theme="${theme}"]`).classList.add('active');
+  document.getElementById('articleMockup').dataset.activeTheme = theme;
+}
+</script>
+
+</body>
+</html>
