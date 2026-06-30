@@ -9,18 +9,7 @@ import '../../domain/entities/topic_section.dart';
 import '../../domain/entities/localized_text.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../localization/ar.dart';
-
-const Color _pageBg = Color(0xFFFAF7F2);
-const Color _paperBg = Color(0xFFFFFEFB);
-const Color _textPrimary = Color(0xFF171411);
-const Color _textSecondary = Color(0xFF6D6258);
-const Color _textMuted = Color(0xFF9A8E84);
-const Color _border = Color(0xFFE8DCD3);
-const Color _softPanel = Color(0xFFF7EFEA);
-const Color _accent = Color(0xFF8A3030);
-const Color _accentSoft = Color(0xFFF5E9E5);
-const Color _dangerText = Color(0xFFA23A36);
-const Color _tableHeaderBg = Color(0xFFF3E8E3);
+import '../theme/encyclopedia_card_colors.dart';
 
 class TopicDetailScreen extends StatefulWidget {
   final String topicId;
@@ -45,7 +34,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     final topic = provider.currentTopic;
 
     return Scaffold(
-      backgroundColor: _pageBg,
+      backgroundColor: EncyclopediaCardColors.pageBg,
       body: SafeArea(
         child: AsyncValueWidget(
           isLoading: provider.isLoading,
@@ -53,7 +42,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           isEmpty: topic == null && provider.error == null,
           onRetry: () => provider.loadTopicDetail(widget.topicId),
           onEmpty: () => const Center(
-            child: Text(Ar.topicNotFound, style: TextStyle(color: _textSecondary)),
+            child: Text(Ar.topicNotFound, style: TextStyle(color: EncyclopediaCardColors.textSecondary)),
           ),
           onData: () => _buildArticle(context, provider, topic!),
         ),
@@ -175,14 +164,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         children: [
           Row(
             children: [
-              Container(width: 36, height: 2, color: _accent),
+              Container(width: 36, height: 2, color: EncyclopediaCardColors.accent),
               const SizedBox(width: 12),
               Text(
                 displayKicker,
                 style: const TextStyle(
                   fontSize: 11,
                   letterSpacing: 1.5,
-                  color: _accent,
+                  color: EncyclopediaCardColors.accent,
                   fontWeight: FontWeight.w600,
                 ),
                 textDirection: TextDirection.ltr,
@@ -195,7 +184,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: _textPrimary,
+              color: EncyclopediaCardColors.textPrimary,
               height: 1.3,
             ),
           ),
@@ -213,7 +202,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: _textPrimary),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: EncyclopediaCardColors.textPrimary),
             onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
@@ -227,13 +216,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   letterSpacing: 2.5,
-                  color: _textSecondary,
+                  color: EncyclopediaCardColors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 'سيڤل بيديا',
-                style: TextStyle(fontSize: 8, color: _textSecondary, height: 1),
+                style: TextStyle(fontSize: 8, color: EncyclopediaCardColors.textSecondary, height: 1),
               ),
             ],
           ),
@@ -243,7 +232,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildDivider() {
-    return Container(height: 1, color: _border, margin: const EdgeInsets.symmetric(horizontal: 16));
+    return Container(height: 1, color: EncyclopediaCardColors.border, margin: const EdgeInsets.symmetric(horizontal: 16));
   }
 
   Widget _buildBrandPill() {
@@ -252,12 +241,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: _accentSoft,
+          color: EncyclopediaCardColors.accentSoft,
           borderRadius: BorderRadius.circular(4),
         ),
         child: const Text(
           'الموسوعة الهندسية',
-          style: TextStyle(fontSize: 10, color: _accent, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 10, color: EncyclopediaCardColors.accent, fontWeight: FontWeight.w600),
         ),
       ),
     );
@@ -275,7 +264,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             _categoryName(topic.categoryId),
             style: const TextStyle(
               fontSize: 12,
-              color: _accent,
+              color: EncyclopediaCardColors.accent,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.3,
             ),
@@ -289,7 +278,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: _textPrimary,
+              color: EncyclopediaCardColors.textPrimary,
               height: 1.3,
             ),
           ),
@@ -302,7 +291,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               topic.simpleExplanation!.ar,
               style: const TextStyle(
                 fontSize: 15,
-                color: _textSecondary,
+                color: EncyclopediaCardColors.textSecondary,
                 height: 1.7,
               ),
             ),
@@ -314,7 +303,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               topic.summary,
               style: const TextStyle(
                 fontSize: 15,
-                color: _textSecondary,
+                color: EncyclopediaCardColors.textSecondary,
                 height: 1.7,
               ),
             ),
@@ -329,10 +318,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               children: topic.tags.map((tag) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: _border.withValues(alpha: 0.3),
+                  color: EncyclopediaCardColors.border.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(tag, style: const TextStyle(fontSize: 11, color: _textSecondary)),
+                child: Text(tag, style: const TextStyle(fontSize: 11, color: EncyclopediaCardColors.textSecondary)),
               )).toList(),
             ),
           ),
@@ -350,7 +339,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _border.withValues(alpha: 0.5)),
+        border: Border.all(color: EncyclopediaCardColors.border.withValues(alpha: 0.5)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Image.asset(
@@ -390,7 +379,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             overviewText,
-            style: const TextStyle(fontSize: 15, color: _textPrimary, height: 1.8),
+            style: const TextStyle(fontSize: 15, color: EncyclopediaCardColors.textPrimary, height: 1.8),
           ),
         ),
         const SizedBox(height: 8),
@@ -411,10 +400,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: _softPanel,
+              color: EncyclopediaCardColors.softPanel,
               borderRadius: BorderRadius.circular(10),
               border: const Border(
-                right: BorderSide(color: _accent, width: 3),
+                right: BorderSide(color: EncyclopediaCardColors.accent, width: 3),
               ),
             ),
             child: Column(
@@ -442,13 +431,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 5),
-            child: Icon(Icons.diamond, size: 8, color: _accent),
+            child: Icon(Icons.diamond, size: 8, color: EncyclopediaCardColors.accent),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               display,
-              style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.7),
+              style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
             ),
           ),
         ],
@@ -495,7 +484,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 data.caption!,
                 style: const TextStyle(
                   fontSize: 13,
-                  color: _textSecondary,
+                  color: EncyclopediaCardColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -508,20 +497,20 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: _border),
+                      border: Border.all(color: EncyclopediaCardColors.border),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
-                        headingRowColor: WidgetStateProperty.all(_tableHeaderBg),
+                        headingRowColor: WidgetStateProperty.all(EncyclopediaCardColors.tableHeaderBg),
                         headingTextStyle: const TextStyle(
-                          color: _textPrimary,
+                          color: EncyclopediaCardColors.textPrimary,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
                         dataTextStyle: const TextStyle(
-                          color: _textPrimary,
+                          color: EncyclopediaCardColors.textPrimary,
                           fontSize: 13,
                           height: 1.4,
                         ),
@@ -541,11 +530,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                       padding: const EdgeInsets.only(top: 6),
                       child: Row(
                         children: [
-                          Icon(Icons.swipe, size: 12, color: _textMuted),
+                          Icon(Icons.swipe, size: 12, color: EncyclopediaCardColors.textMuted),
                           const SizedBox(width: 4),
                           Text(
                             'اسحب الجدول أفقياً لعرض جميع الأعمدة',
-                            style: TextStyle(fontSize: 11, color: _textMuted),
+                            style: TextStyle(fontSize: 11, color: EncyclopediaCardColors.textMuted),
                           ),
                         ],
                       ),
@@ -608,13 +597,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: _textPrimary,
+              color: EncyclopediaCardColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             content,
-            style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.7),
+            style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
           ),
         ],
       ),
@@ -632,7 +621,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: _accent,
+              color: EncyclopediaCardColors.accent,
               borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,
@@ -652,13 +641,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               children: [
                 Text(
                   step.description,
-                  style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+                  style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
                 ),
                 if (step.notes != null && step.notes!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     step.notes!,
-                    style: const TextStyle(fontSize: 12, color: _textSecondary, height: 1.5),
+                    style: const TextStyle(fontSize: 12, color: EncyclopediaCardColors.textSecondary, height: 1.5),
                   ),
                 ],
               ],
@@ -716,14 +705,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             child: Icon(
               isCritical ? Icons.check_circle_outline : Icons.radio_button_unchecked,
               size: 18,
-              color: isCritical ? _dangerText : _textMuted,
+              color: isCritical ? EncyclopediaCardColors.dangerText : EncyclopediaCardColors.textMuted,
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+                style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
                 children: [
                   TextSpan(
                     text: criteria,
@@ -732,12 +721,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   if (limit != null && limit.isNotEmpty)
                     TextSpan(
                       text: ' — $limit',
-                      style: const TextStyle(color: _textSecondary),
+                      style: const TextStyle(color: EncyclopediaCardColors.textSecondary),
                     ),
                   if (method != null && method.isNotEmpty)
                     TextSpan(
                       text: ' | $method',
-                      style: const TextStyle(color: _textSecondary, fontSize: 12),
+                      style: const TextStyle(color: EncyclopediaCardColors.textSecondary, fontSize: 12),
                     ),
                 ],
               ),
@@ -758,7 +747,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: _border),
+          border: Border.all(color: EncyclopediaCardColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -766,7 +755,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             if (_hasText(block.title)) ...[
               Text(
                 block.title!,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: _textPrimary),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: EncyclopediaCardColors.textPrimary),
               ),
               const SizedBox(height: 10),
             ],
@@ -775,12 +764,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.check_box_outline_blank, size: 18, color: _textMuted),
+                      Icon(Icons.check_box_outline_blank, size: 18, color: EncyclopediaCardColors.textMuted),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           item.text,
-                          style: const TextStyle(fontSize: 13, color: _textPrimary, height: 1.5),
+                          style: const TextStyle(fontSize: 13, color: EncyclopediaCardColors.textPrimary, height: 1.5),
                         ),
                       ),
                     ],
@@ -816,7 +805,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               child: Center(
                 child: Text(
                   block.caption!,
-                  style: const TextStyle(fontSize: 12, color: _textSecondary),
+                  style: const TextStyle(fontSize: 12, color: EncyclopediaCardColors.textSecondary),
                 ),
               ),
             ),
@@ -850,7 +839,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: _softPanel,
+              color: EncyclopediaCardColors.softPanel,
               borderRadius: BorderRadius.circular(10),
               border: const Border(
                 right: BorderSide(color: Color(0xFFD4A017), width: 3),
@@ -871,7 +860,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                     Expanded(
                       child: Text(
                         s.note.message,
-                        style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+                        style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
                       ),
                     ),
                   ],
@@ -900,9 +889,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: _accentSoft.withValues(alpha: 0.3),
+              color: EncyclopediaCardColors.mistakeBg,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: _dangerText.withValues(alpha: 0.15)),
+              border: Border.all(color: EncyclopediaCardColors.mistakeBorder.withValues(alpha: 0.15)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -924,12 +913,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('×', style: TextStyle(fontSize: 16, color: _dangerText, fontWeight: FontWeight.bold)),
+          const Text('×', style: TextStyle(fontSize: 16, color: EncyclopediaCardColors.dangerText, fontWeight: FontWeight.bold)),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.6),
+              style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
             ),
           ),
         ],
@@ -954,15 +943,15 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: _border),
-              color: _paperBg,
+              border: Border.all(color: EncyclopediaCardColors.border),
+              color: EncyclopediaCardColors.paperBg,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   wording,
-                  style: const TextStyle(fontSize: 14, color: _textPrimary, height: 1.7),
+                  style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -981,17 +970,17 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: _accentSoft,
+                          color: EncyclopediaCardColors.accentSoft,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.copy, size: 14, color: _accent),
+                            Icon(Icons.copy, size: 14, color: EncyclopediaCardColors.accent),
                             SizedBox(width: 6),
                             Text(
                               'نسخ',
-                              style: TextStyle(fontSize: 12, color: _accent, fontWeight: FontWeight.w600),
+                              style: TextStyle(fontSize: 12, color: EncyclopediaCardColors.accent, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -1037,12 +1026,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(
-                    color: _accentSoft,
+                    color: EncyclopediaCardColors.accentSoft,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     name,
-                    style: const TextStyle(fontSize: 13, color: _accent, fontWeight: FontWeight.w500),
+                    style: const TextStyle(fontSize: 13, color: EncyclopediaCardColors.accent, fontWeight: FontWeight.w500),
                   ),
                 ),
               );
