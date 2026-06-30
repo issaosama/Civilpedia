@@ -98,8 +98,8 @@
           </div>
           <div class="form-group">
             <label>السمة البصرية</label>
-            <select data-path="topic.visualTheme.accent" class="form-select">
-              ${themeOptions((topic.visualTheme && topic.visualTheme.accent) || 'cement_gray')}
+            <select data-path="topic.visual_theme.accent" class="form-select">
+              ${themeOptions((topic.visual_theme && topic.visual_theme.accent) || 'cement_gray')}
             </select>
           </div>
           <div class="form-group">

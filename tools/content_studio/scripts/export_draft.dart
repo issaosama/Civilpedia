@@ -32,7 +32,7 @@ Map<String, dynamic> _exportTopic(Map<String, dynamic> src, Map<String, dynamic>
     'codeNotes': _localized(src['codeNotes']),
     'siteNotes': _localized(src['siteNotes']),
     'reportWording': _localized(src['reportWording']),
-    'visualTheme': _exportVisualTheme(src['visualTheme']),
+    'visual_theme': _exportVisualTheme(src['visual_theme']),
     'relatedToolRoutes': (src['relatedToolRoutes'] as List?)?.cast<String>() ?? [],
     'relatedChecklistIds': (src['relatedChecklistIds'] as List?)?.cast<String>() ?? [],
   };

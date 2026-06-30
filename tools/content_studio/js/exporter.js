@@ -40,7 +40,7 @@ class AppExporter {
       codeNotes: this._localized(src.codeNotes),
       siteNotes: this._localized(src.siteNotes),
       reportWording: this._localized(src.reportWording),
-      visualTheme: this._exportVisualTheme(src.visualTheme),
+      'visual_theme': this._exportVisualTheme(src.visual_theme),
       relatedToolRoutes: src.relatedToolRoutes || [],
       relatedChecklistIds: src.relatedChecklistIds || []
     };
