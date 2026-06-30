@@ -143,9 +143,11 @@ class EngineeringTopic {
             ? LocalizedText.fromJson(
                 json['reportWording'] as Map<String, dynamic>)
             : null,
-        visualTheme: json['visual_theme'] != null
-            ? (json['visual_theme'] as Map<String, dynamic>)['accent'] as String?
-            : null,
+        visualTheme: (() {
+          final vt = json['visual_theme'];
+          final accent = vt is Map<String, dynamic> ? vt['accent'] : null;
+          return accent is String ? accent : null;
+        })(),
         relatedToolRoutes: (json['relatedToolRoutes'] as List<dynamic>?)
                 ?.cast<String>() ??
             const [],
