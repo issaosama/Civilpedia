@@ -158,6 +158,14 @@
         html += renderSectionCard(sections[i], i);
       }
     }
+    html += `
+      <div class="section-add-control">
+        <select class="form-select add-section-type">
+          ${addableSectionOptions()}
+        </select>
+        <button class="btn btn-primary ie-add-section" type="button">➕ إضافة قسم</button>
+      </div>
+    `;
     html += InlineTopicEditor.renderMistakesEditor(draft);
     html += InlineTopicEditor.renderAcceptRejectEditor(draft);
     $('sections-container').innerHTML = html;
@@ -185,6 +193,7 @@
           <span class="section-type-badge">${esc(typeLabel)}</span>
           <span class="section-title">${esc(section.title)}</span>
           <span class="section-block-count">${blocks.length} كتل</span>
+          <button class="ie-remove-section" data-section-idx="${index}" type="button" title="حذف القسم">🗑️</button>
         </div>
         <div class="section-card-body">
           ${blocksHtml}
@@ -383,7 +392,7 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -404,6 +413,10 @@
       handleMoveBlock(target, 'up');
     } else if (target.classList.contains('ie-move-down')) {
       handleMoveBlock(target, 'down');
+    } else if (target.classList.contains('ie-add-section')) {
+      handleAddSection();
+    } else if (target.classList.contains('ie-remove-section')) {
+      handleRemoveSection(target);
     } else if (target.classList.contains('block-mini')) {
       handleBlockEdit(target);
     }
@@ -582,6 +595,49 @@
     renderSections();
     updatePreview();
     showToast('✅ تم حذف الكتلة', 'success');
+  }
+
+  function handleAddSection() {
+    if (!draft.isValid()) return;
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    const select = document.querySelector('.add-section-type');
+    const sectionType = select ? select.value : 'general';
+    const nextOrder = sections.length + 1;
+
+    const newSection = {
+      id: `sec-${Date.now()}`,
+      title: 'قسم جديد',
+      type: sectionType,
+      order: nextOrder,
+      blocks: []
+    };
+
+    sections.push(newSection);
+    sections.forEach((s, i) => { s.order = i + 1; });
+    draft.setField('sections', sections);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم إضافة القسم بنجاح', 'success');
+  }
+
+  function handleRemoveSection(btn) {
+    if (!draft.isValid()) return;
+    const sectionIdx = parseInt(btn.dataset.sectionIdx, 10);
+    if (isNaN(sectionIdx)) return;
+
+    if (!confirm('هل أنت متأكد من حذف هذا القسم وكل الكتل داخله؟')) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (sectionIdx < 0 || sectionIdx >= sections.length) return;
+
+    sections.splice(sectionIdx, 1);
+    sections.forEach((s, i) => { s.order = i + 1; });
+    draft.setField('sections', sections);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حذف القسم', 'success');
   }
 
   function handleMoveBlock(btn, direction) {

@@ -53,6 +53,12 @@ function addableBlockOptions() {
   ).join('');
 }
 
+function addableSectionOptions() {
+  return Object.entries(SECTION_TYPE_LABELS).map(([key, label]) =>
+    `<option value="${esc(key)}">${esc(label)}</option>`
+  ).join('');
+}
+
 const BLOCK_DISPLAY_NAMES = {
   text: 'نص',
   execution_step: 'خطوة تنفيذية',
