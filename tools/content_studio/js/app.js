@@ -13,6 +13,10 @@
   let _metadataSnapshotPushed = false;
   let _openSectionIdx = -1;
   const _topicListOpen = { commonMistakes: false, acceptRejectItems: false };
+  let _tableColKeyCounter = 0;
+  function _nextTableColKey() {
+    return 'new-col-' + (++_tableColKeyCounter);
+  }
 
   function pushUndoSnapshot() {
     _metadataSnapshotPushed = false;
@@ -856,8 +860,11 @@
     const rowsContainer = editor.querySelector('.ie-table-rows');
     if (!headersContainer) return;
 
+    const colKey = _nextTableColKey();
+
     const headerDiv = document.createElement('div');
     headerDiv.className = 'ie-table-header-row';
+    headerDiv.setAttribute('data-col-key', colKey);
     const headerInput = document.createElement('input');
     headerInput.type = 'text';
     headerInput.className = 'form-input ie-table-header-input';
@@ -880,6 +887,7 @@
         const cellInput = document.createElement('input');
         cellInput.type = 'text';
         cellInput.className = 'form-input ie-table-cell-input';
+        cellInput.setAttribute('data-col-key', colKey);
         cellInput.value = '';
         cellInput.placeholder = '...';
         cellInput.dir = 'rtl';
@@ -891,14 +899,13 @@
   function handleTableRemoveHeader(target) {
     const headerRow = target.closest('.ie-table-header-row');
     if (!headerRow) return;
-    const headersContainer = headerRow.closest('.ie-table-headers');
-    if (!headersContainer) return;
-    const colIdx = Array.from(headersContainer.children).indexOf(headerRow);
-    if (colIdx === -1) return;
+    const colKey = headerRow.getAttribute('data-col-key');
+    if (!colKey) return;
 
     headerRow.remove();
 
-    if (!headersContainer.children.length) {
+    const headersContainer = headerRow.closest('.ie-table-headers');
+    if (headersContainer && !headersContainer.children.length) {
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'empty-state-compact';
       emptyDiv.textContent = 'لا توجد رؤوس أعمدة';
@@ -910,16 +917,21 @@
     const rowsContainer = editor.querySelector('.ie-table-rows');
     if (rowsContainer) {
       Array.from(rowsContainer.children).forEach(rowEl => {
-        const cells = rowEl.querySelectorAll('.ie-table-cell-input');
-        if (cells[colIdx]) cells[colIdx].remove();
+        const cell = rowEl.querySelector(`.ie-table-cell-input[data-col-key="${colKey}"]`);
+        if (cell) cell.remove();
       });
     }
 
-    // Track removed column indices for headersEn sync
-    const removedAttr = editor.getAttribute('data-removed');
-    const removed = removedAttr ? JSON.parse(removedAttr) : [];
-    removed.push(colIdx);
-    editor.setAttribute('data-removed', JSON.stringify(removed));
+    // Track removed column indices for headersEn sync (original columns only)
+    if (colKey.startsWith('col-')) {
+      const originalIdx = parseInt(colKey.slice(4), 10);
+      if (!isNaN(originalIdx)) {
+        const removedAttr = editor.getAttribute('data-removed');
+        const removed = removedAttr ? JSON.parse(removedAttr) : [];
+        removed.push(originalIdx);
+        editor.setAttribute('data-removed', JSON.stringify(removed));
+      }
+    }
   }
 
   function handleTopicSave(saveBtn) {

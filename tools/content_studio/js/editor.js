@@ -82,8 +82,8 @@ class InlineBlockEditor {
     const headers = block.headers || [];
     const rows = block.rows || [];
 
-    const headersHtml = headers.map(h => `
-      <div class="ie-table-header-row">
+    const headersHtml = headers.map((h, ci) => `
+      <div class="ie-table-header-row" data-col-key="col-${ci}">
         <input type="text" class="form-input ie-table-header-input" value="${esc(h)}" placeholder="..." dir="rtl">
         <button class="ie-table-remove-header" title="حذف العمود">🗑️</button>
       </div>
@@ -91,8 +91,8 @@ class InlineBlockEditor {
 
     const rowsHtml = rows.map(r => {
       const cells = r.cells || [];
-      const cellsHtml = cells.map(c => `
-        <input type="text" class="form-input ie-table-cell-input" value="${esc(c)}" placeholder="..." dir="rtl">
+      const cellsHtml = cells.map((c, ci) => `
+        <input type="text" class="form-input ie-table-cell-input" data-col-key="col-${ci}" value="${esc(c)}" placeholder="..." dir="rtl">
       `).join('');
       return `<div class="ie-table-row">${cellsHtml}<button class="ie-table-remove-row" title="حذف الصف">🗑️</button></div>`;
     }).join('');
