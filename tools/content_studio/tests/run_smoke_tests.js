@@ -165,6 +165,44 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 6: headersEn sync logic (pure algorithm test)
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n6. headersEn sync algorithm');
+
+  function syncHeadersEn(oldHeadersEn, removedIndices, newHeadersLength) {
+    const removedSet = new Set(removedIndices);
+    let en = oldHeadersEn.filter((_, idx) => !removedSet.has(idx));
+    while (en.length < newHeadersLength) en.push('');
+    return en.slice(0, newHeadersLength);
+  }
+
+  assert(JSON.stringify(syncHeadersEn(['A','B','C'], [1], 2)) === JSON.stringify(['A','C']),
+    'Remove index 1 from [A,B,C] => [A,C]');
+
+  assert(JSON.stringify(syncHeadersEn(['A','B','C','D'], [1, 2], 2)) === JSON.stringify(['A','D']),
+    'Remove [1,2] from [A,B,C,D] => [A,D]');
+
+  assert(JSON.stringify(syncHeadersEn(['A','B','C','D'], [2, 1], 2)) === JSON.stringify(['A','D']),
+    'Remove [2,1] (reverse order) from [A,B,C,D] => [A,D]');
+
+  assert(JSON.stringify(syncHeadersEn(['A','B','C'], [], 3)) === JSON.stringify(['A','B','C']),
+    'No removals => unchanged');
+
+  assert(JSON.stringify(syncHeadersEn(['A','B','C'], [0, 1, 2], 0)) === JSON.stringify([]),
+    'Remove all => []');
+
+  assert(JSON.stringify(syncHeadersEn(['A','B'], [5], 2)) === JSON.stringify(['A','B']),
+    'Remove out-of-range index (new column) => unchanged');
+
+  assert(JSON.stringify(syncHeadersEn(['A','B','C'], [1], 3)) === JSON.stringify(['A','C','']),
+    'Remove index 1, pad to 3 => [A,C,]');
+
+  assert(JSON.stringify(syncHeadersEn(['A','B','C','D'], [0, 2], 3)) === JSON.stringify(['B','D','']),
+    'Remove [0,2] from 4, pad to 3 => [B,D,]');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

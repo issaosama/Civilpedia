@@ -781,10 +781,8 @@
     const removedAttr = editor.getAttribute('data-removed');
     let removedIndices = [];
     try { removedIndices = removedAttr ? JSON.parse(removedAttr) : []; } catch (e) { removedIndices = []; }
-    let en = [...oldHeadersEn];
-    for (const idx of removedIndices) {
-      if (idx < en.length) en.splice(idx, 1);
-    }
+    const removedSet = new Set(removedIndices);
+    let en = oldHeadersEn.filter((_, idx) => !removedSet.has(idx));
     while (en.length < block.headers.length) en.push('');
     block.headersEn = en.slice(0, block.headers.length);
 
