@@ -227,6 +227,9 @@ class ValidationEngine {
           this._addWarning(`section "${sectionId}" block[${index}] — table: "rows" فارغ`, { sectionIdx, blockIdx: index });
           this.fieldErrors.push(fe);
         }
+        if (block.headersEn !== undefined && block.headers !== undefined && Array.isArray(block.headers) && Array.isArray(block.headersEn) && block.headers.length !== block.headersEn.length) {
+          this._addWarning(`section "${sectionId}" block[${index}] — table: عدد الرؤوس (${block.headers.length}) لا يتطابق مع الرؤوس الإنجليزية (${block.headersEn.length})`);
+        }
         break;
       case 'checklist':
         if (block.items && Array.isArray(block.items) && block.items.length === 0) {

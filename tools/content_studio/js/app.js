@@ -606,12 +606,24 @@
     const block = sections[sectionIdx].blocks[blockIdx];
     if (!block) return;
 
+    const oldHeadersEn = [...(block.headersEn || [])];
+
     const captionInput = editor.querySelector('.ie-table-caption');
     block.caption = block.caption || {};
     block.caption.ar = captionInput ? captionInput.value : '';
 
     const headerInputs = editor.querySelectorAll('.ie-table-header-input');
     block.headers = Array.from(headerInputs).map(inp => inp.value);
+
+    // Sync headersEn: apply tracked removals, then pad/trim to match headers length
+    const removedAttr = editor.getAttribute('data-removed');
+    const removedIndices = removedAttr ? JSON.parse(removedAttr) : [];
+    let en = [...oldHeadersEn];
+    for (const idx of removedIndices) {
+      if (idx < en.length) en.splice(idx, 1);
+    }
+    while (en.length < block.headers.length) en.push('');
+    block.headersEn = en.slice(0, block.headers.length);
 
     const rowEls = editor.querySelectorAll('.ie-table-row');
     block.rows = Array.from(rowEls).map(rowEl => {
@@ -742,6 +754,12 @@
         if (cells[colIdx]) cells[colIdx].remove();
       });
     }
+
+    // Track removed column indices for headersEn sync
+    const removedAttr = editor.getAttribute('data-removed');
+    const removed = removedAttr ? JSON.parse(removedAttr) : [];
+    removed.push(colIdx);
+    editor.setAttribute('data-removed', JSON.stringify(removed));
   }
 
   function handleTopicSave(saveBtn) {
