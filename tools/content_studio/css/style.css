@@ -971,6 +971,7 @@ body {
 .toast-success { background: var(--success); }
 .toast-error { background: var(--error); }
 .toast-info { background: var(--primary); }
+.toast-warning { background: var(--warning); }
 .toast-fade { opacity: 0; }
 
 /* Scrollbar */

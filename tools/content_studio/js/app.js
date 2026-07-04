@@ -475,6 +475,7 @@
     }
 
     if (sectionIdx !== undefined && _openSectionIdx !== sectionIdx) {
+      if (!guardNoOpenInlineEditor()) return;
       _openSectionIdx = sectionIdx;
       needsSectionReRender = true;
     }
@@ -609,7 +610,16 @@
     }, 2500);
   }
 
+  function guardNoOpenInlineEditor() {
+    if (document.querySelector('.inline-editor')) {
+      showToast('احفظ أو ألغِ التعديل الحالي قبل فتح قسم آخر', 'warning');
+      return false;
+    }
+    return true;
+  }
+
   function handleSectionToggle(headerEl) {
+    if (!guardNoOpenInlineEditor()) return;
     const sectionIdx = parseInt(headerEl.dataset.sectionIdx, 10);
     if (isNaN(sectionIdx)) return;
     _openSectionIdx = _openSectionIdx === sectionIdx ? -1 : sectionIdx;
