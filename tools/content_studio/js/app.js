@@ -169,6 +169,15 @@
     let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index)).join('');
     if (!blocksHtml) blocksHtml = '<div class="empty-state">لا توجد كتل في هذا القسم</div>';
 
+    const addBlockHtml = `
+      <div class="section-add-block">
+        <select class="form-select add-block-select" data-section-idx="${index}">
+          ${addableBlockOptions()}
+        </select>
+        <button class="btn btn-success ie-add-block" data-section-idx="${index}" type="button">➕ إضافة كتلة</button>
+      </div>
+    `;
+
     return `
       <div class="section-card">
         <div class="section-card-header">
@@ -179,6 +188,7 @@
         </div>
         <div class="section-card-body">
           ${blocksHtml}
+          ${addBlockHtml}
         </div>
       </div>
     `;
@@ -227,6 +237,11 @@
         summary = '';
     }
 
+    const isSimple = BLOCK_TYPES_SIMPLE.includes(block.type);
+    const removeBtn = isSimple
+      ? `<button class="ie-remove-block" data-section-idx="${sectionIdx}" data-block-idx="${index}" type="button" title="حذف الكتلة">🗑️</button>`
+      : '';
+
     return `
       <div class="block-mini block-mini-${block.type}" data-section-idx="${sectionIdx}" data-block-idx="${index}">
         <div class="block-mini-header">
@@ -234,6 +249,7 @@
           <span class="block-order">ترتيب ${order}</span>
         </div>
         <div class="block-mini-summary">${esc(summary) || '<em class="muted">لا يوجد محتوى</em>'}</div>
+        ${removeBtn}
       </div>
     `;
   }
@@ -358,7 +374,7 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -371,6 +387,10 @@
       handleAddItem(target);
     } else if (target.classList.contains('ie-remove-item')) {
       handleRemoveItem(target);
+    } else if (target.classList.contains('ie-add-block')) {
+      handleAddBlock(target);
+    } else if (target.classList.contains('ie-remove-block')) {
+      handleRemoveBlock(target);
     } else if (target.classList.contains('block-mini')) {
       handleBlockEdit(target);
     }
@@ -489,6 +509,66 @@
     renderSections();
     updatePreview();
     showToast('✅ تم حذف البند', 'success');
+  }
+
+  function handleAddBlock(btn) {
+    if (!draft.isValid()) return;
+    const sectionIdx = parseInt(btn.dataset.sectionIdx, 10);
+    if (isNaN(sectionIdx)) return;
+
+    const sectionCard = btn.closest('.section-card');
+    if (!sectionCard) return;
+    const select = sectionCard.querySelector('.add-block-select');
+    const blockType = select ? select.value : 'text';
+    if (!BLOCK_TYPES_SIMPLE.includes(blockType)) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const blocks = sections[sectionIdx].blocks || [];
+    const nextOrder = blocks.length + 1;
+
+    let newBlock;
+    switch (blockType) {
+      case 'text':
+        newBlock = { type: 'text', order: nextOrder, content: { ar: '' } };
+        break;
+      case 'execution_step':
+        newBlock = { type: 'execution_step', order: nextOrder, stepNumber: 1, description: { ar: '' }, notes: { ar: '' } };
+        break;
+      case 'safety_note':
+        newBlock = { type: 'safety_note', order: nextOrder, message: { ar: '' }, severity: 'medium' };
+        break;
+      default:
+        return;
+    }
+
+    blocks.push(newBlock);
+    draft.setField(`sections.${sectionIdx}.blocks`, blocks);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم إضافة الكتلة بنجاح', 'success');
+  }
+
+  function handleRemoveBlock(btn) {
+    if (!draft.isValid()) return;
+    const sectionIdx = parseInt(btn.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(btn.dataset.blockIdx, 10);
+    if (isNaN(sectionIdx) || isNaN(blockIdx)) return;
+
+    if (!confirm('هل أنت متأكد من حذف هذه الكتلة؟')) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const blocks = sections[sectionIdx].blocks || [];
+    if (blockIdx < 0 || blockIdx >= blocks.length) return;
+
+    blocks.splice(blockIdx, 1);
+    draft.setField(`sections.${sectionIdx}.blocks`, blocks);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حذف الكتلة', 'success');
   }
 
   function getNested(obj, path) {

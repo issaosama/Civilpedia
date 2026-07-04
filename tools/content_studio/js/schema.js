@@ -39,6 +39,20 @@ const REQUIRED_SECTION = ['id', 'title', 'type', 'order', 'blocks'];
 
 const REQUIRED_BLOCK = ['type', 'order'];
 
+const BLOCK_TYPES_SIMPLE = ['text', 'execution_step', 'safety_note'];
+
+const ADDABLE_BLOCK_OPTIONS = [
+  { type: 'text', label: 'نص عادي' },
+  { type: 'execution_step', label: 'خطوة تنفيذ' },
+  { type: 'safety_note', label: 'ملاحظة سلامة' },
+];
+
+function addableBlockOptions() {
+  return ADDABLE_BLOCK_OPTIONS.map(o =>
+    `<option value="${esc(o.type)}">${esc(o.label)}</option>`
+  ).join('');
+}
+
 const BLOCK_DISPLAY_NAMES = {
   text: 'نص',
   execution_step: 'خطوة تنفيذية',
