@@ -463,26 +463,33 @@
   }
 
   function navigateToTarget(path, sectionIdx, blockIdx) {
-    let needsReRender = false;
+    let needsSectionReRender = false;
+    let topicListKeyToOpen = null;
 
     if (path) {
       if (path.startsWith('topic.commonMistakes') && !_topicListOpen.commonMistakes) {
-        _topicListOpen.commonMistakes = true;
-        needsReRender = true;
+        topicListKeyToOpen = 'commonMistakes';
       } else if (path.startsWith('topic.acceptRejectItems') && !_topicListOpen.acceptRejectItems) {
-        _topicListOpen.acceptRejectItems = true;
-        needsReRender = true;
+        topicListKeyToOpen = 'acceptRejectItems';
       }
     }
 
     if (sectionIdx !== undefined && _openSectionIdx !== sectionIdx) {
       _openSectionIdx = sectionIdx;
-      needsReRender = true;
+      needsSectionReRender = true;
     }
 
-    if (needsReRender) {
+    if (needsSectionReRender) {
+      if (topicListKeyToOpen) _topicListOpen[topicListKeyToOpen] = true;
       renderSections();
       setTimeout(() => scrollToTarget(path, sectionIdx, blockIdx), 0);
+      return;
+    }
+
+    if (topicListKeyToOpen) {
+      _topicListOpen[topicListKeyToOpen] = true;
+      topicListDomToggle(topicListKeyToOpen);
+      scrollToTarget(path, sectionIdx, blockIdx);
       return;
     }
 
@@ -609,11 +616,26 @@
     renderSections();
   }
 
+  function topicListDomToggle(key) {
+    if (!key || !(key in _topicListOpen)) return;
+    const isOpen = _topicListOpen[key];
+    const card = document.querySelector(`.topic-editor-card[data-key="${key}"]`);
+    if (!card) return;
+    card.classList.toggle('section-card-collapsed', !isOpen);
+    const body = card.querySelector('.section-card-body');
+    if (body) body.style.display = isOpen ? '' : 'none';
+    const header = card.querySelector('.section-card-header');
+    if (header) {
+      const arrow = header.querySelector('.section-toggle-arrow');
+      if (arrow) arrow.textContent = isOpen ? '▾' : '▸';
+    }
+  }
+
   function handleTopicToggle(headerEl) {
     const key = headerEl.dataset.topicList;
     if (!key || !(key in _topicListOpen)) return;
     _topicListOpen[key] = !_topicListOpen[key];
-    renderSections();
+    topicListDomToggle(key);
   }
 
   function handleSectionContainerClick(e) {
