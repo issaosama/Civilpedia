@@ -301,7 +301,7 @@
     }
     const engine = new ValidationEngine(draft);
     const result = engine.validate();
-    renderValidationResults(result);
+    renderValidationResults(result, 'validate');
   }
 
   function clearFieldHighlights() {
@@ -340,18 +340,40 @@
     return attrs;
   }
 
-  function renderValidationResults(result) {
+  function getReadinessHtml(result, context) {
+    if (result.hasErrors) {
+      const msg = context === 'export'
+        ? '❌ التصدير محظور — توجد أخطاء يجب إصلاحها قبل التصدير. اضغط على الخطأ للانتقال إلى مكانه.'
+        : '❌ الموضوع غير جاهز للتصدير — توجد أخطاء يجب إصلاحها. اضغط على الخطأ للانتقال إلى مكانه.';
+      return `<div class="val-readiness val-readiness-error">${msg}</div>`;
+    }
+    if (result.hasWarnings) {
+      const msg = context === 'export'
+        ? '⚠️ التصدير مسموح مع وجود تحذيرات — يُفضّل مراجعة التحذيرات قبل الاعتماد على الملف.'
+        : '⚠️ الموضوع يمكن تصديره، لكن يُفضّل مراجعة التحذيرات.';
+      return `<div class="val-readiness val-readiness-warn">${msg}</div>`;
+    }
+    return '<div class="val-readiness val-readiness-ok">✅ الموضوع جاهز للتصدير — لا توجد مشاكل.</div>';
+  }
+
+  function renderValidationResults(result, context) {
     clearFieldHighlights();
 
     const container = $('validation-results');
-    const summaryClass = result.hasErrors ? 'val-error' : result.hasWarnings ? 'val-warning' : 'val-pass';
-    let html = `<div class="val-summary ${summaryClass}">${result.summary}</div>`;
+    let html = getReadinessHtml(result, context || 'validate');
 
-    if (result.passed.length) {
-      html += '<div class="val-group"><h4>✅ نجاح</h4><ul>' +
-        result.passed.map(m => `<li class="val-pass-item">${esc(m)}</li>`).join('') + '</ul></div>';
+    const summaryClass = result.hasErrors ? 'val-error' : result.hasWarnings ? 'val-warning' : 'val-pass';
+    html += `<div class="val-summary ${summaryClass}">${result.summary}</div>`;
+
+    if (result.hasErrors) {
+      html += '<div class="val-group"><h4>❌ أخطاء</h4><ul>';
+      result.errors.forEach((m, i) => {
+        const meta = result.errorsMeta ? result.errorsMeta[i] : null;
+        html += `<li class="val-error-item"${makeValItemAttrs(meta)}>${esc(m)}</li>`;
+      });
+      html += '</ul></div>';
     }
-    if (result.warnings.length) {
+    if (result.hasWarnings) {
       html += '<div class="val-group"><h4>⚠️ تحذيرات</h4><ul>';
       result.warnings.forEach((m, i) => {
         const meta = result.warningsMeta ? result.warningsMeta[i] : null;
@@ -359,13 +381,9 @@
       });
       html += '</ul></div>';
     }
-    if (result.errors.length) {
-      html += '<div class="val-group"><h4>❌ أخطاء</h4><ul>';
-      result.errors.forEach((m, i) => {
-        const meta = result.errorsMeta ? result.errorsMeta[i] : null;
-        html += `<li class="val-error-item"${makeValItemAttrs(meta)}>${esc(m)}</li>`;
-      });
-      html += '</ul></div>';
+    if (result.passed.length) {
+      html += '<div class="val-group"><h4>✅ نجاح</h4><ul>' +
+        result.passed.map(m => `<li class="val-pass-item">${esc(m)}</li>`).join('') + '</ul></div>';
     }
     container.innerHTML = html;
 
@@ -434,17 +452,17 @@
 
     const engine = new ValidationEngine(draft);
     const result = engine.validate();
-    renderValidationResults(result);
+    renderValidationResults(result, 'export');
 
     if (result.hasErrors) {
-      showToast('❌ التصدير محظور — يوجد أخطاء في التحقق. راجع لوحة التحقق.', 'error');
       $('export-warning').innerHTML = '';
+      showToast('❌ التصدير محظور — توجد أخطاء يجب إصلاحها أولاً', 'error');
       return;
     }
 
     if (result.hasWarnings) {
       $('export-warning').innerHTML =
-        '<div class="export-warning-banner">⚠️ يوجد تحذيرات — يرجى مراجعتها قبل الاعتماد على الملف المُصدر.</div>';
+        '<div class="export-warning-banner">⚠️ تم التصدير مع وجود تحذيرات — يُرجى مراجعة التحذيرات قبل الاعتماد على الملف المُصدر.</div>';
     } else {
       $('export-warning').innerHTML = '';
     }
