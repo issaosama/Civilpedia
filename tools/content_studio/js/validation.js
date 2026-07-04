@@ -4,12 +4,14 @@ class ValidationEngine {
     this.errors = [];
     this.warnings = [];
     this.passed = [];
+    this.fieldErrors = [];
   }
 
   validate() {
     this.errors = [];
     this.warnings = [];
     this.passed = [];
+    this.fieldErrors = [];
 
     if (!this.draft || !this.draft.isValid()) {
       this.errors.push('لم يتم تحميل أي ملف Draft JSON');
@@ -62,6 +64,14 @@ class ValidationEngine {
         this.passed.push(`topic.${key} موجود`);
       }
     }
+    if (topic.titleAr !== undefined && topic.titleAr !== null && topic.titleAr.trim() === '') {
+      this.errors.push('topic.titleAr فارغ — يرجى إدخال عنوان الموضوع');
+      this.fieldErrors.push({ path: 'topic.titleAr', type: 'field', message: 'عنوان الموضوع فارغ' });
+    }
+    if (topic.summaryAr !== undefined && topic.summaryAr !== null && topic.summaryAr.trim() === '') {
+      this.errors.push('topic.summaryAr فارغ — يرجى إدخال ملخص الموضوع');
+      this.fieldErrors.push({ path: 'topic.summaryAr', type: 'field', message: 'ملخص الموضوع فارغ' });
+    }
     if (topic.level && !VALID_LEVELS.includes(topic.level)) {
       this.warnings.push(`topic.level غير صالح: "${topic.level}". القيم المقبولة: ${VALID_LEVELS.join(', ')}`);
     }
@@ -101,24 +111,36 @@ class ValidationEngine {
     for (const key of REQUIRED_SECTION) {
       if (section[key] === undefined || section[key] === null) {
         this.errors.push(`section[${index}] "${section.id || '?'}" — "${key}" مفقود`);
+        if (key === 'title') {
+          this.fieldErrors.push({ sectionIdx: index, type: 'section', message: 'عنوان القسم فارغ' });
+        }
       } else {
         this.passed.push(`section "${section.id || '?'}" — "${key}" موجود`);
+        if (key === 'title' && section.title !== undefined && section.title !== null && section.title.trim() === '') {
+          this.errors.push(`section[${index}] "${section.id || '?'}" — عنوان القسم فارغ`);
+          this.fieldErrors.push({ sectionIdx: index, type: 'section', message: 'عنوان القسم فارغ' });
+        }
       }
     }
     if (section.type && !VALID_SECTION_TYPES.includes(section.type)) {
       this.warnings.push(`section "${section.id || '?'}" — النوع "${section.type}" غير معروف`);
     }
     if (section.blocks && Array.isArray(section.blocks)) {
+      if (section.blocks.length === 0) {
+        this.warnings.push(`section "${section.id || '?'}" — لا توجد كتل في هذا القسم`);
+        this.fieldErrors.push({ sectionIdx: index, type: 'section', message: 'لا توجد كتل في هذا القسم' });
+      }
       this.passed.push(`section "${section.id || '?'}" — عدد الكتل: ${section.blocks.length}`);
       for (let j = 0; j < section.blocks.length; j++) {
-        this._checkBlock(section.blocks[j], section.id || '?', j);
+        this._checkBlock(section.blocks[j], section.id || '?', index, j);
       }
     } else {
       this.errors.push(`section "${section.id || '?'}" — "blocks" مفقود أو ليس مصفوفة`);
+      this.fieldErrors.push({ sectionIdx: index, type: 'section', message: 'الكتل مفقودة في هذا القسم' });
     }
   }
 
-  _checkBlock(block, sectionId, index) {
+  _checkBlock(block, sectionId, sectionIdx, index) {
     for (const key of REQUIRED_BLOCK) {
       if (block[key] === undefined || block[key] === null) {
         this.errors.push(`section "${sectionId}" block[${index}] — "${key}" مفقود`);
@@ -133,6 +155,10 @@ class ValidationEngine {
       case 'text':
         if (!block.content) {
           this.errors.push(`section "${sectionId}" block[${index}] — text: "content" مفقود`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'محتوى النص فارغ' });
+        } else if (!block.content.ar || block.content.ar.trim() === '') {
+          this.errors.push(`section "${sectionId}" block[${index}] — text: المحتوى العربي فارغ`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'محتوى النص العربي فارغ' });
         }
         if (block.variant && !VALID_TEXT_VARIANTS.includes(block.variant)) {
           this.warnings.push(`section "${sectionId}" block[${index}] — text variant "${block.variant}" غير معروف`);
@@ -144,11 +170,19 @@ class ValidationEngine {
         }
         if (!block.description) {
           this.errors.push(`section "${sectionId}" block[${index}] — execution_step: "description" مفقود`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'وصف الخطوة فارغ' });
+        } else if (!block.description.ar || block.description.ar.trim() === '') {
+          this.errors.push(`section "${sectionId}" block[${index}] — execution_step: الوصف العربي فارغ`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'الوصف العربي للخطوة فارغ' });
         }
         break;
       case 'safety_note':
         if (!block.message) {
           this.errors.push(`section "${sectionId}" block[${index}] — safety_note: "message" مفقود`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'رسالة السلامة فارغة' });
+        } else if (!block.message.ar || block.message.ar.trim() === '') {
+          this.errors.push(`section "${sectionId}" block[${index}] — safety_note: الرسالة العربية فارغة`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'رسالة السلامة العربية فارغة' });
         }
         if (block.severity && !VALID_SEVERITIES.includes(block.severity)) {
           this.warnings.push(`section "${sectionId}" block[${index}] — severity "${block.severity}" غير صالح`);
@@ -157,9 +191,11 @@ class ValidationEngine {
       case 'table':
         if (!block.headers || (Array.isArray(block.headers) && block.headers.length === 0)) {
           this.errors.push(`section "${sectionId}" block[${index}] — table: "headers" مفقود أو فارغ`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'رؤوس الأعمدة فارغة' });
         }
         if (!block.rows || (Array.isArray(block.rows) && block.rows.length === 0)) {
           this.warnings.push(`section "${sectionId}" block[${index}] — table: "rows" فارغ`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'صفوف الجدول فارغة' });
         }
         break;
       case 'checklist':
@@ -168,7 +204,10 @@ class ValidationEngine {
         }
         break;
       case 'inspection_point':
-        if (!block.criteriaAr) this.errors.push(`section "${sectionId}" block[${index}] — inspection_point: "criteriaAr" مفقود`);
+        if (!block.criteriaAr) {
+          this.errors.push(`section "${sectionId}" block[${index}] — inspection_point: "criteriaAr" مفقود`);
+          this.fieldErrors.push({ sectionIdx, blockIdx: index, type: 'block', message: 'معيار الفحص فارغ' });
+        }
         if (!block.methodAr) this.warnings.push(`section "${sectionId}" block[${index}] — inspection_point: "methodAr" مفقود`);
         break;
       case 'image':
@@ -195,6 +234,7 @@ class ValidationEngine {
       errors: this.errors,
       warnings: this.warnings,
       passed: this.passed,
+      fieldErrors: this.fieldErrors,
       hasErrors: this.errors.length > 0,
       hasWarnings: this.warnings.length > 0,
       summary: `${this.passed.length} نجاح، ${this.warnings.length} تحذير، ${this.errors.length} خطأ`

@@ -539,6 +539,35 @@ body {
   cursor: not-allowed;
 }
 
+/* Field Error Highlighting */
+.field-error {
+  border-color: var(--error) !important;
+  background-color: #fef2f2 !important;
+  box-shadow: 0 0 0 2px rgba(220,38,38,0.15) !important;
+}
+
+.section-card-error {
+  border-color: #fca5a5 !important;
+  border-width: 2px !important;
+  box-shadow: 0 0 0 1px rgba(220,38,38,0.12) !important;
+}
+
+.block-mini-error {
+  border-color: #fca5a5 !important;
+  border-width: 2px !important;
+  background-color: #fef2f2 !important;
+}
+
+@keyframes flash-highlight {
+  0% { box-shadow: 0 0 0 3px var(--error); }
+  50% { box-shadow: 0 0 0 6px var(--error); }
+  100% { box-shadow: 0 0 0 3px var(--error); }
+}
+
+.highlight-flash {
+  animation: flash-highlight 0.5s ease-in-out 2;
+}
+
 /* Validation */
 
 .val-summary {

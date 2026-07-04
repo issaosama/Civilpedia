@@ -303,7 +303,35 @@
     renderValidationResults(result);
   }
 
+  function clearFieldHighlights() {
+    document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+    document.querySelectorAll('.section-card-error').forEach(el => el.classList.remove('section-card-error'));
+    document.querySelectorAll('.block-mini-error').forEach(el => el.classList.remove('block-mini-error'));
+  }
+
+  function applyFieldHighlights(result) {
+    if (!result.fieldErrors) return;
+    result.fieldErrors.forEach(fe => {
+      if (fe.type === 'field' && fe.path) {
+        const el = document.querySelector(`[data-path="${fe.path}"]`);
+        if (el) el.classList.add('field-error');
+      } else if (fe.type === 'section' && fe.sectionIdx !== undefined) {
+        const cards = document.querySelectorAll('.section-card');
+        if (cards[fe.sectionIdx]) cards[fe.sectionIdx].classList.add('section-card-error');
+      } else if (fe.type === 'block' && fe.sectionIdx !== undefined && fe.blockIdx !== undefined) {
+        const cards = document.querySelectorAll('.section-card');
+        const sectionCard = cards[fe.sectionIdx];
+        if (sectionCard) {
+          const blockMinis = sectionCard.querySelectorAll('.block-mini');
+          if (blockMinis[fe.blockIdx]) blockMinis[fe.blockIdx].classList.add('block-mini-error');
+        }
+      }
+    });
+  }
+
   function renderValidationResults(result) {
+    clearFieldHighlights();
+
     const container = $('validation-results');
     const summaryClass = result.hasErrors ? 'val-error' : result.hasWarnings ? 'val-warning' : 'val-pass';
     let html = `<div class="val-summary ${summaryClass}">${result.summary}</div>`;
@@ -321,6 +349,8 @@
         result.errors.map(m => `<li class="val-error-item">${esc(m)}</li>`).join('') + '</ul></div>';
     }
     container.innerHTML = html;
+
+    applyFieldHighlights(result);
   }
 
   function updatePreview() {
