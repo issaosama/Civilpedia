@@ -203,6 +203,48 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 7: Image block validation and export
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n7. Image block validation and export');
+
+  // 7a: image block with url produces no errors
+  const draftWithImage = loadDraft(Object.assign(makeMinimalDraft(), {
+    sections: [{
+      id: 'img-sec', title: 'Image Section', type: 'general', order: 1,
+      blocks: [{ type: 'image', order: 1, url: 'assets/images/test.png', caption: { ar: 'صورة اختبار', en: 'Test image' } }]
+    }]
+  }));
+  const r1 = validate(draftWithImage);
+  const hasNoErrors = r1.errors.length === 0;
+  assert(hasNoErrors, 'Image block with url should produce no errors');
+  if (!hasNoErrors) console.log('  Errors:', r1.errors);
+
+  // 7b: image block without url produces warning, not error
+  const draftMissingUrl = loadDraft(Object.assign(makeMinimalDraft(), {
+    sections: [{
+      id: 'img-sec2', title: 'Image Section 2', type: 'general', order: 1,
+      blocks: [{ type: 'image', order: 1, url: '', caption: { ar: '', en: '' } }]
+    }]
+  }));
+  const r2 = validate(draftMissingUrl);
+  assert(r2.errors.length === 0, 'Image block without url should have NO errors');
+  assert(r2.warnings.length > 0, 'Image block without url should have warnings');
+  assert(r2.warnings.some(w => w.includes('url')), 'Warning should mention missing url');
+
+  // 7c: export image block
+  const exporter = new AppExporter();
+  const exported = exporter.export(draftWithImage);
+  const secId = 'img-sec';
+  const blocks = exported.blocks[secId];
+  assert(blocks && blocks.length === 1, 'Exported should have 1 block');
+  const imgBlock = blocks[0];
+  assert(imgBlock.type === 'image', 'Exported block type should be image');
+  assert(imgBlock.imageUrl === 'assets/images/test.png', 'Exported imageUrl should be preserved');
+  assert(imgBlock.caption === 'صورة اختبار', 'Exported caption should be Arabic caption');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

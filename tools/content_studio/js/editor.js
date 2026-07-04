@@ -7,6 +7,7 @@ class InlineBlockEditor {
       case 'execution_step': return this._executionStepEditor(sectionIdx, blockIdx, block);
       case 'safety_note': return this._safetyNoteEditor(sectionIdx, blockIdx, block);
       case 'table': return this._tableEditor(sectionIdx, blockIdx, block);
+      case 'image': return this._imageEditor(sectionIdx, blockIdx, block);
       default: return '';
     }
   }
@@ -48,6 +49,34 @@ class InlineBlockEditor {
           <div class="inline-field">
             <label>ملاحظات</label>
             <textarea class="form-textarea ie-input" data-field="notes.ar" dir="rtl" rows="2">${esc(notes.ar || '')}</textarea>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  static _imageEditor(sectionIdx, blockIdx, block) {
+    const url = block.url || '';
+    const caption = block.caption ? (block.caption.ar || '') : '';
+    const previewHtml = url
+      ? `<div class="image-editor-preview"><img src="${esc(url)}" alt="" style="max-width:100%;max-height:200px;border-radius:6px;border:1px solid #ddd;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none;color:#999;font-size:12px;">⚠️ تعذر تحميل الصورة</div></div>`
+      : '<div class="image-editor-hint" style="color:#999;font-size:12px;">أدخل مسار الصورة داخل assets/images</div>';
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير الصورة</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>مسار الصورة</label>
+            <input type="text" class="form-input ie-input" data-field="url" value="${esc(url)}" placeholder="assets/images/..." dir="ltr">
+          </div>
+          ${previewHtml}
+          <div class="inline-field">
+            <label>التعليق (اختياري)</label>
+            <textarea class="form-textarea ie-input" data-field="caption.ar" dir="rtl" rows="2">${esc(caption)}</textarea>
           </div>
         </div>
         <div class="inline-actions">

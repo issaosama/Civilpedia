@@ -326,7 +326,7 @@
         summary = `معدات: ${(block.items || []).length} عناصر`;
         break;
       case 'image':
-        summary = block.url || '';
+        summary = block.url || (block.caption ? block.caption.ar || '' : '') || '';
         break;
       default:
         summary = '';
@@ -1046,6 +1046,9 @@
         break;
       case 'table':
         newBlock = { type: 'table', order: nextOrder, caption: { ar: '', en: '' }, headers: [], headersEn: [], rows: [] };
+        break;
+      case 'image':
+        newBlock = { type: 'image', order: nextOrder, url: '', caption: { ar: '', en: '' } };
         break;
       default:
         return;
