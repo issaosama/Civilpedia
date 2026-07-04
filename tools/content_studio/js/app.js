@@ -33,6 +33,10 @@
   }
 
   function restoreUndoSnapshot() {
+    if (document.querySelector('.inline-editor')) {
+      showToast('احفظ أو ألغِ التعديل الحالي قبل التراجع', 'warning');
+      return;
+    }
     const snapshot = undoStack.pop();
     if (!snapshot) return;
     _lastSnapshotStr = '';
@@ -698,6 +702,10 @@
   }
 
   function handleBlockEdit(blockMini) {
+    if (document.querySelector('.inline-editor')) {
+      showToast('احفظ أو ألغِ التعديل الحالي قبل تعديل كتلة أخرى', 'warning');
+      return;
+    }
     const sectionIdx = parseInt(blockMini.dataset.sectionIdx, 10);
     const blockIdx = parseInt(blockMini.dataset.blockIdx, 10);
     const data = draft.toJSON();
@@ -767,7 +775,8 @@
 
     // Sync headersEn: apply tracked removals, then pad/trim to match headers length
     const removedAttr = editor.getAttribute('data-removed');
-    const removedIndices = removedAttr ? JSON.parse(removedAttr) : [];
+    let removedIndices = [];
+    try { removedIndices = removedAttr ? JSON.parse(removedAttr) : []; } catch (e) { removedIndices = []; }
     let en = [...oldHeadersEn];
     for (const idx of removedIndices) {
       if (idx < en.length) en.splice(idx, 1);
@@ -917,6 +926,11 @@
     if (!draft.isValid()) return;
     const targetPath = saveBtn.dataset.target;
     if (!targetPath) return;
+
+    if (document.querySelector('.inline-editor')) {
+      showToast('احفظ أو ألغِ التعديل الحالي قبل حفظ هذه القائمة', 'warning');
+      return;
+    }
 
     const items = saveBtn.closest('.section-card-body').querySelectorAll('.inline-topic-item');
     pushUndoSnapshot();
