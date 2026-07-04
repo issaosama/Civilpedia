@@ -18,6 +18,7 @@
     $('sections-container').innerHTML = '<div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>';
     $('sections-container').addEventListener('click', handleSectionContainerClick);
     $('validation-results').innerHTML = '';
+    $('validation-results').addEventListener('click', handleValidationNavClick);
     $('download-btn').disabled = true;
     $('export-btn').disabled = true;
   }
@@ -329,6 +330,16 @@
     });
   }
 
+  function makeValItemAttrs(meta) {
+    if (!meta) return '';
+    let attrs = '';
+    if (meta.path) attrs += ` data-target-path="${esc(meta.path)}"`;
+    if (meta.sectionIdx !== undefined) attrs += ` data-section-idx="${meta.sectionIdx}"`;
+    if (meta.blockIdx !== undefined) attrs += ` data-block-idx="${meta.blockIdx}"`;
+    if (attrs) attrs += ' style="cursor:pointer;" title="انقر للانتقال إلى موقع الخطأ"';
+    return attrs;
+  }
+
   function renderValidationResults(result) {
     clearFieldHighlights();
 
@@ -341,16 +352,58 @@
         result.passed.map(m => `<li class="val-pass-item">${esc(m)}</li>`).join('') + '</ul></div>';
     }
     if (result.warnings.length) {
-      html += '<div class="val-group"><h4>⚠️ تحذيرات</h4><ul>' +
-        result.warnings.map(m => `<li class="val-warning-item">${esc(m)}</li>`).join('') + '</ul></div>';
+      html += '<div class="val-group"><h4>⚠️ تحذيرات</h4><ul>';
+      result.warnings.forEach((m, i) => {
+        const meta = result.warningsMeta ? result.warningsMeta[i] : null;
+        html += `<li class="val-warning-item"${makeValItemAttrs(meta)}>${esc(m)}</li>`;
+      });
+      html += '</ul></div>';
     }
     if (result.errors.length) {
-      html += '<div class="val-group"><h4>❌ أخطاء</h4><ul>' +
-        result.errors.map(m => `<li class="val-error-item">${esc(m)}</li>`).join('') + '</ul></div>';
+      html += '<div class="val-group"><h4>❌ أخطاء</h4><ul>';
+      result.errors.forEach((m, i) => {
+        const meta = result.errorsMeta ? result.errorsMeta[i] : null;
+        html += `<li class="val-error-item"${makeValItemAttrs(meta)}>${esc(m)}</li>`;
+      });
+      html += '</ul></div>';
     }
     container.innerHTML = html;
 
     applyFieldHighlights(result);
+  }
+
+  function navigateToTarget(path, sectionIdx, blockIdx) {
+    let el = null;
+    if (path) {
+      el = document.querySelector(`[data-path="${path}"]`);
+      if (el && el.focus) {
+        el.focus();
+        if (el.select) el.select();
+      }
+    }
+    if (!el && sectionIdx !== undefined) {
+      const cards = document.querySelectorAll('.section-card');
+      el = cards[sectionIdx];
+      if (el && blockIdx !== undefined) {
+        const blockMinis = el.querySelectorAll('.block-mini');
+        if (blockMinis[blockIdx]) el = blockMinis[blockIdx];
+      }
+    }
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('highlight-flash');
+      setTimeout(() => el.classList.remove('highlight-flash'), 2000);
+    }
+  }
+
+  function handleValidationNavClick(e) {
+    const li = e.target.closest('.val-error-item, .val-warning-item');
+    if (!li) return;
+    const path = li.dataset.targetPath;
+    const sectionIdx = li.dataset.sectionIdx !== undefined ? parseInt(li.dataset.sectionIdx, 10) : undefined;
+    const blockIdx = li.dataset.blockIdx !== undefined ? parseInt(li.dataset.blockIdx, 10) : undefined;
+    if (path === undefined && sectionIdx === undefined) return;
+    navigateToTarget(path, sectionIdx, blockIdx);
   }
 
   function updatePreview() {
