@@ -11,6 +11,7 @@
   const undoStack = [];
   let _lastSnapshotStr = '';
   let _metadataSnapshotPushed = false;
+  let _openSectionIdx = -1;
 
   function pushUndoSnapshot() {
     _metadataSnapshotPushed = false;
@@ -35,6 +36,7 @@
     if (!snapshot) return;
     _lastSnapshotStr = '';
     _metadataSnapshotPushed = false;
+    _openSectionIdx = -1;
     const fileName = draft.fileName || 'restored.json';
     draft = new Draft();
     draft.load(JSON.stringify(snapshot), fileName);
@@ -83,6 +85,7 @@
         $('file-name').textContent = file.name;
         clearUndoHistory();
         _metadataSnapshotPushed = false;
+        _openSectionIdx = -1;
         renderTopicMetadata();
         renderSections();
         updatePreview();
@@ -228,17 +231,9 @@
   function renderSectionCard(section, index, numSections) {
     const blocks = section.blocks || [];
     const typeLabel = SECTION_TYPE_LABELS[section.type] || section.type;
-    let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index, blocks.length)).join('');
-    if (!blocksHtml) blocksHtml = '<div class="empty-state-compact">لا توجد كتل داخل هذا القسم</div>';
-
-    const addBlockHtml = `
-      <div class="section-add-block">
-        <select class="form-select add-block-select" data-section-idx="${index}">
-          ${addableBlockOptions()}
-        </select>
-        <button class="btn btn-success ie-add-block" data-section-idx="${index}" type="button">➕ إضافة كتلة</button>
-      </div>
-    `;
+    const isOpen = index === _openSectionIdx;
+    const arrow = isOpen ? '▾' : '▸';
+    const titleHint = isOpen ? 'إغلاق القسم' : 'فتح القسم';
 
     const sectionUpDisabled = index === 0;
     const sectionDownDisabled = index === numSections - 1;
@@ -249,9 +244,26 @@
       </span>
     `;
 
+    let bodyHtml = '';
+    if (isOpen) {
+      let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index, blocks.length)).join('');
+      if (!blocksHtml) blocksHtml = '<div class="empty-state-compact">لا توجد كتل داخل هذا القسم</div>';
+
+      const addBlockHtml = `
+        <div class="section-add-block">
+          <select class="form-select add-block-select" data-section-idx="${index}">
+            ${addableBlockOptions()}
+          </select>
+          <button class="btn btn-success ie-add-block" data-section-idx="${index}" type="button">➕ إضافة كتلة</button>
+        </div>
+      `;
+      bodyHtml = `<div class="section-card-body">${blocksHtml}${addBlockHtml}</div>`;
+    }
+
     return `
-      <div class="section-card">
-        <div class="section-card-header">
+      <div class="section-card${isOpen ? '' : ' section-card-collapsed'}" data-section-idx="${index}">
+        <div class="section-card-header ie-section-toggle" data-section-idx="${index}" title="${titleHint}">
+          <span class="section-toggle-arrow">${arrow}</span>
           <span class="section-order">#${section.order}</span>
           <span class="section-type-badge">${esc(typeLabel)}</span>
           <span class="section-title">${esc(section.title)}</span>
@@ -259,10 +271,7 @@
           ${sectionReorderHtml}
           <button class="ie-remove-section" data-section-idx="${index}" type="button" title="حذف القسم">🗑️</button>
         </div>
-        <div class="section-card-body">
-          ${blocksHtml}
-          ${addBlockHtml}
-        </div>
+        ${bodyHtml}
       </div>
     `;
   }
@@ -449,6 +458,16 @@
   }
 
   function navigateToTarget(path, sectionIdx, blockIdx) {
+    if (sectionIdx !== undefined && _openSectionIdx !== sectionIdx) {
+      _openSectionIdx = sectionIdx;
+      renderSections();
+      setTimeout(() => scrollToTarget(path, sectionIdx, blockIdx), 0);
+      return;
+    }
+    scrollToTarget(path, sectionIdx, blockIdx);
+  }
+
+  function scrollToTarget(path, sectionIdx, blockIdx) {
     let el = null;
     if (path) {
       el = document.querySelector(`[data-path="${path}"]`);
@@ -561,8 +580,15 @@
     }, 2500);
   }
 
+  function handleSectionToggle(headerEl) {
+    const sectionIdx = parseInt(headerEl.dataset.sectionIdx, 10);
+    if (isNaN(sectionIdx)) return;
+    _openSectionIdx = _openSectionIdx === sectionIdx ? -1 : sectionIdx;
+    renderSections();
+  }
+
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-section-toggle');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -601,6 +627,8 @@
       handleMoveSection(target, 'up');
     } else if (target.classList.contains('ie-section-down')) {
       handleMoveSection(target, 'down');
+    } else if (target.classList.contains('ie-section-toggle')) {
+      handleSectionToggle(target);
     } else if (target.classList.contains('block-mini')) {
       handleBlockEdit(target);
     }
@@ -975,6 +1003,7 @@
     [sections[sectionIdx], sections[targetIdx]] = [sections[targetIdx], sections[sectionIdx]];
     sections.forEach((s, i) => { s.order = i + 1; });
     draft.setField('sections', sections);
+    _openSectionIdx = -1;
     renderSections();
     updatePreview();
     showToast('✅ تم تغيير ترتيب الأقسام', 'success');
@@ -1000,6 +1029,7 @@
     sections.push(newSection);
     sections.forEach((s, i) => { s.order = i + 1; });
     draft.setField('sections', sections);
+    _openSectionIdx = sections.length - 1;
     renderSections();
     updatePreview();
     showToast('✅ تم إضافة القسم بنجاح', 'success');
@@ -1020,6 +1050,7 @@
     sections.splice(sectionIdx, 1);
     sections.forEach((s, i) => { s.order = i + 1; });
     draft.setField('sections', sections);
+    _openSectionIdx = -1;
     renderSections();
     updatePreview();
     showToast('✅ تم حذف القسم', 'success');

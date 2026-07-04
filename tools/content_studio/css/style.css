@@ -318,6 +318,23 @@ body {
   box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
+.section-card-collapsed {
+  opacity: 0.85;
+}
+
+.ie-section-toggle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.section-toggle-arrow {
+  font-size: 12px;
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
 .section-card-header {
   display: flex;
   align-items: center;
