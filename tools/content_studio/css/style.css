@@ -413,6 +413,36 @@ body {
   opacity: 1;
 }
 
+.block-mini-reorder {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.ie-move-up,
+.ie-move-down {
+  background: none;
+  border: 1px solid var(--border-light);
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 1px 5px;
+  line-height: 1.2;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+}
+.ie-move-up:hover,
+.ie-move-down:hover {
+  opacity: 1;
+  border-color: var(--text-secondary);
+}
+.ie-move-up:disabled,
+.ie-move-down:disabled {
+  opacity: 0.15;
+  cursor: not-allowed;
+}
+
 /* Validation */
 #validation-results {
   margin-top: 12px;

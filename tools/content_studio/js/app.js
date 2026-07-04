@@ -166,7 +166,7 @@
   function renderSectionCard(section, index) {
     const blocks = section.blocks || [];
     const typeLabel = SECTION_TYPE_LABELS[section.type] || section.type;
-    let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index)).join('');
+    let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index, blocks.length)).join('');
     if (!blocksHtml) blocksHtml = '<div class="empty-state">لا توجد كتل في هذا القسم</div>';
 
     const addBlockHtml = `
@@ -194,7 +194,7 @@
     `;
   }
 
-  function renderBlockMini(block, index, sectionIdx) {
+  function renderBlockMini(block, index, sectionIdx, blocksLen) {
     const typeLabel = BLOCK_DISPLAY_NAMES[block.type] || block.type;
     const order = block.order || '-';
     let summary = '';
@@ -238,12 +238,21 @@
     }
 
     const isSimple = BLOCK_TYPES_SIMPLE.includes(block.type);
+    const moveDisabledUp = index === 0;
+    const moveDisabledDown = index === blocksLen - 1;
+    const reorderHtml = isSimple
+      ? `<div class="block-mini-reorder">
+          <button class="ie-move-up" data-section-idx="${sectionIdx}" data-block-idx="${index}" type="button" title="تحريك للأعلى"${moveDisabledUp ? ' disabled' : ''}>↑</button>
+          <button class="ie-move-down" data-section-idx="${sectionIdx}" data-block-idx="${index}" type="button" title="تحريك للأسفل"${moveDisabledDown ? ' disabled' : ''}>↓</button>
+        </div>`
+      : '';
     const removeBtn = isSimple
       ? `<button class="ie-remove-block" data-section-idx="${sectionIdx}" data-block-idx="${index}" type="button" title="حذف الكتلة">🗑️</button>`
       : '';
 
     return `
       <div class="block-mini block-mini-${block.type}" data-section-idx="${sectionIdx}" data-block-idx="${index}">
+        ${reorderHtml}
         <div class="block-mini-header">
           <span class="block-type-label">${esc(typeLabel)}</span>
           <span class="block-order">ترتيب ${order}</span>
@@ -374,7 +383,7 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -391,6 +400,10 @@
       handleAddBlock(target);
     } else if (target.classList.contains('ie-remove-block')) {
       handleRemoveBlock(target);
+    } else if (target.classList.contains('ie-move-up')) {
+      handleMoveBlock(target, 'up');
+    } else if (target.classList.contains('ie-move-down')) {
+      handleMoveBlock(target, 'down');
     } else if (target.classList.contains('block-mini')) {
       handleBlockEdit(target);
     }
@@ -569,6 +582,30 @@
     renderSections();
     updatePreview();
     showToast('✅ تم حذف الكتلة', 'success');
+  }
+
+  function handleMoveBlock(btn, direction) {
+    if (!draft.isValid()) return;
+    const sectionIdx = parseInt(btn.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(btn.dataset.blockIdx, 10);
+    if (isNaN(sectionIdx) || isNaN(blockIdx)) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const blocks = sections[sectionIdx].blocks || [];
+
+    const targetIdx = direction === 'up' ? blockIdx - 1 : blockIdx + 1;
+    if (targetIdx < 0 || targetIdx >= blocks.length) return;
+
+    [blocks[blockIdx], blocks[targetIdx]] = [blocks[targetIdx], blocks[blockIdx]];
+
+    blocks.forEach((b, i) => { b.order = i + 1; });
+
+    draft.setField(`sections.${sectionIdx}.blocks`, blocks);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم تغيير الترتيب', 'success');
   }
 
   function getNested(obj, path) {
