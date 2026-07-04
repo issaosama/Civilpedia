@@ -6,6 +6,55 @@
 
   const $ = id => document.getElementById(id);
 
+  // Undo Manager
+  const UNDO_MAX = 30;
+  const undoStack = [];
+  let _lastSnapshotStr = '';
+  let _metadataSnapshotPushed = false;
+
+  function pushUndoSnapshot() {
+    _metadataSnapshotPushed = false;
+    if (!draft.isValid()) return;
+    const json = draft.toJSON();
+    if (!json) return;
+    const str = JSON.stringify(json);
+    if (str === _lastSnapshotStr) return;
+    _lastSnapshotStr = str;
+    undoStack.push(json);
+    if (undoStack.length > UNDO_MAX) undoStack.shift();
+    updateUndoButton();
+  }
+
+  function updateUndoButton() {
+    const btn = $('undo-btn');
+    if (btn) btn.disabled = undoStack.length === 0;
+  }
+
+  function restoreUndoSnapshot() {
+    const snapshot = undoStack.pop();
+    if (!snapshot) return;
+    _lastSnapshotStr = '';
+    _metadataSnapshotPushed = false;
+    const fileName = draft.fileName || 'restored.json';
+    draft = new Draft();
+    draft.load(JSON.stringify(snapshot), fileName);
+    renderTopicMetadata();
+    renderSections();
+    updatePreview();
+    $('validation-results').innerHTML = '';
+    $('export-warning').innerHTML = '';
+    clearFieldHighlights();
+    updateUndoButton();
+    showToast('✅ تم التراجع عن آخر تعديل', 'success');
+  }
+
+  function clearUndoHistory() {
+    undoStack.length = 0;
+    _lastSnapshotStr = '';
+    _metadataSnapshotPushed = false;
+    updateUndoButton();
+  }
+
   function init() {
     $('load-btn').addEventListener('click', () => $('file-input').click());
     $('file-input').addEventListener('change', handleFileLoad);
@@ -13,6 +62,7 @@
     $('download-btn').addEventListener('click', downloadDraft);
     $('export-btn').addEventListener('click', exportAppReady);
     $('preview-btn').addEventListener('click', updatePreview);
+    $('undo-btn').addEventListener('click', restoreUndoSnapshot);
 
     previewRenderer.clear();
     $('sections-container').innerHTML = '<div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>';
@@ -31,6 +81,8 @@
       try {
         draft.load(ev.target.result, file.name);
         $('file-name').textContent = file.name;
+        clearUndoHistory();
+        _metadataSnapshotPushed = false;
         renderTopicMetadata();
         renderSections();
         updatePreview();
@@ -289,6 +341,12 @@
     const el = e.target;
     const path = el.dataset.path;
     if (!path) return;
+
+    if (!_metadataSnapshotPushed) {
+      pushUndoSnapshot();
+      _metadataSnapshotPushed = true;
+    }
+
     let value = el.type === 'number' ? parseInt(el.value, 10) : el.value;
     if (el.tagName === 'SELECT') value = el.value;
     draft.setField(path, value);
@@ -571,6 +629,8 @@
     const blockIdx = parseInt(editor.dataset.blockIdx, 10);
     const path = `sections.${sectionIdx}.blocks.${blockIdx}`;
 
+    pushUndoSnapshot();
+
     // Read all fields from the editor form
     const inputs = editor.querySelectorAll('.ie-input');
     inputs.forEach(input => {
@@ -581,7 +641,6 @@
       if (input.type === 'number') value = parseInt(value, 10);
       draft.setField(fullPath, value);
     });
-
     renderSections();
     updatePreview();
     showToast('✅ تم حفظ التعديلات', 'success');
@@ -631,6 +690,7 @@
       return { cells: Array.from(cellInputs).map(inp => inp.value) };
     });
 
+    pushUndoSnapshot();
     draft.setField(`sections.${sectionIdx}.blocks.${blockIdx}`, block);
     renderSections();
     updatePreview();
@@ -768,6 +828,8 @@
     if (!targetPath) return;
 
     const items = saveBtn.closest('.section-card-body').querySelectorAll('.inline-topic-item');
+    pushUndoSnapshot();
+
     items.forEach(item => {
       const fields = item.querySelectorAll('.ie-topic-field');
       fields.forEach(field => {
@@ -786,7 +848,6 @@
         draft.setField(fullPath, value);
       });
     });
-
     renderSections();
     updatePreview();
     showToast('✅ تم حفظ التعديلات', 'success');
@@ -810,6 +871,7 @@
       return;
     }
 
+    pushUndoSnapshot();
     arr.push(newItem);
     draft.setField(targetPath, arr);
     renderSections();
@@ -826,6 +888,7 @@
     let arr = getNested(data, targetPath);
     if (!Array.isArray(arr) || idx < 0 || idx >= arr.length) return;
 
+    pushUndoSnapshot();
     arr.splice(idx, 1);
     draft.setField(targetPath, arr);
     renderSections();
@@ -868,6 +931,7 @@
         return;
     }
 
+    pushUndoSnapshot();
     blocks.push(newBlock);
     draft.setField(`sections.${sectionIdx}.blocks`, blocks);
     renderSections();
@@ -889,6 +953,7 @@
     const blocks = sections[sectionIdx].blocks || [];
     if (blockIdx < 0 || blockIdx >= blocks.length) return;
 
+    pushUndoSnapshot();
     blocks.splice(blockIdx, 1);
     draft.setField(`sections.${sectionIdx}.blocks`, blocks);
     renderSections();
@@ -906,6 +971,7 @@
     const targetIdx = direction === 'up' ? sectionIdx - 1 : sectionIdx + 1;
     if (targetIdx < 0 || targetIdx >= sections.length) return;
 
+    pushUndoSnapshot();
     [sections[sectionIdx], sections[targetIdx]] = [sections[targetIdx], sections[sectionIdx]];
     sections.forEach((s, i) => { s.order = i + 1; });
     draft.setField('sections', sections);
@@ -930,6 +996,7 @@
       blocks: []
     };
 
+    pushUndoSnapshot();
     sections.push(newSection);
     sections.forEach((s, i) => { s.order = i + 1; });
     draft.setField('sections', sections);
@@ -949,6 +1016,7 @@
     const sections = data.sections || [];
     if (sectionIdx < 0 || sectionIdx >= sections.length) return;
 
+    pushUndoSnapshot();
     sections.splice(sectionIdx, 1);
     sections.forEach((s, i) => { s.order = i + 1; });
     draft.setField('sections', sections);
@@ -971,8 +1039,8 @@
     const targetIdx = direction === 'up' ? blockIdx - 1 : blockIdx + 1;
     if (targetIdx < 0 || targetIdx >= blocks.length) return;
 
+    pushUndoSnapshot();
     [blocks[blockIdx], blocks[targetIdx]] = [blocks[targetIdx], blocks[blockIdx]];
-
     blocks.forEach((b, i) => { b.order = i + 1; });
 
     draft.setField(`sections.${sectionIdx}.blocks`, blocks);
