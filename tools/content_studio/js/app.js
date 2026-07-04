@@ -154,8 +154,9 @@
     if (sections.length === 0) {
       html = '<div class="empty-state">لا توجد أقسام في هذا الموضوع</div>';
     } else {
-      for (let i = 0; i < sections.length; i++) {
-        html += renderSectionCard(sections[i], i);
+      const numSections = sections.length;
+      for (let i = 0; i < numSections; i++) {
+        html += renderSectionCard(sections[i], i, numSections);
       }
     }
     html += `
@@ -171,7 +172,7 @@
     $('sections-container').innerHTML = html;
   }
 
-  function renderSectionCard(section, index) {
+  function renderSectionCard(section, index, numSections) {
     const blocks = section.blocks || [];
     const typeLabel = SECTION_TYPE_LABELS[section.type] || section.type;
     let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index, blocks.length)).join('');
@@ -186,6 +187,15 @@
       </div>
     `;
 
+    const sectionUpDisabled = index === 0;
+    const sectionDownDisabled = index === numSections - 1;
+    const sectionReorderHtml = `
+      <span class="section-reorder-group">
+        <button class="ie-section-up" data-section-idx="${index}" type="button" title="تحريك القسم للأعلى"${sectionUpDisabled ? ' disabled' : ''}>↑</button>
+        <button class="ie-section-down" data-section-idx="${index}" type="button" title="تحريك القسم للأسفل"${sectionDownDisabled ? ' disabled' : ''}>↓</button>
+      </span>
+    `;
+
     return `
       <div class="section-card">
         <div class="section-card-header">
@@ -193,6 +203,7 @@
           <span class="section-type-badge">${esc(typeLabel)}</span>
           <span class="section-title">${esc(section.title)}</span>
           <span class="section-block-count">${blocks.length} كتل</span>
+          ${sectionReorderHtml}
           <button class="ie-remove-section" data-section-idx="${index}" type="button" title="حذف القسم">🗑️</button>
         </div>
         <div class="section-card-body">
@@ -392,7 +403,7 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -417,6 +428,10 @@
       handleAddSection();
     } else if (target.classList.contains('ie-remove-section')) {
       handleRemoveSection(target);
+    } else if (target.classList.contains('ie-section-up')) {
+      handleMoveSection(target, 'up');
+    } else if (target.classList.contains('ie-section-down')) {
+      handleMoveSection(target, 'down');
     } else if (target.classList.contains('block-mini')) {
       handleBlockEdit(target);
     }
@@ -595,6 +610,24 @@
     renderSections();
     updatePreview();
     showToast('✅ تم حذف الكتلة', 'success');
+  }
+
+  function handleMoveSection(btn, direction) {
+    if (!draft.isValid()) return;
+    const sectionIdx = parseInt(btn.dataset.sectionIdx, 10);
+    if (isNaN(sectionIdx)) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    const targetIdx = direction === 'up' ? sectionIdx - 1 : sectionIdx + 1;
+    if (targetIdx < 0 || targetIdx >= sections.length) return;
+
+    [sections[sectionIdx], sections[targetIdx]] = [sections[targetIdx], sections[sectionIdx]];
+    sections.forEach((s, i) => { s.order = i + 1; });
+    draft.setField('sections', sections);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم تغيير ترتيب الأقسام', 'success');
   }
 
   function handleAddSection() {
