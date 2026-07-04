@@ -145,7 +145,7 @@ class InlineTopicEditor {
       <div class="inline-topic-item" data-mistake-idx="${i}">
         <div class="inline-field">
           <label>الخطأ #${i + 1}</label>
-          <textarea class="form-textarea ie-topic-field" data-outer="topic.commonMistakes.${i}" data-field="ar" dir="rtl" rows="2">${esc(m.ar || '')}</textarea>
+          <textarea class="form-textarea ie-topic-field" data-path="topic.commonMistakes.${i}.ar" data-outer="topic.commonMistakes.${i}" data-field="ar" dir="rtl" rows="2">${esc(m.ar || '')}</textarea>
         </div>
         <button class="btn btn-outline ie-remove-item" data-target="topic.commonMistakes" data-idx="${i}" type="button" style="font-size:12px;padding:4px 8px;margin-top:4px;">🗑️ حذف</button>
       </div>
@@ -160,23 +160,23 @@ class InlineTopicEditor {
       <div class="inline-topic-item" data-ar-idx="${i}">
         <div class="inline-field">
           <label>المعيار</label>
-          <input type="text" class="form-input ie-topic-field" data-outer="topic.acceptRejectItems.${i}" data-field="criteriaAr" value="${esc(item.criteriaAr || '')}" dir="rtl">
+          <input type="text" class="form-input ie-topic-field" data-path="topic.acceptRejectItems.${i}.criteriaAr" data-outer="topic.acceptRejectItems.${i}" data-field="criteriaAr" value="${esc(item.criteriaAr || '')}" dir="rtl">
         </div>
         <div class="inline-field">
           <label>حد القبول</label>
-          <input type="text" class="form-input ie-topic-field" data-outer="topic.acceptRejectItems.${i}" data-field="acceptanceLimitAr" value="${esc(item.acceptanceLimitAr || '')}" dir="rtl">
+          <input type="text" class="form-input ie-topic-field" data-path="topic.acceptRejectItems.${i}.acceptanceLimitAr" data-outer="topic.acceptRejectItems.${i}" data-field="acceptanceLimitAr" value="${esc(item.acceptanceLimitAr || '')}" dir="rtl">
         </div>
         <div class="inline-field">
           <label>طريقة الفحص</label>
-          <input type="text" class="form-input ie-topic-field" data-outer="topic.acceptRejectItems.${i}" data-field="methodAr" value="${esc(item.methodAr || '')}" dir="rtl">
+          <input type="text" class="form-input ie-topic-field" data-path="topic.acceptRejectItems.${i}.methodAr" data-outer="topic.acceptRejectItems.${i}" data-field="methodAr" value="${esc(item.methodAr || '')}" dir="rtl">
         </div>
         <div class="inline-field inline-field-row">
           <label class="inline-checkbox-label">
-            <input type="checkbox" class="ie-topic-field" data-outer="topic.acceptRejectItems.${i}" data-field="isCritical" ${item.isCritical ? 'checked' : ''}>
+            <input type="checkbox" class="ie-topic-field" data-path="topic.acceptRejectItems.${i}.isCritical" data-outer="topic.acceptRejectItems.${i}" data-field="isCritical" ${item.isCritical ? 'checked' : ''}>
             isCritical
           </label>
           <label class="inline-checkbox-label">
-            <input type="checkbox" class="ie-topic-field" data-outer="topic.acceptRejectItems.${i}" data-field="reviewRequired" ${item.reviewRequired !== false ? 'checked' : ''}>
+            <input type="checkbox" class="ie-topic-field" data-path="topic.acceptRejectItems.${i}.reviewRequired" data-outer="topic.acceptRejectItems.${i}" data-field="reviewRequired" ${item.reviewRequired !== false ? 'checked' : ''}>
             reviewRequired
           </label>
         </div>
