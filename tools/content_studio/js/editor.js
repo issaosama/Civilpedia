@@ -137,7 +137,7 @@ class InlineBlockEditor {
 }
 
 class InlineTopicEditor {
-  static renderMistakesEditor(draft) {
+  static renderMistakesEditor(draft, isOpen) {
     const data = draft.toJSON();
     const mistakes = (data.topic && data.topic.commonMistakes) || [];
     if (!mistakes.length && !data.topic) return '';
@@ -149,10 +149,10 @@ class InlineTopicEditor {
         </div>
         <button class="btn btn-outline ie-remove-item" data-target="topic.commonMistakes" data-idx="${i}" type="button" style="font-size:12px;padding:4px 8px;margin-top:4px;">🗑️ حذف</button>
       </div>
-    `, 'topic.commonMistakes');
+    `, 'topic.commonMistakes', isOpen);
   }
 
-  static renderAcceptRejectEditor(draft) {
+  static renderAcceptRejectEditor(draft, isOpen) {
     const data = draft.toJSON();
     const items = (data.topic && data.topic.acceptRejectItems) || [];
     if (!items.length && !data.topic) return '';
@@ -182,18 +182,22 @@ class InlineTopicEditor {
         </div>
         <button class="btn btn-outline ie-remove-item" data-target="topic.acceptRejectItems" data-idx="${i}" type="button" style="font-size:12px;padding:4px 8px;margin-top:4px;">🗑️ حذف</button>
       </div>
-    `, 'topic.acceptRejectItems');
+    `, 'topic.acceptRejectItems', isOpen);
   }
 
-  static _card(key, title, items, itemRenderer, arrayPath) {
+  static _card(key, title, items, itemRenderer, arrayPath, isOpen) {
     const itemsHtml = items.map((m, i) => itemRenderer(m, i)).join('');
+    const arrow = isOpen ? '▾' : '▸';
+    const collapsedClass = isOpen ? '' : ' section-card-collapsed';
+    const bodyStyle = isOpen ? '' : ' style="display:none"';
     return `
-      <div class="section-card topic-editor-card" data-key="${key}">
-        <div class="section-card-header">
+      <div class="section-card topic-editor-card${collapsedClass}" data-key="${key}">
+        <div class="section-card-header ie-topic-toggle" data-topic-list="${key}">
+          <span class="section-toggle-arrow">${arrow}</span>
           <span class="section-title">✏️ ${esc(title)}</span>
           <span class="section-block-count">${items.length} بند</span>
         </div>
-        <div class="section-card-body">
+        <div class="section-card-body"${bodyStyle}>
           <div class="topic-editor-items">${itemsHtml}</div>
           <div class="inline-actions" style="margin-top:12px;">
             <button class="btn btn-success ie-save-topic" data-target="${arrayPath}" type="button">💾 حفظ الكل</button>

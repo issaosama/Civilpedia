@@ -322,7 +322,8 @@ body {
   opacity: 0.85;
 }
 
-.ie-section-toggle {
+.ie-section-toggle,
+.ie-topic-toggle {
   cursor: pointer;
   user-select: none;
 }

@@ -12,6 +12,7 @@
   let _lastSnapshotStr = '';
   let _metadataSnapshotPushed = false;
   let _openSectionIdx = -1;
+  const _topicListOpen = { commonMistakes: false, acceptRejectItems: false };
 
   function pushUndoSnapshot() {
     _metadataSnapshotPushed = false;
@@ -37,6 +38,8 @@
     _lastSnapshotStr = '';
     _metadataSnapshotPushed = false;
     _openSectionIdx = -1;
+    _topicListOpen.commonMistakes = false;
+    _topicListOpen.acceptRejectItems = false;
     const fileName = draft.fileName || 'restored.json';
     draft = new Draft();
     draft.load(JSON.stringify(snapshot), fileName);
@@ -86,6 +89,8 @@
         clearUndoHistory();
         _metadataSnapshotPushed = false;
         _openSectionIdx = -1;
+        _topicListOpen.commonMistakes = false;
+        _topicListOpen.acceptRejectItems = false;
         renderTopicMetadata();
         renderSections();
         updatePreview();
@@ -223,8 +228,8 @@
         <button class="btn btn-primary ie-add-section" type="button">➕ إضافة قسم</button>
       </div>
     `;
-    html += InlineTopicEditor.renderMistakesEditor(draft);
-    html += InlineTopicEditor.renderAcceptRejectEditor(draft);
+    html += InlineTopicEditor.renderMistakesEditor(draft, _topicListOpen.commonMistakes);
+    html += InlineTopicEditor.renderAcceptRejectEditor(draft, _topicListOpen.acceptRejectItems);
     $('sections-container').innerHTML = html;
   }
 
@@ -458,12 +463,29 @@
   }
 
   function navigateToTarget(path, sectionIdx, blockIdx) {
+    let needsReRender = false;
+
+    if (path) {
+      if (path.startsWith('topic.commonMistakes') && !_topicListOpen.commonMistakes) {
+        _topicListOpen.commonMistakes = true;
+        needsReRender = true;
+      } else if (path.startsWith('topic.acceptRejectItems') && !_topicListOpen.acceptRejectItems) {
+        _topicListOpen.acceptRejectItems = true;
+        needsReRender = true;
+      }
+    }
+
     if (sectionIdx !== undefined && _openSectionIdx !== sectionIdx) {
       _openSectionIdx = sectionIdx;
+      needsReRender = true;
+    }
+
+    if (needsReRender) {
       renderSections();
       setTimeout(() => scrollToTarget(path, sectionIdx, blockIdx), 0);
       return;
     }
+
     scrollToTarget(path, sectionIdx, blockIdx);
   }
 
@@ -587,8 +609,15 @@
     renderSections();
   }
 
+  function handleTopicToggle(headerEl) {
+    const key = headerEl.dataset.topicList;
+    if (!key || !(key in _topicListOpen)) return;
+    _topicListOpen[key] = !_topicListOpen[key];
+    renderSections();
+  }
+
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-section-toggle');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-section-toggle, .ie-topic-toggle');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -627,6 +656,8 @@
       handleMoveSection(target, 'up');
     } else if (target.classList.contains('ie-section-down')) {
       handleMoveSection(target, 'down');
+    } else if (target.classList.contains('ie-topic-toggle')) {
+      handleTopicToggle(target);
     } else if (target.classList.contains('ie-section-toggle')) {
       handleSectionToggle(target);
     } else if (target.classList.contains('block-mini')) {
