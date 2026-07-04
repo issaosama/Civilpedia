@@ -6,6 +6,7 @@ class InlineBlockEditor {
       case 'text': return this._textEditor(sectionIdx, blockIdx, block);
       case 'execution_step': return this._executionStepEditor(sectionIdx, blockIdx, block);
       case 'safety_note': return this._safetyNoteEditor(sectionIdx, blockIdx, block);
+      case 'table': return this._tableEditor(sectionIdx, blockIdx, block);
       default: return '';
     }
   }
@@ -70,6 +71,64 @@ class InlineBlockEditor {
         </div>
         <div class="inline-actions">
           <button class="btn btn-success ie-save" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  static _tableEditor(sectionIdx, blockIdx, block) {
+    const caption = block.caption ? (block.caption.ar || '') : '';
+    const headers = block.headers || [];
+    const rows = block.rows || [];
+
+    const headersHtml = headers.map(h => `
+      <div class="ie-table-header-row">
+        <input type="text" class="form-input ie-table-header-input" value="${esc(h)}" placeholder="..." dir="rtl">
+        <button class="ie-table-remove-header" title="حذف العمود">🗑️</button>
+      </div>
+    `).join('');
+
+    const rowsHtml = rows.map(r => {
+      const cells = r.cells || [];
+      const cellsHtml = cells.map(c => `
+        <input type="text" class="form-input ie-table-cell-input" value="${esc(c)}" placeholder="..." dir="rtl">
+      `).join('');
+      return `<div class="ie-table-row">${cellsHtml}<button class="ie-table-remove-row" title="حذف الصف">🗑️</button></div>`;
+    }).join('');
+
+    const noRows = rows.length === 0 ? '<div class="empty-state-compact">لا توجد صفوف في الجدول</div>' : '';
+
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير الجدول</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>عنوان الجدول</label>
+            <input type="text" class="form-input ie-table-caption" value="${esc(caption)}" placeholder="..." dir="rtl">
+          </div>
+          <div class="ie-table-section">
+            <div class="ie-table-section-header">
+              <span>رؤوس الأعمدة</span>
+              <button class="btn btn-outline ie-table-add-header" type="button" style="font-size:11px;padding:3px 8px;">➕ إضافة عمود</button>
+            </div>
+            <div class="ie-table-headers">
+              ${headersHtml || '<div class="empty-state-compact">لا توجد رؤوس أعمدة</div>'}
+            </div>
+          </div>
+          <div class="ie-table-section">
+            <div class="ie-table-section-header">
+              <span>الصفوف</span>
+              <button class="btn btn-outline ie-table-add-row" type="button" style="font-size:11px;padding:3px 8px;">➕ إضافة صف</button>
+            </div>
+            <div class="ie-table-rows">
+              ${rowsHtml}
+            </div>
+            ${noRows}
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save-table" type="button">💾 حفظ</button>
           <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
         </div>
       </div>

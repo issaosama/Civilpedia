@@ -403,11 +403,21 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
       handleBlockSave(target);
+    } else if (target.classList.contains('ie-save-table')) {
+      handleTableSave(target);
+    } else if (target.classList.contains('ie-table-add-row')) {
+      handleTableAddRow(target);
+    } else if (target.classList.contains('ie-table-remove-row')) {
+      handleTableRemoveRow(target);
+    } else if (target.classList.contains('ie-table-add-header')) {
+      handleTableAddHeader(target);
+    } else if (target.classList.contains('ie-table-remove-header')) {
+      handleTableRemoveHeader(target);
     } else if (target.classList.contains('ie-cancel')) {
       handleBlockCancel();
     } else if (target.classList.contains('ie-save-topic')) {
@@ -479,6 +489,158 @@
   function handleBlockCancel() {
     renderSections();
     updatePreview();
+  }
+
+  function handleTableSave(saveBtn) {
+    if (!draft.isValid()) return;
+    const editor = saveBtn.closest('.inline-editor');
+    if (!editor) return;
+    const sectionIdx = parseInt(editor.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(editor.dataset.blockIdx, 10);
+    if (isNaN(sectionIdx) || isNaN(blockIdx)) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const block = sections[sectionIdx].blocks[blockIdx];
+    if (!block) return;
+
+    const captionInput = editor.querySelector('.ie-table-caption');
+    block.caption = block.caption || {};
+    block.caption.ar = captionInput ? captionInput.value : '';
+
+    const headerInputs = editor.querySelectorAll('.ie-table-header-input');
+    block.headers = Array.from(headerInputs).map(inp => inp.value);
+
+    const rowEls = editor.querySelectorAll('.ie-table-row');
+    block.rows = Array.from(rowEls).map(rowEl => {
+      const cellInputs = rowEl.querySelectorAll('.ie-table-cell-input');
+      return { cells: Array.from(cellInputs).map(inp => inp.value) };
+    });
+
+    draft.setField(`sections.${sectionIdx}.blocks.${blockIdx}`, block);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حفظ الجدول', 'success');
+  }
+
+  function handleTableAddRow(target) {
+    const editor = target.closest('.inline-editor');
+    if (!editor) return;
+    const headersContainer = editor.querySelector('.ie-table-headers');
+    const rowsContainer = editor.querySelector('.ie-table-rows');
+    if (!rowsContainer) return;
+    const numCols = headersContainer ? headersContainer.querySelectorAll('.ie-table-header-input').length : 0;
+
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'ie-table-row';
+    for (let c = 0; c < numCols; c++) {
+      const cellInput = document.createElement('input');
+      cellInput.type = 'text';
+      cellInput.className = 'form-input ie-table-cell-input';
+      cellInput.value = '';
+      cellInput.placeholder = '...';
+      cellInput.dir = 'rtl';
+      rowDiv.appendChild(cellInput);
+    }
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'ie-table-remove-row';
+    removeBtn.title = 'حذف الصف';
+    removeBtn.textContent = '🗑️';
+    rowDiv.appendChild(removeBtn);
+
+    rowsContainer.appendChild(rowDiv);
+
+    const emptyState = editor.querySelector('.ie-table-section:last-child .empty-state-compact');
+    if (emptyState) emptyState.remove();
+  }
+
+  function handleTableRemoveRow(target) {
+    const row = target.closest('.ie-table-row');
+    if (!row) return;
+    const rowsContainer = row.closest('.ie-table-rows');
+    if (!rowsContainer) return;
+    if (rowsContainer.children.length <= 1) {
+      if (!confirm('سيؤدي حذف آخر صف إلى جدول فارغ. هل أنت متأكد؟')) return;
+    }
+    row.remove();
+    const editor = target.closest('.inline-editor');
+    if (editor && !rowsContainer.children.length) {
+      const section = rowsContainer.closest('.ie-table-section');
+      if (section && !section.querySelector('.empty-state-compact')) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state-compact';
+        emptyDiv.textContent = 'لا توجد صفوف في الجدول';
+        section.appendChild(emptyDiv);
+      }
+    }
+  }
+
+  function handleTableAddHeader(target) {
+    const editor = target.closest('.inline-editor');
+    if (!editor) return;
+    const headersContainer = editor.querySelector('.ie-table-headers');
+    const rowsContainer = editor.querySelector('.ie-table-rows');
+    if (!headersContainer) return;
+
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'ie-table-header-row';
+    const headerInput = document.createElement('input');
+    headerInput.type = 'text';
+    headerInput.className = 'form-input ie-table-header-input';
+    headerInput.value = '';
+    headerInput.placeholder = '...';
+    headerInput.dir = 'rtl';
+    headerDiv.appendChild(headerInput);
+    const removeHeaderBtn = document.createElement('button');
+    removeHeaderBtn.className = 'ie-table-remove-header';
+    removeHeaderBtn.title = 'حذف العمود';
+    removeHeaderBtn.textContent = '🗑️';
+    headerDiv.appendChild(removeHeaderBtn);
+    headersContainer.appendChild(headerDiv);
+
+    const emptyState = headersContainer.querySelector('.empty-state-compact');
+    if (emptyState) emptyState.remove();
+
+    if (rowsContainer) {
+      Array.from(rowsContainer.children).forEach(rowEl => {
+        const cellInput = document.createElement('input');
+        cellInput.type = 'text';
+        cellInput.className = 'form-input ie-table-cell-input';
+        cellInput.value = '';
+        cellInput.placeholder = '...';
+        cellInput.dir = 'rtl';
+        rowEl.insertBefore(cellInput, rowEl.querySelector('.ie-table-remove-row'));
+      });
+    }
+  }
+
+  function handleTableRemoveHeader(target) {
+    const headerRow = target.closest('.ie-table-header-row');
+    if (!headerRow) return;
+    const headersContainer = headerRow.closest('.ie-table-headers');
+    if (!headersContainer) return;
+    const colIdx = Array.from(headersContainer.children).indexOf(headerRow);
+    if (colIdx === -1) return;
+
+    headerRow.remove();
+
+    if (!headersContainer.children.length) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty-state-compact';
+      emptyDiv.textContent = 'لا توجد رؤوس أعمدة';
+      headersContainer.appendChild(emptyDiv);
+    }
+
+    const editor = target.closest('.inline-editor');
+    if (!editor) return;
+    const rowsContainer = editor.querySelector('.ie-table-rows');
+    if (rowsContainer) {
+      Array.from(rowsContainer.children).forEach(rowEl => {
+        const cells = rowEl.querySelectorAll('.ie-table-cell-input');
+        if (cells[colIdx]) cells[colIdx].remove();
+      });
+    }
   }
 
   function handleTopicSave(saveBtn) {
@@ -579,6 +741,9 @@
         break;
       case 'safety_note':
         newBlock = { type: 'safety_note', order: nextOrder, message: { ar: '' }, severity: 'medium' };
+        break;
+      case 'table':
+        newBlock = { type: 'table', order: nextOrder, caption: { ar: '', en: '' }, headers: [], headersEn: [], rows: [] };
         break;
       default:
         return;
