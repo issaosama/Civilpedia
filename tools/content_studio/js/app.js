@@ -758,6 +758,7 @@
     if (!draft.isValid()) return;
     const editor = saveBtn.closest('.inline-editor');
     if (!editor) return;
+    normalizeTableRows(editor);
     const sectionIdx = parseInt(editor.dataset.sectionIdx, 10);
     const blockIdx = parseInt(editor.dataset.blockIdx, 10);
     if (isNaN(sectionIdx) || isNaN(blockIdx)) return;
@@ -802,30 +803,17 @@
   function handleTableAddRow(target) {
     const editor = target.closest('.inline-editor');
     if (!editor) return;
-    const headersContainer = editor.querySelector('.ie-table-headers');
     const rowsContainer = editor.querySelector('.ie-table-rows');
     if (!rowsContainer) return;
-    const numCols = headersContainer ? headersContainer.querySelectorAll('.ie-table-header-input').length : 0;
-
     const rowDiv = document.createElement('div');
     rowDiv.className = 'ie-table-row';
-    for (let c = 0; c < numCols; c++) {
-      const cellInput = document.createElement('input');
-      cellInput.type = 'text';
-      cellInput.className = 'form-input ie-table-cell-input';
-      cellInput.value = '';
-      cellInput.placeholder = '...';
-      cellInput.dir = 'rtl';
-      rowDiv.appendChild(cellInput);
-    }
     const removeBtn = document.createElement('button');
     removeBtn.className = 'ie-table-remove-row';
     removeBtn.title = 'حذف الصف';
     removeBtn.textContent = '🗑️';
     rowDiv.appendChild(removeBtn);
-
     rowsContainer.appendChild(rowDiv);
-
+    normalizeTableRows(editor);
     const emptyState = editor.querySelector('.ie-table-section:last-child .empty-state-compact');
     if (emptyState) emptyState.remove();
   }
@@ -849,6 +837,40 @@
         section.appendChild(emptyDiv);
       }
     }
+  }
+
+  function normalizeTableRows(editor) {
+    const headersContainer = editor.querySelector('.ie-table-headers');
+    const rowsContainer = editor.querySelector('.ie-table-rows');
+    if (!headersContainer || !rowsContainer) return;
+    const headerKeys = Array.from(headersContainer.querySelectorAll('.ie-table-header-row'))
+      .map(row => row.getAttribute('data-col-key'))
+      .filter(Boolean);
+    Array.from(rowsContainer.children).forEach(rowEl => {
+      if (!rowEl.classList.contains('ie-table-row')) return;
+      const existingCells = rowEl.querySelectorAll('.ie-table-cell-input');
+      const valueMap = {};
+      existingCells.forEach(cell => {
+        const key = cell.getAttribute('data-col-key');
+        if (key) valueMap[key] = cell.value;
+      });
+      existingCells.forEach(cell => cell.remove());
+      const removeBtn = rowEl.querySelector('.ie-table-remove-row');
+      for (const key of headerKeys) {
+        const cellInput = document.createElement('input');
+        cellInput.type = 'text';
+        cellInput.className = 'form-input ie-table-cell-input';
+        cellInput.setAttribute('data-col-key', key);
+        cellInput.value = valueMap[key] !== undefined ? valueMap[key] : '';
+        cellInput.placeholder = '...';
+        cellInput.dir = 'rtl';
+        if (removeBtn) {
+          rowEl.insertBefore(cellInput, removeBtn);
+        } else {
+          rowEl.appendChild(cellInput);
+        }
+      }
+    });
   }
 
   function handleTableAddHeader(target) {
@@ -880,18 +902,7 @@
     const emptyState = headersContainer.querySelector('.empty-state-compact');
     if (emptyState) emptyState.remove();
 
-    if (rowsContainer) {
-      Array.from(rowsContainer.children).forEach(rowEl => {
-        const cellInput = document.createElement('input');
-        cellInput.type = 'text';
-        cellInput.className = 'form-input ie-table-cell-input';
-        cellInput.setAttribute('data-col-key', colKey);
-        cellInput.value = '';
-        cellInput.placeholder = '...';
-        cellInput.dir = 'rtl';
-        rowEl.insertBefore(cellInput, rowEl.querySelector('.ie-table-remove-row'));
-      });
-    }
+    normalizeTableRows(editor);
   }
 
   function handleTableRemoveHeader(target) {
@@ -912,13 +923,7 @@
 
     const editor = target.closest('.inline-editor');
     if (!editor) return;
-    const rowsContainer = editor.querySelector('.ie-table-rows');
-    if (rowsContainer) {
-      Array.from(rowsContainer.children).forEach(rowEl => {
-        const cell = rowEl.querySelector(`.ie-table-cell-input[data-col-key="${colKey}"]`);
-        if (cell) cell.remove();
-      });
-    }
+    normalizeTableRows(editor);
 
     // Track removed column indices for headersEn sync (original columns only)
     if (colKey.startsWith('col-')) {
