@@ -26,15 +26,15 @@
     <div class="editor-panel">
       <div class="panel-header">
         <span>✏️ المحرر</span>
-        <button class="btn btn-success" id="validate-btn" style="margin-right:auto;padding:4px 12px;font-size:12px;">✅ Validate</button>
-        <button class="btn btn-outline" id="preview-btn" style="padding:4px 12px;font-size:12px;">👁️ تحديث المعاينة</button>
+        <button class="btn btn-success btn-sm" id="validate-btn">✅ تحقق</button>
+        <button class="btn btn-outline btn-sm" id="preview-btn">👁️ تحديث المعاينة</button>
       </div>
       <div class="panel-body" id="topic-metadata">
         <!-- Metadata form rendered here by app.js -->
       </div>
 
-      <div class="panel-body" style="border-top:1px solid var(--border-light);padding-top:12px;">
-        <h3 style="font-size:14px;margin-bottom:8px;color:var(--text-secondary);">الأقسام والكتل</h3>
+      <div class="panel-body panel-body-sections">
+        <h3 class="sections-heading">الأقسام والكتل</h3>
         <div id="sections-container">
           <div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>
         </div>
@@ -55,7 +55,7 @@
       <div class="panel-body" id="preview-container">
         <div class="preview-empty">قم بتحميل ملف Draft لعرض المعاينة</div>
       </div>
-      <div class="panel-body" id="validation-results" style="border-top:1px solid var(--border-light);"></div>
+      <div class="panel-body panel-body-sections" id="validation-results"></div>
     </div>
 
   </div>

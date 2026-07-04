@@ -176,7 +176,7 @@
     const blocks = section.blocks || [];
     const typeLabel = SECTION_TYPE_LABELS[section.type] || section.type;
     let blocksHtml = blocks.map((block, bi) => renderBlockMini(block, bi, index, blocks.length)).join('');
-    if (!blocksHtml) blocksHtml = '<div class="empty-state">لا توجد كتل في هذا القسم</div>';
+    if (!blocksHtml) blocksHtml = '<div class="empty-state-compact">لا توجد كتل داخل هذا القسم</div>';
 
     const addBlockHtml = `
       <div class="section-add-block">
