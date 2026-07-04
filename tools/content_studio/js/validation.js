@@ -277,3 +277,7 @@ class ValidationEngine {
     };
   }
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { ValidationEngine };
+}

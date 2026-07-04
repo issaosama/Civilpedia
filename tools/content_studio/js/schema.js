@@ -105,3 +105,15 @@ function themeOptions(selectedKey) {
     `<option value="${esc(o.value)}"${o.value === sel ? ' selected' : ''}>${esc(o.label)}</option>`
   ).join('');
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    esc, options, addableBlockOptions, addableSectionOptions, themeOptions,
+    SCHEMA_VERSION, VALID_LEVELS, VALID_PLAN_KEYS, VALID_TOPIC_STATUSES,
+    VALID_REVIEW_STATUSES, VALID_SECTION_TYPES, VALID_BLOCK_TYPES,
+    VALID_TEXT_VARIANTS, VALID_SEVERITIES, REQUIRED_TOP_LEVEL, REQUIRED_META,
+    REQUIRED_TOPIC, REQUIRED_SECTION, REQUIRED_BLOCK, BLOCK_TYPES_SIMPLE,
+    ADDABLE_BLOCK_OPTIONS, BLOCK_DISPLAY_NAMES, SECTION_TYPE_LABELS,
+    SEVERITY_LABELS, THEME_OPTIONS, VALID_THEME_KEYS
+  };
+}

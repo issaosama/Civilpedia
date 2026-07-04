@@ -78,3 +78,7 @@ class Draft {
     return pretty ? JSON.stringify(this.data, null, 2) : JSON.stringify(this.data);
   }
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { Draft };
+}
