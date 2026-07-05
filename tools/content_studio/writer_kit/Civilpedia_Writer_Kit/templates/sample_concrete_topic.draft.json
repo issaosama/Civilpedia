@@ -1,0 +1,126 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-05T00:00:00.000Z",
+    "updatedAt": "2026-07-05T00:00:00.000Z",
+    "createdBy": null,
+    "updatedBy": null,
+    "source": "template",
+    "id": "sample-concrete-curing"
+  },
+  "topic": {
+    "id": "sample-concrete-curing",
+    "titleAr": "نموذج: معالجة الخرسانة بعد الصب",
+    "titleEn": "Sample: Concrete Curing After Casting",
+    "categoryId": "concrete",
+    "summaryAr": "هذا نموذج لموضوع تعليمي يشرح أهمية معالجة الخرسانة بعد الصب.",
+    "summaryEn": "This is a sample educational topic explaining the importance of concrete curing after casting.",
+    "tags": ["خرسانة", "معالجة", "نموذج"],
+    "relatedTopicIds": [],
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "featuredImageUrl": "",
+    "simpleExplanation": {
+      "ar": "المعالجة هي الحفاظ على رطوبة الخرسانة بعد الصب لضمان وصولها إلى القوة المطلوبة."
+    }
+  },
+  "sections": [
+    {
+      "id": "s-intro",
+      "title": "أهمية المعالجة",
+      "titleEn": "Importance of Curing",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "المعالجة الجيدة تمنع التشقق السطحي وتزيد من متانة الخرسانة ومقاومتها للعوامل الجوية."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "image",
+          "order": 2,
+          "url": "",
+          "caption": {
+            "ar": "مثال: معالجة الخرسانة بالماء",
+            "en": "Example: Concrete curing with water"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s-methods",
+      "title": "طرق المعالجة",
+      "titleEn": "Curing Methods",
+      "type": "execution",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تتعدد طرق المعالجة حسب موقع العنصر الخرساني والظروف الجوية."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 1,
+          "description": {
+            "ar": "المعالجة بالرش المستمر بالماء لمدة لا تقل عن 7 أيام."
+          },
+          "notes": {
+            "ar": "يفضل استخدام خرطوم رش ناعم لتجنب إتلاف السطح."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 2,
+          "description": {
+            "ar": "تغطية السطح بأكياس مبللة أو مشمع بلاستيكي للحفاظ على الرطوبة."
+          }
+        }
+      ]
+    },
+    {
+      "id": "s-safety",
+      "title": "ملاحظات السلامة",
+      "titleEn": "Safety Notes",
+      "type": "safety",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "تجنب المشي على الخرسانة الطازجة ووضع علامات تحذير حول منطقة الصب."
+          },
+          "severity": "high"
+        },
+        {
+          "type": "image",
+          "order": 2,
+          "url": "",
+          "caption": {
+            "ar": "مثال: علامات تحذير أثناء الصب",
+            "en": "Example: Warning signs during casting"
+          }
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "",
+    "approvalStatus": null
+  }
+}
