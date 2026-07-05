@@ -74,6 +74,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           _buildHeroSection(topic),
           const SizedBox(height: 8),
           numbered((n) => _buildOverviewSection(topic, blocksByType, number: n)),
+          if (_hasGeneralData(blocksByType))
+            numbered((n) => _buildGeneralSection(blocksByType, number: n)),
           if (_hasImportanceData(topic, blocksByType))
             numbered((n) => _buildImportanceSection(topic, blocksByType, number: n)),
           if (_hasTableData(blocksByType))
@@ -145,6 +147,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   bool _hasSafetyData(Map<SectionType, List<ContentBlock>> blocksByType) {
     final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
     return safetyBlocks.any((b) => b is SafetyNoteBlock && _hasText(b.note.message));
+  }
+
+  bool _hasGeneralData(Map<SectionType, List<ContentBlock>> blocksByType) {
+    final generalBlocks = blocksByType[SectionType.general] ?? <ContentBlock>[];
+    return generalBlocks.isNotEmpty;
   }
 
   bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
@@ -822,6 +829,73 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         .where((b) => b.imageUrl.isNotEmpty)
         .map(_buildImageBlock)
         .toList();
+  }
+
+  // ───────────── GENERAL CONTENT · 03 ─────────────
+
+  Widget _buildGeneralSection(Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+    final generalBlocks = blocksByType[SectionType.general] ?? <ContentBlock>[];
+    if (generalBlocks.isEmpty) return const SizedBox.shrink();
+
+    final children = <Widget>[];
+    for (final block in generalBlocks) {
+      if (block is TextBlock && _hasText(block.content)) {
+        children.add(Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+          child: Text(
+            block.content,
+            style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
+          ),
+        ));
+      } else if (block is ImageBlock && block.imageUrl.isNotEmpty) {
+        children.add(_buildImageBlock(block));
+      } else if (block is SafetyNoteBlock && _hasText(block.note.message)) {
+        children.add(_buildGeneralSafetyNote(block));
+      }
+    }
+    if (children.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('GENERAL', 'المحتوى العام', number: number),
+        ...children,
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildGeneralSafetyNote(SafetyNoteBlock block) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: EncyclopediaCardColors.softPanel,
+          borderRadius: BorderRadius.circular(8),
+          border: const Border(
+            right: BorderSide(color: Color(0xFFD4A017), width: 3),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFB8860B)),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                block.note.message,
+                style: const TextStyle(fontSize: 13, color: EncyclopediaCardColors.textPrimary, height: 1.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ───────────── COMMON MISTAKES · 08 ─────────────
