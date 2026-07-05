@@ -97,9 +97,6 @@ class ValidationEngine {
     if (topic.status && !VALID_TOPIC_STATUSES.includes(topic.status)) {
       this._addWarning(`topic.status غير صالح: "${topic.status}". القيم المقبولة: ${VALID_TOPIC_STATUSES.join(', ')}`);
     }
-    if (topic.tags && Array.isArray(topic.tags) && topic.tags.length === 0) {
-      this._addWarning('topic.tags فارغ — يفضل إضافة وسوم');
-    }
     if (topic.simpleExplanation) {
       if (topic.simpleExplanation.ar === undefined || topic.simpleExplanation.ar === null) {
         this._addWarning('simpleExplanation.ar مفقود');
