@@ -245,6 +245,67 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 8: Image path validation warnings
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n8. Image path validation warnings');
+
+  function validateImageUrl(url, desc) {
+    const draft = loadDraft(Object.assign(makeMinimalDraft(), {
+      sections: [{
+        id: 'img-sec', title: 'Image Section', type: 'general', order: 1,
+        blocks: [{ type: 'image', order: 1, url, caption: { ar: '', en: '' } }]
+      }]
+    }));
+    const result = validate(draft);
+    const warns = result.warnings;
+    return { result, warns };
+  }
+
+  function expectNoWarn(url, label) {
+    const { warns } = validateImageUrl(url);
+    const hasFormatWarn = warns.some(w => w.includes('صيغة') || w.includes('assets/images') || w.includes('مسار الحاسبة') || w.includes('بدلاً من') || w.includes('فراغات'));
+    assert(!hasFormatWarn, `${label}: should have NO format warning for "${url}"`);
+  }
+
+  function expectWarn(url, label) {
+    const { warns } = validateImageUrl(url);
+    assert(warns.length > 0, `${label}: should produce warning(s) for "${url}"`);
+    return warns;
+  }
+
+  // Supported extensions — no format warning
+  expectNoWarn('assets/images/test.png', 'PNG');
+  expectNoWarn('assets/images/test.jpg', 'JPG');
+  expectNoWarn('assets/images/test.jpeg', 'JPEG');
+  expectNoWarn('assets/images/test.webp', 'WEBP');
+
+  // Unsupported extensions — format warning
+  let w = expectWarn('assets/images/test.heic', 'HEIC');
+  assert(w.some(x => x.includes('صيغة')), 'HEIC should warn about unsupported format');
+  w = expectWarn('assets/images/test.svg', 'SVG');
+  assert(w.some(x => x.includes('صيغة')), 'SVG should warn about unsupported format');
+
+  // Absolute Windows path
+  w = expectWarn('D:\\Civilpedia\\assets\\images\\test.png', 'Absolute Windows path');
+  assert(w.some(x => x.includes('مسار الحاسبة')), 'Absolute path should warn about drive letter');
+
+  // Backslash path
+  w = expectWarn('assets\\images\\test.png', 'Backslash');
+  assert(w.some(x => x.includes('بدلاً من')), 'Backslash path should warn');
+
+  // Spaces in filename
+  w = expectWarn('assets/images/test image.png', 'Spaces');
+  assert(w.some(x => x.includes('فراغات')), 'Spaces should warn');
+
+  // Missing assets/images/ prefix
+  w = expectWarn('images/test.png', 'Missing prefix');
+  assert(w.some(x => x.includes('assets/images')), 'Missing prefix should warn');
+
+  console.log(`  PASS: All ${arguments.length || 'image path'} checks passed`);
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -805,7 +806,23 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               block.imageUrl,
               fit: BoxFit.contain,
               width: double.infinity,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              errorBuilder: (_, __, ___) {
+                if (kReleaseMode) return const SizedBox.shrink();
+                return Container(
+                  width: double.infinity,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'تعذر تحميل الصورة\n${block.imageUrl}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                );
+              },
             ),
           ),
           if (_hasText(block.caption))

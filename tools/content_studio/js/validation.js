@@ -241,9 +241,31 @@ class ValidationEngine {
         }
         if (!block.methodAr) this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "methodAr" مفقود`);
         break;
-      case 'image':
-        if (!block.url) this._addWarning(`section "${sectionId}" block[${index}] — image: "url" مفقود`);
+      case 'image': {
+        if (!block.url) {
+          this._addWarning(`section "${sectionId}" block[${index}] — image: "url" مفقود`);
+          break;
+        }
+        const url = block.url;
+        const ext = url.split('.').pop().toLowerCase();
+        const supported = ['png', 'jpg', 'jpeg', 'webp'];
+        if (!supported.includes(ext)) {
+          this._addWarning(`section "${sectionId}" block[${index}] — صيغة الصورة غير مدعومة: .${ext}. استخدم PNG أو JPG أو JPEG أو WEBP.`);
+        }
+        if (!url.startsWith('assets/images/')) {
+          this._addWarning(`section "${sectionId}" block[${index}] — يجب أن يبدأ مسار الصورة بـ assets/images/`);
+        }
+        if (/^[A-Za-z]:\\/.test(url)) {
+          this._addWarning(`section "${sectionId}" block[${index}] — لا تستخدم مسار الحاسبة مثل C:\\ أو D:\\`);
+        }
+        if (url.includes('\\')) {
+          this._addWarning(`section "${sectionId}" block[${index}] — استخدم / بدلاً من \\ في المسار.`);
+        }
+        if (/\s/.test(url)) {
+          this._addWarning(`section "${sectionId}" block[${index}] — يفضّل أن يكون اسم الصورة بدون فراغات.`);
+        }
         break;
+      }
       case 'equipment':
         if (!block.items || (Array.isArray(block.items) && block.items.length === 0)) {
           this._addWarning(`section "${sectionId}" block[${index}] — equipment: "items" فارغ`);
