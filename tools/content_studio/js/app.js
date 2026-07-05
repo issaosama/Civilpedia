@@ -280,6 +280,7 @@
           <span class="section-order">#${section.order}</span>
           <span class="section-type-badge">${esc(typeLabel)}</span>
           <span class="section-title">${esc(section.title)}</span>
+          <button class="ie-edit-section-title" data-section-idx="${index}" type="button" title="تعديل اسم القسم">✏️</button>
           <span class="section-block-count">${blocks.length} كتل</span>
           ${sectionReorderHtml}
           <button class="ie-remove-section" data-section-idx="${index}" type="button" title="حذف القسم">🗑️</button>
@@ -657,7 +658,7 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-section-toggle, .ie-topic-toggle');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-section-toggle, .ie-topic-toggle, .ie-edit-section-title, .ie-save-section-title, .ie-cancel-section-title');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -692,6 +693,12 @@
       handleAddSection();
     } else if (target.classList.contains('ie-remove-section')) {
       handleRemoveSection(target);
+    } else if (target.classList.contains('ie-edit-section-title')) {
+      handleSectionTitleEdit(target);
+    } else if (target.classList.contains('ie-save-section-title')) {
+      handleSectionTitleSave(target);
+    } else if (target.classList.contains('ie-cancel-section-title')) {
+      handleSectionTitleCancel();
     } else if (target.classList.contains('ie-section-up')) {
       handleMoveSection(target, 'up');
     } else if (target.classList.contains('ie-section-down')) {
@@ -1149,6 +1156,72 @@
     renderSections();
     updatePreview();
     showToast('✅ تم حذف القسم', 'success');
+  }
+
+  function handleSectionTitleEdit(target) {
+    const sectionIdx = parseInt(target.dataset.sectionIdx, 10);
+    if (isNaN(sectionIdx)) return;
+    const header = target.closest('.section-card-header');
+    if (!header) return;
+    const titleSpan = header.querySelector('.section-title');
+    if (!titleSpan) return;
+
+    const currentTitle = titleSpan.textContent;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'section-title-input';
+    input.value = currentTitle;
+    input.dir = 'rtl';
+
+    const editGroup = document.createElement('span');
+    editGroup.className = 'section-title-edit-group';
+    editGroup.innerHTML = `
+      <button class="ie-save-section-title" data-section-idx="${sectionIdx}" type="button" title="حفظ">💾</button>
+      <button class="ie-cancel-section-title" data-section-idx="${sectionIdx}" type="button" title="إلغاء">❌</button>
+    `;
+
+    titleSpan.replaceWith(input);
+    input.insertAdjacentElement('afterend', editGroup);
+    target.style.display = 'none';
+
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const saveBtn = editGroup.querySelector('.ie-save-section-title');
+        if (saveBtn) handleSectionTitleSave(saveBtn);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        handleSectionTitleCancel();
+      }
+    });
+
+    input.focus();
+    input.select();
+  }
+
+  function handleSectionTitleSave(target) {
+    const sectionIdx = parseInt(target.dataset.sectionIdx, 10);
+    if (isNaN(sectionIdx)) return;
+    const header = target.closest('.section-card-header');
+    if (!header) return;
+    const input = header.querySelector('.section-title-input');
+    if (!input) return;
+
+    const newTitle = input.value.trim();
+    if (!newTitle) {
+      showToast('❌ اسم القسم لا يمكن أن يكون فارغاً', 'error');
+      return;
+    }
+
+    pushUndoSnapshot();
+    draft.setField(`sections.${sectionIdx}.title`, newTitle);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حفظ اسم القسم', 'success');
+  }
+
+  function handleSectionTitleCancel() {
+    renderSections();
   }
 
   function handleMoveBlock(btn, direction) {

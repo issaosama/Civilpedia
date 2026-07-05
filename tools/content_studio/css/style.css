@@ -375,6 +375,53 @@ body {
   font-weight: 600;
   font-size: 14px;
 }
+.section-title-input {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border: 2px solid var(--primary);
+  border-radius: 4px;
+  outline: none;
+  font-family: var(--font-ar);
+  min-width: 120px;
+}
+.section-title-edit-group {
+  display: inline-flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.ie-save-section-title,
+.ie-cancel-section-title {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 4px;
+  line-height: 1;
+  border-radius: 3px;
+  transition: background 0.15s;
+}
+.ie-save-section-title:hover,
+.ie-cancel-section-title:hover {
+  background: var(--border-light);
+}
+.ie-edit-section-title {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0 4px;
+  line-height: 1;
+  border-radius: 3px;
+  transition: background 0.15s;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.ie-edit-section-title:hover {
+  opacity: 1;
+  background: var(--border-light);
+}
 
 .section-block-count {
   font-size: 12px;

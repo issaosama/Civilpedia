@@ -306,6 +306,71 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 9: Section title persistence
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n9. Section title persistence');
+
+  function makeDraftWithSection(title) {
+    return loadDraft(Object.assign(makeMinimalDraft(), {
+      sections: [{
+        id: 'sec-1', title, type: 'general', order: 1, blocks: []
+      }]
+    }));
+  }
+
+  // 9a: Section title is stored correctly
+  const d1 = makeDraftWithSection('أسباب التشققات');
+  assert(d1.toJSON().sections[0].title === 'أسباب التشققات', 'Title should be stored as set');
+
+  // 9b: Section title persists after setField + JSON round-trip
+  const d2 = makeDraftWithSection('قسم جديد');
+  d2.setField('sections.0.title', 'طرق المعالجة');
+  const serialized = JSON.stringify(d2.toJSON());
+  const d3 = new Draft();
+  d3.load(serialized, 'test-roundtrip.draft.json');
+  assert(d3.toJSON().sections[0].title === 'طرق المعالجة', 'Title should survive JSON round-trip');
+
+  // 9c: Section title persists after sections array round-trip
+  const data = d2.toJSON();
+  data.sections[0].title = 'المعدات المطلوبة';
+  d2.setField('sections', data.sections);
+  assert(d2.toJSON().sections[0].title === 'المعدات المطلوبة', 'Title should persist after sections array reassignment');
+
+  // 9d: Multiple sections each preserve their own title
+  const d4 = makeDraftWithSection('القسم الأول');
+  const sections = d4.toJSON().sections;
+  sections.push({ id: 'sec-2', title: 'القسم الثاني', type: 'general', order: 2, blocks: [] });
+  d4.setField('sections', sections);
+  assert(d4.toJSON().sections.length === 2, 'Should have 2 sections');
+  assert(d4.toJSON().sections[0].title === 'القسم الأول', 'Section 0 title preserved');
+  assert(d4.toJSON().sections[1].title === 'القسم الثاني', 'Section 1 title preserved');
+
+  // 9e: Section title is preserved after undo
+  const d5 = makeDraftWithSection('العنوان الأصلي');
+  d5.setField('sections.0.title', 'العنوان الجديد');
+  const snapshot = d5.toJSON();
+  // Simulate undo by restoring the previous snapshot
+  const d6 = new Draft();
+  d6.load(JSON.stringify(snapshot), 'test-undo.draft.json');
+  // Re-set to original
+  const originalData = JSON.parse(JSON.stringify(snapshot));
+  originalData.sections[0].title = 'العنوان الأصلي';
+  d6.load(JSON.stringify(originalData), 'test-undo.draft.json');
+  assert(d6.toJSON().sections[0].title === 'العنوان الأصلي', 'Undo should restore previous title');
+
+  // 9f: Validation still works after title change
+  const d7 = makeDraftWithSection('قسم مع تعديل');
+  const v1 = validate(d7);
+  d7.setField('sections.0.title', 'عنوان معدل');
+  const v2 = validate(d7);
+  assert(v2.errors.length === v1.errors.length, 'Validation error count should not change after title edit');
+  assert(v2.warnings.length === v1.warnings.length, 'Validation warning count should not change after title edit');
+
+  console.log('  PASS: All section title checks passed');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

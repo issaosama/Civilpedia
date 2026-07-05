@@ -103,6 +103,13 @@ class InlineBlockEditor {
   static _handleImagePick(fileInput, urlInputId, previewId) {
     const file = fileInput.files[0];
     if (!file) return;
+    const ext = file.name.toLowerCase().split('.').pop();
+    const supported = ['png', 'jpg', 'jpeg', 'webp'];
+    if (!supported.includes(ext)) {
+      alert('صيغة الصورة غير مدعومة حالياً. استخدم PNG أو JPG أو JPEG أو WEBP.');
+      fileInput.value = '';
+      return;
+    }
     const name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '_').replace(/\s+/g, '_');
     const urlInput = document.getElementById(urlInputId);
     if (!urlInput) return;
