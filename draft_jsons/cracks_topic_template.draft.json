@@ -1,0 +1,116 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-05T00:00:00.000Z",
+    "updatedAt": "2026-07-05T00:00:00.000Z",
+    "createdBy": null,
+    "updatedBy": null,
+    "source": "template",
+    "id": "your-topic-id"
+  },
+  "topic": {
+    "id": "cracks-topic-id",
+    "titleAr": "الشقوق في الخرسانة",
+    "titleEn": "",
+    "categoryId": "general",
+    "summaryAr": "الشقوق التي تظهر في الخراسنة",
+    "summaryEn": "",
+    "tags": [],
+    "relatedTopicIds": [],
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "featuredImageUrl": "",
+    "simpleExplanation": {
+      "ar": ""
+    },
+    "visual_theme": {
+      "accent": "maroon"
+    },
+    "reportWording": {
+      "ar": "في بعض الاحيان تظهر شقوق على اسطح الخرسانه"
+    },
+    "commonMistakes": [
+      {
+        "ar": "تجنب صب الخرسانه عند درجات الحراره المرتفعة",
+        "en": "",
+        "severity": "medium"
+      }
+    ],
+    "acceptRejectItems": [
+      {
+        "criteriaAr": "سمك التشقق",
+        "criteriaEn": "",
+        "acceptanceLimitAr": "تشققات شعيرية",
+        "acceptanceLimitEn": "",
+        "methodAr": "يتم الفحص بالامواض الفوق الصوتيه",
+        "methodEn": "",
+        "isCritical": false,
+        "reviewRequired": true,
+        "planKey": "",
+        "codeReference": ""
+      }
+    ]
+  },
+  "sections": [
+    {
+      "id": "sec-intro",
+      "title": "القسم الأول: مقدمة",
+      "titleEn": "",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "الخرسانه عندما يتم تسليحها لا يحدث فيها تشققات"
+          },
+          "variant": "paragraph"
+        }
+      ]
+    },
+    {
+      "id": "sec-content",
+      "title": "القسم الثاني: المحتوى الرئيسي",
+      "titleEn": "",
+      "type": "general",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "هنالك العديد من الامور التي تسبب ظهور التشققات في الخرسانة"
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "احذر من الخرسانه"
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "image",
+          "order": 3,
+          "url": "assets/images/crack.png",
+          "caption": {
+            "ar": "صور للتشقوقات التي تظهر على الخرسانة",
+            "en": ""
+          }
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "",
+    "approvalStatus": null
+  }
+}
