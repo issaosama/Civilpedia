@@ -62,16 +62,29 @@ class InlineBlockEditor {
   static _imageEditor(sectionIdx, blockIdx, block) {
     const url = block.url || '';
     const caption = block.caption ? (block.caption.ar || '') : '';
+    const urlInputId = `ie-img-url-${sectionIdx}-${blockIdx}`;
+    const fileInputId = `ie-img-file-${sectionIdx}-${blockIdx}`;
+    const previewId = `ie-img-prev-${sectionIdx}-${blockIdx}`;
     const previewHtml = url
-      ? `<div class="image-editor-preview"><img src="${esc(url)}" alt="" style="max-width:100%;max-height:200px;border-radius:6px;border:1px solid #ddd;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none;color:#999;font-size:12px;">⚠️ تعذر تحميل الصورة</div></div>`
-      : '<div class="image-editor-hint" style="color:#999;font-size:12px;">أدخل مسار الصورة داخل assets/images</div>';
+      ? `<div id="${previewId}" class="image-editor-preview"><img src="${esc(url)}" alt="" style="max-width:100%;max-height:200px;border-radius:6px;border:1px solid #ddd;" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none;color:#999;font-size:12px;">⚠️ تعذر تحميل الصورة</div></div>`
+      : `<div id="${previewId}" class="image-editor-hint" style="color:#999;font-size:12px;">أدخل مسار الصورة داخل assets/images</div>`;
     return `
       <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
         <div class="inline-header">✏️ تحرير الصورة</div>
         <div class="inline-body">
           <div class="inline-field">
             <label>مسار الصورة</label>
-            <input type="text" class="form-input ie-input" data-field="url" value="${esc(url)}" placeholder="assets/images/..." dir="ltr">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" id="${urlInputId}" class="form-input ie-input" data-field="url" value="${esc(url)}" placeholder="assets/images/..." dir="ltr" style="flex:1;">
+              <button type="button" class="btn btn-outline image-pick-btn" onclick="document.getElementById('${fileInputId}').click()" style="white-space:nowrap;">اختيار صورة</button>
+            </div>
+            <input type="file" id="${fileInputId}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="InlineBlockEditor._handleImagePick(this,'${urlInputId}','${previewId}')">
+          </div>
+          <div style="margin-top:4px;font-size:11px;color:#888;line-height:1.6;">
+            <strong>إرشاد سريع:</strong><br>
+            اضغط "اختيار صورة" وسيتم تعبئة المسار تلقائياً.<br>
+            أرسل ملف الصورة مع ملف الـ Draft.<br>
+            يفضّل أن يكون اسم الصورة إنكليزي وبدون فراغات.
           </div>
           ${previewHtml}
           <div class="inline-field">
@@ -85,6 +98,25 @@ class InlineBlockEditor {
         </div>
       </div>
     `;
+  }
+
+  static _handleImagePick(fileInput, urlInputId, previewId) {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '_').replace(/\s+/g, '_');
+    const urlInput = document.getElementById(urlInputId);
+    if (!urlInput) return;
+    urlInput.value = 'assets/images/' + name;
+    const preview = document.getElementById(previewId);
+    if (!preview) return;
+    if (preview._objUrl) URL.revokeObjectURL(preview._objUrl);
+    preview._objUrl = URL.createObjectURL(file);
+    preview.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = preview._objUrl;
+    img.style.cssText = 'max-width:100%;max-height:200px;border-radius:6px;border:1px solid #ddd;';
+    preview.appendChild(img);
+    fileInput.value = '';
   }
 
   static _safetyNoteEditor(sectionIdx, blockIdx, block) {
