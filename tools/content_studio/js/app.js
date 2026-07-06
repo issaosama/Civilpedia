@@ -544,7 +544,7 @@
   function togglePreviewTheme() {
     const container = $('preview-container');
     const isDark = container.classList.toggle('preview-theme-dark');
-    $('preview-theme-toggle').textContent = isDark ? '☀️ نهار' : '🌙 ليلة';
+    $('preview-theme-toggle').textContent = isDark ? '☀️ فاتح' : '🌙 داكن';
   }
 
   function updatePreview() {
