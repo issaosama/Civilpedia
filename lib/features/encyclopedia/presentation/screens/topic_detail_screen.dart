@@ -56,9 +56,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   // ───────────── Main article column ─────────────
 
   Widget _buildArticle(BuildContext context, EncyclopediaProvider provider, EngineeringTopic topic) {
-    final blocksByType = _collectBlocksByType(provider);
     EncyclopediaCardColors.apply(EncyclopediaTopicTheme.fromKey(topic.visualTheme));
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final sortedSections = List<TopicSection>.from(provider.currentSections)
+      ..sort((a, b) => a.order.compareTo(b.order));
 
     int seq = 0;
 
@@ -76,23 +78,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           _buildBrandPill(isDark: isDark),
           _buildHeroSection(topic, isDark: isDark),
           const SizedBox(height: 8),
-          numbered((n) => _buildOverviewSection(topic, blocksByType, isDark: isDark, number: n)),
-          if (_hasGeneralData(blocksByType))
-            numbered((n) => _buildGeneralSection(blocksByType, isDark: isDark, number: n)),
-          if (_hasImportanceData(topic, blocksByType))
-            numbered((n) => _buildImportanceSection(topic, blocksByType, isDark: isDark, number: n)),
-          if (_hasTableData(blocksByType))
-            numbered((n) => _buildDimensionsSection(blocksByType, isDark: isDark, number: n)),
-          if (_hasApplicationData(topic, blocksByType))
-            numbered((n) => _buildApplicationSection(topic, blocksByType, isDark: isDark, number: n)),
-          if (_hasSafetyData(blocksByType))
-            numbered((n) => _buildSafetySection(blocksByType, isDark: isDark, number: n)),
-          if (_hasInspectionData(topic, blocksByType))
-            numbered((n) => _buildInspectionSection(topic, blocksByType, isDark: isDark, number: n)),
-          if (_hasCommonMistakes(topic, blocksByType))
-            numbered((n) => _buildCommonMistakesSection(topic, blocksByType, isDark: isDark, number: n)),
-          if (topic.reportWording != null)
-            _buildReportWordingSection(topic, isDark: isDark),
+          for (final section in sortedSections)
+            numbered((n) => _buildSectionByOrder(section, provider, isDark: isDark, number: n)),
+          if (_hasLegacyMetadata(topic))
+            ..._buildLegacySections(topic, isDark: isDark, startNumber: seq + 1),
           if (topic.relatedToolRoutes.isNotEmpty)
             _buildRelatedToolsSection(context, topic, isDark: isDark),
           const SizedBox(height: 48),
@@ -103,66 +92,23 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Data helpers ─────────────
 
-  Map<SectionType, List<ContentBlock>> _collectBlocksByType(EncyclopediaProvider provider) {
-    final map = <SectionType, List<ContentBlock>>{};
-    for (final section in provider.currentSections) {
-      final blocks = provider.blocksForSection(section.id);
-      if (blocks.isNotEmpty) {
-        map.putIfAbsent(section.type, () => []);
-        map[section.type]!.addAll(blocks);
-      }
-    }
-    return map;
-  }
-
-  bool _hasImportanceData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (_hasText(topic.siteNotes?.ar) || _hasText(topic.codeNotes?.ar)) return true;
-    return false;
-  }
-
-  bool _hasTableData(Map<SectionType, List<ContentBlock>> blocksByType) {
-    for (final blocks in blocksByType.values) {
-      if (blocks.any((b) => b is TableBlock && b.data.rows.isNotEmpty)) return true;
-    }
-    return false;
-  }
-
-  bool _hasApplicationData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (_localizedHasText(topic.beforeWork) || _localizedHasText(topic.duringWork) || _localizedHasText(topic.afterWork)) return true;
-    if (blocksByType.containsKey(SectionType.execution)) return true;
-    return false;
-  }
-
-  bool _hasInspectionData(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (topic.acceptRejectItems.any((item) => _hasText(item.criteriaAr))) { return true; }
-    if (blocksByType.containsKey(SectionType.inspection) &&
-        blocksByType[SectionType.inspection]!.any((b) =>
-            (b is InspectionPointBlock && _hasText(b.point.criteria)) ||
-            (b is ChecklistBlock && b.items.any((i) => _hasText(i.text))))) { return true; }
-    return false;
-  }
-
-  bool _hasCommonMistakes(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType) {
-    if (topic.commonMistakes.any((m) => _hasText(m.ar) || _hasText(m.en))) { return true; }
-    return false;
-  }
-
-  bool _hasSafetyData(Map<SectionType, List<ContentBlock>> blocksByType) {
-    final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
-    return safetyBlocks.any((b) => b is SafetyNoteBlock && _hasText(b.note.message));
-  }
-
-  bool _hasGeneralData(Map<SectionType, List<ContentBlock>> blocksByType) {
-    final generalBlocks = blocksByType[SectionType.general] ?? <ContentBlock>[];
-    return generalBlocks.isNotEmpty;
-  }
-
   bool _hasText(String? value) => value != null && value.trim().isNotEmpty;
 
   bool _localizedHasText(LocalizedText? value) => _hasText(value?.ar) || _hasText(value?.en);
 
   String _cleanDisplayText(String text) {
     return text.replaceAll('[DRAFT - REVIEW REQUIRED]', '').trim();
+  }
+
+  bool _hasLegacyMetadata(EngineeringTopic topic) {
+    return _localizedHasText(topic.beforeWork) ||
+        _localizedHasText(topic.duringWork) ||
+        _localizedHasText(topic.afterWork) ||
+        _localizedHasText(topic.siteNotes) ||
+        _localizedHasText(topic.codeNotes) ||
+        _localizedHasText(topic.reportWording) ||
+        topic.commonMistakes.any((m) => _hasText(m.ar) || _hasText(m.en)) ||
+        topic.acceptRejectItems.any((item) => _hasText(item.criteriaAr));
   }
 
   // ───────────── Section header ─────────────
@@ -203,6 +149,336 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  // ───────────── Section-driven block rendering ─────────────
+
+  Widget _buildSectionByOrder(TopicSection section, EncyclopediaProvider provider, {required bool isDark, required int number}) {
+    final blocks = provider.blocksForSection(section.id);
+    if (blocks.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(section.type.labelAr.toUpperCase(), section.title, number: number, isDark: isDark),
+        ...blocks.map((block) => _renderSingleBlock(block, isDark: isDark)),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _renderSingleBlock(ContentBlock block, {required bool isDark}) {
+    return switch (block) {
+      TextBlock b when _hasText(b.content) => _buildBlockText(b, isDark: isDark),
+      SafetyNoteBlock b when _hasText(b.note.message) => _buildSafetyNoteBlock(b, isDark: isDark),
+      ExecutionStepBlock b => _buildStepCard(b, isDark: isDark),
+      TableBlock b when b.data.rows.isNotEmpty => _buildEditorialTable(b, isDark: isDark),
+      ImageBlock b when b.imageUrl.isNotEmpty => _buildImageBlock(b, isDark: isDark),
+      ChecklistBlock b when b.items.any((i) => _hasText(i.text)) => _buildChecklistBlock(b, isDark: isDark),
+      InspectionPointBlock b when _hasText(b.point.criteria) => _buildInspectionPointBlock(b, isDark: isDark),
+      EquipmentBlock b when b.items.isNotEmpty => _buildEquipmentBlock(b, isDark: isDark),
+      CodeReferenceBlock b => _buildCodeReferenceBlock(b, isDark: isDark),
+      _ => const SizedBox.shrink(),
+    };
+  }
+
+  Widget _buildBlockText(TextBlock block, {required bool isDark}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Text(
+        block.content,
+        style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
+      ),
+    );
+  }
+
+  Widget _buildSafetyNoteBlock(SafetyNoteBlock block, {required bool isDark}) {
+    if (!_hasText(block.note.message)) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
+          borderRadius: BorderRadius.circular(8),
+          border: const Border(
+            right: BorderSide(color: EncyclopediaCardColors.safetyBorder, width: 3),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 2),
+              child: Icon(Icons.warning_amber_rounded, size: 16, color: EncyclopediaCardColors.safetyIcon),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                block.note.message,
+                style: TextStyle(fontSize: 13, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEquipmentBlock(EquipmentBlock block, {required bool isDark}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (block.title != null) ...[
+              Row(
+                children: [
+                  Icon(Icons.precision_manufacturing, size: 18, color: EncyclopediaCardColors.accent),
+                  const SizedBox(width: 8),
+                  Text(
+                    block.title!,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+            ],
+            ...block.items.map((item) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.circle, size: 6, color: EncyclopediaCardColors.accent),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item.name,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (item.purpose != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 14, top: 2),
+                      child: Text(
+                        'الغرض: ${item.purpose}',
+                        style: TextStyle(fontSize: 13, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
+                      ),
+                    ),
+                  if (item.specification != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 14, top: 2),
+                      child: Text(
+                        'المواصفة: ${item.specification}',
+                        style: TextStyle(fontSize: 13, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
+                      ),
+                    ),
+                ],
+              ),
+            )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCodeReferenceBlock(CodeReferenceBlock block, {required bool isDark}) {
+    final ref = block.reference;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: EncyclopediaCardColors.dangerText,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    ref.code,
+                    style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: EncyclopediaCardColors.dangerText.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'القسم ${ref.section}',
+                    style: TextStyle(color: EncyclopediaCardColors.dangerText, fontSize: 11, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              ref.title,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
+                height: 1.5,
+              ),
+            ),
+            if (ref.description != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                ref.description!,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary,
+                  height: 1.6,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInspectionPointBlock(InspectionPointBlock block, {required bool isDark}) {
+    final point = block.point;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              point.isCritical ? Icons.check_circle_outline : Icons.radio_button_unchecked,
+              size: 18,
+              color: point.isCritical ? EncyclopediaCardColors.dangerText : (isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
+                children: [
+                  TextSpan(
+                    text: point.criteria,
+                    style: TextStyle(fontWeight: point.isCritical ? FontWeight.w600 : FontWeight.normal),
+                  ),
+                  if (point.acceptableTolerance != null && point.acceptableTolerance!.isNotEmpty)
+                    TextSpan(
+                      text: ' — ${point.acceptableTolerance}',
+                      style: TextStyle(color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
+                    ),
+                  if (point.method != null && point.method!.isNotEmpty)
+                    TextSpan(
+                      text: ' | ${point.method}',
+                      style: TextStyle(color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary, fontSize: 12),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ───────────── Legacy metadata sections ─────────────
+
+  List<Widget> _buildLegacySections(EngineeringTopic topic, {required bool isDark, required int startNumber}) {
+    final widgets = <Widget>[];
+    int n = startNumber;
+
+    if (_hasText(topic.siteNotes?.ar) || _hasText(topic.codeNotes?.ar)) {
+      widgets.add(_buildImportanceSection(topic, isDark: isDark, number: n++));
+    }
+
+    if (_localizedHasText(topic.beforeWork) || _localizedHasText(topic.duringWork) || _localizedHasText(topic.afterWork)) {
+      widgets.add(_buildLegacyAppSection(topic, isDark: isDark, number: n++));
+    }
+
+    if (topic.acceptRejectItems.any((item) => _hasText(item.criteriaAr))) {
+      widgets.add(_buildLegacyInspSection(topic, isDark: isDark, number: n++));
+    }
+
+    if (topic.commonMistakes.any((m) => _hasText(m.ar) || _hasText(m.en))) {
+      widgets.add(_buildCommonMistakesSection(topic, isDark: isDark, number: n++));
+    }
+
+    if (_hasText(topic.reportWording?.ar)) {
+      widgets.add(_buildReportWordingSection(topic, isDark: isDark));
+    }
+
+    return widgets;
+  }
+
+  Widget _buildLegacyAppSection(EngineeringTopic topic, {required bool isDark, required int number}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('APPLICATION', 'طريقة التنفيذ', number: number, isDark: isDark),
+        if (_hasText(topic.beforeWork?.ar))
+          _buildSubSection('قبل العمل', topic.beforeWork!.ar, isDark: isDark),
+        if (_hasText(topic.duringWork?.ar))
+          _buildSubSection('أثناء العمل', topic.duringWork!.ar, isDark: isDark),
+        if (_hasText(topic.afterWork?.ar))
+          _buildSubSection('بعد العمل', topic.afterWork!.ar, isDark: isDark),
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+
+  Widget _buildLegacyInspSection(EngineeringTopic topic, {required bool isDark, required int number}) {
+    final validItems = topic.acceptRejectItems.where((item) => _hasText(item.criteriaAr)).toList();
+    if (validItems.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader('INSPECTION', 'فحص الأعمال بعد الإنجاز', number: number, isDark: isDark),
+        ...validItems.map((item) => _buildInspectionRow(
+              item.criteriaAr,
+              item.acceptanceLimitAr,
+              item.methodAr,
+              item.isCritical,
+              isDark: isDark,
+            )),
+        const SizedBox(height: 8),
+      ],
     );
   }
 
@@ -378,30 +654,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     }
   }
 
-  // ───────────── OVERVIEW · 01 ─────────────
-
-  Widget _buildOverviewSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
-    final overviewText = topic.simpleExplanation?.ar ?? topic.summary;
-    if (!_hasText(overviewText)) return const SizedBox.shrink();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('OVERVIEW', 'نظرة عامة', number: number, isDark: isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            overviewText,
-            style: TextStyle(fontSize: 15, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.8),
-          ),
-        ),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
   // ───────────── IMPORTANCE · 02 ─────────────
 
-  Widget _buildImportanceSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
+  Widget _buildImportanceSection(EngineeringTopic topic, {required bool isDark, required int number}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -457,33 +712,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  // ───────────── DIMENSIONS · 05 ─────────────
-
-  Widget _buildDimensionsSection(Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
-    final tables = <TableBlock>[];
-    final images = <Widget>[];
-    for (final blocks in blocksByType.values) {
-      for (final block in blocks) {
-        if (block is TableBlock && block.data.rows.isNotEmpty) tables.add(block);
-      }
-      images.addAll(_imageBlocksFrom(blocks, isDark: isDark));
-    }
-    if (tables.isEmpty && images.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('TABLES', 'القياسات والسماكات المتداولة', number: number, isDark: isDark),
-        ...tables.map((t) => _buildEditorialTable(t, isDark: isDark)),
-        ...images,
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
   Widget _buildEditorialTable(TableBlock tableBlock, {required bool isDark}) {
     final data = tableBlock.data;
     if (data.rows.isEmpty) return const SizedBox.shrink();
+    final colCount = data.headers.length;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 16),
       child: Column(
@@ -503,6 +736,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             ),
           LayoutBuilder(
             builder: (context, constraints) {
+              const spacing = 24.0;
+              const margin = 14.0;
+              final minTableWidth = colCount * 130 + (colCount - 1) * spacing + 2 * margin;
+              final needsScroll = colCount > 2 && constraints.maxWidth < minTableWidth;
+
               return Column(
                 children: [
                   Container(
@@ -526,27 +764,32 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                           fontSize: 13,
                           height: 1.4,
                         ),
-                        columnSpacing: 24,
-                        horizontalMargin: 14,
+                        columnSpacing: spacing,
+                        horizontalMargin: margin,
+                        dataRowMinHeight: 36,
                         columns: data.headers.map((h) => DataColumn(label: Text(h))).toList(),
                         rows: data.rows
                             .map((row) => DataRow(
-                                  cells: row.cells.map((c) => DataCell(Text(c))).toList(),
+                                  cells: row.cells
+                                      .map((c) => DataCell(
+                                            Text(c, softWrap: true),
+                                          ))
+                                      .toList(),
                                 ))
                             .toList(),
                       ),
                     ),
                   ),
-                  if (constraints.maxWidth < _tableTotalWidth(data))
+                  if (needsScroll)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
                       child: Row(
                         children: [
-                          Icon(Icons.swipe, size: 12, color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
-                          const SizedBox(width: 4),
+                          Icon(Icons.swipe, size: 14, color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
+                          const SizedBox(width: 6),
                           Text(
                             'اسحب الجدول أفقياً لعرض جميع الأعمدة',
-                            style: TextStyle(fontSize: 11, color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
+                            style: TextStyle(fontSize: 12, color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
                           ),
                         ],
                       ),
@@ -557,44 +800,6 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  double _tableTotalWidth(TableData data) {
-    const colSpacing = 24.0;
-    const horizMargin = 14.0;
-    final colCount = data.headers.length;
-    final totalWidth = colCount * 120.0 + (colCount - 1) * colSpacing + 2 * horizMargin;
-    return totalWidth;
-  }
-
-  // ───────────── APPLICATION · 06 ─────────────
-
-  Widget _buildApplicationSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
-    final executionBlocks = blocksByType[SectionType.execution] ?? <ContentBlock>[];
-    final steps = executionBlocks.whereType<ExecutionStepBlock>().toList()
-      ..sort((a, b) => a.step.stepNumber.compareTo(b.step.stepNumber));
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('APPLICATION', 'طرق التنفيذ', number: number, isDark: isDark),
-        if (_hasText(topic.beforeWork?.ar))
-          _buildSubSection('قبل العمل', topic.beforeWork!.ar, isDark: isDark),
-        if (_hasText(topic.duringWork?.ar))
-          _buildSubSection('أثناء العمل', topic.duringWork!.ar, isDark: isDark),
-        if (_hasText(topic.afterWork?.ar))
-          _buildSubSection('بعد العمل', topic.afterWork!.ar, isDark: isDark),
-        if (steps.isNotEmpty) ...[
-          if (!_localizedHasText(topic.beforeWork) && !_localizedHasText(topic.duringWork) && !_localizedHasText(topic.afterWork))
-            const SizedBox(height: 4)
-          else
-            const SizedBox(height: 8),
-          ...steps.map((s) => _buildStepCard(s, isDark: isDark)),
-        ],
-        ..._imageBlocksFrom(executionBlocks, isDark: isDark),
-        const SizedBox(height: 8),
-      ],
     );
   }
 
@@ -671,42 +876,6 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   // ───────────── INSPECTION · 07 ─────────────
-
-  Widget _buildInspectionSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
-    final inspBlocks = blocksByType[SectionType.inspection] ?? <ContentBlock>[];
-
-    final validAcceptReject = topic.acceptRejectItems.where((item) => _hasText(item.criteriaAr)).toList();
-    final validInspPoints = inspBlocks.whereType<InspectionPointBlock>().where((b) => _hasText(b.point.criteria)).toList();
-    final validChecklists = inspBlocks.whereType<ChecklistBlock>().where((b) => b.items.any((i) => _hasText(i.text))).toList();
-
-    if (validAcceptReject.isEmpty && validInspPoints.isEmpty && validChecklists.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('INSPECTION', 'فحص الأعمال بعد الإنجاز', number: number, isDark: isDark),
-        ...validAcceptReject.map((item) => _buildInspectionRow(
-              item.criteriaAr,
-              item.acceptanceLimitAr,
-              item.methodAr,
-              item.isCritical,
-              isDark: isDark,
-            )),
-        ...validInspPoints.map((b) => _buildInspectionRow(
-              b.point.criteria,
-              b.point.acceptableTolerance,
-              b.point.method,
-              b.point.isCritical,
-              isDark: isDark,
-            )),
-        ...validChecklists.map((b) => _buildChecklistBlock(b, isDark: isDark)),
-        ..._imageBlocksFrom(inspBlocks, isDark: isDark),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
 
   Widget _buildInspectionRow(String criteria, String? limit, String? method, bool isCritical, {required bool isDark}) {
     return Padding(
@@ -844,134 +1013,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  List<Widget> _imageBlocksFrom(List<ContentBlock> blocks, {required bool isDark}) {
-    return blocks
-        .whereType<ImageBlock>()
-        .where((b) => b.imageUrl.isNotEmpty)
-        .map((b) => _buildImageBlock(b, isDark: isDark))
-        .toList();
-  }
-
-  // ───────────── GENERAL CONTENT · 03 ─────────────
-
-  Widget _buildGeneralSection(Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
-    final generalBlocks = blocksByType[SectionType.general] ?? <ContentBlock>[];
-    if (generalBlocks.isEmpty) return const SizedBox.shrink();
-
-    final children = <Widget>[];
-    for (final block in generalBlocks) {
-      if (block is TextBlock && _hasText(block.content)) {
-        children.add(Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-          child: Text(
-            block.content,
-            style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
-          ),
-        ));
-      } else if (block is ImageBlock && block.imageUrl.isNotEmpty) {
-        children.add(_buildImageBlock(block, isDark: isDark));
-      } else if (block is SafetyNoteBlock && _hasText(block.note.message)) {
-        children.add(_buildGeneralSafetyNote(block, isDark: isDark));
-      }
-    }
-    if (children.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('GENERAL', 'المحتوى العام', number: number, isDark: isDark),
-        ...children,
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
-  Widget _buildGeneralSafetyNote(SafetyNoteBlock block, {required bool isDark}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
-          borderRadius: BorderRadius.circular(8),
-          border: const Border(
-            right: BorderSide(color: Color(0xFFD4A017), width: 3),
-          ),
-        ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(top: 2),
-              child: Icon(Icons.warning_amber_rounded, size: 16, color: Color(0xFFB8860B)),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                block.note.message,
-                style: TextStyle(fontSize: 13, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // ───────────── COMMON MISTAKES · 08 ─────────────
 
-  Widget _buildSafetySection(Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
-    final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
-    final validNotes = safetyBlocks.whereType<SafetyNoteBlock>().where((s) => _hasText(s.note.message)).toList();
-    if (validNotes.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionHeader('SAFETY', 'تنبيهات السلامة', number: number, isDark: isDark),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
-              borderRadius: BorderRadius.circular(10),
-              border: const Border(
-                right: BorderSide(color: Color(0xFFD4A017), width: 3),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: validNotes.map((s) => Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(top: 2),
-                      child: Icon(Icons.warning_amber_rounded, size: 18, color: Color(0xFFB8860B)),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        s.note.message,
-                        style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
-                      ),
-                    ),
-                  ],
-                ),
-              )).toList(),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-      ],
-    );
-  }
-
-  Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
+  Widget _buildCommonMistakesSection(EngineeringTopic topic, {required bool isDark, required int number}) {
     final validMistakes = topic.commonMistakes.where((m) => _hasText(m.ar) || _hasText(m.en)).toList();
 
     if (validMistakes.isEmpty) return const SizedBox.shrink();
