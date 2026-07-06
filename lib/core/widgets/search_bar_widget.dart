@@ -15,17 +15,17 @@ class SearchBarWidget extends StatelessWidget {
       textAlign: TextAlign.right,
       decoration: InputDecoration(
         hintText: Ar.search,
-        hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
-        prefixIcon: Icon(Icons.search, color: Colors.white.withValues(alpha: 0.7)),
+        hintStyle: TextStyle(color: const Color(0xFFF0ECE2).withValues(alpha: 0.6)),
+        prefixIcon: Icon(Icons.search, color: const Color(0xFFF0ECE2).withValues(alpha: 0.7)),
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.2),
+        fillColor: const Color(0xFFF0ECE2).withValues(alpha: 0.12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(28),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       ),
-      style: const TextStyle(color: Colors.white),
+      style: const TextStyle(color: Color(0xFFF0ECE2)),
     );
   }
 }

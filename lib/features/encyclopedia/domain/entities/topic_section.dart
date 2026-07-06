@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
 
 enum SectionType {
   execution,
@@ -21,7 +22,7 @@ enum SectionType {
 
   Color get accentColor {
     return switch (this) {
-      SectionType.execution => const Color(0xFF1565C0),
+      SectionType.execution => AppColors.primaryDark,
       SectionType.inspection => const Color(0xFFEF6C00),
       SectionType.safety => const Color(0xFF2E7D32),
       SectionType.equipment => const Color(0xFF6A1B9A),

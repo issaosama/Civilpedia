@@ -68,7 +68,7 @@ class InspectionSummaryCard extends StatelessWidget {
           AppSpacing.gapSm,
           Row(
             children: [
-              _stat(Colors.green, passLabel, '${summary.passed}'),
+              _stat(AppColors.success, passLabel, '${summary.passed}'),
               const SizedBox(width: 16),
               _stat(AppColors.error, failLabel, '${summary.failed}'),
               const SizedBox(width: 16),

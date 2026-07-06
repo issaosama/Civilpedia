@@ -77,7 +77,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       ]
                     : [
                         Colors.white,
-                        AppColors.surfaceTint.withValues(alpha: 0.1),
+                        AppColors.primary.withValues(alpha: 0.04),
                         AppColors.primaryLight.withValues(alpha: 0.05),
                       ],
                 begin: Alignment.topCenter,
@@ -249,7 +249,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                     context,
                     icon: Icons.architecture,
                     label: 'هندسة مدنية',
-                    color: Colors.blueAccent,
+                    color: AppColors.primary,
                   ),
                 ),
                 // Floating glass card 2

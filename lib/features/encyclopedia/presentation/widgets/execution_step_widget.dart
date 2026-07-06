@@ -16,9 +16,9 @@ class ExecutionStepWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF1565C0).withValues(alpha: 0.04),
+        color: AppColors.primaryDark.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.15)),
+        border: Border.all(color: AppColors.primaryDark.withValues(alpha: 0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -27,7 +27,7 @@ class ExecutionStepWidget extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFF1565C0),
+              color: AppColors.primary,
               borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
             ),
             alignment: Alignment.center,

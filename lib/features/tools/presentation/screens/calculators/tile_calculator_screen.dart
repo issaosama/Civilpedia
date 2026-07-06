@@ -739,7 +739,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
       padding: const EdgeInsets.symmetric(vertical: 1),
       child: Row(
         children: [
-          const Icon(Icons.subdirectory_arrow_left, size: 14, color: Colors.grey),
+          const Icon(Icons.subdirectory_arrow_left, size: 14, color: AppColors.textSecondary),
           const SizedBox(width: 4),
           Text(
             '$label: ${pct.toStringAsFixed(1)}%',
@@ -805,15 +805,15 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
             fontSize: 13,
           ),
           filled: true,
-          fillColor: const Color(0xFFF8FAFC),
+          fillColor: AppColors.surface,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: const BorderSide(color: AppColors.border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-            borderSide: BorderSide(color: Colors.grey.shade200),
+            borderSide: const BorderSide(color: AppColors.border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
@@ -831,15 +831,15 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
       hintText: '0',
       hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.4)),
       filled: true,
-      fillColor: const Color(0xFFF8FAFC),
+      fillColor: AppColors.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        borderSide: BorderSide(color: Colors.grey.shade200),
+        borderSide: const BorderSide(color: AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),

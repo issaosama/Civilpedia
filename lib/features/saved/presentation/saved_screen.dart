@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/custom_card.dart';
 import '../../../data/repositories/article_repository.dart';
 import '../../../data/local/hive_helper.dart';
@@ -61,9 +62,9 @@ class _SavedScreenState extends State<SavedScreen> with SingleTickerProviderStat
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.favorite_border, size: 64, color: Colors.grey.shade400),
+            Icon(Icons.favorite_border, size: 64, color: AppColors.textSecondary),
             const SizedBox(height: 16),
-            Text(Ar.noFavorites, style: TextStyle(color: Colors.grey.shade600)),
+            Text(Ar.noFavorites, style: TextStyle(color: AppColors.textSecondary)),
           ],
         ),
       );
@@ -106,9 +107,9 @@ class _SavedScreenState extends State<SavedScreen> with SingleTickerProviderStat
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.download_outlined, size: 64, color: Colors.grey.shade400),
+            Icon(Icons.download_outlined, size: 64, color: AppColors.textSecondary),
             const SizedBox(height: 16),
-            Text(Ar.noDownloads, style: TextStyle(color: Colors.grey.shade600)),
+            Text(Ar.noDownloads, style: TextStyle(color: AppColors.textSecondary)),
           ],
         ),
       );
@@ -135,7 +136,7 @@ class _SavedScreenState extends State<SavedScreen> with SingleTickerProviderStat
               Expanded(
                 child: Text(article.title, style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
-              const Icon(Icons.check_circle, color: Colors.green, size: 20),
+              const Icon(Icons.check_circle, color: AppColors.success, size: 20),
             ],
           ),
         );

@@ -143,7 +143,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
 
   Color _categoryColor(String id) {
     return switch (id) {
-      'concrete' => const Color(0xFF1565C0),
+      'concrete' => AppColors.primary,
       'steel' => const Color(0xFFC62828),
       'soil' => const Color(0xFF795548),
       'roads' => const Color(0xFF2E7D32),

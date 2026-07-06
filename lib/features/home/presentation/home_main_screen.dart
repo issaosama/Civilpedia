@@ -8,6 +8,7 @@ import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/theme/spacing.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../data/repositories/article_repository.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
@@ -42,6 +43,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
     final repo = ArticleRepository();
     final auth = context.watch<AuthProvider>();
     final connectivity = context.watch<ConnectivityProvider>();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       body: RefreshIndicator(
         onRefresh: _onRefresh,
@@ -51,10 +53,9 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Theme.of(context).primaryColor,
-                    Theme.of(context).primaryColor.withValues(alpha: 0.7),
-                  ],
+                  colors: isDark
+                      ? [const Color(0xFF1A1813), const Color(0xFF24221A)]
+                      : [const Color(0xFF2A2620), const Color(0xFF3A3530)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -69,15 +70,13 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                       Row(
                         children: [
                           CircleAvatar(
-                            backgroundColor: Colors.white.withValues(
-                              alpha: 0.2,
-                            ),
+                            backgroundColor: AppColors.primary,
                             child: Text(
                               auth.isLoggedIn
                                   ? auth.userName[0].toUpperCase()
                                   : 'Z',
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: AppColors.onPrimary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -92,7 +91,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                                       ? '${tr(Ar.welcome, En.welcome)}، ${auth.userName}'
                                       : tr(Ar.welcome, En.welcome),
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: Color(0xFFF0ECE2),
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -104,8 +103,8 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                                           ? auth.userEmail
                                           : Ar.appName,
                                       style: TextStyle(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.8,
+                                        color: const Color(0xFFA8A294).withValues(
+                                          alpha: 0.9,
                                         ),
                                         fontSize: 12,
                                       ),
@@ -136,7 +135,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             ),
             Container(
               height: 1,
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              color: AppColors.border.withValues(alpha: 0.5),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
@@ -144,7 +143,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             ),
             Container(
               height: 1,
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              color: AppColors.border.withValues(alpha: 0.5),
             ),
             SectionHeader(title: Ar.quickTools, actionLabel: tr(Ar.viewAll, En.viewAll)),
             const QuickToolsSection(),

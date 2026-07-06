@@ -546,7 +546,7 @@ class ProfileScreen extends StatelessWidget {
             '${tr(Ar.backupExportSuccess, En.backupExportSuccess)}\n$fileName\n$fullPath',
           ),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
           duration: const Duration(seconds: 5),
         ),
       );
@@ -557,7 +557,7 @@ class ProfileScreen extends StatelessWidget {
           content: Text(
               '${tr(Ar.backupExportFailed, En.backupExportFailed)}: $e'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
     }

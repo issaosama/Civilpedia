@@ -30,7 +30,7 @@ class _ChecklistWidgetState extends State<ChecklistWidget> {
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surfaceContainer,
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),

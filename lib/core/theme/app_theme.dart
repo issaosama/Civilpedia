@@ -15,14 +15,14 @@ class AppTheme {
       colorScheme: const ColorScheme.light(
         primary: AppColors.primary,
         onPrimary: AppColors.onPrimary,
-        secondary: AppColors.brandSecondary,
-        onSecondary: AppColors.onSecondary,
-        surface: AppColors.surface,
+        secondary: AppColors.primaryDark,
+        onSecondary: AppColors.onPrimaryDark,
+        surface: AppColors.surfaceWhite,
         error: AppColors.error,
       ),
       textTheme: AppTypography.textTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.primaryDark,
         foregroundColor: AppColors.onPrimary,
         centerTitle: true,
         elevation: 0,
@@ -31,9 +31,11 @@ class AppTheme {
         elevation: DesignTokens.elevation2,
         shadowColor: AppColors.cardShadow,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
+        color: AppColors.surfaceWhite,
+        surfaceTintColor: Colors.transparent,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: AppColors.surface,
+        backgroundColor: AppColors.surfaceWhite,
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
@@ -44,7 +46,9 @@ class AppTheme {
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusSm)),
+          elevation: 1,
+          shadowColor: AppColors.primary.withValues(alpha: 0.3),
         ),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
@@ -55,12 +59,20 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.background,
+        fillColor: AppColors.surface,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
           borderSide: BorderSide.none,
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.border,
+        thickness: 1,
+        space: 1,
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
       ),
     );
   }
@@ -69,42 +81,47 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: AppColors.primaryLight,
+      primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.darkBackground,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryLight,
+        primary: AppColors.primary,
         onPrimary: AppColors.onPrimary,
-        secondary: AppColors.brandSecondary,
-        onSecondary: AppColors.onSecondary,
+        secondary: AppColors.primaryLight,
+        onSecondary: AppColors.onPrimary,
         surface: AppColors.darkSurface,
         error: AppColors.error,
       ),
       textTheme: AppTypography.darkTextTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.darkSurface,
+        backgroundColor: AppColors.darkBackground,
         foregroundColor: AppColors.darkTextPrimary,
         centerTitle: true,
         elevation: 0,
       ),
       cardTheme: CardThemeData(
-        elevation: DesignTokens.elevation2,
-        shadowColor: Colors.black26,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
-        color: AppColors.darkCard,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+          side: const BorderSide(color: AppColors.darkBorder, width: 1),
+        ),
+        color: AppColors.darkSurface,
+        surfaceTintColor: Colors.transparent,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.darkSurface,
-        selectedItemColor: AppColors.primaryLight,
+        selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.darkTextSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryLight,
+          backgroundColor: AppColors.primary,
           foregroundColor: AppColors.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusSm)),
+          elevation: 0,
         ),
       ),
       pageTransitionsTheme: const PageTransitionsTheme(
@@ -117,10 +134,22 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.darkSurface,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+          borderSide: const BorderSide(color: AppColors.darkBorder),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+          borderSide: const BorderSide(color: AppColors.darkBorderLight),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      ),
+      dividerTheme: const DividerThemeData(
+        color: AppColors.darkBorder,
+        thickness: 1,
+        space: 1,
+      ),
+      dialogTheme: DialogThemeData(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
       ),
     );
   }

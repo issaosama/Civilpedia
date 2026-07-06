@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../../core/theme/app_colors.dart';
 import '../models/inspection_category.dart';
 import '../models/inspection_item.dart';
 
@@ -7,7 +8,7 @@ const List<InspectionCategory> kCategories = [
     id: 'concrete',
     titleKey: 'catConcrete',
     icon: Icons.architecture,
-    accentColor: Color(0xFF1565C0),
+    accentColor: AppColors.primary,
     order: 1,
   ),
   InspectionCategory(

@@ -8,7 +8,7 @@ import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
 
-const Color _fieldFill = Color(0xFFF8FAFC);
+const Color _fieldFill = AppColors.surface;
 
 class CalculatorScreen extends StatefulWidget {
   final String type;

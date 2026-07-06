@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/design_tokens.dart';
 import '../../../../data/repositories/article_repository.dart';
 
 class QuickToolsSection extends StatelessWidget {
@@ -9,6 +11,7 @@ class QuickToolsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tools = ArticleRepository.tools;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SizedBox(
       height: 100,
       child: ListView.separated(
@@ -20,7 +23,8 @@ class QuickToolsSection extends StatelessWidget {
           final tool = tools[index];
           return Material(
             borderRadius: BorderRadius.circular(16),
-            elevation: 1,
+            elevation: isDark ? 0 : 1,
+            color: isDark ? AppColors.darkSurface : AppColors.surfaceWhite,
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
               onTap: () => context.push('/${tool.route}'),
@@ -28,7 +32,9 @@ class QuickToolsSection extends StatelessWidget {
                 width: 90,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
+                  border: Border.all(
+                    color: isDark ? AppColors.darkBorder : AppColors.border,
+                  ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -36,15 +42,19 @@ class QuickToolsSection extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
                       ),
-                      child: Icon(tool.icon, size: 24, color: Theme.of(context).primaryColor),
+                      child: Icon(tool.icon, size: 24, color: AppColors.primary),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       tool.name,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? AppColors.darkTextPrimary : AppColors.mainText,
+                      ),
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

@@ -1,6 +1,7 @@
 import '../../models/article_model.dart';
 import '../../models/category_model.dart';
 import '../../models/tool_model.dart';
+import '../../core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class ArticleRepository {
@@ -9,7 +10,7 @@ class ArticleRepository {
       id: '1',
       name: 'خرسانة',
       icon: Icons.architecture,
-      color: const Color(0xFF1565C0),
+      color: AppColors.primary,
     ),
     CategoryModel(
       id: '2',

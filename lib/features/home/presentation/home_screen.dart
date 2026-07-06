@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import '../../../localization/ar.dart';
 import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -58,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
       child: Scaffold(
-        extendBody: true, // This allows the content to scroll behind the floating bottom bar
+        extendBody: true,
         body: SafeArea(
           bottom: false,
           child: Column(
@@ -70,21 +71,25 @@ class _HomeScreenState extends State<HomeScreen> {
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+            borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: Container(
                 height: 70,
                 decoration: BoxDecoration(
                   color: isDark
-                      ? theme.colorScheme.surface.withValues(alpha: 0.8)
-                      : Colors.white.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+                      ? AppColors.darkBottomNav.withValues(alpha: 0.85)
+                      : AppColors.surfaceWhite.withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
                   border: Border.all(
-                    color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05),
+                    color: isDark
+                        ? AppColors.darkBorder.withValues(alpha: 0.5)
+                        : AppColors.border.withValues(alpha: 0.5),
                     width: 1,
                   ),
-                  boxShadow: DesignTokens.softShadow(theme.shadowColor),
+                  boxShadow: isDark
+                      ? null
+                      : DesignTokens.cardShadow(AppColors.cardShadow),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -106,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNavItem(int index, IconData outlineIcon, IconData filledIcon, String label, ThemeData theme, int currentIndex) {
     final isSelected = currentIndex == index;
     final isDark = theme.brightness == Brightness.dark;
-    final activeColor = theme.primaryColor;
+    final activeColor = AppColors.primary;
 
     return Expanded(
       child: GestureDetector(
@@ -128,13 +133,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? theme.primaryColor.withValues(alpha: 0.1)
+                      ? AppColors.primary.withValues(alpha: 0.12)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                 ),
                 child: Icon(
                   isSelected ? filledIcon : outlineIcon,
-                  color: isSelected ? activeColor : (isDark ? Colors.white60 : Colors.black45),
+                  color: isSelected
+                      ? activeColor
+                      : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
                   size: 24,
                 ),
               ),
@@ -144,7 +151,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected ? activeColor : (isDark ? Colors.white60 : Colors.black45),
+                  color: isSelected
+                      ? activeColor
+                      : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
                 ),
               ),
             ],
