@@ -69,11 +69,20 @@ List<Map<String, dynamic>> _exportAcceptReject(dynamic items) {
   }).toList();
 }
 
+const _sectionTypeMap = {
+  'code_reference': 'codeReference',
+};
+
+String _exportSectionType(dynamic type) {
+  final raw = type?.toString() ?? 'general';
+  return _sectionTypeMap[raw] ?? raw;
+}
+
 List<Map<String, dynamic>> _exportSections(List sections) {
   return sections.map((s) => {
     'id': s['id'],
     'title': s['title'],
-    'type': s['type'],
+    'type': _exportSectionType(s['type']),
     'order': s['order'],
   }).toList();
 }
