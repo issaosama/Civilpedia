@@ -71,7 +71,17 @@ A compatibility report with:
 - [ ] Safety notes have a `severity` field (`low`, `medium`, or `high`).
 
 ### Execution Steps
-- [ ] Execution steps have a `step.ar` field.
+- [ ] Execution steps have `stepNumber` (number, required) — otherwise preview shows `?`.
+- [ ] Execution steps have `description.ar` (string, required) — otherwise editor shows "لا يوجد محتوى".
+- [ ] Do NOT use `"step": {"ar": "..."}` — this field is NOT supported by editor or preview.
+- [ ] `notes.ar` is optional but recommended if extra context is needed.
+
+### Renderability (Critical)
+- [ ] Every block must be renderable in the Content Studio **editor** — expand each section and confirm no block shows "لا يوجد محتوى".
+- [ ] Every block must be renderable in the Content Studio **preview** — confirm no block shows `?` as a placeholder for missing content.
+- [ ] JSON validity alone is NOT sufficient — a block can be structurally valid but render as empty.
+- [ ] A supported block type is NOT sufficient — the block must also have the correct field names that the editor and preview expect.
+- [ ] **Every individual block field must match the exact field name** expected by `editor.js` and `preview.js` for that block type.
 
 ### Rendering Preview
 - [ ] Content should display correctly in light mode.
@@ -88,6 +98,10 @@ A compatibility report with:
 - If any check fails, status is NEEDS FIXES.
 - Provide specific, actionable fix suggestions.
 - Prioritize issues by impact (high/medium/low).
+- **JSON validity is NOT enough** — blocks must also have the correct field names for their type.
+- **Supported block type is NOT enough** — the block's field names must match what the editor and preview expect.
+- **Check each block type's expected field names in `editor.js` and `preview.js`** — do not guess.
+- Any block that would display "لا يوجد محتوى" or `?` in preview is a **HIGH severity** issue.
 
 ## What Not to Do
 
@@ -96,6 +110,8 @@ A compatibility report with:
 - Do not output app-ready JSON.
 - Do not modify generated catalog.
 - Do not modify the Draft JSON — only report issues.
+- Do not assume a block is compatible just because its `type` is in the supported list.
+- Do not skip checking `execution_step` blocks for the correct `description.ar` and `stepNumber` fields.
 
 ## Prompt Template
 
@@ -111,11 +127,16 @@ A compatibility report with:
 المطلوب:
 1. تحقق من صحة JSON.
 2. تحقق من أنواع الكتل المدعومة فقط.
-3. تحقق من مسارات الصور والصيغ.
-4. تحقق من وجود التعليقات التوضيحية للصور.
-5. تحقق من هيكل الأقسام والكتل.
-6. تحقق من إمكانية التصدير.
-7. تحقق من توافق الوضع الفاتح والداكن.
-8. أعد تقريرًا بالحالة: PASS أو NEEDS FIXES.
-9. لكل مشكلة: اكتب الوصف والموقع والخطورة والإصلاح المقترح.
+3. تحقق من أن كل كتلة تحتوي على الحقول الصحيحة المتوقعة من Content Studio (راجع editor.js و preview.js لكل نوع).
+4. تحقق بشكل خاص من execution_step:
+   - يجب أن يحتوي على stepNumber (رقم) و description.ar (نص).
+   - لا تستخدم "step" — هذا الحقل غير مدعوم ويعرض "لا يوجد محتوى".
+5. تحقق من مسارات الصور والصيغ.
+6. تحقق من وجود التعليقات التوضيحية للصور.
+7. تحقق من هيكل الأقسام والكتل.
+8. تحقق من أن لا شيء يعرض "لا يوجد محتوى" أو "?".
+9. تحقق من إمكانية التصدير.
+10. تحقق من توافق الوضع الفاتح والداكن.
+11. أعد تقريرًا بالحالة: PASS أو NEEDS FIXES.
+12. لكل مشكلة: اكتب الوصف والموقع والخطورة والإصلاح المقترح.
 ```

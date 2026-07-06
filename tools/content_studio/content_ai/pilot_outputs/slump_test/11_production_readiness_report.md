@@ -75,11 +75,13 @@
 |-------|--------|
 | Valid block types only | ✅ PASS — uses text, execution_step, safety_note, table, image |
 | No unsupported block types | ✅ PASS |
+| Execution_step uses correct fields (`stepNumber` + `description.ar`) | ✅ PASS — fixed in CONTENT-AI-PILOT-4 (was `step.ar`) |
 | Section types valid | ✅ PASS — general, equipment, execution, inspection, code_reference, safety |
 | Image paths correct | ✅ PASS |
 | No absolute paths or backslashes | ✅ PASS |
-| Should load in Content Studio | ✅ PASS |
+| Should load in Content Studio without "لا يوجد محتوى" | ✅ PASS |
 | Should validate without errors | ✅ PASS |
+| Should preview without "?" placeholders | ✅ PASS |
 | Should preview in light mode | ✅ PASS |
 | Should preview in dark mode | ✅ PASS |
 
@@ -108,6 +110,7 @@
 | 10. Compatibility (09_report) | ✅ | PASS |
 | 11. Owner Review Notes (10_notes) | ✅ | This document |
 | 12. Production Readiness (11_report) | ✅ | This document |
+| 13. **CONTENT-AI-PILOT-4 Fix (execution_step shape)** | ✅ | Fixed `step` → `stepNumber`+`description.ar` in both drafts + agent docs + QA checklist |
 
 ---
 
@@ -120,6 +123,16 @@
 | 09_compatibility_report.md | UPDATED | Updated to match post-review draft, added verification marking checks |
 | 10_owner_review_notes.md | **NEW** | Owner verification items, image requirements, suggested improvements |
 | 11_production_readiness_report.md | **NEW** | This report — full production readiness assessment |
+| | | |
+| **CONTENT-AI-PILOT-4 Fixes** | | |
+| 07_slump_test.draft.json | UPDATED | Fixed 6 execution_step blocks: `step.ar` → `stepNumber` + `description.ar` |
+| draft_jsons/slump_test.draft.json | UPDATED | Same fix — kept in sync with pilot source |
+| 07_content_studio_json_agent.md | UPDATED | Added execution_step shape rules + warning about `step` field |
+| 09_content_studio_compatibility_agent.md | UPDATED | Added renderability checks + execution_step field checks |
+| QA_CHECKLIST.md | UPDATED | Added execution_step shape checks + mandatory visual QA section |
+| 09_compatibility_report.md | UPDATED | Documented fix in execution steps section |
+| 11_production_readiness_report.md | UPDATED | This file — added PILOT-4 notes |
+| 12_content_studio_review_tracking.md | UPDATED | Added PILOT-4 to commit history + fix notes |
 
 ---
 
@@ -131,17 +144,19 @@ The Slump Test draft JSON is ready for the app owner to open in Content Studio.
 
 **Conditions for production promotion (moving to `draft_jsons/`):**
 
-1. **Engineering verification** — The app owner must verify the slump acceptance values (Section 6) against the Iraqi Code or project specifications. The "(يحتاج تدقيق)" markings can then be removed or replaced with confirmed values.
+1. **Execution_step shape verified** — ✅ Fixed in CONTENT-AI-PILOT-4. Both drafts use `stepNumber` + `description.ar`; editor no longer shows "لا يوجد محتوى" and preview no longer shows "?".
 
-2. **Image files** — 4 image files must be created/obtained and placed in `assets/images/` matching the filenames in the draft.
+2. **Engineering verification** — The app owner must verify the slump acceptance values (Section 6) against the Iraqi Code or project specifications. The "(يحتاج تدقيق)" markings can then be removed or replaced with confirmed values.
 
-3. **Content Studio review** — The owner should load, read, and validate the draft in Content Studio, making any final editorial adjustments.
+3. **Image files** — 4 image files must be created/obtained and placed in `assets/images/` matching the filenames in the draft.
 
-4. **Export** — After approval, export App-ready JSON and rebuild the catalog.
+4. **Content Studio review** — The owner should load, read, and validate the draft in Content Studio, making any final editorial adjustments.
 
-5. **Flutter test** — Verify the topic renders correctly in the Flutter app in both light and dark mode.
+5. **Export** — After approval, export App-ready JSON and rebuild the catalog.
 
-6. **Commit** — Once verified, move the draft to `draft_jsons/`, export to `app_ready_jsons/`, add images, rebuild catalog, and commit.
+6. **Flutter test** — Verify the topic renders correctly in the Flutter app in both light and dark mode.
+
+7. **Commit** — Once verified, move the draft to `draft_jsons/`, export to `app_ready_jsons/`, add images, rebuild catalog, and commit.
 
 ---
 

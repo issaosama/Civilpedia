@@ -82,12 +82,14 @@
 | Severity field present | ✅ PASS | Severity: high (1), medium (2), low (2) |
 | Valid severity values | ✅ PASS | Only "low", "medium", "high" used |
 
-### Execution Steps
+### Execution Steps (Fixed in CONTENT-AI-PILOT-4)
 
 | Check | Result | Details |
 |-------|--------|---------|
-| Execution steps have `step.ar` | ✅ PASS | All 6 steps have clear Arabic text |
+| Execution steps have `stepNumber` (not `step`) | ✅ PASS | All 6 steps use `stepNumber` + `description.ar` — fixes "?" in preview |
+| Execution steps have `description.ar` (not `step.ar`) | ✅ PASS | All 6 steps use correct field — fixes "لا يوجد محتوى" in editor |
 | Steps are in logical order | ✅ PASS | Progression from prep to measurement |
+| Notes field present (`notes.ar`) | ✅ PASS | All 6 steps have empty `notes.ar` placeholder |
 
 ### Rendering Preview
 
@@ -117,6 +119,10 @@
 **Total Issues Found: 0**
 
 All checks pass. No compatibility issues detected.
+
+### Historical Note (CONTENT-AI-PILOT-4 Fix)
+
+In the original pilot draft, `execution_step` blocks used `"step": {"ar": "..."}` which is **not supported** by Content Studio. This caused empty render in the editor ("لا يوجد محتوى") and placeholder `?` in preview. CONTENT-AI-PILOT-4 corrected all 6 blocks to use `"stepNumber"` + `"description": {"ar": "..."}`. The agent docs (`07_content_studio_json_agent.md`, `09_content_studio_compatibility_agent.md`) and `QA_CHECKLIST.md` have been updated with the correct field names and explicit warnings about this issue.
 
 ---
 

@@ -42,6 +42,10 @@ Use this checklist to review every generated topic before the app owner opens it
 ## Checklists and Steps
 
 - [ ] Execution steps are actionable and in order.
+- [ ] Execution steps use the correct Content Studio shape:
+  - `stepNumber` (number) — required, or preview shows `?`
+  - `description.ar` (string) — required, or editor shows "لا يوجد محتوى"
+  - Do NOT use `"step": {"ar": "..."}` — this field is ignored by Content Studio
 - [ ] Checklist items are practical for site use.
 - [ ] Acceptance/rejection criteria are clear.
 
@@ -60,6 +64,22 @@ Use this checklist to review every generated topic before the app owner opens it
 - [ ] Validation engine shows no errors (warnings about empty fields are acceptable).
 - [ ] Preview looks good in light mode.
 - [ ] Preview looks good in dark mode.
+
+## Mandatory Visual QA (Renderability)
+
+These checks must be done by opening the draft in Content Studio and visually inspecting it.
+JSON validity alone is NOT sufficient — a block can be valid JSON but render as empty.
+
+- [ ] **Open the draft in Content Studio** (`index.html` → File → Open).
+- [ ] **Expand every section** and confirm every block shows visible content.
+- [ ] No block should display **"لا يوجد محتوى"** in the editor.
+- [ ] **Switch to preview** and confirm no block shows **"?"** as a placeholder.
+- [ ] Verify every `execution_step` block shows its step number and description text.
+- [ ] Verify every `safety_note` block shows its message.
+- [ ] Verify every `text` block shows its content.
+- [ ] Verify every `table` block shows headers and row data.
+- [ ] Verify every `image` block shows a path (even if the file is missing).
+- [ ] Confirm that a supported block type alone is not enough — the correct field names must be present.
 
 ## Export
 

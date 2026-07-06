@@ -71,10 +71,34 @@ A single valid JSON file following the Content Studio Draft JSON shape:
 | Type | JSON shape |
 |---|---|
 | `text` | `{"type":"text","order":1,"content":{"ar":"..."},"variant":"paragraph"}` |
-| `execution_step` | `{"type":"execution_step","order":1,"step":{"ar":"..."}}` |
+| `execution_step` | `{"type":"execution_step","order":1,"stepNumber":1,"description":{"ar":"..."},"notes":{"ar":""}}` |
 | `safety_note` | `{"type":"safety_note","order":1,"message":{"ar":"..."},"severity":"medium"}` |
 | `table` | `{"type":"table","order":1,"headers":["عمود1","عمود2"],"rows":[{"cells":["قيمة1","قيمة2"]}]}` |
 | `image` | `{"type":"image","order":1,"url":"assets/images/file_name.png","caption":{"ar":"تعليق","en":""}}` |
+
+## Critical: Execution Step Shape
+
+**Do NOT use `"step": {"ar": "..."}` — this is WRONG and causes "لا يوجد محتوى" in the editor.**
+
+Content Studio expects `execution_step` blocks to have:
+- `stepNumber` (number, required) — displayed as the step number
+- `description` (object with `ar` field, required) — the step description text
+- `notes` (object with `ar` field, optional) — additional notes
+
+The correct shape:
+```json
+{
+  "type": "execution_step",
+  "order": 1,
+  "stepNumber": 1,
+  "description": { "ar": "خطوة التنفيذ الأولى" },
+  "notes": { "ar": "" }
+}
+```
+
+The `description.ar` field is what appears in both the editor and the preview.
+If `stepNumber` is missing, the preview shows `?` instead of the number.
+If `description.ar` is missing or empty, the editor shows "لا يوجد محتوى".
 
 ## Rules
 
@@ -101,6 +125,9 @@ A single valid JSON file following the Content Studio Draft JSON shape:
 - Do NOT use markdown in JSON values.
 - Do NOT use unsupported block types.
 - Do NOT add extra fields not in the Draft JSON schema.
+- Do NOT use `"step": {"ar": "..."}` for `execution_step` — use `"stepNumber"` + `"description": {"ar": "..."}` instead.
+- Do NOT omit `stepNumber` on `execution_step` — preview will show `?` without it.
+- Do NOT assume JSON validity alone means the block will render — verify each block's field names match what Content Studio expects.
 
 ## Prompt Template
 
@@ -119,4 +146,6 @@ A single valid JSON file following the Content Studio Draft JSON shape:
 - status: "draft"
 - لا تنتج JSON جاهز للتطبيق (App-ready).
 - املأ الحقول العربية، واترك الإنكليزية فارغة إن لم تكن مطلوبة.
+- مهم: execution_step يجب أن يستخدم stepNumber و description.ar — لا تستخدم "step".
+  مثال صحيح: {"type":"execution_step","order":1,"stepNumber":1,"description":{"ar":"..."}}
 ```
