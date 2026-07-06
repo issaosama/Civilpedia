@@ -1,4 +1,4 @@
-# 09 — Content Studio Compatibility Agent: Compatibility Report
+# 09 — Content Studio Compatibility Agent: Compatibility Report (Updated)
 
 ## Topic: اختبار الهبوط — Slump Test
 ## File: 07_slump_test.draft.json
@@ -33,7 +33,7 @@
 
 | Check | Result | Details |
 |-------|--------|---------|
-| All sections have Arabic title | ✅ PASS | All 11 sections have Arabic titles |
+| All sections have Arabic title | ✅ PASS | All 11 sections have clear Arabic titles |
 | All sections have unique id | ✅ PASS | sec-definition through sec-images |
 | Section types are valid | ✅ PASS | general, equipment, execution, inspection, code_reference, safety |
 | Blocks are ordered sequentially | ✅ PASS | Order numbers are sequential within each section |
@@ -61,9 +61,10 @@
 | Check | Result | Details |
 |-------|--------|---------|
 | Tables have at least one header | ✅ PASS | All 3 tables have headers |
-| Tables have at least one row | ✅ PASS | Minimum 3 rows, maximum 6 rows |
+| Tables have at least one row | ✅ PASS | Min 3 rows, max 6 rows |
 | Headers in Arabic | ✅ PASS | All headers in Arabic |
 | Row cell count matches header count | ✅ PASS | Each row matches its column count |
+| Tables are simple and readable | ✅ PASS | Max 4 columns, clear headers |
 
 ### Text Blocks
 
@@ -71,34 +72,43 @@
 |-------|--------|---------|
 | Text blocks use `variant: "paragraph"` | ✅ PASS | All text blocks have this variant |
 | Content in Arabic in `content.ar` | ✅ PASS | All filled |
+| No paragraphs are excessively long | ✅ PASS | Max ~7 short sentences, no wall-of-text issues |
 
 ### Safety Notes
 
 | Check | Result | Details |
 |-------|--------|---------|
 | Safety notes have `message.ar` | ✅ PASS | All 5 have Arabic messages |
-| Severity field present | ✅ PASS | Severity values: high (1), medium (2), low (2) |
+| Severity field present | ✅ PASS | Severity: high (1), medium (2), low (2) |
 | Valid severity values | ✅ PASS | Only "low", "medium", "high" used |
 
 ### Execution Steps
 
 | Check | Result | Details |
 |-------|--------|---------|
-| Execution steps have `step.ar` | ✅ PASS | All 6 steps have Arabic text |
+| Execution steps have `step.ar` | ✅ PASS | All 6 steps have clear Arabic text |
+| Steps are in logical order | ✅ PASS | Progression from prep to measurement |
 
 ### Rendering Preview
 
 | Check | Result | Details |
 |-------|--------|---------|
-| Compatible with light mode | ✅ PASS | No hardcoded colors or themes |
-| Compatible with dark mode | ✅ PASS | No hardcoded colors or themes |
-| No hardcoded colors in content | ✅ PASS | Content is plain text |
+| Compatible with light mode | ✅ PASS | No hardcoded colors |
+| Compatible with dark mode | ✅ PASS | No hardcoded colors |
+| No hardcoded colors in content | ✅ PASS | Content is plain text only |
 
 ### Export
 
 | Check | Result | Details |
 |-------|--------|---------|
-| Export to App-ready JSON should work | ✅ PASS | Standard block types only, Draft JSON shape is valid |
+| Export to App-ready JSON should work | ✅ PASS | Standard block types, valid Draft JSON shape |
+
+### Verification Markings
+
+| Check | Result | Details |
+|-------|--------|---------|
+| All code-sensitive values marked | ✅ PASS | Equipment dimensions, stroke count, lift time, slump values, time limits all marked with "(يحتاج تدقيق)" or equivalent |
+| No fabricated code references | ✅ PASS | Standards mentioned generically where not verified |
 
 ---
 
@@ -114,11 +124,15 @@ All checks pass. No compatibility issues detected.
 
 **✅ APPROVED — The draft JSON is fully compatible with Content Studio and the Flutter app.**
 
-The file:
+The file post-review:
 - Can be opened in Content Studio without errors
-- Uses only supported block types
-- Has correct image paths and naming
+- Uses only supported block types (text, execution_step, safety_note, table, image)
+- Has correct image paths with `assets/images/` prefix
+- Uses lowercase English filenames with underscores
+- Has Arabic captions for all images
+- Has simple, readable tables
 - Will render correctly in both light and dark mode
 - Will export to App-ready JSON successfully after owner review
+- All code-sensitive values are now clearly marked for verification
 
-**Note:** Image files are not yet present in `assets/images/`. They must be obtained or created and placed in the correct path before the topic can be fully published. This does not affect Content Studio loading or editing.
+**Note:** Image files are not yet present in `assets/images/`. They must be obtained or created before the topic can be fully published. This does not affect Content Studio loading or editing.
