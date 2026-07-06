@@ -135,7 +135,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             ),
             Container(
               height: 1,
-              color: AppColors.border.withValues(alpha: 0.5),
+              color: isDark ? AppColors.darkBorder.withValues(alpha: 0.5) : AppColors.border.withValues(alpha: 0.5),
             ),
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 12),
@@ -143,7 +143,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             ),
             Container(
               height: 1,
-              color: AppColors.border.withValues(alpha: 0.5),
+              color: isDark ? AppColors.darkBorder.withValues(alpha: 0.5) : AppColors.border.withValues(alpha: 0.5),
             ),
             SectionHeader(title: Ar.quickTools, actionLabel: tr(Ar.viewAll, En.viewAll)),
             const QuickToolsSection(),

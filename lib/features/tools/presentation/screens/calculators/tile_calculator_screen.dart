@@ -282,6 +282,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
   // ───────────── Input Card ─────────────
 
   Widget _buildInputCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     return CustomCard(
       child: Column(
@@ -406,7 +407,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
             text: TextSpan(
               text: '${Ar.wastePercent}: ',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
               ),
               children: [
                 TextSpan(
@@ -526,6 +527,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
   // ───────────── Results Card ─────────────
 
   Widget _buildResultsCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final r = _result!;
     return CustomCard(
       child: Column(
@@ -686,7 +688,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
                       Text(
                         '${Ar.spareText.replaceAll('%d', '${r.spareTiles}')} (${r.roomCategory})',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                           height: 1.4,
                         ),
                       ),
@@ -735,16 +737,17 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
   }
 
   Widget _breakdownItem(String label, double pct, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 1),
       child: Row(
         children: [
-          const Icon(Icons.subdirectory_arrow_left, size: 14, color: AppColors.textSecondary),
+          Icon(Icons.subdirectory_arrow_left, size: 14, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
           const SizedBox(width: 4),
           Text(
             '$label: ${pct.toStringAsFixed(1)}%',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
               fontSize: 12,
             ),
           ),
@@ -787,6 +790,7 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
     required ThemeData theme,
     String hint = '0',
   }) {
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextField(
@@ -794,26 +798,26 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
         textAlign: TextAlign.right,
-        style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+        style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary, fontSize: 15),
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
-          hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.4)),
+          hintStyle: TextStyle(color: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.4)),
           suffixText: suffix.isNotEmpty ? suffix : null,
-          suffixStyle: const TextStyle(
-            color: AppColors.textSecondary,
+          suffixStyle: TextStyle(
+            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
             fontSize: 13,
           ),
           filled: true,
-          fillColor: AppColors.surface,
+          fillColor: isDark ? AppColors.darkSurface : AppColors.surface,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-            borderSide: const BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
@@ -825,21 +829,22 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
   }
 
   InputDecoration _inputDecoration(String label, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+      labelStyle: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, fontSize: 14),
       hintText: '0',
-      hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.4)),
+      hintStyle: TextStyle(color: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.4)),
       filled: true,
-      fillColor: AppColors.surface,
+      fillColor: isDark ? AppColors.darkSurface : AppColors.surface,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        borderSide: const BorderSide(color: AppColors.border),
+        borderSide: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),

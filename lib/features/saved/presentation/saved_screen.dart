@@ -58,13 +58,14 @@ class _SavedScreenState extends State<SavedScreen> with SingleTickerProviderStat
     final articles = ArticleRepository.articles.where((a) => favoriteIds.contains(a.id)).toList();
 
     if (articles.isEmpty) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.favorite_border, size: 64, color: AppColors.textSecondary),
+            Icon(Icons.favorite_border, size: 64, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
             const SizedBox(height: 16),
-            Text(Ar.noFavorites, style: TextStyle(color: AppColors.textSecondary)),
+            Text(Ar.noFavorites, style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
           ],
         ),
       );
@@ -103,13 +104,14 @@ class _SavedScreenState extends State<SavedScreen> with SingleTickerProviderStat
     final articles = ArticleRepository.articles.where((a) => downloadedIds.contains(a.id)).toList();
 
     if (articles.isEmpty) {
+      final isDark = Theme.of(context).brightness == Brightness.dark;
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.download_outlined, size: 64, color: AppColors.textSecondary),
+            Icon(Icons.download_outlined, size: 64, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
             const SizedBox(height: 16),
-            Text(Ar.noDownloads, style: TextStyle(color: AppColors.textSecondary)),
+            Text(Ar.noDownloads, style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
           ],
         ),
       );

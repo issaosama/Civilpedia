@@ -14,12 +14,13 @@ class InspectionProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return ClipRRect(
       borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
       child: LinearProgressIndicator(
         value: progress.clamp(0.0, 1.0),
         minHeight: 8,
-        backgroundColor: AppColors.textSecondary.withValues(alpha: 0.1),
+        backgroundColor: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.1),
         valueColor: AlwaysStoppedAnimation<Color>(
           color ?? AppColors.primary,
         ),

@@ -26,6 +26,7 @@ class InspectionCategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final done = items.where((i) => i.status != InspectionStatus.pending).length;
     final progress = items.isEmpty ? 0.0 : done / items.length;
     final allPassed = items.isNotEmpty && items.every((i) => i.status == InspectionStatus.pass);
@@ -63,7 +64,7 @@ class InspectionCategoryCard extends StatelessWidget {
                     Text(
                       '$done / ${items.length}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                         fontSize: 12,
                       ),
                     ),
@@ -82,7 +83,7 @@ class InspectionCategoryCard extends StatelessWidget {
               Icon(
                 allPassed ? Icons.check_circle : Icons.chevron_right,
                 size: 20,
-                color: allPassed ? AppColors.success : AppColors.textSecondary,
+                color: allPassed ? AppColors.success : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
               ),
             ],
           ),

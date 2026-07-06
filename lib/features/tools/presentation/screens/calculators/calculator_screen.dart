@@ -316,9 +316,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Widget _buildConcreteScreen() {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         title: Text(_title, style: const TextStyle(color: Colors.white)),
         backgroundColor: AppColors.primary,
@@ -342,6 +343,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildInfoHeader(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -357,7 +359,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: Text(
               Ar.addElementsInfo,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 fontSize: 13,
               ),
             ),
@@ -369,22 +371,23 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Widget _buildCard(int index, ThemeData theme) {
     final card = _cards[index];
+    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? AppColors.darkSurface : Colors.white,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.15), width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.02),
+              color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.02),
               blurRadius: 4,
               offset: const Offset(0, 1),
             ),
@@ -438,11 +441,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildIllustration(_ElementCardData card) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 160,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.background,
+        color: isDark ? AppColors.darkBackground : AppColors.background,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(DesignTokens.radiusMd),
           topRight: Radius.circular(DesignTokens.radiusMd),
@@ -464,6 +468,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildCardHeader(int index, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Row(
       children: [
         Container(
@@ -486,7 +491,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
           child: Padding(
             padding: const EdgeInsets.all(4),
-            child: Icon(Icons.close, size: 20, color: AppColors.textSecondary),
+            child: Icon(Icons.close, size: 20, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
           ),
         ),
       ],
@@ -494,6 +499,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildTypeDropdown(_ElementCardData card, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return DropdownButtonFormField<String>(
       value: card.elementType,
       decoration: _inputDecoration(Ar.elementType),
@@ -502,7 +508,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             (e) => DropdownMenuItem(
               value: e['value'],
               child: Text(e['label']!,
-                  style: const TextStyle(color: AppColors.textPrimary)),
+                  style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary)),
             ),
           )
           .toList(),
@@ -606,6 +612,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildOptionsCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return CustomCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -615,7 +622,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.options,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: AppColors.textPrimary,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -624,7 +631,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.wasteFactor,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -645,7 +652,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     labelStyle: TextStyle(
                       color: !_isCustomWaste && _wastePercent == pct
                           ? AppColors.primary
-                          : AppColors.textPrimary,
+                          : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -656,7 +663,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   onSelected: (_) => setState(() => _isCustomWaste = true),
                   selectedColor: AppColors.primary.withValues(alpha: 0.15),
                   labelStyle: TextStyle(
-                    color: _isCustomWaste ? AppColors.primary : AppColors.textPrimary,
+                    color: _isCustomWaste ? AppColors.primary : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -672,7 +679,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.truckCapacity,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -688,7 +695,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         setState(() => _truckCapacity = cap.toDouble()),
                     selectedColor: AppColors.primary.withValues(alpha: 0.15),
                     labelStyle: TextStyle(
-                      color: _truckCapacity == cap ? AppColors.primary : AppColors.textPrimary,
+                      color: _truckCapacity == cap ? AppColors.primary : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -703,7 +710,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: Text(
                     Ar.costPerCubic,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -726,6 +733,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildGrandTotalBar(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final hasResults = _cards.isNotEmpty && _cards.any((c) => c.volume > 0);
 
     return Container(
@@ -736,13 +744,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.darkSurface : Colors.white,
         border: Border(
           top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -767,7 +775,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 Text(
                   Ar.grandTotal,
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -775,8 +783,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 const SizedBox(height: 2),
                 Text(
                   '${_totalRequired.toStringAsFixed(2)} ${Ar.cubicMeters}',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
@@ -789,7 +797,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       child: Text(
                         '${Ar.netVolume}: ${_netTotal.toStringAsFixed(2)} ${Ar.cubicMeters}  |  ${Ar.wasteVolume} ($_wastePercent%): ${_wasteVolume.toStringAsFixed(2)} ${Ar.cubicMeters}',
                         style: TextStyle(
-                          color: AppColors.textSecondary,
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                           fontSize: 11,
                         ),
                       ),
@@ -799,7 +807,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                         ? '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount  |  ${Ar.concreteCost}: ${_totalConcreteCost!.toStringAsFixed(0)}'
                         : '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount',
                     style: TextStyle(
-                      color: AppColors.textSecondary,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                     ),
@@ -832,9 +840,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Widget _buildSteelScreen() {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
       appBar: AppBar(
         title: Text(_title, style: const TextStyle(color: Colors.white)),
         backgroundColor: AppColors.primary,
@@ -862,6 +871,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildSteelInputCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return CustomCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -871,7 +881,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.steelInputSection,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: AppColors.textPrimary,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -948,6 +958,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildSteelOptionsCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return CustomCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -957,7 +968,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.options,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: AppColors.textPrimary,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -965,7 +976,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.wasteFactor,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -987,7 +998,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                     labelStyle: TextStyle(
                       color: !_steelIsCustomWaste && _steelWastePercent == pct
                           ? AppColors.primary
-                          : AppColors.textPrimary,
+                          : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                       fontWeight: FontWeight.w600,
                       fontSize: 13,
                     ),
@@ -999,7 +1010,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                       setState(() => _steelIsCustomWaste = true),
                   selectedColor: AppColors.primary.withValues(alpha: 0.15),
                   labelStyle: TextStyle(
-                    color: _steelIsCustomWaste ? AppColors.primary : AppColors.textPrimary,
+                    color: _steelIsCustomWaste ? AppColors.primary : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                     fontWeight: FontWeight.w600,
                     fontSize: 13,
                   ),
@@ -1017,7 +1028,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   child: Text(
                     Ar.steelPricePerKg,
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1037,7 +1048,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.steelProcurementSection,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -1050,6 +1061,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildSteelResultsCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return CustomCard(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1059,7 +1071,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Text(
               Ar.steelResults,
               style: theme.textTheme.titleSmall?.copyWith(
-                color: AppColors.textPrimary,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -1147,6 +1159,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildSteelBottomBar(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -1155,13 +1168,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.darkSurface : Colors.white,
         border: Border(
           top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -1186,7 +1199,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 Text(
                   Ar.weight,
                   style: TextStyle(
-                    color: AppColors.textSecondary,
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
@@ -1196,8 +1209,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   _steelCalculated
                       ? '${_steelTotalW.toStringAsFixed(2)} ${Ar.kg} / ${(_steelTotalW / 1000).toStringAsFixed(3)} ${Ar.tons}'
                       : '0.00 ${Ar.kg} / 0.000 ${Ar.tons}',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1226,16 +1239,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _steelResultRow(String label, String value, {bool isBold = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label,
-              style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+              style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, fontSize: 14)),
           Text(value,
               style: TextStyle(
-                color: AppColors.textPrimary,
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 fontSize: 14,
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               )),
@@ -1246,6 +1260,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Widget _buildCardField(String label, TextEditingController ctrl,
       {bool isInteger = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextField(
       controller: ctrl,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -1256,19 +1271,20 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           FilteringTextInputFormatter.allow(RegExp(r'[\d.]')),
       ],
       textAlign: TextAlign.start,
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+      style: TextStyle(color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary, fontSize: 15),
       decoration: _inputDecoration(label),
     );
   }
 
   InputDecoration _inputDecoration(String label) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InputDecoration(
       labelText: label,
-      labelStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+      labelStyle: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, fontSize: 14),
       hintText: '0.0',
-      hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.4)),
+      hintStyle: TextStyle(color: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.4)),
       filled: true,
-      fillColor: _fieldFill,
+      fillColor: isDark ? AppColors.darkSurface : _fieldFill,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),

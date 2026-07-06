@@ -42,15 +42,16 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
   }
 
   Widget _topicCard(BuildContext context, dynamic topic) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
       child: Container(
         width: 200,
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
-          boxShadow: DesignTokens.softShadow(AppColors.cardShadow),
+          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.primary.withValues(alpha: 0.08)),
+          boxShadow: isDark ? null : DesignTokens.softShadow(AppColors.cardShadow),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +101,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
-                          ?.copyWith(color: AppColors.textSecondary),
+                          ?.copyWith(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),

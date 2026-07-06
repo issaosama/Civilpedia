@@ -34,17 +34,18 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<EncyclopediaProvider>();
     final topic = provider.currentTopic;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: EncyclopediaCardColors.pageBg,
+      backgroundColor: isDark ? EncyclopediaCardColors.darkPageBg : EncyclopediaCardColors.pageBg,
       body: SafeArea(
         child: AsyncValueWidget(
           isLoading: provider.isLoading,
           error: provider.error,
           isEmpty: topic == null && provider.error == null,
           onRetry: () => provider.loadTopicDetail(widget.topicId),
-          onEmpty: () => const Center(
-            child: Text(Ar.topicNotFound, style: TextStyle(color: EncyclopediaCardColors.textSecondary)),
+          onEmpty: () => Center(
+            child: Text(Ar.topicNotFound, style: TextStyle(color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary)),
           ),
           onData: () => _buildArticle(context, provider, topic!),
         ),
@@ -57,6 +58,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildArticle(BuildContext context, EncyclopediaProvider provider, EngineeringTopic topic) {
     final blocksByType = _collectBlocksByType(provider);
     EncyclopediaCardColors.apply(EncyclopediaTopicTheme.fromKey(topic.visualTheme));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     int seq = 0;
 
@@ -69,28 +71,28 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTopBar(context),
-          _buildDivider(),
+          _buildTopBar(context, isDark: isDark),
+          _buildDivider(isDark: isDark),
           _buildBrandPill(),
-          _buildHeroSection(topic),
+          _buildHeroSection(topic, isDark: isDark),
           const SizedBox(height: 8),
-          numbered((n) => _buildOverviewSection(topic, blocksByType, number: n)),
+          numbered((n) => _buildOverviewSection(topic, blocksByType, isDark: isDark, number: n)),
           if (_hasGeneralData(blocksByType))
-            numbered((n) => _buildGeneralSection(blocksByType, number: n)),
+            numbered((n) => _buildGeneralSection(blocksByType, isDark: isDark, number: n)),
           if (_hasImportanceData(topic, blocksByType))
-            numbered((n) => _buildImportanceSection(topic, blocksByType, number: n)),
+            numbered((n) => _buildImportanceSection(topic, blocksByType, isDark: isDark, number: n)),
           if (_hasTableData(blocksByType))
-            numbered((n) => _buildDimensionsSection(blocksByType, number: n)),
+            numbered((n) => _buildDimensionsSection(blocksByType, isDark: isDark, number: n)),
           if (_hasApplicationData(topic, blocksByType))
-            numbered((n) => _buildApplicationSection(topic, blocksByType, number: n)),
+            numbered((n) => _buildApplicationSection(topic, blocksByType, isDark: isDark, number: n)),
           if (_hasSafetyData(blocksByType))
-            numbered((n) => _buildSafetySection(blocksByType, number: n)),
+            numbered((n) => _buildSafetySection(blocksByType, isDark: isDark, number: n)),
           if (_hasInspectionData(topic, blocksByType))
-            numbered((n) => _buildInspectionSection(topic, blocksByType, number: n)),
+            numbered((n) => _buildInspectionSection(topic, blocksByType, isDark: isDark, number: n)),
           if (_hasCommonMistakes(topic, blocksByType))
-            numbered((n) => _buildCommonMistakesSection(topic, blocksByType, number: n)),
+            numbered((n) => _buildCommonMistakesSection(topic, blocksByType, isDark: isDark, number: n)),
           if (topic.reportWording != null)
-            _buildReportWordingSection(topic),
+            _buildReportWordingSection(topic, isDark: isDark),
           if (topic.relatedToolRoutes.isNotEmpty)
             _buildRelatedToolsSection(context, topic),
           const SizedBox(height: 48),
@@ -206,19 +208,19 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Top Bar ─────────────
 
-  Widget _buildTopBar(BuildContext context) {
+  Widget _buildTopBar(BuildContext context, {required bool isDark}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: EncyclopediaCardColors.textPrimary),
+            icon: Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary),
             onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
           ),
           const Spacer(),
-          const Column(
+          Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
@@ -226,13 +228,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 style: TextStyle(
                   fontSize: 10,
                   letterSpacing: 2.5,
-                  color: EncyclopediaCardColors.textSecondary,
+                  color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 'سيڤل بيديا',
-                style: TextStyle(fontSize: 8, color: EncyclopediaCardColors.textSecondary, height: 1),
+                style: TextStyle(fontSize: 8, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary, height: 1),
               ),
             ],
           ),
@@ -241,8 +243,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _buildDivider() {
-    return Container(height: 1, color: EncyclopediaCardColors.border, margin: const EdgeInsets.symmetric(horizontal: 16));
+  Widget _buildDivider({required bool isDark}) {
+    return Container(height: 1, color: isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border, margin: const EdgeInsets.symmetric(horizontal: 16));
   }
 
   Widget _buildBrandPill() {
@@ -264,7 +266,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Hero Section ─────────────
 
-  Widget _buildHeroSection(EngineeringTopic topic) {
+  Widget _buildHeroSection(EngineeringTopic topic, {required bool isDark}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -285,10 +287,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             topic.titleAr,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
-              color: EncyclopediaCardColors.textPrimary,
+              color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
               height: 1.3,
             ),
           ),
@@ -299,9 +301,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               topic.simpleExplanation!.ar,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
-                color: EncyclopediaCardColors.textSecondary,
+                color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary,
                 height: 1.7,
               ),
             ),
@@ -311,9 +313,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               topic.summary,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
-                color: EncyclopediaCardColors.textSecondary,
+                color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary,
                 height: 1.7,
               ),
             ),
@@ -328,20 +330,20 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               children: topic.tags.map((tag) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
                 decoration: BoxDecoration(
-                  color: EncyclopediaCardColors.border.withValues(alpha: 0.3),
+                  color: (isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border).withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Text(tag, style: const TextStyle(fontSize: 11, color: EncyclopediaCardColors.textSecondary)),
+                child: Text(tag, style: TextStyle(fontSize: 11, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary)),
               )).toList(),
             ),
           ),
         const SizedBox(height: 16),
-        if (_hasText(topic.featuredImageUrl)) _buildHeroImage(topic),
+        if (_hasText(topic.featuredImageUrl)) _buildHeroImage(topic, isDark: isDark),
       ],
     );
   }
 
-  Widget _buildHeroImage(EngineeringTopic topic) {
+  Widget _buildHeroImage(EngineeringTopic topic, {required bool isDark}) {
     final url = topic.featuredImageUrl;
     if (url == null || url.isEmpty) return const SizedBox.shrink();
     return Container(
@@ -349,7 +351,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: EncyclopediaCardColors.border.withValues(alpha: 0.5)),
+        border: Border.all(color: (isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border).withValues(alpha: 0.5)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Image.asset(
@@ -378,7 +380,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── OVERVIEW · 01 ─────────────
 
-  Widget _buildOverviewSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildOverviewSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     final overviewText = topic.simpleExplanation?.ar ?? topic.summary;
     if (!_hasText(overviewText)) return const SizedBox.shrink();
     return Column(
@@ -389,7 +391,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             overviewText,
-            style: const TextStyle(fontSize: 15, color: EncyclopediaCardColors.textPrimary, height: 1.8),
+            style: TextStyle(fontSize: 15, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.8),
           ),
         ),
         const SizedBox(height: 8),
@@ -399,7 +401,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── IMPORTANCE · 02 ─────────────
 
-  Widget _buildImportanceSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildImportanceSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -410,7 +412,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: EncyclopediaCardColors.softPanel,
+              color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
               borderRadius: BorderRadius.circular(10),
               border: Border(
                 right: BorderSide(color: EncyclopediaCardColors.accent, width: 3),
@@ -420,9 +422,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (_hasText(topic.siteNotes?.ar))
-                  _buildImportanceItem(topic.siteNotes!.ar),
+                  _buildImportanceItem(topic.siteNotes!.ar, isDark: isDark),
                 if (_hasText(topic.codeNotes?.ar))
-                  _buildImportanceItem(topic.codeNotes!.ar),
+                  _buildImportanceItem(topic.codeNotes!.ar, isDark: isDark),
               ],
             ),
           ),
@@ -432,7 +434,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _buildImportanceItem(String text) {
+  Widget _buildImportanceItem(String text, {required bool isDark}) {
     final display = _cleanDisplayText(text);
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -447,7 +449,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           Expanded(
             child: Text(
               display,
-              style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
+              style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
             ),
           ),
         ],
@@ -457,14 +459,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── DIMENSIONS · 05 ─────────────
 
-  Widget _buildDimensionsSection(Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildDimensionsSection(Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     final tables = <TableBlock>[];
     final images = <Widget>[];
     for (final blocks in blocksByType.values) {
       for (final block in blocks) {
         if (block is TableBlock && block.data.rows.isNotEmpty) tables.add(block);
       }
-      images.addAll(_imageBlocksFrom(blocks));
+      images.addAll(_imageBlocksFrom(blocks, isDark: isDark));
     }
     if (tables.isEmpty && images.isEmpty) return const SizedBox.shrink();
 
@@ -472,14 +474,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader('TABLES', 'القياسات والسماكات المتداولة', number: number),
-        ...tables.map((t) => _buildEditorialTable(t)),
+        ...tables.map((t) => _buildEditorialTable(t, isDark: isDark)),
         ...images,
         const SizedBox(height: 8),
       ],
     );
   }
 
-  Widget _buildEditorialTable(TableBlock tableBlock) {
+  Widget _buildEditorialTable(TableBlock tableBlock, {required bool isDark}) {
     final data = tableBlock.data;
     if (data.rows.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -492,9 +494,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 data.caption!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: EncyclopediaCardColors.textSecondary,
+                  color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -507,20 +509,20 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                     width: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: EncyclopediaCardColors.border),
+                      border: Border.all(color: isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(
-                        headingRowColor: WidgetStateProperty.all(EncyclopediaCardColors.tableHeaderBg),
-                        headingTextStyle: const TextStyle(
-                          color: EncyclopediaCardColors.textPrimary,
+                        headingRowColor: WidgetStateProperty.all(isDark ? EncyclopediaCardColors.darkTableHeaderBg : EncyclopediaCardColors.tableHeaderBg),
+                        headingTextStyle: TextStyle(
+                          color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
                         ),
-                        dataTextStyle: const TextStyle(
-                          color: EncyclopediaCardColors.textPrimary,
+                        dataTextStyle: TextStyle(
+                          color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
                           fontSize: 13,
                           height: 1.4,
                         ),
@@ -540,11 +542,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                       padding: const EdgeInsets.only(top: 6),
                       child: Row(
                         children: [
-                          Icon(Icons.swipe, size: 12, color: EncyclopediaCardColors.textMuted),
+                          Icon(Icons.swipe, size: 12, color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
                           const SizedBox(width: 4),
                           Text(
                             'اسحب الجدول أفقياً لعرض جميع الأعمدة',
-                            style: TextStyle(fontSize: 11, color: EncyclopediaCardColors.textMuted),
+                            style: TextStyle(fontSize: 11, color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
                           ),
                         ],
                       ),
@@ -568,7 +570,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── APPLICATION · 06 ─────────────
 
-  Widget _buildApplicationSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildApplicationSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     final executionBlocks = blocksByType[SectionType.execution] ?? <ContentBlock>[];
     final steps = executionBlocks.whereType<ExecutionStepBlock>().toList()
       ..sort((a, b) => a.step.stepNumber.compareTo(b.step.stepNumber));
@@ -578,25 +580,25 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
       children: [
         _buildSectionHeader('APPLICATION', 'طرق التنفيذ', number: number),
         if (_hasText(topic.beforeWork?.ar))
-          _buildSubSection('قبل العمل', topic.beforeWork!.ar),
+          _buildSubSection('قبل العمل', topic.beforeWork!.ar, isDark: isDark),
         if (_hasText(topic.duringWork?.ar))
-          _buildSubSection('أثناء العمل', topic.duringWork!.ar),
+          _buildSubSection('أثناء العمل', topic.duringWork!.ar, isDark: isDark),
         if (_hasText(topic.afterWork?.ar))
-          _buildSubSection('بعد العمل', topic.afterWork!.ar),
+          _buildSubSection('بعد العمل', topic.afterWork!.ar, isDark: isDark),
         if (steps.isNotEmpty) ...[
           if (!_localizedHasText(topic.beforeWork) && !_localizedHasText(topic.duringWork) && !_localizedHasText(topic.afterWork))
             const SizedBox(height: 4)
           else
             const SizedBox(height: 8),
-          ...steps.map((s) => _buildStepCard(s)),
+          ...steps.map((s) => _buildStepCard(s, isDark: isDark)),
         ],
-        ..._imageBlocksFrom(executionBlocks),
+        ..._imageBlocksFrom(executionBlocks, isDark: isDark),
         const SizedBox(height: 8),
       ],
     );
   }
 
-  Widget _buildSubSection(String title, String content) {
+  Widget _buildSubSection(String title, String content, {required bool isDark}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 14),
       child: Column(
@@ -604,23 +606,23 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: EncyclopediaCardColors.textPrimary,
+              color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             content,
-            style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
+            style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStepCard(ExecutionStepBlock stepBlock) {
+  Widget _buildStepCard(ExecutionStepBlock stepBlock, {required bool isDark}) {
     final step = stepBlock.step;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 12),
@@ -651,13 +653,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               children: [
                 Text(
                   step.description,
-                  style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
+                  style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
                 ),
                 if (step.notes != null && step.notes!.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
                     step.notes!,
-                    style: const TextStyle(fontSize: 12, color: EncyclopediaCardColors.textSecondary, height: 1.5),
+                    style: TextStyle(fontSize: 12, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary, height: 1.5),
                   ),
                 ],
               ],
@@ -670,7 +672,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── INSPECTION · 07 ─────────────
 
-  Widget _buildInspectionSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildInspectionSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     final inspBlocks = blocksByType[SectionType.inspection] ?? <ContentBlock>[];
 
     final validAcceptReject = topic.acceptRejectItems.where((item) => _hasText(item.criteriaAr)).toList();
@@ -690,21 +692,23 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               item.acceptanceLimitAr,
               item.methodAr,
               item.isCritical,
+              isDark: isDark,
             )),
         ...validInspPoints.map((b) => _buildInspectionRow(
               b.point.criteria,
               b.point.acceptableTolerance,
               b.point.method,
               b.point.isCritical,
+              isDark: isDark,
             )),
-        ...validChecklists.map(_buildChecklistBlock),
-        ..._imageBlocksFrom(inspBlocks),
+        ...validChecklists.map((b) => _buildChecklistBlock(b, isDark: isDark)),
+        ..._imageBlocksFrom(inspBlocks, isDark: isDark),
         const SizedBox(height: 8),
       ],
     );
   }
 
-  Widget _buildInspectionRow(String criteria, String? limit, String? method, bool isCritical) {
+  Widget _buildInspectionRow(String criteria, String? limit, String? method, bool isCritical, {required bool isDark}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 10),
       child: Row(
@@ -715,14 +719,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             child: Icon(
               isCritical ? Icons.check_circle_outline : Icons.radio_button_unchecked,
               size: 18,
-              color: isCritical ? EncyclopediaCardColors.dangerText : EncyclopediaCardColors.textMuted,
+              color: isCritical ? EncyclopediaCardColors.dangerText : (isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: RichText(
               text: TextSpan(
-                style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
+                style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
                 children: [
                   TextSpan(
                     text: criteria,
@@ -731,12 +735,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   if (limit != null && limit.isNotEmpty)
                     TextSpan(
                       text: ' — $limit',
-                      style: const TextStyle(color: EncyclopediaCardColors.textSecondary),
+                      style: TextStyle(color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
                     ),
                   if (method != null && method.isNotEmpty)
                     TextSpan(
                       text: ' | $method',
-                      style: const TextStyle(color: EncyclopediaCardColors.textSecondary, fontSize: 12),
+                      style: TextStyle(color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary, fontSize: 12),
                     ),
                 ],
               ),
@@ -747,7 +751,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _buildChecklistBlock(ChecklistBlock block) {
+  Widget _buildChecklistBlock(ChecklistBlock block, {required bool isDark}) {
     final validItems = block.items.where((i) => _hasText(i.text)).toList();
     if (validItems.isEmpty) return const SizedBox.shrink();
     return Padding(
@@ -757,7 +761,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: EncyclopediaCardColors.border),
+          border: Border.all(color: isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -765,7 +769,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             if (_hasText(block.title)) ...[
               Text(
                 block.title!,
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: EncyclopediaCardColors.textPrimary),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary),
               ),
               const SizedBox(height: 10),
             ],
@@ -774,12 +778,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.check_box_outline_blank, size: 18, color: EncyclopediaCardColors.textMuted),
+                      Icon(Icons.check_box_outline_blank, size: 18, color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           item.text,
-                          style: const TextStyle(fontSize: 13, color: EncyclopediaCardColors.textPrimary, height: 1.5),
+                          style: TextStyle(fontSize: 13, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.5),
                         ),
                       ),
                     ],
@@ -793,7 +797,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Image Block ─────────────
 
-  Widget _buildImageBlock(ImageBlock block) {
+  Widget _buildImageBlock(ImageBlock block, {required bool isDark}) {
     if (block.imageUrl.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -812,14 +816,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   width: double.infinity,
                   height: 120,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
+                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     'تعذر تحميل الصورة\n${block.imageUrl}',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    style: TextStyle(fontSize: 11, color: isDark ? Colors.grey.shade300 : Colors.grey),
                   ),
                 );
               },
@@ -831,7 +835,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               child: Center(
                 child: Text(
                   block.caption!,
-                  style: const TextStyle(fontSize: 12, color: EncyclopediaCardColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
                 ),
               ),
             ),
@@ -840,17 +844,17 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  List<Widget> _imageBlocksFrom(List<ContentBlock> blocks) {
+  List<Widget> _imageBlocksFrom(List<ContentBlock> blocks, {required bool isDark}) {
     return blocks
         .whereType<ImageBlock>()
         .where((b) => b.imageUrl.isNotEmpty)
-        .map(_buildImageBlock)
+        .map((b) => _buildImageBlock(b, isDark: isDark))
         .toList();
   }
 
   // ───────────── GENERAL CONTENT · 03 ─────────────
 
-  Widget _buildGeneralSection(Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildGeneralSection(Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     final generalBlocks = blocksByType[SectionType.general] ?? <ContentBlock>[];
     if (generalBlocks.isEmpty) return const SizedBox.shrink();
 
@@ -861,13 +865,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           child: Text(
             block.content,
-            style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
+            style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
           ),
         ));
       } else if (block is ImageBlock && block.imageUrl.isNotEmpty) {
-        children.add(_buildImageBlock(block));
+        children.add(_buildImageBlock(block, isDark: isDark));
       } else if (block is SafetyNoteBlock && _hasText(block.note.message)) {
-        children.add(_buildGeneralSafetyNote(block));
+        children.add(_buildGeneralSafetyNote(block, isDark: isDark));
       }
     }
     if (children.isEmpty) return const SizedBox.shrink();
@@ -882,14 +886,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _buildGeneralSafetyNote(SafetyNoteBlock block) {
+  Widget _buildGeneralSafetyNote(SafetyNoteBlock block, {required bool isDark}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: EncyclopediaCardColors.softPanel,
+          color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
           borderRadius: BorderRadius.circular(8),
           border: const Border(
             right: BorderSide(color: Color(0xFFD4A017), width: 3),
@@ -906,7 +910,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             Expanded(
               child: Text(
                 block.note.message,
-                style: const TextStyle(fontSize: 13, color: EncyclopediaCardColors.textPrimary, height: 1.6),
+                style: TextStyle(fontSize: 13, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
               ),
             ),
           ],
@@ -917,7 +921,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── COMMON MISTAKES · 08 ─────────────
 
-  Widget _buildSafetySection(Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildSafetySection(Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     final safetyBlocks = blocksByType[SectionType.safety] ?? <ContentBlock>[];
     final validNotes = safetyBlocks.whereType<SafetyNoteBlock>().where((s) => _hasText(s.note.message)).toList();
     if (validNotes.isEmpty) return const SizedBox.shrink();
@@ -932,7 +936,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: EncyclopediaCardColors.softPanel,
+              color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.softPanel,
               borderRadius: BorderRadius.circular(10),
               border: const Border(
                 right: BorderSide(color: Color(0xFFD4A017), width: 3),
@@ -953,7 +957,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                     Expanded(
                       child: Text(
                         s.note.message,
-                        style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
+                        style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
                       ),
                     ),
                   ],
@@ -967,7 +971,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required int number}) {
+  Widget _buildCommonMistakesSection(EngineeringTopic topic, Map<SectionType, List<ContentBlock>> blocksByType, {required bool isDark, required int number}) {
     final validMistakes = topic.commonMistakes.where((m) => _hasText(m.ar) || _hasText(m.en)).toList();
 
     if (validMistakes.isEmpty) return const SizedBox.shrink();
@@ -982,14 +986,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: EncyclopediaCardColors.mistakeBg,
+              color: isDark ? EncyclopediaCardColors.darkMistakeBg : EncyclopediaCardColors.mistakeBg,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: EncyclopediaCardColors.mistakeBorder.withValues(alpha: 0.15)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ...validMistakes.map((m) => _buildMistakeItem(m.ar)),
+                ...validMistakes.map((m) => _buildMistakeItem(m.ar, isDark: isDark)),
               ],
             ),
           ),
@@ -999,7 +1003,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     );
   }
 
-  Widget _buildMistakeItem(String text) {
+  Widget _buildMistakeItem(String text, {required bool isDark}) {
     if (!_hasText(text)) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
@@ -1011,7 +1015,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.6),
+              style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
             ),
           ),
         ],
@@ -1021,7 +1025,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Report Wording ─────────────
 
-  Widget _buildReportWordingSection(EngineeringTopic topic) {
+  Widget _buildReportWordingSection(EngineeringTopic topic, {required bool isDark}) {
     final wording = _cleanDisplayText(topic.reportWording!.ar);
     if (wording.isEmpty) return const SizedBox.shrink();
 
@@ -1036,15 +1040,15 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: EncyclopediaCardColors.border),
-              color: EncyclopediaCardColors.paperBg,
+              border: Border.all(color: isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border),
+              color: isDark ? EncyclopediaCardColors.darkPaperBg : EncyclopediaCardColors.paperBg,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   wording,
-                  style: const TextStyle(fontSize: 14, color: EncyclopediaCardColors.textPrimary, height: 1.7),
+                  style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
                 ),
                 const SizedBox(height: 12),
                 Row(

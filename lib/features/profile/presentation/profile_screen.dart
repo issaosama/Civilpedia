@@ -409,7 +409,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.person_outline, color: AppColors.textSecondary),
+            Icon(Icons.person_outline, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
             AppSpacing.gapMd,
             Expanded(
               child: Text(

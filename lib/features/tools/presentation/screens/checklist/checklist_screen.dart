@@ -202,6 +202,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final l10n = L10n(isArabic);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final summary = _summary;
 
     String tr(String ar, String en) => isArabic ? ar : en;
@@ -259,7 +260,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                         ),
                       ),
                     ),
-                    Icon(Icons.chevron_right, size: 20, color: AppColors.textSecondary),
+                    Icon(Icons.chevron_right, size: 20, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
                   ],
                 ),
               ),

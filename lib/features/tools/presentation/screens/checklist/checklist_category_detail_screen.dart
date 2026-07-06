@@ -59,6 +59,7 @@ class _ChecklistCategoryDetailScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final items = widget.items;
     final done = items.where((i) => i.status != InspectionStatus.pending).length;
     final progress = items.isEmpty ? 0.0 : done / items.length;
@@ -120,7 +121,7 @@ class _ChecklistCategoryDetailScreenState
                         child: LinearProgressIndicator(
                           value: progress.clamp(0.0, 1.0),
                           minHeight: 6,
-                          backgroundColor: AppColors.textSecondary.withValues(alpha: 0.1),
+                          backgroundColor: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.1),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             widget.category.accentColor,
                           ),

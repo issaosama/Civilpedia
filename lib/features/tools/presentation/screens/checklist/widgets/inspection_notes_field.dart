@@ -37,6 +37,7 @@ class _InspectionNotesFieldState extends State<InspectionNotesField> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasNotes = _controller.text.isNotEmpty;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,14 +50,14 @@ class _InspectionNotesFieldState extends State<InspectionNotesField> {
               Icon(
                 _expanded ? Icons.expand_less : Icons.notes,
                 size: 16,
-                color: hasNotes ? AppColors.primary : AppColors.textSecondary,
+                color: hasNotes ? AppColors.primary : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
               ),
               const SizedBox(width: 4),
               Text(
                 hasNotes ? _controller.text : widget.hintText,
                 style: TextStyle(
                   fontSize: 12,
-                  color: hasNotes ? AppColors.textPrimary : AppColors.textSecondary,
+                  color: hasNotes ? (isDark ? AppColors.darkTextPrimary : AppColors.textPrimary) : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
                   fontStyle: hasNotes ? FontStyle.normal : FontStyle.italic,
                 ),
                 maxLines: 1,
@@ -73,7 +74,7 @@ class _InspectionNotesFieldState extends State<InspectionNotesField> {
               hintText: widget.hintText,
               hintStyle: TextStyle(
                 fontSize: 13,
-                color: AppColors.textSecondary,
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 fontStyle: FontStyle.italic,
               ),
               isDense: true,
@@ -84,13 +85,13 @@ class _InspectionNotesFieldState extends State<InspectionNotesField> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
                 borderSide: BorderSide(
-                  color: AppColors.textSecondary.withValues(alpha: 0.3),
+                  color: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.3),
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
                 borderSide: BorderSide(
-                  color: AppColors.textSecondary.withValues(alpha: 0.2),
+                  color: (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.2),
                 ),
               ),
               focusedBorder: OutlineInputBorder(

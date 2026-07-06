@@ -37,6 +37,7 @@ class InspectionSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return CustomCard(
       child: Column(
@@ -58,7 +59,7 @@ class InspectionSummaryCard extends StatelessWidget {
                 '${summary.passed + summary.failed} / ${summary.totalItems}',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
+                  color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 ),
               ),
             ],
@@ -68,21 +69,21 @@ class InspectionSummaryCard extends StatelessWidget {
           AppSpacing.gapSm,
           Row(
             children: [
-              _stat(AppColors.success, passLabel, '${summary.passed}'),
+              _stat(AppColors.success, passLabel, '${summary.passed}', isDark: isDark),
               const SizedBox(width: 16),
-              _stat(AppColors.error, failLabel, '${summary.failed}'),
+              _stat(AppColors.error, failLabel, '${summary.failed}', isDark: isDark),
               const SizedBox(width: 16),
-              _stat(AppColors.textSecondary, pendingLabel, '${summary.pending}'),
+              _stat(isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, pendingLabel, '${summary.pending}', isDark: isDark),
             ],
           ),
           const Divider(height: 20),
           Row(
             children: [
-              _stat(AppColors.error, criticalLabel, '${summary.criticalPassed}/${summary.criticalTotal}'),
+              _stat(AppColors.error, criticalLabel, '${summary.criticalPassed}/${summary.criticalTotal}', isDark: isDark),
               const SizedBox(width: 16),
-              _stat(AppColors.warning, requiredLabel, '${summary.requiredPassed}/${summary.requiredTotal}'),
+              _stat(AppColors.warning, requiredLabel, '${summary.requiredPassed}/${summary.requiredTotal}', isDark: isDark),
               const Spacer(),
-              _stat(AppColors.textSecondary, totalItemsLabel, '${summary.totalItems}'),
+              _stat(isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, totalItemsLabel, '${summary.totalItems}', isDark: isDark),
             ],
           ),
           AppSpacing.gapSm,
@@ -90,12 +91,12 @@ class InspectionSummaryCard extends StatelessWidget {
             alignment: AlignmentDirectional.centerEnd,
             child: TextButton.icon(
               onPressed: onReset,
-              icon: const Icon(Icons.refresh, size: 16, color: AppColors.textSecondary),
+              icon: Icon(Icons.refresh, size: 16, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
               label: Text(
                 resetLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.textSecondary,
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 ),
               ),
               style: TextButton.styleFrom(
@@ -110,7 +111,7 @@ class InspectionSummaryCard extends StatelessWidget {
     );
   }
 
-  Widget _stat(Color color, String label, String value) {
+  Widget _stat(Color color, String label, String value, {required bool isDark}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -126,7 +127,7 @@ class InspectionSummaryCard extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 11,
-            color: AppColors.textSecondary,
+            color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
           ),
         ),
       ],
