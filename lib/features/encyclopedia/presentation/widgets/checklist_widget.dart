@@ -25,12 +25,13 @@ class _ChecklistWidgetState extends State<ChecklistWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
       ),
@@ -53,14 +54,14 @@ class _ChecklistWidgetState extends State<ChecklistWidget> {
             const SizedBox(height: 10),
           ],
           ...widget.block.items.map(
-            (item) => _buildItem(context, item),
+            (item) => _buildItem(context, item, isDark: isDark),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildItem(BuildContext context, ChecklistItem item) {
+  Widget _buildItem(BuildContext context, ChecklistItem item, {bool isDark = false}) {
     final checked = _checked[item.id] ?? false;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 3),
@@ -79,7 +80,7 @@ class _ChecklistWidgetState extends State<ChecklistWidget> {
                 color: checked ? AppColors.success : Colors.transparent,
                 borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
                 border: Border.all(
-                  color: checked ? AppColors.success : AppColors.textSecondary,
+                  color: checked ? AppColors.success : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
                   width: checked ? 0 : 1.5,
                 ),
               ),
@@ -94,7 +95,7 @@ class _ChecklistWidgetState extends State<ChecklistWidget> {
               item.text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     decoration: checked ? TextDecoration.lineThrough : null,
-                    color: checked ? AppColors.textSecondary : null,
+                    color: checked ? (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary) : null,
                     height: 1.5,
                   ),
             ),

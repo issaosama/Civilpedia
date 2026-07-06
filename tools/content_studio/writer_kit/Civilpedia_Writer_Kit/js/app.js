@@ -76,6 +76,7 @@
     $('export-btn').addEventListener('click', exportAppReady);
     $('preview-btn').addEventListener('click', updatePreview);
     $('undo-btn').addEventListener('click', restoreUndoSnapshot);
+    $('preview-theme-toggle').addEventListener('click', togglePreviewTheme);
 
     previewRenderer.clear();
     $('sections-container').innerHTML = '<div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>';
@@ -538,6 +539,12 @@
     const blockIdx = li.dataset.blockIdx !== undefined ? parseInt(li.dataset.blockIdx, 10) : undefined;
     if (path === undefined && sectionIdx === undefined) return;
     navigateToTarget(path, sectionIdx, blockIdx);
+  }
+
+  function togglePreviewTheme() {
+    const container = $('preview-container');
+    const isDark = container.classList.toggle('preview-theme-dark');
+    $('preview-theme-toggle').textContent = isDark ? '☀️ نهار' : '🌙 ليلة';
   }
 
   function updatePreview() {

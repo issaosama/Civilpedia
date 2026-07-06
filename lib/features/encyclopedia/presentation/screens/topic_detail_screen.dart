@@ -73,7 +73,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         children: [
           _buildTopBar(context, isDark: isDark),
           _buildDivider(isDark: isDark),
-          _buildBrandPill(),
+          _buildBrandPill(isDark: isDark),
           _buildHeroSection(topic, isDark: isDark),
           const SizedBox(height: 8),
           numbered((n) => _buildOverviewSection(topic, blocksByType, isDark: isDark, number: n)),
@@ -94,7 +94,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           if (topic.reportWording != null)
             _buildReportWordingSection(topic, isDark: isDark),
           if (topic.relatedToolRoutes.isNotEmpty)
-            _buildRelatedToolsSection(context, topic),
+            _buildRelatedToolsSection(context, topic, isDark: isDark),
           const SizedBox(height: 48),
         ],
       ),
@@ -167,7 +167,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Section header ─────────────
 
-  Widget _buildSectionHeader(String kicker, String title, {int? number}) {
+  Widget _buildSectionHeader(String kicker, String title, {int? number, bool isDark = false}) {
     final displayKicker = number != null ? '$kicker · ${number.toString().padLeft(2, '0')}' : kicker;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -193,10 +193,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
-              color: EncyclopediaCardColors.textPrimary,
+              color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
               height: 1.3,
             ),
           ),
@@ -247,13 +247,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Container(height: 1, color: isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border, margin: const EdgeInsets.symmetric(horizontal: 16));
   }
 
-  Widget _buildBrandPill() {
+  Widget _buildBrandPill({bool isDark = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: EncyclopediaCardColors.accentSoft,
+          color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.accentSoft,
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
@@ -386,7 +386,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('OVERVIEW', 'نظرة عامة', number: number),
+        _buildSectionHeader('OVERVIEW', 'نظرة عامة', number: number, isDark: isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Text(
@@ -405,7 +405,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('IMPORTANCE', 'الأهمية الهندسية', number: number),
+        _buildSectionHeader('IMPORTANCE', 'الأهمية الهندسية', number: number, isDark: isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
@@ -473,7 +473,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('TABLES', 'القياسات والسماكات المتداولة', number: number),
+        _buildSectionHeader('TABLES', 'القياسات والسماكات المتداولة', number: number, isDark: isDark),
         ...tables.map((t) => _buildEditorialTable(t, isDark: isDark)),
         ...images,
         const SizedBox(height: 8),
@@ -578,7 +578,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('APPLICATION', 'طرق التنفيذ', number: number),
+        _buildSectionHeader('APPLICATION', 'طرق التنفيذ', number: number, isDark: isDark),
         if (_hasText(topic.beforeWork?.ar))
           _buildSubSection('قبل العمل', topic.beforeWork!.ar, isDark: isDark),
         if (_hasText(topic.duringWork?.ar))
@@ -686,7 +686,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('INSPECTION', 'فحص الأعمال بعد الإنجاز', number: number),
+        _buildSectionHeader('INSPECTION', 'فحص الأعمال بعد الإنجاز', number: number, isDark: isDark),
         ...validAcceptReject.map((item) => _buildInspectionRow(
               item.criteriaAr,
               item.acceptanceLimitAr,
@@ -879,7 +879,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('GENERAL', 'المحتوى العام', number: number),
+        _buildSectionHeader('GENERAL', 'المحتوى العام', number: number, isDark: isDark),
         ...children,
         const SizedBox(height: 8),
       ],
@@ -929,7 +929,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('SAFETY', 'تنبيهات السلامة', number: number),
+        _buildSectionHeader('SAFETY', 'تنبيهات السلامة', number: number, isDark: isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
@@ -979,7 +979,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('COMMON MISTAKES', 'أخطاء شائعة يجب تجنبها', number: number),
+        _buildSectionHeader('COMMON MISTAKES', 'أخطاء شائعة يجب تجنبها', number: number, isDark: isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
@@ -1032,7 +1032,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('', 'صياغة تقرير'),
+        _buildSectionHeader('', 'صياغة تقرير', isDark: isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Container(
@@ -1067,7 +1067,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
-                          color: EncyclopediaCardColors.accentSoft,
+                    color: isDark ? EncyclopediaCardColors.darkSoftPanel : EncyclopediaCardColors.accentSoft,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -1096,7 +1096,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   // ───────────── Related Tools ─────────────
 
-  Widget _buildRelatedToolsSection(BuildContext context, EngineeringTopic topic) {
+  Widget _buildRelatedToolsSection(BuildContext context, EngineeringTopic topic, {bool isDark = false}) {
     const toolNames = <String, String>{
       '/calculator/concrete': 'حاسبة الخرسانة',
       '/calculator/steel': 'حاسبة الحديد',
@@ -1106,7 +1106,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('', 'أدوات ذات صلة'),
+        _buildSectionHeader('', 'أدوات ذات صلة', isDark: isDark),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Wrap(

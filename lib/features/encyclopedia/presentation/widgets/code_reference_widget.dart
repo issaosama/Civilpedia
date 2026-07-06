@@ -14,6 +14,7 @@ class CodeReferenceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
     final ref = block.reference;
@@ -22,7 +23,7 @@ class CodeReferenceWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFC62828).withValues(alpha: 0.04),
+        color: isDark ? const Color(0xFFC62828).withValues(alpha: 0.12) : const Color(0xFFC62828).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
         border: Border.all(
           color: const Color(0xFFC62828).withValues(alpha: 0.15),
@@ -79,7 +80,7 @@ class CodeReferenceWidget extends StatelessWidget {
             Text(
               ref.description!,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                     height: 1.6,
                   ),
             ),

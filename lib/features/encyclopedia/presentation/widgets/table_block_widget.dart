@@ -10,6 +10,7 @@ class TableBlockWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final data = block.data;
     if (data.headers.isEmpty || data.rows.isEmpty) return const SizedBox.shrink();
     final textTheme = Theme.of(context).textTheme;
@@ -18,7 +19,7 @@ class TableBlockWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.15)),
+        border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.primary.withValues(alpha: 0.15)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
@@ -26,7 +27,7 @@ class TableBlockWidget extends StatelessWidget {
           scrollDirection: Axis.horizontal,
           child: DataTable(
             headingRowColor: WidgetStateProperty.all(
-              AppColors.primary.withValues(alpha: 0.06),
+              isDark ? AppColors.darkSurface : AppColors.primary.withValues(alpha: 0.06),
             ),
             headingTextStyle: textTheme.bodySmall?.copyWith(
               color: AppColors.primary,

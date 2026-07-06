@@ -14,6 +14,7 @@ class EquipmentWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
     return Container(
@@ -21,7 +22,7 @@ class EquipmentWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFF6A1B9A).withValues(alpha: 0.04),
+        color: isDark ? const Color(0xFF6A1B9A).withValues(alpha: 0.12) : const Color(0xFF6A1B9A).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
         border: Border.all(
           color: const Color(0xFF6A1B9A).withValues(alpha: 0.15),
@@ -46,13 +47,13 @@ class EquipmentWidget extends StatelessWidget {
             ),
             const SizedBox(height: 10),
           ],
-          ...block.items.map((item) => _itemCard(context, item, tr)),
+          ...block.items.map((item) => _itemCard(context, item, tr, isDark: isDark)),
         ],
       ),
     );
   }
 
-  Widget _itemCard(BuildContext context, EquipmentItem item, String Function(String ar, String en) tr) {
+  Widget _itemCard(BuildContext context, EquipmentItem item, String Function(String ar, String en) tr, {bool isDark = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(
@@ -79,7 +80,7 @@ class EquipmentWidget extends StatelessWidget {
               child: Text(
                 '${tr(Ar.equipmentPurpose, En.equipmentPurpose)}: ${item.purpose}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                     ),
               ),
             ),
@@ -91,7 +92,7 @@ class EquipmentWidget extends StatelessWidget {
               child: Text(
                 '${tr(Ar.equipmentSpecification, En.equipmentSpecification)}: ${item.specification}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                     ),
               ),
             ),

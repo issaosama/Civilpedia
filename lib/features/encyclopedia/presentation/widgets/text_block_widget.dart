@@ -29,14 +29,15 @@ class TextBlockWidget extends StatelessWidget {
   }
 
   Widget _variantBox(BuildContext context, Color color, IconData icon) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
+        color: color.withValues(alpha: isDark ? 0.12 : 0.08),
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.35 : 0.25)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +48,7 @@ class TextBlockWidget extends StatelessWidget {
             child: Text(
               block.content,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: color.withValues(alpha: 0.9),
+                    color: color.withValues(alpha: isDark ? 1.0 : 0.9),
                     height: 1.6,
                   ),
             ),

@@ -10,13 +10,14 @@ class ExecutionStepWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final step = block.step;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.primaryDark.withValues(alpha: 0.08),
+        color: isDark ? AppColors.primaryDark.withValues(alpha: 0.15) : AppColors.primaryDark.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
         border: Border.all(color: AppColors.primaryDark.withValues(alpha: 0.2)),
       ),
@@ -56,7 +57,7 @@ class ExecutionStepWidget extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.08),
+                      color: isDark ? Colors.amber.withValues(alpha: 0.15) : Colors.amber.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
                     ),
                     child: Row(

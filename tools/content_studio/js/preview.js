@@ -1,9 +1,11 @@
 class PreviewRenderer {
   constructor(containerId) {
     this.container = document.getElementById(containerId);
+    this._sectionNum = 0;
   }
 
   render(draft) {
+    this._sectionNum = 0;
     if (!draft || !draft.isValid()) {
       this.container.innerHTML = '<div class="preview-empty">قم بتحميل ملف Draft لعرض المعاينة</div>';
       return;
@@ -11,35 +13,99 @@ class PreviewRenderer {
     const data = draft.toJSON();
     const topic = data.topic || {};
     const sections = data.sections || [];
-    const html = this._renderTopic(topic) + this._renderSections(sections, data) + this._renderMistakes(topic) + this._renderAcceptReject(topic);
+
+    let html = this._renderTopic(topic, data);
+
+    // Overview section (matches Flutter _buildOverviewSection)
+    const overviewText = (topic.simpleExplanation && topic.simpleExplanation.ar) || topic.summaryAr || '';
+    if (overviewText) {
+      html += this._buildSection('OVERVIEW', 'نظرة عامة', `<p class="fp-overview-text">${this._escape(overviewText)}</p>`);
+    }
+
+    // Importance section (matches Flutter _buildImportanceSection)
+    const siteNotes = topic.siteNotes && topic.siteNotes.ar || '';
+    const codeNotes = topic.codeNotes && topic.codeNotes.ar || '';
+    if (siteNotes || codeNotes) {
+      let itemsHtml = '';
+      if (siteNotes) {
+        itemsHtml += `<div class="fp-importance-item"><span class="fp-importance-diamond">◆</span><span>${this._escape(siteNotes)}</span></div>`;
+      }
+      if (codeNotes) {
+        itemsHtml += `<div class="fp-importance-item"><span class="fp-importance-diamond">◆</span><span>${this._escape(codeNotes)}</span></div>`;
+      }
+      html += this._buildSection('IMPORTANCE', 'الأهمية الهندسية', `<div class="fp-importance-card">${itemsHtml}</div>`);
+    }
+
+    // Draft sections
+    html += this._renderSections(sections, data);
+
+    // Common Mistakes (matches Flutter _buildCommonMistakesSection)
+    html += this._renderMistakes(topic);
+
+    // Accept/Reject criteria (matches Flutter _buildInspectionSection)
+    html += this._renderAcceptReject(topic);
+
     this.container.innerHTML = html;
   }
 
   clear() {
+    this._sectionNum = 0;
     this.container.innerHTML = '<div class="preview-empty">قم بتحميل ملف Draft لعرض المعاينة</div>';
   }
 
-  _renderTopic(topic) {
-    const levelBadge = topic.level ? `<span class="preview-badge preview-badge-${topic.level}">${topic.level}</span>` : '';
-    const planBadge = topic.planKey ? `<span class="preview-badge preview-badge-plan">${topic.planKey}</span>` : '';
-    const tags = topic.tags && Array.isArray(topic.tags)
-      ? topic.tags.map(t => `<span class="preview-tag">${this._escape(t)}</span>`).join('')
-      : '';
+  // ─── Helpers ──────────────────────────────────────
 
+  _nextNum() {
+    this._sectionNum++;
+    return this._sectionNum < 10 ? '0' + this._sectionNum : String(this._sectionNum);
+  }
+
+  _buildSection(kicker, title, bodyHtml) {
+    const num = this._nextNum();
     return `
-      <div class="preview-section preview-header">
-        <h1 class="preview-title-ar">${this._escape(topic.titleAr || '')}</h1>
-        <h2 class="preview-title-en">${this._escape(topic.titleEn || '')}</h2>
-        <div class="preview-badges">${levelBadge} ${planBadge}</div>
-        <div class="preview-tags">${tags}</div>
-        <p class="preview-summary">${this._escape(topic.summaryAr || topic.summary || '')}</p>
+      <div class="fp-section">
+        <div class="fp-section-header">
+          <div class="fp-accent-bar"></div>
+          <span class="fp-section-kicker">${kicker} · ${num}</span>
+        </div>
+        <h2 class="fp-section-title">${title}</h2>
+        <div class="fp-section-body">${bodyHtml}</div>
       </div>
     `;
   }
 
-  _renderSections(sections, data) {
-    if (!sections.length) return '<div class="preview-empty">لا توجد أقسام</div>';
+  _categoryName(id) {
+    const names = {
+      concrete: 'الخرسانة',
+      steel: 'الحديد',
+      soil: 'التربة',
+      finishing: 'أعمال الإنهاءات'
+    };
+    return names[id] || id || '';
+  }
 
+  // ─── Topic Hero ───────────────────────────────────
+
+  _renderTopic(topic) {
+    const category = this._categoryName(topic.categoryId);
+    const tags = topic.tags && Array.isArray(topic.tags)
+      ? topic.tags.map(t => `<span class="fp-tag">${this._escape(t)}</span>`).join('')
+      : '';
+    const summary = (topic.simpleExplanation && topic.simpleExplanation.ar) || topic.summaryAr || topic.summary || '';
+
+    return `
+      <div class="fp-hero">
+        ${category ? `<div class="fp-category">${this._escape(category)}</div>` : ''}
+        <h1 class="fp-title">${this._escape(topic.titleAr || '')}</h1>
+        ${summary ? `<p class="fp-summary">${this._escape(summary)}</p>` : ''}
+        ${tags ? `<div class="fp-tags">${tags}</div>` : ''}
+      </div>
+    `;
+  }
+
+  // ─── Sections ─────────────────────────────────────
+
+  _renderSections(sections, data) {
     let html = '';
     for (const section of sections) {
       html += this._renderSection(section, data);
@@ -47,9 +113,22 @@ class PreviewRenderer {
     return html;
   }
 
+  _sectionKicker(type) {
+    const map = {
+      general: 'GENERAL',
+      execution: 'APPLICATION',
+      safety: 'SAFETY',
+      inspection: 'INSPECTION',
+      equipment: 'EQUIPMENT',
+      codeReference: 'CODE REFERENCE'
+    };
+    return map[type] || (type ? type.toUpperCase() : '');
+  }
+
   _renderSection(section, data) {
-    const typeLabel = SECTION_TYPE_LABELS[section.type] || section.type;
+    const kicker = this._sectionKicker(section.type);
     const blocks = section.blocks || [];
+    const num = this._nextNum();
 
     let blocksHtml = '';
     for (const block of blocks) {
@@ -57,17 +136,20 @@ class PreviewRenderer {
     }
 
     return `
-      <div class="preview-section preview-section-block">
-        <div class="preview-section-header">
-          <span class="preview-section-type">${typeLabel}</span>
-          <h3 class="preview-section-title">${this._escape(section.title)}</h3>
+      <div class="fp-section">
+        <div class="fp-section-header">
+          <div class="fp-accent-bar"></div>
+          <span class="fp-section-kicker">${kicker} · ${num}</span>
         </div>
-        <div class="preview-section-content">
-          ${blocksHtml}
+        <h2 class="fp-section-title">${this._escape(section.title)}</h2>
+        <div class="fp-section-body">
+          ${blocksHtml || '<div class="fp-empty-inline">⚠️ لا توجد كتل في هذا القسم</div>'}
         </div>
       </div>
     `;
   }
+
+  // ─── Block Router ─────────────────────────────────
 
   _renderBlock(block, data) {
     switch (block.type) {
@@ -90,28 +172,28 @@ class PreviewRenderer {
       case 'code_reference':
         return this._renderCodeReference(block);
       default:
-        return `<div class="preview-block preview-unknown">${this._escape(block.type || 'نوع غير معروف')}</div>`;
+        return `<div class="fp-text">${this._escape(block.type || 'نوع غير معروف')}</div>`;
     }
   }
+
+  // ─── Block Renderers ──────────────────────────────
 
   _renderTextBlock(block) {
     const content = block.content || {};
     const text = content.ar || '';
-    const variant = block.variant || 'paragraph';
-    const cls = `preview-text preview-text-${variant}`;
-    return `<div class="${cls}">${this._escape(text)}</div>`;
+    return `<div class="fp-text">${this._escape(text)}</div>`;
   }
 
   _renderExecutionStep(block) {
     const desc = block.description || {};
     const notes = block.notes || {};
     const stepNum = block.stepNumber || '?';
-    const noteHtml = notes.ar ? `<div class="preview-step-note">💡 ${this._escape(notes.ar)}</div>` : '';
+    const noteHtml = notes.ar ? `<div class="fp-step-note">💡 ${this._escape(notes.ar)}</div>` : '';
     return `
-      <div class="preview-step">
-        <div class="preview-step-number">${stepNum}</div>
-        <div class="preview-step-body">
-          <div class="preview-step-desc">${this._escape(desc.ar || '')}</div>
+      <div class="fp-step">
+        <div class="fp-step-number">${stepNum}</div>
+        <div class="fp-step-body">
+          <div class="fp-step-desc">${this._escape(desc.ar || '')}</div>
           ${noteHtml}
         </div>
       </div>
@@ -120,14 +202,11 @@ class PreviewRenderer {
 
   _renderSafetyNote(block) {
     const msg = block.message || {};
-    const severity = block.severity || 'medium';
-    const severityLabel = SEVERITY_LABELS[severity] || severity;
     return `
-      <div class="preview-safety preview-safety-${severity}">
-        <div class="preview-safety-icon">⚠️</div>
-        <div class="preview-safety-body">
-          <div class="preview-safety-severity">${severityLabel}</div>
-          <div class="preview-safety-msg">${this._escape(msg.ar || '')}</div>
+      <div class="fp-safety">
+        <div class="fp-safety-icon">⚠️</div>
+        <div class="fp-safety-body">
+          <div class="fp-safety-text">${this._escape(msg.ar || '')}</div>
         </div>
       </div>
     `;
@@ -149,9 +228,9 @@ class PreviewRenderer {
       }).join('') + '</tbody>';
     }
     return `
-      <div class="preview-table-wrapper">
-        ${caption ? `<div class="preview-table-caption">${this._escape(caption)}</div>` : ''}
-        <table class="preview-table">
+      <div class="fp-table-wrapper">
+        ${caption ? `<div class="fp-table-caption">${this._escape(caption)}</div>` : ''}
+        <table class="fp-table">
           ${thead}
           ${tbody}
         </table>
@@ -162,7 +241,7 @@ class PreviewRenderer {
 
   _noTableData(headers, rows) {
     if (headers.length > 0 && rows.length > 0) return '';
-    return '<div class="preview-empty-inline">⚠️ جدول بدون بيانات</div>';
+    return '<div class="fp-empty-inline">⚠️ جدول بدون بيانات</div>';
   }
 
   _renderChecklist(block) {
@@ -170,23 +249,23 @@ class PreviewRenderer {
     const items = block.items || [];
     if (items.length === 0) {
       return `
-        <div class="preview-checklist">
-          ${title ? `<div class="preview-checklist-title">${this._escape(title)}</div>` : ''}
-          <div class="preview-empty-inline">⚠️ قائمة الفحص فارغة — يرجى إضافة بنود</div>
+        <div class="fp-checklist">
+          ${title ? `<div class="fp-checklist-title">${this._escape(title)}</div>` : ''}
+          <div class="fp-empty-inline">⚠️ قائمة الفحص فارغة — يرجى إضافة بنود</div>
         </div>
       `;
     }
     const listHtml = items.map(item => {
       const required = item.isRequired !== false;
-      return `<div class="preview-checklist-item ${required ? 'preview-checklist-required' : ''}">
-        <span class="preview-checklist-check">${required ? '☐' : '◻'}</span>
+      return `<div class="fp-checklist-item">
+        <span class="fp-checklist-check">${required ? '☐' : '◻'}</span>
         <span>${this._escape(item.textAr || item.text || '')}</span>
       </div>`;
     }).join('');
     return `
-      <div class="preview-checklist">
-        ${title ? `<div class="preview-checklist-title">${this._escape(title)}</div>` : ''}
-        ${listHtml}
+      <div class="fp-checklist">
+        ${title ? `<div class="fp-checklist-title">${this._escape(title)}</div>` : ''}
+        <div class="fp-checklist-card">${listHtml}</div>
       </div>
     `;
   }
@@ -195,70 +274,71 @@ class PreviewRenderer {
     const isCritical = block.isCritical;
     const icon = isCritical ? '🔴' : '🟡';
     return `
-      <div class="preview-inspection">
-        <div class="preview-inspection-header">
-          ${icon} <strong>${this._escape(block.criteriaAr || '')}</strong>
-        </div>
-        <div class="preview-inspection-detail">
-          القبول: ${this._escape(block.acceptanceLimitAr || '')}<br>
-          الطريقة: ${this._escape(block.methodAr || '')}
+      <div class="fp-inspection">
+        <div class="fp-inspection-row">
+          <span class="fp-inspection-icon ${isCritical ? 'fp-inspection-critical' : 'fp-inspection-regular'}">${icon}</span>
+          <div>
+            <strong>${this._escape(block.criteriaAr || '')}</strong><br>
+            <span class="fp-text-muted">القبول: ${this._escape(block.acceptanceLimitAr || '')} | الطريقة: ${this._escape(block.methodAr || '')}</span>
+          </div>
         </div>
       </div>
     `;
   }
 
   _renderImage(block) {
-    return `
-      <div class="preview-image-placeholder">
-        <div class="preview-image-icon">🖼️</div>
-        <div>${this._escape(block.url || '')}</div>
-        ${block.caption ? `<div class="preview-image-caption">${this._escape(block.caption.ar || '')}</div>` : ''}
-      </div>
-    `;
+    const url = block.url || '';
+    const caption = block.caption ? (block.caption.ar || '') : '';
+    if (!url && !caption) return '';
+    let innerHtml;
+    if (url) {
+      innerHtml = `<img src="${this._escape(url)}" alt="${this._escape(caption)}" class="fp-image-img" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="fp-image-empty" style="display:none"><div class="fp-image-icon">🖼️</div><div class="fp-image-path">${this._escape(url)}</div></div>`;
+    } else {
+      innerHtml = '<div class="fp-image-empty"><div class="fp-image-icon">🖼️</div></div>';
+    }
+    if (caption) {
+      innerHtml += `<div class="fp-image-caption">${this._escape(caption)}</div>`;
+    }
+    return `<div class="fp-image">${innerHtml}</div>`;
   }
 
   _renderEquipment(block) {
     const items = block.items || [];
-    if (items.length === 0) return '<div class="preview-empty-inline">⚠️ قائمة المعدات فارغة</div>';
+    if (items.length === 0) return '<div class="fp-empty-inline">⚠️ قائمة المعدات فارغة</div>';
     const list = items.map(item => {
-      return `<div class="preview-equipment-item">
-        <strong>${this._escape(item.nameAr || '')}</strong>
-        ${item.specification ? `— ${this._escape(item.specification)}` : ''}
-        ${item.purpose ? `<br><em>${this._escape(item.purpose)}</em>` : ''}
-      </div>`;
+      let html = `<div class="fp-equipment-item"><strong>${this._escape(item.nameAr || '')}</strong>`;
+      if (item.specification) html += ` <span class="fp-equipment-spec">— ${this._escape(item.specification)}</span>`;
+      if (item.purpose) html += `<br><span class="fp-equipment-purpose">${this._escape(item.purpose)}</span>`;
+      html += '</div>';
+      return html;
     }).join('');
-    return `<div class="preview-equipment">${list}</div>`;
+    return `<div class="fp-equipment">${list}</div>`;
   }
 
   _renderCodeReference(block) {
     const title = block.title || {};
-    return `
-      <div class="preview-code-ref">
-        <strong>${this._escape(block.code || '')}</strong>
-        ${title.ar ? `— ${this._escape(title.ar)}` : ''}
-        ${block.excerpt ? `<br><em>${this._escape(block.excerpt.ar || '')}</em>` : ''}
-      </div>
-    `;
+    let html = `<div class="fp-code-ref"><strong>${this._escape(block.code || '')}</strong>`;
+    if (title.ar) html += ` — ${this._escape(title.ar)}`;
+    if (block.excerpt) html += `<br><em>${this._escape(block.excerpt.ar || '')}</em>`;
+    html += '</div>';
+    return html;
   }
+
+  // ─── Common Mistakes ──────────────────────────────
 
   _renderMistakes(topic) {
     const mistakes = topic.commonMistakes;
     if (!mistakes || !mistakes.length) return '';
     const items = mistakes.map(m => `
-      <li class="preview-mistake-item">
-        <span class="preview-mistake-icon">❌</span>
+      <div class="fp-mistake-item">
+        <span class="fp-mistake-icon">×</span>
         <span>${this._escape(m.ar || '')}</span>
-      </li>
-    `).join('');
-    return `
-      <div class="preview-section preview-section-block">
-        <div class="preview-section-header">
-          <h3 class="preview-section-title">الأخطاء الشائعة</h3>
-        </div>
-        <ul class="preview-mistakes">${items}</ul>
       </div>
-    `;
+    `).join('');
+    return this._buildSection('COMMON MISTAKES', 'أخطاء شائعة يجب تجنبها', `<div class="fp-mistakes">${items}</div>`);
   }
+
+  // ─── Accept / Reject ──────────────────────────────
 
   _renderAcceptReject(topic) {
     const items = topic.acceptRejectItems;
@@ -272,12 +352,9 @@ class PreviewRenderer {
         <td>${this._escape(item.methodAr || '')}</td>
       </tr>`;
     }).join('');
-    return `
-      <div class="preview-section preview-section-block">
-        <div class="preview-section-header">
-          <h3 class="preview-section-title">معايير القبول والرفض</h3>
-        </div>
-        <table class="preview-table preview-table-small">
+    return this._buildSection('INSPECTION', 'معايير القبول والرفض', `
+      <div class="fp-table-wrapper">
+        <table class="fp-table fp-table-small">
           <thead><tr>
             <th></th>
             <th>المعيار</th>
@@ -287,8 +364,10 @@ class PreviewRenderer {
           <tbody>${rows}</tbody>
         </table>
       </div>
-    `;
+    `);
   }
+
+  // ─── Escape ───────────────────────────────────────
 
   _escape(str) {
     if (str === null || str === undefined) return '';

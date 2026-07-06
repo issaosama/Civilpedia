@@ -9,12 +9,13 @@ class SafetyNoteWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final note = block.note;
     final (Color bg, Color fg, IconData icon) = switch (note.severity) {
-      SafetySeverity.low => (const Color(0xFFE8F5E9), const Color(0xFF2E7D32), Icons.check_circle_outline),
-      SafetySeverity.medium => (const Color(0xFFFFF3E0), const Color(0xFFEF6C00), Icons.warning_amber_rounded),
-      SafetySeverity.high => (const Color(0xFFFFEBEE), const Color(0xFFC62828), Icons.gpp_bad),
-      SafetySeverity.critical => (const Color(0xFF4A0000), const Color(0xFFFF1744), Icons.dangerous),
+      SafetySeverity.low => (isDark ? const Color(0xFF1B3A1B) : const Color(0xFFE8F5E9), const Color(0xFF2E7D32), Icons.check_circle_outline),
+      SafetySeverity.medium => (isDark ? const Color(0xFF3A2A1B) : const Color(0xFFFFF3E0), const Color(0xFFEF6C00), Icons.warning_amber_rounded),
+      SafetySeverity.high => (isDark ? const Color(0xFF3A1B1B) : const Color(0xFFFFEBEE), const Color(0xFFC62828), Icons.gpp_bad),
+      SafetySeverity.critical => (isDark ? const Color(0xFF5A0000) : const Color(0xFF4A0000), const Color(0xFFFF1744), Icons.dangerous),
     };
 
     return Container(

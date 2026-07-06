@@ -14,6 +14,7 @@ class InspectionPointWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
     final point = block.point;
@@ -22,7 +23,7 @@ class InspectionPointWidget extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFEF6C00).withValues(alpha: 0.04),
+        color: isDark ? const Color(0xFFEF6C00).withValues(alpha: 0.12) : const Color(0xFFEF6C00).withValues(alpha: 0.04),
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
         border: Border.all(
           color: point.isCritical
@@ -64,21 +65,21 @@ class InspectionPointWidget extends StatelessWidget {
           ),
           if (point.acceptableTolerance != null) ...[
             const SizedBox(height: 6),
-            _metaRow(context, Icons.straighten, tr(Ar.allowedTolerance, En.allowedTolerance), point.acceptableTolerance!),
+            _metaRow(context, Icons.straighten, tr(Ar.allowedTolerance, En.allowedTolerance), point.acceptableTolerance!, isDark: isDark),
           ],
           if (point.method != null) ...[
             const SizedBox(height: 4),
-            _metaRow(context, Icons.handyman, tr(Ar.inspectionMethodLabel, En.inspectionMethodLabel), point.method!),
+            _metaRow(context, Icons.handyman, tr(Ar.inspectionMethodLabel, En.inspectionMethodLabel), point.method!, isDark: isDark),
           ],
         ],
       ),
     );
   }
 
-  Widget _metaRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _metaRow(BuildContext context, IconData icon, String label, String value, {bool isDark = false}) {
     return Row(
       children: [
-        Icon(icon, size: 15, color: AppColors.textSecondary),
+        Icon(icon, size: 15, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
         const SizedBox(width: 6),
         Text(
           '$label: ',
