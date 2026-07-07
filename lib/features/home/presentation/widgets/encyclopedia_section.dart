@@ -32,8 +32,16 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
 
   @override
   Widget build(BuildContext context) {
+    // Force Theme dependency so this widget always rebuilds on theme switch,
+    // even when topics is empty (avoiding stale colors from early-return).
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final topics = context.watch<EncyclopediaProvider>().topics;
-    if (topics.isEmpty) return const SizedBox.shrink();
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
+
+    if (topics.isEmpty) return const SizedBox(height: 200);
+
+    final isDarkCard = isDark;
+    final cardMuted = mutedText;
 
     return SizedBox(
       height: 200,
@@ -44,16 +52,14 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final topic = topics[index];
-          return _topicCard(context, topic);
+          return _topicCard(context, topic, isDark: isDarkCard, mutedText: cardMuted);
         },
       ),
     );
   }
 
-  Widget _topicCard(BuildContext context, dynamic topic) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _topicCard(BuildContext context, dynamic topic, {required bool isDark, required Color mutedText}) {
     final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
-    final secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
     return GestureDetector(
       onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
       child: Container(
@@ -105,7 +111,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
-                          ?.copyWith(color: secondaryText),
+                          ?.copyWith(color: mutedText),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -119,7 +125,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: secondaryText.withValues(alpha: 0.10),
+                              color: mutedText.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(
                                   DesignTokens.radiusFull),
                             ),
@@ -129,7 +135,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                                   .textTheme
                                   .labelSmall
                                   ?.copyWith(
-                                    color: secondaryText,
+                                    color: mutedText,
                                     fontSize: 9,
                                   ),
                             ),

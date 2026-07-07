@@ -6,7 +6,6 @@ import '../../domain/entities/engineering_topic.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
-import '../../../../core/widgets/search_bar_widget.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
@@ -71,6 +70,42 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
     super.dispose();
   }
 
+  Widget _buildSearchField({required bool isDark}) {
+    final bgColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.mainText;
+    final hintColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final iconColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final borderColor = isDark ? AppColors.darkBorder : AppColors.border;
+    return TextField(
+      controller: _searchController,
+      onChanged: (query) {
+        context.read<EncyclopediaProvider>().searchTopics(query);
+      },
+      textAlign: TextAlign.right,
+      decoration: InputDecoration(
+        hintText: Ar.search,
+        hintStyle: TextStyle(color: hintColor),
+        prefixIcon: Icon(Icons.search, color: iconColor),
+        filled: true,
+        fillColor: bgColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(color: borderColor.withValues(alpha: 0.5)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(28),
+          borderSide: BorderSide(color: borderColor, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      ),
+      style: TextStyle(color: textColor),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<EncyclopediaProvider>();
@@ -84,12 +119,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: SearchBarWidget(
-              controller: _searchController,
-              onChanged: (query) {
-                provider.searchTopics(query);
-              },
-            ),
+            child: _buildSearchField(isDark: isDark),
           ),
           Expanded(
             child: AsyncValueWidget(
@@ -104,7 +134,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                     provider.isSearchActive
                         ? 'لا توجد نتائج للبحث عن "${_searchController.text}"'
                         : tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
-                    style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                    style: TextStyle(color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -141,7 +171,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
       return Center(
         child: Text(
           tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
-          style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+          style: TextStyle(color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
         ),
       );
     }
@@ -161,6 +191,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
     const previewCount = 4;
     final showAll = topics.length > previewCount;
     final displayTopics = showAll ? topics.take(previewCount).toList() : topics;
+    final countColor = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,7 +211,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                 '(${topics.length})',
                 style: TextStyle(
                   fontSize: 12,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: countColor,
                 ),
               ),
               const Spacer(),
@@ -208,6 +239,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
 
   Widget _compactTopicCard(BuildContext context, EngineeringTopic topic, {required bool isDark}) {
     final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     return GestureDetector(
       onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
       child: Container(
@@ -254,7 +286,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                     Text(
                       topic.summary,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        color: mutedText,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -309,7 +341,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
   Widget _topicCard(BuildContext context, EngineeringTopic topic, {required bool isDark}) {
     final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
     final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
-    final secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     return Card(
       elevation: 0,
       color: cardColor,
@@ -353,19 +385,19 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                         if (topic.titleEn != null)
                           Text(
                             topic.titleEn!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryText),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: mutedText),
                           ),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_left, color: secondaryText),
+                  Icon(Icons.chevron_left, color: mutedText),
                 ],
               ),
               const SizedBox(height: 10),
               Text(
                 topic.summary,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: secondaryText,
+                  color: mutedText,
                   height: 1.5,
                 ),
                 maxLines: 2,
@@ -380,13 +412,13 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: (isDark ? AppColors.darkTextSecondary : AppColors.primary).withValues(alpha: 0.08),
+                        color: mutedText.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                       ),
                       child: Text(
                         tag,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.primary,
+                          color: mutedText,
                         ),
                       ),
                     );
@@ -401,8 +433,8 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
   }
 
   Widget _defaultTopicIcon({required bool isDark}) {
-    final bgColor = (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.10);
-    final iconColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
+    final bgColor = mutedText.withValues(alpha: 0.10);
     return Container(
       width: 44,
       height: 44,
@@ -410,7 +442,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
         color: bgColor,
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
       ),
-      child: Icon(Icons.menu_book, color: iconColor, size: 22),
+      child: Icon(Icons.menu_book, color: mutedText, size: 22),
     );
   }
 }

@@ -13,6 +13,9 @@ class AppColors {
   static const Color border = Color(0xFFE6DDCD);           // soft warm border
   static const Color cardShadow = Color(0x1A000000);       // shadow tint
 
+  static const Color textMuted = Color(0xFF5C5545);       // readable muted text for card summaries (~2.6:1 on surface)
+  static const Color darkTextMuted = Color(0xFFC0BAA8);    // readable muted text in dark mode (~4.75:1 on darkSurface)
+
   // ── Amber / Yellow Accent System ──
   static const Color primary = Color(0xFFE98A1E);          // primary amber
   static const Color primaryDark = Color(0xFFC26A0C);      // darker amber for readable elements

@@ -37,7 +37,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
     final provider = context.watch<EncyclopediaProvider>();
-    final secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     return Scaffold(
       appBar: AppBar(title: Text(_categoryLabel(widget.categoryId, tr))),
       body: AsyncValueWidget(
@@ -49,10 +49,10 @@ class _TopicListScreenState extends State<TopicListScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.menu_book, size: 48, color: secondaryText),
+              Icon(Icons.menu_book, size: 48, color: mutedText),
               const SizedBox(height: 12),
               Text(tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
-                  style: TextStyle(color: secondaryText)),
+                  style: TextStyle(color: mutedText)),
             ],
           ),
         ),
@@ -70,7 +70,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
   Widget _topicCard(BuildContext context, EngineeringTopic topic, {required bool isDark}) {
     final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
     final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
-    final secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     return Card(
       elevation: 0,
       color: cardColor,
@@ -120,19 +120,19 @@ class _TopicListScreenState extends State<TopicListScreen> {
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
-                                ?.copyWith(color: secondaryText),
+                                ?.copyWith(color: mutedText),
                           ),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_left, color: secondaryText),
+                  Icon(Icons.chevron_left, color: mutedText),
                 ],
               ),
               const SizedBox(height: 10),
               Text(
                 topic.summary,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: secondaryText,
+                      color: mutedText,
                       height: 1.5,
                     ),
                 maxLines: 2,
@@ -148,14 +148,14 @@ class _TopicListScreenState extends State<TopicListScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: (isDark ? AppColors.darkTextSecondary : AppColors.primary).withValues(alpha: 0.08),
+                        color: mutedText.withValues(alpha: 0.08),
                         borderRadius:
                             BorderRadius.circular(DesignTokens.radiusFull),
                       ),
                       child: Text(
                         tag,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.primary,
+                              color: mutedText,
                             ),
                       ),
                     );
@@ -170,8 +170,8 @@ class _TopicListScreenState extends State<TopicListScreen> {
   }
 
   Widget _defaultTopicIcon({required bool isDark}) {
-    final bgColor = (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.10);
-    final iconColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
+    final bgColor = mutedText.withValues(alpha: 0.10);
     return Container(
       width: 44,
       height: 44,
@@ -179,7 +179,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
         color: bgColor,
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
       ),
-      child: Icon(Icons.menu_book, color: iconColor, size: 22),
+      child: Icon(Icons.menu_book, color: mutedText, size: 22),
     );
   }
 
