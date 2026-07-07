@@ -7,6 +7,7 @@ import '../../../../core/di/app_dependencies.dart';
 
 class EncyclopediaProvider extends ChangeNotifier {
   final EncyclopediaRepository _repository;
+  String? _searchQuery;
 
   EncyclopediaProvider({EncyclopediaRepository? repository})
       : _repository = repository ?? AppDependencies.encyclopediaRepo;
@@ -18,11 +19,26 @@ class EncyclopediaProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  List<EngineeringTopic> get topics => _topics;
+  List<EngineeringTopic> get topics => _searchQuery != null && _searchQuery!.trim().isNotEmpty
+      ? _filteredTopics
+      : _topics;
   EngineeringTopic? get currentTopic => _currentTopic;
   List<TopicSection> get currentSections => _currentSections;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  String? get currentSearchQuery => _searchQuery;
+  bool get isSearchActive => _searchQuery != null && _searchQuery!.trim().isNotEmpty;
+
+  List<EngineeringTopic> get _filteredTopics {
+    if (_searchQuery == null || _searchQuery!.trim().isEmpty) return _topics;
+    final q = _searchQuery!.trim().toLowerCase();
+    return _topics.where((t) =>
+      t.titleAr.toLowerCase().contains(q) ||
+      (t.titleEn?.toLowerCase().contains(q) ?? false) ||
+      t.summary.toLowerCase().contains(q) ||
+      t.tags.any((tag) => tag.toLowerCase().contains(q))
+    ).toList();
+  }
 
   List<ContentBlock> blocksForSection(String sectionId) =>
       _blocksBySection[sectionId] ?? <ContentBlock>[];
@@ -68,6 +84,17 @@ class EncyclopediaProvider extends ChangeNotifier {
       _error = e.toString();
     }
     _notify();
+  }
+
+  void searchTopics(String query) {
+    _searchQuery = query;
+    _error = null;
+    notifyListeners();
+  }
+
+  void clearSearch() {
+    _searchQuery = null;
+    notifyListeners();
   }
 
   void _setLoading() {

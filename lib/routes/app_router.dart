@@ -4,6 +4,7 @@ import '../features/splash/presentation/splash_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
 import '../features/encyclopedia/presentation/screens/categories_screen.dart';
+import '../features/encyclopedia/presentation/screens/encyclopedia_screen.dart';
 import '../features/encyclopedia/presentation/screens/topic_list_screen.dart';
 import '../features/encyclopedia/presentation/screens/topic_detail_screen.dart';
 import '../features/home/presentation/home_screen.dart';
@@ -55,6 +56,11 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => TopicListScreen(
         categoryId: state.pathParameters['categoryId'] ?? '',
       ),
+    ),
+    GoRoute(
+      path: '/encyclopedia',
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const EncyclopediaScreen(),
     ),
     GoRoute(
       path: '/encyclopedia/topic/:topicId',

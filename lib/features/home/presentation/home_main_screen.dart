@@ -157,7 +157,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             SectionHeader(
               title: tr(Ar.engineeringEncyclopedia, En.engineeringEncyclopedia),
               actionLabel: tr(Ar.viewAll, En.viewAll),
-              onAction: () => context.push('/categories'),
+              onAction: () => context.push('/encyclopedia'),
             ),
             const EncyclopediaSection(),
             AppSpacing.gapSm,
