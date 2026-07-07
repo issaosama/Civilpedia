@@ -598,25 +598,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             ),
           ),
         const SizedBox(height: 14),
-        if (topic.tags.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 4,
-              children: topic.tags.map((tag) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                decoration: BoxDecoration(
-                  color: (isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border).withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(tag, style: TextStyle(fontSize: 11, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary)),
-              )).toList(),
-            ),
-          ),
         if (topic.keyTopics.isNotEmpty)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(top: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -636,22 +620,42 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                     .map((kt) => kt.trim())
                     .where((kt) => kt.isNotEmpty)
                     .toSet()
-                    .map((kt) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: EncyclopediaCardColors.accentChip,
-                        border: Border.all(
-                          color: (isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border).withValues(alpha: 0.5),
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(kt, style: TextStyle(fontSize: 11, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary)),
-                    )).toList(),
+                    .map((kt) => _detailChip(kt, isDark: isDark))
+                    .toList(),
                 ),
               ],
             ),
+          )
+        else if (topic.tags.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: topic.tags.map((tag) => _detailChip(tag, isDark: isDark)).toList(),
+            ),
           ),
       ],
+    );
+  }
+
+  Widget _detailChip(String label, {required bool isDark}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isDark ? EncyclopediaCardColors.chipDarkBg : EncyclopediaCardColors.chipBg,
+        border: Border.all(
+          color: isDark ? EncyclopediaCardColors.chipDarkBorder : EncyclopediaCardColors.chipBorder,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          color: isDark ? EncyclopediaCardColors.chipDarkText : EncyclopediaCardColors.chipText,
+        ),
+      ),
     );
   }
 

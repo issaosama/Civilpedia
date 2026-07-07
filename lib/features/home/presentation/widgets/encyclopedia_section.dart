@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
+import '../../../../features/encyclopedia/domain/entities/engineering_topic.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../features/encyclopedia/presentation/theme/encyclopedia_card_colors.dart';
 
 class EncyclopediaSection extends StatefulWidget {
   const EncyclopediaSection({super.key});
@@ -116,32 +118,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const Spacer(),
-                    if (topic.tags.isNotEmpty)
-                      Wrap(
-                        spacing: 4,
-                        runSpacing: 2,
-                        children: topic.tags.take(2).map<Widget>((tag) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: mutedText.withValues(alpha: 0.10),
-                              borderRadius: BorderRadius.circular(
-                                  DesignTokens.radiusFull),
-                            ),
-                            child: Text(
-                              tag,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    color: mutedText,
-                                    fontSize: 9,
-                                  ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                    ..._cardChips(topic, isDark: isDark),
                   ],
                 ),
               ),
@@ -191,5 +168,47 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
       'roads' => Icons.signpost,
       _ => Icons.menu_book,
     };
+  }
+
+  List<Widget> _cardChips(EngineeringTopic topic, {required bool isDark}) {
+    final chips = _cardChipLabels(topic);
+    if (chips.isEmpty) return const [];
+    return [
+      Wrap(
+        spacing: 4,
+        runSpacing: 2,
+        children: chips.map((chip) => _buildChip(chip, isDark: isDark)).toList(),
+      ),
+    ];
+  }
+
+  List<String> _cardChipLabels(EngineeringTopic topic) {
+    final source = topic.keyTopics.isNotEmpty ? topic.keyTopics : topic.tags;
+    return source
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .take(2)
+        .toList();
+  }
+
+  Widget _buildChip(String label, {required bool isDark}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: isDark ? EncyclopediaCardColors.chipDarkBg : EncyclopediaCardColors.chipBg,
+        border: Border.all(
+          color: isDark ? EncyclopediaCardColors.chipDarkBorder : EncyclopediaCardColors.chipBorder,
+        ),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontSize: 9,
+          color: isDark ? EncyclopediaCardColors.chipDarkText : EncyclopediaCardColors.chipText,
+        ),
+      ),
+    );
   }
 }

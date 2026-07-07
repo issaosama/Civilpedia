@@ -9,6 +9,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../theme/encyclopedia_card_colors.dart';
 
 const _categoryOrder = [
   'concrete',
@@ -291,6 +292,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    ..._compactCardChipsList(topic, isDark: isDark),
                   ],
                 ),
               ),
@@ -403,28 +405,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
-              if (topic.tags.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 4,
-                  children: topic.tags.map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: mutedText.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-                      ),
-                      child: Text(
-                        tag,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: mutedText,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
+              ..._cardChips(topic, isDark: isDark),
             ],
           ),
         ),
@@ -443,6 +424,66 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
       ),
       child: Icon(Icons.menu_book, color: mutedText, size: 22),
+    );
+  }
+
+  List<Widget> _cardChips(EngineeringTopic topic, {required bool isDark}) {
+    final chips = _cardChipLabels(topic);
+    if (chips.isEmpty) return const [];
+    return [
+      const SizedBox(height: 10),
+      Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        children: chips.map((chip) => _buildChip(chip, isDark: isDark)).toList(),
+      ),
+    ];
+  }
+
+  List<Widget> _compactCardChipsList(EngineeringTopic topic, {required bool isDark}) {
+    final chips = _cardChipLabels(topic);
+    if (chips.isEmpty) return const [];
+    return [
+      Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Wrap(
+          spacing: 4,
+          runSpacing: 2,
+          children: chips.map((chip) => _buildChip(chip, isDark: isDark, compact: true)).toList(),
+        ),
+      ),
+    ];
+  }
+
+  List<String> _cardChipLabels(EngineeringTopic topic) {
+    final source = topic.keyTopics.isNotEmpty ? topic.keyTopics : topic.tags;
+    return source
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toSet()
+        .take(2)
+        .toList();
+  }
+
+  Widget _buildChip(String label, {required bool isDark, bool compact = false}) {
+    return Container(
+      padding: compact
+          ? const EdgeInsets.symmetric(horizontal: 6, vertical: 2)
+          : const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: isDark ? EncyclopediaCardColors.chipDarkBg : EncyclopediaCardColors.chipBg,
+        border: Border.all(
+          color: isDark ? EncyclopediaCardColors.chipDarkBorder : EncyclopediaCardColors.chipBorder,
+        ),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontSize: compact ? 9 : null,
+          color: isDark ? EncyclopediaCardColors.chipDarkText : EncyclopediaCardColors.chipText,
+        ),
+      ),
     );
   }
 }
