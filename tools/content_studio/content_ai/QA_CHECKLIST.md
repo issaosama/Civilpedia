@@ -32,6 +32,16 @@ Use this checklist to review every generated topic before the app owner opens it
 - [ ] No unsupported formats (heic, svg, bmp, tiff, avif).
 - [ ] Image briefs exist for every image referenced.
 
+## Cover Image
+
+- [ ] Content Studio's "اختيار صورة" button in topic metadata opens a file picker, sanitizes filename (lowercase, no spaces, no special chars), prepends `assets/images/`, and sets `coverImageUrl`.
+- [ ] `coverImageUrl` is optional — no error if empty.
+- [ ] If `coverImageUrl` is present, path starts with `assets/images/`.
+- [ ] Cover image format is png, jpg, jpeg, or webp.
+- [ ] Cover image path has no absolute paths, no backslashes, no spaces.
+- [ ] Cover image is distinct from section image blocks (topic-level field).
+- [ ] Missing cover image file does not crash preview or app.
+
 ## Tables
 
 - [ ] Tables are readable and simple (max 5-6 columns).

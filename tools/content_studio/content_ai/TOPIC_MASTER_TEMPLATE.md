@@ -6,7 +6,8 @@ Each Civilpedia topic follows this standard structure.
 
 ```
 1. Topic Title           — العنوان بالعربية
-2. Short Summary         — summaryAr (2-3 جمل)
+2. Cover Image           — coverImageUrl (اختياري، يستخدم كصورة رئيسية لبطاقة الموضوع وصفحة التفاصيل)
+3. Short Summary         — summaryAr (2-3 جمل)
 3. Simple Explanation    — simpleExplanation.ar
 4. Why It Matters on Site  — أهمية الموضوع في الموقع
 5. Required Tools/Equipment — الأدوات والمعدات المطلوبة
@@ -26,6 +27,7 @@ Each Civilpedia topic follows this standard structure.
 | Template Section | Content Studio Block Type | Notes |
 |---|---|---|
 | Topic Title | topic.titleAr | Field in topic metadata |
+| Cover Image | topic.coverImageUrl | Optional topic-level field; path like `assets/images/cover.png`. Set via Content Studio's "اختيار صورة" picker button in topic metadata. |
 | Short Summary | topic.summaryAr | Field in topic metadata |
 | Simple Explanation | topic.simpleExplanation.ar | Field in topic metadata |
 | Why It Matters on Site | text | type: "text", variant: "paragraph" |

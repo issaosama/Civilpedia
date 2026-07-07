@@ -76,6 +76,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           _buildTopBar(context, isDark: isDark),
           _buildDivider(isDark: isDark),
           _buildBrandPill(isDark: isDark),
+          if (_hasText(topic.coverImageUrl)) _buildCoverImage(topic, isDark: isDark),
           _buildHeroSection(topic, isDark: isDark),
           const SizedBox(height: 8),
           for (final section in sortedSections)
@@ -613,8 +614,6 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               )).toList(),
             ),
           ),
-        const SizedBox(height: 16),
-        if (_hasText(topic.coverImageUrl)) _buildCoverImage(topic, isDark: isDark),
       ],
     );
   }
@@ -622,19 +621,30 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildCoverImage(EngineeringTopic topic, {required bool isDark}) {
     final url = topic.coverImageUrl;
     if (url == null || url.isEmpty) return const SizedBox.shrink();
-    return Container(
-      height: 200,
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: (isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border).withValues(alpha: 0.5)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Image.asset(
-        url,
-        fit: BoxFit.cover,
-        width: double.infinity,
-        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 200,
+          decoration: BoxDecoration(
+            border: Border.all(color: (isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border).withValues(alpha: 0.5)),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Image.asset(
+            url,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        ),
       ),
     );
   }

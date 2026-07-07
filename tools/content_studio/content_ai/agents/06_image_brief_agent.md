@@ -30,6 +30,23 @@ A list of image briefs, each containing:
   required: true
 ```
 
+## Cover Image Brief
+
+The agent must now produce a **cover image brief** as the first item in the output, before internal image briefs.
+
+Cover image brief fields:
+```
+filename: concrete_slump_cover.png
+captionAr: صورة غلاف توضح اختبار الهبوط للخرسانة الطازجة
+purpose: تستخدم كصورة رئيسية لبطاقة الموضوع وصفحة التفاصيل
+visual_description: لقطة أو رسم يوضح الموضوع في سياقه العملي
+required_or_optional: recommended
+```
+
+The cover image path will be `assets/images/<filename>`. It is stored in `topic.coverImageUrl`, not as an image block inside a section.
+
+**Cover picker in Content Studio:** The topic metadata form includes a "اختيار صورة" button that opens a file picker. When the user selects an image, the filename is sanitized (lowercase, no spaces, no special chars), prefixed with `assets/images/`, and set as `coverImageUrl`. The picker fires a change event that triggers validation and preview updates.
+
 ## Rules
 
 - Follow `IMAGE_GUIDELINES.md` strictly.
@@ -39,6 +56,7 @@ A list of image briefs, each containing:
 - Purpose must explain why this image is needed.
 - Description must be detailed enough for someone to create the image visually.
 - Mark each image as `required: true` or `required: false`.
+- **Cover image brief must be listed first**, before internal image briefs.
 
 ## What Not to Do
 
@@ -60,12 +78,19 @@ A list of image briefs, each containing:
 [insert content]
 
 المطلوب:
-لكل صورة مطلوبة:
+أولاً: أخرج موجز صورة الغلاف (cover image brief) باستخدام الحقول التالية:
+1. filename (اسم الملف)
+2. captionAr (تعليق بالعربية)
+3. purpose (الغرض)
+4. visual_description (وصف بصري)
+5. required_or_optional (مطلوبة / موصى بها)
+
+ثانياً: لكل صورة داخلية مطلوبة:
 1. اسم الملف (lowercase English، underscores، .png/.jpg/.jpeg/.webp)
 2. captionAr (تعليق بالعربية)
 3. purpose (الغرض من الصورة)
 4. description (وصف بصري مفصل)
 5. required (مطلوبة / اختيارية)
 
-اتبع IMAGE_GUIDELINES.md. لا تضع صورًا زخرفية غير مفيدة.
+اتبع IMAGE_GUIDELINES.md. لا تضع صورًا زخرفية غير مفيدة. ضع موجز صورة الغلاف أولاً.
 ```

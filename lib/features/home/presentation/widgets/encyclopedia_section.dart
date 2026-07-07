@@ -43,6 +43,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
 
   Widget _topicCard(BuildContext context, dynamic topic) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
     return GestureDetector(
       onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
       child: Container(
@@ -56,30 +57,23 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 80,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    _categoryColor(topic.categoryId),
-                    _categoryColor(topic.categoryId).withValues(alpha: 0.6),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(DesignTokens.radiusMd),
-                  topRight: Radius.circular(DesignTokens.radiusMd),
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  _categoryIcon(topic.categoryId),
-                  color: Colors.white,
-                  size: 32,
-                ),
-              ),
-            ),
+            hasCover
+                ? ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(DesignTokens.radiusMd),
+                      topRight: Radius.circular(DesignTokens.radiusMd),
+                    ),
+                    child: SizedBox(
+                      height: 80,
+                      width: double.infinity,
+                      child: Image.asset(
+                        topic.coverImageUrl!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => _categoryHeader(topic.categoryId),
+                      ),
+                    ),
+                  )
+                : _categoryHeader(topic.categoryId),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(12),
@@ -137,6 +131,33 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _categoryHeader(String id) {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            _categoryColor(id),
+            _categoryColor(id).withValues(alpha: 0.6),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(DesignTokens.radiusMd),
+          topRight: Radius.circular(DesignTokens.radiusMd),
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          _categoryIcon(id),
+          color: Colors.white,
+          size: 32,
         ),
       ),
     );

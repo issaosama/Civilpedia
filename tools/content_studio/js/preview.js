@@ -93,6 +93,27 @@ class PreviewRenderer {
       : '';
     const summary = (topic.simpleExplanation && topic.simpleExplanation.ar) || topic.summaryAr || topic.summary || '';
 
+    // Card preview — mirrors Flutter topic card listing
+    let cardPreviewHtml = '';
+    if (topic.titleAr || topic.coverImageUrl) {
+      const thumbHtml = topic.coverImageUrl
+        ? `<img src="${this._escape(topic.coverImageUrl)}" alt="" class="fp-card-preview-img" onerror="this.onerror=null;this.style.display='none';this.parentNode.innerHTML='<div class=\\'fp-card-preview-fallback\\'>📖</div>'">`
+        : '<div class="fp-card-preview-fallback">📖</div>';
+      cardPreviewHtml = `
+        <div class="fp-card-preview">
+          <div class="fp-card-preview-label">📋 معاينة البطاقة في قائمة الموسوعة</div>
+          <div class="fp-card-preview-card">
+            <div class="fp-card-preview-thumb">${thumbHtml}</div>
+            <div class="fp-card-preview-info">
+              <div class="fp-card-preview-title">${this._escape(topic.titleAr || '')}</div>
+              ${summary ? `<div class="fp-card-preview-summary">${this._escape(summary).substring(0, 80)}…</div>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Hero cover — polished hero position
     let coverHtml = '';
     if (topic.coverImageUrl) {
       coverHtml = `
@@ -108,6 +129,7 @@ class PreviewRenderer {
     }
 
     return `
+      ${cardPreviewHtml}
       ${coverHtml}
       <div class="fp-hero">
         ${category ? `<div class="fp-category">${this._escape(category)}</div>` : ''}

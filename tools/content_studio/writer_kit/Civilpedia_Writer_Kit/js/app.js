@@ -168,7 +168,11 @@
           </div>
           <div class="form-group form-group-full">
             <label>صورة الغلاف</label>
-            <input type="text" data-path="topic.coverImageUrl" value="${esc(topic.coverImageUrl || '')}" class="form-input" dir="ltr" placeholder="assets/images/concrete_slump_cover.png">
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="text" data-path="topic.coverImageUrl" value="${esc(topic.coverImageUrl || '')}" class="form-input" dir="ltr" placeholder="assets/images/concrete_slump_cover.png" style="flex:1;">
+              <button type="button" class="btn btn-outline" onclick="document.getElementById('cover-file-input').click()" style="white-space:nowrap;">اختيار صورة</button>
+            </div>
+            <input type="file" id="cover-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="InlineBlockEditor._handleCoverPick(this)">
           </div>
           <div class="form-group">
             <label>السمة البصرية</label>

@@ -61,9 +61,39 @@ assets/images/file_name.png
   - Simple technical diagrams (drawn or generated).
   - Internally prepared illustrations.
 
+## Cover Image
+
+Every topic should have a **optional cover image** (`coverImageUrl`) used as the main thumbnail in the topic card and hero in the topic detail.
+
+**Cover picker in Content Studio:** The topic metadata form includes a "اختيار صورة" button that opens a file picker. When selected, the filename is sanitized (lowercase, no spaces, no special chars), prefixed with `assets/images/`, and set as `coverImageUrl`. The change event triggers validation and preview updates.
+
+### Cover Image Rules
+
+- The `coverImageUrl` field is set at the topic level (not inside a section block).
+- It is different from image blocks inside sections — image blocks are placed inside section content.
+- The cover image follows the same path and format rules as regular images.
+- If no cover image is set, the app displays a gradient/icon fallback.
+- Missing cover image files do not crash the app — a placeholder is shown.
+
+### Cover Image Brief
+
+The Image Brief Agent must now produce a **cover image brief** in addition to internal image briefs:
+
+```json
+{
+  "filename": "concrete_slump_cover.png",
+  "captionAr": "صورة غلاف توضح اختبار الهبوط للخرسانة الطازجة",
+  "purpose": "تستخدم كصورة رئيسية لبطاقة الموضوع وصفحة التفاصيل",
+  "visual_description": "لقطة أو رسم يوضح قالب الهبوط والخرسانة الطازجة في موقع إنشائي",
+  "required_or_optional": "recommended"
+}
+```
+
+The cover image brief is listed first, before internal image briefs.
+
 ## Image Brief Format
 
-Every image brief must include:
+Every image brief (including cover) must include:
 
 ```json
 {

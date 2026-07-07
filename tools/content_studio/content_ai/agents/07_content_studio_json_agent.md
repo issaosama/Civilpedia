@@ -42,6 +42,7 @@ A single valid JSON file following the Content Studio Draft JSON shape:
     "planKey": "free",
     "status": "draft",
     "featuredImageUrl": "",
+    "coverImageUrl": "assets/images/topic_cover.png",  <!-- Set via Content Studio's "اختيار صورة" picker button in topic metadata -->
     "simpleExplanation": {
       "ar": ""
     }

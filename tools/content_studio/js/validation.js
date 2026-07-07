@@ -102,6 +102,27 @@ class ValidationEngine {
         this._addWarning('simpleExplanation.ar مفقود');
       }
     }
+
+    if (topic.coverImageUrl) {
+      const url = topic.coverImageUrl;
+      const ext = url.split('.').pop().toLowerCase();
+      const supported = ['png', 'jpg', 'jpeg', 'webp'];
+      if (!supported.includes(ext)) {
+        this._addWarning(`coverImageUrl: صيغة غير مدعومة .${ext}. استخدم PNG أو JPG أو JPEG أو WEBP.`);
+      }
+      if (!url.startsWith('assets/images/')) {
+        this._addWarning('coverImageUrl: يجب أن يبدأ المسار بـ assets/images/');
+      }
+      if (/^[A-Za-z]:\\/.test(url)) {
+        this._addWarning('coverImageUrl: لا تستخدم مسار الحاسبة مثل C:\\ أو D:\\');
+      }
+      if (url.includes('\\')) {
+        this._addWarning('coverImageUrl: استخدم / بدلاً من \\ في المسار.');
+      }
+      if (/\s/.test(url)) {
+        this._addWarning('coverImageUrl: يفضّل أن يكون اسم الملف بدون فراغات.');
+      }
+    }
   }
 
   _checkSections(sections) {

@@ -56,6 +56,17 @@ A compatibility report with:
 - [ ] Every image block has a `caption.ar` field.
 - [ ] Arabic captions are not empty for required images.
 
+### Cover Image
+- [ ] In Content Studio, the "اختيار صورة" button in topic metadata opens a file picker, sanitizes the filename (lowercase, no spaces, no special chars), prepends `assets/images/`, and sets `coverImageUrl`.
+- [ ] `coverImageUrl` is optional — no error if empty.
+- [ ] If `coverImageUrl` is present:
+  - [ ] Path starts with `assets/images/`.
+  - [ ] Extension is one of: `.png`, `.jpg`, `.jpeg`, `.webp`.
+  - [ ] No absolute paths, no backslashes, no spaces.
+  - [ ] Filename is lowercase English.
+- [ ] `coverImageUrl` is different from image blocks — it is a topic-level field, not a section block.
+- [ ] If the image file is missing, the app shows a placeholder — it does not crash.
+
 ### Tables
 - [ ] Tables have at least one header.
 - [ ] Tables have at least one row.
