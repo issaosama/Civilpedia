@@ -93,7 +93,22 @@ class PreviewRenderer {
       : '';
     const summary = (topic.simpleExplanation && topic.simpleExplanation.ar) || topic.summaryAr || topic.summary || '';
 
+    let coverHtml = '';
+    if (topic.coverImageUrl) {
+      coverHtml = `
+        <div class="fp-cover">
+          <img src="${this._escape(topic.coverImageUrl)}" alt="" class="fp-cover-img"
+            onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'" />
+          <div class="fp-cover-placeholder" style="display:none">
+            <div class="fp-cover-placeholder-icon">🖼️</div>
+            <div class="fp-cover-placeholder-path">${this._escape(topic.coverImageUrl)}</div>
+          </div>
+        </div>
+      `;
+    }
+
     return `
+      ${coverHtml}
       <div class="fp-hero">
         ${category ? `<div class="fp-category">${this._escape(category)}</div>` : ''}
         <h1 class="fp-title">${this._escape(topic.titleAr || '')}</h1>

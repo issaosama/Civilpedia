@@ -66,6 +66,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
   }
 
   Widget _topicCard(BuildContext context, EngineeringTopic topic) {
+    final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
     return Card(
       elevation: DesignTokens.elevation1,
       shape: RoundedRectangleBorder(
@@ -81,16 +82,20 @@ class _TopicListScreenState extends State<TopicListScreen> {
             children: [
               Row(
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-                    ),
-                    child: Icon(Icons.menu_book,
-                        color: AppColors.primary, size: 22),
-                  ),
+                  hasCover
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                          child: SizedBox(
+                            width: 44,
+                            height: 44,
+                            child: Image.asset(
+                              topic.coverImageUrl!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => _defaultTopicIcon(),
+                            ),
+                          ),
+                        )
+                      : _defaultTopicIcon(),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -155,6 +160,18 @@ class _TopicListScreenState extends State<TopicListScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _defaultTopicIcon() {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+      ),
+      child: Icon(Icons.menu_book, color: AppColors.primary, size: 22),
     );
   }
 

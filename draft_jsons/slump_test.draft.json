@@ -23,6 +23,7 @@
     "planKey": "free",
     "status": "draft",
     "featuredImageUrl": "",
+    "coverImageUrl": "assets/images/concrete_slump_cover.png",
     "simpleExplanation": {
       "ar": "الخرسانة الطازجة يجب أن تكون سهلة التشغيل بما يكفي لصبها ودمكها في القوالب، لكن ليست سائلة جدًا بحيث تفقد قوتها. اختبار الهبوط يعطينا فكرة سريعة عن مدى سيولة الخرسانة. كلما زاد الهبوط، زادت السيولة."
     }

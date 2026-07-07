@@ -40,6 +40,7 @@ class EngineeringTopic {
   final LocalizedText? codeNotes;
   final LocalizedText? siteNotes;
   final LocalizedText? reportWording;
+  final String? coverImageUrl;
   final String? visualTheme;
   final List<String> relatedToolRoutes;
   final List<String> relatedChecklistIds;
@@ -66,6 +67,7 @@ class EngineeringTopic {
     this.codeNotes,
     this.siteNotes,
     this.reportWording,
+    this.coverImageUrl,
     this.visualTheme,
     this.relatedToolRoutes = const [],
     this.relatedChecklistIds = const [],
@@ -93,6 +95,7 @@ class EngineeringTopic {
         'codeNotes': codeNotes?.toJson(),
         'siteNotes': siteNotes?.toJson(),
         'reportWording': reportWording?.toJson(),
+        'coverImageUrl': coverImageUrl,
         'visualTheme': visualTheme != null ? {'accent': visualTheme} : null,
         'relatedToolRoutes': relatedToolRoutes,
         'relatedChecklistIds': relatedChecklistIds,
@@ -143,6 +146,7 @@ class EngineeringTopic {
             ? LocalizedText.fromJson(
                 json['reportWording'] as Map<String, dynamic>)
             : null,
+        coverImageUrl: json['coverImageUrl'] as String?,
         visualTheme: (() {
           final vt = json['visual_theme'];
           final accent = vt is Map<String, dynamic> ? vt['accent'] : null;

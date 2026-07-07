@@ -614,13 +614,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             ),
           ),
         const SizedBox(height: 16),
-        if (_hasText(topic.featuredImageUrl)) _buildHeroImage(topic, isDark: isDark),
+        if (_hasText(topic.coverImageUrl)) _buildCoverImage(topic, isDark: isDark),
       ],
     );
   }
 
-  Widget _buildHeroImage(EngineeringTopic topic, {required bool isDark}) {
-    final url = topic.featuredImageUrl;
+  Widget _buildCoverImage(EngineeringTopic topic, {required bool isDark}) {
+    final url = topic.coverImageUrl;
     if (url == null || url.isEmpty) return const SizedBox.shrink();
     return Container(
       height: 200,

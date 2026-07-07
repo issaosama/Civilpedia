@@ -40,6 +40,7 @@ class AppExporter {
       codeNotes: this._localized(src.codeNotes),
       siteNotes: this._localized(src.siteNotes),
       reportWording: this._localized(src.reportWording),
+      coverImageUrl: src.coverImageUrl || null,
       'visual_theme': this._exportVisualTheme(src.visual_theme),
       relatedToolRoutes: src.relatedToolRoutes || [],
       relatedChecklistIds: src.relatedChecklistIds || []
@@ -80,9 +81,16 @@ class AppExporter {
     return srcSections.map(s => ({
       id: s.id,
       title: s.title,
-      type: s.type,
+      type: this._exportSectionType(s.type),
       order: s.order
     }));
+  }
+
+  _exportSectionType(type) {
+    const map = {
+      code_reference: 'codeReference'
+    };
+    return map[type] || type || 'general';
   }
 
   _exportBlocks(srcSections) {

@@ -166,6 +166,10 @@
               ${options(VALID_TOPIC_STATUSES, topic.status)}
             </select>
           </div>
+          <div class="form-group form-group-full">
+            <label>صورة الغلاف</label>
+            <input type="text" data-path="topic.coverImageUrl" value="${esc(topic.coverImageUrl || '')}" class="form-input" dir="ltr" placeholder="assets/images/concrete_slump_cover.png">
+          </div>
           <div class="form-group">
             <label>السمة البصرية</label>
             <select data-path="topic.visual_theme.accent" class="form-select">
