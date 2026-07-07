@@ -103,6 +103,19 @@ class ValidationEngine {
       }
     }
 
+    if (topic.keyTopics !== undefined) {
+      if (!Array.isArray(topic.keyTopics)) {
+        this._addWarning('topic.keyTopics ليس مصفوفة. يفضل استخدام مصفوفة من النصوص.', { path: 'topic.keyTopics' });
+      } else if (topic.keyTopics.length > 20) {
+        this._addWarning('topic.keyTopics يحتوي على أكثر من 20 كلمة مفتاحية. يُفضّل تقليل العدد.', { path: 'topic.keyTopics' });
+      } else {
+        const hasInvalid = topic.keyTopics.some(kt => typeof kt !== 'string' || kt.trim() === '');
+        if (hasInvalid) {
+          this._addWarning('topic.keyTopics يحتوي على قيم غير صالحة. تأكد من أن جميع القيم نصوص غير فارغة.', { path: 'topic.keyTopics' });
+        }
+      }
+    }
+
     if (topic.coverImageUrl) {
       const url = topic.coverImageUrl;
       const ext = url.split('.').pop().toLowerCase();

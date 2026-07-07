@@ -36,7 +36,8 @@ class EncyclopediaProvider extends ChangeNotifier {
       t.titleAr.toLowerCase().contains(q) ||
       (t.titleEn?.toLowerCase().contains(q) ?? false) ||
       t.summary.toLowerCase().contains(q) ||
-      t.tags.any((tag) => tag.toLowerCase().contains(q))
+      t.tags.any((tag) => tag.toLowerCase().contains(q)) ||
+      t.keyTopics.any((kt) => kt.toLowerCase().contains(q))
     ).toList();
   }
 

@@ -32,6 +32,9 @@ Map<String, dynamic> _exportTopic(Map<String, dynamic> src, Map<String, dynamic>
     'codeNotes': _localized(src['codeNotes']),
     'siteNotes': _localized(src['siteNotes']),
     'reportWording': _localized(src['reportWording']),
+    'keyTopics': (src['keyTopics'] is List)
+        ? (src['keyTopics'] as List).map((kt) => kt.toString().trim()).where((kt) => kt.isNotEmpty).toList()
+        : [],
     'coverImageUrl': src['coverImageUrl'],
     'visual_theme': _exportVisualTheme(src['visual_theme']),
     'relatedToolRoutes': (src['relatedToolRoutes'] as List?)?.cast<String>() ?? [],

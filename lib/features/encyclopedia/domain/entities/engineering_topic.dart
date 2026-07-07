@@ -40,6 +40,7 @@ class EngineeringTopic {
   final LocalizedText? codeNotes;
   final LocalizedText? siteNotes;
   final LocalizedText? reportWording;
+  final List<String> keyTopics;
   final String? coverImageUrl;
   final String? visualTheme;
   final List<String> relatedToolRoutes;
@@ -67,6 +68,7 @@ class EngineeringTopic {
     this.codeNotes,
     this.siteNotes,
     this.reportWording,
+    this.keyTopics = const [],
     this.coverImageUrl,
     this.visualTheme,
     this.relatedToolRoutes = const [],
@@ -96,6 +98,7 @@ class EngineeringTopic {
         'siteNotes': siteNotes?.toJson(),
         'reportWording': reportWording?.toJson(),
         'coverImageUrl': coverImageUrl,
+        'keyTopics': keyTopics,
         'visualTheme': visualTheme != null ? {'accent': visualTheme} : null,
         'relatedToolRoutes': relatedToolRoutes,
         'relatedChecklistIds': relatedChecklistIds,
@@ -147,6 +150,16 @@ class EngineeringTopic {
                 json['reportWording'] as Map<String, dynamic>)
             : null,
         coverImageUrl: json['coverImageUrl'] as String?,
+        keyTopics: (() {
+          final raw = json['keyTopics'];
+          if (raw is List) {
+            return raw.cast<String>();
+          }
+          if (raw is String && raw.trim().isNotEmpty) {
+            return raw.split(RegExp(r'[،,]')).map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+          }
+          return const <String>[];
+        })(),
         visualTheme: (() {
           final vt = json['visual_theme'];
           final accent = vt is Map<String, dynamic> ? vt['accent'] : null;

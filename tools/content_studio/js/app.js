@@ -148,6 +148,11 @@
             <label>topic.summaryAr</label>
             <textarea data-path="topic.summaryAr" class="form-textarea" dir="rtl" rows="2">${esc(topic.summaryAr || '')}</textarea>
           </div>
+          <div class="form-group form-group-full">
+            <label>كلمات مفتاحية</label>
+            <input type="text" data-path="topic.keyTopics" value="${esc(Array.isArray(topic.keyTopics) ? topic.keyTopics.join('، ') : (topic.keyTopics || ''))}" class="form-input" dir="rtl" placeholder="اختبار الهبوط، Slump Test، الخرسانة الطازجة، قابلية التشغيل">
+            <div class="form-help">استخدم كلمات أو مصطلحات تساعد البحث، مفصولة بفواصل.</div>
+          </div>
           <div class="form-group">
             <label>topic.level</label>
             <select data-path="topic.level" class="form-select">
@@ -381,6 +386,9 @@
 
     let value = el.type === 'number' ? parseInt(el.value, 10) : el.value;
     if (el.tagName === 'SELECT') value = el.value;
+    if (path === 'topic.keyTopics') {
+      value = String(value).split(/[،,]/).map(s => s.trim()).filter(s => s.length > 0);
+    }
     draft.setField(path, value);
   }
 

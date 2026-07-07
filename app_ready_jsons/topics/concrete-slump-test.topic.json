@@ -42,6 +42,10 @@
       "ar": "",
       "en": ""
     },
+    "keyTopics": [
+      "اختبار الهبوط",
+      "Slump Test"
+    ],
     "coverImageUrl": "assets/images/cracks.jpg",
     "visual_theme": {
       "accent": "cement_gray"

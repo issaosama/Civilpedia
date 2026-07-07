@@ -614,6 +614,43 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               )).toList(),
             ),
           ),
+        if (topic.keyTopics.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(top: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'كلمات مفتاحية',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: topic.keyTopics
+                    .map((kt) => kt.trim())
+                    .where((kt) => kt.isNotEmpty)
+                    .toSet()
+                    .map((kt) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: EncyclopediaCardColors.accentChip,
+                        border: Border.all(
+                          color: (isDark ? EncyclopediaCardColors.darkBorder : EncyclopediaCardColors.border).withValues(alpha: 0.5),
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(kt, style: TextStyle(fontSize: 11, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary)),
+                    )).toList(),
+                ),
+              ],
+            ),
+          ),
       ],
     );
   }

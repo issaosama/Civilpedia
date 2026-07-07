@@ -40,6 +40,7 @@ class AppExporter {
       codeNotes: this._localized(src.codeNotes),
       siteNotes: this._localized(src.siteNotes),
       reportWording: this._localized(src.reportWording),
+      keyTopics: Array.isArray(src.keyTopics) ? src.keyTopics.map(kt => String(kt).trim()).filter(kt => kt.length > 0) : [],
       coverImageUrl: src.coverImageUrl || null,
       'visual_theme': this._exportVisualTheme(src.visual_theme),
       relatedToolRoutes: src.relatedToolRoutes || [],
