@@ -122,6 +122,7 @@ class PreviewRenderer {
             onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="fp-cover-placeholder" style="display:none">
             <div class="fp-cover-placeholder-icon">🖼️</div>
+            <div class="fp-cover-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div>
             <div class="fp-cover-placeholder-path">${this._escape(topic.coverImageUrl)}</div>
           </div>
         </div>
@@ -329,9 +330,9 @@ class PreviewRenderer {
     if (!url && !caption) return '';
     let innerHtml;
     if (url) {
-      innerHtml = `<img src="${this._escape(url)}" alt="${this._escape(caption)}" class="fp-image-img" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="fp-image-empty" style="display:none"><div class="fp-image-icon">🖼️</div><div class="fp-image-path">${this._escape(url)}</div></div>`;
+      innerHtml = `<img src="${this._escape(url)}" alt="${this._escape(caption)}" class="fp-image-img" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="fp-image-empty" style="display:none"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div><div class="fp-image-path">${this._escape(url)}</div></div>`;
     } else {
-      innerHtml = '<div class="fp-image-empty"><div class="fp-image-icon">🖼️</div></div>';
+      innerHtml = '<div class="fp-image-empty"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div></div>';
     }
     if (caption) {
       innerHtml += `<div class="fp-image-caption">${this._escape(caption)}</div>`;

@@ -22,12 +22,16 @@ A list of image briefs, each containing:
   purpose: إظهار شكل القالب المستخدم في اختبار الهبوط
   description: قالب معدني مخروطي الشكل، القاعدة 20 سم، الفتحة العلوية 10 سم، الارتفاع 30 سم
   required: true
+  imageType: article
+  recommendedDimensions: 1200×900 (4:3)
 
 - filename: slump_measurement.jpg
   captionAr: قياس الهبوط بعد رفع القالب
   purpose: إظهار طريقة قياس الهبوط
   description: خرسانة بعد رفع القالب المخروطي، مع شريط قياس يوضح مقدار الهبوط
   required: true
+  imageType: article
+  recommendedDimensions: 1200×900 (4:3)
 ```
 
 ## Cover Image Brief
@@ -41,6 +45,8 @@ captionAr: صورة غلاف توضح اختبار الهبوط للخرسانة
 purpose: تستخدم كصورة رئيسية لبطاقة الموضوع وصفحة التفاصيل
 visual_description: لقطة أو رسم يوضح الموضوع في سياقه العملي
 required_or_optional: recommended
+imageType: cover
+recommendedDimensions: 1600×900 (16:9)
 ```
 
 The cover image path will be `assets/images/<filename>`. It is stored in `topic.coverImageUrl`, not as an image block inside a section.
@@ -57,6 +63,12 @@ The cover image path will be `assets/images/<filename>`. It is stored in `topic.
 - Description must be detailed enough for someone to create the image visually.
 - Mark each image as `required: true` or `required: false`.
 - **Cover image brief must be listed first**, before internal image briefs.
+- **Include `imageType` field** for every brief: `cover`, `article`, `diagram`, or `tall`.
+- **Include `recommendedDimensions` field** based on type:
+  - `cover` → `1600×900 (16:9)`
+  - `article` → `1200×900 (4:3)` or `1200×675 (16:9)`
+  - `diagram` → `1200×900 (4:3)`
+  - `tall` → `900×1200 (3:4)`
 
 ## What Not to Do
 
@@ -84,13 +96,17 @@ The cover image path will be `assets/images/<filename>`. It is stored in `topic.
 3. purpose (الغرض)
 4. visual_description (وصف بصري)
 5. required_or_optional (مطلوبة / موصى بها)
+6. imageType: cover
+7. recommendedDimensions: 1600×900 (16:9)
 
 ثانياً: لكل صورة داخلية مطلوبة:
-1. اسم الملف (lowercase English، underscores، .png/.jpg/.jpeg/.webp)
+1. filename (lowercase English، underscores، .png/.jpg/.jpeg/.webp)
 2. captionAr (تعليق بالعربية)
 3. purpose (الغرض من الصورة)
 4. description (وصف بصري مفصل)
 5. required (مطلوبة / اختيارية)
+6. imageType: article / diagram / tall
+7. recommendedDimensions حسب النوع
 
 اتبع IMAGE_GUIDELINES.md. لا تضع صورًا زخرفية غير مفيدة. ضع موجز صورة الغلاف أولاً.
 ```

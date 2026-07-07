@@ -52,9 +52,19 @@ A compatibility report with:
 - [ ] Image filenames have no spaces.
 - [ ] Only supported extensions: `.png`, `.jpg`, `.jpeg`, `.webp`.
 
+### Image Dimensions & Aspect Ratio
+- [ ] Cover image meets 16:9 aspect ratio (recommended 1600×900, minimum 1200×675).
+- [ ] Article images use 4:3 ratio (1200×900) or 16:9 (1200×675) or 3:4 (900×1200).
+- [ ] Diagrams use 4:3 ratio with clean labels and high contrast.
+- [ ] Important content is centered in cover images (edges may be cropped).
+- [ ] No text or critical detail near cover image edges.
+- [ ] No very small, blurry, or watermarked images.
+
 ### Image Captions
 - [ ] Every image block has a `caption.ar` field.
 - [ ] Arabic captions are not empty for required images.
+- [ ] Captions describe the image, not interpret it.
+- [ ] Captions are 1–2 sentences max.
 
 ### Cover Image
 - [ ] In Content Studio, the "اختيار صورة" button in topic metadata opens a file picker, sanitizes the filename (lowercase, no spaces, no special chars), prepends `assets/images/`, and sets `coverImageUrl`.
@@ -64,8 +74,16 @@ A compatibility report with:
   - [ ] Extension is one of: `.png`, `.jpg`, `.jpeg`, `.webp`.
   - [ ] No absolute paths, no backslashes, no spaces.
   - [ ] Filename is lowercase English.
+  - [ ] Image uses 16:9 crop with main subject centered.
 - [ ] `coverImageUrl` is different from image blocks — it is a topic-level field, not a section block.
 - [ ] If the image file is missing, the app shows a placeholder — it does not crash.
+
+### Preview Parity (Content Studio vs Flutter)
+- [ ] Content Studio cover preview uses 16:9 crop (`object-fit: cover`) matching Flutter hero.
+- [ ] Content Studio article image preview uses full-image fit (`object-fit: contain`) matching Flutter.
+- [ ] Content Studio missing-image placeholder shows icon + path + Arabic message.
+- [ ] Preview looks correct in both light and dark mode.
+- [ ] Border-radius and surface styling match Flutter equivalents.
 
 ### Tables
 - [ ] Tables have at least one header.

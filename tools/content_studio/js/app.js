@@ -177,6 +177,7 @@
               <input type="text" data-path="topic.coverImageUrl" value="${esc(topic.coverImageUrl || '')}" class="form-input" dir="ltr" placeholder="assets/images/concrete_slump_cover.png" style="flex:1;">
               <button type="button" class="btn btn-outline" onclick="document.getElementById('cover-file-input').click()" style="white-space:nowrap;">اختيار صورة</button>
             </div>
+            <div class="image-guidance-cover">المقاس المقترح: 1600×900 بنسبة 16:9 — استخدم صورة أفقية واضحة واجعل العنصر المهم في الوسط.</div>
             <input type="file" id="cover-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="InlineBlockEditor._handleCoverPick(this)">
           </div>
           <div class="form-group">

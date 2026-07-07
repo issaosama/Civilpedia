@@ -31,6 +31,10 @@ Use this checklist to review every generated topic before the app owner opens it
 - [ ] No backslashes in paths (use /).
 - [ ] No unsupported formats (heic, svg, bmp, tiff, avif).
 - [ ] Image briefs exist for every image referenced.
+- [ ] Cover image meets 16:9 aspect ratio (recommended 1600×900, minimum 1200×675).
+- [ ] Article images meet preferred 4:3 ratio (1200×900) or alternative 16:9 (1200×675).
+- [ ] Diagrams use 4:3 ratio (1200×900) with clean labels and high contrast.
+- [ ] Tall process images (3:4, 900×1200) used only when essential.
 
 ## Cover Image
 
@@ -41,6 +45,8 @@ Use this checklist to review every generated topic before the app owner opens it
 - [ ] Cover image path has no absolute paths, no backslashes, no spaces.
 - [ ] Cover image is distinct from section image blocks (topic-level field).
 - [ ] Missing cover image file does not crash preview or app.
+- [ ] Cover image important content is centered (edges may be cropped in 16:9).
+- [ ] No text or critical detail near cover image edges.
 
 ## Tables
 
@@ -102,6 +108,10 @@ JSON validity alone is NOT sufficient — a block can be valid JSON but render a
 - [ ] All blocks render properly.
 - [ ] Images load from assets.
 - [ ] Dark mode rendering is correct.
+- [ ] Cover image displays at 16:9 crop in Flutter hero section.
+- [ ] Article images display with contain fit (full image visible, no cropping).
+- [ ] Content Studio cover preview matches Flutter cover display (same crop, same border-radius).
+- [ ] Content Studio article preview matches Flutter article image display (same fit behavior).
 
 ## Safety and Legal
 

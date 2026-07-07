@@ -292,6 +292,31 @@ body {
   color: var(--text-secondary);
 }
 
+/* Image guidance text — appears near cover image and article image fields */
+.image-guidance-cover,
+.image-guidance-block {
+  font-size: 11px;
+  color: #8B7D6B;
+  margin-top: 4px;
+  line-height: 1.5;
+  padding: 4px 8px;
+  background: rgba(232, 220, 211, 0.2);
+  border-radius: 4px;
+  border-right: 2px solid #C5B8A3;
+}
+.image-guidance-block {
+  margin: 8px 0 4px;
+}
+
+.preview-theme-dark .image-guidance-cover,
+.preview-theme-dark .image-guidance-block,
+#preview-container.preview-theme-dark .image-guidance-cover,
+#preview-container.preview-theme-dark .image-guidance-block {
+  color: #A8A294;
+  background: rgba(50, 47, 37, 0.5);
+  border-right-color: #5C5648;
+}
+
 .export-warning-banner {
   padding: 10px 14px;
   background: #fffbeb;
@@ -1261,11 +1286,17 @@ body {
 .fp-cover-placeholder-icon {
   font-size: 32px;
 }
-.fp-cover-placeholder-path {
+.fp-cover-placeholder-label {
   font-size: 12px;
+  color: var(--fp-text-muted);
+  text-align: center;
+}
+.fp-cover-placeholder-path {
+  font-size: 11px;
   word-break: break-all;
   max-width: 90%;
   text-align: center;
+  opacity: 0.75;
 }
 
 /* Card preview (listing mock) */
@@ -1504,20 +1535,31 @@ body {
 }
 .fp-image-img {
   width: 100%;
+  max-height: 400px;
+  object-fit: contain;
   border-radius: var(--fp-radius);
   border: 1px solid rgba(232, 220, 211, 0.5);
   display: block;
+  background: var(--fp-soft-panel);
 }
 .fp-image-empty {
-  background: #f3f4f6;
+  background: var(--fp-soft-panel);
   border: 2px dashed var(--fp-border);
   border-radius: var(--fp-radius);
-  padding: 24px;
+  padding: 28px 24px;
   text-align: center;
   color: var(--fp-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 .fp-image-icon { font-size: 28px; }
-.fp-image-path { font-size: 12px; margin-top: 4px; word-break: break-all; }
+.fp-image-placeholder-label {
+  font-size: 12px;
+  color: var(--fp-text-muted);
+}
+.fp-image-path { font-size: 11px; word-break: break-all; opacity: 0.75; }
 .fp-image-caption {
   text-align: center;
   font-size: 12px;

@@ -80,6 +80,7 @@ class InlineBlockEditor {
             </div>
             <input type="file" id="${fileInputId}" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="InlineBlockEditor._handleImagePick(this,'${urlInputId}','${previewId}')">
           </div>
+          <div class="image-guidance-block">المقاس المقترح: 1200×900 بنسبة 4:3 أو 1200×675 بنسبة 16:9 حسب نوع الصورة.</div>
           <div style="margin-top:4px;font-size:11px;color:#888;line-height:1.6;">
             <strong>إرشاد سريع:</strong><br>
             اضغط "اختيار صورة" وسيتم تعبئة المسار تلقائياً.<br>
