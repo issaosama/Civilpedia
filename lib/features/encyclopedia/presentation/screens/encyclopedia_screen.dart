@@ -19,6 +19,17 @@ const _categoryOrder = [
   'finishing',
 ];
 
+// Muted fallback colors for topic cards without a cover image.
+// These are intentionally subdued earth tones that don't compete
+// with actual cover photos, while still providing visual variety.
+const _mutedCategoryColors = {
+  'concrete': Color(0xFFD4A373),
+  'steel': Color(0xFFBA8A8A),
+  'soil': Color(0xFF9B8B7A),
+  'roads': Color(0xFF7D9B7D),
+  'finishing': Color(0xFFB8A88A),
+};
+
 String _categoryLabel(String id) {
   switch (id) {
     case 'concrete':
@@ -155,7 +166,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 20, 8, 0),
           child: Row(
             children: [
               Text(
@@ -166,17 +177,16 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                '(${topics.length} مواضيع)',
+                '(${topics.length})',
                 style: TextStyle(
                   fontSize: 12,
                   color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 ),
               ),
               const Spacer(),
-              TextButton.icon(
+              TextButton(
                 onPressed: () => context.push('/encyclopedia/topics/$categoryId'),
-                icon: const Icon(Icons.chevron_left, size: 18),
-                label: Text(tr(Ar.viewAll, En.viewAll), style: const TextStyle(fontSize: 13)),
+                child: Text(tr(Ar.viewAll, En.viewAll), style: const TextStyle(fontSize: 13)),
               ),
             ],
           ),
@@ -205,7 +215,8 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.primary.withValues(alpha: 0.08)),
+          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.border),
+          boxShadow: isDark ? null : DesignTokens.softShadow(AppColors.cardShadow),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,7 +240,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                 : _categoryHeader(topic.categoryId, isDark: isDark),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -282,13 +293,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
   }
 
   Color _categoryColor(String id) {
-    return switch (id) {
-      'concrete' => AppColors.primary,
-      'steel' => const Color(0xFFC62828),
-      'soil' => const Color(0xFF795548),
-      'roads' => const Color(0xFF2E7D32),
-      _ => AppColors.primary,
-    };
+    return _mutedCategoryColors[id] ?? const Color(0xFFB0A090);
   }
 
   IconData _categoryIcon(String id) {
@@ -303,9 +308,15 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
 
   Widget _topicCard(BuildContext context, EngineeringTopic topic, {required bool isDark}) {
     final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
+    final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
     return Card(
-      elevation: DesignTokens.elevation1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd)),
+      elevation: 0,
+      color: cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+        side: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border),
+      ),
       child: InkWell(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
@@ -342,21 +353,19 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                         if (topic.titleEn != null)
                           Text(
                             topic.titleEn!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: secondaryText),
                           ),
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_left, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                  Icon(Icons.chevron_left, color: secondaryText),
                 ],
               ),
               const SizedBox(height: 10),
               Text(
                 topic.summary,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  color: secondaryText,
                   height: 1.5,
                 ),
                 maxLines: 2,
@@ -371,12 +380,14 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.06),
+                        color: (isDark ? AppColors.darkTextSecondary : AppColors.primary).withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                       ),
                       child: Text(
                         tag,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.primary),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.primary,
+                        ),
                       ),
                     );
                   }).toList(),
@@ -390,14 +401,16 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
   }
 
   Widget _defaultTopicIcon({required bool isDark}) {
+    final bgColor = (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary).withValues(alpha: 0.10);
+    final iconColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
     return Container(
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.08),
+        color: bgColor,
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
       ),
-      child: Icon(Icons.menu_book, color: AppColors.primary, size: 22),
+      child: Icon(Icons.menu_book, color: iconColor, size: 22),
     );
   }
 }

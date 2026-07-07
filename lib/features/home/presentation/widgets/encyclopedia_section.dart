@@ -12,6 +12,15 @@ class EncyclopediaSection extends StatefulWidget {
   State<EncyclopediaSection> createState() => _EncyclopediaSectionState();
 }
 
+const _mutedCategoryColors = {
+  'concrete': Color(0xFFD4A373),
+  'steel': Color(0xFFBA8A8A),
+  'soil': Color(0xFF9B8B7A),
+  'roads': Color(0xFF7D9B7D),
+  'finishing': Color(0xFFB8A88A),
+  'general': Color(0xFFB0A090),
+};
+
 class _EncyclopediaSectionState extends State<EncyclopediaSection> {
   @override
   void initState() {
@@ -44,6 +53,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
   Widget _topicCard(BuildContext context, dynamic topic) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
+    final secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
     return GestureDetector(
       onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
       child: Container(
@@ -51,7 +61,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
         decoration: BoxDecoration(
           color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.primary.withValues(alpha: 0.08)),
+          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.border),
           boxShadow: isDark ? null : DesignTokens.softShadow(AppColors.cardShadow),
         ),
         child: Column(
@@ -95,7 +105,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                       style: Theme.of(context)
                           .textTheme
                           .bodySmall
-                          ?.copyWith(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                          ?.copyWith(color: secondaryText),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -109,7 +119,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.06),
+                              color: secondaryText.withValues(alpha: 0.10),
                               borderRadius: BorderRadius.circular(
                                   DesignTokens.radiusFull),
                             ),
@@ -119,7 +129,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                                   .textTheme
                                   .labelSmall
                                   ?.copyWith(
-                                    color: AppColors.primary,
+                                    color: secondaryText,
                                     fontSize: 9,
                                   ),
                             ),
@@ -143,7 +153,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
         gradient: LinearGradient(
           colors: [
             _categoryColor(id),
-            _categoryColor(id).withValues(alpha: 0.6),
+            _categoryColor(id).withValues(alpha: 0.5),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -164,13 +174,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
   }
 
   Color _categoryColor(String id) {
-    return switch (id) {
-      'concrete' => AppColors.primary,
-      'steel' => const Color(0xFFC62828),
-      'soil' => const Color(0xFF795548),
-      'roads' => const Color(0xFF2E7D32),
-      _ => AppColors.primary,
-    };
+    return _mutedCategoryColors[id] ?? const Color(0xFFB0A090);
   }
 
   IconData _categoryIcon(String id) {
