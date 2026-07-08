@@ -44,7 +44,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
       body: AsyncValueWidget(
         isLoading: provider.isLoading,
         error: provider.error,
-        isEmpty: provider.topics.isEmpty && provider.error == null,
+        isEmpty: provider.categoryTopics.isEmpty && provider.error == null,
         onRetry: () => provider.loadTopicsByCategory(widget.categoryId),
         onEmpty: () => Center(
           child: Column(
@@ -59,10 +59,10 @@ class _TopicListScreenState extends State<TopicListScreen> {
         ),
         onData: () => ListView.separated(
           padding: AppSpacing.padLg,
-          itemCount: provider.topics.length,
+          itemCount: provider.categoryTopics.length,
           separatorBuilder: (_, __) => AppSpacing.gapMd,
           itemBuilder: (context, index) =>
-              _topicCard(context, provider.topics[index], isDark: isDark),
+              _topicCard(context, provider.categoryTopics[index], isDark: isDark),
         ),
       ),
     );

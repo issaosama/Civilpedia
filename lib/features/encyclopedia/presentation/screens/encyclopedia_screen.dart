@@ -284,13 +284,15 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      topic.summary,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: mutedText,
+                    Expanded(
+                      child: Text(
+                        topic.summary,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: mutedText,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
                     ..._compactCardChipsList(topic, isDark: isDark),
                   ],
@@ -441,27 +443,30 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
   }
 
   List<Widget> _compactCardChipsList(EngineeringTopic topic, {required bool isDark}) {
-    final chips = _cardChipLabels(topic);
+    final chips = _cardChipLabels(topic, maxChips: 1);
     if (chips.isEmpty) return const [];
     return [
       Padding(
         padding: const EdgeInsets.only(top: 6),
-        child: Wrap(
-          spacing: 4,
-          runSpacing: 2,
-          children: chips.map((chip) => _buildChip(chip, isDark: isDark, compact: true)).toList(),
+        child: SizedBox(
+          height: 18,
+          child: Wrap(
+            spacing: 4,
+            runSpacing: 0,
+            children: chips.map((chip) => _buildChip(chip, isDark: isDark, compact: true)).toList(),
+          ),
         ),
       ),
     ];
   }
 
-  List<String> _cardChipLabels(EngineeringTopic topic) {
+  List<String> _cardChipLabels(EngineeringTopic topic, {int maxChips = 2}) {
     final source = topic.keyTopics.isNotEmpty ? topic.keyTopics : topic.tags;
     return source
         .map((s) => s.trim())
         .where((s) => s.isNotEmpty)
         .toSet()
-        .take(2)
+        .take(maxChips)
         .toList();
   }
 

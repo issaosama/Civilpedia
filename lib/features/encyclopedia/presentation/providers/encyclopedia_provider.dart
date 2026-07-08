@@ -13,6 +13,7 @@ class EncyclopediaProvider extends ChangeNotifier {
       : _repository = repository ?? AppDependencies.encyclopediaRepo;
 
   List<EngineeringTopic> _topics = [];
+  List<EngineeringTopic> _categoryTopics = [];
   EngineeringTopic? _currentTopic;
   List<TopicSection> _currentSections = [];
   final Map<String, List<ContentBlock>> _blocksBySection = {};
@@ -22,6 +23,7 @@ class EncyclopediaProvider extends ChangeNotifier {
   List<EngineeringTopic> get topics => _searchQuery != null && _searchQuery!.trim().isNotEmpty
       ? _filteredTopics
       : _topics;
+  List<EngineeringTopic> get categoryTopics => _categoryTopics;
   EngineeringTopic? get currentTopic => _currentTopic;
   List<TopicSection> get currentSections => _currentSections;
   bool get isLoading => _isLoading;
@@ -50,7 +52,7 @@ class EncyclopediaProvider extends ChangeNotifier {
   Future<void> loadTopicsByCategory(String categoryId) async {
     _setLoading();
     try {
-      _topics = await _repository.getTopicsByCategory(categoryId);
+      _categoryTopics = await _repository.getTopicsByCategory(categoryId);
       _error = null;
     } catch (e) {
       _error = e.toString();
