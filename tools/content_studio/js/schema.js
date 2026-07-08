@@ -108,6 +108,12 @@ const THEME_OPTIONS = [
 
 const VALID_THEME_KEYS = THEME_OPTIONS.map(o => o.value);
 
+const LEGACY_BODY_FIELDS = [
+  'simpleExplanation', 'beforeWork', 'duringWork', 'afterWork',
+  'commonMistakes', 'acceptRejectItems', 'codeNotes', 'siteNotes',
+  'reportWording', 'featuredImageUrl'
+];
+
 function themeOptions(selectedKey) {
   const sel = selectedKey || 'cement_gray';
   return THEME_OPTIONS.map(o =>
@@ -123,6 +129,6 @@ if (typeof module !== 'undefined' && module.exports) {
     VALID_TEXT_VARIANTS, VALID_SEVERITIES, REQUIRED_TOP_LEVEL, REQUIRED_META,
     REQUIRED_TOPIC, REQUIRED_SECTION, REQUIRED_BLOCK, BLOCK_TYPES_SIMPLE,
     ADDABLE_BLOCK_OPTIONS, BLOCK_DISPLAY_NAMES, SECTION_TYPE_LABELS,
-    SEVERITY_LABELS, THEME_OPTIONS, VALID_THEME_KEYS
+    SEVERITY_LABELS, THEME_OPTIONS, VALID_THEME_KEYS, LEGACY_BODY_FIELDS
   };
 }

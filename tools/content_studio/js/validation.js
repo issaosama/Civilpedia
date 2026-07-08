@@ -41,6 +41,7 @@ class ValidationEngine {
     this._checkTopic(data.topic);
     this._checkSections(data.sections);
     this._checkReview(data.review);
+    this._checkDraftVsAppReady(data);
 
     return this.getResult();
   }
@@ -97,9 +98,25 @@ class ValidationEngine {
     if (topic.status && !VALID_TOPIC_STATUSES.includes(topic.status)) {
       this._addWarning(`topic.status غير صالح: "${topic.status}". القيم المقبولة: ${VALID_TOPIC_STATUSES.join(', ')}`);
     }
-    if (topic.simpleExplanation) {
-      if (topic.simpleExplanation.ar === undefined || topic.simpleExplanation.ar === null) {
-        this._addWarning('simpleExplanation.ar مفقود');
+    for (const field of LEGACY_BODY_FIELDS) {
+      const val = topic[field];
+      if (val === undefined || val === null || val === '') continue;
+      let hasContent = false;
+      if (typeof val === 'string') {
+        hasContent = val.trim() !== '';
+      } else if (typeof val === 'object') {
+        if (Array.isArray(val)) {
+          hasContent = val.length > 0;
+        } else if (val.ar !== undefined) {
+          hasContent = val.ar !== null && val.ar !== '';
+        } else {
+          hasContent = Object.keys(val).length > 0;
+        }
+      } else {
+        hasContent = true;
+      }
+      if (hasContent) {
+        this._addWarning(`topic.${field} يحتوي على بيانات — يُفضّل نقل هذا المحتوى إلى أقسام وكتل`, { path: `topic.${field}` });
       }
     }
 
@@ -135,6 +152,25 @@ class ValidationEngine {
       if (/\s/.test(url)) {
         this._addWarning('coverImageUrl: يفضّل أن يكون اسم الملف بدون فراغات.');
       }
+    }
+
+    const vt = topic.visual_theme;
+    if (vt !== undefined && vt !== null) {
+      if (typeof vt === 'object') {
+        const accent = vt.accent;
+        if (accent !== undefined && accent !== null) {
+          if (!VALID_THEME_KEYS.includes(accent)) {
+            this._addWarning(`topic.visual_theme.accent "${accent}" غير صالح. القيم المقبولة: ${VALID_THEME_KEYS.join(', ')}`, { path: 'topic.visual_theme.accent' });
+          }
+        }
+      } else if (typeof vt === 'string') {
+        if (!VALID_THEME_KEYS.includes(vt)) {
+          this._addWarning(`topic.visual_theme "${vt}" غير صالح. القيم المقبولة: ${VALID_THEME_KEYS.join(', ')}`, { path: 'topic.visual_theme' });
+        }
+      }
+    }
+    if (topic.visualTheme !== undefined && topic.visualTheme !== null) {
+      this._addWarning('topic.visualTheme (camelCase) موجود — استخدم visual_theme بدلاً من ذلك.', { path: 'topic.visualTheme' });
     }
   }
 
@@ -201,7 +237,8 @@ class ValidationEngine {
     }
     const type = block.type;
     if (type && !VALID_BLOCK_TYPES.includes(type)) {
-      this._addWarning(`section "${sectionId}" block[${index}] — النوع "${type}" غير معروف`);
+      const orderStr = block.order !== undefined ? ` (ترتيب ${block.order})` : '';
+      this._addError(`section "${sectionId}" block[${index}]${orderStr} — النوع "${type}" غير معروف. الأنواع المقبولة: ${VALID_BLOCK_TYPES.join(', ')}`, { sectionIdx, blockIdx: index });
     }
 
     switch (type) {
@@ -261,10 +298,31 @@ class ValidationEngine {
         if (block.headersEn !== undefined && block.headers !== undefined && Array.isArray(block.headers) && Array.isArray(block.headersEn) && block.headers.length !== block.headersEn.length) {
           this._addWarning(`section "${sectionId}" block[${index}] — table: عدد الرؤوس (${block.headers.length}) لا يتطابق مع الرؤوس الإنجليزية (${block.headersEn.length})`);
         }
+        if (block.rows && Array.isArray(block.rows) && block.headers && Array.isArray(block.headers) && block.headers.length > 0) {
+          for (let ri = 0; ri < block.rows.length; ri++) {
+            const row = block.rows[ri];
+            if (!row.cells || !Array.isArray(row.cells)) {
+              this._addWarning(`section "${sectionId}" block[${index}] — table row[${ri}]: "cells" مفقود أو ليس مصفوفة`, { sectionIdx, blockIdx: index });
+            } else if (row.cells.length !== block.headers.length) {
+              this._addWarning(`section "${sectionId}" block[${index}] — table row[${ri}]: عدد الخلايا (${row.cells.length}) لا يتطابق مع عدد الرؤوس (${block.headers.length})`, { sectionIdx, blockIdx: index });
+            }
+          }
+        }
         break;
       case 'checklist':
         if (block.items && Array.isArray(block.items) && block.items.length === 0) {
-          this._addWarning(`section "${sectionId}" block[${index}] — checklist: قائمة الفحص فارغة`);
+          this._addWarning(`section "${sectionId}" block[${index}] — checklist: قائمة الفحص فارغة`, { sectionIdx, blockIdx: index });
+        }
+        if (block.items && Array.isArray(block.items)) {
+          for (let ci = 0; ci < block.items.length; ci++) {
+            const item = block.items[ci];
+            if (item.textAr !== undefined && item.textAr !== null && item.textAr.trim() === '') {
+              this._addWarning(`section "${sectionId}" block[${index}] — checklist item[${ci}]: "textAr" فارغ`, { sectionIdx, blockIdx: index });
+            }
+            if (item.id === undefined || item.id === null || item.id === '') {
+              this._addWarning(`section "${sectionId}" block[${index}] — checklist item[${ci}]: يُفضّل وجود "id" مستقر`, { sectionIdx, blockIdx: index });
+            }
+          }
         }
         break;
       case 'inspection_point':
@@ -273,14 +331,32 @@ class ValidationEngine {
           this._addError(`section "${sectionId}" block[${index}] — inspection_point: "criteriaAr" مفقود`, { sectionIdx, blockIdx: index });
           this.fieldErrors.push(fe);
         }
-        if (!block.methodAr) this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "methodAr" مفقود`);
+        if (!block.methodAr) this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "methodAr" مفقود`, { sectionIdx, blockIdx: index });
+        if (block.acceptableTolerance !== undefined && block.acceptableTolerance !== null) {
+          const tol = block.acceptableTolerance;
+          if (typeof tol === 'object' && tol.ar !== undefined && tol.ar !== null && tol.ar.trim() === '') {
+            this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "acceptableTolerance.ar" فارغ`, { sectionIdx, blockIdx: index });
+          }
+        }
+        if (block.acceptanceLimit !== undefined && block.acceptanceLimit !== null) {
+          const al = block.acceptanceLimit;
+          if (typeof al === 'object' && al.ar !== undefined && al.ar !== null && al.ar.trim() === '') {
+            this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "acceptanceLimit.ar" فارغ`, { sectionIdx, blockIdx: index });
+          }
+        }
         break;
       case 'image': {
         if (!block.url) {
-          this._addWarning(`section "${sectionId}" block[${index}] — image: "url" مفقود`);
+          this._addWarning(`section "${sectionId}" block[${index}] — image: "url" مفقود`, { sectionIdx, blockIdx: index });
           break;
         }
         const url = block.url;
+        if (url.startsWith('blob:') || url.startsWith('data:')) {
+          this._addError(`section "${sectionId}" block[${index}] — image: لا يمكن استخدام عناوين blob: أو data:. استخدم مسار ملف صالح مثل assets/images/...`, { sectionIdx, blockIdx: index });
+        }
+        if (url.startsWith('file:')) {
+          this._addError(`section "${sectionId}" block[${index}] — image: لا يمكن استخدام عناوين file:. استخدم مسار ملف صالح مثل assets/images/...`, { sectionIdx, blockIdx: index });
+        }
         const ext = url.split('.').pop().toLowerCase();
         const supported = ['png', 'jpg', 'jpeg', 'webp'];
         if (!supported.includes(ext)) {
@@ -300,9 +376,32 @@ class ValidationEngine {
         }
         break;
       }
+      case 'code_reference':
+        if (!block.code || (typeof block.code === 'string' && block.code.trim() === '')) {
+          this._addError(`section "${sectionId}" block[${index}] — code_reference: "code" مفقود`, { sectionIdx, blockIdx: index });
+        }
+        if (block.title !== undefined && block.title !== null) {
+          if (block.title.ar === undefined || block.title.ar === null || block.title.ar.trim() === '') {
+            this._addWarning(`section "${sectionId}" block[${index}] — code_reference: "title.ar" مفقود أو فارغ`, { sectionIdx, blockIdx: index });
+          }
+        }
+        if (block.excerpt !== undefined && block.excerpt !== null) {
+          if (block.excerpt.ar !== undefined && block.excerpt.ar !== null && block.excerpt.ar.trim() === '') {
+            this._addWarning(`section "${sectionId}" block[${index}] — code_reference: "excerpt.ar" فارغ`, { sectionIdx, blockIdx: index });
+          }
+        }
+        break;
       case 'equipment':
         if (!block.items || (Array.isArray(block.items) && block.items.length === 0)) {
-          this._addWarning(`section "${sectionId}" block[${index}] — equipment: "items" فارغ`);
+          this._addWarning(`section "${sectionId}" block[${index}] — equipment: "items" فارغ`, { sectionIdx, blockIdx: index });
+        }
+        if (block.items && Array.isArray(block.items)) {
+          for (let ei = 0; ei < block.items.length; ei++) {
+            const item = block.items[ei];
+            if (!item.nameAr || (typeof item.nameAr === 'string' && item.nameAr.trim() === '')) {
+              this._addWarning(`section "${sectionId}" block[${index}] — equipment item[${ei}]: "nameAr" مفقود أو فارغ`, { sectionIdx, blockIdx: index });
+            }
+          }
         }
         break;
     }
@@ -314,6 +413,33 @@ class ValidationEngine {
       this._addWarning(`review.status غير صالح: "${review.status}". القيم المقبولة: ${VALID_REVIEW_STATUSES.join(', ')}`);
     }
     this.passed.push('review موجود');
+  }
+
+  _checkDraftVsAppReady(data) {
+    const signals = [];
+    if (!data._meta || !data.review) {
+      signals.push('المفاتيح الرئيسية _meta و/أو review مفقودة — هذا يبدو كـ App-ready JSON');
+    }
+    if (data.sections && Array.isArray(data.sections)) {
+      const missingBlocks = data.sections.some(s => s.blocks === undefined || s.blocks === null);
+      if (missingBlocks && data.blocks && typeof data.blocks === 'object') {
+        signals.push('الأقسام لا تحتوي على blocks ولكن يوجد blocks ككائن علوي — هذا هو تنسيق App-ready');
+      }
+    }
+    if (data.topic && data.topic.summary !== undefined && data.topic.summaryAr === undefined) {
+      signals.push('topic.summary موجود بدلاً من topic.summaryAr — هذا هو تنسيق App-ready');
+    }
+    if (data.topic) {
+      const appReadySignals = [];
+      if (data.topic.featuredImageUrl) appReadySignals.push('featuredImageUrl');
+      if (data.topic.simpleExplanation) appReadySignals.push('simpleExplanation');
+      if (appReadySignals.length > 0 && !data.sections) {
+        signals.push('يحتوي على حقول قديمة في topic بدون أقسام — هذا يبدو كـ App-ready JSON قديم');
+      }
+    }
+    if (signals.length > 0) {
+      this._addWarning('هذا الملف يبدو أنه بتنسيق App-ready JSON، وليس Draft JSON. قد تحتاج إلى تحويل الاستيراد/التصدير.' + ' الإشارات: ' + signals.join(' | '));
+    }
   }
 
   getResult() {

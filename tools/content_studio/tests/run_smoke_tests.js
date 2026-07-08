@@ -371,6 +371,253 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 10: Legacy body field detection
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n10. Legacy body field detection');
+
+  // 10a: Draft with legacy fields populated should give warnings
+  const withLegacy = makeMinimalDraft();
+  withLegacy.topic.simpleExplanation = { ar: 'شرح مبسط', en: 'Simple explanation' };
+  withLegacy.topic.beforeWork = { ar: 'قبل العمل', en: 'Before work' };
+  withLegacy.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1, blocks: [{ type: 'text', order: 1, content: { ar: 'محتوى' } }] }];
+  let r = validate(loadDraft(withLegacy));
+  const legacyWarns = r.warnings.filter(w => w.includes('يحتوي على بيانات'));
+  assert(legacyWarns.length >= 2, `Legacy fields should produce warnings (got ${legacyWarns.length})`);
+  assert(legacyWarns.some(w => w.includes('simpleExplanation')), 'simpleExplanation warning should mention field name');
+  assert(legacyWarns.some(w => w.includes('beforeWork')), 'beforeWork warning should mention field name');
+
+  // 10b: Draft without legacy fields should NOT produce legacy warnings
+  const clean = makeMinimalDraft();
+  clean.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1, blocks: [{ type: 'text', order: 1, content: { ar: 'محتوى' } }] }];
+  r = validate(loadDraft(clean));
+  const cleanLegacyWarns = r.warnings.filter(w => w.includes('يحتوي على بيانات'));
+  assert(cleanLegacyWarns.length === 0, 'Clean draft should have zero legacy field warnings');
+
+  console.log('  PASS: All legacy field checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 11: Invalid visual_theme validation
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n11. visual_theme validation');
+
+  // 11a: Invalid visual_theme.accent gives warning
+  const badTheme = makeMinimalDraft();
+  badTheme.topic.visual_theme = { accent: 'hot_pink' };
+  badTheme.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1, blocks: [{ type: 'text', order: 1, content: { ar: 'محتوى' } }] }];
+  let r = validate(loadDraft(badTheme));
+  assert(r.warnings.some(w => w.includes('visual_theme')), 'Invalid visual_theme.accent should give warning');
+
+  // 11b: Valid theme key produces no visual_theme warning
+  const goodTheme = makeMinimalDraft();
+  goodTheme.topic.visual_theme = { accent: 'cement_gray' };
+  goodTheme.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1, blocks: [{ type: 'text', order: 1, content: { ar: 'محتوى' } }] }];
+  r = validate(loadDraft(goodTheme));
+  const vtWarns = r.warnings.filter(w => w.includes('visual_theme') && !w.includes('visualTheme'));
+  assert(vtWarns.length === 0, 'Valid visual_theme should give no visual_theme warning');
+
+  // 11c: Missing visual_theme is allowed (no warning)
+  const noTheme = makeMinimalDraft();
+  noTheme.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1, blocks: [{ type: 'text', order: 1, content: { ar: 'محتوى' } }] }];
+  r = validate(loadDraft(noTheme));
+  const missingWarns = r.warnings.filter(w => w.includes('visual_theme'));
+  assert(missingWarns.length === 0, 'Missing visual_theme should give no visual_theme warning');
+
+  // 11d: camelCase visualTheme should warn
+  const camelTheme = makeMinimalDraft();
+  camelTheme.topic.visualTheme = 'cement_gray';
+  camelTheme.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1, blocks: [{ type: 'text', order: 1, content: { ar: 'محتوى' } }] }];
+  r = validate(loadDraft(camelTheme));
+  assert(r.warnings.some(w => w.includes('visualTheme')), 'camelCase visualTheme should give warning');
+
+  console.log('  PASS: All visual_theme checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 12: Unknown block type produces error
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n12. Unknown block type produces error');
+
+  const unknown = makeMinimalDraft();
+  unknown.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'unknown_block_type', order: 1 }, { type: 'text', order: 2, content: { ar: 'محتوى' } }]
+  }];
+  const r = validate(loadDraft(unknown));
+  assert(r.hasErrors, 'Unknown block type should produce errors');
+  const unknownErrors = r.errors.filter(e => e.includes('غير معروف'));
+  assert(unknownErrors.length === 1, 'Should have exactly 1 unknown block type error');
+  assert(unknownErrors[0].includes('unknown_block_type'), 'Error should mention the unknown type');
+  assert(unknownErrors[0].includes('الأنواع المقبولة'), 'Error should list accepted types');
+
+  console.log('  PASS: Unknown block type check passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 13: Image blob/data URL produces error
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n13. Image blob/data URL produces error');
+
+  // 13a: blob: URL
+  const blobUrl = makeMinimalDraft();
+  blobUrl.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'image', order: 1, url: 'blob:http://example.com/uuid' }]
+  }];
+  let r = validate(loadDraft(blobUrl));
+  assert(r.hasErrors, 'blob: URL should produce errors');
+  assert(r.errors.some(e => e.includes('blob')), 'Error should mention blob');
+
+  // 13b: data: URL
+  const dataUrl = makeMinimalDraft();
+  dataUrl.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'image', order: 1, url: 'data:image/png;base64,abc123' }]
+  }];
+  r = validate(loadDraft(dataUrl));
+  assert(r.hasErrors, 'data: URL should produce errors');
+  assert(r.errors.some(e => e.includes('data:')), 'Error should mention data:');
+
+  // 13c: file: URL
+  const fileUrl = makeMinimalDraft();
+  fileUrl.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'image', order: 1, url: 'file:///C:/images/test.png' }]
+  }];
+  r = validate(loadDraft(fileUrl));
+  assert(r.hasErrors, 'file: URL should produce errors');
+  assert(r.errors.some(e => e.includes('file:')), 'Error should mention file:');
+
+  // 13d: Valid image path produces no errors
+  const valid = makeMinimalDraft();
+  valid.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'image', order: 1, url: 'assets/images/test.png' }]
+  }];
+  r = validate(loadDraft(valid));
+  assert(r.errors.length === 0, 'Valid image path should produce no errors');
+
+  console.log('  PASS: All image URL checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 14: Empty checklist gives warning
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n14. Empty checklist gives warning');
+
+  const emptyChecklist = makeMinimalDraft();
+  emptyChecklist.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'checklist', order: 1, items: [] }]
+  }];
+  const r = validate(loadDraft(emptyChecklist));
+  assert(r.warnings.some(w => w.includes('قائمة الفحص فارغة')), 'Empty checklist should give warning');
+  assert(!r.hasErrors, 'Empty checklist should not produce errors');
+
+  console.log('  PASS: Empty checklist check passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 15: code_reference missing code gives error
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n15. code_reference missing code gives error');
+
+  // 15a: Missing code should error
+  const noCode = makeMinimalDraft();
+  noCode.sections = [{ id: 's1', title: 'S1', type: 'codeReference', order: 1,
+    blocks: [{ type: 'code_reference', order: 1, code: '', title: { ar: 'مادة الكود' } }]
+  }];
+  let r = validate(loadDraft(noCode));
+  assert(r.hasErrors, 'code_reference with empty code should produce errors');
+  assert(r.errors.some(e => e.includes('code')), 'Error should mention code field');
+
+  // 15b: Valid code_reference should not error
+  const validCode = makeMinimalDraft();
+  validCode.sections = [{ id: 's1', title: 'S1', type: 'codeReference', order: 1,
+    blocks: [{ type: 'code_reference', order: 1, code: 'ACI 318-19', title: { ar: 'مادة الكود' }, section: '5.4', excerpt: { ar: 'نص المادة' } }]
+  }];
+  r = validate(loadDraft(validCode));
+  const codeErrors = r.errors.filter(e => e.includes('code_reference'));
+  assert(codeErrors.length === 0, 'Valid code_reference should produce no code_reference errors');
+  assert(!r.hasErrors, 'Valid code_reference should not produce errors');
+
+  console.log('  PASS: All code_reference checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 16: App-ready JSON detection gives warning
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n16. App-ready JSON detection gives warning');
+
+  // 16a: Draft with app-ready signals should warn
+  const appReadyLike = {
+    _meta: { schemaVersion: '1.0.0', version: 1, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z', source: 'test', id: 'test' },
+    review: { status: 'draft', reviewedBy: null, reviewedAt: null, reviewNotes: null, approvalStatus: null },
+    topic: {
+      id: 'test', titleAr: 'Test', categoryId: 'concrete',
+      summary: 'This is summary not summaryAr',
+      level: 'basic', planKey: 'free', status: 'draft'
+    },
+    sections: [
+      { id: 's1', title: 'S1', type: 'general', order: 1 }
+    ],
+    blocks: {
+      s1: [{ type: 'text', order: 1, content: 'محتوى نصي' }]
+    }
+  };
+  const raw = new Draft();
+  raw.load(JSON.stringify(appReadyLike), 'app-ready.json');
+  const r = validate(raw);
+  assert(r.hasWarnings, 'App-ready-like JSON should produce warnings');
+  const appReadyWarn = r.warnings.some(w => w.includes('App-ready'));
+  assert(appReadyWarn, 'Warning should mention App-ready JSON');
+
+  // 16b: Valid Draft JSON should NOT produce app-ready warning
+  const validDraft = loadDraft(makeMinimalDraft());
+  const r2 = validate(validDraft);
+  const falsePositive = r2.warnings.filter(w => w.includes('App-ready'));
+  assert(falsePositive.length === 0, 'Valid Draft JSON should not produce App-ready warning');
+
+  console.log('  PASS: App-ready detection checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 17: Table cell count mismatch
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n17. Table cell count mismatch');
+
+  // Row with fewer cells than headers
+  const mismatch = makeMinimalDraft();
+  mismatch.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{
+      type: 'table', order: 1,
+      headers: ['Col1', 'Col2', 'Col3'],
+      rows: [{ cells: ['v1', 'v2'] }]
+    }]
+  }];
+  const r = validate(loadDraft(mismatch));
+  assert(!r.hasErrors, 'Cell count mismatch should not error');
+  assert(r.warnings.some(w => w.includes('عدد الخلايا')), 'Cell count mismatch should warn');
+
+  // Row with matching cells should not warn
+  const match = makeMinimalDraft();
+  match.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{
+      type: 'table', order: 1,
+      headers: ['Col1', 'Col2'],
+      rows: [{ cells: ['v1', 'v2'] }]
+    }]
+  }];
+  const r2 = validate(loadDraft(match));
+  const cellWarns = r2.warnings.filter(w => w.includes('عدد الخلايا'));
+  assert(cellWarns.length === 0, 'Matching cells should not warn');
+
+  console.log('  PASS: Table cell count checks passed');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);
