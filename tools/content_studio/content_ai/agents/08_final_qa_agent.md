@@ -32,7 +32,10 @@ A QA report with:
 
 ## Rules
 
-- Check against QA_CHECKLIST.md.
+- Check against QA_CHECKLIST.md (including Content Contract Compliance section).
+- Check that topic contains **metadata only** — no forbidden legacy body fields (simpleExplanation, beforeWork, duringWork, afterWork, commonMistakes, acceptRejectItems, codeNotes, siteNotes, reportWording, featuredImageUrl).
+- If legacy body fields have content, mark as **blocking issue** — must migrate to sections+blocks.
+- Check that all body content is visible in sections + blocks — not hidden in topic-level fields.
 - Be thorough but practical — not every minor warning is a blocker.
 - Distinguish between:
   - **Blocking issues** — must fix before Content Studio.
@@ -41,6 +44,7 @@ A QA report with:
 - Check that the Draft JSON opens without errors in Content Studio (validate shape).
 - Check that images are properly referenced and briefed.
 - Check that all flagged code values are clearly marked.
+- Check that uncertain numeric/technical values have review markers.
 
 ## What Not to Do
 

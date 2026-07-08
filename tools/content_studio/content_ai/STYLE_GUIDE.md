@@ -63,6 +63,46 @@
 - مسار الصورة: `assets/images/` + اسم الملف.
 - يمكن أن تكون الصورة مفقودة — التطبيق يعرض placeholder بدلاً من التعطل.
 
+## العقد الرسمي لهيكل المحتوى (Official Content Structure Contract)
+
+### المبدأ الأساسي
+
+- **topic = بيانات تعريف فقط (metadata only).**
+- **sections + blocks = كل محتوى المقال (all body content).**
+- لا يجوز تخزين محتوى المقال في حقول topic-level.
+- اللغة العربية هي لغة الكتابة الأساسية.
+- المصطلحات التقنية الإنكليزية قد تظهر بين قوسين داخل النص العربي.
+- لا تنشئ حقول إنكليزية منفصلة (مثل titleEn, summaryEn, content.en) إلا عند الطلب الصريح.
+- Big Pickle يجب أن ينتج Draft JSON فقط، وليس App-ready JSON أو Catalog JSON.
+
+### الحقول الممنوعة في topic (Forbidden Legacy Fields)
+
+هذه الحقول كانت تُستخدم سابقًا لتخزين محتوى المقال مباشرة في topic. **يمنع استخدامها في أي موضوع جديد.** إذا وُجدت في ملف قديم، يجب ترحيل محتواها إلى sections + blocks:
+
+| الحقل الممنوع | أين يجب أن يكون المحتوى بدلاً من ذلك |
+|---|---|
+| `simpleExplanation` | قسم `general` / كتلة `text` (variant: "paragraph") |
+| `beforeWork` | قسم `execution` / كتل `execution_step` أو `text` |
+| `duringWork` | قسم `execution` / كتل `execution_step` أو `text` |
+| `afterWork` | قسم `execution` / كتل `execution_step` أو `text` |
+| `commonMistakes` | قسم `general` / كتل `text` (variant: "warning") |
+| `acceptRejectItems` | قسم `inspection` / كتل `inspection_point` أو جدول فحص |
+| `codeNotes` | قسم `codeReference` / كتل `code_reference` |
+| `siteNotes` | قسم `general` / كتلة `text` (variant: "note") |
+| `reportWording` | قسم `general` / كتلة `text` (variant: "paragraph") |
+| `featuredImageUrl` | استخدم `coverImageUrl` للصورة الرئيسية، أو كتلة `image` داخل الأقسام |
+
+### هيكل ملف Draft JSON
+
+```
+{
+  "_meta":     { /* بيانات الإصدار والمصدر */ },
+  "topic":     { /* بيانات تعريف فقط — لا محتوى مقال */ },
+  "sections":  [ /* الأقسام — كل محتوى المقال هنا */ ],
+  "review":    { /* حالة المراجعة */ }
+}
+```
+
 ## اختيار السمة البصرية للموضوع (Visual Theme)
 
 - اختر سمة (visual_theme) من القائمة المنسدلة في Content Studio ضمن بيانات الموضوع.
@@ -75,6 +115,7 @@
   - مواضيع الصحة والسلامة: `amber` أو `maroon` أو `emerald`.
 - السمة المختارة تُخزّن كمفتاح (snake_case) فقط، ولا تُخزّن التسمية العربية.
 - إذا لم تُحدّد سمة، يُستخدم `cement_gray` تلقائيًا.
+- المفاتيح المسموح بها (14): `cement_gray`, `navy`, `teal`, `olive`, `amber`, `maroon`, `steel_blue`, `graphite`, `sand`, `brick`, `emerald`, `indigo`, `copper`, `asphalt`.
 
 ## التنسيق العام
 

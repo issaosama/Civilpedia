@@ -22,6 +22,19 @@ A compatibility report with:
 
 ## Checks Performed
 
+### Content Contract Compliance
+- [ ] **File is Draft JSON, not App-ready JSON** — `_meta` and `review` top-level keys must exist.
+- [ ] **Topic = metadata only** — no forbidden legacy body fields exist in `topic`:
+  - `simpleExplanation` must be absent or empty
+  - `beforeWork`, `duringWork`, `afterWork` must be absent or empty
+  - `commonMistakes` must be absent or empty
+  - `acceptRejectItems` must be absent or empty
+  - `codeNotes`, `siteNotes`, `reportWording` must be absent or empty
+  - `featuredImageUrl` must be absent or empty
+  - `titleEn`, `summaryEn` must be absent or empty (unless explicitly requested)
+- [ ] If any legacy field has content, status = NEEDS FIXES — content must be migrated to sections+blocks.
+- [ ] All body content is in `sections` + `blocks`.
+
 ### Draft JSON Structure
 - [ ] JSON is syntactically valid.
 - [ ] All required top-level keys exist: `_meta`, `topic`, `sections`, `review`.
@@ -30,19 +43,25 @@ A compatibility report with:
 - [ ] `topic.status` is "draft".
 
 ### Block Types
-- [ ] Only supported block types are used:
+- [ ] Only supported block types are used (9 types):
   - `text`
   - `execution_step`
   - `safety_note`
   - `table`
   - `image`
-- [ ] No unsupported block types (e.g., `commonMistakes` as a type, `acceptRejectItems` as a type).
+  - `checklist`
+  - `inspection_point`
+  - `code_reference`
+  - `equipment`
+- [ ] No unsupported block types.
+- [ ] Every block type has the correct Draft JSON field names expected by Content Studio (not App-ready shape).
 
 ### Section Structure
 - [ ] Every section has a `title` in Arabic.
 - [ ] Every section has a unique `id`.
-- [ ] Section `type` is one of: `general`, `execution`, `inspection`, `safety`, `equipment`, `code_reference`.
-- [ ] Blocks are ordered sequentially within each section.
+- [ ] Section `type` is one of: `general`, `execution`, `inspection`, `safety`, `equipment`, `codeReference`.
+- [ ] Blocks have 1-based sequential `order` within each section.
+- [ ] Sections have 1-based sequential `order`.
 
 ### Image Paths
 - [ ] All image paths use `assets/images/` prefix.
@@ -85,6 +104,23 @@ A compatibility report with:
 - [ ] Preview looks correct in both light and dark mode.
 - [ ] Border-radius and surface styling match Flutter equivalents.
 
+### Visual Theme
+- [ ] `visual_theme.accent` is one of the 14 valid keys: `cement_gray`, `navy`, `teal`, `olive`, `amber`, `maroon`, `steel_blue`, `graphite`, `sand`, `brick`, `emerald`, `indigo`, `copper`, `asphalt`.
+- [ ] If `visual_theme` is absent, the default `cement_gray` is used (acceptable).
+- [ ] Theme key is snake_case only (no spaces, no Arabic).
+- [ ] Theme dropdown in Content Studio will show the correct Arabic label.
+
+### Image Paths
+- [ ] All image paths use `assets/images/` prefix.
+- [ ] No absolute paths (no `C:\` or `D:\`).
+- [ ] No backslashes (`\`) in paths (use `/`).
+- [ ] Image filenames are lowercase English.
+- [ ] Image filenames have no spaces.
+- [ ] Only supported extensions: `.png`, `.jpg`, `.jpeg`, `.webp`.
+- [ ] Every image block has a `caption.ar` field (non-empty).
+- [ ] No blob/data URIs or local file paths.
+- [ ] If no actual images are provided, use placeholder path or omit the block.
+
 ### Tables
 - [ ] Tables have at least one header.
 - [ ] Tables have at least one row.
@@ -92,18 +128,39 @@ A compatibility report with:
 - [ ] Row cell count matches header count.
 
 ### Text Blocks
-- [ ] Text blocks use `variant: "paragraph"`.
+- [ ] Text blocks use one of the valid variants: `paragraph`, `note`, `tip`, `warning`.
 - [ ] Content is in Arabic in the `content.ar` field.
+- [ ] `content.ar` is non-empty.
 
 ### Safety Notes
-- [ ] Safety notes have a `message.ar` field.
-- [ ] Safety notes have a `severity` field (`low`, `medium`, or `high`).
+- [ ] Safety notes have a `message.ar` field (non-empty).
+- [ ] Safety notes have a `severity` field (`low`, `medium`, `high`, or `critical`).
 
 ### Execution Steps
 - [ ] Execution steps have `stepNumber` (number, required) — otherwise preview shows `?`.
 - [ ] Execution steps have `description.ar` (string, required) — otherwise editor shows "لا يوجد محتوى".
 - [ ] Do NOT use `"step": {"ar": "..."}` — this field is NOT supported by editor or preview.
 - [ ] `notes.ar` is optional but recommended if extra context is needed.
+
+### Checklists
+- [ ] Checklist has `title.ar` field.
+- [ ] Checklist items have `textAr` (non-empty).
+- [ ] Checklist items have `isRequired` (boolean) or absent (defaults to false).
+- [ ] If inspection/acceptance data exists in topic-level fields, it must be migrated to checklist/inspection_point blocks.
+
+### Inspection Points
+- [ ] `criteriaAr` is non-empty.
+- [ ] `methodAr` is non-empty.
+- [ ] `isCritical` is boolean or absent.
+- [ ] `acceptableTolerance` is string (optional).
+
+### Code References
+- [ ] `code` is non-empty.
+- [ ] `title.ar` is non-empty.
+
+### Equipment
+- [ ] `items` array has at least one entry.
+- [ ] Each item has `nameAr` (non-empty).
 
 ### Renderability (Critical)
 - [ ] Every block must be renderable in the Content Studio **editor** — expand each section and confirm no block shows "لا يوجد محتوى".
@@ -131,6 +188,11 @@ A compatibility report with:
 - **Supported block type is NOT enough** — the block's field names must match what the editor and preview expect.
 - **Check each block type's expected field names in `editor.js` and `preview.js`** — do not guess.
 - Any block that would display "لا يوجد محتوى" or `?` in preview is a **HIGH severity** issue.
+- **Legacy body fields with content = HIGH severity** — all body content must be in sections+blocks.
+- **Unsupported block types = HIGH severity** — only the 9 official types are allowed.
+- **visual_theme outside the 14 allowed keys = MEDIUM severity** — will fall back to cement_gray.
+- **Image paths not following convention = MEDIUM severity** — will fail in Flutter app.
+- **Draft JSON vs App-ready JSON**: The file must be Draft JSON. If it has no `_meta` or `review` top-level keys, it is NOT Draft JSON.
 
 ## What Not to Do
 
@@ -141,6 +203,8 @@ A compatibility report with:
 - Do not modify the Draft JSON — only report issues.
 - Do not assume a block is compatible just because its `type` is in the supported list.
 - Do not skip checking `execution_step` blocks for the correct `description.ar` and `stepNumber` fields.
+- Do not approve a topic that has forbidden legacy body fields with content.
+- Do not approve a topic with unsupported block types.
 
 ## Prompt Template
 
@@ -154,18 +218,21 @@ A compatibility report with:
 [insert JSON content]
 
 المطلوب:
-1. تحقق من صحة JSON.
-2. تحقق من أنواع الكتل المدعومة فقط.
-3. تحقق من أن كل كتلة تحتوي على الحقول الصحيحة المتوقعة من Content Studio (راجع editor.js و preview.js لكل نوع).
-4. تحقق بشكل خاص من execution_step:
+1. تحقق من أن الملف هو Draft JSON (يحتوي على _meta و review).
+2. تحقق من أن topic = بيانات تعريف فقط — لا يحتوي على الحقول القديمة الممنوعة (simpleExplanation, beforeWork, duringWork, afterWork, commonMistakes, acceptRejectItems, codeNotes, siteNotes, reportWording, featuredImageUrl).
+3. تحقق من أن كل محتوى المقال داخل sections + blocks.
+4. تحقق من أنواع الكتل المدعومة فقط (9 أنواع): text, execution_step, safety_note, table, image, checklist, inspection_point, code_reference, equipment.
+5. تحقق من أن كل كتلة تحتوي على الحقول الصحيحة المتوقعة من Content Studio (راجع editor.js و preview.js لكل نوع).
+6. تحقق بشكل خاص من execution_step:
    - يجب أن يحتوي على stepNumber (رقم) و description.ar (نص).
    - لا تستخدم "step" — هذا الحقل غير مدعوم ويعرض "لا يوجد محتوى".
-5. تحقق من مسارات الصور والصيغ.
-6. تحقق من وجود التعليقات التوضيحية للصور.
-7. تحقق من هيكل الأقسام والكتل.
-8. تحقق من أن لا شيء يعرض "لا يوجد محتوى" أو "?".
-9. تحقق من إمكانية التصدير.
-10. تحقق من توافق الوضع الفاتح والداكن.
-11. أعد تقريرًا بالحالة: PASS أو NEEDS FIXES.
-12. لكل مشكلة: اكتب الوصف والموقع والخطورة والإصلاح المقترح.
+7. تحقق من مسارات الصور والصيغ.
+8. تحقق من وجود التعليقات التوضيحية للصور.
+9. تحقق من أن السمة البصرية visual_theme.accent هي أحد المفاتيح الـ 14 المسموحة.
+10. تحقق من هيكل الأقسام والكتل.
+11. تحقق من أن لا شيء يعرض "لا يوجد محتوى" أو "?".
+12. تحقق من إمكانية التصدير.
+13. تحقق من توافق الوضع الفاتح والداكن.
+14. أعد تقريرًا بالحالة: PASS أو NEEDS FIXES.
+15. لكل مشكلة: اكتب الوصف والموقع والخطورة والإصلاح المقترح.
 ```

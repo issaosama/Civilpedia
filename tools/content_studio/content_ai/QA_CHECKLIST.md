@@ -79,6 +79,27 @@ Use this checklist to review every generated topic before the app owner opens it
 - [ ] All IDs are unique (section IDs, topic ID).
 - [ ] _meta schemaVersion matches "1.0.0".
 
+## Content Contract Compliance
+
+These checks enforce the official content structure contract. Every topic must pass all checks before approval.
+
+- [ ] **No forbidden legacy body fields** — topic-level fields `simpleExplanation`, `beforeWork`, `duringWork`, `afterWork`, `commonMistakes`, `acceptRejectItems`, `codeNotes`, `siteNotes`, `reportWording`, `featuredImageUrl` are empty or absent (if found, content must be migrated into sections/blocks).
+- [ ] **All body content is in sections + blocks** — every article's text, steps, checklists, tables, images, mistakes, and references are inside section blocks, not in topic fields.
+- [ ] **At least one section with at least one block** — topic is not empty.
+- [ ] **Section IDs are unique** — no duplicate `sec-*` IDs.
+- [ ] **Block order is 1-based sequential** within each section.
+- [ ] **Section order is 1-based sequential** across the topic.
+- [ ] **No unknown block types** — only the 9 official types: `text`, `execution_step`, `safety_note`, `table`, `image`, `checklist`, `inspection_point`, `code_reference`, `equipment`.
+- [ ] **No empty checklist** if inspection/acceptance data exists elsewhere.
+- [ ] **Tables have consistent headers and rows** — row cell count matches header count.
+- [ ] **All image paths use `assets/images/filename.ext`** — no absolute paths, no backslashes, no spaces.
+- [ ] **No blob/data URIs or local file paths** stored in any field.
+- [ ] **`visual_theme.accent` is one of the 14 valid keys** — or absent (defaults to `cement_gray`).
+- [ ] **Content Studio preview matches intended structure** — all sections and blocks visible in preview.
+- [ ] **Draft JSON only** — the file is Draft JSON format, not App-ready JSON or Catalog JSON.
+- [ ] **Numeric/technical values needing verification are clearly marked** with `"(يحتاج تدقيق)"` or `"(تحتاج مراجعة)"`.
+- [ ] **Legacy fields, if found, must be migrated into sections/blocks before approval** — do not approve if any legacy body field has content.
+
 ## Visual Theme
 
 - [ ] `visual_theme.accent` is set to one of the 14 allowed keys (or left unset to default to `cement_gray`).

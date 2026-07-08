@@ -1,71 +1,87 @@
 # Topic Master Template
 
-Each Civilpedia topic follows this standard structure.
+## Content Contract Overview
 
-## Recommended Topic Structure
+**Critical principle:** `topic` = metadata only. `sections` + `blocks` = all body content.
 
+Big Pickle must output **Draft JSON** only (the format Content Studio reads/writes).  
+**Do NOT output App-ready JSON** (the format the Flutter app consumes — that is produced by the exporter).  
+
+Draft JSON structure:
 ```
-1. Topic Title           — العنوان بالعربية
-2. Cover Image           — coverImageUrl (اختياري، يستخدم كصورة رئيسية لبطاقة الموضوع وصفحة التفاصيل)
-3. Short Summary         — summaryAr (2-3 جمل)
-3. Simple Explanation    — simpleExplanation.ar
-4. Why It Matters on Site  — أهمية الموضوع في الموقع
-5. Required Tools/Equipment — الأدوات والمعدات المطلوبة
-6. Execution or Inspection Steps — خطوات التنفيذ أو الفحص
-7. Acceptance / Rejection Criteria — معايير القبول والرفض
-8. Common Mistakes       — الأخطاء الشائعة
-9. Safety Notes          — ملاحظات السلامة
-10. Practical Checklist  — قائمة فحص عملية
-11. Tables (if useful)   — جداول مقارنة أو قيم مرجعية
-12. Image Briefs         — وصف الصور المطلوبة
-13. Notes Needing Verification — نقاط تحتاج تدقيق هندسي
-14. Final QA Checklist   — قائمة فحص المراجعة النهائية
+{
+  "_meta":     { /* schema version, timestamps, source info */ },
+  "topic":     { /* metadata only — id, titleAr, categoryId, level, etc. */ },
+  "sections":  [ /* all body content lives here */ ],
+  "review":    { /* review status for Content Studio workflow */ }
+}
 ```
 
-## Mapping to Content Studio Block Types
+## Official Topic Metadata Fields (topic = metadata only)
 
-| Template Section | Content Studio Block Type | Notes |
-|---|---|---|
-| Topic Title | topic.titleAr | Field in topic metadata |
-| Cover Image | topic.coverImageUrl | Optional topic-level field; path like `assets/images/cover.png`. Set via Content Studio's "اختيار صورة" picker button in topic metadata. |
-| Short Summary | topic.summaryAr | Field in topic metadata |
-| Simple Explanation | topic.simpleExplanation.ar | Field in topic metadata |
-| Why It Matters on Site | text | type: "text", variant: "paragraph" |
-| Required Tools/Equipment | text + table | List as text or table block |
-| Execution Steps | execution_step | type: "execution_step" |
-| Acceptance / Rejection | text | Can use acceptRejectItems pattern |
-| Common Mistakes | text | type: "text", variant: "paragraph" |
-| Safety Notes | safety_note | type: "safety_note" |
-| Practical Checklist | text | Bullet list as text block |
-| Tables | table | type: "table" |
-| Image Briefs | image | type: "image" (url + caption) |
-| Notes Needing Verification | text | Mark clearly with "(يحتاج تدقيق)" |
+### Identification
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `id` | string (kebab-case) | Yes | e.g., `concrete-slump-test` |
+| `titleAr` | string | Yes | Arabic title |
+| `titleEn` | string | No | Optional — only when explicitly requested |
+| `categoryId` | string | Yes | e.g., `concrete`, `steel`, `general` |
+| `summaryAr` | string | Yes | 2-3 sentence Arabic summary |
 
-## Block Type Reference
+### Classification
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `level` | `"basic" \| "intermediate" \| "advanced"` | Yes | |
+| `planKey` | `"free" \| "pro"` | Yes | |
+| `tags` | string[] | No | Max 10 |
+| `keyTopics` | string[] | No | Max 20 |
 
-| Block Type | JSON `type` | Description |
-|---|---|---|
-| Text | `"text"` | Free text paragraph, variant: "paragraph" |
-| Execution Step | `"execution_step"` | Single step in a procedure |
-| Safety Note | `"safety_note"` | Safety alert, severity: "low"/"medium"/"high" |
-| Table | `"table"` | Tabular data with headers and rows |
-| Image | `"image"` | Image block with url and caption |
+### Relationships
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `relatedTopicIds` | string[] | No | Cross-topic links |
+| `relatedToolRoutes` | string[] | No | App tool routes |
+| `relatedChecklistIds` | string[] | No | Checklist references |
 
-## Minimal Required Fields
+### Media
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `coverImageUrl` | string | No | Must start with `assets/images/` |
+| `visual_theme` | object | No | `{"accent": "key"}` — one of 14 keys, defaults to `cement_gray` |
 
-- `topic.titleAr` — Arabic title
-- `topic.categoryId` — Category (e.g. "concrete", "steel", "general")
-- `topic.summaryAr` — Arabic summary
-- `topic.level` — "basic", "intermediate", or "advanced"
-- `topic.status` — Must be "draft"
-- At least one section with at least one block
-- `review.status` — "draft"
+### Audit
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `createdAt` | ISO 8601 string | Yes | |
+| `updatedAt` | ISO 8601 string | Yes | |
+
+### Content Studio Internal
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `status` | `"draft"` | Yes | Always `"draft"` for new topics |
+
+### Forbidden Topic-Level Body Fields
+
+These fields **must NOT** appear in new topics. Any content that would have gone here must be placed in `sections` + `blocks`:
+
+| Forbidden Field | Correct Location |
+|---|---|
+| `simpleExplanation` | `general` section / `text` block (variant: "paragraph") |
+| `beforeWork` | `execution` section / `execution_step` or `text` blocks |
+| `duringWork` | `execution` section / `execution_step` or `text` blocks |
+| `afterWork` | `execution` section / `execution_step` or `text` blocks |
+| `commonMistakes` | `general` section / `text` blocks (variant: "warning") |
+| `acceptRejectItems` | `inspection` section / `inspection_point` blocks |
+| `codeNotes` | `codeReference` section / `code_reference` blocks |
+| `siteNotes` | `general` section / `text` block (variant: "note") |
+| `reportWording` | `general` section / `text` block (variant: "paragraph") |
+| `featuredImageUrl` | Use `coverImageUrl` or `image` block inside a section |
 
 ## Visual Theme (visual_theme)
 
-Each topic must have a `visual_theme.accent` key in its metadata. If not set, the system defaults to `cement_gray`.
+`topic.visual_theme` must be an object: `{"accent": "key"}`. If unset, defaults to `cement_gray`.
 
-Allowed values (snake_case keys only):
+Allowed 14 keys (snake_case only):
 
 | Key | Arabic Label |
 |---|---|
@@ -84,13 +100,114 @@ Allowed values (snake_case keys only):
 | `copper` | نحاسي |
 | `asphalt` | أسفلتي |
 
-## Section Type Options
+## Section Types
 
-| Type | Usage |
-|---|---|
-| `general` | General explanatory content |
-| `execution` | Execution or construction steps |
-| `inspection` | Inspection or testing content |
-| `safety` | Safety-related content |
-| `equipment` | Tools and equipment lists |
-| `code_reference` | Standards and code references |
+6 official section types. Each section has: `id` (unique), `title` (Arabic), `type`, `order` (1-based), `blocks[]`.
+
+| Type | Purpose | Arabic Label |
+|---|---|---|
+| `general` | Introductions, explanations, notes, common mistakes | معلومات عامة |
+| `execution` | Step-by-step work procedures | خطوات التنفيذ |
+| `inspection` | Quality control, inspection points, checklists | الفحص والتفتيش |
+| `safety` | Safety notes and warnings | إجراءات السلامة |
+| `equipment` | Required tools and equipment | المعدات والأجهزة |
+| `codeReference` | Standards, codes, specifications | المراجع والكودات |
+
+## Block Types — Draft JSON Shape
+
+9 official block types. Each block has: `type`, `order` (1-based within section), and type-specific fields.
+
+### text
+```
+{ "type": "text", "order": 1, "content": { "ar": "نص عربي" }, "variant": "paragraph" }
+```
+Variants: `paragraph` (body text), `note` (supplementary), `tip` (professional tip), `warning` (mistake/caution).
+
+### execution_step
+```
+{ "type": "execution_step", "order": 1, "stepNumber": 1, "description": { "ar": "..." }, "notes": { "ar": "" } }
+```
+Do NOT use `"step": {"ar": "..."}` — this is unsupported and shows "لا يوجد محتوى".
+
+### safety_note
+```
+{ "type": "safety_note", "order": 1, "message": { "ar": "..." }, "severity": "medium" }
+```
+Severity: `low`, `medium`, `high`, `critical`.
+
+### table
+```
+{ "type": "table", "order": 1, "headers": ["عمود1", "عمود2"], "rows": [{ "cells": ["قيمة1", "قيمة2"] }] }
+```
+
+### image
+```
+{ "type": "image", "order": 1, "url": "assets/images/file_name.png", "caption": { "ar": "تعليق", "en": "" } }
+```
+URL must start with `assets/images/`. Supported: `.png`, `.jpg`, `.jpeg`, `.webp`.
+
+### checklist
+```
+{ "type": "checklist", "order": 1, "title": { "ar": "عنوان القائمة" }, "items": [{ "id": "item-01", "textAr": "نص البند", "isRequired": true }] }
+```
+
+### inspection_point
+```
+{ "type": "inspection_point", "order": 1, "criteriaAr": "معيار الفحص", "criteriaEn": "", "methodAr": "طريقة الفحص", "acceptableTolerance": "±5mm", "isCritical": false }
+```
+
+### code_reference
+```
+{ "type": "code_reference", "order": 1, "code": "ACI 318-19", "title": { "ar": "عنوان الكود", "en": "" }, "section": "7.6.1", "excerpt": { "ar": "نص من الكود", "en": "" } }
+```
+
+### equipment
+```
+{ "type": "equipment", "order": 1, "title": "المعدات", "items": [{ "nameAr": "اسم المعدة", "purpose": "الغرض", "specification": "المواصفات" }] }
+```
+
+## Draft JSON vs App-Ready JSON — Key Differences
+
+Big Pickle generates **Draft JSON** only. The exporter converts to App-ready JSON.
+
+| Aspect | Draft JSON (output of Big Pickle) | App-ready JSON (output of exporter) |
+|---|---|---|
+| `summaryAr` | Used in topic | Renamed to `summary` |
+| `text.content` | `{ar, en}` object | Flat string `content` (Arabic only) |
+| `execution_step` | `stepNumber`, `description:{ar,en}` | Nested `step{stepNumber, description}` |
+| `safety_note` | `message:{ar,en}`, `severity` | Nested `note{message, severity}` |
+| `image` | `url`, `caption:{ar,en}` | `imageUrl`, flat `caption` |
+| `_meta` | Present | Stripped |
+| `review` | Present | Stripped |
+| `sections[].blocks` | Nested inside section | Flat `blocks{sectionId: [...]}` |
+
+## Recommended Topic Structure (content outline)
+
+```
+1. Definition & Importance   → general section / text block (variant: paragraph)
+2. Required Tools/Equipment  → equipment section / equipment blocks
+3. Execution Steps           → execution section / execution_step blocks
+4. Inspection & Acceptance   → inspection section / inspection_point + checklist blocks
+5. Common Mistakes           → general section / text blocks (variant: warning)
+6. Safety Notes              → safety section / safety_note blocks
+7. Code References           → codeReference section / code_reference blocks
+8. Site Notes                → general section / text blocks (variant: note)
+9. Tables (if useful)        → table blocks in appropriate section
+10. Images                   → image blocks in appropriate sections
+```
+
+Each topic should have at least 1 section with at least 1 block. There is no maximum, but keep focused.
+
+## Minimal Required Fields
+
+- `_meta.schemaVersion` — must be `"1.0.0"`
+- `_meta.id` — must match `topic.id`
+- `topic.id` — unique kebab-case ID
+- `topic.titleAr` — Arabic title
+- `topic.categoryId` — category slug
+- `topic.summaryAr` — Arabic summary
+- `topic.level` — one of: `"basic"`, `"intermediate"`, `"advanced"`
+- `topic.planKey` — one of: `"free"`, `"pro"`
+- `topic.status` — must be `"draft"`
+- At least one section with at least one block
+- `review.status` — must be `"draft"`
