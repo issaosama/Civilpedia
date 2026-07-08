@@ -1,3 +1,5 @@
+> **[LEGACY]** This workflow has been superseded by Civilpedia Content Studio + Content AI Pipeline. Keep this file for historical reference only; do not use it for new content production.
+
 # شرح بنية ملفات CSV لمحتوى Civilpedia
 
 ## مقدمة

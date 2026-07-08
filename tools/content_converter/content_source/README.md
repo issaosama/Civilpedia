@@ -1,3 +1,5 @@
+> **[LEGACY]** This workflow has been superseded by Civilpedia Content Studio + Content AI Pipeline. Keep this file for historical reference only; do not use it for new content production.
+
 # Canonical Encyclopedia Content Source
 
 This folder is the **official tracked content source** for Civilpedia.
