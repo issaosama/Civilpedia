@@ -327,22 +327,29 @@ class PreviewRenderer {
 
   // ─── Marker helpers ──────────────────────────────
 
-  _markerHtml(markerStyle, isCritical) {
+  _markerHtml(markerStyle, isCritical, markerColorMode) {
     const style = markerStyle || (isCritical ? 'critical' : 'inspection');
     const map = {
-      neutral:    { bg: '#9E9E9E', symbol: '•', fg: '#FFFFFF' },
-      inspection: { bg: '#EF6C00', symbol: '!', fg: '#FFFFFF' },
-      info:       { bg: '#1976D2', symbol: 'i', fg: '#FFFFFF' },
-      warning:    { bg: '#F9A825', symbol: '!', fg: '#1A1A1A' },
-      critical:   { bg: '#D32F2F', symbol: '!', fg: '#FFFFFF' },
-      success:    { bg: '#388E3C', symbol: '✓', fg: '#FFFFFF' },
+      neutral:    { bg: '#9E9E9E', symbol: '•', syFg: '#FFFFFF' },
+      inspection: { bg: '#EF6C00', symbol: '!', syFg: '#FFFFFF' },
+      info:       { bg: '#1976D2', symbol: 'i', syFg: '#FFFFFF' },
+      warning:    { bg: '#F9A825', symbol: '!', syFg: '#1A1A1A' },
+      critical:   { bg: '#D32F2F', symbol: '!', syFg: '#FFFFFF' },
+      success:    { bg: '#388E3C', symbol: '✓', syFg: '#FFFFFF' },
+      diamond:    { bg: '#2E7D32', symbol: '◆', syFg: '#FFFFFF' },
+      triangle:   { bg: '#1565C0', symbol: '▲', syFg: '#FFFFFF' },
+      square:     { bg: '#6A1B9A', symbol: '■', syFg: '#FFFFFF' },
+      target:     { bg: '#C62828', symbol: '◎', syFg: '#FFFFFF' },
     };
     const m = map[style] || map.inspection;
-    return `<span class="fp-marker" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${m.bg};color:${m.fg};font-size:12px;font-weight:bold;flex-shrink:0;line-height:1;">${m.symbol}</span>`;
+    const isSemantic = markerColorMode === 'semantic';
+    const bg = isSemantic ? m.bg : 'var(--topic-accent)';
+    const syFg = isSemantic ? m.syFg : '#FFFFFF';
+    return `<span class="fp-marker" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${bg};color:${syFg};font-size:12px;font-weight:bold;flex-shrink:0;line-height:1;">${m.symbol}</span>`;
   }
 
   _renderInspectionPoint(block) {
-    const markerHtml = this._markerHtml(block.markerStyle, block.isCritical);
+    const markerHtml = this._markerHtml(block.markerStyle, block.isCritical, block.markerColorMode);
     return `
       <div class="fp-inspection">
         <div class="fp-inspection-row">

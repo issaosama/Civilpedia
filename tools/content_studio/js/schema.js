@@ -118,10 +118,47 @@ const MARKER_STYLE_LABELS = {
   info: 'معلومة',
   warning: 'تحذير',
   critical: 'حرج',
-  success: 'قبول / صحيح'
+  success: 'قبول / صحيح',
+  diamond: 'ماسي',
+  triangle: 'مثلث',
+  square: 'مربع',
+  target: 'هدف'
 };
 
-const MARKER_STYLE_OPTIONS = ['neutral', 'inspection', 'info', 'warning', 'critical', 'success'];
+const MARKER_STYLE_SYMBOLS = {
+  neutral: '•',
+  inspection: '!',
+  info: 'i',
+  warning: '!',
+  critical: '!',
+  success: '✓',
+  diamond: '◆',
+  triangle: '▲',
+  square: '■',
+  target: '◎'
+};
+
+const MARKER_STYLE_COLORS = {
+  neutral:    { bg: '#9E9E9E', fg: '#FFFFFF' },
+  inspection: { bg: '#EF6C00', fg: '#FFFFFF' },
+  info:       { bg: '#1976D2', fg: '#FFFFFF' },
+  warning:    { bg: '#F9A825', fg: '#1A1A1A' },
+  critical:   { bg: '#D32F2F', fg: '#FFFFFF' },
+  success:    { bg: '#388E3C', fg: '#FFFFFF' },
+  diamond:    { bg: '#2E7D32', fg: '#FFFFFF' },
+  triangle:   { bg: '#1565C0', fg: '#FFFFFF' },
+  square:     { bg: '#6A1B9A', fg: '#FFFFFF' },
+  target:     { bg: '#C62828', fg: '#FFFFFF' },
+};
+
+const MARKER_STYLE_OPTIONS = ['neutral', 'inspection', 'info', 'warning', 'critical', 'success', 'diamond', 'triangle', 'square', 'target'];
+
+const MARKER_COLOR_MODE_OPTIONS = ['theme', 'semantic'];
+
+const MARKER_COLOR_MODE_LABELS = {
+  theme: 'لون النسق',
+  semantic: 'لون دلالي'
+};
 
 const LEGACY_BODY_FIELDS = [
   'simpleExplanation', 'beforeWork', 'duringWork', 'afterWork',
@@ -145,6 +182,7 @@ if (typeof module !== 'undefined' && module.exports) {
     REQUIRED_TOPIC, REQUIRED_SECTION, REQUIRED_BLOCK, BLOCK_TYPES_SIMPLE,
     ADDABLE_BLOCK_OPTIONS, BLOCK_DISPLAY_NAMES, SECTION_TYPE_LABELS,
     SEVERITY_LABELS, THEME_OPTIONS, VALID_THEME_KEYS, LEGACY_BODY_FIELDS,
-    MARKER_STYLE_OPTIONS, MARKER_STYLE_LABELS
+    MARKER_STYLE_OPTIONS, MARKER_STYLE_LABELS, MARKER_STYLE_SYMBOLS,
+    MARKER_STYLE_COLORS, MARKER_COLOR_MODE_OPTIONS, MARKER_COLOR_MODE_LABELS
   };
 }

@@ -379,6 +379,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildInspectionPointBlock(InspectionPointBlock block, {required bool isDark}) {
     final point = block.point;
     final ms = MarkerStyle.fromInspectionPoint(point);
+    final useTheme = point.effectiveMarkerColorMode != 'semantic';
+    final markerBg = useTheme ? EncyclopediaCardColors.accent : ms.semanticFgColor(isDark);
+    final markerSymbolColor = useTheme ? Colors.white : ms.symbolColor(isDark);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 10),
       child: Row(
@@ -388,14 +391,14 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: 22,
             height: 22,
             decoration: BoxDecoration(
-              color: ms.fgColor(isDark),
+              color: markerBg,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: Text(
               ms.symbol,
               style: TextStyle(
-                color: ms.symbolColor(isDark),
+                color: markerSymbolColor,
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
               ),

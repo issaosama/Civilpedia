@@ -368,8 +368,20 @@ class InlineBlockEditor {
   // ─── Inspection Point Editor ───────────────────────
 
   static _inspectionPointEditor(sectionIdx, blockIdx, block) {
-    const markerOpts = MARKER_STYLE_OPTIONS.map(m =>
-      `<option value="${m}"${block.markerStyle === m ? ' selected' : ''}>${esc(MARKER_STYLE_LABELS[m])}</option>`
+    const pickerId = `marker-picker-${sectionIdx}-${blockIdx}`;
+    const markerChips = ['', ...MARKER_STYLE_OPTIONS].map(m => {
+      const val = m || '';
+      const label = m ? MARKER_STYLE_LABELS[m] : 'تلقائي';
+      const sym = m ? MARKER_STYLE_SYMBOLS[m] : '?';
+      const col = m ? MARKER_STYLE_COLORS[m] : { bg: 'var(--topic-accent)', fg: '#FFFFFF' };
+      const active = val === (block.markerStyle || '') ? ' active' : '';
+      return `<div class="marker-option${active}" data-value="${val}" onclick="var g=document.getElementById('${pickerId}');g.querySelector('.ie-input').value='${val}';g.querySelectorAll('.marker-option').forEach(function(o){o.classList.remove('active')});this.classList.add('active')">
+        <span class="marker-preview" style="background:${col.bg};color:${col.fg}">${sym}</span>
+        <span class="marker-picker-label">${label}</span>
+      </div>`;
+    }).join('');
+    const cmLabels = MARKER_COLOR_MODE_OPTIONS.map(m =>
+      `<option value="${m}"${(block.markerColorMode || 'theme') === m ? ' selected' : ''}>${esc(MARKER_COLOR_MODE_LABELS[m])}</option>`
     ).join('');
     return `
       <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
@@ -389,9 +401,15 @@ class InlineBlockEditor {
           </div>
           <div class="inline-field">
             <label>نمط العلامة</label>
-            <select class="form-input ie-input" data-field="markerStyle" dir="rtl">
-              <option value=""${!block.markerStyle ? ' selected' : ''}>تلقائي</option>
-              ${markerOpts}
+            <div class="marker-picker-grid" id="${pickerId}">
+              ${markerChips}
+            </div>
+            <input type="hidden" class="ie-input" data-field="markerStyle" value="${block.markerStyle || ''}">
+          </div>
+          <div class="inline-field">
+            <label>وضع لون العلامة</label>
+            <select class="form-input ie-input" data-field="markerColorMode" dir="rtl">
+              ${cmLabels}
             </select>
           </div>
           <div class="inline-field inline-field-row">

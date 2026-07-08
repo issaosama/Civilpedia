@@ -104,8 +104,9 @@ Severity: `low`, `medium`, `high`, `critical`.
 ```
 {"type":"inspection_point","order":1,"criteriaAr":"معيار الفحص","methodAr":"طريقة الفحص","acceptableTolerance":"±5mm","isCritical":false}
 ```
-Optional field: `"markerStyle"` — one of `neutral`, `inspection`, `info`, `warning`, `critical`, `success`.
+Optional field: `"markerStyle"` — one of `neutral`, `inspection`, `info`, `warning`, `critical`, `success`, `diamond`, `triangle`, `square`, `target`.
 If missing, falls back based on `isCritical`.
+Optional field: `"markerColorMode"` — `theme` (default, uses topic accent color) or `semantic` (uses predefined style color).
 
 ### code_reference
 ```

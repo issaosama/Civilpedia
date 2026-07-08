@@ -815,6 +815,86 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 22: markerColorMode validation
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n22. markerColorMode for inspection_point');
+
+  // 22a: markerColorMode = theme passes (default)
+  const themeMode = makeMinimalDraft();
+  themeMode.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'التطبيل', methodAr: 'فحص', markerColorMode: 'theme' }]
+  }];
+  let r = validate(loadDraft(themeMode));
+  assert(!r.hasErrors, 'markerColorMode = theme should produce no errors');
+  let cmWarns = r.warnings.filter(w => w.includes('markerColorMode'));
+  assert(cmWarns.length === 0, 'markerColorMode = theme should produce no markerColorMode warnings');
+
+  // 22b: markerColorMode = semantic passes
+  const semMode = makeMinimalDraft();
+  semMode.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'الاستواء', methodAr: 'قياس', markerColorMode: 'semantic' }]
+  }];
+  r = validate(loadDraft(semMode));
+  assert(!r.hasErrors, 'markerColorMode = semantic should produce no errors');
+  cmWarns = r.warnings.filter(w => w.includes('markerColorMode'));
+  assert(cmWarns.length === 0, 'markerColorMode = semantic should produce no markerColorMode warnings');
+
+  // 22c: missing markerColorMode passes (default = theme)
+  const noMode = makeMinimalDraft();
+  noMode.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'التطبيل', methodAr: 'فحص' }]
+  }];
+  r = validate(loadDraft(noMode));
+  assert(!r.hasErrors, 'Missing markerColorMode should produce no errors');
+  cmWarns = r.warnings.filter(w => w.includes('markerColorMode'));
+  assert(cmWarns.length === 0, 'Missing markerColorMode should produce no markerColorMode warnings');
+
+  // 22d: invalid markerColorMode triggers warning
+  const badMode = makeMinimalDraft();
+  badMode.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'التطبيل', methodAr: 'فحص', markerColorMode: 'invalid' }]
+  }];
+  r = validate(loadDraft(badMode));
+  assert(!r.hasErrors, 'Invalid markerColorMode should not produce errors');
+  assert(r.warnings.some(w => w.includes('markerColorMode')), 'Invalid markerColorMode should produce a warning');
+
+  // 22e: all valid markerColorMode values pass
+  for (const cm of MARKER_COLOR_MODE_OPTIONS) {
+    const d = makeMinimalDraft();
+    d.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+      blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'اختبار', methodAr: 'فحص', markerColorMode: cm }]
+    }];
+    r = validate(loadDraft(d));
+    assert(!r.hasErrors, `Valid markerColorMode "${cm}" should produce no errors`);
+    const cmw = r.warnings.filter(w => w.includes('markerColorMode'));
+    assert(cmw.length === 0, `Valid markerColorMode "${cm}" should produce no markerColorMode warnings`);
+  }
+
+  console.log('  PASS: All markerColorMode checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 23: New marker styles (diamond, triangle, square, target)
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n23. New marker styles for inspection_point');
+
+  for (const ms of ['diamond', 'triangle', 'square', 'target']) {
+    const d = makeMinimalDraft();
+    d.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+      blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'اختبار', methodAr: 'فحص', isCritical: false, markerStyle: ms }]
+    }];
+    const r = validate(loadDraft(d));
+    assert(!r.hasErrors, `New markerStyle "${ms}" should produce no errors`);
+    const msw = r.warnings.filter(w => w.includes('markerStyle'));
+    assert(msw.length === 0, `New markerStyle "${ms}" should produce no markerStyle warnings`);
+  }
+
+  console.log('  PASS: All new marker style checks passed');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

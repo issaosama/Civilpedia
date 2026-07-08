@@ -349,6 +349,11 @@ class ValidationEngine {
             this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "markerStyle" "${block.markerStyle}" غير صالح. القيم المقبولة: ${MARKER_STYLE_OPTIONS.join(', ')}`, { sectionIdx, blockIdx: index });
           }
         }
+        if (block.markerColorMode !== undefined && block.markerColorMode !== null && block.markerColorMode !== '') {
+          if (!MARKER_COLOR_MODE_OPTIONS.includes(block.markerColorMode)) {
+            this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "markerColorMode" "${block.markerColorMode}" غير صالح. القيم المقبولة: ${MARKER_COLOR_MODE_OPTIONS.join(', ')}`, { sectionIdx, blockIdx: index });
+          }
+        }
         break;
       case 'image': {
         if (!block.url) {

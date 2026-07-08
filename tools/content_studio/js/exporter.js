@@ -163,9 +163,11 @@ class AppExporter {
           method: src.methodAr || '',
           isCritical: !!src.isCritical,
           acceptableTolerance: src.acceptableTolerance || '',
-          markerStyle: src.markerStyle || undefined
+          markerStyle: src.markerStyle || undefined,
+          markerColorMode: src.markerColorMode || undefined
         };
         if (!block.point.markerStyle) delete block.point.markerStyle;
+        if (!block.point.markerColorMode || block.point.markerColorMode === 'theme') delete block.point.markerColorMode;
         break;
       }
       case 'code_reference': {

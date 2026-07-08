@@ -1805,3 +1805,50 @@ body {
   color: var(--fp-text);
   margin-bottom: 4px;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Marker Picker — visual chip grid for markerStyle selection
+   ═══════════════════════════════════════════════════════════════════════════ */
+.marker-picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.marker-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  background: white;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.marker-option:hover {
+  border-color: var(--primary);
+  background: #f0f7ff;
+}
+.marker-option.active {
+  border-color: var(--primary);
+  background: #e0edff;
+}
+.marker-preview {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.marker-picker-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+}

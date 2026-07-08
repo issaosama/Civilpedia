@@ -7,6 +7,7 @@ import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/services/language_provider.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../theme/encyclopedia_card_colors.dart';
 
 class InspectionPointWidget extends StatelessWidget {
   final InspectionPointBlock block;
@@ -20,14 +21,18 @@ class InspectionPointWidget extends StatelessWidget {
     String tr(String ar, String en) => isArabic ? ar : en;
     final point = block.point;
     final ms = MarkerStyle.fromInspectionPoint(point);
+    final useTheme = point.effectiveMarkerColorMode != 'semantic';
+    final markerBg = useTheme ? EncyclopediaCardColors.accent : ms.semanticFgColor(isDark);
+    final markerSymbolColor = useTheme ? Colors.white : ms.symbolColor(isDark);
+    final containerBg = useTheme ? EncyclopediaCardColors.accentSoft : ms.semanticBgColor(isDark);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: ms.bgColor(isDark),
+        color: containerBg,
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(color: ms.fgColor(isDark).withValues(alpha: 0.3)),
+        border: Border.all(color: markerBg.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,14 +43,14 @@ class InspectionPointWidget extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: BoxDecoration(
-                  color: ms.fgColor(isDark),
+                  color: markerBg,
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   ms.symbol,
                   style: TextStyle(
-                    color: ms.symbolColor(isDark),
+                    color: markerSymbolColor,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
                   ),

@@ -153,7 +153,8 @@ A compatibility report with:
 - [ ] `methodAr` is non-empty.
 - [ ] `isCritical` is boolean or absent.
 - [ ] `acceptableTolerance` is string (optional).
-- [ ] `markerStyle` (optional) must be one of: `neutral`, `inspection`, `info`, `warning`, `critical`, `success`.
+- [ ] `markerStyle` (optional) must be one of: `neutral`, `inspection`, `info`, `warning`, `critical`, `success`, `diamond`, `triangle`, `square`, `target`.
+- [ ] `markerColorMode` (optional) must be `theme` or `semantic`.
 
 ### Code References
 - [ ] `code` is non-empty.
