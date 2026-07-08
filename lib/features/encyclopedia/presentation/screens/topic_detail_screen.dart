@@ -8,6 +8,7 @@ import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/content_block.dart';
 import '../../domain/entities/topic_section.dart';
 import '../../domain/entities/localized_text.dart';
+import '../../domain/entities/marker_style.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../localization/ar.dart';
 import '../theme/encyclopedia_card_colors.dart';
@@ -377,17 +378,27 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
 
   Widget _buildInspectionPointBlock(InspectionPointBlock block, {required bool isDark}) {
     final point = block.point;
+    final ms = MarkerStyle.fromInspectionPoint(point);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Icon(
-              point.isCritical ? Icons.check_circle_outline : Icons.radio_button_unchecked,
-              size: 18,
-              color: point.isCritical ? EncyclopediaCardColors.dangerText : (isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted),
+          Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: ms.fgColor(isDark),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              ms.symbol,
+              style: TextStyle(
+                color: ms.symbolColor(isDark),
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: 10),

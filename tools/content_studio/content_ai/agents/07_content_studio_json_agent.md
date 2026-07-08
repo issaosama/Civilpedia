@@ -102,8 +102,10 @@ Severity: `low`, `medium`, `high`, `critical`.
 
 ### inspection_point
 ```
-{"type":"inspection_point","order":1,"criteriaAr":"معيار الفحص","criteriaEn":"","methodAr":"طريقة الفحص","acceptableTolerance":"±5mm","isCritical":false}
+{"type":"inspection_point","order":1,"criteriaAr":"معيار الفحص","methodAr":"طريقة الفحص","acceptableTolerance":"±5mm","isCritical":false}
 ```
+Optional field: `"markerStyle"` — one of `neutral`, `inspection`, `info`, `warning`, `critical`, `success`.
+If missing, falls back based on `isCritical`.
 
 ### code_reference
 ```

@@ -91,6 +91,7 @@ These checks enforce the official content structure contract. Every topic must p
 - [ ] **Section order is 1-based sequential** across the topic.
 - [ ] **No unknown block types** — only the 9 official types: `text`, `execution_step`, `safety_note`, `table`, `image`, `checklist`, `inspection_point`, `code_reference`, `equipment`.
 - [ ] **No empty checklist** if inspection/acceptance data exists elsewhere.
+- [ ] **Inspection point markerStyle** uses allowed values only (`neutral`, `inspection`, `info`, `warning`, `critical`, `success`).
 - [ ] **Tables have consistent headers and rows** — row cell count matches header count.
 - [ ] **All image paths use `assets/images/filename.ext`** — no absolute paths, no backslashes, no spaces.
 - [ ] **No blob/data URIs or local file paths** stored in any field.

@@ -344,6 +344,11 @@ class ValidationEngine {
             this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "acceptanceLimit.ar" فارغ`, { sectionIdx, blockIdx: index });
           }
         }
+        if (block.markerStyle !== undefined && block.markerStyle !== null && block.markerStyle !== '') {
+          if (!MARKER_STYLE_OPTIONS.includes(block.markerStyle)) {
+            this._addWarning(`section "${sectionId}" block[${index}] — inspection_point: "markerStyle" "${block.markerStyle}" غير صالح. القيم المقبولة: ${MARKER_STYLE_OPTIONS.join(', ')}`, { sectionIdx, blockIdx: index });
+          }
+        }
         break;
       case 'image': {
         if (!block.url) {

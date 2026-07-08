@@ -112,6 +112,17 @@ const THEME_OPTIONS = [
 
 const VALID_THEME_KEYS = THEME_OPTIONS.map(o => o.value);
 
+const MARKER_STYLE_LABELS = {
+  neutral: 'عادي',
+  inspection: 'فحص',
+  info: 'معلومة',
+  warning: 'تحذير',
+  critical: 'حرج',
+  success: 'قبول / صحيح'
+};
+
+const MARKER_STYLE_OPTIONS = ['neutral', 'inspection', 'info', 'warning', 'critical', 'success'];
+
 const LEGACY_BODY_FIELDS = [
   'simpleExplanation', 'beforeWork', 'duringWork', 'afterWork',
   'commonMistakes', 'acceptRejectItems', 'codeNotes', 'siteNotes',
@@ -133,6 +144,7 @@ if (typeof module !== 'undefined' && module.exports) {
     VALID_TEXT_VARIANTS, VALID_SEVERITIES, REQUIRED_TOP_LEVEL, REQUIRED_META,
     REQUIRED_TOPIC, REQUIRED_SECTION, REQUIRED_BLOCK, BLOCK_TYPES_SIMPLE,
     ADDABLE_BLOCK_OPTIONS, BLOCK_DISPLAY_NAMES, SECTION_TYPE_LABELS,
-    SEVERITY_LABELS, THEME_OPTIONS, VALID_THEME_KEYS, LEGACY_BODY_FIELDS
+    SEVERITY_LABELS, THEME_OPTIONS, VALID_THEME_KEYS, LEGACY_BODY_FIELDS,
+    MARKER_STYLE_OPTIONS, MARKER_STYLE_LABELS
   };
 }

@@ -153,8 +153,10 @@ URL must start with `assets/images/`. Supported: `.png`, `.jpg`, `.jpeg`, `.webp
 
 ### inspection_point
 ```
-{ "type": "inspection_point", "order": 1, "criteriaAr": "معيار الفحص", "criteriaEn": "", "methodAr": "طريقة الفحص", "acceptableTolerance": "±5mm", "isCritical": false }
+{ "type": "inspection_point", "order": 1, "criteriaAr": "معيار الفحص", "methodAr": "طريقة الفحص", "acceptableTolerance": "±5mm", "isCritical": false }
 ```
+Optional `markerStyle` field — one of: `neutral`, `inspection`, `info`, `warning`, `critical`, `success`.
+If missing, falls back to `critical` (when `isCritical: true`) or `inspection` (when `isCritical: false`).
 
 ### code_reference
 ```

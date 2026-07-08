@@ -162,8 +162,10 @@ class AppExporter {
           criteria: src.criteriaAr || '',
           method: src.methodAr || '',
           isCritical: !!src.isCritical,
-          acceptableTolerance: src.acceptableTolerance || ''
+          acceptableTolerance: src.acceptableTolerance || '',
+          markerStyle: src.markerStyle || undefined
         };
+        if (!block.point.markerStyle) delete block.point.markerStyle;
         break;
       }
       case 'code_reference': {

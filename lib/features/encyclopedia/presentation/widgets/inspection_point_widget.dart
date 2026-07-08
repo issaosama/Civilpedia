@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../domain/entities/content_block.dart';
+import '../../domain/entities/marker_style.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/services/language_provider.dart';
@@ -18,24 +19,39 @@ class InspectionPointWidget extends StatelessWidget {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
     final point = block.point;
+    final ms = MarkerStyle.fromInspectionPoint(point);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 5),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFFEF6C00).withValues(alpha: 0.12) : const Color(0xFFEF6C00).withValues(alpha: 0.04),
+        color: ms.bgColor(isDark),
         borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(
-          color: point.isCritical
-              ? AppColors.error.withValues(alpha: 0.4)
-              : const Color(0xFFEF6C00).withValues(alpha: 0.15),
-        ),
+        border: Border.all(color: ms.fgColor(isDark).withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  color: ms.fgColor(isDark),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  ms.symbol,
+                  style: TextStyle(
+                    color: ms.symbolColor(isDark),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   point.criteria,
@@ -45,7 +61,7 @@ class InspectionPointWidget extends StatelessWidget {
                       ),
                 ),
               ),
-                if (point.isCritical)
+              if (point.isCritical)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(

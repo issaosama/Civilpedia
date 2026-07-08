@@ -325,16 +325,31 @@ class PreviewRenderer {
     `;
   }
 
+  // ─── Marker helpers ──────────────────────────────
+
+  _markerHtml(markerStyle, isCritical) {
+    const style = markerStyle || (isCritical ? 'critical' : 'inspection');
+    const map = {
+      neutral:    { bg: '#9E9E9E', symbol: '•', fg: '#FFFFFF' },
+      inspection: { bg: '#EF6C00', symbol: '!', fg: '#FFFFFF' },
+      info:       { bg: '#1976D2', symbol: 'i', fg: '#FFFFFF' },
+      warning:    { bg: '#F9A825', symbol: '!', fg: '#1A1A1A' },
+      critical:   { bg: '#D32F2F', symbol: '!', fg: '#FFFFFF' },
+      success:    { bg: '#388E3C', symbol: '✓', fg: '#FFFFFF' },
+    };
+    const m = map[style] || map.inspection;
+    return `<span class="fp-marker" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:${m.bg};color:${m.fg};font-size:12px;font-weight:bold;flex-shrink:0;line-height:1;">${m.symbol}</span>`;
+  }
+
   _renderInspectionPoint(block) {
-    const isCritical = block.isCritical;
-    const icon = isCritical ? '🔴' : '🟡';
+    const markerHtml = this._markerHtml(block.markerStyle, block.isCritical);
     return `
       <div class="fp-inspection">
         <div class="fp-inspection-row">
-          <span class="fp-inspection-icon ${isCritical ? 'fp-inspection-critical' : 'fp-inspection-regular'}">${icon}</span>
-          <div>
+          ${markerHtml}
+          <div style="margin-right:8px;">
             <strong>${this._escape(block.criteriaAr || '')}</strong><br>
-            <span class="fp-text-muted">القبول: ${this._escape(block.acceptanceLimitAr || block.acceptableTolerance || '')} | الطريقة: ${this._escape(block.methodAr || '')}</span>
+            <span class="fp-text-muted">القبول: ${this._escape(block.acceptableTolerance || '')} | الطريقة: ${this._escape(block.methodAr || '')}</span>
           </div>
         </div>
       </div>

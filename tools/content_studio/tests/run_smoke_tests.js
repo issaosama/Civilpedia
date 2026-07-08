@@ -755,6 +755,66 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 21: markerStyle validation for inspection_point
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n21. markerStyle for inspection_point');
+
+  // 21a: inspection_point without markerStyle passes (default fallback)
+  const noStyle = makeMinimalDraft();
+  noStyle.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'التطبيل', methodAr: 'فحص', isCritical: true, acceptableTolerance: '5%' }]
+  }];
+  let r = validate(loadDraft(noStyle));
+  assert(!r.hasErrors, 'Inspection point without markerStyle should produce no errors');
+  const msWarns = r.warnings.filter(w => w.includes('markerStyle'));
+  assert(msWarns.length === 0, 'Inspection point without markerStyle should produce no markerStyle warnings');
+
+  // 21b: markerStyle = critical passes
+  const crit = makeMinimalDraft();
+  crit.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'التطبيل', methodAr: 'فحص', isCritical: true, markerStyle: 'critical' }]
+  }];
+  r = validate(loadDraft(crit));
+  assert(!r.hasErrors, 'markerStyle = critical should produce no errors');
+  const critWarns = r.warnings.filter(w => w.includes('markerStyle'));
+  assert(critWarns.length === 0, 'markerStyle = critical should produce no markerStyle warnings');
+
+  // 21c: markerStyle = success passes
+  const succ = makeMinimalDraft();
+  succ.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'الاستواء', methodAr: 'قياس', isCritical: false, markerStyle: 'success' }]
+  }];
+  r = validate(loadDraft(succ));
+  assert(!r.hasErrors, 'markerStyle = success should produce no errors');
+  const succWarns = r.warnings.filter(w => w.includes('markerStyle'));
+  assert(succWarns.length === 0, 'markerStyle = success should produce no markerStyle warnings');
+
+  // 21d: invalid markerStyle triggers warning
+  const bad = makeMinimalDraft();
+  bad.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'التطبيل', methodAr: 'فحص', isCritical: true, markerStyle: 'purple' }]
+  }];
+  r = validate(loadDraft(bad));
+  assert(!r.hasErrors, 'Invalid markerStyle should not produce errors');
+  assert(r.warnings.some(w => w.includes('markerStyle')), 'Invalid markerStyle should produce a warning');
+
+  // 21e: all valid marker styles pass
+  for (const ms of MARKER_STYLE_OPTIONS) {
+    const d = makeMinimalDraft();
+    d.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+      blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'اختبار', methodAr: 'فحص', isCritical: false, markerStyle: ms }]
+    }];
+    r = validate(loadDraft(d));
+    assert(!r.hasErrors, `Valid markerStyle "${ms}" should produce no errors`);
+    const msw = r.warnings.filter(w => w.includes('markerStyle'));
+    assert(msw.length === 0, `Valid markerStyle "${ms}" should produce no markerStyle warnings`);
+  }
+
+  console.log('  PASS: All markerStyle checks passed');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

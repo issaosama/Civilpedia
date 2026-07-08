@@ -90,12 +90,14 @@ class InspectionPoint {
   final String? acceptableTolerance;
   final String? method;
   final bool isCritical;
+  final String? markerStyle;
 
   const InspectionPoint({
     required this.criteria,
     this.acceptableTolerance,
     this.method,
     this.isCritical = false,
+    this.markerStyle,
   });
 
   Map<String, dynamic> toJson() => {
@@ -103,6 +105,7 @@ class InspectionPoint {
         'acceptableTolerance': acceptableTolerance,
         'method': method,
         'isCritical': isCritical,
+        'markerStyle': markerStyle,
       };
 
   factory InspectionPoint.fromJson(Map<String, dynamic> json) =>
@@ -111,7 +114,10 @@ class InspectionPoint {
         acceptableTolerance: json['acceptableTolerance'] as String?,
         method: json['method'] as String?,
         isCritical: json['isCritical'] as bool? ?? false,
+        markerStyle: json['markerStyle'] as String?,
       );
+
+  String get effectiveMarkerStyle => markerStyle ?? (isCritical ? 'critical' : 'inspection');
 }
 
 class ExecutionStep {

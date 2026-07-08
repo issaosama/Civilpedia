@@ -153,6 +153,7 @@ A compatibility report with:
 - [ ] `methodAr` is non-empty.
 - [ ] `isCritical` is boolean or absent.
 - [ ] `acceptableTolerance` is string (optional).
+- [ ] `markerStyle` (optional) must be one of: `neutral`, `inspection`, `info`, `warning`, `critical`, `success`.
 
 ### Code References
 - [ ] `code` is non-empty.

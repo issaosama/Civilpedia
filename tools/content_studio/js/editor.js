@@ -368,6 +368,9 @@ class InlineBlockEditor {
   // ─── Inspection Point Editor ───────────────────────
 
   static _inspectionPointEditor(sectionIdx, blockIdx, block) {
+    const markerOpts = MARKER_STYLE_OPTIONS.map(m =>
+      `<option value="${m}"${block.markerStyle === m ? ' selected' : ''}>${esc(MARKER_STYLE_LABELS[m])}</option>`
+    ).join('');
     return `
       <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
         <div class="inline-header">✏️ تحرير نقطة الفحص</div>
@@ -383,6 +386,13 @@ class InlineBlockEditor {
           <div class="inline-field">
             <label>حد القبول</label>
             <input type="text" class="form-input ie-input" data-field="acceptableTolerance" value="${esc(block.acceptableTolerance || '')}" dir="rtl" placeholder="مثال: ±5 مم">
+          </div>
+          <div class="inline-field">
+            <label>نمط العلامة</label>
+            <select class="form-input ie-input" data-field="markerStyle" dir="rtl">
+              <option value=""${!block.markerStyle ? ' selected' : ''}>تلقائي</option>
+              ${markerOpts}
+            </select>
           </div>
           <div class="inline-field inline-field-row">
             <label class="inline-checkbox-label">
