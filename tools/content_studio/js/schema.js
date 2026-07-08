@@ -96,6 +96,14 @@ const THEME_OPTIONS = [
   { label: 'زيتي', value: 'olive' },
   { label: 'كهرماني ترابي', value: 'amber' },
   { label: 'عنابي', value: 'maroon' },
+  { label: 'أزرق فولاذي', value: 'steel_blue' },
+  { label: 'جرافيتي', value: 'graphite' },
+  { label: 'رملي', value: 'sand' },
+  { label: 'طوبي', value: 'brick' },
+  { label: 'زمردي', value: 'emerald' },
+  { label: 'نيلي', value: 'indigo' },
+  { label: 'نحاسي', value: 'copper' },
+  { label: 'أسفلتي', value: 'asphalt' },
 ];
 
 const VALID_THEME_KEYS = THEME_OPTIONS.map(o => o.value);

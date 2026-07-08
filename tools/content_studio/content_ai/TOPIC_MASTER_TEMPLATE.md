@@ -61,6 +61,29 @@ Each Civilpedia topic follows this standard structure.
 - At least one section with at least one block
 - `review.status` — "draft"
 
+## Visual Theme (visual_theme)
+
+Each topic must have a `visual_theme.accent` key in its metadata. If not set, the system defaults to `cement_gray`.
+
+Allowed values (snake_case keys only):
+
+| Key | Arabic Label |
+|---|---|
+| `cement_gray` | افتراضي / رصاصي أسمنتي |
+| `navy` | كحلي هندسي |
+| `teal` | بترولي |
+| `olive` | زيتي |
+| `amber` | كهرماني ترابي |
+| `maroon` | عنابي |
+| `steel_blue` | أزرق فولاذي |
+| `graphite` | جرافيتي |
+| `sand` | رملي |
+| `brick` | طوبي |
+| `emerald` | زمردي |
+| `indigo` | نيلي |
+| `copper` | نحاسي |
+| `asphalt` | أسفلتي |
+
 ## Section Type Options
 
 | Type | Usage |

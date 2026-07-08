@@ -79,12 +79,19 @@ Use this checklist to review every generated topic before the app owner opens it
 - [ ] All IDs are unique (section IDs, topic ID).
 - [ ] _meta schemaVersion matches "1.0.0".
 
+## Visual Theme
+
+- [ ] `visual_theme.accent` is set to one of the 14 allowed keys (or left unset to default to `cement_gray`).
+- [ ] Theme key is snake_case only (no spaces, no Arabic).
+- [ ] Theme dropdown in Content Studio shows the correct Arabic label for the selected key.
+- [ ] Preview updates immediately when theme changes (CSS `data-theme` attribute).
+
 ## Content Studio Compatibility
 
 - [ ] Draft opens in Content Studio without errors.
 - [ ] Validation engine shows no errors (warnings about empty fields are acceptable).
-- [ ] Preview looks good in light mode.
-- [ ] Preview looks good in dark mode.
+- [ ] Preview looks good in light mode with the selected theme.
+- [ ] Preview looks good in dark mode with the selected theme.
 
 ## Mandatory Visual QA (Renderability)
 

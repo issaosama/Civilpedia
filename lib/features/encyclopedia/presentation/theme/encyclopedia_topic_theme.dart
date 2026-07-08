@@ -55,6 +55,62 @@ class EncyclopediaTopicTheme {
     accentDark: Color(0xFF5A1E26),
   );
 
+  static const steelBlue = EncyclopediaTopicTheme._(
+    accent: Color(0xFF4A6B8A),
+    accentSoft: Color(0xFFE8EDF2),
+    accentChip: Color(0xFFD8E0E8),
+    accentDark: Color(0xFF2E4A66),
+  );
+
+  static const graphite = EncyclopediaTopicTheme._(
+    accent: Color(0xFF5A5E66),
+    accentSoft: Color(0xFFEDEEF0),
+    accentChip: Color(0xFFDFE0E4),
+    accentDark: Color(0xFF3A3D44),
+  );
+
+  static const sand = EncyclopediaTopicTheme._(
+    accent: Color(0xFFB8A88A),
+    accentSoft: Color(0xFFF5F0E8),
+    accentChip: Color(0xFFEDE6D8),
+    accentDark: Color(0xFF8C7E66),
+  );
+
+  static const brick = EncyclopediaTopicTheme._(
+    accent: Color(0xFF8B5E4A),
+    accentSoft: Color(0xFFF0E8E4),
+    accentChip: Color(0xFFE6DAD4),
+    accentDark: Color(0xFF6B4230),
+  );
+
+  static const emerald = EncyclopediaTopicTheme._(
+    accent: Color(0xFF2D7A5A),
+    accentSoft: Color(0xFFE6F0EC),
+    accentChip: Color(0xFFD4E4DC),
+    accentDark: Color(0xFF1E5C42),
+  );
+
+  static const indigo = EncyclopediaTopicTheme._(
+    accent: Color(0xFF4A5080),
+    accentSoft: Color(0xFFEAEAF2),
+    accentChip: Color(0xFFDCDCE8),
+    accentDark: Color(0xFF323866),
+  );
+
+  static const copper = EncyclopediaTopicTheme._(
+    accent: Color(0xFFA0734A),
+    accentSoft: Color(0xFFF0E8E0),
+    accentChip: Color(0xFFE6DCD0),
+    accentDark: Color(0xFF7A5832),
+  );
+
+  static const asphalt = EncyclopediaTopicTheme._(
+    accent: Color(0xFF6A6E78),
+    accentSoft: Color(0xFFECEDF0),
+    accentChip: Color(0xFFDEE0E4),
+    accentDark: Color(0xFF4E525C),
+  );
+
   static const List<EncyclopediaTopicTheme> all = [
     cementGray,
     navy,
@@ -62,6 +118,14 @@ class EncyclopediaTopicTheme {
     olive,
     amber,
     maroon,
+    steelBlue,
+    graphite,
+    sand,
+    brick,
+    emerald,
+    indigo,
+    copper,
+    asphalt,
   ];
 
   static const EncyclopediaTopicTheme defaultTheme = cementGray;
@@ -73,6 +137,14 @@ class EncyclopediaTopicTheme {
       'olive' => olive,
       'amber' => amber,
       'maroon' => maroon,
+      'steel_blue' => steelBlue,
+      'graphite' => graphite,
+      'sand' => sand,
+      'brick' => brick,
+      'emerald' => emerald,
+      'indigo' => indigo,
+      'copper' => copper,
+      'asphalt' => asphalt,
       _ => cementGray,
     };
   }
