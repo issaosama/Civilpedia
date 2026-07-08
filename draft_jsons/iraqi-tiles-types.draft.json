@@ -289,7 +289,9 @@
           "criteriaAr": "التطبيل — فحص الصوت المجوف بعد التبليط",
           "methodAr": "الطرق بمطرقة خشبية أو قطعة معدنية خفيفة على سطح البلاط والاستماع للصوت.",
           "isCritical": true,
-          "acceptableTolerance": "لا يزيد عن 5% من مساحة البلاط (يحتاج تدقيق)"
+          "acceptableTolerance": "لا يزيد عن 5% من مساحة البلاط (يحتاج تدقيق)",
+          "markerStyle": "diamond",
+          "markerColorMode": "theme"
         },
         {
           "type": "inspection_point",
@@ -313,7 +315,9 @@
           "criteriaAr": "عرض الفواصل — انتظام المسافات بين البلاطات",
           "methodAr": "قياس عرض الفاصل بعدة نقاط باستخدام مسطرة أو ميكرومتر.",
           "isCritical": false,
-          "acceptableTolerance": "±0.5 مم عن العرض المطلوب في المخطط"
+          "acceptableTolerance": "±0.5 مم عن العرض المطلوب في المخطط",
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
         },
         {
           "type": "inspection_point",
@@ -321,7 +325,9 @@
           "criteriaAr": "المظهر العام — الخدوش والكسور وتغير اللون",
           "methodAr": "فحص بصري شامل للسطح وتدوين أي عيوب واضحة.",
           "isCritical": true,
-          "acceptableTolerance": "لا توجد خدوش أو كسر أو تغير في اللون"
+          "acceptableTolerance": "لا توجد خدوش أو كسر أو تغير في اللون",
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
         },
         {
           "type": "inspection_point",
@@ -345,7 +351,9 @@
           "criteriaAr": "الفواصل الحرارية / فواصل التمدد",
           "methodAr": "قياس المسافات بين فواصل التمدد والتأكد من وجودها في المساحات الكبيرة وعند تغير الاتجاهات.",
           "isCritical": true,
-          "acceptableTolerance": "تترك كل 5-6 متر في المساحات الكبيرة (يحتاج تدقيق)"
+          "acceptableTolerance": "تترك كل 5-6 متر في المساحات الكبيرة (يحتاج تدقيق)",
+          "markerStyle": "target",
+          "markerColorMode": "theme"
         },
         {
           "type": "checklist",
@@ -394,7 +402,7 @@
       ]
     },
     {
-      "id": "sec-common-mistakes",
+      "id": "sec-common-mistakes-tiles",
       "title": "الأخطاء الشائعة",
       "type": "general",
       "order": 4,
@@ -458,7 +466,7 @@
       ]
     },
     {
-      "id": "sec-safety",
+      "id": "sec-safety-tiles",
       "title": "ملاحظات السلامة",
       "type": "safety",
       "order": 5,

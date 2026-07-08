@@ -2,9 +2,9 @@
   "topic": {
     "id": "iraqi-tiles-types",
     "titleAr": "الكاشي وأنواع البلاط في السوق العراقي",
-    "titleEn": "Tiles and Flooring Types in the Iraqi Market",
+    "titleEn": "",
     "categoryId": "finishing",
-    "summary": "دليل شامل لأنواع الكاشي والبلاط المستخدمة في السوق العراقي مع مقارنة بين السيراميك والبورسلين والكرانيت والمرمر.",
+    "summary": "دليل موقعي لأنواع الكاشي والبلاط في السوق العراقي يشمل مقارنة بين السيراميك والبورسلين والكرانيت والمرمر، مع خطوات التنفيذ ونقاط الفحص ومعايير القبول.",
     "tags": [
       "كاشي",
       "بلاط",
@@ -15,203 +15,121 @@
       "إنهاءات"
     ],
     "relatedTopicIds": [],
-    "createdAt": "2026-06-28T00:00:00.000Z",
-    "updatedAt": "2026-06-28T00:00:00.000Z",
+    "createdAt": "2026-07-08T10:00:00.000Z",
+    "updatedAt": "2026-07-08T10:00:00.000Z",
     "level": "basic",
     "planKey": "free",
     "featuredImageUrl": null,
     "simpleExplanation": {
-      "ar": "أنواع الكاشي والبلاط في السوق العراقي متعددة وتختلف في الخامات وطرق التصنيع والاستخدامات. السيراميك هو الأكثر شيوعاً في المنازل، يليه البورسلين للاستخدامات التجارية عالية الحركة، والكرانيت والمرمر للأماكن الفاخرة. اختيار النوع المناسب يعتمد على الاستخدام المطلوب وحركة المشاة وميزانية المشروع.",
-      "en": "Tiles and flooring types in the Iraqi market are diverse, varying in materials, manufacturing methods, and applications. Ceramic is the most common for homes, followed by porcelain for high-traffic commercial use, and granite and marble for luxury spaces. Choosing the right type depends on the intended use, traffic, and project budget."
+      "ar": "",
+      "en": ""
     },
     "beforeWork": {
-      "ar": "تجهيز السطح: التأكد من استواء واستقامة سطح الخرسانة أو المونة الأسمنتية. تنظيف السطح من الأتربة والزيوت والشوائب. توزيع البلاط جافاً لتحديد أماكن القصاصات واختيار اتجاه التبليط. تجهيز المونة اللاصقة حسب تعليمات الشركة المصنعة.",
-      "en": "Surface preparation: ensure the concrete slab is level and clean. Remove dust and debris. Dry-lay tiles to determine cut positions and tiling direction. Prepare adhesive mortar per manufacturer instructions."
+      "ar": "",
+      "en": ""
     },
     "duringWork": {
-      "ar": "فرد المونة اللاصقة بواسطة المسنن المناسب (6 مم للسيراميك و10 مم للبورسلين). تركيب البلاط مع الضغط والتحريك الخفيف لتوزيع المونة. ضبط الفواصل بواسطة الصلبان البلاستيكية (2-3 مم للسيراميك و3-5 مم للبورسلين). تسوية البلاط باستخدام ميزان الماء والجاكوش المطاطي. ترويب الفواصل بعد 24-48 ساعة من جفاف المونة.",
-      "en": "Apply adhesive with appropriate notched trowel (6mm for ceramic, 10mm for porcelain). Install tiles with light pressing and twisting. Set joint spacers (2-3mm ceramic, 3-5mm porcelain). Level tiles using spirit level and rubber mallet. Grout joints after 24-48 hours."
+      "ar": "",
+      "en": ""
     },
     "afterWork": {
-      "ar": "تنظيف سطح البلاط من بقايا المونة والروبة مباشرة بعد الترويب. حماية البلاط من المشاة لمدة 48 ساعة على الأقل. معالجة الفواصل (إذا كانت روبة أسمنتية) برش الماء خفيفاً لمدة 3 أيام. الفحص النهائي للتأكد من الاستواء والميول والفواصل والمظهر العام.",
-      "en": "Clean tile surfaces from adhesive and grout residue immediately. Protect tiles from foot traffic for at least 48 hours. Cure cementitious grout by misting with water for 3 days. Final inspection: verify leveling, slopes, joints, and overall appearance."
+      "ar": "",
+      "en": ""
     },
-    "commonMistakes": [
-      {
-        "ar": "لصق البورسلين بطريقة النقاط بدل الفرش الكامل.",
-        "en": "Spot-bonding porcelain tiles instead of full-bed application."
-      },
-      {
-        "ar": "استخدام سيراميك جدران للأرضيات.",
-        "en": "Using wall tiles on floors."
-      },
-      {
-        "ar": "إهمال الميول في الحمامات والسطوح.",
-        "en": "Neglecting proper slopes in bathrooms and roofs."
-      },
-      {
-        "ar": "التبليط بدون فواصل تمدد.",
-        "en": "Tiling without expansion joints."
-      },
-      {
-        "ar": "خلط دفعات إنتاج مختلفة من البلاط.",
-        "en": "Mixing tiles from different production batches."
-      },
-      {
-        "ar": "ترويب المرمر الفاتح بروبة رمادية.",
-        "en": "Grouting light marble with grey grout."
-      },
-      {
-        "ar": "عدم ترك وقت كاف لجفاف المونة قبل الترويب.",
-        "en": "Not allowing enough adhesive curing time before grouting."
-      }
-    ],
-    "acceptRejectItems": [
-      {
-        "criteriaAr": "التطبيل (Hollow Sound)",
-        "criteriaEn": "Hollow sound test",
-        "acceptanceLimitAr": "لا يزيد عن 5% من مساحة البلاط",
-        "acceptanceLimitEn": "Not more than 5% of tile area",
-        "methodAr": "الطرق بمطرقة خشبية",
-        "methodEn": "Light wooden mallet tapping",
-        "isCritical": true,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      },
-      {
-        "criteriaAr": "الاستواء (Leveling)",
-        "criteriaEn": "Leveling",
-        "acceptanceLimitAr": "±2 مم على طول 2 متر",
-        "acceptanceLimitEn": "±2mm over 2m",
-        "methodAr": "ميزان الماء أو مسطرة ألمنيوم",
-        "methodEn": "Spirit level or aluminum straightedge",
-        "isCritical": true,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      },
-      {
-        "criteriaAr": "الميول (Slopes)",
-        "criteriaEn": "Slopes",
-        "acceptanceLimitAr": "1-2% في الحمامات والسطوح",
-        "acceptanceLimitEn": "1-2% in bathrooms and roofs",
-        "methodAr": "ميزان الماء",
-        "methodEn": "Spirit level",
-        "isCritical": true,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      },
-      {
-        "criteriaAr": "عرض الفواصل (Joint Width)",
-        "criteriaEn": "Joint width",
-        "acceptanceLimitAr": "±0.5 مم عن العرض المطلوب",
-        "acceptanceLimitEn": "±0.5mm from specified width",
-        "methodAr": "مسطرة أو شبلون",
-        "methodEn": "Ruler or gauge",
-        "isCritical": false,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      },
-      {
-        "criteriaAr": "المظهر العام (Appearance)",
-        "criteriaEn": "Appearance",
-        "acceptanceLimitAr": "لا توجد خدوش أو كسر أو تغير في اللون",
-        "acceptanceLimitEn": "No scratches cracks or color variation",
-        "methodAr": "فحص بصري",
-        "methodEn": "Visual inspection",
-        "isCritical": true,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      },
-      {
-        "criteriaAr": "القص والتفصيل (Cutting quality)",
-        "criteriaEn": "Cutting quality",
-        "acceptanceLimitAr": "قصاصات نظيفة بدون تشقق",
-        "acceptanceLimitEn": "Cuts clean without chipping",
-        "methodAr": "فحص بصري",
-        "methodEn": "Visual inspection",
-        "isCritical": false,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      },
-      {
-        "criteriaAr": "النهايات (Edges/Ends)",
-        "criteriaEn": "Edges and ends",
-        "acceptanceLimitAr": "محاذاة النهايات مع الحوائط بشكل نظيف",
-        "acceptanceLimitEn": "Edges aligned neatly with walls",
-        "methodAr": "فحص بصري وشريط قياس",
-        "methodEn": "Visual inspection and tape measure",
-        "isCritical": false,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      },
-      {
-        "criteriaAr": "الفواصل الحرارية (Expansion Joints)",
-        "criteriaEn": "Expansion joints",
-        "acceptanceLimitAr": "تترك كل 5-6 متر في المساحات الكبيرة",
-        "acceptanceLimitEn": "Every 5-6m in large areas",
-        "methodAr": "قياس المسافات",
-        "methodEn": "Distance measurement",
-        "isCritical": true,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      }
-    ],
+    "commonMistakes": [],
+    "acceptRejectItems": [],
     "codeNotes": {
-      "ar": "يُفضل الرجوع إلى المواصفات العراقية والمواصفات العالمية ASTM C1026 وISO 10545 لأنواع البلاط للتأكد من مطابقة المنتج للمواصفات الفنية المطلوبة.",
-      "en": "Refer to Iraqi standards and international standards ASTM C1026 and ISO 10545 for tile types to ensure product compliance."
+      "ar": "",
+      "en": ""
     },
     "siteNotes": {
-      "ar": "من المهم مراعاة أن البورسلين والكرانيت يحتاجان أقراص قص ماسية (Diamond Blades). المرمر يحتاج عناية خاصة في الترويب والتنظيف لأنه يتأثر بالأحماض. يُفضل الاحتفاظ ببلاط إضافي بنسبة 5% كاحتياطي للصيانة المستقبلية.",
-      "en": "Note that porcelain and granite require diamond blades for cutting. Marble needs special care in grouting and cleaning as it is acid-sensitive. Keep 5% extra tiles as spare for future maintenance."
+      "ar": "",
+      "en": ""
     },
     "reportWording": {
-      "ar": "تم تنفيذ أعمال التبليط باستخدام [نوع البلاط] وبأبعاد [الأبعاد] حسب المخططات والمواصفات المعتمدة. تم فحص التبليط والتأكد من الاستواء والميول والفواصل وجودة القص وجميعها ضمن الحدود المسموحة وبمطابقة المواصفات.",
-      "en": "Tiling works were executed using [tile type] with dimensions [dimensions] according to approved drawings and specifications. Inspection confirmed leveling, slopes, joints, and cutting quality are within allowable limits."
+      "ar": "",
+      "en": ""
     },
-    "relatedToolRoutes": [
-      "/calculator/tile"
+    "keyTopics": [
+      "الكاشي",
+      "البلاط",
+      "السيراميك",
+      "البورسلين",
+      "الكرانيت",
+      "المرمر",
+      "التبليط",
+      "أعمال الإنهاءات",
+      "فحص التبليط",
+      "فواصل البلاط"
     ],
+    "coverImageUrl": null,
+    "visual_theme": {
+      "accent": "brick"
+    },
+    "relatedToolRoutes": [],
     "relatedChecklistIds": []
   },
   "sections": [
     {
-      "id": "tile-tables",
-      "title": "جداول المقارنة والقياسات",
+      "id": "sec-overview",
+      "title": "نظرة عامة",
       "type": "general",
       "order": 1
     },
     {
-      "id": "tile-application",
-      "title": "خطوات التبليط التنفيذية",
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ التبليط",
       "type": "execution",
       "order": 2
     },
     {
-      "id": "tile-inspection",
+      "id": "sec-inspection",
       "title": "نقاط فحص التبليط",
       "type": "inspection",
       "order": 3
     },
     {
-      "id": "tile-safety",
+      "id": "sec-common-mistakes-tiles",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 4
+    },
+    {
+      "id": "sec-safety-tiles",
       "title": "ملاحظات السلامة",
       "type": "safety",
-      "order": 4
+      "order": 5
+    },
+    {
+      "id": "sec-equipment",
+      "title": "المعدات والأدوات المطلوبة",
+      "type": "equipment",
+      "order": 6
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "المراجع والملاحظات الفنية",
+      "type": "codeReference",
+      "order": 7
+    },
+    {
+      "id": "sec-report-wording",
+      "title": "صيغة تقرير جاهزة",
+      "type": "general",
+      "order": 8
     }
   ],
   "blocks": {
-    "tile-tables": [
+    "sec-overview": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "تتنوع أنواع الكاشي والبلاط في السوق العراقي بين السيراميك والبورسلين والكرانيت والمرمر. يختلف كل نوع في الخامة وطريقة التصنيع والمقاومة والسعر. اختيار النوع المناسب يعتمد على موقع الاستخدام وحركة المشاة المتوقعة والميزانية المخصصة للأعمال.",
+        "variant": "paragraph"
+      },
       {
         "type": "table",
-        "order": 1,
+        "order": 2,
         "data": {
           "caption": "جدول مقارنة أنواع البلاط",
           "headers": [
@@ -226,7 +144,7 @@
             {
               "cells": [
                 "سيراميك",
-                "طين مطفي مع طبقة زجاجية",
+                "طين مطفي + طبقة زجاجية",
                 "متوسطة",
                 "جيدة",
                 "المنازل والمكاتب منخفضة الحركة",
@@ -236,7 +154,7 @@
             {
               "cells": [
                 "بورسلين",
-                "طين مطفي مع إضافات معدنية",
+                "طين مطفي + إضافات معدنية",
                 "عالية جداً",
                 "ممتازة",
                 "المطارات والمولات والمساحات التجارية",
@@ -268,9 +186,9 @@
       },
       {
         "type": "table",
-        "order": 2,
+        "order": 3,
         "data": {
-          "caption": "جدول الأبعاد والسمك النموذجية",
+          "caption": "جدول الأبعاد والسمك النموذجية للبلاط",
           "headers": [
             "النوع",
             "الأبعاد الشائعة (سم)",
@@ -320,16 +238,22 @@
             }
           ]
         }
+      },
+      {
+        "type": "text",
+        "order": 4,
+        "content": "تختلف الأسعار والجودة بشكل ملحوظ حسب المنشأ والشركة المصنعة والدفعة الإنتاجية. يُفضّل الحصول على عينات من الدفعة المراد شراؤها قبل الشراء لفحص الاتساق في اللون والأبعاد.",
+        "variant": "note"
       }
     ],
-    "tile-application": [
+    "sec-execution": [
       {
         "type": "execution_step",
         "order": 1,
         "step": {
           "stepNumber": 1,
-          "description": "تجهيز السطح والتأكد من استواءه ونظافته.",
-          "notes": "يجب إزالة أي بقايا مواد أو زيوت من سطح الخرسانة."
+          "description": "تجهيز السطح والتأكد من النظافة والاستواء.",
+          "notes": "يجب إزالة الأتربة والدهون والشوائب، ومعالجة أي عيوب في سطح الخرسانة قبل البدء."
         }
       },
       {
@@ -337,8 +261,8 @@
         "order": 2,
         "step": {
           "stepNumber": 2,
-          "description": "فرد المونة اللاصقة بواسطة المسنن.",
-          "notes": "استخدم المسنن 6 مم للسيراميك و10 مم للبورسلين."
+          "description": "توزيع البلاط جافاً لتحديد القصاصات واتجاه التبليط.",
+          "notes": "يُفضّل بدء التبليط من منتصف المساحة أو من الزاوية الأكثر ظهوراً في الفراغ."
         }
       },
       {
@@ -346,8 +270,8 @@
         "order": 3,
         "step": {
           "stepNumber": 3,
-          "description": "تركيب البلاط مع الضغط والتحريك الخفيف لتوزيع المونة.",
-          "notes": "تأكد من تغطية المونة لأكبر مساحة من ظهر البلاطة."
+          "description": "فرد المونة اللاصقة بالمسنن المناسب.",
+          "notes": "استخدم مسنن 6 مم للسيراميك و10 مم للبورسلين لضمان التصاق كافٍ."
         }
       },
       {
@@ -355,8 +279,8 @@
         "order": 4,
         "step": {
           "stepNumber": 4,
-          "description": "ضبط الفواصل بواسطة الصلبان البلاستيكية.",
-          "notes": "استخدم فواصل 2-3 مم للسيراميك و3-5 مم للبورسلين."
+          "description": "تركيب البلاط مع الضغط والتحريك الخفيف.",
+          "notes": "تأكد من تغطية المونة لأكبر مساحة من ظهر البلاطة. يحتاج البورسلين فرشاً كاملاً وليس لصقاً نقتطي."
         }
       },
       {
@@ -364,8 +288,8 @@
         "order": 5,
         "step": {
           "stepNumber": 5,
-          "description": "تسوية البلاط باستخدام ميزان الماء والجاكوش المطاطي.",
-          "notes": "راجع الاستواء في جميع الاتجاهات."
+          "description": "ضبط الفواصل بالصلبان البلاستيكية.",
+          "notes": "يفضّل فواصل 2-3 مم للسيراميك و3-5 مم للبلاط كبير الأبعاد والبورسلين."
         }
       },
       {
@@ -373,31 +297,209 @@
         "order": 6,
         "step": {
           "stepNumber": 6,
-          "description": "ترويب الفواصل بعد جفاف المونة (24-48 ساعة).",
-          "notes": "استخدم روبة مناسبة للون البلاط ونوعه."
+          "description": "تسوية البلاط بميزان الماء والجاكوش المطاطي.",
+          "notes": "راجع الاستواء في جميع الاتجاهات فور تركيب كل بلاطة قبل جفاف المونة."
         }
+      },
+      {
+        "type": "execution_step",
+        "order": 7,
+        "step": {
+          "stepNumber": 7,
+          "description": "الترويب بعد جفاف المونة.",
+          "notes": "اترك المونة تجف لمدة 24-48 ساعة قبل الترويب. اختر لون الروبة المناسب خاصة للمرمر الفاتح."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 8,
+        "step": {
+          "stepNumber": 8,
+          "description": "تنظيف وحماية السطح بعد الترويب.",
+          "notes": "نظف سطح البلاط من بقايا الروبة فوراً. امنع المشاة عن السطح لمدة 48 ساعة على الأقل."
+        }
+      }
+    ],
+    "sec-inspection": [
+      {
+        "type": "inspection_point",
+        "order": 1,
+        "point": {
+          "criteria": "التطبيل — فحص الصوت المجوف بعد التبليط",
+          "method": "الطرق بمطرقة خشبية أو قطعة معدنية خفيفة على سطح البلاط والاستماع للصوت.",
+          "isCritical": true,
+          "acceptableTolerance": "لا يزيد عن 5% من مساحة البلاط (يحتاج تدقيق)",
+          "markerStyle": "diamond"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 2,
+        "point": {
+          "criteria": "الاستواء — تفاوت السطح بعد التبليط",
+          "method": "استخدام ميزان الماء أو مسطرة ألمنيوم طول 2 متر وقياس الفجوة بين المسطرة والبلاط.",
+          "isCritical": true,
+          "acceptableTolerance": "±2 مم على طول 2 متر (يحتاج تدقيق)"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 3,
+        "point": {
+          "criteria": "الميول — في المناطق الرطبة والسطوح",
+          "method": "استخدام ميزان الماء مع البلاط أو صب الماء ومراقبة الاتجاه والسرعة.",
+          "isCritical": true,
+          "acceptableTolerance": "1-2% حسب متطلبات المشروع (يحتاج تدقيق)"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 4,
+        "point": {
+          "criteria": "عرض الفواصل — انتظام المسافات بين البلاطات",
+          "method": "قياس عرض الفاصل بعدة نقاط باستخدام مسطرة أو ميكرومتر.",
+          "isCritical": false,
+          "acceptableTolerance": "±0.5 مم عن العرض المطلوب في المخطط",
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 5,
+        "point": {
+          "criteria": "المظهر العام — الخدوش والكسور وتغير اللون",
+          "method": "فحص بصري شامل للسطح وتدوين أي عيوب واضحة.",
+          "isCritical": true,
+          "acceptableTolerance": "لا توجد خدوش أو كسر أو تغير في اللون",
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 6,
+        "point": {
+          "criteria": "جودة القص والتفصيل",
+          "method": "فحص بصري لحواف القصاصات والمناطق المحيطة بالقواطع والزوايا.",
+          "isCritical": false,
+          "acceptableTolerance": "قصاصات نظيفة بدون تشقق أو تهشم"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 7,
+        "point": {
+          "criteria": "النهايات والحافات — محاذاة مع الحوائط",
+          "method": "فحص بصري وشريط قياس أو مسطرة لضبط الفراغ بين البلاط والحائط.",
+          "isCritical": false,
+          "acceptableTolerance": "فراغ منتظم يغطى بالزاوية أو الحافة الزخرفية"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 8,
+        "point": {
+          "criteria": "الفواصل الحرارية / فواصل التمدد",
+          "method": "قياس المسافات بين فواصل التمدد والتأكد من وجودها في المساحات الكبيرة وعند تغير الاتجاهات.",
+          "isCritical": true,
+          "acceptableTolerance": "تترك كل 5-6 متر في المساحات الكبيرة (يحتاج تدقيق)",
+          "markerStyle": "target"
+        }
+      },
+      {
+        "type": "checklist",
+        "order": 9,
+        "title": "قائمة فحص سريعة للتبليط",
+        "items": [
+          {
+            "id": "item-01",
+            "text": "فحص نظافة السطح قبل التبليط",
+            "isRequired": true
+          },
+          {
+            "id": "item-02",
+            "text": "فحص اتجاه التبليط والقصاصات",
+            "isRequired": true
+          },
+          {
+            "id": "item-03",
+            "text": "فحص استواء البلاط",
+            "isRequired": true
+          },
+          {
+            "id": "item-04",
+            "text": "فحص الميول في المناطق الرطبة",
+            "isRequired": true
+          },
+          {
+            "id": "item-05",
+            "text": "فحص التطبيل بعد الجفاف",
+            "isRequired": true
+          },
+          {
+            "id": "item-06",
+            "text": "فحص انتظام الفواصل",
+            "isRequired": true
+          },
+          {
+            "id": "item-07",
+            "text": "فحص جودة الترويب والتنظيف",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "sec-common-mistakes-tiles": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "لصق البورسلين بطريقة النقاط بدل الفرش الكامل — يؤدي إلى فراغات وتطبيل وكسر تحت الأحمال.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "استخدام سيراميك حوائط للأرضيات — سيراميك الحوائط أقل مقاومة للبلي والكسر ولا يتحمل المشاة.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 3,
+        "content": "إهمال الميول في الحمامات والسطوح — يؤدي إلى تجمع المياه والرطوبة والتسربات.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 4,
+        "content": "التبليط بدون فواصل تمدد في المساحات الكبيرة — يؤدي إلى انبعاج أو تشقق البلاط نتيجة التمدد الحراري.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 5,
+        "content": "خلط دفعات إنتاج مختلفة من البلاط — يؤدي إلى اختلاف في اللون والأبعاد بين البلاطات.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 6,
+        "content": "ترويب المرمر الفاتح بروبة رمادية غير مناسبة — تترك بقعاً دائمة يصعب إزالتها.",
+        "variant": "warning"
       },
       {
         "type": "text",
         "order": 7,
-        "content": "يجب مراعاة تركيب البلاط بحيث تكون القصاصات في الزوايا والأماكن غير الظاهرة قدر الإمكان.",
-        "variant": "note"
+        "content": "الترويب قبل جفاف المونة بشكل كامل — يؤدي إلى تشقق الروبة وضعف التماسك.",
+        "variant": "warning"
       }
     ],
-    "tile-inspection": [
-      {
-        "type": "checklist",
-        "order": 1,
-        "title": "قائمة فحص التبليط",
-        "items": []
-      }
-    ],
-    "tile-safety": [
+    "sec-safety-tiles": [
       {
         "type": "safety_note",
         "order": 1,
         "note": {
-          "message": "استخدم واقي العينين والقفازات عند قص البلاط.",
+          "message": "استخدم واقي العينين والقفازات عند قص البلاط لحماية العينين من الشظايا واليدين من الجروح.",
           "severity": "medium"
         }
       },
@@ -405,9 +507,97 @@
         "type": "safety_note",
         "order": 2,
         "note": {
-          "message": "تأكد من تهوية المكان عند استخدام مواد لاصقة أو روبة كيميائية.",
-          "severity": "low"
+          "message": "تأكد من تهوية المكان عند استخدام مواد لاصقة أو روبة كيميائية لتجنب استنشاق الأبخرة الضارة.",
+          "severity": "high"
         }
+      },
+      {
+        "type": "safety_note",
+        "order": 3,
+        "note": {
+          "message": "تعامل بحذر مع أقراص القص الماسية والأدوات الحادة، وأوقف تشغيل الجهاز قبل تغيير القرص.",
+          "severity": "high"
+        }
+      }
+    ],
+    "sec-equipment": [
+      {
+        "type": "equipment",
+        "order": 1,
+        "title": "المعدات الأساسية لتنفيذ التبليط",
+        "items": [
+          {
+            "name": "مسنن فرد المونة",
+            "purpose": "لفرد المونة اللاصقة بسماكة منتظمة",
+            "specification": "6-10 مم حسب نوع البلاط"
+          },
+          {
+            "name": "ميزان ماء",
+            "purpose": "لتسوية البلاط وضبط الاستواء والميول",
+            "specification": "طول 1-2 متر"
+          },
+          {
+            "name": "جاكوش مطاطي",
+            "purpose": "لدق البلاط برفق لتسويته دون كسره",
+            "specification": ""
+          },
+          {
+            "name": "صلبان فواصل",
+            "purpose": "لضبط المسافات بين البلاطات",
+            "specification": "2-5 مم حسب النوع"
+          },
+          {
+            "name": "قاطع بلاط أو Grinder",
+            "purpose": "لقص البلاط إلى المقاسات المطلوبة",
+            "specification": "يدوي للقص المستقيم / كهربائي للتفصيل"
+          },
+          {
+            "name": "قرص قص ماسي",
+            "purpose": "لقص البورسلين والكرانيت",
+            "specification": "قطر مناسب لل Grinder"
+          },
+          {
+            "name": "سطل خلط",
+            "purpose": "لخلط المونة اللاصقة والروبة",
+            "specification": ""
+          },
+          {
+            "name": "إسفنجة تنظيف",
+            "purpose": "لتنظيف سطح البلاط من بقايا الروبة",
+            "specification": ""
+          },
+          {
+            "name": "ميزان ليزر",
+            "purpose": "لضبط خطوط التبليط والزوايا بدقة",
+            "specification": "إذا متوفر في الموقع"
+          }
+        ]
+      }
+    ],
+    "sec-code-reference": [
+      {
+        "type": "code_reference",
+        "order": 1,
+        "reference": {
+          "code": "ASTM C1026 / ISO 10545",
+          "title": "مراجع فنية لفحوصات ومواصفات البلاط",
+          "section": "",
+          "description": "يجب تدقيق المواصفة المناسبة حسب نوع البلاط ومتطلبات المشروع. (يحتاج تدقيق)"
+        }
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "القيم الرقمية والمراجع الفنية في هذا الموضوع تحتاج مراجعة مهندس مختص قبل النشر النهائي.",
+        "variant": "note"
+      }
+    ],
+    "sec-report-wording": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "تم تنفيذ أعمال التبليط باستخدام [نوع البلاط] وبأبعاد [الأبعاد] حسب المخططات والمواصفات المعتمدة. تم فحص التبليط والتأكد من الاستواء والميول والفواصل وجودة القص والمظهر العام، وتحتاج القيم الرقمية النهائية إلى اعتماد المهندس المشرف حسب متطلبات المشروع.",
+        "variant": "paragraph"
       }
     ]
   }
