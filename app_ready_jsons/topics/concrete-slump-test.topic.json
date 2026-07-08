@@ -44,11 +44,17 @@
     },
     "keyTopics": [
       "اختبار الهبوط",
-      "Slump Test"
+      "Slump Test",
+      "الخرسانة الطازجة",
+      "قابلية التشغيل",
+      "قوام الخرسانة",
+      "هبوط الخرسانة",
+      "فحص الخرسانة",
+      "Slump Cone"
     ],
-    "coverImageUrl": "assets/images/cracks.jpg",
+    "coverImageUrl": "assets/images/concrete_slump_cover.png",
     "visual_theme": {
-      "accent": "cement_gray"
+      "accent": "emerald"
     },
     "relatedToolRoutes": [],
     "relatedChecklistIds": []
