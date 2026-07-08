@@ -53,6 +53,18 @@ class PreviewRenderer {
     this.container.innerHTML = '<div class="preview-empty">قم بتحميل ملف Draft لعرض المعاينة</div>';
   }
 
+  // ─── Preview-only asset path resolver ────────────
+  // Content Studio runs from tools/content_studio/, while Flutter asset paths
+  // (assets/images/...) are project-root relative. This resolver is preview-only.
+  _resolveAssetPath(path) {
+    if (!path) return '';
+    if (path.startsWith('assets/images/')) return '../../' + path;
+    if (path.startsWith('./') || path.startsWith('../')) return path;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('data:')) return path;
+    return path;
+  }
+
   // ─── Helpers ──────────────────────────────────────
 
   _nextNum() {
@@ -94,10 +106,11 @@ class PreviewRenderer {
     const summary = (topic.simpleExplanation && topic.simpleExplanation.ar) || topic.summaryAr || topic.summary || '';
 
     // Card preview — mirrors Flutter topic card listing
+    const coverImageSrc = this._resolveAssetPath(topic.coverImageUrl || '');
     let cardPreviewHtml = '';
     if (topic.titleAr || topic.coverImageUrl) {
       const thumbHtml = topic.coverImageUrl
-        ? `<img src="${this._escape(topic.coverImageUrl)}" alt="" class="fp-card-preview-img" onerror="this.onerror=null;this.style.display='none';this.parentNode.innerHTML='<div class=\\'fp-card-preview-fallback\\'>📖</div>'">`
+        ? `<img src="${this._escape(coverImageSrc)}" alt="" class="fp-card-preview-img" onerror="this.onerror=null;this.style.display='none';this.parentNode.innerHTML='<div class=\\'fp-card-preview-fallback\\'>📖</div>'">`
         : '<div class="fp-card-preview-fallback">📖</div>';
       cardPreviewHtml = `
         <div class="fp-card-preview">
@@ -118,7 +131,7 @@ class PreviewRenderer {
     if (topic.coverImageUrl) {
       coverHtml = `
         <div class="fp-cover">
-          <img src="${this._escape(topic.coverImageUrl)}" alt="" class="fp-cover-img"
+          <img src="${this._escape(coverImageSrc)}" alt="" class="fp-cover-img"
             onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='flex'" />
           <div class="fp-cover-placeholder" style="display:none">
             <div class="fp-cover-placeholder-icon">🖼️</div>
@@ -328,9 +341,10 @@ class PreviewRenderer {
     const url = block.url || '';
     const caption = block.caption ? (block.caption.ar || '') : '';
     if (!url && !caption) return '';
+    const resolvedSrc = this._resolveAssetPath(url);
     let innerHtml;
     if (url) {
-      innerHtml = `<img src="${this._escape(url)}" alt="${this._escape(caption)}" class="fp-image-img" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="fp-image-empty" style="display:none"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div><div class="fp-image-path">${this._escape(url)}</div></div>`;
+      innerHtml = `<img src="${this._escape(resolvedSrc)}" alt="${this._escape(caption)}" class="fp-image-img" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="fp-image-empty" style="display:none"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div><div class="fp-image-path">${this._escape(url)}</div></div>`;
     } else {
       innerHtml = '<div class="fp-image-empty"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div></div>';
     }
