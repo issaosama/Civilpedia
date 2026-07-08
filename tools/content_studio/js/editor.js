@@ -8,6 +8,10 @@ class InlineBlockEditor {
       case 'safety_note': return this._safetyNoteEditor(sectionIdx, blockIdx, block);
       case 'table': return this._tableEditor(sectionIdx, blockIdx, block);
       case 'image': return this._imageEditor(sectionIdx, blockIdx, block);
+      case 'checklist': return this._checklistEditor(sectionIdx, blockIdx, block);
+      case 'inspection_point': return this._inspectionPointEditor(sectionIdx, blockIdx, block);
+      case 'code_reference': return this._codeReferenceEditor(sectionIdx, blockIdx, block);
+      case 'equipment': return this._equipmentEditor(sectionIdx, blockIdx, block);
       default: return '';
     }
   }
@@ -315,6 +319,152 @@ class InlineBlockEditor {
         </div>
         <div class="inline-actions">
           <button class="btn btn-success ie-save-table" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Checklist Editor ─────────────────────────────
+
+  static _checklistEditor(sectionIdx, blockIdx, block) {
+    const title = block.title || {};
+    const items = block.items || [];
+    const itemsHtml = items.map((item, ci) => `
+      <div class="ie-checklist-item" data-ci="${ci}">
+        <input type="text" class="form-input ie-checklist-text" value="${esc(item.textAr || '')}" placeholder="نص البند" dir="rtl" style="flex:1;">
+        <label class="inline-checkbox-label" style="white-space:nowrap;">
+          <input type="checkbox" class="ie-checklist-required" ${item.isRequired !== false ? 'checked' : ''}>
+          إجباري
+        </label>
+        <button class="ie-checklist-remove-item" title="حذف البند">🗑️</button>
+      </div>
+    `).join('');
+
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير قائمة الفحص</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>عنوان القائمة</label>
+            <input type="text" class="form-input ie-checklist-title" value="${esc(title.ar || '')}" placeholder="..." dir="rtl">
+          </div>
+          <div class="inline-field">
+            <label>البنود</label>
+            <div class="ie-checklist-items">
+              ${itemsHtml || '<div class="empty-state-compact">لا توجد بنود في القائمة</div>'}
+            </div>
+            <button class="btn btn-outline ie-checklist-add-item" type="button" style="margin-top:6px;font-size:12px;padding:4px 10px;">➕ إضافة بند</button>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save-checklist" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Inspection Point Editor ───────────────────────
+
+  static _inspectionPointEditor(sectionIdx, blockIdx, block) {
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير نقطة الفحص</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>معيار الفحص</label>
+            <textarea class="form-textarea ie-input" data-field="criteriaAr" dir="rtl" rows="2">${esc(block.criteriaAr || '')}</textarea>
+          </div>
+          <div class="inline-field">
+            <label>طريقة الفحص</label>
+            <textarea class="form-textarea ie-input" data-field="methodAr" dir="rtl" rows="2">${esc(block.methodAr || '')}</textarea>
+          </div>
+          <div class="inline-field">
+            <label>حد القبول</label>
+            <input type="text" class="form-input ie-input" data-field="acceptableTolerance" value="${esc(block.acceptableTolerance || '')}" dir="rtl" placeholder="مثال: ±5 مم">
+          </div>
+          <div class="inline-field inline-field-row">
+            <label class="inline-checkbox-label">
+              <input type="checkbox" class="ie-input" data-field="isCritical" ${block.isCritical ? 'checked' : ''}>
+              حرج (Critical)
+            </label>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Code Reference Editor ─────────────────────────
+
+  static _codeReferenceEditor(sectionIdx, blockIdx, block) {
+    const title = block.title || {};
+    const excerpt = block.excerpt || {};
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير مرجع كود</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>رمز الكود <span class="field-required">*</span></label>
+            <input type="text" class="form-input ie-input" data-field="code" value="${esc(block.code || '')}" dir="ltr" placeholder="ACI 318-19">
+            <div class="form-help">يجب التحقق من صحة رقم الكود هندسياً</div>
+          </div>
+          <div class="inline-field">
+            <label>العنوان</label>
+            <input type="text" class="form-input ie-input" data-field="title.ar" value="${esc(title.ar || '')}" dir="rtl" placeholder="مادة الكود">
+          </div>
+          <div class="inline-field">
+            <label>القسم (اختياري)</label>
+            <input type="text" class="form-input ie-input" data-field="section" value="${esc(block.section || '')}" dir="ltr" placeholder="5.4">
+          </div>
+          <div class="inline-field">
+            <label>نص المادة (اختياري)</label>
+            <textarea class="form-textarea ie-input" data-field="excerpt.ar" dir="rtl" rows="3">${esc(excerpt.ar || '')}</textarea>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Equipment Editor ──────────────────────────────
+
+  static _equipmentEditor(sectionIdx, blockIdx, block) {
+    const items = block.items || [];
+    const itemsHtml = items.map((item, ei) => `
+      <div class="ie-equipment-item" data-ei="${ei}">
+        <input type="text" class="form-input ie-equipment-name" value="${esc(item.nameAr || '')}" placeholder="اسم المعدة" dir="rtl" style="flex:1;">
+        <input type="text" class="form-input ie-equipment-purpose" value="${esc(item.purpose || '')}" placeholder="الغرض" dir="rtl" style="flex:1;">
+        <input type="text" class="form-input ie-equipment-spec" value="${esc(item.specification || '')}" placeholder="المواصفات" dir="rtl" style="flex:0.7;">
+        <button class="ie-equipment-remove-item" title="حذف">🗑️</button>
+      </div>
+    `).join('');
+
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير قائمة المعدات</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>العنوان</label>
+            <input type="text" class="form-input ie-equipment-section-title" value="${esc(block.title || '')}" placeholder="..." dir="rtl">
+          </div>
+          <div class="inline-field">
+            <label>المعدات / الأدوات</label>
+            <div class="ie-equipment-items">
+              ${itemsHtml || '<div class="empty-state-compact">لا توجد معدات</div>'}
+            </div>
+            <button class="btn btn-outline ie-equipment-add-item" type="button" style="margin-top:6px;font-size:12px;padding:4px 10px;">➕ إضافة معدة</button>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save-equipment" type="button">💾 حفظ</button>
           <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
         </div>
       </div>

@@ -618,6 +618,143 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 18: Checklist block shape and validation
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n18. Checklist block shape and validation');
+
+  // 18a: Empty checklist gives warning (no errors)
+  const empty = makeMinimalDraft();
+  empty.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'checklist', order: 1, title: { ar: '' }, items: [] }]
+  }];
+  let r = validate(loadDraft(empty));
+  assert(!r.hasErrors, 'Empty checklist should not produce errors');
+  assert(r.warnings.some(w => w.includes('قائمة الفحص فارغة')), 'Empty checklist should warn');
+
+  // 18b: Proper checklist with items should pass
+  const good = makeMinimalDraft();
+  good.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{
+      type: 'checklist', order: 1,
+      title: { ar: 'قبل الصب' },
+      items: [
+        { id: 'item-01', textAr: 'فحص هبوط المخروط', isRequired: true },
+        { id: 'item-02', textAr: 'فحص درجة الحرارة', isRequired: false }
+      ]
+    }]
+  }];
+  r = validate(loadDraft(good));
+  assert(!r.hasErrors, 'Valid checklist should produce no errors');
+  const clWarns = r.warnings.filter(w => w.includes('checklist'));
+  assert(clWarns.length === 0, 'Valid checklist should produce no checklist warnings');
+
+  // 18c: Checklist with empty item textAr warns
+  const emptyItem = makeMinimalDraft();
+  emptyItem.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{
+      type: 'checklist', order: 1,
+      title: { ar: 'قائمة' },
+      items: [{ id: 'item-01', textAr: '', isRequired: true }]
+    }]
+  }];
+  r = validate(loadDraft(emptyItem));
+  assert(r.warnings.some(w => w.includes('textAr')), 'Empty checklist item textAr should warn');
+
+  console.log('  PASS: All checklist checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 19: Inspection point block shape and validation
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n19. Inspection point block shape and validation');
+
+  // 19a: Missing criteriaAr should error
+  const noCriteria = makeMinimalDraft();
+  noCriteria.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: '', methodAr: '', isCritical: false }]
+  }];
+  let r = validate(loadDraft(noCriteria));
+  assert(r.hasErrors, 'Inspection point with empty criteriaAr should error');
+  assert(r.errors.some(e => e.includes('criteriaAr')), 'Error should mention criteriaAr');
+
+  // 19b: Proper inspection point should pass
+  const good = makeMinimalDraft();
+  good.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{
+      type: 'inspection_point', order: 1,
+      criteriaAr: 'التطبيل',
+      methodAr: 'فحص بصري',
+      isCritical: true,
+      acceptableTolerance: '±5 مم'
+    }]
+  }];
+  r = validate(loadDraft(good));
+  assert(!r.hasErrors, 'Valid inspection point should produce no errors');
+  const ipWarns = r.warnings.filter(w => w.includes('inspection_point'));
+  assert(ipWarns.length === 0, 'Valid inspection point should produce no inspection_point warnings');
+
+  // 19c: Missing methodAr should warn but not error
+  const noMethod = makeMinimalDraft();
+  noMethod.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1,
+    blocks: [{ type: 'inspection_point', order: 1, criteriaAr: 'الاستواء', methodAr: '' }]
+  }];
+  r = validate(loadDraft(noMethod));
+  assert(!r.hasErrors, 'Missing methodAr should not error');
+  assert(r.warnings.some(w => w.includes('methodAr')), 'Missing methodAr should warn');
+
+  console.log('  PASS: All inspection point checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 20: Equipment block shape and validation
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n20. Equipment block shape and validation');
+
+  // 20a: Empty equipment gives warning
+  const empty = makeMinimalDraft();
+  empty.sections = [{ id: 's1', title: 'S1', type: 'equipment', order: 1,
+    blocks: [{ type: 'equipment', order: 1, title: '', items: [] }]
+  }];
+  let r = validate(loadDraft(empty));
+  assert(!r.hasErrors, 'Empty equipment should not error');
+  assert(r.warnings.some(w => w.includes('items')), 'Empty equipment should warn about items');
+
+  // 20b: Proper equipment with items should pass
+  const good = makeMinimalDraft();
+  good.sections = [{ id: 's1', title: 'S1', type: 'equipment', order: 1,
+    blocks: [{
+      type: 'equipment', order: 1,
+      title: 'معدات الفحص',
+      items: [
+        { nameAr: 'مخروط الهبوط', purpose: 'قياس الهبوط', specification: 'ASTM C143' },
+        { nameAr: 'ميزان', purpose: 'التحقق من الاستواء', specification: '' }
+      ]
+    }]
+  }];
+  r = validate(loadDraft(good));
+  assert(!r.hasErrors, 'Valid equipment should produce no errors');
+  const eqWarns = r.warnings.filter(w => w.includes('equipment'));
+  assert(eqWarns.length === 0, 'Valid equipment should produce no equipment warnings');
+
+  // 20c: Item with missing nameAr should warn
+  const noName = makeMinimalDraft();
+  noName.sections = [{ id: 's1', title: 'S1', type: 'equipment', order: 1,
+    blocks: [{
+      type: 'equipment', order: 1,
+      items: [{ nameAr: '', purpose: 'اختبار', specification: '' }]
+    }]
+  }];
+  r = validate(loadDraft(noName));
+  assert(!r.hasErrors, 'Missing nameAr should not error');
+  assert(r.warnings.some(w => w.includes('nameAr')), 'Missing nameAr should warn');
+
+  console.log('  PASS: All equipment checks passed');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

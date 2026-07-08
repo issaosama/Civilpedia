@@ -684,13 +684,17 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-section-toggle, .ie-topic-toggle, .ie-edit-section-title, .ie-save-section-title, .ie-cancel-section-title');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-save-checklist, .ie-checklist-add-item, .ie-checklist-remove-item, .ie-save-equipment, .ie-equipment-add-item, .ie-equipment-remove-item, .ie-section-toggle, .ie-topic-toggle, .ie-edit-section-title, .ie-save-section-title, .ie-cancel-section-title');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
       handleBlockSave(target);
     } else if (target.classList.contains('ie-save-table')) {
       handleTableSave(target);
+    } else if (target.classList.contains('ie-save-checklist')) {
+      handleChecklistSave(target);
+    } else if (target.classList.contains('ie-save-equipment')) {
+      handleEquipmentSave(target);
     } else if (target.classList.contains('ie-table-add-row')) {
       handleTableAddRow(target);
     } else if (target.classList.contains('ie-table-remove-row')) {
@@ -699,6 +703,14 @@
       handleTableAddHeader(target);
     } else if (target.classList.contains('ie-table-remove-header')) {
       handleTableRemoveHeader(target);
+    } else if (target.classList.contains('ie-checklist-add-item')) {
+      handleChecklistAddItem(target);
+    } else if (target.classList.contains('ie-checklist-remove-item')) {
+      handleChecklistRemoveItem(target);
+    } else if (target.classList.contains('ie-equipment-add-item')) {
+      handleEquipmentAddItem(target);
+    } else if (target.classList.contains('ie-equipment-remove-item')) {
+      handleEquipmentRemoveItem(target);
     } else if (target.classList.contains('ie-cancel')) {
       handleBlockCancel();
     } else if (target.classList.contains('ie-save-topic')) {
@@ -774,7 +786,11 @@
       if (!field) return;
       const fullPath = `${path}.${field}`;
       let value = input.value;
-      if (input.type === 'number') value = parseInt(value, 10);
+      if (input.type === 'checkbox') {
+        value = input.checked;
+      } else if (input.type === 'number') {
+        value = parseInt(value, 10);
+      }
       draft.setField(fullPath, value);
     });
     renderSections();
@@ -970,6 +986,151 @@
     }
   }
 
+  // ─── Checklist handlers ─────────────────────────────
+
+  function handleChecklistSave(saveBtn) {
+    if (!draft.isValid()) return;
+    const editor = saveBtn.closest('.inline-editor');
+    if (!editor) return;
+    const sectionIdx = parseInt(editor.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(editor.dataset.blockIdx, 10);
+    if (isNaN(sectionIdx) || isNaN(blockIdx)) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const block = sections[sectionIdx].blocks[blockIdx];
+    if (!block) return;
+
+    const titleInput = editor.querySelector('.ie-checklist-title');
+    block.title = block.title || {};
+    block.title.ar = titleInput ? titleInput.value : '';
+
+    const itemEls = editor.querySelectorAll('.ie-checklist-item');
+    block.items = Array.from(itemEls).map((itemEl, idx) => {
+      const textInput = itemEl.querySelector('.ie-checklist-text');
+      const reqCheck = itemEl.querySelector('.ie-checklist-required');
+      return {
+        id: `item-${String(idx + 1).padStart(2, '0')}`,
+        textAr: textInput ? textInput.value : '',
+        isRequired: reqCheck ? reqCheck.checked : true
+      };
+    });
+
+    pushUndoSnapshot();
+    draft.setField(`sections.${sectionIdx}.blocks.${blockIdx}`, block);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حفظ قائمة الفحص', 'success');
+  }
+
+  function handleChecklistAddItem(target) {
+    const editor = target.closest('.inline-editor');
+    if (!editor) return;
+    const itemsContainer = editor.querySelector('.ie-checklist-items');
+    if (!itemsContainer) return;
+    const existingItems = itemsContainer.querySelectorAll('.ie-checklist-item');
+    const idx = existingItems.length + 1;
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'ie-checklist-item';
+    itemDiv.setAttribute('data-ci', String(idx));
+    itemDiv.innerHTML = `
+      <input type="text" class="form-input ie-checklist-text" value="" placeholder="نص البند" dir="rtl" style="flex:1;">
+      <label class="inline-checkbox-label" style="white-space:nowrap;">
+        <input type="checkbox" class="ie-checklist-required" checked>
+        إجباري
+      </label>
+      <button class="ie-checklist-remove-item" title="حذف البند">🗑️</button>
+    `;
+    const emptyState = itemsContainer.querySelector('.empty-state-compact');
+    if (emptyState) emptyState.remove();
+    itemsContainer.appendChild(itemDiv);
+  }
+
+  function handleChecklistRemoveItem(target) {
+    const item = target.closest('.ie-checklist-item');
+    if (!item) return;
+    const editor = target.closest('.inline-editor');
+    const itemsContainer = editor ? editor.querySelector('.ie-checklist-items') : null;
+    item.remove();
+    if (itemsContainer && !itemsContainer.querySelectorAll('.ie-checklist-item').length) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty-state-compact';
+      emptyDiv.textContent = 'لا توجد بنود في القائمة';
+      itemsContainer.appendChild(emptyDiv);
+    }
+  }
+
+  // ─── Equipment handlers ────────────────────────────
+
+  function handleEquipmentSave(saveBtn) {
+    if (!draft.isValid()) return;
+    const editor = saveBtn.closest('.inline-editor');
+    if (!editor) return;
+    const sectionIdx = parseInt(editor.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(editor.dataset.blockIdx, 10);
+    if (isNaN(sectionIdx) || isNaN(blockIdx)) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const block = sections[sectionIdx].blocks[blockIdx];
+    if (!block) return;
+
+    const titleInput = editor.querySelector('.ie-equipment-section-title');
+    block.title = titleInput ? titleInput.value : '';
+
+    const itemEls = editor.querySelectorAll('.ie-equipment-item');
+    block.items = Array.from(itemEls).map(itemEl => {
+      const nameInput = itemEl.querySelector('.ie-equipment-name');
+      const purposeInput = itemEl.querySelector('.ie-equipment-purpose');
+      const specInput = itemEl.querySelector('.ie-equipment-spec');
+      return {
+        nameAr: nameInput ? nameInput.value : '',
+        purpose: purposeInput ? purposeInput.value : '',
+        specification: specInput ? specInput.value : ''
+      };
+    });
+
+    pushUndoSnapshot();
+    draft.setField(`sections.${sectionIdx}.blocks.${blockIdx}`, block);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم حفظ قائمة المعدات', 'success');
+  }
+
+  function handleEquipmentAddItem(target) {
+    const editor = target.closest('.inline-editor');
+    if (!editor) return;
+    const itemsContainer = editor.querySelector('.ie-equipment-items');
+    if (!itemsContainer) return;
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'ie-equipment-item';
+    itemDiv.innerHTML = `
+      <input type="text" class="form-input ie-equipment-name" value="" placeholder="اسم المعدة" dir="rtl" style="flex:1;">
+      <input type="text" class="form-input ie-equipment-purpose" value="" placeholder="الغرض" dir="rtl" style="flex:1;">
+      <input type="text" class="form-input ie-equipment-spec" value="" placeholder="المواصفات" dir="rtl" style="flex:0.7;">
+      <button class="ie-equipment-remove-item" title="حذف">🗑️</button>
+    `;
+    const emptyState = itemsContainer.querySelector('.empty-state-compact');
+    if (emptyState) emptyState.remove();
+    itemsContainer.appendChild(itemDiv);
+  }
+
+  function handleEquipmentRemoveItem(target) {
+    const item = target.closest('.ie-equipment-item');
+    if (!item) return;
+    const editor = target.closest('.inline-editor');
+    const itemsContainer = editor ? editor.querySelector('.ie-equipment-items') : null;
+    item.remove();
+    if (itemsContainer && !itemsContainer.querySelectorAll('.ie-equipment-item').length) {
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty-state-compact';
+      emptyDiv.textContent = 'لا توجد معدات';
+      itemsContainer.appendChild(emptyDiv);
+    }
+  }
+
   function handleTopicSave(saveBtn) {
     if (!draft.isValid()) return;
     const targetPath = saveBtn.dataset.target;
@@ -1082,6 +1243,18 @@
         break;
       case 'image':
         newBlock = { type: 'image', order: nextOrder, url: '', caption: { ar: '', en: '' } };
+        break;
+      case 'checklist':
+        newBlock = { type: 'checklist', order: nextOrder, title: { ar: '' }, items: [] };
+        break;
+      case 'inspection_point':
+        newBlock = { type: 'inspection_point', order: nextOrder, criteriaAr: '', methodAr: '', isCritical: false, acceptableTolerance: '' };
+        break;
+      case 'code_reference':
+        newBlock = { type: 'code_reference', order: nextOrder, code: '', title: { ar: '' }, section: '', excerpt: { ar: '' } };
+        break;
+      case 'equipment':
+        newBlock = { type: 'equipment', order: nextOrder, title: '', items: [] };
         break;
       default:
         return;

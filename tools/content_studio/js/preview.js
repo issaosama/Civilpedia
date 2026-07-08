@@ -334,7 +334,7 @@ class PreviewRenderer {
           <span class="fp-inspection-icon ${isCritical ? 'fp-inspection-critical' : 'fp-inspection-regular'}">${icon}</span>
           <div>
             <strong>${this._escape(block.criteriaAr || '')}</strong><br>
-            <span class="fp-text-muted">القبول: ${this._escape(block.acceptanceLimitAr || '')} | الطريقة: ${this._escape(block.methodAr || '')}</span>
+            <span class="fp-text-muted">القبول: ${this._escape(block.acceptanceLimitAr || block.acceptableTolerance || '')} | الطريقة: ${this._escape(block.methodAr || '')}</span>
           </div>
         </div>
       </div>
