@@ -317,6 +317,48 @@ body {
   border-right-color: #5C5648;
 }
 
+/* Image return instructions — shown after picking a local image */
+.image-return-info {
+  margin-top: 6px;
+  padding: 8px 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #166534;
+}
+.image-return-text {
+  margin-bottom: 4px;
+}
+.image-return-filename {
+  font-weight: 700;
+  font-size: 13px;
+  direction: ltr;
+  text-align: left;
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+.image-return-path-label {
+  font-size: 11px;
+  color: #15803d;
+  direction: ltr;
+  text-align: left;
+  word-break: break-all;
+}
+
+/* Image filename warning — shown when filename has non-ideal characters */
+.image-warning {
+  margin-top: 4px;
+  padding: 6px 10px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #92400e;
+}
+
 .export-warning-banner {
   padding: 10px 14px;
   background: #fffbeb;

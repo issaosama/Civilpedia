@@ -178,6 +178,8 @@
               <button type="button" class="btn btn-outline" onclick="document.getElementById('cover-file-input').click()" style="white-space:nowrap;">اختيار صورة</button>
             </div>
             <div class="image-guidance-cover">المقاس المقترح: 1600×900 بنسبة 16:9 — استخدم صورة أفقية واضحة واجعل العنصر المهم في الوسط.</div>
+            <div id="cover-image-warning" class="image-warning" style="display:none"></div>
+            <div id="cover-return-info" class="image-return-info" style="display:none"></div>
             <input type="file" id="cover-file-input" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="InlineBlockEditor._handleCoverPick(this)">
           </div>
           <div class="form-group">
@@ -1288,6 +1290,9 @@
     }
     return current;
   }
+
+  // Expose preview updater globally so image pickers can trigger re-render
+  window._updatePreview = updatePreview;
 
   document.addEventListener('DOMContentLoaded', init);
 })();

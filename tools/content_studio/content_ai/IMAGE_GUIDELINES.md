@@ -180,33 +180,66 @@ Every brief should specify the **recommended dimensions** based on its `imageTyp
 - Missing image URL produces a **warning**, not an error (images are optional)
 - Empty image URL on an image block warns that the image is missing
 
+### Image Picker (Portable Mode)
+When using the "اختيار صورة" button:
+- Content Studio preserves the **original filename exactly as selected**
+- No auto-rename, no lowercase conversion, no space replacement, no Arabic-letter removal
+- Stored path format: `assets/images/<original_selected_filename>`
+- Selected image appears **immediately in preview** via a temporary browser URL
+- No local absolute path, no base64, no blob URL is stored in JSON
+- After page refresh, the temp preview is cleared and falls back to the project asset path or placeholder
+- Warnings (not errors) appear if the filename contains spaces, uppercase, Arabic letters, or unsupported extensions
+- The filename must be sent alongside the JSON file with the **exact same name**
+
 ## 8. Contributor Handoff Rules
 
 When sending images to include in a topic:
 
+### How the Picker Works
+- Select any image from your computer using the "اختيار صورة" button
+- Content Studio stores the **original filename** prefixed with `assets/images/`
+- Content Studio shows the image **immediately in preview**
+- The stored path will say: `assets/images/<your_selected_filename>`
+- You must send the image file **with that exact filename** alongside the JSON file
+
 ### What to Send
-- Image files (PNG, JPG, or WebP)
+- Image files (PNG, JPG, or WebP) — with the **exact filenames** shown in Content Studio
+- The Draft JSON file (the paths inside will reference those filenames)
 - A note of where each image should appear (section + position)
 - Arabic caption for each image
 
-### File Preparation
-- Rename files to **lowercase English** using underscores for spaces
+### Recommended File Naming (Before Selecting)
+While Content Studio preserves any filename, contributors should **rename files before selecting them** to follow best practices:
+- Use **lowercase English** letters only
+- Use underscores `_` instead of spaces
 - Use descriptive names: `concrete_slump_cone.png` not `IMG_001.jpg`
-- Crop/reduce to recommended sizes before sending
-- Do NOT embed images in the JSON file
+- No special characters (parentheses `()`, brackets `[]`, `&`, `%`, `#`)
+- No Arabic letters in filenames — Arabic is for captions only
+
+**Good examples:**
+```
+concrete_slump_cover.jpg
+slump_cone_equipment.png
+slump_measurement_step.jpg
+```
+
+**Bad examples (will still work but show a warning):**
+```
+IMG_1234.JPG           ← Not descriptive
+Slump Cone Photo.JPG   ← Spaces and capitals
+صورة_الهبوط.jpg         ← Arabic characters
+slump photo final.png  ← Spaces
+```
 
 ### What NOT to Do
-- Do not send images with:
-  - Watermarks
-  - Copyrighted content
-  - Arabic or special characters in filenames
-  - Spaces in filenames
+- Do not change the filename after selecting it in Content Studio (the stored path will no longer match)
 - Do not embed images as base64
 - Do not use HEIC, SVG, BMP, TIFF, or AVIF formats
+- Do not send watermarked or copyrighted images
 
 ### Checklist Before Publishing
 1. Every image path starts with `assets/images/`
-2. Every filename is lowercase English with no spaces
+2. Filenames are ideally lowercase English with no spaces (warnings guide but do not block)
 3. Every image has an Arabic caption
 4. Cover image is 16:9 with main subject centered
 5. Article images use preferred 4:3 ratio (or 16:9 or 3:4 where appropriate)
@@ -215,3 +248,4 @@ When sending images to include in a topic:
 8. No watermarks, no copyright issues
 9. All images are readable on mobile (not too small, not too detailed)
 10. Images add information — none are purely decorative
+11. Image files are sent with the **exact filenames** shown in Content Studio

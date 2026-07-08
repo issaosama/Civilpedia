@@ -87,7 +87,9 @@ class InlineBlockEditor {
             أرسل ملف الصورة مع ملف الـ Draft.<br>
             يفضّل أن يكون اسم الصورة إنكليزي وبدون فراغات.
           </div>
+          <div id="img-warn-${previewId}" class="image-warning" style="display:none"></div>
           ${previewHtml}
+          <div id="img-return-${previewId}" class="image-return-info" style="display:none"></div>
           <div class="inline-field">
             <label>التعليق (اختياري)</label>
             <textarea class="form-textarea ie-input" data-field="caption.ar" dir="rtl" rows="2">${esc(caption)}</textarea>
@@ -101,6 +103,34 @@ class InlineBlockEditor {
     `;
   }
 
+  // ─── Temp preview URL registry ────────────────────
+  // Maps stored app path (assets/images/...) to ephemeral blob: URL
+  // so selected local images appear in preview before files exist in project.
+  static _ensureTempRegistry() {
+    if (!window.__csTempPreviews) window.__csTempPreviews = new Map();
+  }
+
+  static _getTempPreviewUrl(appPath) {
+    this._ensureTempRegistry();
+    return window.__csTempPreviews.get(appPath);
+  }
+
+  // ─── Filename advice warning (non-blocking) ──────
+  static _nameWarningMessage(filename) {
+    const warns = [];
+    if (/\s/.test(filename)) warns.push('المسافات');
+    if (/[A-Z]/.test(filename)) warns.push('الأحرف الكبيرة');
+    if (/[\u0600-\u06FF]/.test(filename)) warns.push('الأحرف العربية');
+    const ext = filename.split('.').pop();
+    const allowed = ['png', 'jpg', 'jpeg', 'webp'];
+    if (ext && !allowed.includes(ext.toLowerCase())) {
+      warns.push('صيغة غير مدعومة');
+    }
+    if (warns.length === 0) return '';
+    return 'ملاحظة: ' + warns.join('، ') + ' — يفضل أن يكون اسم الصورة باللغة الإنكليزية وبحروف صغيرة وبدون مسافات، مثل: slump_cone_photo.jpg';
+  }
+
+  // ─── Cover image picker ───────────────────────────
   static _handleCoverPick(fileInput) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -111,14 +141,46 @@ class InlineBlockEditor {
       fileInput.value = '';
       return;
     }
-    const name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '_').replace(/\s+/g, '_');
+    const originalName = file.name;
+    const appPath = 'assets/images/' + originalName;
     const urlInput = document.querySelector('[data-path="topic.coverImageUrl"]');
     if (!urlInput) return;
-    urlInput.value = 'assets/images/' + name;
+
+    // Store original filename in draft
+    urlInput.value = appPath;
     urlInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Register temp preview URL for main preview
+    this._ensureTempRegistry();
+    const objUrl = URL.createObjectURL(file);
+    window.__csTempPreviews.set(appPath, objUrl);
+
+    // Update return-info UI
+    const infoDiv = document.getElementById('cover-return-info');
+    if (infoDiv) {
+      infoDiv.style.display = 'block';
+      infoDiv.innerHTML = `
+        <div class="image-return-text">تم اختيار الصورة. عند إرسال الملف، أرسل الصورة أيضاً بنفس الاسم:</div>
+        <div class="image-return-filename">${esc(originalName)}</div>
+        <div class="image-return-path-label">المسار داخل التطبيق: <span dir="ltr">${esc(appPath)}</span></div>
+      `;
+    }
+
+    // Show name warning if needed
+    const warnMsg = this._nameWarningMessage(originalName);
+    const warnDiv = document.getElementById('cover-image-warning');
+    if (warnDiv) {
+      warnDiv.textContent = warnMsg;
+      warnDiv.style.display = warnMsg ? 'block' : 'none';
+    }
+
+    // Force preview update
+    if (window._updatePreview) window._updatePreview();
+
     fileInput.value = '';
   }
 
+  // ─── Article image picker ─────────────────────────
   static _handleImagePick(fileInput, urlInputId, previewId) {
     const file = fileInput.files[0];
     if (!file) return;
@@ -129,19 +191,56 @@ class InlineBlockEditor {
       fileInput.value = '';
       return;
     }
-    const name = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, '_').replace(/\s+/g, '_');
+    const originalName = file.name;
+    const appPath = 'assets/images/' + originalName;
     const urlInput = document.getElementById(urlInputId);
     if (!urlInput) return;
-    urlInput.value = 'assets/images/' + name;
+
+    // Store original filename in editor field
+    urlInput.value = appPath;
+    // Trigger save so draft data is updated
+    urlInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+    // Register temp preview URL for main preview
+    this._ensureTempRegistry();
+    const objUrl = URL.createObjectURL(file);
+    window.__csTempPreviews.set(appPath, objUrl);
+
+    // Update editor inline preview
     const preview = document.getElementById(previewId);
-    if (!preview) return;
-    if (preview._objUrl) URL.revokeObjectURL(preview._objUrl);
-    preview._objUrl = URL.createObjectURL(file);
-    preview.innerHTML = '';
-    const img = document.createElement('img');
-    img.src = preview._objUrl;
-    img.style.cssText = 'max-width:100%;max-height:200px;border-radius:6px;border:1px solid #ddd;';
-    preview.appendChild(img);
+    if (preview) {
+      if (preview._objUrl) URL.revokeObjectURL(preview._objUrl);
+      preview._objUrl = objUrl;
+      preview.className = 'image-editor-preview';
+      preview.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = objUrl;
+      img.style.cssText = 'max-width:100%;max-height:200px;border-radius:6px;border:1px solid #ddd;';
+      preview.appendChild(img);
+    }
+
+    // Update return-info UI
+    const infoDiv = document.getElementById('img-return-' + previewId);
+    if (infoDiv) {
+      infoDiv.style.display = 'block';
+      infoDiv.innerHTML = `
+        <div class="image-return-text">أرسل هذه الصورة مع ملف JSON بنفس الاسم:</div>
+        <div class="image-return-filename">${esc(originalName)}</div>
+        <div class="image-return-path-label">المسار داخل التطبيق: <span dir="ltr">${esc(appPath)}</span></div>
+      `;
+    }
+
+    // Show name warning if needed
+    const warnMsg = this._nameWarningMessage(originalName);
+    const warnDiv = document.getElementById('img-warn-' + previewId);
+    if (warnDiv) {
+      warnDiv.textContent = warnMsg;
+      warnDiv.style.display = warnMsg ? 'block' : 'none';
+    }
+
+    // Force preview update
+    if (window._updatePreview) window._updatePreview();
+
     fileInput.value = '';
   }
 

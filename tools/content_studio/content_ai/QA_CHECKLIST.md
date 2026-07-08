@@ -38,7 +38,12 @@ Use this checklist to review every generated topic before the app owner opens it
 
 ## Cover Image
 
-- [ ] Content Studio's "اختيار صورة" button in topic metadata opens a file picker, sanitizes filename (lowercase, no spaces, no special chars), prepends `assets/images/`, and sets `coverImageUrl`.
+- [ ] Content Studio's "اختيار صورة" button in topic metadata opens a file picker.
+- [ ] The picker preserves the original filename exactly (no auto-rename, no lowercase, no space removal).
+- [ ] Stored path is `assets/images/<original_selected_filename>` — not a local absolute path.
+- [ ] The selected image appears immediately in Content Studio preview.
+- [ ] After page refresh, the stored path still shows `assets/images/...` — preview falls back to project asset or placeholder.
+- [ ] Helper text shows the reviewer which exact image filename to send back.
 - [ ] `coverImageUrl` is optional — no error if empty.
 - [ ] If `coverImageUrl` is present, path starts with `assets/images/`.
 - [ ] Cover image format is png, jpg, jpeg, or webp.

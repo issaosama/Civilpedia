@@ -58,6 +58,10 @@ class PreviewRenderer {
   // (assets/images/...) are project-root relative. This resolver is preview-only.
   _resolveAssetPath(path) {
     if (!path) return '';
+    // Check for ephemeral temp preview (local file picked via file input)
+    if (window.__csTempPreviews && window.__csTempPreviews.has(path)) {
+      return window.__csTempPreviews.get(path);
+    }
     if (path.startsWith('assets/images/')) return '../../' + path;
     if (path.startsWith('./') || path.startsWith('../')) return path;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
