@@ -19,7 +19,6 @@ final warnings = <String>[];
 int filesRead = 0;
 int filesValid = 0;
 final seenTopicIds = <String>{};
-final seenSectionIds = <String>{};
 
 void main() {
   print('=== Catalog Generator ===');
@@ -87,6 +86,10 @@ void main() {
         continue;
       }
       seenTopicIds.add(topicId);
+
+      // Per-file section-ID dedup set (must be per file — section IDs
+      // like "sec-overview" are intentionally reused across topics)
+      final seenSectionIds = <String>{};
 
       // Validate sections
       final cleanedSections = <Map<String, dynamic>>[];
