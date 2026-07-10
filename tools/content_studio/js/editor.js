@@ -375,7 +375,7 @@ class InlineBlockEditor {
       const sym = m ? MARKER_STYLE_SYMBOLS[m] : '?';
       const col = m ? MARKER_STYLE_COLORS[m] : { bg: 'var(--topic-accent)', fg: '#FFFFFF' };
       const active = val === (block.markerStyle || '') ? ' active' : '';
-      return `<div class="marker-option${active}" data-value="${val}" onclick="var g=document.getElementById('${pickerId}');g.querySelector('.ie-input').value='${val}';g.querySelectorAll('.marker-option').forEach(function(o){o.classList.remove('active')});this.classList.add('active')">
+      return `<div class="marker-option${active}" data-value="${val}" onclick="_handleMarkerPick(this,'${val}','${pickerId}')">
         <span class="marker-preview" style="background:${col.bg};color:${col.fg}">${sym}</span>
         <span class="marker-picker-label">${label}</span>
       </div>`;
@@ -408,7 +408,7 @@ class InlineBlockEditor {
           </div>
           <div class="inline-field">
             <label>وضع لون العلامة</label>
-            <select class="form-input ie-input" data-field="markerColorMode" dir="rtl">
+            <select class="form-input ie-input" data-field="markerColorMode" dir="rtl" onchange="_handleMarkerColorMode(this)">
               ${cmLabels}
             </select>
           </div>

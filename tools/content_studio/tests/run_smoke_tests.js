@@ -895,6 +895,54 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 24: Default block template accepts markerStyle/markerColorMode
+//          (regression: ensure draft.setField works on blocks created by
+//           handleAddBlock's template, which omits marker fields)
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n24. Default inspection_point block template accepts marker fields');
+
+  // Exact template from handleAddBlock in app.js (line 1250-1252)
+  const defaultBlock = {
+    type: 'inspection_point', order: 1, criteriaAr: 'اختبار',
+    methodAr: 'فحص', isCritical: false, acceptableTolerance: ''
+  };
+
+  const d = makeMinimalDraft();
+  d.sections = [{ id: 's1', title: 'S1', type: 'inspection', order: 1, blocks: [defaultBlock] }];
+  const draft = loadDraft(d);
+
+  // 24a: No markerStyle/markerColorMode initially — should not warn
+  let r = validate(draft);
+  assert(!r.hasErrors, 'No markerStyle/markerColorMode should produce no errors');
+  let msw = r.warnings.filter(w => w.includes('markerStyle'));
+  assert(msw.length === 0, 'No markerStyle/markerColorMode should produce no markerStyle warnings');
+  let cmw = r.warnings.filter(w => w.includes('markerColorMode'));
+  assert(cmw.length === 0, 'No markerStyle/markerColorMode should produce no markerColorMode warnings');
+
+  // 24b: Set markerStyle via draft.setField (as _handleMarkerPick does)
+  draft.setField('sections.0.blocks.0.markerStyle', 'diamond');
+  r = validate(draft);
+  assert(!r.hasErrors, 'markerStyle=diamond after setField should produce no errors');
+  msw = r.warnings.filter(w => w.includes('markerStyle'));
+  assert(msw.length === 0, 'markerStyle=diamond after setField should produce no markerStyle warnings');
+
+  // 24c: Set markerColorMode via draft.setField (as _handleMarkerColorMode does)
+  draft.setField('sections.0.blocks.0.markerColorMode', 'semantic');
+  r = validate(draft);
+  assert(!r.hasErrors, 'markerColorMode=semantic after setField should produce no errors');
+  cmw = r.warnings.filter(w => w.includes('markerColorMode'));
+  assert(cmw.length === 0, 'markerColorMode=semantic after setField should produce no markerColorMode warnings');
+
+  // 24d: Verify both fields persist in the draft data
+  const data = draft.toJSON();
+  assert(data.sections[0].blocks[0].markerStyle === 'diamond', 'markerStyle=diamond should persist in draft data');
+  assert(data.sections[0].blocks[0].markerColorMode === 'semantic', 'markerColorMode=semantic should persist in draft data');
+
+  console.log('  PASS: All default block template checks passed');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

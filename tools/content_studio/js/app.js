@@ -1467,5 +1467,36 @@
   // Expose preview updater globally so image pickers can trigger re-render
   window._updatePreview = updatePreview;
 
+  // Global handler for marker style chip picker (called from inline onclick in editor.js)
+  window._handleMarkerPick = function(el, val, pickerId) {
+    var g = document.getElementById(pickerId);
+    if (!g) return;
+    var inp = g.parentElement.querySelector('.ie-input[data-field="markerStyle"]');
+    if (inp) inp.value = val;
+    g.querySelectorAll('.marker-option').forEach(function(o) { o.classList.remove('active'); });
+    el.classList.add('active');
+    var ed = el.closest('.inline-editor');
+    if (ed && draft && draft.setField) {
+      var secIdx = parseInt(ed.dataset.sectionIdx, 10);
+      var blkIdx = parseInt(ed.dataset.blockIdx, 10);
+      draft.setField('sections.' + secIdx + '.blocks.' + blkIdx + '.markerStyle', val);
+      updatePreview();
+      runValidation();
+    }
+  };
+
+  // Global handler for marker color mode select change (called from onchange in editor.js)
+  window._handleMarkerColorMode = function(el) {
+    var val = el.value;
+    var ed = el.closest('.inline-editor');
+    if (ed && draft && draft.setField) {
+      var secIdx = parseInt(ed.dataset.sectionIdx, 10);
+      var blkIdx = parseInt(ed.dataset.blockIdx, 10);
+      draft.setField('sections.' + secIdx + '.blocks.' + blkIdx + '.markerColorMode', val);
+      updatePreview();
+      runValidation();
+    }
+  };
+
   document.addEventListener('DOMContentLoaded', init);
 })();
