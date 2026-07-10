@@ -2,89 +2,52 @@
   "_meta": {
     "schemaVersion": "1.0.0",
     "version": 1,
-    "createdAt": "2026-06-26T23:24:21.274412Z",
-    "updatedAt": "2026-06-26T23:24:21.275411Z",
-    "createdBy": null,
-    "updatedBy": null,
-    "source": "catalog-migration",
+    "createdAt": "2026-07-10T00:00:00.000Z",
+    "updatedAt": "2026-07-10T00:00:00.000Z",
+    "source": "opencode",
     "id": "concrete-curing"
   },
   "topic": {
     "id": "concrete-curing",
     "titleAr": "معالجة الخرسانة",
-    "titleEn": "Concrete Curing",
     "categoryId": "concrete",
-    "summaryAr": "موضوع يشرح أهمية معالجة الخرسانة بعد الصب للحفاظ على الرطوبة وتحسين المقاومة.",
-    "summaryEn": "A topic explaining the importance of concrete curing after casting to maintain moisture and improve strength.",
+    "summaryAr": "معالجة الخرسانة هي عملية الحفاظ على رطوبتها ودرجة حرارتها ضمن الحدود المناسبة بعد الصب والتشطيب، وذلك لضمان استمرار تفاعل الإماهة وتطور المقاومة مع تقليل التشققات السطحية وضعف السطح.",
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "visual_theme": {
+      "accent": "teal"
+    },
+    "keyTopics": [
+      "معالجة الخرسانة",
+      "Curing",
+      "رش الخرسانة",
+      "الرطوبة",
+      "التشققات",
+      "مقاومة الخرسانة",
+      "بعد الصب",
+      "خرسانة صيفية",
+      "خرسانة شتوية",
+      "حماية السطح"
+    ],
     "tags": [
       "خرسانة",
       "معالجة",
-      "صب"
+      "صب الخرسانة",
+      "مقاومة",
+      "موقع",
+      "تشققات",
+      "جودة"
     ],
-    "relatedTopicIds": [
-      "concrete-casting"
-    ],
-    "level": "basic",
-    "planKey": null,
-    "status": "draft",
-    "featuredImageUrl": null,
-    "simpleExplanation": {
-      "ar": "المحافظة على رطوبة الخرسانة بعد الصب حتى تستمر عملية الإماهة.",
-      "en": "Maintaining moisture after casting to continue hydration."
-    },
-    "beforeWork": {
-      "ar": "",
-      "en": ""
-    },
-    "duringWork": {
-      "ar": "",
-      "en": ""
-    },
-    "afterWork": {
-      "ar": "",
-      "en": ""
-    },
-    "commonMistakes": [
-      {
-        "ar": "ترك الخرسانة بدون معالجة في الأجواء الحارة.",
-        "en": "Leaving concrete without curing in hot weather.",
-        "severity": "high"
-      }
-    ],
-    "acceptRejectItems": [
-      {
-        "criteriaAr": "استمرار رطوبة سطح الخرسانة",
-        "criteriaEn": "Maintaining concrete surface moisture",
-        "acceptanceLimitAr": "يجب أن لا يجف السطح خلال فترة المعالجة المطلوبة",
-        "acceptanceLimitEn": "Surface should not dry during the required curing period",
-        "methodAr": "فحص بصري ومتابعة دورية",
-        "methodEn": "Visual inspection and periodic monitoring",
-        "isCritical": true,
-        "reviewRequired": true,
-        "planKey": "",
-        "codeReference": ""
-      }
-    ],
-    "codeNotes": {
-      "ar": "",
-      "en": ""
-    },
-    "siteNotes": {
-      "ar": "",
-      "en": ""
-    },
-    "reportWording": {
-      "ar": "",
-      "en": ""
-    },
+    "coverImageUrl": null,
+    "relatedTopicIds": [],
     "relatedToolRoutes": [],
     "relatedChecklistIds": []
   },
   "sections": [
     {
-      "id": "curing-overview",
-      "title": "ملاحظات عملية حول معالجة الخرسانة",
-      "titleEn": "Practical Notes on Concrete Curing",
+      "id": "sec-overview",
+      "title": "نظرة عامة",
       "type": "general",
       "order": 1,
       "blocks": [
@@ -92,8 +55,7 @@
           "type": "text",
           "order": 1,
           "content": {
-            "ar": "الغرض من المعالجة هو تقليل فقدان الرطوبة من الخرسانة في الأيام الأولى بعد الصب.",
-            "en": "The purpose of curing is to minimize moisture loss from concrete in the early days after casting."
+            "ar": "معالجة الخرسانة هي عملية الحفاظ على الرطوبة ودرجة الحرارة المناسبة للخرسانة بعد الصب والتشطيب، لضمان استمرار تفاعل الإسمنت مع الماء (الإماهة) وتطور مقاومة الخرسانة وتقليل التشققات السطحية وضعف السطح. تبدأ المعالجة بعد أن يصبح سطح الخرسانة قادراً على تحمل الرش أو التغطية بدون تخريب التشطيب، وتستمر لمدة محددة حسب المواصفة وظروف الموقع."
           },
           "variant": "paragraph"
         },
@@ -101,23 +63,591 @@
           "type": "text",
           "order": 2,
           "content": {
-            "ar": "إهمال المعالجة قد يؤدي إلى تشققات سطحية وضعف في مقاومة الخرسانة.",
-            "en": "Neglecting curing may lead to surface cracks and reduced concrete strength."
+            "ar": "المعالجة لا تعني فقط رش الماء، بل تشمل منع فقدان الرطوبة وحماية الخرسانة من العوامل الخارجية مثل الشمس المباشرة والرياح والحرارة المرتفعة أو البرودة الشديدة. الطريقة المناسبة تعتمد على نوع العنصر الخرساني والظروف الجوية والمواصفة المعتمدة."
           },
-          "variant": "warning"
+          "variant": "note"
+        },
+        {
+          "type": "table",
+          "order": 3,
+          "caption": {
+            "ar": "أهداف معالجة الخرسانة"
+          },
+          "headers": [
+            "الهدف",
+            "الأثر على الخرسانة",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "الحفاظ على الرطوبة",
+                "يساعد على استمرار تفاعل الإماهة وتطور المقاومة",
+                "يحتاج متابعة بالموقع"
+              ]
+            },
+            {
+              "cells": [
+                "تقليل التشققات المبكرة",
+                "يقلل الانكماش السطحي والتشققات الناتجة عن الجفاف السريع",
+                "مهم جداً في الصيف والرياح"
+              ]
+            },
+            {
+              "cells": [
+                "تحسين مقاومة السطح",
+                "يقلل ضعف وتفتت السطح الخرساني",
+                "يعتمد على مدة وطريقة المعالجة"
+              ]
+            },
+            {
+              "cells": [
+                "حماية الخرسانة من العوامل الجوية",
+                "تقليل تأثير الحرارة أو البرودة أو الرياح",
+                "التفاصيل حسب المواصفة والمشروع (يحتاج تدقيق)"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المستخدمة",
+      "type": "equipment",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "equipment",
+          "order": 1,
+          "title": {
+            "ar": "الأدوات والمواد المستخدمة في معالجة الخرسانة"
+          },
+          "items": [
+            {
+              "nameAr": "ماء نظيف للمعالجة",
+              "purpose": "للرش أو الغمر أو التبليل المستمر للخرسانة",
+              "specification": "ماء صالح للشرب أو خالٍ من المواد الضارة"
+            },
+            {
+              "nameAr": "خراطيم رش أو مرشات",
+              "purpose": "لرش الماء على السطح الخرساني",
+              "specification": "خراطيم مرنة مع رشاش مناسب لتوزيع الماء بالتساوي"
+            },
+            {
+              "nameAr": "خيش رطب أو أغطية قماشية",
+              "purpose": "لتغطية السطح الخرساني والحفاظ على الرطوبة",
+              "specification": "خيش ثقيل أو قماش يمتص الماء ويحتفظ بالرطوبة"
+            },
+            {
+              "nameAr": "نايلون أو أغطية بلاستيكية",
+              "purpose": "لتقليل فقدان الرطوبة وحماية السطح من الجفاف",
+              "specification": "نايلون بسمك مناسب مع تثبيت جيد لحمايته من الرياح"
+            },
+            {
+              "nameAr": "مواد معالجة كيميائية Curing Compound",
+              "purpose": "للمعالجة عند صعوبة الرش المستمر",
+              "specification": "تستخدم فقط إذا كانت معتمدة من المهندس ومطابقة للمواصفة (يحتاج تدقيق)"
+            },
+            {
+              "nameAr": "حواجز أو شريط تحذير",
+              "purpose": "لحماية منطقة الصب ومنع المرور المبكر",
+              "specification": "شريط تحذير ملون أو حواجز بلاستيكية"
+            },
+            {
+              "nameAr": "ميزان حرارة",
+              "purpose": "لمراقبة درجة حرارة الخرسانة والجو",
+              "specification": "ميزان حرارة زئبقي أو رقمي مناسب للموقع"
+            },
+            {
+              "nameAr": "سجل متابعة المعالجة",
+              "purpose": "لتوثيق تواريخ وأوقات وطرق المعالجة",
+              "specification": "نموذج ورقي أو إلكتروني معتمد"
+            },
+            {
+              "nameAr": "معدات حماية شخصية",
+              "purpose": "لحماية العمال أثناء رش الماء والتعامل مع المواد الكيميائية",
+              "specification": "قفازات، نظارات، أحذية عازلة للماء حسب الحاجة"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات المعالجة بالموقع",
+      "type": "execution",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "execution_step",
+          "order": 1,
+          "stepNumber": 1,
+          "description": {
+            "ar": "إنهاء الصب والتسوية والتشطيب حسب متطلبات العنصر الخرساني"
+          },
+          "notes": {
+            "ar": "تأكد من إنجاز أعمال التسوية والتشطيب قبل بدء المعالجة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 2,
+          "description": {
+            "ar": "بدء الحماية الأولية للسطح بعد أن يصبح مناسباً للمعالجة بدون تخريب التشطيب"
+          },
+          "notes": {
+            "ar": "التوقيت المناسب لبدء المعالجة يحتاج تدقيق حسب نوع الخرسانة وحالة الجو (يحتاج تدقيق)."
+          }
         },
         {
           "type": "execution_step",
           "order": 3,
-          "stepNumber": 1,
+          "stepNumber": 3,
           "description": {
-            "ar": "ابدأ المعالجة بعد انتهاء التشطيب الأولي للسطح.",
-            "en": "Start curing after initial surface finishing is complete."
+            "ar": "منع تعرض السطح الخرساني للجفاف السريع بسبب الشمس المباشرة أو الرياح"
           },
           "notes": {
-            "ar": "لا تنتظر إلى أن يجف سطح الخرسانة بالكامل.",
-            "en": "Do not wait until the concrete surface is completely dry."
+            "ar": "يمكن استخدام أغطية مؤقتة أو رش خفيف فور الانتهاء من التشطيب."
           }
+        },
+        {
+          "type": "execution_step",
+          "order": 4,
+          "stepNumber": 4,
+          "description": {
+            "ar": "اختيار طريقة المعالجة المناسبة حسب الظروف"
+          },
+          "notes": {
+            "ar": "الخيارات تشمل: رش الماء، خيش رطب، أغطية بلاستيكية، غمر بالماء، أو مركب معالجة كيميائي معتمد."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 5,
+          "stepNumber": 5,
+          "description": {
+            "ar": "المحافظة على رطوبة مستمرة أو حماية مناسبة خلال مدة المعالجة المطلوبة"
+          },
+          "notes": {
+            "ar": "يجب ألا يجف السطح الخرساني خلال فترة المعالجة. المدة تعتمد على المواصفة وظروف الموقع (يحتاج تدقيق)."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 6,
+          "stepNumber": 6,
+          "description": {
+            "ar": "متابعة المعالجة أكثر من مرة يومياً خصوصاً في الجو الحار أو الجاف أو عند وجود رياح"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 7,
+          "stepNumber": 7,
+          "description": {
+            "ar": "حماية الخرسانة من الصدمات أو المرور المبكر أو الاهتزاز خلال فترة المعالجة"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 8,
+          "stepNumber": 8,
+          "description": {
+            "ar": "توثيق تاريخ بداية المعالجة والطريقة المستخدمة وعدد مرات الرش أو المتابعة"
+          },
+          "notes": {
+            "ar": "سجل متابعة المعالجة هو وثيقة مهمة في تقرير الموقع."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 9,
+          "stepNumber": 9,
+          "description": {
+            "ar": "إبلاغ المهندس المشرف عند حدوث جفاف مبكر أو تشقق أو ضعف بالسطح"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 10,
+          "stepNumber": 10,
+          "description": {
+            "ar": "إنهاء المعالجة فقط بعد تحقق المدة المطلوبة حسب المواصفة أو تعليمات المهندس المشرف"
+          },
+          "notes": {
+            "ar": "لا تنهي المعالجة قبل الأوان حتى لو ظهر السطح جيداً."
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والقبول",
+      "type": "inspection",
+      "order": 4,
+      "blocks": [
+        {
+          "type": "inspection_point",
+          "order": 1,
+          "criteriaAr": "بدء المعالجة بالوقت المناسب بعد التشطيب",
+          "methodAr": "مراجعة سجل الصب والتحقق من توقيت بدء المعالجة",
+          "acceptableTolerance": "يجب أن تبدأ المعالجة بعد أن يصبح السطح مناسباً وقبل أن يظهر عليه الجفاف",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 2,
+          "criteriaAr": "استمرار رطوبة السطح الخرساني أو الحماية المناسبة طوال فترة المعالجة",
+          "methodAr": "الفحص البصري الدوري للتأكد من بقاء السطح رطباً أو مغطى",
+          "acceptableTolerance": "يجب ألا يجف السطح الخرساني خلال مدة المعالجة، وإذا جف يُعاد التبليل فوراً ويُبلّغ المهندس",
+          "isCritical": true,
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 3,
+          "criteriaAr": "عدم تعرض الخرسانة للشمس المباشرة أو الرياح بدون حماية مناسبة",
+          "methodAr": "الفحص البصري للمكان والتأكد من وجود أغطية أو حماية",
+          "acceptableTolerance": "يجب توفير حماية للخرسانة من العوامل الجوية المباشرة طوال فترة المعالجة",
+          "isCritical": true,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 4,
+          "criteriaAr": "عدم وجود جفاف أو تغير لون شديد على سطح الخرسانة",
+          "methodAr": "الفحص البصري للسطح الخرساني",
+          "acceptableTolerance": "لون موحد للسطح، بدون بقع بيضاء أو جفاف واضح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 5,
+          "criteriaAr": "عدم وجود تشققات انكماش مبكرة على السطح",
+          "methodAr": "الفحص البصري للسطح والحواف والزوايا",
+          "acceptableTolerance": "يجب ألا تظهر تشققات سطحية نتيجة الجفاف السريع (يحتاج تدقيق)",
+          "isCritical": true,
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 6,
+          "criteriaAr": "حماية الحافات والزوايا من الجفاف والكسر",
+          "methodAr": "الفحص البصري للحافات والزوايا وظروف تغطيتها",
+          "acceptableTolerance": "يجب أن تكون الحافات والزوايا مغطاة أو محمية أثناء المعالجة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 7,
+          "criteriaAr": "توثيق مدة وطريقة المعالجة في السجل اليومي",
+          "methodAr": "مراجعة سجل متابعة المعالجة وتوقيع المسؤول",
+          "acceptableTolerance": "يجب أن يشمل التوثيق: تاريخ البدء، الطريقة المستخدمة، عدد مرات الرش، وتاريخ الانتهاء",
+          "isCritical": false,
+          "markerStyle": "info",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 8,
+          "criteriaAr": "التزام العمال بمنع المرور المبكر أو تحميل العنصر الخرساني قبل الوقت المناسب",
+          "methodAr": "الفحص البصري للموقع والتأكد من وجود حواجز وشريط تحذير",
+          "acceptableTolerance": "يجب منع المرور فوق العنصر الخرساني خلال مدة المعالجة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 9,
+          "criteriaAr": "استخدام مواد معالجة كيميائية Curing Compound فقط عند اعتمادها من المهندس",
+          "methodAr": "مراجعة إذن استخدام المادة ومطابقتها للمواصفة",
+          "acceptableTolerance": "يجب اعتماد المادة من المهندس المشرف قبل الاستخدام (يحتاج تدقيق)",
+          "isCritical": true,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 10,
+          "criteriaAr": "مطابقة مدة المعالجة لمتطلبات المشروع والمواصفة المعتمدة",
+          "methodAr": "مراجعة المواصفة أو تعليمات المشروع ومقارنتها مع المدة الفعلية المنفذة",
+          "acceptableTolerance": "مدة المعالجة المطلوبة حسب المواصفة أو تعليمات المهندس (يحتاج تدقيق)",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "checklist",
+          "order": 11,
+          "title": {
+            "ar": "قائمة فحص سريعة لمعالجة الخرسانة"
+          },
+          "items": [
+            {
+              "id": "chk-01",
+              "textAr": "التأكد من بدء المعالجة بعد التشطيب بالوقت المناسب",
+              "isRequired": true
+            },
+            {
+              "id": "chk-02",
+              "textAr": "التأكد من توفر الماء أو الأغطية قبل الصب",
+              "isRequired": true
+            },
+            {
+              "id": "chk-03",
+              "textAr": "التأكد من حماية السطح من الشمس والرياح",
+              "isRequired": true
+            },
+            {
+              "id": "chk-04",
+              "textAr": "التأكد من بقاء الخيش أو السطح رطباً",
+              "isRequired": true
+            },
+            {
+              "id": "chk-05",
+              "textAr": "التأكد من منع المرور المبكر فوق العنصر",
+              "isRequired": true
+            },
+            {
+              "id": "chk-06",
+              "textAr": "التأكد من توثيق مدة المعالجة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-07",
+              "textAr": "التأكد من عدم وجود تشققات سطحية مبكرة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-08",
+              "textAr": "مراجعة المهندس عند استخدام Curing Compound",
+              "isRequired": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-methods",
+      "title": "طرق معالجة الخرسانة",
+      "type": "general",
+      "order": 5,
+      "blocks": [
+        {
+          "type": "table",
+          "order": 1,
+          "caption": {
+            "ar": "طرق شائعة لمعالجة الخرسانة"
+          },
+          "headers": [
+            "الطريقة",
+            "الاستخدام",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "الرش بالماء",
+                "للعناصر الأفقية والعمودية حسب الإمكانية",
+                "يحتاج تكرار ومتابعة مستمرة"
+              ]
+            },
+            {
+              "cells": [
+                "الخيش الرطب",
+                "للبلاطات والأسطح المكشوفة",
+                "يجب أن يبقى الخيش رطباً طوال فترة المعالجة"
+              ]
+            },
+            {
+              "cells": [
+                "الأغطية البلاستيكية",
+                "لتقليل فقدان الرطوبة",
+                "يجب تثبيتها جيداً لحمايتها من الرياح"
+              ]
+            },
+            {
+              "cells": [
+                "الغمر بالماء",
+                "مناسب لبعض البلاطات أو النماذج الخرسانية",
+                "يحتاج حواف تمنع تسرب الماء"
+              ]
+            },
+            {
+              "cells": [
+                "مواد المعالجة الكيميائية Curing Compound",
+                "عند صعوبة الرش المستمر أو عدم توفر الماء",
+                "تستخدم فقط إذا كانت معتمدة من المهندس (يحتاج تدقيق)"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "أفضل طريقة لمعالجة الخرسانة ليست ثابتة لكل مشروع؛ تختار حسب نوع العنصر الخرساني والظروف الجوية وتوفر الماء والمواصفة المعتمدة وتعليمات المهندس المشرف."
+          },
+          "variant": "tip"
+        }
+      ]
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 6,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تأخير المعالجة بعد الصب إلى أن يجف السطح الخرساني بشكل واضح."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "رش الماء مرة واحدة فقط واعتبار المعالجة مكتملة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "ترك الخرسانة تحت الشمس المباشرة أو الرياح بدون أي حماية أو تغطية."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 4,
+          "content": {
+            "ar": "استخدام خيش جاف فوق الخرسانة بدلاً من الخيش الرطب مما يسبب سحب الرطوبة من الخرسانة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 5,
+          "content": {
+            "ar": "إزالة الأغطية أو الخيش مبكراً بسبب الاستعجال أو عدم المتابعة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 6,
+          "content": {
+            "ar": "السماح بالمرور أو تحميل العنصر الخرساني قبل الوقت المناسب."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 7,
+          "content": {
+            "ar": "استخدام Curing Compound بدون اعتماد من المهندس أو بطريقة غير صحيحة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 8,
+          "content": {
+            "ar": "عدم توثيق مدة المعالجة وطريقتها في تقرير الموقع اليومي."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "انتبه عند استخدام الماء قرب مصادر الكهرباء أو التمديدات المؤقتة في الموقع."
+          },
+          "severity": "high"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "حافظ على ممرات آمنة حول منطقة الصب لأن الأرض قد تكون زلقة أثناء الرش."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 3,
+          "message": {
+            "ar": "عند استخدام مواد معالجة كيميائية Curing Compound، يجب الالتزام بتعليمات السلامة الخاصة بالمادة وارتداء معدات الحماية الشخصية المناسبة."
+          },
+          "severity": "high"
+        }
+      ]
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "المراجع والملاحظات الفنية",
+      "type": "codeReference",
+      "order": 8,
+      "blocks": [
+        {
+          "type": "code_reference",
+          "order": 1,
+          "code": "ACI / ASTM / BS EN / Iraqi Specifications",
+          "title": {
+            "ar": "مراجع فنية لمعالجة الخرسانة"
+          },
+          "excerpt": {
+            "ar": "مدة وطريقة معالجة الخرسانة يجب أن تعتمد على نوع الإسمنت ونوع العنصر الخرساني وظروف الجو ومتطلبات المواصفة أو المشروع. القيم الرقمية ومدة المعالجة تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+          }
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "لا يجوز اعتماد مدة معالجة واحدة لكل الحالات بدون مراجعة ظروف الموقع والمواصفة. في الأجواء الحارة أو الرياح القوية قد تحتاج الخرسانة إلى عناية أكبر لمنع الجفاف السريع. (يحتاج تدقيق)"
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير جاهزة",
+      "type": "general",
+      "order": 9,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تمت معالجة خرسانة [اسم العنصر] بعد الصب بتاريخ [تاريخ الصب] باستخدام طريقة [طريقة المعالجة]، وتمت متابعة الرطوبة والحماية خلال مدة [مدة المعالجة]. لم يتم ملاحظة/تمت ملاحظة [ملاحظات]، وتبقى مدة وطريقة المعالجة خاضعة لمتطلبات المشروع وتوجيهات المهندس المشرف."
+          },
+          "variant": "paragraph"
         }
       ]
     }
@@ -126,7 +656,7 @@
     "status": "draft",
     "reviewedBy": null,
     "reviewedAt": null,
-    "reviewNotes": "Migrated from official catalog. Topic has empty beforeWork, duringWork, afterWork, codeNotes, siteNotes, reportWording.",
+    "reviewNotes": "مسودة أولية لموضوع معالجة الخرسانة — تحتاج مراجعة القيم العددية ومدة المعالجة والمواصفات من مهندس مختص.",
     "approvalStatus": null
   }
 }
