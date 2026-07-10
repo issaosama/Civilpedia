@@ -61,11 +61,11 @@ class EncyclopediaRepositoryImpl implements EncyclopediaRepository {
   }
 
   @override
-  Future<List<ContentBlock>> getBlocksForSection(String sectionId) async {
+  Future<List<ContentBlock>> getBlocksForSection(String topicId, String sectionId) async {
     try {
-      return await _jsonDataSource.fetchBlocksForSection(sectionId);
+      return await _jsonDataSource.fetchBlocksForSection(topicId, sectionId);
     } catch (_) {
-      return _fallbackDataSource.fetchBlocksForSection(sectionId);
+      return _fallbackDataSource.fetchBlocksForSection(topicId, sectionId);
     }
   }
 }

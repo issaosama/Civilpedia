@@ -42,9 +42,9 @@ class EncyclopediaLocalDataSource {
     return sections;
   }
 
-  Future<List<ContentBlock>> fetchBlocksForSection(String sectionId) async {
+  Future<List<ContentBlock>> fetchBlocksForSection(String topicId, String sectionId) async {
     await Future.delayed(const Duration(milliseconds: 30));
-    final blocks = _mockBlocks[sectionId] ?? [];
+    final blocks = _mockBlocks['${topicId}__$sectionId'] ?? _mockBlocks[sectionId] ?? [];
     return blocks;
   }
 }

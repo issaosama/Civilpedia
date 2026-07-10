@@ -94,7 +94,7 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
                 : _categoryHeader(topic.categoryId),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

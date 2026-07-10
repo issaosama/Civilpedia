@@ -79,7 +79,7 @@ class EncyclopediaProvider extends ChangeNotifier {
       _blocksBySection.clear();
       for (final section in _currentSections) {
         final blocks =
-            await _repository.getBlocksForSection(section.id);
+            await _repository.getBlocksForSection(topicId, section.id);
         _blocksBySection[section.id] = blocks;
       }
       _error = null;

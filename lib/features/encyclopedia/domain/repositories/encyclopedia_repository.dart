@@ -13,5 +13,5 @@ abstract class EncyclopediaRepository {
 
   Future<List<TopicSection>> getSectionsForTopic(String topicId);
 
-  Future<List<ContentBlock>> getBlocksForSection(String sectionId);
+  Future<List<ContentBlock>> getBlocksForSection(String topicId, String sectionId);
 }

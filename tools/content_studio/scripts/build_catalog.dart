@@ -166,7 +166,7 @@ void main() {
 
           cleanedBlocks.add(Map.from(blk));
         }
-        blocks[secId] = cleanedBlocks;
+        blocks['${topicId}__$secId'] = cleanedBlocks;
       }
 
       // Build the topic entry (flatten topic wrapper → top-level fields)

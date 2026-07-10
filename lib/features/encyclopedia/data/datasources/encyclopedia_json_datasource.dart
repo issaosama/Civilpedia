@@ -93,8 +93,8 @@ class EncyclopediaJsonDataSource {
     return _sections![topicId] ?? <TopicSection>[];
   }
 
-  Future<List<ContentBlock>> fetchBlocksForSection(String sectionId) async {
+  Future<List<ContentBlock>> fetchBlocksForSection(String topicId, String sectionId) async {
     await _ensureLoaded();
-    return _blocks![sectionId] ?? <ContentBlock>[];
+    return _blocks!['${topicId}__$sectionId'] ?? <ContentBlock>[];
   }
 }
