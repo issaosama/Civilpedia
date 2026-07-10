@@ -327,9 +327,10 @@
         "point": {
           "criteria": "التطبيل — فحص الصوت المجوف بعد التبليط",
           "method": "الطرق بمطرقة خشبية أو قطعة معدنية خفيفة على سطح البلاط والاستماع للصوت.",
-          "isCritical": true,
+          "isCritical": false,
           "acceptableTolerance": "لا يزيد عن 5% من مساحة البلاط (يحتاج تدقيق)",
-          "markerStyle": "diamond"
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
         }
       },
       {
