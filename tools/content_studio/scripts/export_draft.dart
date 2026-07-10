@@ -163,6 +163,8 @@ Map<String, dynamic> _exportBlock(Map<String, dynamic> src) {
         'method': (src['methodAr'] as String?) ?? '',
         'isCritical': src['isCritical'] == true,
         'acceptableTolerance': (src['acceptableTolerance'] as String?) ?? '',
+        if (src['markerStyle'] != null) 'markerStyle': src['markerStyle'] as String,
+        if (src['markerColorMode'] != null) 'markerColorMode': src['markerColorMode'] as String,
       };
       break;
     }
