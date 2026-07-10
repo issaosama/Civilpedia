@@ -1,0 +1,729 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-10T00:00:00.000Z",
+    "updatedAt": "2026-07-10T00:00:00.000Z",
+    "source": "opencode",
+    "id": "rebar-works"
+  },
+  "topic": {
+    "id": "rebar-works",
+    "titleAr": "التسليح",
+    "categoryId": "structural-works",
+    "summaryAr": "أعمال التسليح تشمل استلام وخزن وقص وثني وتثبيت حديد التسليح حسب المخططات والمواصفات المعتمدة، مع التأكد من الأقطار والأعداد والمسافات والغطاء الخرساني والتراكب والنظافة قبل الصب.",
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "visual_theme": {
+      "accent": "steel_blue"
+    },
+    "keyTopics": [
+      "التسليح",
+      "حديد التسليح",
+      "Rebar",
+      "الغطاء الخرساني",
+      "تراكب الحديد",
+      "الكانات",
+      "الكراسي",
+      "Spacers",
+      "Laps",
+      "Bar Bending Schedule",
+      "استلام التسليح",
+      "قبل الصب"
+    ],
+    "tags": [
+      "تسليح",
+      "حديد",
+      "إنشائي",
+      "صب",
+      "موقع",
+      "غطاء",
+      "كانات",
+      "تراكب"
+    ],
+    "coverImageUrl": null,
+    "relatedTopicIds": [],
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "أعمال التسليح هي واحدة من أهم مراحل العمل الإنشائي، لأن حديد التسليح هو العنصر الرئيسي اللي يتحمل قوى الشد والضغط جنب الخرسانة. أي خطأ بالقطر أو العدد أو المسافات أو الغطاء أو التراكب ممكن يأثر على متانة وسلامة المبنى وحتى يسبب فشل بعد الصب. مهندس الموقع لازم يتأكد من كل التفاصيل قبل ما يسمح بالصب."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "أخطاء صغيرة بالتسليح مثل نقص الغطاء أو تراكب غير صحيح أو استخدام قطر مختلف قد لا تظهر مباشرة بعد الصب، لكنها تؤثر على عمر المبنى وسلامته. التدقيق الدقيق قبل الصب هو الفرق بين عمل مضبوط ومشكلة بعد الصب."
+          },
+          "variant": "note"
+        },
+        {
+          "type": "table",
+          "order": 3,
+          "caption": {
+            "ar": "عناصر يجب فهمها قبل استلام التسليح"
+          },
+          "headers": [
+            "العنصر",
+            "شنو يعني؟",
+            "شنو أراجع؟"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "قطر الحديد Bar Diameter",
+                "سمك قضيب الحديد بالملم",
+                "القطر المطلوب بالمخطط مقابل القطر الموجود بالموقع"
+              ]
+            },
+            {
+              "cells": [
+                "عدد القضبان Number of Bars",
+                "عدد القضبان المطلوبة لكل عنصر",
+                "عد القضبان وتطابق العدد مع المخطط"
+              ]
+            },
+            {
+              "cells": [
+                "المسافات Spacing",
+                "المسافة بين محور قضيب والثاني",
+                "القياس الفعلي ومطابقته للمخطط"
+              ]
+            },
+            {
+              "cells": [
+                "الغطاء الخرساني Concrete Cover",
+                "المسافة بين الحديد وسطح الخرسانة لحماية الحديد من الصدأ",
+                "قياس الغطاء من الحديد لحافة القالب"
+              ]
+            },
+            {
+              "cells": [
+                "التراكب Lap Splice",
+                "طول تداخل قضيبين لضمان استمرارية القوى",
+                "طول التراكب وموقعه حسب المواصفة (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "الكانات Stirrups / Ties",
+                "قضبان جانبية لتثبيت الحديد الطولي ومنع الانبعاج",
+                "القطر والمسافة وطريقة الربط"
+              ]
+            },
+            {
+              "cells": [
+                "الكراسي Chairs / Supports",
+                "قضبان أو قطع لتثبيت الحديد العلوي ومنع هبوطه",
+                "عددها وتوزيعها وقوتها"
+              ]
+            },
+            {
+              "cells": [
+                "نظافة الحديد Rebar Cleanliness",
+                "خلو الحديد من الطين والزيوت والصدأ المؤثر",
+                "الفحص البصري قبل الصب"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "equipment",
+          "order": 1,
+          "title": "الأدوات والمواد المطلوبة لأعمال التسليح",
+          "items": [
+            {
+              "nameAr": "مخططات إنشائية معتمدة",
+              "purpose": "مرجع أساسي لأقطار الحديد وأعداده ومسافاته وتفاصيله",
+              "specification": "آخر إصدار معتمد مع Revision"
+            },
+            {
+              "nameAr": "جدول تسليح Bar Bending Schedule",
+              "purpose": "لتحديد أطوال القص والثني لكل قضيب",
+              "specification": "إذا متوفر حسب المشروع"
+            },
+            {
+              "nameAr": "شريط قياس",
+              "purpose": "لقياس الأبعاد والمسافات والغطاء",
+              "specification": "شريط قياس معدني بطول 5–10 م"
+            },
+            {
+              "nameAr": "قدمة قياس أو مقياس قطر الحديد",
+              "purpose": "للتحقق من قطر الحديد",
+              "specification": "قدمة Vernier Caliper أو مقياس قطر خاص"
+            },
+            {
+              "nameAr": "سلك ربط",
+              "purpose": "لربط القضبان عند تقاطعاتها",
+              "specification": "سلك ربط حديدي ناعم 1.2–1.6 مم"
+            },
+            {
+              "nameAr": "كماشة ربط",
+              "purpose": "لفك وربط سلك الحديد",
+              "specification": "كماشة ربط عادية أو كهربائية"
+            },
+            {
+              "nameAr": "كراسي حديد أو بلاستك",
+              "purpose": "لرفع الحديد العلوي والحفاظ على الغطاء",
+              "specification": "حسب الاعتماد والنوع المستخدم بالمشروع"
+            },
+            {
+              "nameAr": "Spacers / Cover Blocks",
+              "purpose": "لضمان المسافة بين الحديد والقالب",
+              "specification": "بلاستك أو إسمنتي حسب القيمة المطلوبة"
+            },
+            {
+              "nameAr": "علامات تعليم أو طباشير",
+              "purpose": "لتحديد مسافات الكانات والحديد على العنصر",
+              "specification": "طبشور إنشائي أو قلم تعليم"
+            },
+            {
+              "nameAr": "معدات حماية شخصية",
+              "purpose": "حماية العمال والمهندس أثناء العمل",
+              "specification": "قفازات، خوذة، أحذية سلامة"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ التسليح",
+      "type": "execution",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "execution_step",
+          "order": 1,
+          "stepNumber": 1,
+          "description": {
+            "ar": "مراجعة آخر مخطط إنشائي معتمد وجدول التسليح إن وجد"
+          },
+          "notes": {
+            "ar": "تأكد من رقم المخطط والإصدار قبل البدء بأي عمل."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 2,
+          "description": {
+            "ar": "التأكد من أقطار الحديد وأعداد القضبان قبل التركيب"
+          },
+          "notes": {
+            "ar": "قارن الحديد الموجود بالموقع مع المخطط — لا تعتمد على الذاكرة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 3,
+          "description": {
+            "ar": "قص وثني الحديد حسب التفاصيل والمخططات"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 4,
+          "stepNumber": 4,
+          "description": {
+            "ar": "ترتيب الحديد في الموقع حسب العنصر والقطر لتقليل الخلط"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 5,
+          "stepNumber": 5,
+          "description": {
+            "ar": "تثبيت الحديد السفلي والعلوي حسب المخطط"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 6,
+          "stepNumber": 6,
+          "description": {
+            "ar": "تثبيت الكانات Stirrups أو الروابط Ties بالمسافات المطلوبة"
+          },
+          "notes": {
+            "ar": "مسافات الكانات تتغير عند الجسور وعند الأعمدة — تأكد من التفاصيل."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 7,
+          "stepNumber": 7,
+          "description": {
+            "ar": "وضع الكراسي Chairs والـ Spacers لضمان الغطاء الخرساني المطلوب"
+          },
+          "notes": {
+            "ar": "لا تعتمد فقط على الكراسي النادرة؛ الكمية الكافية هي اللي تضمن الغطاء."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 8,
+          "stepNumber": 8,
+          "description": {
+            "ar": "مراجعة التراكب Laps ومواقع الوصلات حسب المخطط والمواصفة"
+          },
+          "notes": {
+            "ar": "طول التراكب وموقعه يختلف حسب قطر الحديد والمواصفة — تحتاج تدقيق (يحتاج تدقيق)."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 9,
+          "stepNumber": 9,
+          "description": {
+            "ar": "تنظيف الحديد من الطين والزيوت والمواد الضعيفة قبل الصب"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 10,
+          "stepNumber": 10,
+          "description": {
+            "ar": "عدم السماح بالصب قبل استلام التسليح من المهندس المشرف"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 4,
+      "blocks": [
+        {
+          "type": "inspection_point",
+          "order": 1,
+          "criteriaAr": "مطابقة قطر الحديد للمخطط",
+          "methodAr": "قياس القضبان ومقارنة الأقطار مع المخطط",
+          "acceptableTolerance": "قطر الحديد المستخدم مطابق للقطر المطلوب بالمخطط",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 2,
+          "criteriaAr": "مطابقة عدد القضبان المطلوب لكل عنصر",
+          "methodAr": "عد القضبان وتطابقها مع المخطط",
+          "acceptableTolerance": "عدد القضبان مطابق للمخطط ولا يوجد نقص",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 3,
+          "criteriaAr": "مطابقة المسافات بين القضبان Spacing",
+          "methodAr": "قياس المسافات بين القضبان ومقارنتها بالمخطط",
+          "acceptableTolerance": "المسافات ضمن التفاوت المسموح حسب المواصفة (يحتاج تدقيق)",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 4,
+          "criteriaAr": "مطابقة الغطاء الخرساني Concrete Cover",
+          "methodAr": "قياس المسافة بين الحديد وحافة القالب الداخلية",
+          "acceptableTolerance": "الغطاء مطابق للمخطط — لا يزيد ولا ينقص عن المطلوب (يحتاج تدقيق)",
+          "isCritical": true,
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 5,
+          "criteriaAr": "صحة التراكب Lap Splice وموقعه",
+          "methodAr": "قياس طول التراكب ومقارنته بالمخطط والمواصفة",
+          "acceptableTolerance": "طول التراكب كافي وموقعه مناسب حسب المخطط (يحتاج تدقيق)",
+          "isCritical": true,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 6,
+          "criteriaAr": "تثبيت الكانات Stirrups والمسافات بينها",
+          "methodAr": "فحص المسافات بين الكانات وطريقة ربطها",
+          "acceptableTolerance": "الكانات مثبتة بإحكام بالمسافات المطلوبة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 7,
+          "criteriaAr": "وجود الكراسي والـ Spacers بالعدد والتوزيع المناسب",
+          "methodAr": "الفحص البصري لعدد الكراسي ومدى ثباتها",
+          "acceptableTolerance": "كراسي كافية تمنع هبوط الحديد العلوي أثناء الصب",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 8,
+          "criteriaAr": "نظافة الحديد قبل الصب من الطين والمواد الضعيفة",
+          "methodAr": "الفحص البصري للحديد والتأكد من خلوه من الشوائب",
+          "acceptableTolerance": "الحديد نظيف ولا توجد مواد تقلل الالتصاق مع الخرسانة",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 9,
+          "criteriaAr": "عدم وجود صدأ مؤثر أو زيوت على سطح الحديد",
+          "methodAr": "الفحص البصري والتأكد من خلو الحديد من الزيوت والصدأ المتقشر",
+          "acceptableTolerance": "صدأ سطحي مقبول في حال عدم تأثر المقطع — زيوت ممنوعة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 10,
+          "criteriaAr": "عدم تحرك الحديد أثناء الصب — تثبيت كافٍ",
+          "methodAr": "مراجعة تثبيت الحديد وربطه قبل الصب",
+          "acceptableTolerance": "الحديد مربوط جيداً ولا يتحرك بشكل ملحوظ",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 11,
+          "criteriaAr": "مطابقة حديد الفتحات والتقويات مع المخطط",
+          "methodAr": "الفحص البصري للفتحات والتأكد من وجود الحديد الإضافي المطلوب",
+          "acceptableTolerance": "كل فتحة أو ضعف يحتوي على حديد إضافي أو تقوية حسب المخطط",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 12,
+          "criteriaAr": "اعتماد المهندس المشرف قبل الصب",
+          "methodAr": "مراجعة توقيع المهندس على سجل الاستلام",
+          "acceptableTolerance": "يجب أن يكون التسليح مستلماً ومعتمداً رسمياً قبل بدء الصب",
+          "isCritical": true,
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "checklist",
+          "order": 13,
+          "title": {
+            "ar": "قائمة فحص سريعة للتسليح قبل الصب"
+          },
+          "items": [
+            {
+              "id": "chk-01",
+              "textAr": "مراجعة آخر مخطط معتمد",
+              "isRequired": true
+            },
+            {
+              "id": "chk-02",
+              "textAr": "التأكد من الأقطار والأعداد",
+              "isRequired": true
+            },
+            {
+              "id": "chk-03",
+              "textAr": "قياس المسافات بين القضبان",
+              "isRequired": true
+            },
+            {
+              "id": "chk-04",
+              "textAr": "قياس الغطاء الخرساني",
+              "isRequired": true
+            },
+            {
+              "id": "chk-05",
+              "textAr": "مراجعة التراكب",
+              "isRequired": true
+            },
+            {
+              "id": "chk-06",
+              "textAr": "مراجعة الكانات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-07",
+              "textAr": "تثبيت الكراسي والـ Spacers",
+              "isRequired": true
+            },
+            {
+              "id": "chk-08",
+              "textAr": "تنظيف الحديد من الشوائب",
+              "isRequired": true
+            },
+            {
+              "id": "chk-09",
+              "textAr": "مراجعة الفتحات والتقويات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-10",
+              "textAr": "منع الصب قبل استلام المهندس",
+              "isRequired": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 5,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "استخدام قطر حديد مختلف عن المخطط."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "نقص عدد القضبان أو تغيير المسافات بدون اعتماد."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "ضعف الغطاء الخرساني بسبب عدم استخدام Spacers أو استخدام عدد غير كافي."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 4,
+          "content": {
+            "ar": "وضع التراكب في مكان غير مناسب — مثلاً في منطقة أقصى عزوم أو بدون تداخل كافي."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 5,
+          "content": {
+            "ar": "عدم تثبيت الحديد جيداً فيتحرك أثناء الصب."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 6,
+          "content": {
+            "ar": "نسيان حديد إضافي حول الفتحات والتقويات."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 7,
+          "content": {
+            "ar": "وجود طين أو زيت على الحديد قبل الصب بدون تنظيف."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 8,
+          "content": {
+            "ar": "الاعتماد على كلام العمال بدون قياس فعلي للتأكد من المسافات والأعداد."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 9,
+          "content": {
+            "ar": "عدم مراجعة آخر Revision للمخطط قبل بدء التسليح."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-cover-laps",
+      "title": "ملاحظات خاصة بالغطاء والتراكب",
+      "type": "general",
+      "order": 6,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "الغطاء الخرساني والتراكب من أهم النقاط اللي تحتاج تدقيق دقيق في أعمال التسليح. قيمهم تعتمد على المخططات والمواصفة المعتمدة للمشروع ونوع العنصر والظروف البيئية. لا يوجد قيمة واحدة تناسب كل الحالات."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "table",
+          "order": 2,
+          "caption": {
+            "ar": "نقاط تحتاج تدقيق في الغطاء والتراكب"
+          },
+          "headers": [
+            "النقطة",
+            "سبب أهميتها",
+            "الملاحظة"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "الغطاء الخرساني Concrete Cover",
+                "يحمي الحديد من الصدأ ويساعد على المتانة",
+                "القيم حسب العنصر والمواصفة (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "التراكب Lap Splice",
+                "ينقل القوى بين القضبان لضمان استمرارية التسليح",
+                "الطول والموقع حسب التصميم والمواصفة (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "الكراسي Chairs",
+                "تثبت الحديد العلوي وتمنع هبوطه أثناء الصب",
+                "العدد والمسافة حسب الحاجة بالموقع (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "Spacers",
+                "تمنع نقص الغطاء وتضمن المسافة بين الحديد والقالب",
+                "يجب أن تكون مناسبة للعنصر ومعتمدة"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "لا تعتمد على النظر فقط في الغطاء أو المسافات؛ القياس المباشر قبل الصب ضروري للتأكد من المطابقة."
+          },
+          "variant": "tip"
+        }
+      ]
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "انتبه من أطراف الحديد البارزة لأنها تسبب جروح وإصابات."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "يجب تأمين مسارات حركة العمال فوق التسليح لتقليل التعثر والسقوط."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 3,
+          "message": {
+            "ar": "لا تقف على الحديد غير المثبت أو القوالب غير الآمنة أثناء الفحص."
+          },
+          "severity": "high"
+        }
+      ]
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 8,
+      "blocks": [
+        {
+          "type": "code_reference",
+          "order": 1,
+          "code": "ACI / BS EN / Iraqi Specifications / Project Drawings",
+          "title": {
+            "ar": "مراجع فنية لأعمال التسليح"
+          },
+          "excerpt": {
+            "ar": "أقطار الحديد، المسافات، الغطاء، التراكب، تفاصيل الكانات، ومواقع الوصلات يجب أن تعتمد على المخططات الإنشائية والمواصفات المعتمدة للمشروع. القيم الرقمية تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+          }
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "عند وجود تعارض بين المخطط وجدول التسليح أو بين تفاصيل مختلفة، يجب إصدار استفسار RFI أو الرجوع للمهندس المصمم/المشرف قبل التنفيذ."
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 9,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تم فحص تسليح [اسم العنصر] حسب المخطط رقم [رقم المخطط] إصدار [Revision]، وتمت مراجعة الأقطار والأعداد والمسافات والغطاء والتراكب والكانات والنظافة قبل الصب. الملاحظات المسجلة: [الملاحظات]، ويتم الصب بعد معالجة الملاحظات واعتماد المهندس المشرف."
+          },
+          "variant": "paragraph"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "مسودة أولية لموضوع التسليح — تحتاج مراجعة القيم الرقمية للغطاء والتراكب والمواصفات من مهندس إنشائي مختص.",
+    "approvalStatus": null
+  }
+}

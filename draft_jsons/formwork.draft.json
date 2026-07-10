@@ -1,0 +1,706 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-10T00:00:00.000Z",
+    "updatedAt": "2026-07-10T00:00:00.000Z",
+    "source": "opencode",
+    "id": "formwork"
+  },
+  "topic": {
+    "id": "formwork",
+    "titleAr": "القالب الخشبي",
+    "categoryId": "structural-works",
+    "summaryAr": "القالب الخشبي يستخدم لتشكيل الخرسانة بالمقاسات والمناسيب المطلوبة، ويجب فحص الأبعاد والاستقامة والدعم والربط والإحكام قبل الصب لمنع التشوهات أو التسرب أو الفشل أثناء الصب.",
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "visual_theme": {
+      "accent": "sand"
+    },
+    "keyTopics": [
+      "القالب الخشبي",
+      "Formwork",
+      "الشدة الخشبية",
+      "دعم القالب",
+      "أبعاد القالب",
+      "مناسيب القالب",
+      "زيت القالب",
+      "تسرب اللباني",
+      "فحص قبل الصب",
+      "فك القالب"
+    ],
+    "tags": [
+      "قالب",
+      "خشب",
+      "شدة",
+      "خرسانة",
+      "صب",
+      "موقع",
+      "أبعاد",
+      "مناسيب"
+    ],
+    "coverImageUrl": null,
+    "relatedTopicIds": [],
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "القالب الخشبي أو الشدة الخشبية هو الهيكل المؤقت اللي يشكل الخرسانة الطازجة ويعطيها الشكل والأبعاد والمناسيب المطلوبة لحين تصلبها. جودة تنفيذ القالب تأثر بشكل مباشر على جودة الخرسانة المطبوعة، وتساعد على منع التسرب والتشوهات والفشل أثناء الصب."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "فشل القالب أثناء الصب من أخطر المشاكل اللي ممكن تصير بالموقع. إذا انفتح القالب أو انبعج أو سقط، النتيجة تكون تأخير وخسارة مادية كبيرة وإصابة محتملة للعمال. لذلك الفحص الدقيق قبل الصب ضروري وليس اختياري."
+          },
+          "variant": "note"
+        },
+        {
+          "type": "table",
+          "order": 3,
+          "caption": {
+            "ar": "شنو نراجع بالقالب قبل الصب؟"
+          },
+          "headers": [
+            "العنصر",
+            "سبب المراجعة",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "الأبعاد",
+                "لضمان مطابقة العنصر للمخطط",
+                "يجب القياس المباشر"
+              ]
+            },
+            {
+              "cells": [
+                "المناسيب",
+                "لضمان مستوى العنصر الصحيح",
+                "يحتاج ربط مع Bench Mark"
+              ]
+            },
+            {
+              "cells": [
+                "الاستقامة والعمودية",
+                "لمنع الميلان أو البروز",
+                "تفحص بالخيط والميزان"
+              ]
+            },
+            {
+              "cells": [
+                "الدعم والربط",
+                "لمنع الفتح أو الانبعاج",
+                "مهم جداً أثناء الصب"
+              ]
+            },
+            {
+              "cells": [
+                "الإحكام",
+                "لمنع تسرب اللباني",
+                "خصوصاً عند الفواصل والزوايا"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "equipment",
+          "order": 1,
+          "title": "الأدوات والمواد المطلوبة لتنفيذ القالب الخشبي",
+          "items": [
+            {
+              "nameAr": "مخطط معتمد للعنصر المطلوب",
+              "purpose": "مرجع للأبعاد والمناسيب والتفاصيل",
+              "specification": "آخر إصدار معتمد"
+            },
+            {
+              "nameAr": "خشب أو ألواح قالب مناسبة",
+              "purpose": "لتشكيل هيكل القالب حسب الأبعاد",
+              "specification": "خشب صلب أو ألواح كونتر معالجة ضد الرطوبة"
+            },
+            {
+              "nameAr": "دعامات وشدادات",
+              "purpose": "لتثبيت القالب ومنع حركته أثناء الصب",
+              "specification": "أخشاب أو معدن حسب النظام المستخدم"
+            },
+            {
+              "nameAr": "مسامير ورباط",
+              "purpose": "لتثبيت الألواح والدعامات",
+              "specification": "مسامير إنشائية بطول مناسب"
+            },
+            {
+              "nameAr": "ميزان ماء أو ليزر",
+              "purpose": "لضبط المناسيب والاستقامة والعمودية",
+              "specification": "ميزان ماء خرطوم أو ليزر دوار"
+            },
+            {
+              "nameAr": "شريط قياس",
+              "purpose": "لقياس الأبعاد الداخلية والخارجية",
+              "specification": "شريط قياس معدني بطول 5–10 م"
+            },
+            {
+              "nameAr": "خيط شد",
+              "purpose": "لتحديد المحاور والاستقامة",
+              "specification": "خيط شد إنشائي"
+            },
+            {
+              "nameAr": "زيت قالب Form Release Agent",
+              "purpose": "لمنع التصاق الخرسانة بالقالب وتسهيل فكه",
+              "specification": "زيت مناسب للخرسانة — لا يؤثر على السطح"
+            },
+            {
+              "nameAr": "فواصل أو سدادات",
+              "purpose": "لمنع تسرب اللباني من الفتحات والفواصل",
+              "specification": "فوم أو سدادات مطاطية حسب الفجوة"
+            },
+            {
+              "nameAr": "معدات حماية شخصية",
+              "purpose": "لحماية العمال أثناء التركيب والصب",
+              "specification": "قفازات، خوذة، أحذية سلامة"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ القالب الخشبي",
+      "type": "execution",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "execution_step",
+          "order": 1,
+          "stepNumber": 1,
+          "description": {
+            "ar": "مراجعة المخطط والتأكد من الأبعاد والمناسيب المطلوبة"
+          },
+          "notes": {
+            "ar": "قبل أي قطع أو تركيب، تأكد من فهم كل الأبعاد والمناسيب."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 2,
+          "description": {
+            "ar": "تجهيز موقع العمل وتنظيف مكان تركيب القالب"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 3,
+          "description": {
+            "ar": "قص وتجهيز ألواح القالب حسب المقاسات المطلوبة"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 4,
+          "stepNumber": 4,
+          "description": {
+            "ar": "تركيب القالب وضبط الأبعاد الداخلية حسب المخطط"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 5,
+          "stepNumber": 5,
+          "description": {
+            "ar": "ضبط المناسيب والاستقامة والعمودية"
+          },
+          "notes": {
+            "ar": "استخدم الميزان والخيط لضبط المستوى — لا تعتمد فقط على العين."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 6,
+          "stepNumber": 6,
+          "description": {
+            "ar": "تثبيت الدعامات والشدادات لمنع الحركة أثناء الصب"
+          },
+          "notes": {
+            "ar": "الدعامات يجب أن تكون كافية لتحمل ضغط الخرسانة الطازجة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 7,
+          "stepNumber": 7,
+          "description": {
+            "ar": "سد الفتحات والفواصل لمنع تسرب اللباني"
+          },
+          "notes": {
+            "ar": "فحص الفواصل خصوصاً عند الزوايا والتقاطعات."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 8,
+          "stepNumber": 8,
+          "description": {
+            "ar": "دهن القالب بزيت مناسب بدون تلويث التسليح"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 9,
+          "stepNumber": 9,
+          "description": {
+            "ar": "مراجعة الفتحات والـ Sleeves والـ Embedded Items إن وجدت"
+          },
+          "notes": {
+            "ar": "كل فتحة أو إدخال لازم يكون موجود ومثبت قبل تركيب التسليح أو الصب."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 10,
+          "stepNumber": 10,
+          "description": {
+            "ar": "استلام القالب قبل تركيب التسليح أو الصب حسب تسلسل العمل بالموقع"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 4,
+      "blocks": [
+        {
+          "type": "inspection_point",
+          "order": 1,
+          "criteriaAr": "مطابقة الأبعاد الداخلية للقالب مع المخطط",
+          "methodAr": "قياس الأبعاد الداخلية ومقارنتها مع المخطط",
+          "acceptableTolerance": "الأبعاد الداخلية مطابقة للمخطط ضمن التفاوت المسموح (يحتاج تدقيق)",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 2,
+          "criteriaAr": "مطابقة المناسيب Level مع المخطط",
+          "methodAr": "ضبط الميزان على نقطة مرجعية ومقارنة مناسيب القالب",
+          "acceptableTolerance": "منسوب القالب مطابق للمخطط",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 3,
+          "criteriaAr": "استقامة القالب وعدم وجود ميلان",
+          "methodAr": "فحص الاستقامة بالخيط أو الميزان على طول القالب",
+          "acceptableTolerance": "القالب مستقيم ولا يوجد ميلان ظاهر",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 4,
+          "criteriaAr": "تثبيت الدعامات والشدادات بشكل يضمن السلامة أثناء الصب",
+          "methodAr": "الفحص البصري للدعامات واختبار ثباتها يدوياً",
+          "acceptableTolerance": "الدعامات كافية ومثبتة وتمنع الحركة أو الانبعاج أثناء الصب",
+          "isCritical": true,
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 5,
+          "criteriaAr": "إحكام الفواصل ومنع تسرب اللباني",
+          "methodAr": "الفحص البصري للفواصل والزوايا والتقاطعات",
+          "acceptableTolerance": "لا توجد فتحات أو فجوات تسمح بتسرب اللباني",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 6,
+          "criteriaAr": "نظافة داخل القالب من المخلفات والنشارة والمواد الغريبة",
+          "methodAr": "الفحص البصري والتنظيف قبل الصب",
+          "acceptableTolerance": "داخل القالب نظيف ولا يوجد مخلفات",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 7,
+          "criteriaAr": "استخدام زيت قالب مناسب وبكمية مناسبة",
+          "methodAr": "الفحص البصري لطبقة الزيت على سطح القالب",
+          "acceptableTolerance": "طبقة رقيقة ومنتظمة — لا تجمعات زيت",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 8,
+          "criteriaAr": "عدم تلويث حديد التسليح بزيت القالب",
+          "methodAr": "الفحص البصري للحديد بعد دهن القالب",
+          "acceptableTolerance": "الحديد خالي من الزيت — أي تلويث يجب تنظيفه قبل الصب",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 9,
+          "criteriaAr": "سلامة الفتحات والـ Sleeves والـ Embedded Items",
+          "methodAr": "الفحص البصري لكل فتحة أو إدخال في القالب",
+          "acceptableTolerance": "جميع الفتحات والـ Sleeves موجودة وفي مكانها الصحيح ومثبتة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 10,
+          "criteriaAr": "عدم وجود خشب ضعيف أو متضرر يؤثر على جودة القالب",
+          "methodAr": "الفحص البصري للألواح والدعامات",
+          "acceptableTolerance": "جميع العناصر الخشبية سليمة وقادرة على تحمل الأحمال",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 11,
+          "criteriaAr": "وجود ممرات آمنة للفحص والصب حول القالب",
+          "methodAr": "الفحص البصري لممرات الحركة حول القالب",
+          "acceptableTolerance": "ممرات واضحة وآمنة للعمال والمهندس",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 12,
+          "criteriaAr": "اعتماد المهندس المشرف للقالب قبل الصب",
+          "methodAr": "مراجعة توقيع المهندس على سجل الاستلام",
+          "acceptableTolerance": "القالب مستلم ومعتمد قبل الصب",
+          "isCritical": true,
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "checklist",
+          "order": 13,
+          "title": {
+            "ar": "قائمة فحص سريعة للقالب الخشبي"
+          },
+          "items": [
+            {
+              "id": "chk-01",
+              "textAr": "مراجعة الأبعاد الداخلية",
+              "isRequired": true
+            },
+            {
+              "id": "chk-02",
+              "textAr": "مراجعة المناسيب",
+              "isRequired": true
+            },
+            {
+              "id": "chk-03",
+              "textAr": "فحص الاستقامة والعمودية",
+              "isRequired": true
+            },
+            {
+              "id": "chk-04",
+              "textAr": "فحص الدعامات والشدادات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-05",
+              "textAr": "سد الفواصل لمنع تسرب اللباني",
+              "isRequired": true
+            },
+            {
+              "id": "chk-06",
+              "textAr": "تنظيف داخل القالب",
+              "isRequired": true
+            },
+            {
+              "id": "chk-07",
+              "textAr": "دهن القالب بزيت مناسب",
+              "isRequired": true
+            },
+            {
+              "id": "chk-08",
+              "textAr": "عدم تلويث التسليح بالزيت",
+              "isRequired": true
+            },
+            {
+              "id": "chk-09",
+              "textAr": "مراجعة الفتحات والـ Sleeves",
+              "isRequired": true
+            },
+            {
+              "id": "chk-10",
+              "textAr": "عدم الصب قبل الاستلام والاعتماد",
+              "isRequired": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 5,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "ضعف تدعيم القالب قبل الصب مما يؤدي إلى انبعاج أو فتح أثناء الصب."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "عدم قياس الأبعاد الداخلية والاكتفاء بالنظر فقط."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "تسرب اللباني بسبب فواصل مفتوحة أو غير مسدودة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 4,
+          "content": {
+            "ar": "استخدام زيت قالب بكمية زائدة مما يسبب تلويث حديد التسليح."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 5,
+          "content": {
+            "ar": "وجود خشب ضعيف أو متضرر أو غير مناسب للعنصر."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 6,
+          "content": {
+            "ar": "عدم تنظيف داخل القالب من المخلفات والنشارة قبل الصب."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 7,
+          "content": {
+            "ar": "عدم مراجعة الفتحات والـ Sleeves قبل تركيب التسليح."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 8,
+          "content": {
+            "ar": "فك القالب مبكراً بدون اعتماد المهندس."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 9,
+          "content": {
+            "ar": "عدم توفير ممر آمن للعمال أثناء الصب والفحص."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-stripping",
+      "title": "ملاحظات حول فك القالب",
+      "type": "general",
+      "order": 6,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "فك القالب يعتمد على نوع العنصر وعمر الخرسانة والظروف الجوية والمتطلبات التصميمية والمواصفات المعتمدة. لا يجوز فك القالب مبكراً إذا كان يؤثر على سلامة العنصر أو يسبب تشقق أو هبوط. القرار ليس بيد العمال فقط، بل يتطلب تقييم مهندس."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "table",
+          "order": 2,
+          "caption": {
+            "ar": "نقاط مهمة قبل فك القالب"
+          },
+          "headers": [
+            "النقطة",
+            "لماذا مهمة؟",
+            "الملاحظة"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "عمر الخرسانة",
+                "يرتبط بتطور المقاومة — الفك المبكر يسبب تشقق",
+                "المدة حسب المواصفة والمشروع (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "نوع العنصر",
+                "الأعمدة تختلف عن البلاطات والكمرات",
+                "يحتاج قرار من المهندس حسب حالة العنصر"
+              ]
+            },
+            {
+              "cells": [
+                "الدعم السفلي",
+                "قد يحتاج إبقاء الدعم أو إعادة تدعيم مؤقت",
+                "حسب العنصر والمخطط (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "طريقة الفك",
+                "تأثير الفك المفاجئ يختلف عن الفك التدريجي",
+                "يجب أن يكون تدريجياً وآمناً لمنع تكسير الحافات"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "فك القالب ليس قرار عامل الموقع فقط؛ يجب أن يكون حسب تعليمات المهندس والمواصفة المعتمدة."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "فشل القالب أثناء الصب قد يسبب إصابات خطيرة وخسائر كبيرة — تأكد من الدعامات قبل البدء."
+          },
+          "severity": "high"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "لا تستخدم دعامات ضعيفة أو غير مثبتة في مناطق الصب."
+          },
+          "severity": "high"
+        },
+        {
+          "type": "safety_note",
+          "order": 3,
+          "message": {
+            "ar": "يجب توفير ممرات آمنة للعمال وعدم الوقوف تحت عناصر غير مدعومة جيداً."
+          },
+          "severity": "high"
+        }
+      ]
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 8,
+      "blocks": [
+        {
+          "type": "code_reference",
+          "order": 1,
+          "code": "ACI / BS EN / Project Specifications / Approved Formwork Method Statement",
+          "title": {
+            "ar": "مراجع فنية للقالب الخشبي"
+          },
+          "excerpt": {
+            "ar": "تصميم القالب والدعامات وفترات الفك يجب أن تعتمد على نوع العنصر وارتفاع الصب ومعدل الصب وقوة الخرسانة والمواصفات المعتمدة للمشروع. القيم الرقمية تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+          }
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "عند وجود صبات كبيرة أو ارتفاعات عالية أو ضغط جانبي كبير، يجب الرجوع إلى Method Statement أو تصميم شدة معتمد من المهندس."
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 9,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تم فحص القالب الخشبي لعنصر [اسم العنصر] حسب المخطط رقم [رقم المخطط] إصدار [Revision]، وتمت مراجعة الأبعاد والمناسيب والاستقامة والدعامات والإحكام والنظافة والفتحات قبل الصب. الملاحظات المسجلة: [الملاحظات]، ويتم الصب بعد معالجة الملاحظات واعتماد المهندس المشرف."
+          },
+          "variant": "paragraph"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "مسودة أولية لموضوع القالب الخشبي — تحتاج مراجعة ممارسة الموقع العراقي والتفاصيل الفنية من مهندس ذو خبرة.",
+    "approvalStatus": null
+  }
+}
