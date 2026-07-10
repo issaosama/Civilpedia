@@ -1,0 +1,716 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-10T00:00:00.000Z",
+    "updatedAt": "2026-07-10T00:00:00.000Z",
+    "source": "opencode",
+    "id": "masonry-works"
+  },
+  "topic": {
+    "id": "masonry-works",
+    "titleAr": "أعمال البناء",
+    "categoryId": "finishing-works",
+    "summaryAr": "أعمال البناء تشمل تنفيذ الجدران بالطابوق أو البلوك حسب المخططات، مع ضبط الاستقامة والشاقولية والمناسيب والربط والفتحات والمونة، لأنها تؤثر على جودة التشطيبات والعزل والأبواب والشبابيك.",
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "visual_theme": {
+      "accent": "brick"
+    },
+    "keyTopics": [
+      "أعمال البناء",
+      "طابوق",
+      "بلوك",
+      "Masonry",
+      "المونة",
+      "الشاقولية",
+      "الاستقامة",
+      "الفتحات",
+      "الربط",
+      "Joints",
+      "Lintels",
+      "قبل اللبخ"
+    ],
+    "tags": [
+      "بناء",
+      "طابوق",
+      "بلوك",
+      "موقع",
+      "جدران",
+      "تشطيبات",
+      "مونة",
+      "فتحات"
+    ],
+    "coverImageUrl": null,
+    "relatedTopicIds": [],
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "أعمال البناء بالماسونري (Masonry) هي عملية تنفيذ الجدران باستخدام الطابوق أو البلوك وربطها بالمونة الإسمنتية، حسب المخططات المعمارية والتفاصيل الإنشائية. جودة البناء تؤثر على كل المراحل اللي بعده: اللبخ، تركيب الأبواب والشبابيك، العزل، الكهرباء، الصحي، والتشطيب النهائي."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "أي انحراف بسيط بالجدار — في الاستقامة أو الشاقولية أو مكان الفتحة — ممكن يكبر ويسبب مشاكل تكسير وتعديل بعدها. الفحص المستمر أثناء البناء هو الحل."
+          },
+          "variant": "note"
+        },
+        {
+          "type": "table",
+          "order": 3,
+          "caption": {
+            "ar": "شنو نراجع في أعمال البناء؟"
+          },
+          "headers": [
+            "العنصر",
+            "سبب المراجعة",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "المحاور والمواقع",
+                "لضمان مكان الجدار حسب المخطط",
+                "تحديدها قبل البدء"
+              ]
+            },
+            {
+              "cells": [
+                "الشاقولية",
+                "لمنع ميلان الجدار",
+                "تفحص بالميزان/الخيط"
+              ]
+            },
+            {
+              "cells": [
+                "الاستقامة",
+                "لضمان سطح منتظم",
+                "مهم قبل اللبخ"
+              ]
+            },
+            {
+              "cells": [
+                "الفتحات",
+                "للأبواب والشبابيك والخدمات",
+                "يجب مطابقتها مع المخطط"
+              ]
+            },
+            {
+              "cells": [
+                "المونة والمفاصل",
+                "تؤثر على تماسك الجدار",
+                "حسب المواصفة"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "equipment",
+          "order": 1,
+          "title": "الأدوات والمواد المطلوبة لأعمال البناء",
+          "items": [
+            {
+              "nameAr": "مخطط معماري معتمد",
+              "purpose": "مرجع لمواقع الجدران والفتحات والأبعاد",
+              "specification": "آخر إصدار معتمد مع Revision"
+            },
+            {
+              "nameAr": "طابوق أو بلوك حسب المواصفة",
+              "purpose": "لبناء الجدران بالمقاس والنوع المطلوب",
+              "specification": "حسب المخطط والمواصفة (يحتاج تدقيق)"
+            },
+            {
+              "nameAr": "مونة بناء",
+              "purpose": "لربط الطابوق وتماسك الجدار",
+              "specification": "نسب الخلط حسب المواصفة (يحتاج تدقيق)"
+            },
+            {
+              "nameAr": "ميزان ماء أو ليزر",
+              "purpose": "لضبط الاستقامة والشاقولية والمناسيب",
+              "specification": "ميزان قامة أو ليزر دوار"
+            },
+            {
+              "nameAr": "خيط بناء",
+              "purpose": "لتحديد خطوط الجدران والمحاور",
+              "specification": "خيط شد إنشائي"
+            },
+            {
+              "nameAr": "شريط قياس",
+              "purpose": "لقياس الأبعاد والمسافات والفتحات",
+              "specification": "شريط قياس معدني بطول 5-10 م"
+            },
+            {
+              "nameAr": "شاقول",
+              "purpose": "للتأكد من عمودية الجدار",
+              "specification": "شاقول عادي"
+            },
+            {
+              "nameAr": "أدوات قص عند الحاجة",
+              "purpose": "لقص الطابوق أو البلوك حسب الموقع",
+              "specification": "قدوم أو منشار طابوق"
+            },
+            {
+              "nameAr": "ماء للترطيب إذا مطلوب",
+              "purpose": "لترطيب الطابوق في الظروف الجافة حسب المواصفة",
+              "specification": "ماء نظيف"
+            },
+            {
+              "nameAr": "معدات حماية شخصية",
+              "purpose": "حماية العمال أثناء القص والبناء",
+              "specification": "نظارات، قفازات، خوذة، أحذية سلامة"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ أعمال البناء",
+      "type": "execution",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "execution_step",
+          "order": 1,
+          "stepNumber": 1,
+          "description": {
+            "ar": "مراجعة آخر مخطط معماري معتمد وتحديد مواقع الجدران"
+          },
+          "notes": {
+            "ar": "تأكد من رقم المخطط والإصدار قبل البدء — الفتحات والجدران تتغير أحياناً."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 2,
+          "description": {
+            "ar": "تنظيف الأرضية أو السطح الذي سيتم البناء فوقه"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 3,
+          "description": {
+            "ar": "تحديد المحاور وخطوط الجدران والفتحات حسب المخطط"
+          },
+          "notes": {
+            "ar": "استخدم الخيط والشواخص لتحديد الجدران بدقة — لا تعتمد على التخمين."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 4,
+          "stepNumber": 4,
+          "description": {
+            "ar": "تحضير المونة أو المادة الرابطة حسب المواصفة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "نسب الخلط تختلف حسب نوع الطابوق والمواصفة — لا تعتمد على نسب تقليدية بدون مرجع."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 5,
+          "stepNumber": 5,
+          "description": {
+            "ar": "تنفيذ أول مدماك بدقة لأنه يتحكم بباقي الجدار"
+          },
+          "notes": {
+            "ar": "أول مدماك هو أساس الجدار — أي خطأ فيه يتضاعف مع كل مدماك."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 6,
+          "stepNumber": 6,
+          "description": {
+            "ar": "متابعة البناء مع فحص الاستقامة والشاقولية باستمرار"
+          },
+          "notes": {
+            "ar": "افحص بعد كل 3-4 مداميك — لا تنتظر حتى نهاية الجدار."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 7,
+          "stepNumber": 7,
+          "description": {
+            "ar": "المحافظة على انتظام المفاصل الأفقية والعمودية حسب المتطلبات (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "المفاصل المنتظمة تعطي جدار قوي ومنظر نظيف."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 8,
+          "stepNumber": 8,
+          "description": {
+            "ar": "ترك الفتحات للأبواب والشبابيك والخدمات حسب المخطط"
+          },
+          "notes": {
+            "ar": "لا تنسى فتحات الكهرباء والصحي قبل إكمال الجدار."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 9,
+          "stepNumber": 9,
+          "description": {
+            "ar": "تنفيذ الربط أو التقويات أو الـ Lintels حسب التفاصيل المعتمدة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "الـ Lintel أو العتبة فوق الفتحات ضروري — محددة بالمخطط والتفاصيل."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 10,
+          "stepNumber": 10,
+          "description": {
+            "ar": "تنظيف الجدار من المونة الزائدة وتجهيزه للمرحلة التالية"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 4,
+      "blocks": [
+        {
+          "type": "inspection_point",
+          "order": 1,
+          "criteriaAr": "مطابقة موقع الجدار للمخطط",
+          "methodAr": "قياس موقع الجدار ومقارنته مع المخطط المعماري",
+          "acceptableTolerance": "موقع الجدار مطابق للمخطط ضمن التفاوت المسموح",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 2,
+          "criteriaAr": "مطابقة السماكة والنوع للطابوق أو البلوك مع المخطط",
+          "methodAr": "الفحص البصري والقياس",
+          "acceptableTolerance": "السماكة والنوع مطابقان للمخطط",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 3,
+          "criteriaAr": "استقامة الجدار",
+          "methodAr": "فحص الاستقامة بالخيط أو القامة الطويلة",
+          "acceptableTolerance": "الجدار مستقيم ولا يوجد التواء ظاهر",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 4,
+          "criteriaAr": "شاقولية الجدار",
+          "methodAr": "فحص الشاقولية بالميزان أو الشاقول",
+          "acceptableTolerance": "الجدار شاقولي ضمن التفاوت المسموح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 5,
+          "criteriaAr": "انتظام المفاصل الأفقية والعمودية",
+          "methodAr": "الفحص البصري وقياس عرض المفاصل",
+          "acceptableTolerance": "المفاصل منتظمة حسب المتطلبات (يحتاج تدقيق)",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 6,
+          "criteriaAr": "جودة المونة وخلطها",
+          "methodAr": "الفحص البصري والتأكد من تماسك المونة",
+          "acceptableTolerance": "المونة مخلوطة بالنسب الصحيحة ولا توجد مونة ضعيفة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 7,
+          "criteriaAr": "مطابقة الفتحات للمخطط من حيث الموقع والأبعاد",
+          "methodAr": "قياس الفتحات ومقارنتها مع مخطط الأبواب والشبابيك والخدمات",
+          "acceptableTolerance": "الفتحات مطابقة للمخطط في الموقع والأبعاد والمنسوب",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 8,
+          "criteriaAr": "وجود Lintels أو تقويات فوق الفتحات",
+          "methodAr": "الفحص البصري والتأكد من وجود العتبات أو التقويات حسب التفاصيل",
+          "acceptableTolerance": "جميع الفتحات لها Lintel أو تقوية حسب المخطط",
+          "isCritical": true,
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 9,
+          "criteriaAr": "الربط مع العناصر المجاورة حسب التفاصيل",
+          "methodAr": "الفحص البصري للربط مع الأعمدة أو الجدران المجاورة",
+          "acceptableTolerance": "الربط منفذ حسب التفاصيل — لا يوجد فاصل أو ضعف",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 10,
+          "criteriaAr": "نظافة الجدار من المونة الزائدة قبل اللبخ",
+          "methodAr": "الفحص البصري للتأكد من نظافة سطح الجدار",
+          "acceptableTolerance": "الجدار نظيف وخالي من بقايا المونة قبل اللبخ",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 11,
+          "criteriaAr": "عدم وجود شروخ أو فراغات واضحة في البناء",
+          "methodAr": "الفحص البصري للجدار بالكامل",
+          "acceptableTolerance": "لا توجد شروخ أو فراغات واضحة تؤثر على تماسك الجدار",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 12,
+          "criteriaAr": "اعتماد المهندس أو المشرف قبل الانتقال للمرحلة التالية",
+          "methodAr": "مراجعة توقيع المهندس على سجل الاستلام",
+          "acceptableTolerance": "أعمال البناء مستلمة ومعتمدة رسمياً قبل اللبخ",
+          "isCritical": true,
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "checklist",
+          "order": 13,
+          "title": {
+            "ar": "قائمة فحص سريعة لأعمال البناء"
+          },
+          "items": [
+            {
+              "id": "chk-01",
+              "textAr": "مراجعة آخر مخطط معتمد",
+              "isRequired": true
+            },
+            {
+              "id": "chk-02",
+              "textAr": "تحديد مواقع الجدران",
+              "isRequired": true
+            },
+            {
+              "id": "chk-03",
+              "textAr": "فحص نوع وسماكة الطابوق/البلوك",
+              "isRequired": true
+            },
+            {
+              "id": "chk-04",
+              "textAr": "فحص الاستقامة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-05",
+              "textAr": "فحص الشاقولية",
+              "isRequired": true
+            },
+            {
+              "id": "chk-06",
+              "textAr": "مراجعة الفتحات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-07",
+              "textAr": "مراجعة المفاصل",
+              "isRequired": true
+            },
+            {
+              "id": "chk-08",
+              "textAr": "مراجعة الربط والتقويات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-09",
+              "textAr": "تنظيف الجدار",
+              "isRequired": true
+            },
+            {
+              "id": "chk-10",
+              "textAr": "عدم الانتقال لللبخ قبل الاستلام",
+              "isRequired": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 5,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تنفيذ الجدار من مخطط قديم أو بدون مراجعة الفتحات."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "أول مدماك غير مضبوط فيسبب انحراف كامل الجدار."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "عدم فحص الشاقولية أثناء التنفيذ."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 4,
+          "content": {
+            "ar": "اختلاف عرض المفاصل بشكل واضح."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 5,
+          "content": {
+            "ar": "نسيان فتحات الخدمات أو تنفيذها بمكان خاطئ."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 6,
+          "content": {
+            "ar": "ضعف الربط مع الأعمدة أو الجدران المجاورة حسب التفاصيل."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 7,
+          "content": {
+            "ar": "عدم تنفيذ تقوية أو Lintel فوق الفتحات عند الحاجة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 8,
+          "content": {
+            "ar": "ترك مونة زائدة أو سطح غير نظيف قبل اللبخ."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-openings",
+      "title": "ملاحظات حول الفتحات والتنسيق",
+      "type": "general",
+      "order": 6,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "الفتحات في الجدران (أبواب، شبابيك، فتحات خدمات) تحتاج تنسيق مع المخططات المعمارية ومخططات الخدمات قبل وأثناء البناء. أي اختلاف أو نسيان للفتحة يعني تكسير وتعديل بعد البناء، وهذا يضعف الجدار ويكلف وقت وجهد إضافي."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "table",
+          "order": 2,
+          "caption": {
+            "ar": "نقاط تنسيق مهمة قبل وأثناء البناء"
+          },
+          "headers": [
+            "النقطة",
+            "ليش مهمة؟",
+            "التصرف الصحيح"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "فتحات الأبواب",
+                "تؤثر على تركيب الباب",
+                "مطابقة المخطط قبل البناء"
+              ]
+            },
+            {
+              "cells": [
+                "فتحات الشبابيك",
+                "تؤثر على الألمنيوم والواجهات",
+                "مراجعة المنسوب والعرض"
+              ]
+            },
+            {
+              "cells": [
+                "تمديدات الكهرباء",
+                "تمنع التكسير العشوائي لاحقاً",
+                "تنسيق قبل التنفيذ"
+              ]
+            },
+            {
+              "cells": [
+                "تمديدات الصحي",
+                "تمنع تعارضات داخل الجدار",
+                "مراجعة مع مخططات الخدمات"
+              ]
+            },
+            {
+              "cells": [
+                "اللبخ",
+                "يتأثر باستقامة الجدار",
+                "فحص الجدار قبل التسليم"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "كلما كان البناء مضبوطاً، يقل التصحيح والتكسير والهدر في مراحل اللبخ والتشطيب."
+          },
+          "variant": "tip"
+        }
+      ]
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "تأكد من ثبات السقالات أو منصات العمل عند بناء الجدران العالية."
+          },
+          "severity": "high"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "تجنب رمي الطابوق أو البلوك من ارتفاع لأنه يسبب إصابات."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 3,
+          "message": {
+            "ar": "استخدم القفازات والنظارات عند القص أو التكسير."
+          },
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 8,
+      "blocks": [
+        {
+          "type": "code_reference",
+          "order": 1,
+          "code": "Project Drawings / Project Specifications / Iraqi Specifications / Manufacturer Recommendations",
+          "title": {
+            "ar": "مراجع فنية لأعمال البناء"
+          },
+          "excerpt": {
+            "ar": "نوع الطابوق أو البلوك، سماكة الجدران، نوع المونة، تفاصيل الربط، وفتحات الخدمات يجب أن تعتمد على المخططات والمواصفات المعتمدة للمشروع. القيم الرقمية تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+          }
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "أي تغيير بموقع الجدار أو الفتحة يجب أن يعتمد من الجهة المشرفة أو المصمم، خصوصاً إذا أثر على الإنشاء أو الخدمات."
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 9,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تم فحص أعمال البناء لمنطقة [اسم المنطقة/الطابق] حسب المخطط رقم [رقم المخطط] إصدار [Revision]، وتمت مراجعة مواقع الجدران والسماكات والاستقامة والشاقولية والفتحات والربط والتنظيف. الملاحظات المسجلة: [الملاحظات]، ويتم الانتقال للمرحلة التالية بعد معالجتها واعتماد المهندس المشرف."
+          },
+          "variant": "paragraph"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "مسودة أولية لموضوع أعمال البناء — تحتاج مراجعة تفاصيل الربط والـ Lintels والمفاصل حسب المواصفات المعتمدة للمشروع.",
+    "approvalStatus": null
+  }
+}

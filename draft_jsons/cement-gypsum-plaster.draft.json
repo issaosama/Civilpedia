@@ -1,0 +1,704 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-10T00:00:00.000Z",
+    "updatedAt": "2026-07-10T00:00:00.000Z",
+    "source": "opencode",
+    "id": "cement-gypsum-plaster"
+  },
+  "topic": {
+    "id": "cement-gypsum-plaster",
+    "titleAr": "اللبخ بالأسمنت والجص",
+    "categoryId": "finishing-works",
+    "summaryAr": "اللبخ بالأسمنت أو الجص يستخدم لتسوية وحماية أسطح الجدران والسقوف قبل التشطيب، ويحتاج إلى تحضير سطح جيد، ضبط السماكة والاستقامة، معالجة مناسبة، وفحص للتشققات والانفصال وضعف الالتصاق.",
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "visual_theme": {
+      "accent": "sand"
+    },
+    "keyTopics": [
+      "اللبخ",
+      "لبخ أسمنتي",
+      "لبخ جص",
+      "Plaster",
+      "طرطشة",
+      "استقامة الجدران",
+      "تشققات اللبخ",
+      "انفصال اللبخ",
+      "معالجة اللبخ",
+      "قبل الصبغ",
+      "Finishing"
+    ],
+    "tags": [
+      "لبخ",
+      "جص",
+      "أسمنت",
+      "تشطيبات",
+      "جدران",
+      "سقوف",
+      "طرطشة",
+      "صبغ"
+    ],
+    "coverImageUrl": null,
+    "relatedTopicIds": [],
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "اللبخ أو Plaster هو طبقة تغطية تُطبق على الجدران والسقوف لتسوية السطح وحمايته وتجهيزه للتشطيب النهائي. اللبخ الأسمنتي مناسب للأماكن الرطبة والخارجية، بينما الجص يستخدم عادة للأماكن الداخلية الجافة. طريقة التطبيق والتحضير قبل اللبخ تؤثر على جودة النتيجة النهائية أكثر من نوع المادة."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "اللبخ ما يصير مجرد تغطية للجدار؛ يعتمد بشكل كبير على تحضير السطح قبل التطبيق. سطح مغبر أو ضعيف أو غير معالج يؤدي إلى تشققات وانفصال وتطبيل بعد فترة."
+          },
+          "variant": "note"
+        },
+        {
+          "type": "table",
+          "order": 3,
+          "caption": {
+            "ar": "مقارنة مبسطة بين اللبخ الأسمنتي والجص"
+          },
+          "headers": [
+            "النوع",
+            "الاستخدام الشائع",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "اللبخ الأسمنتي",
+                "الأماكن الرطبة والخارجية حسب المواصفة",
+                "يحتاج معالجة وحماية"
+              ]
+            },
+            {
+              "cells": [
+                "الجص",
+                "الأماكن الداخلية الجافة غالباً",
+                "يتأثر بالرطوبة"
+              ]
+            },
+            {
+              "cells": [
+                "الطرطشة",
+                "طبقة تحضيرية لتحسين الالتصاق",
+                "حسب حالة السطح والمواصفة"
+              ]
+            },
+            {
+              "cells": [
+                "معجون/تشطيب نهائي",
+                "قبل الصبغ أو التشطيب",
+                "يعتمد على نظام التشطيب"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "equipment",
+          "order": 1,
+          "title": "الأدوات والمواد المطلوبة للبخ",
+          "items": [
+            {
+              "nameAr": "إسمنت ورمل أو خلطة معتمدة",
+              "purpose": "مادة اللبخ الأساسية للأسمنتي",
+              "specification": "حسب المواصفة المعتمدة"
+            },
+            {
+              "nameAr": "جص حسب الاستخدام",
+              "purpose": "لللبخ الجصي في الأماكن الداخلية",
+              "specification": "جص بناء ناعم حسب المواصفة (يحتاج تدقيق)"
+            },
+            {
+              "nameAr": "ماء نظيف",
+              "purpose": "للخلط والمعالجة",
+              "specification": "ماء نظيف غير ملوث"
+            },
+            {
+              "nameAr": "أدوات خلط",
+              "purpose": "لخلط مادة اللبخ",
+              "specification": "خلاطة أو أداة خلط يدوية"
+            },
+            {
+              "nameAr": "مالج وقاعدة تسوية",
+              "purpose": "لتطبيق وتسوية اللبخ",
+              "specification": "مالج معدني، مسطرين"
+            },
+            {
+              "nameAr": "ميزان ماء أو ليزر",
+              "purpose": "لضبط الاستقامة والمناسيب",
+              "specification": "ميزان قامة أو ليزر دوار"
+            },
+            {
+              "nameAr": "قدات أو بروفايلات ضبط",
+              "purpose": "علامات لتحديد سمك اللبخ واستقامته",
+              "specification": "قدات خشبية أو معدنية"
+            },
+            {
+              "nameAr": "فرشاة تنظيف أو ماء تنظيف",
+              "purpose": "لتنظيف السطح قبل اللبخ",
+              "specification": "فرشاة، ماء نظيف"
+            },
+            {
+              "nameAr": "مواد Bonding Agent عند الحاجة",
+              "purpose": "لتحسين التصاق اللبخ على الأسطح الملساء",
+              "specification": "حسب اعتماد المهندس والمواصفة"
+            },
+            {
+              "nameAr": "معدات حماية شخصية",
+              "purpose": "حماية العمال أثناء الخلط والتطبيق",
+              "specification": "نظارات، قفازات، كمامة، خوذة"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ اللبخ",
+      "type": "execution",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "execution_step",
+          "order": 1,
+          "stepNumber": 1,
+          "description": {
+            "ar": "فحص الجدار أو السطح قبل اللبخ والتأكد من استلام أعمال البناء أو الخرسانة"
+          },
+          "notes": {
+            "ar": "لا تبدأ باللبخ إذا كان الجدار غير مستلم — أي مشكلة بالجدار راح تظهر بعد اللبخ."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 2,
+          "description": {
+            "ar": "تنظيف السطح من الغبار والزيوت والمونة الضعيفة"
+          },
+          "notes": {
+            "ar": "السطح المغبر أو المدهون بالزيوت يسبب انفصال اللبخ بعد التطبيق."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 3,
+          "description": {
+            "ar": "معالجة الشروخ أو الفراغات أو المناطق الضعيفة قبل البدء"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 4,
+          "stepNumber": 4,
+          "description": {
+            "ar": "ترطيب السطح أو تنفيذ طبقة تحضيرية مثل الطرطشة حسب المواصفة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "الطرطشة تزيد الالتصاق — بعض الأسطح تحتاجها وبعضها لا — راجع المواصفة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 5,
+          "stepNumber": 5,
+          "description": {
+            "ar": "تثبيت القدات أو علامات ضبط السماكة والاستقامة"
+          },
+          "notes": {
+            "ar": "القدات هي أساس ضبط سماكة اللبخ — لا تبدأ بدونها."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 6,
+          "stepNumber": 6,
+          "description": {
+            "ar": "خلط مادة اللبخ بالنسب والطريقة المعتمدة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "نسب الخلط تختلف حسب المادة المستخدمة والمواصفة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 7,
+          "stepNumber": 7,
+          "description": {
+            "ar": "تطبيق اللبخ على طبقات إذا تطلبت السماكة أو المواصفة ذلك (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "طبقة واحدة سميكة تسبب تشقق وضعف — التطبيق على طبقات أفضل."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 8,
+          "stepNumber": 8,
+          "description": {
+            "ar": "تسوية السطح وفحص الاستقامة والزوايا"
+          },
+          "notes": {
+            "ar": "استخدم القاعدة والميزان للتأكد من الاستقامة بعد التسوية."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 9,
+          "stepNumber": 9,
+          "description": {
+            "ar": "معالجة اللبخ الأسمنتي وحمايته من الجفاف السريع (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "اللبخ الأسمنتي يحتاج معالجة بالماء — خاصة في الجو الحار."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 10,
+          "stepNumber": 10,
+          "description": {
+            "ar": "عدم البدء بالصبغ أو التشطيب النهائي قبل جفاف السطح وقبوله حسب المواصفة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "الدهان فوق لبخ غير جاف يسبب تقشر وفشل التشطيب."
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 4,
+      "blocks": [
+        {
+          "type": "inspection_point",
+          "order": 1,
+          "criteriaAr": "نظافة السطح من الغبار والزيوت والمونة الضعيفة قبل اللبخ",
+          "methodAr": "الفحص البصري للسطح قبل التطبيق",
+          "acceptableTolerance": "السطح نظيف وجاف (أو رطب حسب المطلوب) وخالي من المواد الضعيفة",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 2,
+          "criteriaAr": "معالجة الفراغات والشروخ قبل اللبخ",
+          "methodAr": "الفحص البصري والتأكد من معالجة العيوب",
+          "acceptableTolerance": "الشروخ والفراغات معالجة حسب المواصفة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 3,
+          "criteriaAr": "وجود طبقة تحضيرية أو طرطشة عند الحاجة",
+          "methodAr": "الفحص البصري والتأكد من وجود التحضير المناسب",
+          "acceptableTolerance": "التحضير منفذ حسب المواصفة وحالة السطح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 4,
+          "criteriaAr": "مطابقة السماكة المطلوبة للبخ",
+          "methodAr": "قياس السماكة بعد التطبيق ومقارنتها بالمطلوب",
+          "acceptableTolerance": "السماكة ضمن التفاوت المسموح حسب المواصفة (يحتاج تدقيق)",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 5,
+          "criteriaAr": "استقامة السطح بعد اللبخ",
+          "methodAr": "فحص الاستقامة بالقاعدة الطويلة أو الليزر",
+          "acceptableTolerance": "السطح مستقيم ضمن التفاوت المسموح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 6,
+          "criteriaAr": "شاقولية الجدران بعد اللبخ",
+          "methodAr": "فحص الشاقولية بالميزان أو الشاقول",
+          "acceptableTolerance": "الجدار شاقولي ضمن التفاوت المسموح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 7,
+          "criteriaAr": "ضبط الزوايا والحافات",
+          "methodAr": "الفحص البصري والتأكد من حدة الزوايا واستقامتها",
+          "acceptableTolerance": "الزوايا مضبوطة والحافات واضحة ونظيفة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 8,
+          "criteriaAr": "عدم وجود تشققات في اللبخ",
+          "methodAr": "الفحص البصري للسطح بالكامل",
+          "acceptableTolerance": "لا توجد تشققات ظاهرة تؤثر على جودة السطح",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 9,
+          "criteriaAr": "عدم وجود انفصال أو صوت تطبيل عند الطرق الخفيف",
+          "methodAr": "الطرق الخفيف على السطح بالمطرقة أو الأداة المناسبة",
+          "acceptableTolerance": "لا توجد مناطق تطبيل أو انفصال — الصوت موحد",
+          "isCritical": true,
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 10,
+          "criteriaAr": "جودة السطح قبل الصبغ أو التشطيب",
+          "methodAr": "الفحص البصري والتأكد من نعومة السطح وخلوه من العيوب",
+          "acceptableTolerance": "السطح أملس ونظيف وجاهز للتشطيب",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 11,
+          "criteriaAr": "معالجة اللبخ الأسمنتي حسب المواصفة",
+          "methodAr": "الفحص البصري للتأكد من وجود معالجة مناسبة",
+          "acceptableTolerance": "اللبخ الأسمنتي معالج ومحمي من الجفاف السريع",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 12,
+          "criteriaAr": "اعتماد المهندس أو المشرف قبل الصبغ أو التشطيب",
+          "methodAr": "مراجعة توقيع المهندس على سجل الاستلام",
+          "acceptableTolerance": "اللبخ مستلم ومعتمد قبل البدء بالصبغ أو التشطيب",
+          "isCritical": true,
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "checklist",
+          "order": 13,
+          "title": {
+            "ar": "قائمة فحص سريعة للبخ"
+          },
+          "items": [
+            {
+              "id": "chk-01",
+              "textAr": "تنظيف السطح",
+              "isRequired": true
+            },
+            {
+              "id": "chk-02",
+              "textAr": "فحص الشروخ والفراغات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-03",
+              "textAr": "تنفيذ الطرطشة أو التحضير عند الحاجة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-04",
+              "textAr": "ضبط القدات والسماكة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-05",
+              "textAr": "فحص الاستقامة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-06",
+              "textAr": "فحص الزوايا",
+              "isRequired": true
+            },
+            {
+              "id": "chk-07",
+              "textAr": "فحص التشققات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-08",
+              "textAr": "فحص التطبيل",
+              "isRequired": true
+            },
+            {
+              "id": "chk-09",
+              "textAr": "معالجة اللبخ الأسمنتي",
+              "isRequired": true
+            },
+            {
+              "id": "chk-10",
+              "textAr": "عدم الصبغ قبل الاستلام",
+              "isRequired": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 5,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "اللبخ فوق سطح مغبر أو ضعيف."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "عدم تنفيذ تحضير أو طرطشة عند الحاجة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "سماكة كبيرة بطبقة واحدة بدون معالجة مناسبة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 4,
+          "content": {
+            "ar": "عدم ترطيب أو معالجة اللبخ الأسمنتي."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 5,
+          "content": {
+            "ar": "استخدام الجص في أماكن رطبة بدون اعتماد."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 6,
+          "content": {
+            "ar": "عدم ضبط الزوايا والحافات."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 7,
+          "content": {
+            "ar": "الصبغ فوق لبخ غير جاف أو غير مقبول."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 8,
+          "content": {
+            "ar": "قبول السطح رغم وجود تطبيل أو انفصال."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-defects",
+      "title": "فحص التطبيل والتشققات",
+      "type": "general",
+      "order": 6,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "التطبيل هو صوت أجوف يسمع عند الطرق الخفيف على سطح اللبخ، ويدل على ضعف الالتصاق أو انفصال بين اللبخ والقاعدة. التشققات تظهر لأسباب متعددة: جفاف سريع، سماكة غير مناسبة، ضعف المادة أو تحرك القاعدة. فحص التطبيل والتشققات جزء أساسي من استلام اللبخ."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "table",
+          "order": 2,
+          "caption": {
+            "ar": "مشاكل شائعة في اللبخ"
+          },
+          "headers": [
+            "المشكلة",
+            "العلامة",
+            "التصرف المقترح"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "تشققات شعرية",
+                "خطوط رفيعة على السطح",
+                "تقييم السبب والمعالجة حسب الحالة"
+              ]
+            },
+            {
+              "cells": [
+                "تطبيل",
+                "صوت أجوف عند الطرق الخفيف",
+                "إزالة وإعادة تنفيذ المنطقة عند الحاجة"
+              ]
+            },
+            {
+              "cells": [
+                "انفصال",
+                "سقوط أو ضعف التصاق",
+                "يحتاج إزالة ومعالجة السبب"
+              ]
+            },
+            {
+              "cells": [
+                "ضعف السطح",
+                "تفتت أو غبار",
+                "يحتاج تقييم خلطة أو معالجة"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "لا يتم قبول اللبخ من الشكل فقط؛ يجب فحص الاستقامة والتشققات والتطبيل وجودة الالتصاق."
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "استخدم نظارات وقفازات عند خلط الإسمنت أو الجص لتجنب تهيج الجلد والعين."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "تأكد من سلامة السقالات أو السلالم عند لبخ الجدران العالية والسقوف."
+          },
+          "severity": "high"
+        },
+        {
+          "type": "safety_note",
+          "order": 3,
+          "message": {
+            "ar": "تجنب استنشاق الغبار أثناء الخلط أو تنظيف السطح."
+          },
+          "severity": "medium"
+        }
+      ]
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 8,
+      "blocks": [
+        {
+          "type": "code_reference",
+          "order": 1,
+          "code": "Project Specifications / Iraqi Specifications / Manufacturer Recommendations",
+          "title": {
+            "ar": "مراجع فنية للبخ بالأسمنت والجص"
+          },
+          "excerpt": {
+            "ar": "سماكة اللبخ، نسب الخلط، نوع التحضير، مدة المعالجة، وشروط قبول السطح يجب أن تعتمد على المواصفات المعتمدة وتوصيات المواد المستخدمة. القيم الرقمية تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+          }
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "اختيار اللبخ الأسمنتي أو الجص يعتمد على موقع السطح والرطوبة ونظام التشطيب النهائي، ولا يجوز تعميم مادة واحدة لكل الحالات."
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 9,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تم فحص أعمال اللبخ لمنطقة [اسم المنطقة/الطابق]، وتمت مراجعة نظافة السطح والتحضير والسماكة والاستقامة والزوايا والتشققات والتطبيل والمعالجة. الملاحظات المسجلة: [الملاحظات]، ويتم اعتماد السطح بعد معالجة الملاحظات وقبول المهندس المشرف."
+          },
+          "variant": "paragraph"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "مسودة أولية لموضوع اللبخ بالأسمنت والجص — تحتاج مراجعة نسب الخلط وسماكات التطبيق وطرق المعالجة حسب المواصفات المعتمدة.",
+    "approvalStatus": null
+  }
+}
