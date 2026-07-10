@@ -1,0 +1,687 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-10T00:00:00.000Z",
+    "updatedAt": "2026-07-10T00:00:00.000Z",
+    "source": "opencode",
+    "id": "honeycombing-repair"
+  },
+  "topic": {
+    "id": "honeycombing-repair",
+    "titleAr": "التعشيش وإصلاحه",
+    "categoryId": "concrete",
+    "summaryAr": "التعشيش هو فراغات أو مناطق ضعيفة تظهر في الخرسانة بسبب ضعف الدمك أو سوء الصب أو ازدحام التسليح أو فقدان المونة، وإصلاحه يعتمد على تقييم شدته وموقعه قبل اختيار طريقة المعالجة المناسبة.",
+    "level": "intermediate",
+    "planKey": "free",
+    "status": "draft",
+    "visual_theme": {
+      "accent": "maroon"
+    },
+    "keyTopics": [
+      "التعشيش",
+      "Honeycombing",
+      "إصلاح الخرسانة",
+      "عيوب الصب",
+      "دمك الخرسانة",
+      "ترميم الخرسانة",
+      "Non-shrink Grout",
+      "Repair Mortar",
+      "فحص الخرسانة",
+      "قبول ورفض الخرسانة"
+    ],
+    "tags": [
+      "خرسانة",
+      "تعشيش",
+      "ترميم",
+      "صب",
+      "دمك",
+      "جودة",
+      "موقع",
+      "إصلاح"
+    ],
+    "coverImageUrl": null,
+    "relatedTopicIds": [],
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "التعشيش أو Honeycombing هو ظهور فراغات ومناطق حصى مكشوف في الخرسانة بعد فك القالب، بسبب فشل المونة بملء الفراغات بين الحصى أثناء الصب. يحدث غالباً نتيجة ضعف الدمك أو ازدحام التسليح أو صعوبة وصول الخرسانة للأماكن الضيقة أو فقدان اللباني من القالب. التعشيش مشكلة جودة تؤثر على مظهر الخرسانة وقد تؤثر على متانتها وحماية التسليح حسب شدته."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "لا يجوز إصلاح التعشيش العميق أو القريب من التسليح باجتهاد العمال فقط؛ يجب تقييمه من المهندس المشرف أو المصمم حسب شدة الحالة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "table",
+          "order": 3,
+          "caption": {
+            "ar": "أسباب شائعة للتعشيش"
+          },
+          "headers": [
+            "السبب",
+            "شنو يصير بالموقع؟",
+            "النتيجة"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "ضعف الدمك",
+                "الخرسانة لا تملأ الفراغات",
+                "فراغات وسطح مفتوح"
+              ]
+            },
+            {
+              "cells": [
+                "ازدحام التسليح",
+                "صعوبة مرور الخرسانة",
+                "تعشيش حول الحديد"
+              ]
+            },
+            {
+              "cells": [
+                "تسرب اللباني",
+                "فقدان المونة من القالب",
+                "حصى مكشوف وفراغات"
+              ]
+            },
+            {
+              "cells": [
+                "خرسانة غير مناسبة",
+                "قابلية تشغيل ضعيفة",
+                "صعوبة بالصب والدمك"
+              ]
+            },
+            {
+              "cells": [
+                "صب خاطئ",
+                "سقوط من ارتفاع أو توزيع ضعيف",
+                "انفصال حبيبي محتمل"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-classification",
+      "title": "تصنيف التعشيش",
+      "type": "general",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "table",
+          "order": 1,
+          "caption": {
+            "ar": "تصنيف مبدئي للتعشيش"
+          },
+          "headers": [
+            "النوع",
+            "الوصف",
+            "التصرف المقترح"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "سطحي",
+                "فراغات بسيطة بالسطح بدون كشف تسليح",
+                "إصلاح موضعي بعد تنظيف وتقييم"
+              ]
+            },
+            {
+              "cells": [
+                "متوسط",
+                "فراغات أعمق أو حصى مكشوف بوضوح",
+                "يحتاج تقييم مهندس وطريقة إصلاح معتمدة"
+              ]
+            },
+            {
+              "cells": [
+                "شديد",
+                "كشف تسليح أو فراغ عميق أو قرب منطقة حرجة",
+                "إيقاف الإصلاح العشوائي وطلب قرار هندسي"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "هذا التصنيف مبدئي للمساعدة بالموقع وليس بديلاً عن قرار المهندس أو الفحص المختبري عند الحاجة. (يحتاج تدقيق)"
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "equipment",
+          "order": 1,
+          "title": "الأدوات والمواد المطلوبة لإصلاح التعشيش",
+          "items": [
+            {
+              "nameAr": "فرشاة سلك أو أدوات تنظيف",
+              "purpose": "لتنظيف المنطقة من الخرسانة الضعيفة والمفككة",
+              "specification": "فرشاة سلك معدنية أو أداة تنظيف مناسبة"
+            },
+            {
+              "nameAr": "هواء مضغوط أو ماء تنظيف حسب الاعتماد",
+              "purpose": "لإزالة الغبار والشوائب قبل الإصلاح",
+              "specification": "كمبرسور هواء أو ماء نظيف تحت الضغط"
+            },
+            {
+              "nameAr": "مطرقة خفيفة للفحص الأولي",
+              "purpose": "لتقييم عمق التعشيش ومدى انتشاره",
+              "specification": "مطرقة مهندس أو مطرقة خفيفة"
+            },
+            {
+              "nameAr": "مواد Repair Mortar معتمدة",
+              "purpose": "لملء الفراغات وإصلاح السطح",
+              "specification": "حسب اعتماد المهندس والمواصفة (يحتاج تدقيق)"
+            },
+            {
+              "nameAr": "Non-shrink Grout عند الحاجة",
+              "purpose": "للحالات المتوسطة أو الشديدة أو القريبة من التسليح",
+              "specification": "حسب اعتماد المهندس ومواصفة المنتج"
+            },
+            {
+              "nameAr": "Bonding Agent إذا معتمد",
+              "purpose": "لربط مادة الإصلاح مع الخرسانة القديمة",
+              "specification": "حسب تعليمات الشركة المصنعة واعتماد المهندس"
+            },
+            {
+              "nameAr": "أدوات تطبيق وترميم",
+              "purpose": "لتطبيق مادة الإصلاح وضغطها داخل الفراغات",
+              "specification": "مسطرين، ملعقة، أو أدوات حقن عند الحاجة"
+            },
+            {
+              "nameAr": "أدوات قياس وتوثيق",
+              "purpose": "لقياس عمق وحجم التعشيش وتوثيق الحالة",
+              "specification": "مسطرة، شريط قياس، كاميرا توثيق"
+            },
+            {
+              "nameAr": "معدات حماية شخصية",
+              "purpose": "حماية العمال أثناء التكسير والتنظيف والتطبيق",
+              "specification": "نظارات، قفازات، كمامة، خوذة، أحذية سلامة"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات التعامل مع التعشيش",
+      "type": "execution",
+      "order": 4,
+      "blocks": [
+        {
+          "type": "execution_step",
+          "order": 1,
+          "stepNumber": 1,
+          "description": {
+            "ar": "توثيق مكان التعشيش بالصور وتحديد العنصر والموقع"
+          },
+          "notes": {
+            "ar": "التوثيق قبل أي إصلاح ضروري لمتابعة الحالة واتخاذ القرار."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 2,
+          "description": {
+            "ar": "منع الإصلاح العشوائي قبل تقييم الحالة"
+          },
+          "notes": {
+            "ar": "لا تسمح بتغطية التعشيش بمونة بدون تنظيف أو تقييم."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 3,
+          "description": {
+            "ar": "تنظيف المنطقة من الخرسانة الضعيفة أو المفككة حسب توجيه المهندس"
+          },
+          "notes": {
+            "ar": "أزل كل خرسانة ضعيفة أو مفككة بدون إضعاف العنصر."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 4,
+          "stepNumber": 4,
+          "description": {
+            "ar": "تحديد عمق وحجم التعشيش ومدى قربه من التسليح"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 5,
+          "stepNumber": 5,
+          "description": {
+            "ar": "تصنيف الحالة: سطحية، متوسطة، أو شديدة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "التصنيف حسب الملاحظة البصرية والقياس — لكن القرار النهائي للمهندس."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 6,
+          "stepNumber": 6,
+          "description": {
+            "ar": "اختيار مادة الإصلاح المعتمدة حسب الحالة والمواصفة"
+          },
+          "notes": {
+            "ar": "استخدم المواد المعتمدة فقط — لا تستخدم مواد غير مألوفة بدون اعتماد."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 7,
+          "stepNumber": 7,
+          "description": {
+            "ar": "ترطيب السطح أو استخدام Bonding Agent حسب تعليمات المادة المعتمدة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "كل مادة إصلاح لها تعليمات خاصة — اتبعها حرفياً."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 8,
+          "stepNumber": 8,
+          "description": {
+            "ar": "تطبيق مادة الإصلاح أو الـ Grout بطريقة صحيحة مع الدمك والملء الكامل"
+          },
+          "notes": {
+            "ar": "تأكد من ملء كل الفراغات — السطح فقط لا يكفي."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 9,
+          "stepNumber": 9,
+          "description": {
+            "ar": "معالجة منطقة الإصلاح وحمايتها من الجفاف أو الصدمات"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 10,
+          "stepNumber": 10,
+          "description": {
+            "ar": "توثيق الإصلاح وإعادة الفحص قبل القبول النهائي"
+          },
+          "notes": {
+            "ar": "بعد الإصلاح، وثق النتيجة وصورها — سجل القبول النهائي."
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 5,
+      "blocks": [
+        {
+          "type": "inspection_point",
+          "order": 1,
+          "criteriaAr": "توثيق التعشيش بالصور وتحديد العنصر والموقع قبل الإصلاح",
+          "methodAr": "تصوير المنطقة وتحديد رقم العنصر وموقعه في المخطط",
+          "acceptableTolerance": "صور واضحة قبل الإصلاح مع تحديد العنصر",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 2,
+          "criteriaAr": "تحديد موقع وحجم التعشيش بدقة",
+          "methodAr": "قياس أبعاد وعمق التعشيش",
+          "acceptableTolerance": "الموقع والحجم مسجلان قبل البدء بالإصلاح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 3,
+          "criteriaAr": "تقييم قرب التعشيش من حديد التسليح",
+          "methodAr": "الفحص البصري والقياس المباشر عند الشك",
+          "acceptableTolerance": "تم تقييم قرب التعشيش من التسليح — الحالة مسجلة",
+          "isCritical": true,
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 4,
+          "criteriaAr": "إزالة الخرسانة الضعيفة والمفككة من المنطقة",
+          "methodAr": "استخدام الفرشاة أو المطرقة الخفيفة حسب توجيه المهندس",
+          "acceptableTolerance": "الخرسانة الضعيفة أزيلت — لا توجد مواد مفككة",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 5,
+          "criteriaAr": "نظافة السطح من الغبار والشوائب قبل تطبيق الإصلاح",
+          "methodAr": "الفحص البصري ونظافة المنطقة بعد التنظيف",
+          "acceptableTolerance": "السطح نظيف وجاهز للإصلاح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 6,
+          "criteriaAr": "اعتماد مادة الإصلاح المستخدمة من المهندس",
+          "methodAr": "مراجعة اعتماد المادة مع المواصفة والمخطط",
+          "acceptableTolerance": "مادة الإصلاح معتمدة ومناسبة للحالة",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 7,
+          "criteriaAr": "استخدام Bonding Agent عند الحاجة حسب تعليمات المادة",
+          "methodAr": "الفحص البصري للتأكد من تطبيق الـ Bonding Agent عند الضرورة",
+          "acceptableTolerance": "تم تطبيق Bonding Agent إذا تطلبه تعليمات المادة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 8,
+          "criteriaAr": "ملء الفراغات بالكامل بدون ترك فراغات هوائية",
+          "methodAr": "الفحص البصري والضغط الخفيف بعد التطبيق",
+          "acceptableTolerance": "الفراغات ممتلئة بالكامل — لا يوجد فراغ ظاهر",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 9,
+          "criteriaAr": "معالجة منطقة الإصلاح حسب تعليمات المادة والمواصفة",
+          "methodAr": "الفحص البصري والتأكد من وجود معالجة مناسبة",
+          "acceptableTolerance": "منطقة الإصلاح معالجة ومحمية من الجفاف أو الصدمات",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 10,
+          "criteriaAr": "عدم وجود فراغات أو تشقق بعد الإصلاح",
+          "methodAr": "الفحص البصري بعد جفاف مادة الإصلاح",
+          "acceptableTolerance": "لا توجد فراغات أو تشققات ظاهرة بعد الإصلاح",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 11,
+          "criteriaAr": "اعتماد المهندس للحالات المتوسطة والشديدة",
+          "methodAr": "مراجعة تقرير المهندس وتوجيهاته",
+          "acceptableTolerance": "الحالة المتوسطة أو الشديدة معتمدة من المهندس المختص",
+          "isCritical": true,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 12,
+          "criteriaAr": "توثيق الإصلاح النهائي بالصور والتقرير",
+          "methodAr": "تصوير المنطقة بعد الإصلاح وتسجيل النتيجة",
+          "acceptableTolerance": "الإصلاح موثق بالصور قبل وبعد مع التقرير النهائي",
+          "isCritical": true,
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "checklist",
+          "order": 13,
+          "title": {
+            "ar": "قائمة فحص سريعة للتعشيش"
+          },
+          "items": [
+            {
+              "id": "chk-01",
+              "textAr": "تصوير التعشيش قبل الإصلاح",
+              "isRequired": true
+            },
+            {
+              "id": "chk-02",
+              "textAr": "تحديد العنصر والموقع",
+              "isRequired": true
+            },
+            {
+              "id": "chk-03",
+              "textAr": "منع الإصلاح العشوائي",
+              "isRequired": true
+            },
+            {
+              "id": "chk-04",
+              "textAr": "تقييم العمق والحجم",
+              "isRequired": true
+            },
+            {
+              "id": "chk-05",
+              "textAr": "التأكد من عدم وجود خرسانة ضعيفة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-06",
+              "textAr": "اعتماد مادة الإصلاح",
+              "isRequired": true
+            },
+            {
+              "id": "chk-07",
+              "textAr": "تنظيف السطح",
+              "isRequired": true
+            },
+            {
+              "id": "chk-08",
+              "textAr": "ملء الفراغات بالكامل",
+              "isRequired": true
+            },
+            {
+              "id": "chk-09",
+              "textAr": "معالجة الإصلاح",
+              "isRequired": true
+            },
+            {
+              "id": "chk-10",
+              "textAr": "توثيق النتيجة بعد الإصلاح",
+              "isRequired": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 6,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تغطية التعشيش بالمونة فقط بدون تنظيف أو تقييم."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "إصلاح التعشيش قبل تصويره وتوثيقه."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "استخدام مواد غير معتمدة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 4,
+          "content": {
+            "ar": "ترك خرسانة ضعيفة داخل المنطقة قبل الإصلاح."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 5,
+          "content": {
+            "ar": "عدم معالجة مادة الإصلاح بعد التطبيق."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 6,
+          "content": {
+            "ar": "تجاهل التعشيش القريب من التسليح."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 7,
+          "content": {
+            "ar": "قبول الإصلاح من الشكل الخارجي فقط."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 8,
+          "content": {
+            "ar": "عدم رفع الحالة للمهندس إذا كانت عميقة أو متكررة."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "ارتدِ النظارات والقفازات عند تكسير أو تنظيف الخرسانة الضعيفة."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "لا تستخدم مواد كيميائية أو Bonding Agent بدون قراءة تعليمات السلامة."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 3,
+          "message": {
+            "ar": "في العناصر الحرجة أو الشدات غير المستقرة، لا تبدأ أي تكسير أو إصلاح بدون تقييم سلامة."
+          },
+          "severity": "high"
+        }
+      ]
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 8,
+      "blocks": [
+        {
+          "type": "code_reference",
+          "order": 1,
+          "code": "ACI Repair Guides / ASTM / Manufacturer Datasheets / Project Specifications",
+          "title": {
+            "ar": "مراجع فنية لإصلاح التعشيش"
+          },
+          "excerpt": {
+            "ar": "طريقة إصلاح التعشيش تعتمد على عمق العيب وموقعه وقربه من التسليح وحالة العنصر ونوع مادة الإصلاح المعتمدة. يجب الرجوع للمواصفات ونشرات الشركة المصنعة وتوجيهات المهندس. (يحتاج تدقيق)"
+          }
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "لا توجد طريقة واحدة تصلح لكل حالات التعشيش؛ الإصلاح يجب أن يكون حسب تقييم الحالة وليس حسب الشكل الخارجي فقط."
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 9,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تم رصد تعشيش في عنصر [اسم العنصر] بمنطقة [الموقع]، وتم توثيق الحالة بالصور وتقييمها مبدئياً من حيث العمق والقرب من التسليح. تم تنفيذ/سيتم تنفيذ الإصلاح باستخدام [المادة/الطريقة] بعد اعتماد المهندس المشرف، مع توثيق نتيجة الإصلاح قبل القبول النهائي."
+          },
+          "variant": "paragraph"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "مسودة أولية لموضوع التعشيش وإصلاحه — تحتاج مراجعة تصنيف الحالات وطرق الإصلاح حسب المواصفات المعتمدة.",
+    "approvalStatus": null
+  }
+}

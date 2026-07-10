@@ -1,0 +1,596 @@
+{
+  "_meta": {
+    "schemaVersion": "1.0.0",
+    "version": 1,
+    "createdAt": "2026-07-10T00:00:00.000Z",
+    "updatedAt": "2026-07-10T00:00:00.000Z",
+    "source": "opencode",
+    "id": "blinding-concrete"
+  },
+  "topic": {
+    "id": "blinding-concrete",
+    "titleAr": "صبة النظافة",
+    "categoryId": "concrete",
+    "summaryAr": "صبة النظافة هي طبقة خرسانية بسيطة تنفذ فوق التربة أو طبقة الإحلال لتوفير سطح نظيف ومستوي للعمل فوقه، وحماية التسليح والعزل وتقليل اختلاط خرسانة الأساس بالتربة.",
+    "level": "basic",
+    "planKey": "free",
+    "status": "draft",
+    "visual_theme": {
+      "accent": "cement_gray"
+    },
+    "keyTopics": [
+      "صبة النظافة",
+      "Blinding Concrete",
+      "Lean Concrete",
+      "تحضير التربة",
+      "أساسات",
+      "عزل الأساسات",
+      "منسوب الصب",
+      "طبقة النظافة",
+      "قبل التسليح",
+      "قبل الرفت"
+    ],
+    "tags": [
+      "خرسانة",
+      "أساسات",
+      "صبة النظافة",
+      "موقع",
+      "تربة",
+      "رفت",
+      "تسليح",
+      "عزل"
+    ],
+    "coverImageUrl": null,
+    "relatedTopicIds": [],
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "صبة النظافة أو Blinding Concrete أو Lean Concrete هي طبقة خرسانية بسيطة (عادة ضعيفة المحتوى الإسمنتي) تصب فوق التربة المحضرة أو طبقة الإحلال قبل بدء أعمال الأساسات. الهدف الأساسي منها هو توفير سطح عمل نظيف ومستوي يسهل تركيب التسليح وتنفيذ العزل المائي، وتقليل اختلاط خرسانة الأساس بالتربة، وتساعد بضبط منسوب البدء."
+          },
+          "variant": "paragraph"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "صبة النظافة ليست عنصراً إنشائياً — يعنن وما تحسب بالتصميم الإنشائي للقاعدة أو الجسر. في بعض الحالات إذا كانت الخرسانة نفسها هي الأساس أو ضمن التفاصيل، تكون ضمن المواصفة ولها مقاومة محددة. لا تعتبر صبة النظافة بديل عن الخرسانة الإنشائية."
+          },
+          "variant": "note"
+        },
+        {
+          "type": "table",
+          "order": 3,
+          "caption": {
+            "ar": "فوائد صبة النظافة"
+          },
+          "headers": [
+            "الفائدة",
+            "شنو تحقق بالموقع؟",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "سطح نظيف للعمل",
+                "يسهل تركيب التسليح والعزل",
+                "مهم قبل الأساسات"
+              ]
+            },
+            {
+              "cells": [
+                "ضبط المنسوب",
+                "يساعد على تثبيت منسوب العمل",
+                "يحتاج تدقيق بالموقع"
+              ]
+            },
+            {
+              "cells": [
+                "حماية من التربة",
+                "يقلل اختلاط خرسانة الأساس بالتربة",
+                "حسب حالة الموقع"
+              ]
+            },
+            {
+              "cells": [
+                "تسهيل العزل",
+                "يعطي سطح مناسب للعزل",
+                "مهم للأساسات المعزولة"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 2,
+      "blocks": [
+        {
+          "type": "equipment",
+          "order": 1,
+          "title": "الأدوات والمواد المطلوبة لصبة النظافة",
+          "items": [
+            {
+              "nameAr": "مخطط ومناسيب معتمدة",
+              "purpose": "مرجع لمنسوب الصب والأبعاد والسمك المطلوب",
+              "specification": "آخر إصدار معتمد مع Revision"
+            },
+            {
+              "nameAr": "خرسانة نظافة حسب المواصفة",
+              "purpose": "للصب فوق التربة المحضرة",
+              "specification": "المقاومة والسمك حسب المخطط والمواصفة (يحتاج تدقيق)"
+            },
+            {
+              "nameAr": "ميزان قامة أو ليزر",
+              "purpose": "لضبط منسوب السطح بعد الصب",
+              "specification": "ميزان قامة أو ليزر دوار"
+            },
+            {
+              "nameAr": "خيط وشواخص تحديد",
+              "purpose": "تحديد حدود الصبة والمناسيب",
+              "specification": "خيط شد إنشائي وأوتاد"
+            },
+            {
+              "nameAr": "هزاز أو أدوات تسوية حسب الحاجة",
+              "purpose": "لدمك الخرسانة وتسوية السطح",
+              "specification": "هزاز داخلي أو أداة تسوية حسب سمك الصبة"
+            },
+            {
+              "nameAr": "أدوات تشطيب بسيطة",
+              "purpose": "لتنعيم السطح وضبط المنسوب",
+              "specification": "مسطرين أو أداة تسوية"
+            },
+            {
+              "nameAr": "ماء للمعالجة",
+              "purpose": "معالجة الخرسانة عند الحاجة",
+              "specification": "ماء نظيف غير ملوث"
+            },
+            {
+              "nameAr": "معدات حماية شخصية",
+              "purpose": "حماية العمال والمهندس أثناء العمل",
+              "specification": "قفازات، خوذة، أحذية سلامة"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ صبة النظافة",
+      "type": "execution",
+      "order": 3,
+      "blocks": [
+        {
+          "type": "execution_step",
+          "order": 1,
+          "stepNumber": 1,
+          "description": {
+            "ar": "التأكد من انتهاء الحفر والوصول إلى المنسوب المطلوب"
+          },
+          "notes": {
+            "ar": "قبل أي صبة، تأكد أن الحفر وصل للمنسوب المطلوب حسب المخطط وتقرير التربة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 2,
+          "stepNumber": 2,
+          "description": {
+            "ar": "تنظيف التربة من المواد العضوية والطين الضعيف والمخلفات"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 3,
+          "stepNumber": 3,
+          "description": {
+            "ar": "التأكد من الدمك أو الإحلال حسب تقرير التربة ومتطلبات المشروع (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "في بعض المشاريع تحتاج طبقة إحلال قبل صبة النظافة — راجع تقرير التربة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 4,
+          "stepNumber": 4,
+          "description": {
+            "ar": "تحديد المناسيب والحافات المطلوبة للصبة باستخدام الشواخص والخيط"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 5,
+          "stepNumber": 5,
+          "description": {
+            "ar": "التأكد من عدم وجود مياه راكدة أو تربة رخوة قبل الصب"
+          },
+          "notes": {
+            "ar": "المياه الراكدة تحت صبة النظافة مشكلة — يجب نزحها قبل الصب."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 6,
+          "stepNumber": 6,
+          "description": {
+            "ar": "صب خرسانة النظافة بالسمك المحدد بالمخططات أو المواصفات (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "سمك صبة النظافة يختلف حسب المشروع — لا تعتمد على قيمة ثابتة بدون مرجع."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 7,
+          "stepNumber": 7,
+          "description": {
+            "ar": "تسوية السطح وضبط المنسوب"
+          },
+          "notes": {
+            "ar": "استخدم الميزان والخيط لضبط السطح — السطح المستوي يسهل العمل بعدها."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 8,
+          "stepNumber": 8,
+          "description": {
+            "ar": "حماية الصبة من التلف أو المرور المبكر"
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 9,
+          "stepNumber": 9,
+          "description": {
+            "ar": "معالجة الصبة عند الحاجة حسب ظروف الموقع والمواصفة (يحتاج تدقيق)"
+          },
+          "notes": {
+            "ar": "المعالجة تعتمد على الجو ودرجة الحرارة ونوع الخرسانة المستخدمة."
+          }
+        },
+        {
+          "type": "execution_step",
+          "order": 10,
+          "stepNumber": 10,
+          "description": {
+            "ar": "عدم البدء بالتسليح أو العزل قبل قبول السطح والمنسوب"
+          },
+          "notes": {
+            "ar": "لا تبدأ بالمرحلة التالية إلا بعد استلام صبة النظافة."
+          }
+        }
+      ]
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 4,
+      "blocks": [
+        {
+          "type": "inspection_point",
+          "order": 1,
+          "criteriaAr": "منسوب الحفر قبل الصب مطابق للمخطط",
+          "methodAr": "قياس المنسوب من Bench Mark ومقارنته بالمخطط",
+          "acceptableTolerance": "منسوب الحفر مطابق لعمق الحفر المطلوب",
+          "isCritical": true,
+          "markerStyle": "target",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 2,
+          "criteriaAr": "نظافة التربة أو طبقة الإحلال من المخلفات والمواد العضوية",
+          "methodAr": "الفحص البصري للمنطقة قبل الصب",
+          "acceptableTolerance": "التربة نظيفة ولا توجد مواد عضوية أو مخلفات",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 3,
+          "criteriaAr": "عدم وجود مياه راكدة في الحفر قبل الصب",
+          "methodAr": "الفحص البصري للتأكد من جفاف الحفر",
+          "acceptableTolerance": "لا توجد مياه راكدة أو برك في منطقة الصب",
+          "isCritical": false,
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 4,
+          "criteriaAr": "مطابقة السمك المطلوب لصبة النظافة (يحتاج تدقيق)",
+          "methodAr": "قياس السمك بعد الصب في عدة نقاط",
+          "acceptableTolerance": "السمك مطابق للمخطط أو المواصفة",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 5,
+          "criteriaAr": "مطابقة منسوب السطح بعد الصب",
+          "methodAr": "قياس المنسوب من نقطة مرجعية ومقارنته بالمطلوب",
+          "acceptableTolerance": "منسوب السطح ضمن التفاوت المسموح",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 6,
+          "criteriaAr": "استواء السطح وعدم وجود هبوط أو تضاريس",
+          "methodAr": "الفحص بالخيط أو القامة الطويلة",
+          "acceptableTolerance": "السطح مستوي ولا يوجد هبوط يؤثر على العمل",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 7,
+          "criteriaAr": "عدم وجود تربة رخوة تحت الصبة",
+          "methodAr": "الفحص بالضغط أو التجسس البسيط قبل الصب",
+          "acceptableTolerance": "لا توجد تربة رخوة أو هشة في منطقة الصب",
+          "isCritical": true,
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "inspection_point",
+          "order": 8,
+          "criteriaAr": "جاهزية السطح للعزل أو التسليح",
+          "methodAr": "الفحص البصري والتأكد من نظافة السطح وصلاحيته",
+          "acceptableTolerance": "السطح جاهز للعزل أو التسليح حسب التسلسل المطلوب",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 9,
+          "criteriaAr": "حماية الصبة بعد التنفيذ من التلف أو المرور المبكر",
+          "methodAr": "الفحص البصري للتأكد من وجود حماية مناسبة",
+          "acceptableTolerance": "الصبة محمية ومستوى الحماية مناسب",
+          "isCritical": false,
+          "markerStyle": "inspection",
+          "markerColorMode": "theme"
+        },
+        {
+          "type": "inspection_point",
+          "order": 10,
+          "criteriaAr": "اعتماد المهندس المشرف قبل البدء بالمرحلة التالية",
+          "methodAr": "مراجعة توقيع المهندس على سجل الاستلام",
+          "acceptableTolerance": "صبة النظافة مستلمة ومعتمدة رسمياً قبل المرحلة التالية",
+          "isCritical": true,
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        },
+        {
+          "type": "checklist",
+          "order": 11,
+          "title": {
+            "ar": "قائمة فحص سريعة لصبة النظافة"
+          },
+          "items": [
+            {
+              "id": "chk-01",
+              "textAr": "مراجعة منسوب الحفر",
+              "isRequired": true
+            },
+            {
+              "id": "chk-02",
+              "textAr": "تنظيف الموقع من المخلفات",
+              "isRequired": true
+            },
+            {
+              "id": "chk-03",
+              "textAr": "التأكد من عدم وجود تربة رخوة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-04",
+              "textAr": "التأكد من عدم وجود مياه راكدة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-05",
+              "textAr": "ضبط حدود الصبة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-06",
+              "textAr": "قياس السمك",
+              "isRequired": true
+            },
+            {
+              "id": "chk-07",
+              "textAr": "تسوية السطح",
+              "isRequired": true
+            },
+            {
+              "id": "chk-08",
+              "textAr": "حماية الصبة",
+              "isRequired": true
+            },
+            {
+              "id": "chk-09",
+              "textAr": "عدم البدء بالعزل أو التسليح قبل الاستلام",
+              "isRequired": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 5,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "الصب فوق تربة رخوة أو غير منظفة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "ترك مياه راكدة أسفل صبة النظافة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 3,
+          "content": {
+            "ar": "عدم ضبط المنسوب قبل الصب."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 4,
+          "content": {
+            "ar": "تنفيذ سمك أقل من المطلوب."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 5,
+          "content": {
+            "ar": "استخدام صبة النظافة كأنها عنصر إنشائي بدون مواصفة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 6,
+          "content": {
+            "ar": "إهمال المعالجة أو الحماية عند الحاجة."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 7,
+          "content": {
+            "ar": "البدء بالعزل أو التسليح قبل قبول السطح."
+          },
+          "variant": "warning"
+        },
+        {
+          "type": "text",
+          "order": 8,
+          "content": {
+            "ar": "عدم توثيق المنسوب قبل وبعد الصب."
+          },
+          "variant": "warning"
+        }
+      ]
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 6,
+      "blocks": [
+        {
+          "type": "safety_note",
+          "order": 1,
+          "message": {
+            "ar": "انتبه من الانزلاق داخل مناطق الحفر أو فوق الخرسانة الطازجة."
+          },
+          "severity": "medium"
+        },
+        {
+          "type": "safety_note",
+          "order": 2,
+          "message": {
+            "ar": "يجب تأمين حافات الحفر والممرات قبل العمل."
+          },
+          "severity": "high"
+        },
+        {
+          "type": "safety_note",
+          "order": 3,
+          "message": {
+            "ar": "لا تسمح بحركة معدات ثقيلة قرب الحفر بدون تقييم سلامة الموقع."
+          },
+          "severity": "high"
+        }
+      ]
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 7,
+      "blocks": [
+        {
+          "type": "code_reference",
+          "order": 1,
+          "code": "Project Drawings / Soil Report / Iraqi Specifications / Project Specifications",
+          "title": {
+            "ar": "مراجع فنية لصبة النظافة"
+          },
+          "excerpt": {
+            "ar": "سمك صبة النظافة ونوع الخرسانة ومتطلبات تحضير التربة يجب أن تعتمد على المخططات وتقرير التربة والمواصفات المعتمدة للمشروع. القيم الرقمية تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+          }
+        },
+        {
+          "type": "text",
+          "order": 2,
+          "content": {
+            "ar": "في حال وجود تربة ضعيفة أو مياه جوفية أو اختلاف بالمنسوب، يجب الرجوع للمهندس المشرف قبل الصب."
+          },
+          "variant": "note"
+        }
+      ]
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 8,
+      "blocks": [
+        {
+          "type": "text",
+          "order": 1,
+          "content": {
+            "ar": "تم فحص منطقة صبة النظافة لعنصر [اسم العنصر/المنطقة]، وتمت مراجعة منسوب الحفر ونظافة السطح وعدم وجود مياه راكدة أو تربة رخوة. تم صب خرسانة النظافة حسب المتطلبات، والملاحظات المسجلة: [الملاحظات]. يتم الانتقال للمرحلة التالية بعد اعتماد المهندس المشرف."
+          },
+          "variant": "paragraph"
+        }
+      ]
+    }
+  ],
+  "review": {
+    "status": "draft",
+    "reviewedBy": null,
+    "reviewedAt": null,
+    "reviewNotes": "مسودة أولية لموضوع صبة النظافة — تحتاج مراجعة سمك الصبة ومتطلبات التربة حسب المواصفات المعتمدة للمشروع.",
+    "approvalStatus": null
+  }
+}
