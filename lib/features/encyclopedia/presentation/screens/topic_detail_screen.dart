@@ -186,11 +186,71 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   }
 
   Widget _buildBlockText(TextBlock block, {required bool isDark}) {
+    if (block.variant == TextVariant.paragraph) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+        child: Text(
+          block.content,
+          style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
+        ),
+      );
+    }
+    return _buildVariantTextCard(block, isDark: isDark);
+  }
+
+  Widget _buildVariantTextCard(TextBlock block, {required bool isDark}) {
+    final (Color color, IconData icon, String label) = switch (block.variant) {
+      TextVariant.note => (EncyclopediaCardColors.noteVariant, Icons.info_outline, 'ملاحظة'),
+      TextVariant.tip => (EncyclopediaCardColors.tipVariant, Icons.lightbulb_outline, 'نصيحة'),
+      TextVariant.warning => (EncyclopediaCardColors.warningVariant, Icons.warning_amber_rounded, 'تنبيه'),
+      _ => (EncyclopediaCardColors.noteVariant, Icons.info_outline, 'ملاحظة'),
+    };
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-      child: Text(
-        block.content,
-        style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.7),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: isDark ? 0.12 : 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: isDark ? 0.35 : 0.25)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Icon(icon, size: 18, color: color),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: color,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    block.content,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: color.withValues(alpha: isDark ? 1.0 : 0.9),
+                      height: 1.7,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

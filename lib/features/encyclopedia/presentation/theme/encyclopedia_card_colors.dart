@@ -47,6 +47,11 @@ class EncyclopediaCardColors {
   static const Color darkMistakeBg = Color(0xFF3D1A18);
   static const Color mistakeBorder = Color(0xFFA23A36);
 
+  // ── Semantic: Text Variants (note, tip, warning) ──
+  static const Color noteVariant = Color(0xFF3B82F6);
+  static const Color tipVariant = Color(0xFF10B981);
+  static const Color warningVariant = Color(0xFFF59E0B);
+
   // ── Chip styling (muted, professional, same across all surfaces) ──
   static const Color chipBg = Color(0xFFF0EBE4);
   static const Color chipBorder = Color(0xFFE2D8CC);
