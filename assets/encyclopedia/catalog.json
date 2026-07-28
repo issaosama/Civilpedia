@@ -1,4 +1,8 @@
 {
+  "categories": [
+    {"id": "concrete", "title": {"ar": "الخرسانة", "en": "Concrete"}},
+    {"id": "finishing", "title": {"ar": "أعمال الإنهاءات", "en": "Finishing Works"}}
+  ],
   "topics": [
     {
       "id": "slump-test",

@@ -1,0 +1,700 @@
+{
+  "topic": {
+    "id": "roof-waterproofing",
+    "titleAr": "العزل المائي للأسطح",
+    "titleEn": "",
+    "categoryId": "waterproofing-finishing",
+    "summary": "العزل المائي للأسطح يهدف إلى منع تسرب المياه من السطح إلى داخل المبنى، ويعتمد نجاحه على تجهيز السطح والميول والبرايمر وطريقة تركيب طبقات العزل ومعالجة الزوايا والمصارف والحماية بعد التنفيذ.",
+    "tags": [
+      "عزل",
+      "أسطح",
+      "ماء",
+      "تسرب",
+      "ممبرين",
+      "برايمر",
+      "تشطيبات",
+      "موقع"
+    ],
+    "relatedTopicIds": [],
+    "createdAt": "2026-07-11T00:00:00.000Z",
+    "updatedAt": "2026-07-11T00:00:00.000Z",
+    "level": "basic",
+    "planKey": "free",
+    "featuredImageUrl": null,
+    "simpleExplanation": {
+      "ar": "",
+      "en": ""
+    },
+    "beforeWork": {
+      "ar": "",
+      "en": ""
+    },
+    "duringWork": {
+      "ar": "",
+      "en": ""
+    },
+    "afterWork": {
+      "ar": "",
+      "en": ""
+    },
+    "commonMistakes": [],
+    "acceptRejectItems": [],
+    "codeNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "siteNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "reportWording": {
+      "ar": "",
+      "en": ""
+    },
+    "keyTopics": [
+      "العزل المائي للأسطح",
+      "Waterproofing",
+      "Roof Waterproofing",
+      "Membrane",
+      "Primer",
+      "Overlap",
+      "Upturn",
+      "مصارف السطح",
+      "اختبار الغمر",
+      "تسرب المياه"
+    ],
+    "coverImageUrl": null,
+    "visual_theme": {
+      "accent": "teal"
+    },
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 2
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ العزل المائي للأسطح",
+      "type": "execution",
+      "order": 3
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 4
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 5
+    },
+    {
+      "id": "sec-testing",
+      "title": "اختبار العزل والحماية",
+      "type": "general",
+      "order": 6
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 8
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 9
+    }
+  ],
+  "blocks": {
+    "sec-overview": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "العزل المائي للأسطح (Roof Waterproofing) هو نظام يمنع تسرب المياه من السطح إلى داخل المبنى، ويتم تنفيذه بعد الانتهاء من التسطيح وضبط الميول. نجاح العزل لا يعتمد فقط على جودة المادة المستخدمة، بل على تحضير السطح، تطبيق البرايمر، التراكب الصحيح، معالجة المصارف والزوايا، وحماية العزل بعد التنفيذ. أي خطأ في أي من هذه العناصر قد يسبب تسرب يصعب إصلاحه لاحقاً.",
+        "variant": "paragraph"
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "لا يجوز تنفيذ العزل فوق سطح غير نظيف أو غير مستلم أو فيه تجمع ماء واضح؛ لأن العزل قد يفشل حتى لو كانت المادة جيدة.",
+        "variant": "warning"
+      },
+      {
+        "type": "table",
+        "order": 3,
+        "data": {
+          "caption": "عناصر نجاح عزل السطح",
+          "headers": [
+            "العنصر",
+            "شنو يفيد؟",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "تجهيز السطح",
+                "يحسن الالتصاق",
+                "يجب إزالة الغبار والمواد الضعيفة"
+              ]
+            },
+            {
+              "cells": [
+                "الميول",
+                "تمنع تجمع الماء",
+                "ترتبط بالتسطيح"
+              ]
+            },
+            {
+              "cells": [
+                "البرايمر",
+                "يحسن التصاق العزل حسب النظام",
+                "حسب توصيات الشركة (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "التراكب Overlap",
+                "يمنع التسرب بين الشرائح",
+                "القيم حسب النظام (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "الرفع على الحافات Upturn",
+                "يحمي الزوايا والحافات",
+                "حسب التفاصيل المعتمدة"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "sec-equipment": [
+      {
+        "type": "equipment",
+        "order": 1,
+        "title": "الأدوات والمواد المطلوبة لعزل الأسطح",
+        "items": [
+          {
+            "name": "نظام عزل معتمد Membrane أو Liquid Waterproofing",
+            "purpose": "مادة العزل الرئيسية",
+            "specification": "حسب المواصفة المعتمدة ونظام العزل المختار"
+          },
+          {
+            "name": "Primer حسب نظام العزل",
+            "purpose": "لتحسين التصاق العزل بالسطح",
+            "specification": "حسب توصيات الشركة المصنعة (يحتاج تدقيق)"
+          },
+          {
+            "name": "رول أو فرشاة تطبيق",
+            "purpose": "لتطبيق البرايمر أو العزل السائل",
+            "specification": "حسب نوع المادة"
+          },
+          {
+            "name": "مشعل/معدات تركيب إذا كان النظام يتطلب ذلك",
+            "purpose": "للحام أو تثبيت أغشية العزل",
+            "specification": "حسب نظام العزل وتعليمات السلامة"
+          },
+          {
+            "name": "أدوات قص وقياس",
+            "purpose": "لقص أغشية العزل حسب المقاسات",
+            "specification": "سكينة حادة، شريط قياس"
+          },
+          {
+            "name": "مواد معالجة للزوايا والمصارف",
+            "purpose": "لتقوية وتجهيز الزوايا ونقاط التصريف",
+            "specification": "حسب نظام العزل"
+          },
+          {
+            "name": "طبقة حماية حسب المواصفة",
+            "purpose": "لحماية العزل من التلف",
+            "specification": "حسب المواصفة ونظام العزل"
+          },
+          {
+            "name": "أدوات تنظيف السطح",
+            "purpose": "لتنظيف السطح قبل العزل",
+            "specification": "مكنسة، فرشاة، ماء"
+          },
+          {
+            "name": "معدات حماية شخصية",
+            "purpose": "حماية العمال أثناء تركيب العزل",
+            "specification": "نظارات، قفازات، خوذة، أحذية سلامة، معدات سلامة حريق"
+          }
+        ]
+      }
+    ],
+    "sec-execution": [
+      {
+        "type": "execution_step",
+        "order": 1,
+        "step": {
+          "stepNumber": 1,
+          "description": "التأكد من استلام التسطيح والميول ونقاط التصريف قبل العزل",
+          "notes": "لا تبدأ بالعزل إذا كان التسطيح غير مستلم — أي خطأ تحت العزل يكشف بعد تنفيذ العزل."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 2,
+        "step": {
+          "stepNumber": 2,
+          "description": "تنظيف السطح من الغبار والزيوت والمواد الضعيفة",
+          "notes": "السطح النظيف أساس التصاق العزل — لا تهمل هذه الخطوة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 3,
+        "step": {
+          "stepNumber": 3,
+          "description": "معالجة التشققات والحفر والزوايا قبل تطبيق العزل",
+          "notes": ""
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 4,
+        "step": {
+          "stepNumber": 4,
+          "description": "تطبيق Primer إذا كان مطلوباً حسب نظام العزل (يحتاج تدقيق)",
+          "notes": "البرايمر يعزز الالتصاق — اتبع تعليمات الشركة المصنعة لكل مادة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 5,
+        "step": {
+          "stepNumber": 5,
+          "description": "تنفيذ العزل حول المصارف والزوايا والحافات أولاً حسب التفاصيل",
+          "notes": "المصارف والزوايا هي أكثر نقاط التسرب — عالجها أولاً وبشكل منفصل."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 6,
+        "step": {
+          "stepNumber": 6,
+          "description": "تركيب أو تطبيق طبقة العزل الرئيسية مع الالتزام بالتراكب المطلوب (يحتاج تدقيق)",
+          "notes": "مقدار التراكب يختلف حسب نظام العزل — لا تنقصه لتوفير المادة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 7,
+        "step": {
+          "stepNumber": 7,
+          "description": "رفع العزل على الحافات والجدران الصغيرة Upturn حسب التفاصيل (يحتاج تدقيق)",
+          "notes": "الـ Upturn ضروري لمنع دخول الماء من الأطراف والحافات."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 8,
+        "step": {
+          "stepNumber": 8,
+          "description": "فحص اللحامات أو مناطق التراكب والاختراقات",
+          "notes": "الاختراقات مثل أعمدة الصرف الصحي والكهرباء تحتاج معالجة خاصة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 9,
+        "step": {
+          "stepNumber": 9,
+          "description": "تنفيذ اختبار الغمر أو اختبار التسرب حسب متطلبات المشروع (يحتاج تدقيق)",
+          "notes": "اختبار العزل يكشف التسرب قبل تغطيته — لا تتجاوز هذه الخطوة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 10,
+        "step": {
+          "stepNumber": 10,
+          "description": "تنفيذ طبقة حماية وعدم السماح بتلف العزل أثناء الأعمال اللاحقة",
+          "notes": "العزل بدون حماية يتعرض للتمزق والثقب من الحركة والأعمال اللاحقة."
+        }
+      }
+    ],
+    "sec-inspection": [
+      {
+        "type": "inspection_point",
+        "order": 1,
+        "point": {
+          "criteria": "استلام السطح من التسطيح قبل البدء بالعزل",
+          "method": "مراجعة سجل استلام التسطيح والميول",
+          "isCritical": true,
+          "acceptableTolerance": "التسطيح مستلم ومعتمد قبل العزل",
+          "markerStyle": "target"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 2,
+        "point": {
+          "criteria": "نظافة السطح وجفافه قبل تطبيق العزل",
+          "method": "الفحص البصري للسطح بالكامل",
+          "isCritical": false,
+          "acceptableTolerance": "السطح نظيف وجاف وخالي من الغبار والزيوت",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 3,
+        "point": {
+          "criteria": "عدم وجود تجمع ماء على السطح",
+          "method": "الفحص البصري أو باختبار الماء",
+          "isCritical": true,
+          "acceptableTolerance": "لا توجد مناطق تجمع ماء على السطح",
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 4,
+        "point": {
+          "criteria": "معالجة الزوايا والمصارف قبل العزل الرئيسي",
+          "method": "الفحص البصري للزوايا والمصارف",
+          "isCritical": false,
+          "acceptableTolerance": "الزوايا والمصارف معالجة حسب التفاصيل",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 5,
+        "point": {
+          "criteria": "تطبيق البرايمر عند الحاجة حسب نظام العزل",
+          "method": "الفحص البصري والتأكد من تطبيق البرايمر",
+          "isCritical": false,
+          "acceptableTolerance": "البرايمر مطبق حسب تعليمات الشركة المصنعة",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 6,
+        "point": {
+          "criteria": "صحة التراكب Overlap بين طبقات العزل",
+          "method": "قياس التراكب ومقارنته بالمتطلبات",
+          "isCritical": false,
+          "acceptableTolerance": "التراكب مطابق للمتطلبات (يحتاج تدقيق)",
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 7,
+        "point": {
+          "criteria": "جودة اللحامات أو الالتصاق بين الشرائح",
+          "method": "الفحص البصري والضغط الخفيف للحامات",
+          "isCritical": false,
+          "acceptableTolerance": "اللحامات محكمة ولا توجد فتحات في الوصلات",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 8,
+        "point": {
+          "criteria": "الرفع على الحافات Upturn صحيح حسب التفاصيل",
+          "method": "الفحص البصري وقياس ارتفاع الرفع",
+          "isCritical": false,
+          "acceptableTolerance": "الـ Upturn منفذ حسب التفاصيل — الارتفاع كافي",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 9,
+        "point": {
+          "criteria": "معالجة الاختراقات والفتحات بشكل محكم",
+          "method": "الفحص البصري حول كل اختراق",
+          "isCritical": false,
+          "acceptableTolerance": "جميع الاختراقات معالجة ومحكمة العزل",
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 10,
+        "point": {
+          "criteria": "اختبار الغمر أو التسرب حسب متطلبات المشروع",
+          "method": "مراجعة تقرير الاختبار ونتائجه",
+          "isCritical": false,
+          "acceptableTolerance": "نتيجة الاختبار مقبولة حسب المواصفة — لا تسرب",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 11,
+        "point": {
+          "criteria": "حماية العزل بعد التنفيذ من التلف",
+          "method": "الفحص البصري للتأكد من وجود طبقة حماية أو تدابير حماية",
+          "isCritical": false,
+          "acceptableTolerance": "العزل محمي بطبقة حماية أو تدابير تمنع تلفه",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 12,
+        "point": {
+          "criteria": "اعتماد المهندس أو المشرف لأعمال العزل",
+          "method": "مراجعة توقيع المهندس على سجل الاستلام",
+          "isCritical": true,
+          "acceptableTolerance": "العزل مستلم ومعتمد رسمياً",
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "checklist",
+        "order": 13,
+        "title": "قائمة فحص سريعة لعزل الأسطح",
+        "items": [
+          {
+            "id": "chk-01",
+            "text": "استلام التسطيح والميول",
+            "isRequired": true
+          },
+          {
+            "id": "chk-02",
+            "text": "تنظيف السطح",
+            "isRequired": true
+          },
+          {
+            "id": "chk-03",
+            "text": "معالجة الشروخ والحفر",
+            "isRequired": true
+          },
+          {
+            "id": "chk-04",
+            "text": "تجهيز المصارف والزوايا",
+            "isRequired": true
+          },
+          {
+            "id": "chk-05",
+            "text": "تطبيق Primer عند الحاجة",
+            "isRequired": true
+          },
+          {
+            "id": "chk-06",
+            "text": "فحص التراكب واللحامات",
+            "isRequired": true
+          },
+          {
+            "id": "chk-07",
+            "text": "فحص Upturn",
+            "isRequired": true
+          },
+          {
+            "id": "chk-08",
+            "text": "فحص الاختراقات",
+            "isRequired": true
+          },
+          {
+            "id": "chk-09",
+            "text": "إجراء اختبار الغمر/التسرب عند الطلب",
+            "isRequired": true
+          },
+          {
+            "id": "chk-10",
+            "text": "حماية العزل بعد التنفيذ",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "sec-common-mistakes": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "تنفيذ العزل فوق سطح غير نظيف أو مترب.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "تجاهل مناطق تجمع الماء قبل العزل.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 3,
+        "content": "عدم معالجة المصارف والزوايا بصورة خاصة.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 4,
+        "content": "تقليل التراكب بين طبقات العزل.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 5,
+        "content": "تلف العزل بسبب حركة العمال أو أعمال لاحقة بدون حماية.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 6,
+        "content": "نسيان رفع العزل على الحافات.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 7,
+        "content": "عدم اختبار العزل قبل تنفيذ طبقة الحماية.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 8,
+        "content": "استخدام مادة غير معتمدة أو خلط أنظمة عزل مختلفة.",
+        "variant": "warning"
+      }
+    ],
+    "sec-testing": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "اختبار العزل يهدف إلى كشف التسرب قبل تغطية العزل بطبقة الحماية أو التشطيب النهائي. طريقة الاختبار ومدته تعتمد على مواصفات المشروع ونظام العزل. (يحتاج تدقيق)",
+        "variant": "paragraph"
+      },
+      {
+        "type": "table",
+        "order": 2,
+        "data": {
+          "caption": "نقاط مهمة في اختبار عزل السطح",
+          "headers": [
+            "النقطة",
+            "لماذا مهمة؟",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "سد المصارف مؤقتاً",
+                "يسمح بفحص التسرب",
+                "يجب أن يكون بطريقة آمنة"
+              ]
+            },
+            {
+              "cells": [
+                "مدة الاختبار",
+                "تكشف التسربات البطيئة",
+                "حسب المواصفة (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "مراقبة أسفل السقف",
+                "تكشف الرطوبة أو التسرب",
+                "يحتاج توثيق"
+              ]
+            },
+            {
+              "cells": [
+                "فحص اللحامات",
+                "أكثر مناطق التسرب شيوعاً",
+                "خاصة عند التراكبات"
+              ]
+            },
+            {
+              "cells": [
+                "طبقة الحماية",
+                "تمنع تلف العزل",
+                "لا تنفذ قبل قبول العزل"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "order": 3,
+        "content": "لا تعتمد على شكل العزل فقط؛ الاختبار والحماية بعد التنفيذ جزء أساسي من نجاح النظام.",
+        "variant": "tip"
+      }
+    ],
+    "sec-safety": [
+      {
+        "type": "safety_note",
+        "order": 1,
+        "note": {
+          "message": "عند استخدام مشعل أو مواد قابلة للاشتعال، يجب توفير تهوية ومطفأة حريق وإجراءات سلامة مناسبة.",
+          "severity": "high"
+        }
+      },
+      {
+        "type": "safety_note",
+        "order": 2,
+        "note": {
+          "message": "العمل على الأسطح يحتاج حماية من السقوط خصوصاً قرب الحافات.",
+          "severity": "high"
+        }
+      },
+      {
+        "type": "safety_note",
+        "order": 3,
+        "note": {
+          "message": "بعض مواد العزل أو البرايمر لها أبخرة أو روائح قوية، ويجب الالتزام بتعليمات الشركة المصنعة.",
+          "severity": "medium"
+        }
+      }
+    ],
+    "sec-code-reference": [
+      {
+        "type": "code_reference",
+        "order": 1,
+        "reference": {
+          "code": "Project Specifications / Manufacturer Datasheets / Waterproofing Method Statement",
+          "title": "مراجع فنية للعزل المائي للأسطح",
+          "section": "",
+          "description": "نوع نظام العزل، البرايمر، التراكب، الرفع على الحافات، الاختبار، وطبقة الحماية يجب أن تعتمد على المواصفات ونشرات الشركة المصنعة وطريقة التنفيذ المعتمدة. القيم الرقمية تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+        }
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "لا يجوز تغيير نظام العزل أو خلط مواد من شركات مختلفة بدون اعتماد من المهندس أو الجهة المالكة.",
+        "variant": "note"
+      }
+    ],
+    "sec-report": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "تم فحص أعمال العزل المائي للسطح في منطقة [اسم المنطقة]، وتمت مراجعة نظافة السطح والميول والمصارف والبرايمر والتراكب والـ Upturn والاختراقات. تم/سيتم تنفيذ اختبار العزل حسب متطلبات المشروع، والملاحظات المسجلة: [الملاحظات]. يتم تنفيذ طبقة الحماية بعد قبول العزل من المهندس المشرف.",
+        "variant": "paragraph"
+      }
+    ]
+  }
+}

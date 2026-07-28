@@ -54,7 +54,7 @@
     ],
     "coverImageUrl": "assets/images/concrete_slump_cover.png",
     "visual_theme": {
-      "accent": "emerald"
+      "accent": "cement_gray"
     },
     "relatedToolRoutes": [],
     "relatedChecklistIds": []

@@ -1,0 +1,687 @@
+{
+  "topic": {
+    "id": "roof-screed-surface-preparation",
+    "titleAr": "التسطيح",
+    "titleEn": "",
+    "categoryId": "waterproofing-finishing",
+    "summary": "التسطيح هو تجهيز سطح السقف أو تنفيذ طبقة ميول/تسوية قبل العزل أو التشطيب، بهدف تصريف المياه باتجاه المزاريب أو نقاط التصريف ومنع تجمع الماء الذي يسبب فشل العزل أو تلف السطح.",
+    "tags": [
+      "تسطيح",
+      "سطح",
+      "عزل",
+      "ميول",
+      "خرسانة",
+      "تشطيبات",
+      "تصريف",
+      "موقع"
+    ],
+    "relatedTopicIds": [],
+    "createdAt": "2026-07-11T00:00:00.000Z",
+    "updatedAt": "2026-07-11T00:00:00.000Z",
+    "level": "basic",
+    "planKey": "free",
+    "featuredImageUrl": null,
+    "simpleExplanation": {
+      "ar": "",
+      "en": ""
+    },
+    "beforeWork": {
+      "ar": "",
+      "en": ""
+    },
+    "duringWork": {
+      "ar": "",
+      "en": ""
+    },
+    "afterWork": {
+      "ar": "",
+      "en": ""
+    },
+    "commonMistakes": [],
+    "acceptRejectItems": [],
+    "codeNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "siteNotes": {
+      "ar": "",
+      "en": ""
+    },
+    "reportWording": {
+      "ar": "",
+      "en": ""
+    },
+    "keyTopics": [
+      "التسطيح",
+      "ميول السطح",
+      "Roof Screed",
+      "Surface Preparation",
+      "تصريف المياه",
+      "مزاريب",
+      "قبل العزل",
+      "تجمع الماء",
+      "طبقة الميول",
+      "تجهيز السطح"
+    ],
+    "coverImageUrl": null,
+    "visual_theme": {
+      "accent": "asphalt"
+    },
+    "relatedToolRoutes": [],
+    "relatedChecklistIds": []
+  },
+  "sections": [
+    {
+      "id": "sec-overview",
+      "title": "نظرة عامة",
+      "type": "general",
+      "order": 1
+    },
+    {
+      "id": "sec-equipment",
+      "title": "الأدوات والمواد المطلوبة",
+      "type": "equipment",
+      "order": 2
+    },
+    {
+      "id": "sec-execution",
+      "title": "خطوات تنفيذ التسطيح",
+      "type": "execution",
+      "order": 3
+    },
+    {
+      "id": "sec-inspection",
+      "title": "نقاط الفحص والاستلام",
+      "type": "inspection",
+      "order": 4
+    },
+    {
+      "id": "sec-common-mistakes",
+      "title": "الأخطاء الشائعة",
+      "type": "general",
+      "order": 5
+    },
+    {
+      "id": "sec-drain-test",
+      "title": "اختبار الميول وتجمع الماء",
+      "type": "general",
+      "order": 6
+    },
+    {
+      "id": "sec-safety",
+      "title": "ملاحظات السلامة",
+      "type": "safety",
+      "order": 7
+    },
+    {
+      "id": "sec-code-reference",
+      "title": "ملاحظات فنية ومراجع",
+      "type": "codeReference",
+      "order": 8
+    },
+    {
+      "id": "sec-report",
+      "title": "صيغة تقرير مختصرة",
+      "type": "general",
+      "order": 9
+    }
+  ],
+  "blocks": {
+    "sec-overview": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "التسطيح أو Roof Screed هو تجهيز سطح السقف قبل العزل المائي أو التشطيب النهائي. ويشمل تنفيذ طبقة ميول أو تسوية لتصريف المياه باتجاه المزاريب أو نقاط التصريف المخصصة. جودة التسطيح تحدد نجاح أو فشل العزل لاحقاً، لأن أي تجمع ماء بسبب ميول خاطئ أو سطح غير مستوي يؤدي إلى تلف العزل وتسلل المياه.",
+        "variant": "paragraph"
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "العزل المائي مهما كانت جودته ما يصلح خلل الميول أو التصريف. إذا كان السطح فيه تجمع ماء قبل العزل، نفس المشكلة راح تبقى بعد العزل.",
+        "variant": "note"
+      },
+      {
+        "type": "table",
+        "order": 3,
+        "data": {
+          "caption": "أهداف التسطيح قبل العزل",
+          "headers": [
+            "الهدف",
+            "شنو يحقق؟",
+            "ملاحظات"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "ضبط الميول",
+                "يوجه الماء إلى نقاط التصريف",
+                "القيم حسب المخطط والمواصفة (يحتاج تدقيق)"
+              ]
+            },
+            {
+              "cells": [
+                "تسوية السطح",
+                "يقلل الفراغات والمناطق الضعيفة",
+                "مهم قبل العزل"
+              ]
+            },
+            {
+              "cells": [
+                "معالجة العيوب",
+                "يقلل التشققات والحفر قبل العزل",
+                "يحتاج فحص"
+              ]
+            },
+            {
+              "cells": [
+                "تجهيز المصارف",
+                "يمنع تجمع الماء",
+                "مهم جداً للأسطح المكشوفة"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "sec-equipment": [
+      {
+        "type": "equipment",
+        "order": 1,
+        "title": "الأدوات والمواد المطلوبة للتسطيح",
+        "items": [
+          {
+            "name": "مخطط السطح والمناسيب المعتمد",
+            "purpose": "مرجع للميول ونقاط التصريف",
+            "specification": "آخر إصدار معتمد"
+          },
+          {
+            "name": "مواد طبقة الميول أو المونة حسب المواصفة",
+            "purpose": "لتنفيذ طبقة التسوية والميول",
+            "specification": "حسب المواصفة المعتمدة (يحتاج تدقيق)"
+          },
+          {
+            "name": "ميزان ليزر أو خرطوم ماء",
+            "purpose": "لضبط المناسيب والميول",
+            "specification": "ليزر دوار أو ميزان خرطوم"
+          },
+          {
+            "name": "شريط قياس",
+            "purpose": "لقياس الأبعاد والمسافات",
+            "specification": "شريط قياس معدني"
+          },
+          {
+            "name": "خيط أو علامات مناسيب",
+            "purpose": "تحديد خطوط الميول والارتفاعات",
+            "specification": "خيط شد إنشائي"
+          },
+          {
+            "name": "أدوات تنظيف السطح",
+            "purpose": "لإزالة الغبار والمخلفات",
+            "specification": "مكنسة، فرشاة، ماء"
+          },
+          {
+            "name": "أدوات تسوية وتشطيب",
+            "purpose": "لتسوية السطح وضبط الاستقامة",
+            "specification": "مالج، قاعدة تسوية"
+          },
+          {
+            "name": "ماء للمعالجة عند الحاجة",
+            "purpose": "لمعالجة طبقة الميول الإسمنتية",
+            "specification": "ماء نظيف"
+          },
+          {
+            "name": "معدات حماية شخصية",
+            "purpose": "حماية العمال أثناء العمل",
+            "specification": "قفازات، خوذة، أحذية سلامة"
+          }
+        ]
+      }
+    ],
+    "sec-execution": [
+      {
+        "type": "execution_step",
+        "order": 1,
+        "step": {
+          "stepNumber": 1,
+          "description": "مراجعة مخطط السطح ونقاط التصريف والمناسيب المطلوبة",
+          "notes": "تأكد من فهم اتجاه الميول وأعلى وأخفض منسوب لكل منطقة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 2,
+        "step": {
+          "stepNumber": 2,
+          "description": "تنظيف السطح من الغبار والمخلفات والمواد الضعيفة",
+          "notes": ""
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 3,
+        "step": {
+          "stepNumber": 3,
+          "description": "فحص التشققات والحفر والمناطق الضعيفة قبل البدء",
+          "notes": "لا تطبق طبقة التسطيح فوق عيوب ظاهرة — عالجها أولاً."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 4,
+        "step": {
+          "stepNumber": 4,
+          "description": "تحديد أعلى وأخفض المناسيب واتجاه الميول باتجاه المصارف",
+          "notes": "استخدم الليزر أو الخرطوم لتحديد المناسيب بدقة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 5,
+        "step": {
+          "stepNumber": 5,
+          "description": "تجهيز نقاط التصريف والتأكد من عدم انسدادها",
+          "notes": ""
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 6,
+        "step": {
+          "stepNumber": 6,
+          "description": "تنفيذ طبقة الميول أو التسوية حسب المخطط والمواصفة (يحتاج تدقيق)",
+          "notes": "نوع المادة والسمك يختلف حسب المشروع — راجع المواصفة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 7,
+        "step": {
+          "stepNumber": 7,
+          "description": "فحص الميول أثناء التنفيذ وليس بعد الانتهاء فقط",
+          "notes": "التصحيح أثناء التنفيذ أسهل وأقل تكلفة من التعديل بعد الجفاف."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 8,
+        "step": {
+          "stepNumber": 8,
+          "description": "تسوية السطح بدون ترك حفر أو مناطق تجمع ماء",
+          "notes": ""
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 9,
+        "step": {
+          "stepNumber": 9,
+          "description": "معالجة الطبقة أو حمايتها حسب نوع المادة المستخدمة (يحتاج تدقيق)",
+          "notes": "بعض المواد تحتاج معالجة بالماء وبعضها لا — حسب المواصفة."
+        }
+      },
+      {
+        "type": "execution_step",
+        "order": 10,
+        "step": {
+          "stepNumber": 10,
+          "description": "عدم البدء بالعزل قبل قبول السطح والميول ونقاط التصريف",
+          "notes": "لا تسمح ببدء العزل إلا بعد استلام التسطيح."
+        }
+      }
+    ],
+    "sec-inspection": [
+      {
+        "type": "inspection_point",
+        "order": 1,
+        "point": {
+          "criteria": "نظافة السطح من الغبار والمخلفات قبل التسطيح",
+          "method": "الفحص البصري للمنطقة بالكامل",
+          "isCritical": false,
+          "acceptableTolerance": "السطح نظيف وخالي من المخلفات والمواد الضعيفة",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 2,
+        "point": {
+          "criteria": "مراجعة نقاط التصريف وعدم انسدادها",
+          "method": "الفحص البصري والتأكد من سلامة المصارف",
+          "isCritical": false,
+          "acceptableTolerance": "جميع نقاط التصريف سليمة وغير مسدودة",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 3,
+        "point": {
+          "criteria": "تحديد اتجاه الميول بشكل صحيح",
+          "method": "قياس المناسيب والتأكد من الاتجاه نحو المصارف",
+          "isCritical": true,
+          "acceptableTolerance": "اتجاه الميول مطابق للمخطط — الماء يتجه للمصارف",
+          "markerStyle": "target"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 4,
+        "point": {
+          "criteria": "مطابقة المناسيب للمخطط",
+          "method": "قياس المناسيب في عدة نقاط مقارنة بالمخطط",
+          "isCritical": false,
+          "acceptableTolerance": "المناسيب ضمن التفاوت المسموح حسب المخطط",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 5,
+        "point": {
+          "criteria": "عدم وجود مناطق تجمع ماء بعد التسطيح",
+          "method": "فحص السطح بعد الانتهاء — يفضل باختبار الماء",
+          "isCritical": true,
+          "acceptableTolerance": "لا توجد مناطق راكدة أو تجمع ماء على السطح",
+          "markerStyle": "critical",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 6,
+        "point": {
+          "criteria": "معالجة الشروخ والحفر في السطح قبل التسطيح",
+          "method": "الفحص البصري والتأكد من إصلاح العيوب",
+          "isCritical": false,
+          "acceptableTolerance": "الشروخ والحفر معالجة ومناسبة لقبول طبقة التسطيح",
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 7,
+        "point": {
+          "criteria": "جودة التصاق طبقة التسطيح مع السطح القديم",
+          "method": "الفحص البصري والطرق الخفيف عند الشك",
+          "isCritical": false,
+          "acceptableTolerance": "طبقة التسطيح ملتصقة جيداً ولا يوجد انفصال",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 8,
+        "point": {
+          "criteria": "نعومة السطح مناسبة للعزل",
+          "method": "الفحص البصري واللمس",
+          "isCritical": false,
+          "acceptableTolerance": "السطح أملس بشكل كافي بدون نتوءات حادة أو حفر",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 9,
+        "point": {
+          "criteria": "عدم وجود مناطق ضعيفة أو متفتتة في طبقة التسطيح",
+          "method": "الفحص البصري والضغط الخفيف عند الشك",
+          "isCritical": false,
+          "acceptableTolerance": "الطبقة سليمة ولا توجد مناطق ضعيفة أو متفتتة",
+          "markerStyle": "warning",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 10,
+        "point": {
+          "criteria": "حماية طبقة التسطيح من التلف بعد التنفيذ",
+          "method": "الفحص البصري للتأكد من وجود حماية مناسبة",
+          "isCritical": false,
+          "acceptableTolerance": "السطح محمي من الحركة والأعمال اللاحقة",
+          "markerStyle": "inspection"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 11,
+        "point": {
+          "criteria": "جاهزية السطح لاستقبال العزل",
+          "method": "الفحص النهائي للسطح والميول والمصارف",
+          "isCritical": true,
+          "acceptableTolerance": "السطح جاهز ومستلم للعزل حسب المواصفة",
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "inspection_point",
+        "order": 12,
+        "point": {
+          "criteria": "اعتماد المهندس أو المشرف قبل البدء بالعزل",
+          "method": "مراجعة توقيع المهندس على سجل الاستلام",
+          "isCritical": true,
+          "acceptableTolerance": "التسطيح مستلم ومعتمد رسمياً قبل العزل",
+          "markerStyle": "success",
+          "markerColorMode": "semantic"
+        }
+      },
+      {
+        "type": "checklist",
+        "order": 13,
+        "title": "قائمة فحص سريعة للتسطيح قبل العزل",
+        "items": [
+          {
+            "id": "chk-01",
+            "text": "تنظيف السطح",
+            "isRequired": true
+          },
+          {
+            "id": "chk-02",
+            "text": "فحص التشققات والحفر",
+            "isRequired": true
+          },
+          {
+            "id": "chk-03",
+            "text": "تحديد نقاط التصريف",
+            "isRequired": true
+          },
+          {
+            "id": "chk-04",
+            "text": "تحديد اتجاه الميول",
+            "isRequired": true
+          },
+          {
+            "id": "chk-05",
+            "text": "قياس المناسيب",
+            "isRequired": true
+          },
+          {
+            "id": "chk-06",
+            "text": "فحص عدم تجمع الماء",
+            "isRequired": true
+          },
+          {
+            "id": "chk-07",
+            "text": "فحص نعومة السطح",
+            "isRequired": true
+          },
+          {
+            "id": "chk-08",
+            "text": "فحص المناطق الضعيفة",
+            "isRequired": true
+          },
+          {
+            "id": "chk-09",
+            "text": "حماية الطبقة بعد التنفيذ",
+            "isRequired": true
+          },
+          {
+            "id": "chk-10",
+            "text": "عدم البدء بالعزل قبل الاستلام",
+            "isRequired": true
+          }
+        ]
+      }
+    ],
+    "sec-common-mistakes": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "تنفيذ العزل فوق سطح غير نظيف أو غير مستوي.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "ترك مناطق تجمع ماء قرب المصارف أو الزوايا.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 3,
+        "content": "عدم تنسيق الميول مع مواقع التصريف.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 4,
+        "content": "الاعتماد على النظر فقط بدون قياس المناسيب.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 5,
+        "content": "عدم معالجة التشققات أو الحفر قبل العزل.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 6,
+        "content": "تنفيذ طبقة ضعيفة أو متفتتة تحت العزل.",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 7,
+        "content": "البدء بالعزل قبل جفاف أو قبول طبقة التسطيح (يحتاج تدقيق).",
+        "variant": "warning"
+      },
+      {
+        "type": "text",
+        "order": 8,
+        "content": "عدم حماية السطح من الحركة أو التلف قبل العزل.",
+        "variant": "warning"
+      }
+    ],
+    "sec-drain-test": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "بعد انتهاء التسطيح، يجب فحص حركة الماء أو المناسيب للتأكد من عدم وجود مناطق تجمع تؤثر على العزل. طريقة الفحص تعتمد على متطلبات المشروع والمواصفة. (يحتاج تدقيق)",
+        "variant": "paragraph"
+      },
+      {
+        "type": "table",
+        "order": 2,
+        "data": {
+          "caption": "علامات مشاكل الميول",
+          "headers": [
+            "المشكلة",
+            "العلامة بالموقع",
+            "التصرف المقترح"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "تجمع ماء",
+                "بقاء ماء في منطقة منخفضة",
+                "تصحيح الميول قبل العزل"
+              ]
+            },
+            {
+              "cells": [
+                "مصرف مرتفع",
+                "الماء لا يصل إلى المصرف",
+                "تعديل المنطقة حول المصرف"
+              ]
+            },
+            {
+              "cells": [
+                "سطح خشن جداً",
+                "قد يؤذي طبقة العزل",
+                "معالجة أو تسوية السطح"
+              ]
+            },
+            {
+              "cells": [
+                "سطح ضعيف",
+                "تفتت أو غبار",
+                "إزالة/تقوية حسب تقييم المهندس"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "type": "text",
+        "order": 3,
+        "content": "نجاح العزل يبدأ من التسطيح؛ أي خطأ في الميول سيظهر لاحقاً كتسرب أو تجمع ماء.",
+        "variant": "tip"
+      }
+    ],
+    "sec-safety": [
+      {
+        "type": "safety_note",
+        "order": 1,
+        "note": {
+          "message": "انتبه من العمل قرب حافات السطح ويجب توفير حماية من السقوط.",
+          "severity": "high"
+        }
+      },
+      {
+        "type": "safety_note",
+        "order": 2,
+        "note": {
+          "message": "حافظ على ممرات آمنة عند نقل المواد فوق السطح.",
+          "severity": "medium"
+        }
+      },
+      {
+        "type": "safety_note",
+        "order": 3,
+        "note": {
+          "message": "لا تترك أدوات أو مخلفات قرب المصارف أو حافات السطح.",
+          "severity": "medium"
+        }
+      }
+    ],
+    "sec-code-reference": [
+      {
+        "type": "code_reference",
+        "order": 1,
+        "reference": {
+          "code": "Project Drawings / Project Specifications / Waterproofing System Requirements",
+          "title": "مراجع فنية للتسطيح قبل العزل",
+          "section": "",
+          "description": "الميول والمناسيب وسماكة طبقة التسطيح ونوع المادة يجب أن تعتمد على المخططات والمواصفات ونظام العزل المستخدم. القيم الرقمية تحتاج تدقيق حسب المرجع المعتمد. (يحتاج تدقيق)"
+        }
+      },
+      {
+        "type": "text",
+        "order": 2,
+        "content": "يجب تنسيق التسطيح مع تفاصيل المصارف والحافات والفتحات والـ upstands قبل العزل.",
+        "variant": "note"
+      }
+    ],
+    "sec-report": [
+      {
+        "type": "text",
+        "order": 1,
+        "content": "تم فحص أعمال التسطيح لمنطقة [اسم السطح/المنطقة]، وتمت مراجعة نظافة السطح والمناسيب واتجاه الميول ونقاط التصريف وعدم وجود مناطق تجمع ماء أو عيوب ظاهرة. الملاحظات المسجلة: [الملاحظات]، ويتم البدء بالعزل بعد معالجة الملاحظات واعتماد المهندس المشرف.",
+        "variant": "paragraph"
+      }
+    ]
+  }
+}

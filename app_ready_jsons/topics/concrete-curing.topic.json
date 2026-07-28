@@ -337,8 +337,7 @@
           "method": "مراجعة سجل الصب والتحقق من توقيت بدء المعالجة",
           "isCritical": true,
           "acceptableTolerance": "يجب أن تبدأ المعالجة بعد أن يصبح السطح مناسباً وقبل أن يظهر عليه الجفاف",
-          "markerStyle": "target",
-          "markerColorMode": "theme"
+          "markerStyle": "target"
         }
       },
       {
@@ -373,8 +372,7 @@
           "method": "الفحص البصري للسطح الخرساني",
           "isCritical": false,
           "acceptableTolerance": "لون موحد للسطح، بدون بقع بيضاء أو جفاف واضح",
-          "markerStyle": "inspection",
-          "markerColorMode": "theme"
+          "markerStyle": "inspection"
         }
       },
       {
@@ -397,8 +395,7 @@
           "method": "الفحص البصري للحافات والزوايا وظروف تغطيتها",
           "isCritical": false,
           "acceptableTolerance": "يجب أن تكون الحافات والزوايا مغطاة أو محمية أثناء المعالجة",
-          "markerStyle": "inspection",
-          "markerColorMode": "theme"
+          "markerStyle": "inspection"
         }
       },
       {
@@ -409,8 +406,7 @@
           "method": "مراجعة سجل متابعة المعالجة وتوقيع المسؤول",
           "isCritical": false,
           "acceptableTolerance": "يجب أن يشمل التوثيق: تاريخ البدء، الطريقة المستخدمة، عدد مرات الرش، وتاريخ الانتهاء",
-          "markerStyle": "info",
-          "markerColorMode": "theme"
+          "markerStyle": "info"
         }
       },
       {
@@ -421,8 +417,7 @@
           "method": "الفحص البصري للموقع والتأكد من وجود حواجز وشريط تحذير",
           "isCritical": false,
           "acceptableTolerance": "يجب منع المرور فوق العنصر الخرساني خلال مدة المعالجة",
-          "markerStyle": "inspection",
-          "markerColorMode": "theme"
+          "markerStyle": "inspection"
         }
       },
       {
@@ -445,8 +440,7 @@
           "method": "مراجعة المواصفة أو تعليمات المشروع ومقارنتها مع المدة الفعلية المنفذة",
           "isCritical": true,
           "acceptableTolerance": "مدة المعالجة المطلوبة حسب المواصفة أو تعليمات المهندس (يحتاج تدقيق)",
-          "markerStyle": "target",
-          "markerColorMode": "theme"
+          "markerStyle": "target"
         }
       },
       {
