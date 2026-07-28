@@ -196,6 +196,15 @@ class AppExporter {
         block.caption = caption.ar || '';
         break;
       }
+      case 'common_mistakes':
+      case 'acceptance_criteria':
+      case 'rejection_criteria': {
+        block.title = src.title || '';
+        block.items = (src.items || []).map(item => ({
+          text: item.textAr || ''
+        }));
+        break;
+      }
       default:
         block = { ...block, ...src };
     }

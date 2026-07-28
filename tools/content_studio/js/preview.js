@@ -171,19 +171,54 @@ class PreviewRenderer {
   _sectionKicker(type) {
     const map = {
       general: 'GENERAL',
-      execution: 'APPLICATION',
+      execution: 'EXECUTION',
       safety: 'SAFETY',
       inspection: 'INSPECTION',
       equipment: 'EQUIPMENT',
-      codeReference: 'CODE REFERENCE'
+      codeReference: 'CODE REFERENCE',
+      commonMistakes: 'COMMON MISTAKES',
+      acceptance: 'ACCEPTANCE CRITERIA',
+      rejection: 'REJECTION CRITERIA',
+      bestPractice: 'BEST PRACTICE',
+      siteNotes: 'SITE NOTES',
+      quality: 'QUALITY CONTROL',
+      coordination: 'COORDINATION',
+      report: 'REPORT'
     };
     return map[type] || (type ? type.toUpperCase() : '');
+  }
+
+  _firstBlockLabel(blocks) {
+    if (!blocks || blocks.length === 0) return 'القسم';
+    const b = blocks[0];
+    if (b.type === 'text') {
+      const variant = b.variant;
+      if (variant === 'note') return 'ملاحظة';
+      if (variant === 'tip') return 'نصيحة';
+      if (variant === 'warning') return 'تنبيه';
+      return 'نص';
+    }
+    const map = {
+      table: 'جدول',
+      equipment: 'معدات',
+      execution_step: 'خطوة تنفيذ',
+      inspection_point: 'نقطة فحص',
+      checklist: 'قائمة فحص',
+      safety_note: 'ملاحظة سلامة',
+      code_reference: 'مرجع كود',
+      image: 'صورة',
+      common_mistakes: 'أخطاء شائعة',
+      acceptance_criteria: 'معايير قبول',
+      rejection_criteria: 'معايير رفض'
+    };
+    return map[b.type] || 'القسم';
   }
 
   _renderSection(section, data) {
     const kicker = this._sectionKicker(section.type);
     const blocks = section.blocks || [];
     const num = this._nextNum();
+    const badgeLabel = this._firstBlockLabel(blocks);
 
     let blocksHtml = '';
     for (const block of blocks) {
@@ -195,6 +230,7 @@ class PreviewRenderer {
         <div class="fp-section-header">
           <div class="fp-accent-bar"></div>
           <span class="fp-section-kicker">${kicker} · ${num}</span>
+          <span class="fp-section-type-badge">${badgeLabel}</span>
         </div>
         <h2 class="fp-section-title">${this._escape(section.title)}</h2>
         <div class="fp-section-body">
@@ -226,6 +262,12 @@ class PreviewRenderer {
         return this._renderEquipment(block);
       case 'code_reference':
         return this._renderCodeReference(block);
+      case 'common_mistakes':
+        return this._renderCommonMistakes(block);
+      case 'acceptance_criteria':
+        return this._renderAcceptanceCriteria(block);
+      case 'rejection_criteria':
+        return this._renderRejectionCriteria(block);
       default:
         return `<div class="fp-text">${this._escape(block.type || 'نوع غير معروف')}</div>`;
     }
@@ -236,7 +278,30 @@ class PreviewRenderer {
   _renderTextBlock(block) {
     const content = block.content || {};
     const text = content.ar || '';
+    const variant = block.variant;
+    if (variant && variant !== 'paragraph') {
+      const vc = this._variantConfig(variant);
+      if (vc) {
+        return `
+          <div class="fp-variant-card fp-variant-${vc.cssClass}">
+            <span class="fp-variant-icon">${vc.icon}</span>
+            <div class="fp-variant-content">
+              <div class="fp-variant-label">${vc.label}</div>
+              <div class="fp-variant-text">${this._escape(text)}</div>
+            </div>
+          </div>`;
+      }
+    }
     return `<div class="fp-text">${this._escape(text)}</div>`;
+  }
+
+  _variantConfig(variant) {
+    const map = {
+      note:    { cssClass: 'note',    icon: 'ℹ️',  label: 'ملاحظة' },
+      tip:     { cssClass: 'tip',     icon: '💡', label: 'نصيحة' },
+      warning: { cssClass: 'warning', icon: '⚠️', label: 'تنبيه' },
+    };
+    return map[variant] || { cssClass: 'note', icon: 'ℹ️', label: 'ملاحظة' };
   }
 
   _renderExecutionStep(block) {
@@ -257,31 +322,42 @@ class PreviewRenderer {
 
   _renderSafetyNote(block) {
     const msg = block.message || {};
+    const text = msg.ar || '';
+    if (!text) return '';
+    const sev = block.severity || 'medium';
+    const cfg = this._severityConfig(sev);
     return `
-      <div class="fp-safety">
-        <div class="fp-safety-icon">⚠️</div>
+      <div class="fp-safety fp-safety-${sev}">
+        <div class="fp-safety-icon fp-safety-icon-${sev}">${cfg.icon}</div>
         <div class="fp-safety-body">
-          <div class="fp-safety-text">${this._escape(msg.ar || '')}</div>
+          <div class="fp-safety-label fp-safety-label-${sev}">${cfg.label}</div>
+          <div class="fp-safety-text">${this._escape(text)}</div>
         </div>
       </div>
     `;
   }
 
+  _severityConfig(severity) {
+    const map = {
+      none:     { icon: '',   label: '' },
+      low:      { icon: '✓',  label: 'منخفض' },
+      medium:   { icon: '⚠',  label: 'متوسط' },
+      high:     { icon: '✗',  label: 'عالي' },
+      critical: { icon: '!!', label: 'خطير' },
+    };
+    return map[severity] || map.medium;
+  }
+
   _renderTable(block) {
-    const caption = block.caption ? (block.caption.ar || '') : '';
     const headers = block.headers || [];
     const rows = block.rows || [];
-    let thead = '';
-    if (headers.length) {
-      thead = '<thead><tr>' + headers.map(h => `<th>${this._escape(h)}</th>`).join('') + '</tr></thead>';
-    }
-    let tbody = '';
-    if (rows.length) {
-      tbody = '<tbody>' + rows.map(row => {
-        const cells = row.cells || [];
-        return '<tr>' + cells.map(c => `<td>${this._escape(c)}</td>`).join('') + '</tr>';
-      }).join('') + '</tbody>';
-    }
+    if (!headers.length || !rows.length) return '';
+    const caption = block.caption ? (block.caption.ar || '') : '';
+    const thead = '<thead><tr>' + headers.map(h => `<th>${this._escape(h)}</th>`).join('') + '</tr></thead>';
+    const tbody = '<tbody>' + rows.map(row => {
+      const cells = row.cells || [];
+      return '<tr>' + cells.map(c => `<td>${this._escape(c)}</td>`).join('') + '</tr>';
+    }).join('') + '</tbody>';
     return `
       <div class="fp-table-wrapper">
         ${caption ? `<div class="fp-table-caption">${this._escape(caption)}</div>` : ''}
@@ -289,27 +365,14 @@ class PreviewRenderer {
           ${thead}
           ${tbody}
         </table>
-        ${this._noTableData(headers, rows)}
       </div>
     `;
-  }
-
-  _noTableData(headers, rows) {
-    if (headers.length > 0 && rows.length > 0) return '';
-    return '<div class="fp-empty-inline">⚠️ جدول بدون بيانات</div>';
   }
 
   _renderChecklist(block) {
     const title = block.title ? (block.title.ar || '') : '';
     const items = block.items || [];
-    if (items.length === 0) {
-      return `
-        <div class="fp-checklist">
-          ${title ? `<div class="fp-checklist-title">${this._escape(title)}</div>` : ''}
-          <div class="fp-empty-inline">⚠️ قائمة الفحص فارغة — يرجى إضافة بنود</div>
-        </div>
-      `;
-    }
+    if (items.length === 0) return '';
     const listHtml = items.map(item => {
       const required = item.isRequired !== false;
       return `<div class="fp-checklist-item">
@@ -350,12 +413,13 @@ class PreviewRenderer {
 
   _renderInspectionPoint(block) {
     const markerHtml = this._markerHtml(block.markerStyle, block.isCritical, block.markerColorMode);
+    const criticalBadge = block.isCritical ? '<span class="fp-inspection-critical-badge">حرج</span>' : '';
     return `
       <div class="fp-inspection">
         <div class="fp-inspection-row">
           ${markerHtml}
-          <div style="margin-right:8px;">
-            <strong>${this._escape(block.criteriaAr || '')}</strong><br>
+          <div style="margin-right:8px;flex:1;">
+            <strong>${this._escape(block.criteriaAr || '')}</strong> ${criticalBadge}<br>
             <span class="fp-text-muted">القبول: ${this._escape(block.acceptableTolerance || '')} | الطريقة: ${this._escape(block.methodAr || '')}</span>
           </div>
         </div>
@@ -365,15 +429,10 @@ class PreviewRenderer {
 
   _renderImage(block) {
     const url = block.url || '';
+    if (!url) return '';
     const caption = block.caption ? (block.caption.ar || '') : '';
-    if (!url && !caption) return '';
     const resolvedSrc = this._resolveAssetPath(url);
-    let innerHtml;
-    if (url) {
-      innerHtml = `<img src="${this._escape(resolvedSrc)}" alt="${this._escape(caption)}" class="fp-image-img" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="fp-image-empty" style="display:none"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div><div class="fp-image-path">${this._escape(url)}</div></div>`;
-    } else {
-      innerHtml = '<div class="fp-image-empty"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div></div>';
-    }
+    let innerHtml = `<img src="${this._escape(resolvedSrc)}" alt="${this._escape(caption)}" class="fp-image-img" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'" /><div class="fp-image-empty" style="display:none"><div class="fp-image-icon">🖼️</div><div class="fp-image-placeholder-label">الصورة غير موجودة أو لم يتم إضافتها بعد</div><div class="fp-image-path">${this._escape(url)}</div></div>`;
     if (caption) {
       innerHtml += `<div class="fp-image-caption">${this._escape(caption)}</div>`;
     }
@@ -382,7 +441,7 @@ class PreviewRenderer {
 
   _renderEquipment(block) {
     const items = block.items || [];
-    if (items.length === 0) return '<div class="fp-empty-inline">⚠️ قائمة المعدات فارغة</div>';
+    if (items.length === 0) return '';
     const list = items.map(item => {
       let html = `<div class="fp-equipment-item"><strong>${this._escape(item.nameAr || '')}</strong>`;
       if (item.specification) html += ` <span class="fp-equipment-spec">— ${this._escape(item.specification)}</span>`;
@@ -393,11 +452,96 @@ class PreviewRenderer {
     return `<div class="fp-equipment">${list}</div>`;
   }
 
+  _renderCommonMistakes(block) {
+    const items = block.items || [];
+    if (items.length === 0) return '';
+    const list = items.map(item => `
+      <div class="fp-mistakes-item">
+        <span class="fp-mistakes-marker">✕</span>
+        <span class="fp-mistakes-text">${this._escape(item.textAr || '')}</span>
+      </div>
+    `).join('');
+    return `
+      <div class="fp-mistakes-block">
+        <div class="fp-mistakes-title">${this._escape(block.title || 'الأخطاء الشائعة')}</div>
+        <div class="fp-mistakes-list">${list}</div>
+      </div>
+    `;
+  }
+
+  _renderAcceptanceCriteria(block) {
+    const items = block.items || [];
+    if (items.length === 0) return '';
+    const list = items.map(item => `
+      <div class="fp-callout-item">
+        <span class="fp-callout-icon fp-callout-icon-success">✓</span>
+        <span class="fp-callout-text">${this._escape(item.textAr || '')}</span>
+      </div>
+    `).join('');
+    return `
+      <div class="fp-callout fp-acceptance-block">
+        <div class="fp-callout-header">
+          <span class="fp-callout-header-icon">✅</span>
+          <span class="fp-callout-header-label">${block.title || 'معايير القبول'}</span>
+        </div>
+        <div class="fp-callout-body">${list}</div>
+      </div>
+    `;
+  }
+
+  _renderRejectionCriteria(block) {
+    const items = block.items || [];
+    if (items.length === 0) return '';
+    const list = items.map(item => `
+      <div class="fp-callout-item">
+        <span class="fp-callout-icon fp-callout-icon-danger">⛔</span>
+        <span class="fp-callout-text">${this._escape(item.textAr || '')}</span>
+      </div>
+    `).join('');
+    return `
+      <div class="fp-callout fp-rejection-block">
+        <div class="fp-callout-header">
+          <span class="fp-callout-header-icon">⛔</span>
+          <span class="fp-callout-header-label">${block.title || 'معايير الرفض'}</span>
+        </div>
+        <div class="fp-callout-body">${list}</div>
+      </div>
+    `;
+  }
+
   _renderCodeReference(block) {
     const title = block.title || {};
-    let html = `<div class="fp-code-ref"><strong>${this._escape(block.code || '')}</strong>`;
-    if (title.ar) html += ` — ${this._escape(title.ar)}`;
-    if (block.excerpt) html += `<br><em>${this._escape(block.excerpt.ar || '')}</em>`;
+    const codeStr = block.code || '';
+    const refs = codeStr.split('/').map(s => s.trim()).filter(s => s.length > 0);
+    const isMulti = refs.length > 1;
+    const hasRefs = refs.length > 0;
+    const headerText = (title.ar && title.ar.trim()) ? title.ar : codeStr;
+
+    let headerHtml = `<span class="fp-code-ref-title">${this._escape(headerText)}</span>`;
+    if (block.section) {
+      headerHtml += `<span class="fp-code-ref-section">القسم ${this._escape(block.section)}</span>`;
+    }
+    let html = `<div class="fp-code-ref"><div class="fp-code-ref-header">${headerHtml}</div>`;
+
+    if (hasRefs) {
+      html += '<div class="fp-code-ref-divider"></div>';
+      if (isMulti) {
+        let chipsHtml = '';
+        for (const ref of refs) {
+          chipsHtml += `<span class="fp-code-ref-chip">${this._escape(ref)}</span>`;
+        }
+        html += '<div class="fp-code-ref-references">';
+        html += '<div class="fp-code-ref-references-label">🏷 المراجع</div>';
+        html += `<div class="fp-code-ref-chips">${chipsHtml}</div>`;
+        html += '</div>';
+      } else {
+        html += `<span class="fp-code-ref-code-badge">${this._escape(codeStr)}</span>`;
+      }
+    }
+
+    if (block.excerpt) {
+      html += `<div class="fp-code-ref-excerpt"><em>${this._escape(block.excerpt.ar || '')}</em></div>`;
+    }
     html += '</div>';
     return html;
   }
@@ -453,4 +597,8 @@ class PreviewRenderer {
     div.textContent = String(str);
     return div.innerHTML;
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { PreviewRenderer };
 }

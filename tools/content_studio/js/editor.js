@@ -12,12 +12,24 @@ class InlineBlockEditor {
       case 'inspection_point': return this._inspectionPointEditor(sectionIdx, blockIdx, block);
       case 'code_reference': return this._codeReferenceEditor(sectionIdx, blockIdx, block);
       case 'equipment': return this._equipmentEditor(sectionIdx, blockIdx, block);
+      case 'common_mistakes': return this._commonMistakesEditor(sectionIdx, blockIdx, block);
+      case 'acceptance_criteria': return this._acceptanceCriteriaEditor(sectionIdx, blockIdx, block);
+      case 'rejection_criteria': return this._rejectionCriteriaEditor(sectionIdx, blockIdx, block);
       default: return '';
     }
   }
 
   static _textEditor(sectionIdx, blockIdx, block) {
     const content = block.content || {};
+    const cur = block.variant || 'paragraph';
+    const vOpts = [
+      ['paragraph', '📄 نص عادي'],
+      ['note',      '🔵 ملاحظة'],
+      ['tip',       '🟢 نصيحة'],
+      ['warning',   '🟠 تنبيه'],
+    ].map(([v, label]) =>
+      `<option value="${v}"${cur === v ? ' selected' : ''}>${label}</option>`
+    ).join('');
     return `
       <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
         <div class="inline-header">✏️ تحرير النص</div>
@@ -25,6 +37,12 @@ class InlineBlockEditor {
           <div class="inline-field">
             <label>المحتوى</label>
             <textarea class="form-textarea ie-input" data-field="content.ar" dir="rtl" rows="4">${esc(content.ar || '')}</textarea>
+          </div>
+          <div class="inline-field">
+            <label>نوع العرض</label>
+            <select class="form-input ie-input" data-field="variant" dir="rtl" onchange="_handleTextVariant(this)">
+              ${vOpts}
+            </select>
           </div>
         </div>
         <div class="inline-actions">
@@ -250,6 +268,10 @@ class InlineBlockEditor {
 
   static _safetyNoteEditor(sectionIdx, blockIdx, block) {
     const msg = block.message || {};
+    const cur = block.severity || 'medium';
+    const sOpts = VALID_SEVERITIES.map(v =>
+      `<option value="${v}"${v === cur ? ' selected' : ''}>${esc(SEVERITY_LABELS[v] || v)}</option>`
+    ).join('');
     return `
       <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
         <div class="inline-header">✏️ تحرير ملاحظة السلامة</div>
@@ -257,6 +279,12 @@ class InlineBlockEditor {
           <div class="inline-field">
             <label>الرسالة</label>
             <textarea class="form-textarea ie-input" data-field="message.ar" dir="rtl" rows="3">${esc(msg.ar || '')}</textarea>
+          </div>
+          <div class="inline-field">
+            <label>مستوى الخطورة</label>
+            <select class="form-input ie-input" data-field="severity" dir="rtl" onchange="_handleSafetySeverity(this)">
+              ${sOpts}
+            </select>
           </div>
         </div>
         <div class="inline-actions">
@@ -462,6 +490,108 @@ class InlineBlockEditor {
     `;
   }
 
+  // ─── Common Mistakes Editor ────────────────────────
+
+  static _commonMistakesEditor(sectionIdx, blockIdx, block) {
+    const items = block.items || [];
+    const itemsHtml = items.map((item, ci) => `
+      <div class="ie-callout-item" data-ci="${ci}">
+        <input type="text" class="form-input ie-callout-text" value="${esc(item.textAr || '')}" placeholder="نص البند" dir="rtl" style="flex:1;">
+        <button class="ie-callout-remove-item" title="حذف البند">🗑️</button>
+      </div>
+    `).join('');
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير الأخطاء الشائعة</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>العنوان</label>
+            <input type="text" class="form-input ie-callout-title" value="${esc(block.title || '')}" placeholder="..." dir="rtl">
+          </div>
+          <div class="inline-field">
+            <label>الأخطاء</label>
+            <div class="ie-callout-items">
+              ${itemsHtml || '<div class="empty-state-compact">لا توجد أخطاء مضافة</div>'}
+            </div>
+            <button class="btn btn-outline ie-callout-add-item" type="button" style="margin-top:6px;font-size:12px;padding:4px 10px;">➕ إضافة خطأ</button>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save-callout" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Acceptance Criteria Editor ────────────────────
+
+  static _acceptanceCriteriaEditor(sectionIdx, blockIdx, block) {
+    const items = block.items || [];
+    const itemsHtml = items.map((item, ci) => `
+      <div class="ie-callout-item" data-ci="${ci}">
+        <input type="text" class="form-input ie-callout-text" value="${esc(item.textAr || '')}" placeholder="نص البند" dir="rtl" style="flex:1;">
+        <button class="ie-callout-remove-item" title="حذف البند">🗑️</button>
+      </div>
+    `).join('');
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير معايير القبول</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>العنوان</label>
+            <input type="text" class="form-input ie-callout-title" value="${esc(block.title || '')}" placeholder="..." dir="rtl">
+          </div>
+          <div class="inline-field">
+            <label>البنود</label>
+            <div class="ie-callout-items">
+              ${itemsHtml || '<div class="empty-state-compact">لا توجد بنود</div>'}
+            </div>
+            <button class="btn btn-outline ie-callout-add-item" type="button" style="margin-top:6px;font-size:12px;padding:4px 10px;">➕ إضافة بند</button>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save-callout" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // ─── Rejection Criteria Editor ─────────────────────
+
+  static _rejectionCriteriaEditor(sectionIdx, blockIdx, block) {
+    const items = block.items || [];
+    const itemsHtml = items.map((item, ci) => `
+      <div class="ie-callout-item" data-ci="${ci}">
+        <input type="text" class="form-input ie-callout-text" value="${esc(item.textAr || '')}" placeholder="نص البند" dir="rtl" style="flex:1;">
+        <button class="ie-callout-remove-item" title="حذف البند">🗑️</button>
+      </div>
+    `).join('');
+    return `
+      <div class="${this.EDITING_CLASS}" data-section-idx="${sectionIdx}" data-block-idx="${blockIdx}">
+        <div class="inline-header">✏️ تحرير معايير الرفض</div>
+        <div class="inline-body">
+          <div class="inline-field">
+            <label>العنوان</label>
+            <input type="text" class="form-input ie-callout-title" value="${esc(block.title || '')}" placeholder="..." dir="rtl">
+          </div>
+          <div class="inline-field">
+            <label>البنود</label>
+            <div class="ie-callout-items">
+              ${itemsHtml || '<div class="empty-state-compact">لا توجد بنود</div>'}
+            </div>
+            <button class="btn btn-outline ie-callout-add-item" type="button" style="margin-top:6px;font-size:12px;padding:4px 10px;">➕ إضافة بند</button>
+          </div>
+        </div>
+        <div class="inline-actions">
+          <button class="btn btn-success ie-save-callout" type="button">💾 حفظ</button>
+          <button class="btn btn-outline ie-cancel" type="button">إلغاء</button>
+        </div>
+      </div>
+    `;
+  }
+
   // ─── Equipment Editor ──────────────────────────────
 
   static _equipmentEditor(sectionIdx, blockIdx, block) {
@@ -571,4 +701,8 @@ class InlineTopicEditor {
       </div>
     `;
   }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { InlineBlockEditor, InlineTopicEditor };
 }

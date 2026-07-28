@@ -943,6 +943,99 @@ function assert(condition, msg) {
 })();
 
 // ---------------------------------------------------------------------------
+// Test 25: Severity none validation and export
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n25. Severity none validation and export');
+
+  // 25a: severity 'none' is accepted
+  const dNone = makeMinimalDraft();
+  dNone.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'safety_note', order: 1, message: { ar: 'Neutral note' }, severity: 'none' }]
+  }];
+  let r = validate(loadDraft(dNone));
+  assert(!r.hasErrors, 'severity=none should produce no errors');
+  const sevWarns = r.warnings.filter(w => w.includes('severity'));
+  assert(sevWarns.length === 0, 'severity=none should produce no severity warnings');
+
+  // 25b: unknown severity still warns
+  const dBad = makeMinimalDraft();
+  dBad.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'safety_note', order: 1, message: { ar: 'Bad' }, severity: 'bogus' }]
+  }];
+  r = validate(loadDraft(dBad));
+  assert(!r.hasErrors, 'Unknown severity should not produce errors');
+  assert(r.warnings.some(w => w.includes('severity')), 'Unknown severity should produce a warning');
+
+  // 25c: export preserves 'none'
+  const exporter = new AppExporter();
+  const exported = exporter.export(loadDraft(dNone));
+  const secKey = Object.keys(exported.blocks)[0];
+  const safetyBlock = exported.blocks[secKey].find(b => b.type === 'safety_note');
+  assert(safetyBlock !== undefined, 'Exported should contain safety_note block');
+  assert(safetyBlock.note.severity === 'none', 'Exported severity should be "none"');
+
+  // 25d: existing low/medium/high/critical unchanged
+  for (const s of ['low', 'medium', 'high', 'critical']) {
+    const d = makeMinimalDraft();
+    d.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+      blocks: [{ type: 'safety_note', order: 1, message: { ar: 'Test' }, severity: s }]
+    }];
+    r = validate(loadDraft(d));
+    assert(!r.hasErrors, `severity=${s} should produce no errors`);
+    const sw = r.warnings.filter(w => w.includes('severity'));
+    assert(sw.length === 0, `severity=${s} should produce no severity warnings`);
+  }
+
+  // 25e: missing severity defaults to medium (no warning)
+  const dMissing = makeMinimalDraft();
+  dMissing.sections = [{ id: 's1', title: 'S1', type: 'general', order: 1,
+    blocks: [{ type: 'safety_note', order: 1, message: { ar: 'No severity' } }]
+  }];
+  r = validate(loadDraft(dMissing));
+  assert(!r.hasErrors, 'Missing severity should produce no errors');
+
+  console.log('  PASS: All severity none checks passed');
+})();
+
+// ---------------------------------------------------------------------------
+// Test 26: Report section type validation
+// ---------------------------------------------------------------------------
+(() => {
+  console.log('\n26. Report section type validation');
+
+  // 26a: section type 'report' is valid
+  const dReport = makeMinimalDraft();
+  dReport.sections = [{ id: 's1', title: 'تقرير', type: 'report', order: 1,
+    blocks: [{ type: 'text', order: 1, content: { ar: 'نص التقرير' }, variant: 'paragraph' }]
+  }];
+  let r = validate(loadDraft(dReport));
+  assert(!r.hasErrors, 'Report section should produce no errors');
+  let typeWarns = r.warnings.filter(w => w.includes('type') && w.includes('تقرير'));
+  assert(typeWarns.length === 0, 'Report section should produce no type warnings');
+
+  // 26b: text block within report section exports normally
+  const exporter = new AppExporter();
+  const exported = exporter.export(loadDraft(dReport));
+  const secKey = Object.keys(exported.blocks)[0];
+  const textBlock = exported.blocks[secKey][0];
+  assert(textBlock.type === 'text', 'Report section text block exports as text');
+  assert(textBlock.content === 'نص التقرير', 'Report section text block exports content');
+
+  // 26c: unknown section type warns
+  const dBad = makeMinimalDraft();
+  dBad.sections = [{ id: 's1', title: 'S1', type: 'bogus_type', order: 1, blocks: [] }];
+  r = validate(loadDraft(dBad));
+  assert(!r.hasErrors, 'Unknown section type should not produce errors');
+  assert(r.warnings.some(w => w.includes('type') && w.includes('غير معروف')), 'Unknown section type should produce a warning');
+
+  // 26d: 'report' is listed in VALID_SECTION_TYPES
+  assert(VALID_SECTION_TYPES.includes('report'), 'VALID_SECTION_TYPES should include report');
+
+  console.log('  PASS: All report section checks passed');
+})();
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 console.log(`\n${'='.repeat(40)}`);

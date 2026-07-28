@@ -78,6 +78,17 @@
     $('undo-btn').addEventListener('click', restoreUndoSnapshot);
     $('preview-theme-toggle').addEventListener('click', togglePreviewTheme);
 
+    // Position sticky toolbar below header
+    (function positionToolbar() {
+      const header = document.querySelector('.app-header');
+      const tb = document.getElementById('sticky-toolbar');
+      if (header && tb) {
+        const setTop = function () { tb.style.top = header.offsetHeight + 'px'; };
+        setTop();
+        window.addEventListener('resize', setTop);
+      }
+    })();
+
     previewRenderer.clear();
     $('sections-container').innerHTML = '<div class="empty-state">قم بتحميل ملف Draft JSON لعرض الأقسام والكتل</div>';
     $('sections-container').addEventListener('click', handleSectionContainerClick);
@@ -196,13 +207,7 @@
           </div>
         </div>
       </div>
-      <div class="form-section">
-        <h3>نص التقرير اليومي</h3>
-        <div class="form-group form-group-full">
-          <label>reportWording.ar</label>
-          <textarea data-path="topic.reportWording.ar" class="form-textarea" dir="rtl" rows="3">${esc((topic.reportWording && topic.reportWording.ar) || '')}</textarea>
-        </div>
-      </div>
+      <!-- reportWording editor removed — use report section + blocks instead -->
       <div class="form-section">
         <h3>بيانات المخطط (_meta)</h3>
         <div class="form-grid">
@@ -253,8 +258,9 @@
         <button class="btn btn-primary ie-add-section" type="button">➕ إضافة قسم</button>
       </div>
     `;
-    html += InlineTopicEditor.renderMistakesEditor(draft, _topicListOpen.commonMistakes);
-    html += InlineTopicEditor.renderAcceptRejectEditor(draft, _topicListOpen.acceptRejectItems);
+    // Legacy topic-level editors hidden — authors should use block types instead
+    // html += InlineTopicEditor.renderMistakesEditor(draft, _topicListOpen.commonMistakes);
+    // html += InlineTopicEditor.renderAcceptRejectEditor(draft, _topicListOpen.acceptRejectItems);
     $('sections-container').innerHTML = html;
   }
 
@@ -290,12 +296,17 @@
       bodyHtml = `<div class="section-card-body">${blocksHtml}${addBlockHtml}</div>`;
     }
 
+    const sectionTypeOptions = Object.entries(SECTION_TYPE_LABELS).map(([key, label]) =>
+      `<option value="${esc(key)}"${section.type === key ? ' selected' : ''}>${esc(label)}</option>`
+    ).join('');
     return `
       <div class="section-card${isOpen ? '' : ' section-card-collapsed'}" data-section-idx="${index}">
         <div class="section-card-header ie-section-toggle" data-section-idx="${index}" title="${titleHint}">
           <span class="section-toggle-arrow">${arrow}</span>
           <span class="section-order">#${section.order}</span>
-          <span class="section-type-badge">${esc(typeLabel)}</span>
+          <select class="section-type-select" data-section-idx="${index}" onchange="_handleSectionTypeChange(this)">
+            ${sectionTypeOptions}
+          </select>
           <span class="section-title">${esc(section.title)}</span>
           <button class="ie-edit-section-title" data-section-idx="${index}" type="button" title="تعديل اسم القسم">✏️</button>
           <span class="section-block-count">${blocks.length} كتل</span>
@@ -345,6 +356,15 @@
         break;
       case 'image':
         summary = block.url || (block.caption ? block.caption.ar || '' : '') || '';
+        break;
+      case 'common_mistakes':
+        summary = `أخطاء شائعة: ${(block.items || []).length} بنود`;
+        break;
+      case 'acceptance_criteria':
+        summary = `معايير القبول: ${(block.items || []).length} بنود`;
+        break;
+      case 'rejection_criteria':
+        summary = `معايير الرفض: ${(block.items || []).length} بنود`;
         break;
       default:
         summary = '';
@@ -684,7 +704,7 @@
   }
 
   function handleSectionContainerClick(e) {
-    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-save-checklist, .ie-checklist-add-item, .ie-checklist-remove-item, .ie-save-equipment, .ie-equipment-add-item, .ie-equipment-remove-item, .ie-section-toggle, .ie-topic-toggle, .ie-edit-section-title, .ie-save-section-title, .ie-cancel-section-title');
+    const target = e.target.closest('[data-section-idx], .ie-save, .ie-cancel, .ie-save-topic, .ie-add-item, .ie-remove-item, .ie-add-block, .ie-remove-block, .ie-move-up, .ie-move-down, .ie-add-section, .ie-remove-section, .ie-section-up, .ie-section-down, .ie-save-table, .ie-table-add-row, .ie-table-remove-row, .ie-table-add-header, .ie-table-remove-header, .ie-save-checklist, .ie-checklist-add-item, .ie-checklist-remove-item, .ie-save-equipment, .ie-equipment-add-item, .ie-equipment-remove-item, .ie-save-callout, .ie-callout-add-item, .ie-callout-remove-item, .ie-section-toggle, .ie-topic-toggle, .ie-edit-section-title, .ie-save-section-title, .ie-cancel-section-title');
     if (!target) return;
 
     if (target.classList.contains('ie-save')) {
@@ -711,6 +731,12 @@
       handleEquipmentAddItem(target);
     } else if (target.classList.contains('ie-equipment-remove-item')) {
       handleEquipmentRemoveItem(target);
+    } else if (target.classList.contains('ie-save-callout')) {
+      handleCalloutSave(target);
+    } else if (target.classList.contains('ie-callout-add-item')) {
+      handleCalloutAddItem(target);
+    } else if (target.classList.contains('ie-callout-remove-item')) {
+      handleCalloutRemoveItem(target);
     } else if (target.classList.contains('ie-cancel')) {
       handleBlockCancel();
     } else if (target.classList.contains('ie-save-topic')) {
@@ -1131,6 +1157,73 @@
     }
   }
 
+  // ─── Callout block handlers (common_mistakes / acceptance_criteria / rejection_criteria) ──
+
+  function handleCalloutSave(saveBtn) {
+    if (!draft.isValid()) return;
+    const editor = saveBtn.closest('.inline-editor');
+    if (!editor) return;
+    const sectionIdx = parseInt(editor.dataset.sectionIdx, 10);
+    const blockIdx = parseInt(editor.dataset.blockIdx, 10);
+    if (isNaN(sectionIdx) || isNaN(blockIdx)) return;
+
+    const data = draft.toJSON();
+    const sections = data.sections || [];
+    if (!sections[sectionIdx]) return;
+    const block = sections[sectionIdx].blocks[blockIdx];
+    if (!block) return;
+
+    const titleInput = editor.querySelector('.ie-callout-title');
+    block.title = (titleInput ? titleInput.value : '').trim();
+
+    const itemEls = editor.querySelectorAll('.ie-callout-item');
+    block.items = Array.from(itemEls)
+      .map(itemEl => {
+        const textInput = itemEl.querySelector('.ie-callout-text');
+        return { textAr: (textInput ? textInput.value : '').trim() };
+      })
+      .filter(item => item.textAr !== '');
+
+    pushUndoSnapshot();
+    draft.setField(`sections.${sectionIdx}.blocks.${blockIdx}`, block);
+    renderSections();
+    updatePreview();
+    showToast('✅ تم الحفظ', 'success');
+  }
+
+  function handleCalloutAddItem(target) {
+    const editor = target.closest('.inline-editor');
+    if (!editor) return;
+    const itemsContainer = editor.querySelector('.ie-callout-items');
+    if (!itemsContainer) return;
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'ie-callout-item';
+    itemDiv.innerHTML = `
+      <input type="text" class="form-input ie-callout-text" value="" placeholder="نص البند" dir="rtl" style="flex:1;">
+      <button class="ie-callout-remove-item" title="حذف البند">🗑️</button>
+    `;
+    const emptyState = itemsContainer.querySelector('.empty-state-compact');
+    if (emptyState) emptyState.remove();
+    itemsContainer.appendChild(itemDiv);
+  }
+
+  function handleCalloutRemoveItem(target) {
+    const item = target.closest('.ie-callout-item');
+    if (!item) return;
+    const editor = target.closest('.inline-editor');
+    const itemsContainer = editor ? editor.querySelector('.ie-callout-items') : null;
+    item.remove();
+    if (itemsContainer && !itemsContainer.querySelectorAll('.ie-callout-item').length) {
+      const isCommonMistakes = editor && editor.querySelector('.inline-header') &&
+        editor.querySelector('.inline-header').textContent.includes('الأخطاء الشائعة');
+      const emptyText = isCommonMistakes ? 'لا توجد أخطاء مضافة' : 'لا توجد بنود';
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty-state-compact';
+      emptyDiv.textContent = emptyText;
+      itemsContainer.appendChild(emptyDiv);
+    }
+  }
+
   function handleTopicSave(saveBtn) {
     if (!draft.isValid()) return;
     const targetPath = saveBtn.dataset.target;
@@ -1230,13 +1323,13 @@
     let newBlock;
     switch (blockType) {
       case 'text':
-        newBlock = { type: 'text', order: nextOrder, content: { ar: '' } };
+        newBlock = { type: 'text', order: nextOrder, content: { ar: '' }, variant: 'paragraph' };
         break;
       case 'execution_step':
         newBlock = { type: 'execution_step', order: nextOrder, stepNumber: 1, description: { ar: '' }, notes: { ar: '' } };
         break;
       case 'safety_note':
-        newBlock = { type: 'safety_note', order: nextOrder, message: { ar: '' }, severity: 'medium' };
+        newBlock = { type: 'safety_note', order: nextOrder, message: { ar: '' }, severity: 'none' };
         break;
       case 'table':
         newBlock = { type: 'table', order: nextOrder, caption: { ar: '', en: '' }, headers: [], headersEn: [], rows: [] };
@@ -1255,6 +1348,15 @@
         break;
       case 'equipment':
         newBlock = { type: 'equipment', order: nextOrder, title: '', items: [] };
+        break;
+      case 'common_mistakes':
+        newBlock = { type: 'common_mistakes', order: nextOrder, title: '', items: [] };
+        break;
+      case 'acceptance_criteria':
+        newBlock = { type: 'acceptance_criteria', order: nextOrder, title: '', items: [] };
+        break;
+      case 'rejection_criteria':
+        newBlock = { type: 'rejection_criteria', order: nextOrder, title: '', items: [] };
         break;
       default:
         return;
@@ -1493,6 +1595,44 @@
       var secIdx = parseInt(ed.dataset.sectionIdx, 10);
       var blkIdx = parseInt(ed.dataset.blockIdx, 10);
       draft.setField('sections.' + secIdx + '.blocks.' + blkIdx + '.markerColorMode', val);
+      updatePreview();
+      runValidation();
+    }
+  };
+
+  window._handleSafetySeverity = function(el) {
+    var val = el.value;
+    var ed = el.closest('.inline-editor');
+    if (ed && draft && draft.setField) {
+      var secIdx = parseInt(ed.dataset.sectionIdx, 10);
+      var blkIdx = parseInt(ed.dataset.blockIdx, 10);
+      draft.setField('sections.' + secIdx + '.blocks.' + blkIdx + '.severity', val);
+      updatePreview();
+      runValidation();
+    }
+  };
+
+  window._handleTextVariant = function(el) {
+    var val = el.value;
+    var ed = el.closest('.inline-editor');
+    if (ed && draft && draft.setField) {
+      var secIdx = parseInt(ed.dataset.sectionIdx, 10);
+      var blkIdx = parseInt(ed.dataset.blockIdx, 10);
+      draft.setField('sections.' + secIdx + '.blocks.' + blkIdx + '.variant', val);
+      updatePreview();
+      runValidation();
+    }
+  };
+
+  window._handleSectionTypeChange = function(el) {
+    var val = el.value;
+    var sectionCard = el.closest('.section-card');
+    if (sectionCard && draft && draft.setField) {
+      var secIdx = parseInt(sectionCard.dataset.sectionIdx, 10);
+      if (isNaN(secIdx)) return;
+      pushUndoSnapshot();
+      draft.setField('sections.' + secIdx + '.type', val);
+      renderSections();
       updatePreview();
       runValidation();
     }

@@ -21,13 +21,13 @@ const VALID_TOPIC_STATUSES = ['draft', 'review', 'approved', 'published', 'archi
 
 const VALID_REVIEW_STATUSES = ['draft', 'in_review', 'changes_requested', 'approved', 'rejected'];
 
-const VALID_SECTION_TYPES = ['general', 'execution', 'inspection', 'safety', 'equipment', 'codeReference'];
+const VALID_SECTION_TYPES = ['general', 'execution', 'inspection', 'safety', 'equipment', 'codeReference', 'commonMistakes', 'acceptance', 'rejection', 'bestPractice', 'siteNotes', 'quality', 'coordination', 'report'];
 
-const VALID_BLOCK_TYPES = ['text', 'execution_step', 'safety_note', 'table', 'checklist', 'inspection_point', 'code_reference', 'equipment', 'image'];
+const VALID_BLOCK_TYPES = ['text', 'execution_step', 'safety_note', 'table', 'checklist', 'inspection_point', 'code_reference', 'equipment', 'image', 'common_mistakes', 'acceptance_criteria', 'rejection_criteria'];
 
 const VALID_TEXT_VARIANTS = ['paragraph', 'note', 'warning', 'tip'];
 
-const VALID_SEVERITIES = ['low', 'medium', 'high', 'critical'];
+const VALID_SEVERITIES = ['none', 'low', 'medium', 'high', 'critical'];
 
 const REQUIRED_TOP_LEVEL = ['_meta', 'topic', 'sections', 'review'];
 
@@ -39,7 +39,7 @@ const REQUIRED_SECTION = ['id', 'title', 'type', 'order', 'blocks'];
 
 const REQUIRED_BLOCK = ['type', 'order'];
 
-const BLOCK_TYPES_SIMPLE = ['text', 'execution_step', 'safety_note', 'table', 'image', 'checklist', 'inspection_point', 'code_reference', 'equipment'];
+const BLOCK_TYPES_SIMPLE = ['text', 'execution_step', 'safety_note', 'table', 'image', 'checklist', 'inspection_point', 'code_reference', 'equipment', 'common_mistakes', 'acceptance_criteria', 'rejection_criteria'];
 
 const ADDABLE_BLOCK_OPTIONS = [
   { type: 'text', label: 'نص' },
@@ -51,6 +51,9 @@ const ADDABLE_BLOCK_OPTIONS = [
   { type: 'inspection_point', label: 'نقطة فحص' },
   { type: 'code_reference', label: 'مرجع كودي' },
   { type: 'equipment', label: 'معدات / أدوات' },
+  { type: 'common_mistakes', label: 'أخطاء شائعة' },
+  { type: 'acceptance_criteria', label: 'معايير القبول' },
+  { type: 'rejection_criteria', label: 'معايير الرفض' },
 ];
 
 function addableBlockOptions() {
@@ -74,7 +77,10 @@ const BLOCK_DISPLAY_NAMES = {
   inspection_point: 'نقطة فحص',
   code_reference: 'مرجع كود',
   equipment: 'معدات',
-  image: 'صورة'
+  image: 'صورة',
+  common_mistakes: 'أخطاء شائعة',
+  acceptance_criteria: 'معايير القبول',
+  rejection_criteria: 'معايير الرفض',
 };
 
 const SECTION_TYPE_LABELS = {
@@ -83,10 +89,19 @@ const SECTION_TYPE_LABELS = {
   inspection: 'فحص',
   safety: 'سلامة',
   equipment: 'معدات',
-  codeReference: 'مرجع كود'
+  codeReference: 'مرجع كود',
+  commonMistakes: 'أخطاء شائعة',
+  acceptance: 'معايير قبول',
+  rejection: 'معايير رفض',
+  bestPractice: 'أفضل الممارسات',
+  siteNotes: 'ملاحظات الموقع',
+  quality: 'الجودة',
+  coordination: 'التنسيق',
+  report: 'تقرير'
 };
 
 const SEVERITY_LABELS = {
+  none: 'بلا مستوى خطورة',
   low: 'منخفضة',
   medium: 'متوسطة',
   high: 'عالية',

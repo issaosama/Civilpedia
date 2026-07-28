@@ -414,6 +414,21 @@ class ValidationEngine {
           }
         }
         break;
+      case 'common_mistakes':
+      case 'acceptance_criteria':
+      case 'rejection_criteria':
+        if (!block.items || (Array.isArray(block.items) && block.items.length === 0)) {
+          this._addWarning(`section "${sectionId}" block[${index}] — "${type}": "items" فارغ`, { sectionIdx, blockIdx: index });
+        }
+        if (block.items && Array.isArray(block.items)) {
+          for (let ci = 0; ci < block.items.length; ci++) {
+            const item = block.items[ci];
+            if (item.textAr !== undefined && item.textAr !== null && item.textAr.trim() === '') {
+              this._addWarning(`section "${sectionId}" block[${index}] — "${type}" item[${ci}]: "textAr" فارغ`, { sectionIdx, blockIdx: index });
+            }
+          }
+        }
+        break;
     }
   }
 
