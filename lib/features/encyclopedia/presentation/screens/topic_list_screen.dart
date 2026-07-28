@@ -5,12 +5,11 @@ import '../providers/encyclopedia_provider.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/services/language_provider.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
-import '../theme/encyclopedia_card_colors.dart';
+import '../widgets/topic_list_card.dart';
 
 class TopicListScreen extends StatefulWidget {
   final String categoryId;
@@ -40,7 +39,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
     final provider = context.watch<EncyclopediaProvider>();
     final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     return Scaffold(
-      appBar: AppBar(title: Text(_categoryLabel(widget.categoryId, tr))),
+      appBar: AppBar(title: Text(provider.categoryLabel(widget.categoryId, isArabic: isArabic))),
       body: AsyncValueWidget(
         isLoading: provider.isLoading,
         error: provider.error,
@@ -69,157 +68,11 @@ class _TopicListScreenState extends State<TopicListScreen> {
   }
 
   Widget _topicCard(BuildContext context, EngineeringTopic topic, {required bool isDark}) {
-    final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
-    final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
-    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
-    return Card(
-      elevation: 0,
-      color: cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        side: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  hasCover
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-                          child: SizedBox(
-                            width: 44,
-                            height: 44,
-                            child: Image.asset(
-                              topic.coverImageUrl!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _defaultTopicIcon(isDark: isDark),
-                            ),
-                          ),
-                        )
-                      : _defaultTopicIcon(isDark: isDark),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          topic.titleAr,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        if (topic.titleEn != null)
-                          Text(
-                            topic.titleEn!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: mutedText),
-                          ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.chevron_left, color: mutedText),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                topic.summary,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: mutedText,
-                      height: 1.5,
-                    ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              ..._cardChips(topic, isDark: isDark),
-            ],
-          ),
-        ),
-      ),
+    return TopicListCard(
+      topic: topic,
+      isDark: isDark,
+      onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
     );
   }
 
-  Widget _defaultTopicIcon({required bool isDark}) {
-    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
-    final bgColor = mutedText.withValues(alpha: 0.10);
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-      ),
-      child: Icon(Icons.menu_book, color: mutedText, size: 22),
-    );
-  }
-
-  List<Widget> _cardChips(EngineeringTopic topic, {required bool isDark}) {
-    final chips = _cardChipLabels(topic);
-    if (chips.isEmpty) return const [];
-    return [
-      const SizedBox(height: 10),
-      Wrap(
-        spacing: 6,
-        runSpacing: 4,
-        children: chips.map((chip) => _buildChip(chip, isDark: isDark)).toList(),
-      ),
-    ];
-  }
-
-  List<String> _cardChipLabels(EngineeringTopic topic) {
-    final source = topic.keyTopics.isNotEmpty ? topic.keyTopics : topic.tags;
-    return source
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toSet()
-        .take(2)
-        .toList();
-  }
-
-  Widget _buildChip(String label, {required bool isDark}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: isDark ? EncyclopediaCardColors.chipDarkBg : EncyclopediaCardColors.chipBg,
-        border: Border.all(
-          color: isDark ? EncyclopediaCardColors.chipDarkBorder : EncyclopediaCardColors.chipBorder,
-        ),
-        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: isDark ? EncyclopediaCardColors.chipDarkText : EncyclopediaCardColors.chipText,
-        ),
-      ),
-    );
-  }
-
-  String _categoryLabel(String id, String Function(String ar, String en) tr) {
-    const labels = {
-      'concrete': Ar.concreteCategory,
-      'steel': Ar.steelCategory,
-      'soil': Ar.soilCategory,
-      'roads': Ar.roadsCategory,
-      'finishing': Ar.finishingCategory,
-    };
-    final arLabel = labels[id] ?? id;
-    if (arLabel == id) return id;
-    final enLabels = {
-      'concrete': En.concreteCategory,
-      'steel': En.steelCategory,
-      'soil': En.soilCategory,
-      'roads': En.roadsCategory,
-      'finishing': En.finishingCategory,
-    };
-    return tr(arLabel, enLabels[id] ?? id);
-  }
 }

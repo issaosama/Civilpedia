@@ -47,6 +47,22 @@ class EncyclopediaCardColors {
   static const Color darkMistakeBg = Color(0xFF3D1A18);
   static const Color mistakeBorder = Color(0xFFA23A36);
 
+  // ── Semantic: Callout blocks ──
+  static const Color calloutMistakeBg = Color(0xFFFEF2F2);
+  static const Color darkCalloutMistakeBg = Color(0xFF3D1A18);
+  static const Color calloutMistakeBorder = Color(0xFFA23A36);
+  static const Color calloutMistakeLabel = Color(0xFF991B1B);
+
+  static const Color calloutAcceptBg = Color(0xFFF0FDF4);
+  static const Color darkCalloutAcceptBg = Color(0xFF052E16);
+  static const Color calloutAcceptBorder = Color(0xFF16A34A);
+  static const Color calloutAcceptLabel = Color(0xFF166534);
+
+  static const Color calloutRejectBg = Color(0xFFFEF2F2);
+  static const Color darkCalloutRejectBg = Color(0xFF450A0A);
+  static const Color calloutRejectBorder = Color(0xFFDC2626);
+  static const Color calloutRejectLabel = Color(0xFF7F1D1D);
+
   // ── Semantic: Text Variants (note, tip, warning) ──
   static const Color noteVariant = Color(0xFF3B82F6);
   static const Color tipVariant = Color(0xFF10B981);

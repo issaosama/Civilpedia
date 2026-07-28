@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/content_block.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/design_tokens.dart';
+import '../theme/encyclopedia_card_colors.dart';
 
 class ExecutionStepWidget extends StatelessWidget {
   final ExecutionStepBlock block;
@@ -12,32 +11,26 @@ class ExecutionStepWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final step = block.step;
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 5),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.primaryDark.withValues(alpha: 0.15) : AppColors.primaryDark.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(color: AppColors.primaryDark.withValues(alpha: 0.2)),
-      ),
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
+              color: EncyclopediaCardColors.accent,
+              borderRadius: BorderRadius.circular(14),
             ),
             alignment: Alignment.center,
             child: Text(
               '${step.stepNumber}',
               style: const TextStyle(
                 color: Colors.white,
+                fontSize: 13,
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
               ),
             ),
           ),
@@ -48,33 +41,13 @@ class ExecutionStepWidget extends StatelessWidget {
               children: [
                 Text(
                   step.description,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        height: 1.6,
-                      ),
+                  style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
                 ),
-                if (step.notes != null) ...[
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.amber.withValues(alpha: 0.15) : Colors.amber.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.notes, size: 14, color: AppColors.warning),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            step.notes!,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.warning.withValues(alpha: 0.8),
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
+                if (step.notes != null && step.notes!.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    step.notes!,
+                    style: TextStyle(fontSize: 12, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary, height: 1.5),
                   ),
                 ],
               ],

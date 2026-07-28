@@ -1,8 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../domain/entities/content_block.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/design_tokens.dart';
+import '../theme/encyclopedia_card_colors.dart';
 
 class ImageBlockWidget extends StatelessWidget {
   final ImageBlock block;
@@ -11,48 +10,50 @@ class ImageBlockWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (block.imageUrl.trim().isEmpty) return const SizedBox.shrink();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(color: isDark ? AppColors.darkBorder : Colors.grey.shade200),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CachedNetworkImage(
-              imageUrl: block.imageUrl,
-              height: 200,
-              fit: BoxFit.cover,
-              placeholder: (_, __) => Container(
-                height: 200,
-                color: isDark ? AppColors.darkSurface : Colors.grey.shade100,
-                child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-              ),
-              errorWidget: (_, __, ___) => Container(
-                height: 200,
-                color: isDark ? AppColors.darkSurface : Colors.grey.shade100,
-                child: Icon(Icons.broken_image, size: 48, color: isDark ? AppColors.darkTextSecondary : Colors.grey),
-              ),
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.asset(
+              block.imageUrl,
+              fit: BoxFit.contain,
+              width: double.infinity,
+              errorBuilder: (_, __, ___) {
+                if (kReleaseMode) return const SizedBox.shrink();
+                return Container(
+                  width: double.infinity,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    'تعذر تحميل الصورة\n${block.imageUrl}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 11, color: isDark ? Colors.grey.shade300 : Colors.grey),
+                  ),
+                );
+              },
             ),
-            if (block.caption != null)
-              Container(
-                padding: const EdgeInsets.all(8),
-                color: isDark ? AppColors.darkSurfaceElevated : Colors.grey.shade50,
+          ),
+          if (block.caption != null && block.caption!.trim().isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Center(
                 child: Text(
                   block.caption!,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontStyle: FontStyle.italic,
-                      ),
+                  style: TextStyle(fontSize: 12, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

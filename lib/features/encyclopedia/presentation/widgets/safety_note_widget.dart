@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/content_block.dart';
-import '../../../../core/theme/design_tokens.dart';
+import '../theme/encyclopedia_card_colors.dart';
 
 class SafetyNoteWidget extends StatelessWidget {
   final SafetyNoteBlock block;
@@ -9,43 +9,67 @@ class SafetyNoteWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (block.note.message.trim().isEmpty) return const SizedBox.shrink();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final note = block.note;
-    final (Color bg, Color fg, IconData icon) = switch (note.severity) {
-      SafetySeverity.low => (isDark ? const Color(0xFF1B3A1B) : const Color(0xFFE8F5E9), const Color(0xFF2E7D32), Icons.check_circle_outline),
-      SafetySeverity.medium => (isDark ? const Color(0xFF3A2A1B) : const Color(0xFFFFF3E0), const Color(0xFFEF6C00), Icons.warning_amber_rounded),
-      SafetySeverity.high => (isDark ? const Color(0xFF3A1B1B) : const Color(0xFFFFEBEE), const Color(0xFFC62828), Icons.gpp_bad),
-      SafetySeverity.critical => (isDark ? const Color(0xFF5A0000) : const Color(0xFF4A0000), const Color(0xFFFF1744), Icons.dangerous),
+    final (Color fg, IconData icon, String severityLabel) = switch (note.severity) {
+      SafetySeverity.none => (EncyclopediaCardColors.textSecondary, Icons.info_outline, ''),
+      SafetySeverity.low => (const Color(0xFF2E7D32), Icons.check_circle_outline, 'منخفض'),
+      SafetySeverity.medium => (EncyclopediaCardColors.warningVariant, Icons.warning_amber_rounded, 'متوسط'),
+      SafetySeverity.high => (EncyclopediaCardColors.calloutRejectBorder, Icons.gpp_bad, 'عالي'),
+      SafetySeverity.critical => (const Color(0xFFC62828), Icons.dangerous, 'خطير'),
     };
 
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(color: fg.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 22, color: fg),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              note.message,
-              style: TextStyle(
-                color: fg,
-                fontSize: 14,
-                fontWeight: note.severity == SafetySeverity.critical
-                    ? FontWeight.bold
-                    : FontWeight.w500,
-                height: 1.5,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: fg.withValues(alpha: isDark ? 0.15 : 0.06),
+          borderRadius: BorderRadius.circular(8),
+          border: Border(
+            right: BorderSide(color: fg, width: 3),
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (severityLabel.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(icon, size: 16, color: fg),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (severityLabel.isNotEmpty) ...[
+                    Text(
+                      severityLabel,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: fg,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                  ],
+                  Text(
+                    note.message,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary,
+                      height: 1.6,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

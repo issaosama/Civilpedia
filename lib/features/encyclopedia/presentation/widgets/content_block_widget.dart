@@ -9,6 +9,9 @@ import 'checklist_widget.dart';
 import 'table_block_widget.dart';
 import 'equipment_widget.dart';
 import 'image_block_widget.dart';
+import 'common_mistakes_block_widget.dart';
+import 'acceptance_criteria_block_widget.dart';
+import 'rejection_criteria_block_widget.dart';
 
 class ContentBlockWidget extends StatelessWidget {
   final ContentBlock block;
@@ -27,6 +30,9 @@ class ContentBlockWidget extends StatelessWidget {
       TableBlock b => TableBlockWidget(block: b),
       EquipmentBlock b => EquipmentWidget(block: b),
       ImageBlock b => ImageBlockWidget(block: b),
+      CommonMistakesBlock b => CommonMistakesBlockWidget(block: b),
+      AcceptanceCriteriaBlock b => AcceptanceCriteriaBlockWidget(block: b),
+      RejectionCriteriaBlock b => RejectionCriteriaBlockWidget(block: b),
     };
   }
 }
