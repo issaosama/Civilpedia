@@ -13,12 +13,32 @@
       <h1>Content Studio Lite</h1>
       <div class="subtitle">Civilpedia — محرر محتوى الموسوعة</div>
     </div>
-    <div class="toolbar">
-      <button class="btn btn-primary" id="load-btn">📂 Load Draft JSON</button>
-      <input type="file" id="file-input" accept=".json">
-      <span id="file-name"></span>
-    </div>
   </header>
+
+  <nav class="sticky-toolbar" id="sticky-toolbar">
+    <div class="sticky-toolbar-inner">
+      <button class="btn btn-primary btn-tb" id="load-btn">📂 Load Draft JSON</button>
+      <input type="file" id="file-input" accept=".json">
+      <span id="file-name" class="tb-file-name"></span>
+
+      <div class="tb-sep"></div>
+
+      <button class="btn btn-success btn-tb" id="download-btn" disabled>💾 Download Draft JSON</button>
+
+      <div class="tb-sep"></div>
+
+      <button class="btn btn-outline btn-tb" id="undo-btn" disabled>↶ Undo</button>
+
+      <div class="tb-sep"></div>
+
+      <button class="btn btn-outline btn-tb" id="validate-btn">✔ Validate Draft</button>
+      <button class="btn btn-outline btn-tb" id="preview-btn">🔄 Refresh Preview</button>
+
+      <div class="tb-sep"></div>
+
+      <button class="btn btn-primary btn-tb" id="export-btn" disabled>📦 Export App-ready JSON</button>
+    </div>
+  </nav>
 
   <div class="app-layout">
 
@@ -26,9 +46,6 @@
     <div class="editor-panel">
       <div class="panel-header">
         <span>✏️ المحرر</span>
-        <button class="btn btn-success btn-sm" id="validate-btn">✅ تحقق</button>
-        <button class="btn btn-outline btn-sm" id="preview-btn">👁️ تحديث المعاينة</button>
-        <button class="btn btn-outline btn-sm" id="undo-btn" disabled>↩ تراجع</button>
       </div>
       <div class="panel-body" id="topic-metadata">
         <!-- Metadata form rendered here by app.js -->
@@ -42,10 +59,6 @@
       </div>
 
       <div id="export-warning"></div>
-      <div class="action-bar">
-        <button class="btn btn-success" id="download-btn" disabled>⬇️ Download Draft JSON</button>
-        <button class="btn btn-primary" id="export-btn" disabled>📦 Export App-ready JSON</button>
-      </div>
     </div>
 
     <!-- RIGHT: Preview Panel -->

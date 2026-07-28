@@ -188,13 +188,7 @@
           </div>
         </div>
       </div>
-      <div class="form-section">
-        <h3>نص التقرير اليومي</h3>
-        <div class="form-group form-group-full">
-          <label>reportWording.ar</label>
-          <textarea data-path="topic.reportWording.ar" class="form-textarea" dir="rtl" rows="3">${esc((topic.reportWording && topic.reportWording.ar) || '')}</textarea>
-        </div>
-      </div>
+      <!-- reportWording editor removed — use report section + blocks instead -->
       <div class="form-section">
         <h3>بيانات المخطط (_meta)</h3>
         <div class="form-grid">

@@ -27,7 +27,7 @@ const VALID_BLOCK_TYPES = ['text', 'execution_step', 'safety_note', 'table', 'ch
 
 const VALID_TEXT_VARIANTS = ['paragraph', 'note', 'warning', 'tip'];
 
-const VALID_SEVERITIES = ['low', 'medium', 'high', 'critical'];
+const VALID_SEVERITIES = ['none', 'low', 'medium', 'high', 'critical'];
 
 const REQUIRED_TOP_LEVEL = ['_meta', 'topic', 'sections', 'review'];
 
@@ -83,6 +83,7 @@ const SECTION_TYPE_LABELS = {
 };
 
 const SEVERITY_LABELS = {
+  none: 'بلا مستوى خطورة',
   low: 'منخفضة',
   medium: 'متوسطة',
   high: 'عالية',
