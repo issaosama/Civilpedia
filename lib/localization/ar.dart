@@ -375,13 +375,6 @@ class Ar {
   static const String confirmPasswordHint = 'يرجى تأكيد كلمة المرور';
   static const String passwordsNotMatch = 'كلمة المرور غير متطابقة';
 
-  // Encyclopedia category labels
-  static const String concreteCategory = 'الخرسانة';
-  static const String steelCategory = 'الحديد';
-  static const String soilCategory = 'التربة';
-  static const String roadsCategory = 'الطرق';
-  static const String finishingCategory = 'أعمال الإنهاءات';
-
   // Inspection point labels
   static const String allowedTolerance = 'التسامح المسموح';
   static const String inspectionMethodLabel = 'طريقة الفحص';

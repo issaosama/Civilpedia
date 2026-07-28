@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../domain/entities/category_info.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/content_block.dart';
 import '../../domain/entities/topic_section.dart';
@@ -17,6 +18,7 @@ class EncyclopediaProvider extends ChangeNotifier {
   EngineeringTopic? _currentTopic;
   List<TopicSection> _currentSections = [];
   final Map<String, List<ContentBlock>> _blocksBySection = {};
+  Map<String, CategoryInfo> _categories = {};
   bool _isLoading = false;
   String? _error;
 
@@ -26,6 +28,7 @@ class EncyclopediaProvider extends ChangeNotifier {
   List<EngineeringTopic> get categoryTopics => _categoryTopics;
   EngineeringTopic? get currentTopic => _currentTopic;
   List<TopicSection> get currentSections => _currentSections;
+  Map<String, CategoryInfo> get categories => _categories;
   bool get isLoading => _isLoading;
   String? get error => _error;
   String? get currentSearchQuery => _searchQuery;
@@ -49,6 +52,20 @@ class EncyclopediaProvider extends ChangeNotifier {
   bool blocksLoadedForSection(String sectionId) =>
       _blocksBySection.containsKey(sectionId);
 
+  String categoryLabel(String id, {bool isArabic = true}) {
+    final cat = _categories[id];
+    if (cat == null) return id;
+    return isArabic ? cat.titleAr : cat.titleEn;
+  }
+
+  Future<void> loadCategories() async {
+    try {
+      _categories = await _repository.getCategories();
+    } catch (_) {
+      _categories = {};
+    }
+  }
+
   Future<void> loadTopicsByCategory(String categoryId) async {
     _setLoading();
     try {
@@ -64,6 +81,7 @@ class EncyclopediaProvider extends ChangeNotifier {
     _setLoading();
     try {
       _topics = await _repository.getAllTopics();
+      _categories = await _repository.getCategories();
       _error = null;
     } catch (e) {
       _error = e.toString();

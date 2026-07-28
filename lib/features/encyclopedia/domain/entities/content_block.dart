@@ -4,7 +4,7 @@ import 'code_reference.dart';
 
 enum TextVariant { paragraph, note, tip, warning }
 
-enum SafetySeverity { low, medium, high, critical }
+enum SafetySeverity { none, low, medium, high, critical }
 
 // ───────────── Shared sub-entities ─────────────
 
@@ -197,11 +197,20 @@ class TextBlock extends ContentBlock {
         'variant': variant.name,
       };
 
-  factory TextBlock.fromJson(Map<String, dynamic> json) => TextBlock(
-        content: json['content'] as String,
-        variant:
-            TextVariant.values.byName(json['variant'] as String? ?? 'paragraph'),
-      );
+  factory TextBlock.fromJson(Map<String, dynamic> json) {
+    TextVariant parsed;
+    final raw = json['variant'] as String?;
+    if (raw == null || raw.isEmpty) {
+      parsed = TextVariant.paragraph;
+    } else {
+      try {
+        parsed = TextVariant.values.byName(raw);
+      } catch (_) {
+        parsed = TextVariant.note;
+      }
+    }
+    return TextBlock(content: json['content'] as String, variant: parsed);
+  }
 }
 
 class ChecklistBlock extends ContentBlock {
@@ -354,6 +363,92 @@ class InspectionPointBlock extends ContentBlock {
       );
 }
 
+class CalloutItem {
+  final String text;
+
+  const CalloutItem({required this.text});
+
+  Map<String, dynamic> toJson() => {'text': text};
+
+  factory CalloutItem.fromJson(Map<String, dynamic> json) =>
+      CalloutItem(text: json['text'] as String);
+}
+
+class CommonMistakesBlock extends ContentBlock {
+  final String? title;
+  final List<CalloutItem> items;
+
+  const CommonMistakesBlock({this.title, required this.items});
+
+  @override
+  String get type => 'common_mistakes';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'title': title,
+        'items': items.map((i) => i.toJson()).toList(),
+      };
+
+  factory CommonMistakesBlock.fromJson(Map<String, dynamic> json) =>
+      CommonMistakesBlock(
+        title: json['title'] as String?,
+        items: (json['items'] as List<dynamic>)
+            .map((i) => CalloutItem.fromJson(i as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class AcceptanceCriteriaBlock extends ContentBlock {
+  final String? title;
+  final List<CalloutItem> items;
+
+  const AcceptanceCriteriaBlock({this.title, required this.items});
+
+  @override
+  String get type => 'acceptance_criteria';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'title': title,
+        'items': items.map((i) => i.toJson()).toList(),
+      };
+
+  factory AcceptanceCriteriaBlock.fromJson(Map<String, dynamic> json) =>
+      AcceptanceCriteriaBlock(
+        title: json['title'] as String?,
+        items: (json['items'] as List<dynamic>)
+            .map((i) => CalloutItem.fromJson(i as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
+class RejectionCriteriaBlock extends ContentBlock {
+  final String? title;
+  final List<CalloutItem> items;
+
+  const RejectionCriteriaBlock({this.title, required this.items});
+
+  @override
+  String get type => 'rejection_criteria';
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'type': type,
+        'title': title,
+        'items': items.map((i) => i.toJson()).toList(),
+      };
+
+  factory RejectionCriteriaBlock.fromJson(Map<String, dynamic> json) =>
+      RejectionCriteriaBlock(
+        title: json['title'] as String?,
+        items: (json['items'] as List<dynamic>)
+            .map((i) => CalloutItem.fromJson(i as Map<String, dynamic>))
+            .toList(),
+      );
+}
+
 class ExecutionStepBlock extends ContentBlock {
   final ExecutionStep step;
 
@@ -387,6 +482,9 @@ ContentBlock contentBlockFromJson(Map<String, dynamic> json) {
     'safety_note' => SafetyNoteBlock.fromJson(json),
     'inspection_point' => InspectionPointBlock.fromJson(json),
     'execution_step' => ExecutionStepBlock.fromJson(json),
+    'common_mistakes' => CommonMistakesBlock.fromJson(json),
+    'acceptance_criteria' => AcceptanceCriteriaBlock.fromJson(json),
+    'rejection_criteria' => RejectionCriteriaBlock.fromJson(json),
     _ => throw ArgumentError('Unknown content block type: ${json['type']}'),
   };
 }

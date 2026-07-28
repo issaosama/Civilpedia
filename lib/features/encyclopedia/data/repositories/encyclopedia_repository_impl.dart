@@ -1,3 +1,4 @@
+import '../../domain/entities/category_info.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/content_block.dart';
 import '../../domain/entities/topic_section.dart';
@@ -66,6 +67,15 @@ class EncyclopediaRepositoryImpl implements EncyclopediaRepository {
       return await _jsonDataSource.fetchBlocksForSection(topicId, sectionId);
     } catch (_) {
       return _fallbackDataSource.fetchBlocksForSection(topicId, sectionId);
+    }
+  }
+
+  @override
+  Future<Map<String, CategoryInfo>> getCategories() async {
+    try {
+      return await _jsonDataSource.fetchCategories();
+    } catch (_) {
+      return _fallbackDataSource.fetchCategories();
     }
   }
 }

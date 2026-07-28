@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../../domain/entities/category_info.dart';
 import '../../domain/entities/content_block.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/topic_section.dart';
@@ -10,6 +11,7 @@ class EncyclopediaJsonDataSource {
   List<EngineeringTopic>? _topics;
   Map<String, List<TopicSection>>? _sections;
   Map<String, List<ContentBlock>>? _blocks;
+  Map<String, CategoryInfo>? _categories;
   bool _loaded = false;
   bool _usingGeneratedCatalog = false;
 
@@ -54,6 +56,13 @@ class EncyclopediaJsonDataSource {
             .toList(),
       ),
     );
+
+    _categories = (json['categories'] as List<dynamic>?)
+        ?.map((c) => CategoryInfo.fromJson(c as Map<String, dynamic>))
+        .fold<Map<String, CategoryInfo>>({}, (map, cat) {
+          map[cat.id] = cat;
+          return map;
+        });
   }
 
   Future<List<EngineeringTopic>> fetchAllTopics() async {
@@ -96,5 +105,10 @@ class EncyclopediaJsonDataSource {
   Future<List<ContentBlock>> fetchBlocksForSection(String topicId, String sectionId) async {
     await _ensureLoaded();
     return _blocks!['${topicId}__$sectionId'] ?? <ContentBlock>[];
+  }
+
+  Future<Map<String, CategoryInfo>> fetchCategories() async {
+    await _ensureLoaded();
+    return Map.unmodifiable(_categories ?? const {});
   }
 }

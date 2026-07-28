@@ -208,6 +208,21 @@ void main() {
     exit(1);
   }
 
+  // Build categories array from unique categoryIds
+  final categoryIds = topics
+      .map((t) => t['categoryId'] as String?)
+      .whereType<String>()
+      .toSet()
+      .toList()
+    ..sort();
+  final categories = categoryIds.map((id) {
+    final label = _categoryLabels[id] ?? <String, String>{'ar': id, 'en': id};
+    return <String, dynamic>{
+      'id': id,
+      'title': {'ar': label['ar'], 'en': label['en']},
+    };
+  }).toList();
+
   // Build output
   final now = DateTime.now().toUtc().toIso8601String();
   final meta = {
@@ -221,6 +236,7 @@ void main() {
   };
   final output = <String, dynamic>{
     '_meta': meta,
+    'categories': categories,
     'topics': topics,
     'sections': sections,
     'blocks': blocks,
@@ -232,6 +248,23 @@ void main() {
   print('   Topics: ${topics.length}, Sections: ${meta['sectionCount']}, '
       'Blocks: ${meta['blockCount']}');
 }
+
+const _categoryLabels = <String, Map<String, String>>{
+  'concrete': {'ar': 'الخرسانة', 'en': 'Concrete'},
+  'steel': {'ar': 'الحديد', 'en': 'Steel Works'},
+  'soil': {'ar': 'التربة', 'en': 'Soil Works'},
+  'roads': {'ar': 'الطرق', 'en': 'Roads & Pavement'},
+  'finishing': {'ar': 'أعمال الإنهاءات', 'en': 'Finishing Works'},
+  'finishing-works': {'ar': 'أعمال الإنهاءات', 'en': 'Finishing Works'},
+  'structural-works': {'ar': 'أعمال هيكلية', 'en': 'Structural Works'},
+  'waterproofing-finishing': {
+    'ar': 'العزل المائي والإنهاءات',
+    'en': 'Waterproofing & Finishing',
+  },
+  'engineering-basics': {'ar': 'أساسيات الهندسة', 'en': 'Engineering Basics'},
+  'asphalt': {'ar': 'الأسفلت', 'en': 'Asphalt'},
+  'general': {'ar': 'عام', 'en': 'General'},
+};
 
 void error(String msg) {
   errors.add(msg);

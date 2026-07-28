@@ -7,7 +7,8 @@ enum SectionType {
   safety,
   equipment,
   codeReference,
-  general;
+  general,
+  report;
 
   String get labelAr {
     return switch (this) {
@@ -17,6 +18,7 @@ enum SectionType {
       SectionType.equipment => 'المعدات والأجهزة',
       SectionType.codeReference => 'المراجع والكودات',
       SectionType.general => 'معلومات عامة',
+      SectionType.report => 'تقرير',
     };
   }
 
@@ -28,6 +30,7 @@ enum SectionType {
       SectionType.equipment => const Color(0xFF6A1B9A),
       SectionType.codeReference => const Color(0xFFC62828),
       SectionType.general => const Color(0xFF455A64),
+      SectionType.report => const Color(0xFF2563EB),
     };
   }
 
@@ -39,6 +42,7 @@ enum SectionType {
       SectionType.equipment => Icons.precision_manufacturing,
       SectionType.codeReference => Icons.book,
       SectionType.general => Icons.info_outline,
+      SectionType.report => Icons.assignment,
     };
   }
 }

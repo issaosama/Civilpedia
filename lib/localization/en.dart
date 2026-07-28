@@ -372,13 +372,6 @@ class En {
   static const String confirmPasswordHint = 'Please confirm your password';
   static const String passwordsNotMatch = 'Passwords do not match';
 
-  // Encyclopedia category labels
-  static const String concreteCategory = 'Concrete';
-  static const String steelCategory = 'Steel';
-  static const String soilCategory = 'Soil';
-  static const String roadsCategory = 'Roads';
-  static const String finishingCategory = 'Finishing Works';
-
   // Inspection point labels
   static const String allowedTolerance = 'Allowed Tolerance';
   static const String inspectionMethodLabel = 'Inspection Method';

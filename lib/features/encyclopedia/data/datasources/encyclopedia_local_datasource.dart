@@ -1,3 +1,4 @@
+import '../../domain/entities/category_info.dart';
 import '../../domain/entities/code_reference.dart';
 import '../../domain/entities/content_block.dart';
 import '../../domain/entities/engineering_topic.dart';
@@ -47,9 +48,27 @@ class EncyclopediaLocalDataSource {
     final blocks = _mockBlocks['${topicId}__$sectionId'] ?? _mockBlocks[sectionId] ?? [];
     return blocks;
   }
+
+  Future<Map<String, CategoryInfo>> fetchCategories() async {
+    await Future.delayed(const Duration(milliseconds: 30));
+    return Map.unmodifiable(_mockCategories);
+  }
 }
 
 // ───────────── Mock Data ─────────────
+
+final Map<String, CategoryInfo> _mockCategories = {
+  'concrete': const CategoryInfo(id: 'concrete', titleAr: 'الخرسانة', titleEn: 'Concrete'),
+  'steel': const CategoryInfo(id: 'steel', titleAr: 'الحديد', titleEn: 'Steel'),
+  'soil': const CategoryInfo(id: 'soil', titleAr: 'التربة', titleEn: 'Soil'),
+  'roads': const CategoryInfo(id: 'roads', titleAr: 'الطرق', titleEn: 'Roads'),
+  'finishing': const CategoryInfo(id: 'finishing', titleAr: 'أعمال الإنهاءات', titleEn: 'Finishing Works'),
+  'asphalt': const CategoryInfo(id: 'asphalt', titleAr: 'الأسفلت', titleEn: 'Asphalt'),
+  'finishing-works': const CategoryInfo(id: 'finishing-works', titleAr: 'أعمال الإنهاءات', titleEn: 'Finishing Works'),
+  'engineering-basics': const CategoryInfo(id: 'engineering-basics', titleAr: 'أساسيات الهندسة', titleEn: 'Engineering Basics'),
+  'waterproofing-finishing': const CategoryInfo(id: 'waterproofing-finishing', titleAr: 'العزل المائي والإنهاءات', titleEn: 'Waterproofing & Finishing'),
+  'structural-works': const CategoryInfo(id: 'structural-works', titleAr: 'أعمال هيكلية', titleEn: 'Structural Works'),
+};
 
 final List<EngineeringTopic> _mockTopics = [
   // ── 1. Concrete Pouring ──
