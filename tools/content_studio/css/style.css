@@ -2021,19 +2021,69 @@ body {
   margin: 4px 0;
 }
 
-/* Equipment */
+/* Equipment — Flutter EquipmentWidget parity (soft-panel card) */
 .fp-equipment {
-  padding: 4px 0;
+  margin: 6px 0;
+  padding: 14px;
+  background: var(--fp-soft-panel);
+  border: 1px solid var(--fp-border);
+  border-radius: 8px;
+}
+.fp-equipment-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.fp-equipment-header-icon {
+  flex-shrink: 0;
+  color: var(--topic-accent);
+}
+.fp-equipment-header-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--fp-text);
+  line-height: 1.5;
+}
+.fp-equipment-list {
+  display: flex;
+  flex-direction: column;
 }
 .fp-equipment-item {
-  padding: 6px 0;
-  font-size: 14px;
-  color: var(--fp-text);
-  border-bottom: 1px solid var(--fp-border);
+  padding-bottom: 8px;
 }
-.fp-equipment-item:last-child { border-bottom: none; }
-.fp-equipment-spec { font-size: 13px; color: var(--fp-text-secondary); }
-.fp-equipment-purpose { font-size: 12px; color: var(--fp-text-muted); }
+.fp-equipment-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.fp-equipment-marker {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--topic-accent);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+.fp-equipment-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fp-text);
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+.fp-equipment-purpose,
+.fp-equipment-spec {
+  font-size: 13px;
+  color: var(--fp-text-secondary);
+  line-height: 1.6;
+  margin: 2px 0 0 14px;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
 
 /* Code reference */
 .fp-code-ref {

@@ -254,6 +254,160 @@ function renderSafe(fn, block) {
   assertIncludes(htmlLong, longText, 'Long Arabic text renders');
 })();
 
+// 9b. Equipment block — Flutter EquipmentWidget parity
+(() => {
+  console.log('\n9b. Equipment block unified container');
+  const html = renderSafe('_renderEquipment', {
+    title: 'المعدات المطلوبة',
+    items: [{ nameAr: 'قوالب مكعبات', purpose: 'لتشكيل المكعبات', specification: '150 مم' }]
+  });
+  assert(html !== '', 'Equipment block renders HTML');
+  assertIncludes(html, 'fp-equipment', 'Uses fp-equipment unified container');
+  assertIncludes(html, 'fp-equipment-list', 'Uses fp-equipment-list container');
+  assertIncludes(html, 'fp-equipment-item', 'Uses fp-equipment-item class');
+  assertIncludes(html, 'fp-equipment-item-row', 'Uses fp-equipment-item-row layout');
+  assertIncludes(html, 'fp-equipment-marker', 'Uses fp-equipment-marker bullet');
+  assertIncludes(html, 'fp-equipment-name', 'Uses fp-equipment-name class');
+  assertExcludes(html, '<strong>', 'No obsolete flat-row <strong> layout');
+})();
+
+// 9c. Equipment internal header
+(() => {
+  console.log('\n9c. Equipment internal header');
+  const html = renderSafe('_renderEquipment', {
+    title: 'أدوات ذات صلة',
+    items: [{ nameAr: 'ميزان' }]
+  });
+  assertIncludes(html, 'fp-equipment-header', 'Internal header renders when title present');
+  assertIncludes(html, 'fp-equipment-header-title', 'Header title element present');
+  assertIncludes(html, 'fp-equipment-header-icon', 'Header icon element present');
+  assertIncludes(html, 'أدوات ذات صلة', 'Header title text renders');
+
+  const htmlNoTitle = renderSafe('_renderEquipment', { items: [{ nameAr: 'ميزان' }] });
+  assertExcludes(htmlNoTitle, 'fp-equipment-header', 'No internal header when title absent');
+})();
+
+// 9d. Equipment name renders (nameAr draft field + name fallback)
+(() => {
+  console.log('\n9d. Equipment name rendering');
+  const htmlDraft = renderSafe('_renderEquipment', { items: [{ nameAr: 'هزاز داخلي' }] });
+  assertIncludes(htmlDraft, 'هزاز داخلي', 'Draft nameAr field renders');
+
+  const htmlApp = renderSafe('_renderEquipment', { items: [{ name: 'قضيب دمك' }] });
+  assertIncludes(htmlApp, 'قضيب دمك', 'App-ready name field renders as fallback');
+
+  const htmlNeither = renderSafe('_renderEquipment', { items: [{ purpose: 'فقط غرض' }] });
+  assertIncludes(htmlNeither, 'فقط غرض', 'Item without name still renders its other fields');
+})();
+
+// 9e. Equipment purpose renders only when present (before specification, Flutter order)
+(() => {
+  console.log('\n9e. Equipment purpose rendering');
+  const html = renderSafe('_renderEquipment', { items: [{ nameAr: 'مغرفة', purpose: 'لنقل الخرسانة' }] });
+  assertIncludes(html, 'الغرض: لنقل الخرسانة', 'Purpose renders with label when present');
+  assertIncludes(html, 'fp-equipment-purpose', 'Purpose uses fp-equipment-purpose class');
+
+  const htmlNoPurpose = renderSafe('_renderEquipment', { items: [{ nameAr: 'مغرفة', specification: 'محددة' }] });
+  assertExcludes(htmlNoPurpose, 'الغرض:', 'Purpose label omitted when absent');
+})();
+
+// 9f. Equipment specification renders only when present
+(() => {
+  console.log('\n9f. Equipment specification rendering');
+  const html = renderSafe('_renderEquipment', { items: [{ nameAr: 'ماكينة فحص', specification: 'معايرة حسب المواصفة' }] });
+  assertIncludes(html, 'المواصفة: معايرة حسب المواصفة', 'Specification renders with label when present');
+  assertIncludes(html, 'fp-equipment-spec', 'Specification uses fp-equipment-spec class');
+
+  const htmlNoSpec = renderSafe('_renderEquipment', { items: [{ nameAr: 'ماكينة فحص', purpose: 'لكسر المكعبات' }] });
+  assertExcludes(htmlNoSpec, 'المواصفة:', 'Specification label omitted when absent');
+})();
+
+// 9g. Equipment field order matches Flutter: name → purpose → specification
+(() => {
+  console.log('\n9g. Equipment field order');
+  const html = renderSafe('_renderEquipment', { items: [{ nameAr: 'اسم', purpose: 'غرض', specification: 'مواصفة' }] });
+  const nameIdx = html.indexOf('اسم');
+  const purposeIdx = html.indexOf('الغرض: غرض');
+  const specIdx = html.indexOf('المواصفة: مواصفة');
+  assert(nameIdx >= 0 && purposeIdx > nameIdx && specIdx > purposeIdx, 'Purpose renders after name and before specification');
+})();
+
+// 9h. Multiple equipment items preserve order
+(() => {
+  console.log('\n9h. Multiple equipment items preserve order');
+  const html = renderSafe('_renderEquipment', {
+    items: [{ nameAr: 'الأولى' }, { nameAr: 'الثانية' }, { nameAr: 'الثالثة' }]
+  });
+  const firstIdx = html.indexOf('الأولى');
+  const secondIdx = html.indexOf('الثانية');
+  const thirdIdx = html.indexOf('الثالثة');
+  assert(firstIdx >= 0 && secondIdx > firstIdx && thirdIdx > secondIdx, 'Items render in original order');
+})();
+
+// 9i. Empty equipment items are filtered/omitted
+(() => {
+  console.log('\n9i. Empty equipment items filtered');
+  const html = renderSafe('_renderEquipment', {
+    items: [
+      { nameAr: 'قوالب' },
+      { nameAr: '   ', purpose: '  ', specification: '' },
+      {},
+      { nameAr: '', purpose: '', specification: '' },
+      { nameAr: 'هزاز' }
+    ]
+  });
+  assertIncludes(html, 'قوالب', 'First valid item renders');
+  assertIncludes(html, 'هزاز', 'Last valid item renders');
+  assert(html.split('fp-equipment-item-row').length - 1 === 2, 'Only the 2 valid items render (empty items filtered)');
+})();
+
+// 9j. Empty equipment block omitted entirely
+(() => {
+  console.log('\n9j. Empty equipment block omitted');
+  assert(renderSafe('_renderEquipment', {}) === '', 'Block without items returns empty string');
+  assert(renderSafe('_renderEquipment', { items: [] }) === '', 'Block with empty items array returns empty string');
+  assert(renderSafe('_renderEquipment', { title: 'عنوان', items: [{ nameAr: ' ' }] }) === '', 'Block with only empty items returns empty string');
+})();
+
+// 9k. Long Arabic text renders safely
+(() => {
+  console.log('\n9k. Long Arabic text renders safely');
+  const longName = 'جهاز قياس الهبوط للخرسانة الطازجة وفق متطلبات الاختبار القياسي العراقي المعتمد في المشاريع الإنشائية الكبيرة';
+  const longPurpose = 'لقياس الهبوط وتحديد قابلية تشغيل الخرسانة الطازجة بصورة صحيحة قبل الصب في جميع عناصر المنشأ الخرسانية المسلحة';
+  const html = renderSafe('_renderEquipment', { items: [{ nameAr: longName, purpose: longPurpose }] });
+  assertIncludes(html, longName, 'Long Arabic name preserved intact');
+  assertIncludes(html, longPurpose, 'Long Arabic purpose preserved intact');
+  assertExcludes(html, 'ERROR', 'Long text renders without error');
+})();
+
+// 9l. Mixed Arabic/English content remains intact
+(() => {
+  console.log('\n9l. Mixed Arabic/English equipment content');
+  const html = renderSafe('_renderEquipment', {
+    items: [{
+      nameAr: 'مادة Curing Compound للعناية بالخرسانة',
+      purpose: 'تقليل فقدان الرطوبة وفق ASTM C309',
+      specification: 'نسبة مادة صلبة لا تقل عن 25%'
+    }]
+  });
+  assertIncludes(html, 'مادة Curing Compound للعناية بالخرسانة', 'Mixed Arabic/English name intact');
+  assertIncludes(html, 'وفق ASTM C309', 'Mixed Arabic/English purpose intact');
+  assertIncludes(html, 'نسبة مادة صلبة لا تقل عن 25%', 'Mixed Arabic/English specification intact');
+})();
+
+// 9m. No obsolete flat-row separator layout remains
+(() => {
+  console.log('\n9m. No obsolete flat-row separator layout');
+  const html = renderSafe('_renderEquipment', {
+    title: 'معدات',
+    items: [{ nameAr: 'ميزان', purpose: 'للقياس', specification: 'دقيق' }]
+  });
+  assertExcludes(html, '<strong>', 'No flat-row <strong> name markup');
+  assertExcludes(html, '— ', 'No inline dash-prefixed specification');
+  assertExcludes(html, '<br>', 'No flat-row <br> purpose concatenation');
+  assertExcludes(html, 'border-bottom', 'No flat-row separator style attribute');
+})();
+
 // 10. Report section rendering (normal blocks within section)
 (() => {
   console.log('\n10. Report section through normal blocks');
