@@ -16,11 +16,11 @@ class PreviewRenderer {
 
     let html = this._renderTopic(topic, data);
 
-    // Overview section (matches Flutter _buildOverviewSection)
-    const overviewText = (topic.simpleExplanation && topic.simpleExplanation.ar) || topic.summaryAr || '';
-    if (overviewText) {
-      html += this._buildSection('OVERVIEW', 'نظرة عامة', `<p class="fp-overview-text">${this._escape(overviewText)}</p>`);
-    }
+    // No auto-generated Overview section here: simpleExplanation/summaryAr are
+    // legacy metadata rendered in the hero (see _renderTopic). The article body
+    // must come from sections → blocks only, matching Flutter. Rendering the
+    // legacy field as a numbered section would duplicate the real `general`
+    // section.
 
     // Importance section (matches Flutter _buildImportanceSection)
     const siteNotes = topic.siteNotes && topic.siteNotes.ar || '';

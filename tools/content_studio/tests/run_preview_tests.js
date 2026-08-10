@@ -7,8 +7,9 @@ const BASE = path.join(__dirname, '..', 'js');
 
 // Minimal document and window mocks for PreviewRenderer
 global.window = { __csTempPreviews: null };
+const previewContainer = { innerHTML: '' };
 global.document = {
-  getElementById: () => ({ innerHTML: '' }),
+  getElementById: (id) => (id === 'test-container' ? previewContainer : { innerHTML: '' }),
   createElement: (tag) => {
     if (tag === 'div') {
       return {
@@ -24,6 +25,9 @@ global.document = {
 // Load schema.js (provides globals like VALID_TEXT_VARIANTS, VALID_SEVERITIES, etc.)
 const schemaMod = require(path.join(BASE, 'schema.js'));
 Object.assign(global, schemaMod);
+
+// Load draft.js for full render() tests (article body parity)
+const { Draft } = require(path.join(BASE, 'draft.js'));
 
 // Load preview.js (registers PreviewRenderer globally and exports via module.exports)
 const { PreviewRenderer } = require(path.join(BASE, 'preview.js'));
@@ -72,6 +76,17 @@ function assertExcludes(haystack, needle, msg) {
     console.log(`  PASS: ${msg}`);
     passed++;
   }
+}
+
+function countOccurrences(haystack, needle) {
+  if (!needle) return 0;
+  let count = 0;
+  let idx = haystack.indexOf(needle);
+  while (idx !== -1) {
+    count++;
+    idx = haystack.indexOf(needle, idx + needle.length);
+  }
+  return count;
 }
 
 // Create a PreviewRenderer instance (constructor calls document.getElementById)
@@ -465,6 +480,48 @@ function renderSafe(fn, block) {
     type: 'checklist', order: 1, title: { ar: 'قائمة التقرير' }, items: [{ text: 'بند 1', isRequired: true }]
   }, data);
   assertIncludes(checklistHtml, 'بند 1', 'Report checklist block renders item');
+})();
+
+// 11. Legacy simpleExplanation must NOT create a duplicate Overview section
+(() => {
+  console.log('\n11. Legacy overview does not create a duplicate Final Preview section');
+
+  const raw = {
+    _meta: { schemaVersion: '1.0.0', version: 1, createdAt: '2024-01-01T00:00:00Z', updatedAt: '2024-01-01T00:00:00Z', source: 'test', id: 'legacy' },
+    topic: {
+      id: 'legacy', titleAr: 'المعالجة', categoryId: 'concrete', level: 'basic', planKey: 'free', status: 'draft',
+      simpleExplanation: { ar: 'شرح مبسط للنظرة العامة يجب أن يظهر مرة واحدة فقط' },
+      summaryAr: 'ملخص احتياطي لا يجب أن يتكرر كقسم'
+    },
+    sections: [
+      { id: 's1', type: 'general', title: 'نظرة عامة', order: 1, blocks: [
+        { type: 'text', order: 1, content: { ar: 'محتوى القسم الحقيقي للنظرة العامة' }, variant: 'paragraph' }
+      ]},
+      { id: 's2', type: 'equipment', title: 'المعدات', order: 2, blocks: [
+        { type: 'equipment', order: 1, title: 'معدات', items: [{ nameAr: 'ميزان', purpose: 'للقياس', specification: 'دقيق' }] }
+      ]}
+    ],
+    review: { status: 'draft', reviewedBy: null, reviewedAt: null, reviewNotes: null, approvalStatus: null }
+  };
+
+  const draft = new Draft();
+  draft.load(JSON.stringify(raw), 'legacy.draft.json');
+  renderer.render(draft);
+  const html = previewContainer.innerHTML;
+
+  // Legacy overview text appears in the header (card summary + hero) but NOT as a body section
+  assertsEqual(countOccurrences(html, 'شرح مبسط للنظرة العامة'), 2, 'Legacy overview text appears in card summary + hero only');
+  assertExcludes(html, 'OVERVIEW', 'No auto-generated OVERVIEW section is rendered');
+  assertExcludes(html, 'fp-overview-text', 'No legacy overview body paragraph class');
+  assertExcludes(html, 'ملخص احتياطي', 'summaryAr fallback does not create a body section');
+
+  // Structured sections remain authoritative with sequential numbering
+  assertIncludes(html, 'GENERAL · 01', 'Structured general section is numbered 01');
+  assertsEqual(countOccurrences(html, 'محتوى القسم الحقيقي للنظرة العامة'), 1, 'Structured general content appears exactly once');
+  assertIncludes(html, 'EQUIPMENT · 02', 'Following equipment section is numbered 02');
+
+  // Legacy field remains stored and readable (no data loss)
+  assertsEqual(draft.toJSON().topic.simpleExplanation.ar, 'شرح مبسط للنظرة العامة يجب أن يظهر مرة واحدة فقط', 'Legacy simpleExplanation preserved after render');
 })();
 
 // ---------------------------------------------------------------------------
