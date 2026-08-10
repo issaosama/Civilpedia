@@ -153,6 +153,44 @@ function renderSafe(fn, block) {
   assertExcludes(html, 'حرج', 'Non-critical inspection hides حرج badge');
 })();
 
+// 5b. Inspection acceptance/method render on separate lines, each omitted when empty
+(() => {
+  console.log('\n5b. Inspection acceptance/method separate lines with optional omission');
+
+  // Both present
+  let html = renderSafe('_renderInspectionPoint', {
+    criteriaAr: 'Test criteria', acceptableTolerance: '± 5 مم', methodAr: 'فحص بصري', isCritical: false
+  });
+  assertIncludes(html, '<div class="fp-inspection-detail">القبول: ± 5 مم</div>', 'Acceptance renders on its own row');
+  assertIncludes(html, '<div class="fp-inspection-detail">الطريقة: فحص بصري</div>', 'Method renders on its own row');
+  assertIncludes(html, 'fp-inspection-details', 'Both lines are wrapped in details container');
+  assertExcludes(html, ' | ', 'No inline separator between acceptance and method');
+  assertExcludes(html, 'القبول: ± 5 مم | الطريقة', 'No combined one-line details string');
+
+  // Acceptance only
+  html = renderSafe('_renderInspectionPoint', { criteriaAr: 'Test criteria', acceptableTolerance: 'لا ميل' });
+  assertIncludes(html, '<div class="fp-inspection-detail">القبول: لا ميل</div>', 'Acceptance row present when method empty');
+  assertExcludes(html, 'الطريقة:', 'No method label when method empty');
+
+  // Method only
+  html = renderSafe('_renderInspectionPoint', { criteriaAr: 'Test criteria', methodAr: 'استخدام الشاقول' });
+  assertExcludes(html, 'القبول:', 'No acceptance label when acceptance empty');
+  assertIncludes(html, '<div class="fp-inspection-detail">الطريقة: استخدام الشاقول</div>', 'Method row present when acceptance empty');
+
+  // Both empty → no details area at all
+  html = renderSafe('_renderInspectionPoint', { criteriaAr: 'Test criteria' });
+  assertExcludes(html, 'القبول:', 'No acceptance label when both empty');
+  assertExcludes(html, 'الطريقة:', 'No method label when both empty');
+  assertExcludes(html, 'fp-inspection-details', 'No details container when both empty');
+
+  // Whitespace-only values are hidden; trimmed values render
+  html = renderSafe('_renderInspectionPoint', { criteriaAr: 'T', acceptableTolerance: '   ', methodAr: '  ' });
+  assertExcludes(html, 'fp-inspection-details', 'Whitespace-only values omit the details area');
+  html = renderSafe('_renderInspectionPoint', { criteriaAr: 'T', acceptableTolerance: '  ± 5  ', methodAr: '  فحص  ' });
+  assertIncludes(html, '<div class="fp-inspection-detail">القبول: ± 5</div>', 'Acceptance value is trimmed before render');
+  assertIncludes(html, '<div class="fp-inspection-detail">الطريقة: فحص</div>', 'Method value is trimmed before render');
+})();
+
 // 6. Unknown text variant: falls back to note-style card with ملاحظة label
 (() => {
   console.log('\n6. Unknown text variant in Preview');

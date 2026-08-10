@@ -17,9 +17,14 @@ class InspectionPointWidget extends StatelessWidget {
     final useTheme = point.effectiveMarkerColorMode != 'semantic';
     final markerBg = useTheme ? EncyclopediaCardColors.accent : ms.semanticFgColor(isDark);
     final markerSymbolColor = useTheme ? Colors.white : ms.symbolColor(isDark);
+    final primaryTextColor = isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary;
+    final detailsColor = isDark ? EncyclopediaCardColors.darkTextMuted : EncyclopediaCardColors.textMuted;
+    final acceptance = _trimmed(point.acceptableTolerance);
+    final method = _trimmed(point.method);
+    final detailsStyle = TextStyle(fontSize: 14, color: detailsColor, height: 1.6);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20).copyWith(bottom: 10),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -35,55 +40,68 @@ class InspectionPointWidget extends StatelessWidget {
               ms.symbol,
               style: TextStyle(
                 color: markerSymbolColor,
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.bold,
+                height: 1,
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 18),
           Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: TextStyle(fontSize: 14, color: isDark ? EncyclopediaCardColors.darkTextPrimary : EncyclopediaCardColors.textPrimary, height: 1.6),
-                children: [
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
                   TextSpan(
-                    text: point.criteria,
-                    style: TextStyle(fontWeight: point.isCritical ? FontWeight.w600 : FontWeight.normal),
+                    style: TextStyle(fontSize: 14, color: primaryTextColor, height: 1.6),
+                    children: [
+                      TextSpan(
+                        text: point.criteria,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      if (point.isCritical)
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(start: 4),
+                            child: _criticalBadge(),
+                          ),
+                        ),
+                    ],
                   ),
-                  if (point.acceptableTolerance != null && point.acceptableTolerance!.isNotEmpty)
-                    TextSpan(
-                      text: ' — ${point.acceptableTolerance}',
-                      style: TextStyle(color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
-                    ),
-                  if (point.method != null && point.method!.isNotEmpty)
-                    TextSpan(
-                      text: ' | ${point.method}',
-                      style: TextStyle(color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary, fontSize: 12),
-                    ),
-                ],
-              ),
+                ),
+                if (acceptance != null)
+                  Text('القبول: $acceptance', style: detailsStyle),
+                if (method != null)
+                  Text('الطريقة: $method', style: detailsStyle),
+              ],
             ),
           ),
-          if (point.isCritical)
-            Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: EncyclopediaCardColors.calloutRejectBorder.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  'حرج',
-                  style: TextStyle(
-                    color: EncyclopediaCardColors.calloutRejectBorder,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
         ],
+      ),
+    );
+  }
+
+  String? _trimmed(String? value) {
+    final trimmed = value?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    return trimmed;
+  }
+
+  Widget _criticalBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: EncyclopediaCardColors.calloutRejectBorder.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Text(
+        'حرج',
+        style: TextStyle(
+          color: EncyclopediaCardColors.calloutRejectBorder,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

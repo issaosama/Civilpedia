@@ -2009,6 +2009,11 @@ body {
 }
 .fp-inspection-critical { color: var(--fp-danger); }
 .fp-inspection-regular { color: var(--fp-text-muted); }
+.fp-inspection-detail {
+  font-size: 14px;
+  color: var(--fp-text-muted);
+  line-height: 1.6;
+}
 
 /* Empty inline warning */
 .fp-empty-inline {

@@ -414,13 +414,22 @@ class PreviewRenderer {
   _renderInspectionPoint(block) {
     const markerHtml = this._markerHtml(block.markerStyle, block.isCritical, block.markerColorMode);
     const criticalBadge = block.isCritical ? '<span class="fp-inspection-critical-badge">حرج</span>' : '';
+    const acceptance = (block.acceptableTolerance || '').trim();
+    const method = (block.methodAr || '').trim();
+    let detailsHtml = '';
+    if (acceptance) {
+      detailsHtml += `<div class="fp-inspection-detail">القبول: ${this._escape(acceptance)}</div>`;
+    }
+    if (method) {
+      detailsHtml += `<div class="fp-inspection-detail">الطريقة: ${this._escape(method)}</div>`;
+    }
+    const detailsArea = detailsHtml ? `<div class="fp-inspection-details">${detailsHtml}</div>` : '';
     return `
       <div class="fp-inspection">
         <div class="fp-inspection-row">
           ${markerHtml}
           <div style="margin-right:8px;flex:1;">
-            <strong>${this._escape(block.criteriaAr || '')}</strong> ${criticalBadge}<br>
-            <span class="fp-text-muted">القبول: ${this._escape(block.acceptableTolerance || '')} | الطريقة: ${this._escape(block.methodAr || '')}</span>
+            <strong>${this._escape(block.criteriaAr || '')}</strong> ${criticalBadge}${detailsArea}
           </div>
         </div>
       </div>
