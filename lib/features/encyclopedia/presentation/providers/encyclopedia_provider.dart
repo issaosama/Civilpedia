@@ -21,6 +21,7 @@ class EncyclopediaProvider extends ChangeNotifier {
   Map<String, CategoryInfo> _categories = {};
   bool _isLoading = false;
   String? _error;
+  bool _hasCompletedInitialLoad = false;
 
   List<EngineeringTopic> get topics => _searchQuery != null && _searchQuery!.trim().isNotEmpty
       ? _filteredTopics
@@ -32,6 +33,12 @@ class EncyclopediaProvider extends ChangeNotifier {
   Map<String, CategoryInfo> get categories => _categories;
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  /// True once a catalog load attempt has finished, whether it succeeded
+  /// (with or without topics) or failed. Distinguishes "never loaded" from
+  /// "loaded but empty" so UI never shows an empty state before the first
+  /// real load attempt completes.
+  bool get hasCompletedInitialLoad => _hasCompletedInitialLoad;
   String? get currentSearchQuery => _searchQuery;
   bool get isSearchActive => _searchQuery != null && _searchQuery!.trim().isNotEmpty;
 
@@ -96,7 +103,22 @@ class EncyclopediaProvider extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> loadAllTopics() async {
+  Future<void>? _loadAllTopicsFuture;
+
+  /// Loads the full catalog. Concurrent calls share the single in-flight
+  /// load instead of starting duplicate work; refresh waits on the same
+  /// future so it completes only when the real reload finishes.
+  Future<void> loadAllTopics() {
+    final inFlight = _loadAllTopicsFuture;
+    if (inFlight != null) return inFlight;
+    final future = _loadAllTopicsCore().whenComplete(() {
+      _loadAllTopicsFuture = null;
+    });
+    _loadAllTopicsFuture = future;
+    return future;
+  }
+
+  Future<void> _loadAllTopicsCore() async {
     _setLoading();
     try {
       _topics = await _repository.getAllTopics();
@@ -105,6 +127,7 @@ class EncyclopediaProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
     }
+    _hasCompletedInitialLoad = true;
     _notify();
   }
 

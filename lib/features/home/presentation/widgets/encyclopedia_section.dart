@@ -16,7 +16,10 @@ class _EncyclopediaSectionState extends State<EncyclopediaSection> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EncyclopediaProvider>().loadAllTopics();
+      final provider = context.read<EncyclopediaProvider>();
+      if (provider.allTopics.isEmpty && !provider.isLoading) {
+        provider.loadAllTopics();
+      }
     });
   }
 

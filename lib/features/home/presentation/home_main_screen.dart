@@ -5,19 +5,17 @@ import 'package:provider/provider.dart';
 import '../../../core/services/connectivity_provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/widgets/search_bar_widget.dart';
-import '../../../core/widgets/shimmer_loading.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../data/repositories/article_repository.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../../features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import 'widgets/ad_carousel_widget.dart';
 import 'widgets/quick_tools_section.dart';
 import 'widgets/categories_section.dart';
-import 'widgets/encyclopedia_section.dart';
-import 'widgets/articles_section.dart';
+import 'widgets/home_data_section.dart';
 
 /// Opens the Encyclopedia search experience with [query] already applied.
 /// Home only collects the query; Encyclopedia owns the search logic.
@@ -25,6 +23,13 @@ void openEncyclopediaSearch(BuildContext context, String query) {
   final trimmed = query.trim();
   if (trimmed.isEmpty) return;
   context.push('/encyclopedia?q=${Uri.encodeComponent(trimmed)}');
+}
+
+/// Real pull-to-refresh for Home data. Completes only when the Encyclopedia
+/// reload finishes; there is no synthetic delay or fake success.
+Future<void> refreshHomeData(BuildContext context) async {
+  HapticFeedback.mediumImpact();
+  await context.read<EncyclopediaProvider>().loadAllTopics();
 }
 
 class HomeMainScreen extends StatefulWidget {
@@ -35,20 +40,12 @@ class HomeMainScreen extends StatefulWidget {
 }
 
 class _HomeMainScreenState extends State<HomeMainScreen> {
-  bool _isLoading = false;
-
-  Future<void> _onRefresh() async {
-    HapticFeedback.mediumImpact();
-    setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (mounted) setState(() => _isLoading = false);
-  }
+  Future<void> _onRefresh() => refreshHomeData(context);
 
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
-    final repo = ArticleRepository();
     final auth = context.watch<AuthProvider>();
     final connectivity = context.watch<ConnectivityProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -169,21 +166,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
               actionLabel: tr(Ar.viewAll, En.viewAll),
               onAction: () => context.push('/encyclopedia'),
             ),
-            const EncyclopediaSection(),
-            AppSpacing.gapSm,
-            if (_isLoading)
-              const ShimmerSection()
-            else ...[
-              ArticlesSection(
-                title: Ar.featuredArticles,
-                articles: repo.getFeaturedArticles(),
-              ),
-              const SizedBox(height: 8),
-              ArticlesSection(
-                title: Ar.latestArticles,
-                articles: repo.getLatestArticles(),
-              ),
-            ],
+            const HomeDataSection(),
             const SizedBox(height: 16),
           ],
         ),
