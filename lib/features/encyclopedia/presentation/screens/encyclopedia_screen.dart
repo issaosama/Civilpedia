@@ -20,7 +20,9 @@ const _categoryOrder = [
 ];
 
 class EncyclopediaScreen extends StatefulWidget {
-  const EncyclopediaScreen({super.key});
+  final String? initialQuery;
+
+  const EncyclopediaScreen({super.key, this.initialQuery});
 
   @override
   State<EncyclopediaScreen> createState() => _EncyclopediaScreenState();
@@ -33,7 +35,15 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EncyclopediaProvider>().loadAllTopics();
+      final provider = context.read<EncyclopediaProvider>();
+      final query = widget.initialQuery?.trim() ?? '';
+      if (query.isNotEmpty) {
+        _searchController.text = query;
+        provider.searchTopics(query);
+      }
+      if (provider.allTopics.isEmpty && !provider.isLoading) {
+        provider.loadAllTopics();
+      }
     });
   }
 

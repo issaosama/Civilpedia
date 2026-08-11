@@ -19,6 +19,14 @@ import 'widgets/categories_section.dart';
 import 'widgets/encyclopedia_section.dart';
 import 'widgets/articles_section.dart';
 
+/// Opens the Encyclopedia search experience with [query] already applied.
+/// Home only collects the query; Encyclopedia owns the search logic.
+void openEncyclopediaSearch(BuildContext context, String query) {
+  final trimmed = query.trim();
+  if (trimmed.isEmpty) return;
+  context.push('/encyclopedia?q=${Uri.encodeComponent(trimmed)}');
+}
+
 class HomeMainScreen extends StatefulWidget {
   const HomeMainScreen({super.key});
 
@@ -127,7 +135,9 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      const SearchBarWidget(),
+                      SearchBarWidget(
+                        onSubmitted: (query) => openEncyclopediaSearch(context, query),
+                      ),
                     ],
                   ),
                 ),

@@ -4,14 +4,22 @@ import '../../localization/ar.dart';
 class SearchBarWidget extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
+  final ValueChanged<String>? onSubmitted;
 
-  const SearchBarWidget({super.key, this.controller, this.onChanged});
+  const SearchBarWidget({
+    super.key,
+    this.controller,
+    this.onChanged,
+    this.onSubmitted,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      textInputAction: TextInputAction.search,
       textAlign: TextAlign.right,
       decoration: InputDecoration(
         hintText: Ar.search,

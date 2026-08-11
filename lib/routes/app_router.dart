@@ -60,7 +60,9 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/encyclopedia',
       parentNavigatorKey: _rootNavigator,
-      builder: (context, state) => const EncyclopediaScreen(),
+      builder: (context, state) => EncyclopediaScreen(
+        initialQuery: state.uri.queryParameters['q'],
+      ),
     ),
     GoRoute(
       path: '/encyclopedia/topic/:topicId',
