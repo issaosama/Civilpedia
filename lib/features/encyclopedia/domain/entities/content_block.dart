@@ -4,7 +4,20 @@ import 'code_reference.dart';
 
 enum TextVariant { paragraph, note, tip, warning }
 
-enum SafetySeverity { none, low, medium, high, critical }
+enum SafetySeverity {
+  none,
+  low,
+  medium,
+  high,
+  critical;
+
+  static SafetySeverity parse(Object? raw) {
+    if (raw is String) {
+      return SafetySeverity.values.asNameMap()[raw] ?? SafetySeverity.medium;
+    }
+    return SafetySeverity.medium;
+  }
+}
 
 // ───────────── Shared sub-entities ─────────────
 
@@ -169,7 +182,7 @@ class SafetyNote {
 
   factory SafetyNote.fromJson(Map<String, dynamic> json) => SafetyNote(
         message: json['message'] as String,
-        severity: SafetySeverity.values.byName(json['severity'] as String),
+        severity: SafetySeverity.parse(json['severity']),
       );
 }
 
