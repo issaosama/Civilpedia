@@ -9,6 +9,7 @@ import 'core/services/theme_provider.dart';
 import 'core/services/language_provider.dart';
 import 'core/services/connectivity_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import 'features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import 'features/profile/presentation/providers/user_profile_provider.dart';
 
@@ -53,6 +54,10 @@ void _runApp() {
         ChangeNotifierProvider(create: (_) => EncyclopediaProvider(
           repository: AppDependencies.encyclopediaRepo,
         )),
+
+        ChangeNotifierProvider(
+          create: (_) => EncyclopediaFavoritesProvider()..load(),
+        ),
 
         ChangeNotifierProvider(create: (_) => UserProfileProvider(
           repository: AppDependencies.userProfileRepo,

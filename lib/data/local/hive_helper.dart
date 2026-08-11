@@ -5,9 +5,20 @@ import '../../models/article_model.dart';
 class HiveHelper {
   static late Box _box;
 
-  static Future<void> init() async {
-    await Hive.initFlutter();
-    _box = await Hive.openBox(AppConstants.hiveBoxName);
+  static Future<void> init({String? boxName, String? path}) async {
+    if (path != null) {
+      Hive.init(path);
+    } else {
+      await Hive.initFlutter();
+    }
+    _box = await Hive.openBox(boxName ?? AppConstants.hiveBoxName);
+  }
+
+  static List<String> _asStringList(Object? value) {
+    if (value is List) {
+      return value.whereType<String>().toList();
+    }
+    return <String>[];
   }
 
   static List<String> getFavorites() {
@@ -27,6 +38,28 @@ class HiveHelper {
 
   static bool isFavorite(String articleId) {
     return getFavorites().contains(articleId);
+  }
+
+  static List<String> getEncyclopediaFavorites() {
+    return _asStringList(_box.get(AppConstants.encyclopediaFavoritesKey));
+  }
+
+  static Future<void> addEncyclopediaFavorite(String topicId) async {
+    final favorites = getEncyclopediaFavorites();
+    if (favorites.contains(topicId)) return;
+    favorites.insert(0, topicId);
+    await _box.put(AppConstants.encyclopediaFavoritesKey, favorites);
+  }
+
+  static Future<void> removeEncyclopediaFavorite(String topicId) async {
+    final favorites = getEncyclopediaFavorites();
+    if (!favorites.contains(topicId)) return;
+    favorites.remove(topicId);
+    await _box.put(AppConstants.encyclopediaFavoritesKey, favorites);
+  }
+
+  static bool isEncyclopediaFavorite(String topicId) {
+    return getEncyclopediaFavorites().contains(topicId);
   }
 
   static List<String> getDownloads() {

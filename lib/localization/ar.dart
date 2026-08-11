@@ -15,6 +15,7 @@ class Ar {
   static const String featuredCompanies = 'شركات مميزة';
   static const String favorites = 'المفضلة';
   static const String downloads = 'التحميلات';
+  static const String savedArticlesSection = 'المقالات';
   static const String settings = 'الإعدادات';
   static const String darkMode = 'الوضع الليلي';
   static const String language = 'اللغة';

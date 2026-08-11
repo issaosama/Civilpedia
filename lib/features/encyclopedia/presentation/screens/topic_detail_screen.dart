@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import '../providers/encyclopedia_favorites_provider.dart';
 import '../providers/encyclopedia_provider.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/content_block.dart';
@@ -240,6 +241,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   // ───────────── Top Bar ─────────────
 
   Widget _buildTopBar(BuildContext context, {required bool isDark}) {
+    final favoritesProvider = context.watch<EncyclopediaFavoritesProvider>();
+    final isFavorite = favoritesProvider.isFavorite(widget.topicId);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Row(
@@ -268,6 +272,23 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 style: TextStyle(fontSize: 8, color: isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary, height: 1),
               ),
             ],
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              favoritesProvider.toggle(widget.topicId);
+            },
+            icon: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              size: 20,
+              color: isFavorite
+                  ? EncyclopediaCardColors.dangerText
+                  : (isDark ? EncyclopediaCardColors.darkTextSecondary : EncyclopediaCardColors.textSecondary),
+            ),
+            tooltip: isFavorite ? Ar.removeFromFavorites : Ar.addToFavorites,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
           ),
         ],
       ),

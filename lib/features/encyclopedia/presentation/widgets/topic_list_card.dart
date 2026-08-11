@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../localization/ar.dart';
 import '../../domain/entities/engineering_topic.dart';
 import 'topic_card_chip.dart';
 
@@ -8,12 +9,14 @@ class TopicListCard extends StatelessWidget {
   final EngineeringTopic topic;
   final bool isDark;
   final VoidCallback onTap;
+  final VoidCallback? onRemove;
 
   const TopicListCard({
     super.key,
     required this.topic,
     required this.isDark,
     required this.onTap,
+    this.onRemove,
   });
 
   @override
@@ -96,7 +99,15 @@ class TopicListCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(Icons.chevron_left, color: mutedText),
+                  onRemove != null
+                      ? IconButton(
+                          onPressed: onRemove,
+                          icon: const Icon(Icons.favorite, size: 20, color: AppColors.error),
+                          tooltip: Ar.removeFromFavorites,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                        )
+                      : Icon(Icons.chevron_left, color: mutedText),
                 ],
               ),
               const SizedBox(height: 10),

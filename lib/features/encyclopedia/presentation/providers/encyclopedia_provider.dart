@@ -25,6 +25,7 @@ class EncyclopediaProvider extends ChangeNotifier {
   List<EngineeringTopic> get topics => _searchQuery != null && _searchQuery!.trim().isNotEmpty
       ? _filteredTopics
       : _topics;
+  List<EngineeringTopic> get allTopics => _topics;
   List<EngineeringTopic> get categoryTopics => _categoryTopics;
   EngineeringTopic? get currentTopic => _currentTopic;
   List<TopicSection> get currentSections => _currentSections;
@@ -56,6 +57,24 @@ class EncyclopediaProvider extends ChangeNotifier {
     final cat = _categories[id];
     if (cat == null) return id;
     return isArabic ? cat.titleAr : cat.titleEn;
+  }
+
+  EngineeringTopic? topicById(String id) {
+    for (final topic in _topics) {
+      if (topic.id == id) return topic;
+    }
+    return null;
+  }
+
+  /// Resolves [ids] against loaded topics, preserving order and skipping
+  /// any id that no longer exists in the catalog.
+  List<EngineeringTopic> resolveTopics(Iterable<String> ids) {
+    final resolved = <EngineeringTopic>[];
+    for (final id in ids) {
+      final topic = topicById(id);
+      if (topic != null) resolved.add(topic);
+    }
+    return resolved;
   }
 
   Future<void> loadCategories() async {
