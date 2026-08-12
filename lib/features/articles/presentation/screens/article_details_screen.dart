@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/language_provider.dart';
@@ -8,6 +7,7 @@ import '../../../../data/repositories/article_repository.dart';
 import '../../../../data/local/hive_helper.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../widgets/article_image.dart';
 
 class ArticleDetailsScreen extends StatefulWidget {
   final String articleId;
@@ -93,7 +93,7 @@ class _ArticleDetailsScreenState extends State<ArticleDetailsScreen> {
               borderRadius: BorderRadius.circular(AppConstants.cardRadius),
               child: Stack(
                 children: [
-                  CachedNetworkImage(
+                  ArticleImage(
                     imageUrl: article.image,
                     height: 200,
                     width: double.infinity,

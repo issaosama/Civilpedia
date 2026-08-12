@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/custom_card.dart';
 import '../../../../data/repositories/article_repository.dart';
+import '../widgets/article_image.dart';
 
 class ArticlesScreen extends StatelessWidget {
   final String category;
@@ -28,7 +28,7 @@ class ArticlesScreen extends StatelessWidget {
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-                  child: CachedNetworkImage(
+                  child: ArticleImage(
                     imageUrl: article.image,
                     width: 80,
                     height: 80,

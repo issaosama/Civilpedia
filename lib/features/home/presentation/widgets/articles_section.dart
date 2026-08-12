@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/animated_list_item.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../features/articles/presentation/widgets/article_image.dart';
 
 class ArticlesSection extends StatelessWidget {
   final String title;
@@ -71,19 +71,11 @@ class ArticlesSection extends StatelessWidget {
                                   borderRadius: const BorderRadius.vertical(
                                     top: Radius.circular(DesignTokens.radiusMd),
                                   ),
-                                  child: CachedNetworkImage(
+                                  child: ArticleImage(
                                     imageUrl: article.image,
                                     height: 120,
                                     width: double.infinity,
                                     fit: BoxFit.cover,
-                                    placeholder: (_, __) => Container(
-                                      color: isDark ? Colors.white10 : Colors.grey.shade200,
-                                      child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                                    ),
-                                    errorWidget: (_, __, ___) => Container(
-                                      color: isDark ? Colors.white10 : Colors.grey.shade200,
-                                      child: const Icon(Icons.broken_image),
-                                    ),
                                   ),
                                 ),
                               ),

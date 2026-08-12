@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/custom_card.dart';
 import '../../../data/repositories/article_repository.dart';
 import '../../../data/local/hive_helper.dart';
 import '../../../localization/ar.dart';
+import '../../articles/presentation/widgets/article_image.dart';
 import '../../encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import '../../encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import '../../encyclopedia/presentation/widgets/topic_list_card.dart';
@@ -121,9 +121,11 @@ class _SavedScreenState extends State<SavedScreen> with SingleTickerProviderStat
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-                    child: CachedNetworkImage(
+                    child: ArticleImage(
                       imageUrl: article.image,
-                      width: 60, height: 60, fit: BoxFit.cover,
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -183,9 +185,11 @@ class _SavedScreenState extends State<SavedScreen> with SingleTickerProviderStat
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-                child: CachedNetworkImage(
+                child: ArticleImage(
                   imageUrl: article.image,
-                  width: 60, height: 60, fit: BoxFit.cover,
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: 12),
