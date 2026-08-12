@@ -133,20 +133,30 @@ class En {
   static const String slabLabel = 'Slab';
   static const String circularColumnLabel = 'Circular Column';
   static const String beamLabel = 'Beam';
+  static const String wallLabel = 'Wall';
   static const String footingLabel = 'Footing';
   static const String elementType = 'Element Type';
   static const String addElementsInfo = 'Add concrete elements to calculate total concrete volume';
   static const String grandTotal = 'Total Concrete Volume';
   static const String thickness = 'Thickness';
+  static const String depth = 'Depth';
+  static const String dimensionUnit = 'Dimension Unit';
+  static const String dimensionUnitHint = 'All dimensions are read in the selected unit; results are always in cubic meters (m³)';
+  static const String reset = 'Reset';
+  static const String invalidQuantity = 'Enter a valid quantity (1 or more)';
+  static const String singleElementVolume = 'Single Element Volume';
+  static const String formula = 'Formula';
+  static const String supplyCostSection = 'Supply & Cost Estimate';
+  static const String additionalPercent = 'Additional % (optional)';
   static const String wasteFactor = 'Waste Factor';
   static const String wasteCustom = 'Custom';
   static const String netVolume = 'Net Volume';
-  static const String wasteVolume = 'Waste Volume';
+  static const String wasteVolume = 'Additional Volume';
   static const String totalRequired = 'Total Required';
   static const String truckCapacity = 'Truck Capacity';
-  static const String truckCount = 'Trucks';
+  static const String truckCount = 'Estimated Trucks';
   static const String costPerCubic = 'Cost per m³';
-  static const String concreteCost = 'Concrete Cost';
+  static const String concreteCost = 'Estimated Concrete Cost';
   static const String options = 'Options';
 
   // Steel Calculator

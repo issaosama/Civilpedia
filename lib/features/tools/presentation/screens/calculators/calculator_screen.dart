@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../../core/constants/app_constants.dart';
@@ -7,6 +6,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
+import '../../../../tools/domain/concrete/concrete_volume_calculator.dart';
 
 const Color _fieldFill = AppColors.surface;
 
@@ -24,8 +24,9 @@ class _ElementCardData {
   final lengthCtrl = TextEditingController();
   final widthCtrl = TextEditingController();
   final heightCtrl = TextEditingController();
-  final columnCountCtrl = TextEditingController();
-  double volume = 0;
+  final qtyCtrl = TextEditingController(text: '1');
+  double singleVolume = 0;
+  double netVolume = 0;
   String? error;
 
   _ElementCardData();
@@ -34,7 +35,7 @@ class _ElementCardData {
     lengthCtrl.dispose();
     widthCtrl.dispose();
     heightCtrl.dispose();
-    columnCountCtrl.dispose();
+    qtyCtrl.dispose();
   }
 }
 
@@ -42,15 +43,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   // --- concrete multi-calc state ---
   final List<_ElementCardData> _cards = [];
 
-  // --- waste factor ---
+  // --- dimension unit (applies to every element card) ---
+  ConcreteDimensionUnit _dimensionUnit = ConcreteDimensionUnit.meters;
+
+  // --- additional percentage (waste) ---
   double _wastePercent = 0;
   final _customWasteCtrl = TextEditingController();
   bool _isCustomWaste = false;
 
-  // --- truck capacity ---
-  double _truckCapacity = 8;
-
-  // --- cost estimation ---
+  // --- optional supply & cost estimation ---
+  final _truckCapacityCtrl = TextEditingController();
   final _costPerCubicCtrl = TextEditingController();
   bool _showCost = false;
 
@@ -93,10 +95,36 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     {'value': 'slab', 'label': Ar.slabLabel},
     {'value': 'circular_column', 'label': Ar.circularColumnLabel},
     {'value': 'beam', 'label': Ar.beamLabel},
+    {'value': 'wall', 'label': Ar.wallLabel},
     {'value': 'footing', 'label': Ar.footingLabel},
   ];
 
   static bool _isCircular(String type) => type == 'circular_column';
+
+  static ConcreteElementType _enumType(String type) {
+    switch (type) {
+      case 'slab':
+        return ConcreteElementType.slab;
+      case 'column':
+        return ConcreteElementType.column;
+      case 'circular_column':
+        return ConcreteElementType.circularColumn;
+      case 'beam':
+        return ConcreteElementType.beam;
+      case 'wall':
+        return ConcreteElementType.wall;
+      case 'footing':
+        return ConcreteElementType.footing;
+      default:
+        return ConcreteElementType.column;
+    }
+  }
+
+  String get _unitSymbol => switch (_dimensionUnit) {
+        ConcreteDimensionUnit.meters => Ar.meters,
+        ConcreteDimensionUnit.centimeters => Ar.cm,
+        ConcreteDimensionUnit.millimeters => Ar.unitMm,
+      };
 
   static const Map<int, double> _steelWeightPerMeter = {
     8: 0.395,
@@ -129,46 +157,112 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _calcCard(int index) {
     final card = _cards[index];
+    final type = _enumType(card.elementType);
+    final isCircular = type == ConcreteElementType.circularColumn;
     final l = double.tryParse(card.lengthCtrl.text) ?? 0;
     final w = double.tryParse(card.widthCtrl.text) ?? 0;
     final h = double.tryParse(card.heightCtrl.text) ?? 0;
+    final qty = int.tryParse(card.qtyCtrl.text) ?? 0;
 
-    if (l <= 0 || h <= 0 || (!_isCircular(card.elementType) && w <= 0)) {
+    final dimsValid = l > 0 && h > 0 && (isCircular || w > 0);
+    final qtyValid = qty >= 1;
+
+    if (!dimsValid || !qtyValid) {
       setState(() {
-        card.volume = 0;
-        card.error = Ar.invalidInputs;
+        card.singleVolume = 0;
+        card.netVolume = 0;
+        card.error = !dimsValid ? Ar.invalidInputs : Ar.invalidQuantity;
       });
       return;
     }
 
-    double vol;
-    if (_isCircular(card.elementType)) {
-      vol = math.pi * (l / 2) * (l / 2) * h;
-    } else {
-      vol = l * w * h;
-    }
-
-    if (card.elementType == 'column') {
-      final count = int.tryParse(card.columnCountCtrl.text) ?? 1;
-      vol *= count;
-    }
+    final unitFactor = _dimensionUnit.factorToMeters;
+    // Self-describing named dimensions: each element passes exactly the
+    // dimensions its geometry needs, so diameter, height, width and thickness
+    // can never be confused with one another.
+    final single = switch (type) {
+      ConcreteElementType.slab => ConcreteVolumeCalculator.singleElementVolume(
+          type: type,
+          length: l * unitFactor,
+          width: w * unitFactor,
+          thickness: h * unitFactor,
+        ),
+      ConcreteElementType.beam => ConcreteVolumeCalculator.singleElementVolume(
+          type: type,
+          length: l * unitFactor,
+          width: w * unitFactor,
+          height: h * unitFactor,
+        ),
+      ConcreteElementType.column => ConcreteVolumeCalculator.singleElementVolume(
+          type: type,
+          width: l * unitFactor,
+          depth: w * unitFactor,
+          height: h * unitFactor,
+        ),
+      ConcreteElementType.circularColumn =>
+        ConcreteVolumeCalculator.singleElementVolume(
+          type: type,
+          diameter: l * unitFactor,
+          height: h * unitFactor,
+        ),
+      ConcreteElementType.wall => ConcreteVolumeCalculator.singleElementVolume(
+          type: type,
+          length: l * unitFactor,
+          thickness: w * unitFactor,
+          height: h * unitFactor,
+        ),
+      ConcreteElementType.footing =>
+        ConcreteVolumeCalculator.singleElementVolume(
+          type: type,
+          length: l * unitFactor,
+          width: w * unitFactor,
+          thickness: h * unitFactor,
+        ),
+    };
+    final net = ConcreteVolumeCalculator.netVolume(volume: single, quantity: qty);
 
     setState(() {
-      card.volume = vol;
+      card.singleVolume = single;
+      card.netVolume = net;
       card.error = null;
     });
   }
 
-  double get _grandTotal => _cards.fold<double>(0, (sum, card) => sum + card.volume);
+  double get _netTotal => _cards.fold<double>(0, (sum, card) => sum + card.netVolume);
 
-  double get _netTotal => _grandTotal;
-  double get _wasteVolume => _netTotal * _wastePercent / 100;
+  double get _effectiveWastePercent =>
+      _isCustomWaste ? (double.tryParse(_customWasteCtrl.text) ?? 0) : _wastePercent;
+
+  String get _effectiveWastePercentLabel {
+    final p = _effectiveWastePercent;
+    return p == p.truncateToDouble() ? p.toInt().toString() : p.toString();
+  }
+  double get _wasteVolume => _netTotal * _effectiveWastePercent / 100;
   double get _totalRequired => _netTotal + _wasteVolume;
-  int get _truckCount => (_totalRequired / _truckCapacity).ceil();
+
+  /// Null until the engineer provides a positive mixer/truck capacity.
+  double? get _truckCapacity {
+    final v = double.tryParse(_truckCapacityCtrl.text);
+    if (v == null || v <= 0) return null;
+    return v;
+  }
+
+  int? get _truckCount {
+    final capacity = _truckCapacity;
+    if (capacity == null) return null;
+    return ConcreteVolumeCalculator.truckCount(
+      totalVolume: _totalRequired,
+      truckCapacity: capacity,
+    );
+  }
+
   double? get _totalConcreteCost {
     final cost = double.tryParse(_costPerCubicCtrl.text);
     if (cost == null || cost <= 0 || !_showCost) return null;
-    return _totalRequired * cost;
+    return ConcreteVolumeCalculator.estimatedCost(
+      totalVolume: _totalRequired,
+      pricePerCubicMeter: cost,
+    );
   }
 
   // --- steel getters ---
@@ -187,8 +281,72 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   double get _steelRemainLen => _steelPurchLen - _steelTotalLen;
   double get _steelPurchW => _steelPurchLen * _steelWPM;
 
-  String _firstFieldLabel(_ElementCardData card) =>
-      _isCircular(card.elementType) ? Ar.diameter : Ar.length;
+  /// Dimension fields and their explicit labels for the selected element type.
+  /// Only the fields required by the geometry are shown.
+  List<({String label, TextEditingController ctrl})> _fieldsFor(
+      _ElementCardData card) {
+    switch (card.elementType) {
+      case 'slab':
+        return [
+          (label: Ar.length, ctrl: card.lengthCtrl),
+          (label: Ar.width, ctrl: card.widthCtrl),
+          (label: Ar.thickness, ctrl: card.heightCtrl),
+        ];
+      case 'column':
+        return [
+          (label: Ar.width, ctrl: card.lengthCtrl),
+          (label: Ar.depth, ctrl: card.widthCtrl),
+          (label: Ar.height, ctrl: card.heightCtrl),
+        ];
+      case 'circular_column':
+        return [
+          (label: Ar.diameter, ctrl: card.lengthCtrl),
+          (label: Ar.height, ctrl: card.heightCtrl),
+        ];
+      case 'beam':
+        return [
+          (label: Ar.length, ctrl: card.lengthCtrl),
+          (label: Ar.width, ctrl: card.widthCtrl),
+          (label: Ar.height, ctrl: card.heightCtrl),
+        ];
+      case 'wall':
+        return [
+          (label: Ar.length, ctrl: card.lengthCtrl),
+          (label: Ar.thickness, ctrl: card.widthCtrl),
+          (label: Ar.height, ctrl: card.heightCtrl),
+        ];
+      case 'footing':
+        return [
+          (label: Ar.length, ctrl: card.lengthCtrl),
+          (label: Ar.width, ctrl: card.widthCtrl),
+          (label: Ar.thickness, ctrl: card.heightCtrl),
+        ];
+      default:
+        return [
+          (label: Ar.length, ctrl: card.lengthCtrl),
+          (label: Ar.width, ctrl: card.widthCtrl),
+          (label: Ar.height, ctrl: card.heightCtrl),
+        ];
+    }
+  }
+
+  void _resetAll() {
+    setState(() {
+      for (final card in _cards) {
+        card.dispose();
+      }
+      _cards
+        ..clear()
+        ..add(_ElementCardData());
+      _dimensionUnit = ConcreteDimensionUnit.meters;
+      _wastePercent = 0;
+      _isCustomWaste = false;
+      _customWasteCtrl.clear();
+      _truckCapacityCtrl.clear();
+      _showCost = false;
+      _costPerCubicCtrl.clear();
+    });
+  }
 
   String _assetPath(String type) {
     switch (type) {
@@ -217,6 +375,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         return Icons.radio_button_unchecked;
       case 'beam':
         return Icons.view_headline;
+      case 'wall':
+        return Icons.wallpaper;
       case 'footing':
         return Icons.square_foot;
       default:
@@ -298,6 +458,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _qtyCtrl.dispose();
     _diameterCtrl.dispose();
     _customWasteCtrl.dispose();
+    _truckCapacityCtrl.dispose();
     _costPerCubicCtrl.dispose();
     _steelCustomWasteCtrl.dispose();
     _steelCostPerKgCtrl.dispose();
@@ -324,11 +485,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         title: Text(_title, style: const TextStyle(color: Colors.white)),
         backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: Ar.reset,
+            color: Colors.white,
+            onPressed: _resetAll,
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
           _buildInfoHeader(theme),
+          AppSpacing.gapLg,
+          _buildUnitSelector(theme),
           AppSpacing.gapLg,
           ...List.generate(_cards.length, (i) => _buildCard(i, theme)),
           AppSpacing.gapMd,
@@ -341,6 +512,72 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       bottomNavigationBar: _buildGrandTotalBar(theme),
     );
   }
+
+  Widget _buildUnitSelector(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return CustomCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Ar.dimensionUnit,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final unit in ConcreteDimensionUnit.values)
+                  ChoiceChip(
+                    label: Text(_unitLabel(unit)),
+                    selected: _dimensionUnit == unit,
+                    onSelected: (_) => setState(() {
+                      _dimensionUnit = unit;
+                      // Results are stale: dimensions are now read in the new unit.
+                      for (final card in _cards) {
+                        card.singleVolume = 0;
+                        card.netVolume = 0;
+                        card.error = null;
+                      }
+                    }),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: _dimensionUnit == unit
+                          ? AppColors.primary
+                          : isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Ar.dimensionUnitHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _unitLabel(ConcreteDimensionUnit unit) => switch (unit) {
+        ConcreteDimensionUnit.meters => Ar.meters,
+        ConcreteDimensionUnit.centimeters => Ar.cm,
+        ConcreteDimensionUnit.millimeters => Ar.unitMm,
+      };
 
   Widget _buildInfoHeader(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
@@ -410,26 +647,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   AppSpacing.gapMd,
                   _buildTypeDropdown(card, theme),
                   AppSpacing.gapMd,
-                  _buildCardField(_firstFieldLabel(card), card.lengthCtrl),
-                  if (!_isCircular(card.elementType)) ...[
+                  for (final field in _fieldsFor(card)) ...[
+                    _buildCardField(field.label, field.ctrl),
                     AppSpacing.gapSm,
-                    _buildCardField(Ar.width, card.widthCtrl),
                   ],
-                  AppSpacing.gapSm,
-                  _buildCardField(
-                    card.elementType == 'slab' ? Ar.thickness : Ar.height,
-                    card.heightCtrl,
-                  ),
-                  // Conditional "Number of Columns" field
-                  if (card.elementType == 'column') ...[
-                    AppSpacing.gapSm,
-                    _buildCardField(Ar.numberOfColumns, card.columnCountCtrl,
-                        isInteger: true),
-                  ],
+                  _buildCardField(Ar.quantity, card.qtyCtrl, isInteger: true),
                   AppSpacing.gapMd,
                   _buildCalcButton(index, theme),
                   if (card.error != null) _buildErrorResult(card, theme),
-                  if (card.volume > 0 && card.error == null)
+                  if (card.netVolume > 0 && card.error == null)
                     _buildVolumeResult(card, theme),
                 ],
               ),
@@ -519,8 +745,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             card.lengthCtrl.clear();
             card.widthCtrl.clear();
             card.heightCtrl.clear();
-            card.columnCountCtrl.clear();
-            card.volume = 0;
+            card.qtyCtrl.text = '1';
+            card.singleVolume = 0;
+            card.netVolume = 0;
             card.error = null;
           });
         }
@@ -573,6 +800,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildVolumeResult(_ElementCardData card, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final qty = int.tryParse(card.qtyCtrl.text) ?? 1;
+    final isCircular = _isCircular(card.elementType);
+
+    final l = double.tryParse(card.lengthCtrl.text) ?? 0;
+    final w = double.tryParse(card.widthCtrl.text) ?? 0;
+    final h = double.tryParse(card.heightCtrl.text) ?? 0;
+
+    final formulaText = isCircular
+        ? '(π/4) × ${l.toStringAsFixed(3)}² × ${h.toStringAsFixed(3)} $_unitSymbol'
+        : '${l.toStringAsFixed(3)} × ${w.toStringAsFixed(3)} × ${h.toStringAsFixed(3)} $_unitSymbol';
+
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: Container(
@@ -583,13 +822,38 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
           border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
         ),
-        child: Text(
-          '${Ar.volume}: ${card.volume.toStringAsFixed(2)} ${Ar.cubicMeters}',
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              '${Ar.formula}: $formulaText = ${card.singleVolume.toStringAsFixed(3)} ${Ar.cubicMeters}',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (qty > 1) ...[
+              const SizedBox(height: 4),
+              Text(
+                '${Ar.singleElementVolume}: ${card.singleVolume.toStringAsFixed(3)} ${Ar.cubicMeters}',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            const SizedBox(height: 8),
+            Text(
+              '${Ar.netVolume}${qty > 1 ? ' (×$qty)' : ''}: ${card.netVolume.toStringAsFixed(3)} ${Ar.cubicMeters}',
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: AppColors.primary,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
@@ -627,9 +891,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            // Waste Factor
+            // Optional user-selected additional percentage (default 0%)
             Text(
-              Ar.wasteFactor,
+              Ar.additionalPercent,
               style: theme.textTheme.bodySmall?.copyWith(
                 color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
@@ -672,38 +936,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
             if (_isCustomWaste) ...[
               const SizedBox(height: 8),
-              _buildCardField(Ar.wasteFactor, _customWasteCtrl),
+              _buildCardField(Ar.additionalPercent, _customWasteCtrl),
             ],
             const Divider(height: 32),
-            // Truck Capacity
+            // Optional supply & cost estimation (secondary, opt-in)
             Text(
-              Ar.truckCapacity,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
+              Ar.supplyCostSection,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final cap in [6, 8, 10])
-                  ChoiceChip(
-                    label: Text('$cap m³'),
-                    selected: _truckCapacity == cap,
-                    onSelected: (_) =>
-                        setState(() => _truckCapacity = cap.toDouble()),
-                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
-                    labelStyle: TextStyle(
-                      color: _truckCapacity == cap ? AppColors.primary : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-              ],
-            ),
+            const SizedBox(height: 16),
+            _buildCardField(
+                '${Ar.truckCapacity} (${Ar.cubicMeters})', _truckCapacityCtrl),
             const Divider(height: 32),
-            // Cost Estimation
             Row(
               children: [
                 Expanded(
@@ -734,7 +981,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   Widget _buildGrandTotalBar(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
-    final hasResults = _cards.isNotEmpty && _cards.any((c) => c.volume > 0);
+    final hasResults = _cards.isNotEmpty && _cards.any((c) => c.netVolume > 0);
+    final truckCount = _truckCount;
+    final capacity = _truckCapacity;
+    final cost = _totalConcreteCost;
 
     return Container(
       padding: EdgeInsets.only(
@@ -782,7 +1032,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${_totalRequired.toStringAsFixed(2)} ${Ar.cubicMeters}',
+                  '${_totalRequired.toStringAsFixed(3)} ${Ar.cubicMeters}',
                   style: TextStyle(
                     color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                     fontSize: 22,
@@ -791,27 +1041,41 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                 ),
                 if (hasResults) ...[
                   const SizedBox(height: 6),
-                  if (_wastePercent > 0)
+                  if (_effectiveWastePercent > 0)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 2),
                       child: Text(
-                        '${Ar.netVolume}: ${_netTotal.toStringAsFixed(2)} ${Ar.cubicMeters}  |  ${Ar.wasteVolume} ($_wastePercent%): ${_wasteVolume.toStringAsFixed(2)} ${Ar.cubicMeters}',
+                        '${Ar.netVolume}: ${_netTotal.toStringAsFixed(3)} ${Ar.cubicMeters}  |  ${Ar.wasteVolume} ($_effectiveWastePercentLabel%): ${_wasteVolume.toStringAsFixed(3)} ${Ar.cubicMeters}',
                         style: TextStyle(
                           color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                           fontSize: 11,
                         ),
                       ),
                     ),
-                  Text(
-                    _showCost && _totalConcreteCost != null
-                        ? '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount  |  ${Ar.concreteCost}: ${_totalConcreteCost!.toStringAsFixed(0)}'
-                        : '${Ar.truckCount} (${_truckCapacity}m³): $_truckCount',
-                    style: TextStyle(
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  if (truckCount != null && capacity != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        '${Ar.truckCount} (${capacity.toStringAsFixed(1)} ${Ar.cubicMeters}): $truckCount',
+                        style: TextStyle(
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  ),
+                  if (cost != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        '${Ar.concreteCost}: ${cost.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                 ],
               ],
             ),
@@ -1263,7 +1527,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextField(
       controller: ctrl,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: isInteger
+          ? TextInputType.number
+          : const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [
         if (isInteger)
           FilteringTextInputFormatter.digitsOnly

@@ -137,20 +137,30 @@ class Ar {
   static const String slabLabel = 'بلاطة';
   static const String circularColumnLabel = 'عمود دائري';
   static const String beamLabel = 'كمرة';
+  static const String wallLabel = 'جدار';
   static const String footingLabel = 'قاعدة';
   static const String elementType = 'نوع العنصر';
   static const String addElementsInfo = 'أضف العناصر الخرسانية المطلوبة لحساب إجمالي حجم الخرسانة';
   static const String grandTotal = 'المجموع الكلي للخرسانة';
   static const String thickness = 'السمك';
+  static const String depth = 'العمق';
+  static const String dimensionUnit = 'وحدة الأبعاد';
+  static const String dimensionUnitHint = 'تُفسَّر جميع الأبعاد بالوحدة المختارة، والنتيجة دائماً بالمتر المكعب (م³)';
+  static const String reset = 'إعادة تعيين';
+  static const String invalidQuantity = 'أدخل كمية صحيحة (1 أو أكثر)';
+  static const String singleElementVolume = 'حجم العنصر الواحد';
+  static const String formula = 'المعادلة';
+  static const String supplyCostSection = 'تقدير التوريد والكلفة';
+  static const String additionalPercent = 'نسبة إضافية (اختياري)';
   static const String wasteFactor = 'نسبة الهدر';
   static const String wasteCustom = 'يدوي';
   static const String netVolume = 'الحجم الصافي';
-  static const String wasteVolume = 'حجم الهدر';
+  static const String wasteVolume = 'الحجم الإضافي';
   static const String totalRequired = 'الإجمالي المطلوب';
   static const String truckCapacity = 'سعة الخلاطة';
-  static const String truckCount = 'عدد الخلاطات';
+  static const String truckCount = 'العدد التقديري للخلاطات';
   static const String costPerCubic = 'سعر المتر المكعب';
-  static const String concreteCost = 'تكلفة الخرسانة';
+  static const String concreteCost = 'التكلفة التقديرية للخرسانة';
   static const String options = 'خيارات إضافية';
 
   // Steel Calculator
