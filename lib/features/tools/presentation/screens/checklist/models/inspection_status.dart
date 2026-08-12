@@ -1,1 +1,1 @@
-enum InspectionStatus { pending, pass, fail }
+enum InspectionStatus { pending, pass, fail, na }

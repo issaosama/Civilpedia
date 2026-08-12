@@ -213,6 +213,7 @@ class Ar {
   static const String inspectionPass = 'ناجح';
   static const String inspectionFail = 'راسب';
   static const String inspectionPending = 'قيد الفحص';
+  static const String inspectionNA = 'لا ينطبق';
   static const String inspectionCritical = 'حرج';
   static const String inspectionRequired = 'إلزامي';
   static const String inspectionNotes = 'ملاحظات';

@@ -16,11 +16,12 @@ class ChecklistCategoryDetailScreen extends StatefulWidget {
   final String passLabel;
   final String failLabel;
   final String pendingLabel;
+  final String naLabel;
   final String criticalLabel;
   final String requiredLabel;
   final String notesHint;
   final String codeRefLabel;
-  final ValueChanged<String> onItemStatusChanged;
+  final void Function(String itemId, InspectionStatus newStatus) onItemStatusChanged;
   final void Function(String itemId, String notes) onItemNotesChanged;
 
   const ChecklistCategoryDetailScreen({
@@ -31,6 +32,7 @@ class ChecklistCategoryDetailScreen extends StatefulWidget {
     required this.passLabel,
     required this.failLabel,
     required this.pendingLabel,
+    required this.naLabel,
     required this.criticalLabel,
     required this.requiredLabel,
     required this.notesHint,
@@ -46,8 +48,8 @@ class ChecklistCategoryDetailScreen extends StatefulWidget {
 
 class _ChecklistCategoryDetailScreenState
     extends State<ChecklistCategoryDetailScreen> {
-  void _onItemStatusChanged(String itemId) {
-    widget.onItemStatusChanged(itemId);
+  void _onItemStatusChanged(String itemId, InspectionStatus status) {
+    widget.onItemStatusChanged(itemId, status);
     setState(() {});
   }
 
@@ -143,11 +145,12 @@ class _ChecklistCategoryDetailScreenState
                 passLabel: widget.passLabel,
                 failLabel: widget.failLabel,
                 pendingLabel: widget.pendingLabel,
+                naLabel: widget.naLabel,
                 criticalLabel: widget.criticalLabel,
                 requiredLabel: widget.requiredLabel,
                 notesHint: widget.notesHint,
                 codeRefLabel: widget.codeRefLabel,
-                onStatusChanged: (_) => _onItemStatusChanged(item.id),
+                onStatusChanged: (status) => _onItemStatusChanged(item.id, status),
                 onNotesChanged: (notes) => _onItemNotesChanged(item.id, notes),
               ),
             );

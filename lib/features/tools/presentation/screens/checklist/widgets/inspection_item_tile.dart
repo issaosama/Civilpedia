@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/inspection_item.dart';
 import '../models/inspection_status.dart';
 import '../inspection_localization.dart';
-import 'inspection_status_chip.dart';
 import 'inspection_badge.dart';
 import 'inspection_notes_field.dart';
 import '../../../../../../core/theme/app_colors.dart';
@@ -15,11 +14,12 @@ class InspectionItemTile extends StatelessWidget {
   final String passLabel;
   final String failLabel;
   final String pendingLabel;
+  final String naLabel;
   final String criticalLabel;
   final String requiredLabel;
   final String notesHint;
   final String codeRefLabel;
-  final ValueChanged<InspectionStatus> onStatusChanged;
+  final void Function(InspectionStatus status) onStatusChanged;
   final ValueChanged<String> onNotesChanged;
 
   const InspectionItemTile({
@@ -29,6 +29,7 @@ class InspectionItemTile extends StatelessWidget {
     required this.passLabel,
     required this.failLabel,
     required this.pendingLabel,
+    required this.naLabel,
     required this.criticalLabel,
     required this.requiredLabel,
     required this.notesHint,
@@ -52,108 +53,117 @@ class InspectionItemTile extends StatelessWidget {
               : Colors.transparent,
         ),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-          onTap: () {
-            final next = switch (item.status) {
-              InspectionStatus.pending => InspectionStatus.pass,
-              InspectionStatus.pass => InspectionStatus.fail,
-              InspectionStatus.fail => InspectionStatus.pending,
-            };
-            onStatusChanged(next);
-          },
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            child: Column(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _statusIndicator(item.status),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n(item.titleKey),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              height: 1.4,
-                              decoration: item.status == InspectionStatus.pass
-                                  ? TextDecoration.lineThrough
-                                  : null,
-                              color: item.status == InspectionStatus.pass
-                                  ? AppColors.textSecondary
-                                  : null,
-                            ),
-                          ),
-                          if (item.codeRef != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              '$codeRefLabel: ${item.codeRef}',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
-                          if (item.descriptionKey != null) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              l10n(item.descriptionKey!),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondary,
-                                fontSize: 11,
-                                fontStyle: FontStyle.italic,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    InspectionStatusChip(
-                      status: item.status,
-                      passLabel: passLabel,
-                      failLabel: failLabel,
-                      pendingLabel: pendingLabel,
-                    ),
-                  ],
-                ),
-                if (item.isCritical || item.isRequired) ...[
-                  const SizedBox(height: 6),
-                  Wrap(
-                    spacing: 6,
-                    runSpacing: 4,
+                _statusDot(item.status),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (item.isCritical)
-                        InspectionBadge.critical(criticalLabel),
-                      if (item.isRequired)
-                        InspectionBadge.required(requiredLabel),
+                      Text(
+                        l10n(item.titleKey),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                          decoration: item.status == InspectionStatus.pass
+                              ? TextDecoration.lineThrough
+                              : null,
+                          color: item.status == InspectionStatus.pass
+                              ? AppColors.textSecondary
+                              : null,
+                        ),
+                      ),
+                      if (item.codeRef != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          '$codeRefLabel: ${item.codeRef}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                      if (item.descriptionKey != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          l10n(item.descriptionKey!),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontSize: 11,
+                            fontStyle: FontStyle.italic,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
                   ),
-                ],
-                const SizedBox(height: 6),
-                InspectionNotesField(
-                  initialNotes: item.notes,
-                  hintText: notesHint,
-                  onChanged: onNotesChanged,
                 ),
               ],
             ),
-          ),
+            if (item.isCritical || item.isRequired) ...[
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: [
+                  if (item.isCritical)
+                    InspectionBadge.critical(criticalLabel),
+                  if (item.isRequired)
+                    InspectionBadge.required(requiredLabel),
+                ],
+              ),
+            ],
+            const SizedBox(height: 6),
+            // Status chips
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                _buildStatusChip(InspectionStatus.pass, AppColors.success, passLabel),
+                _buildStatusChip(InspectionStatus.fail, AppColors.error, failLabel),
+                _buildStatusChip(InspectionStatus.na, AppColors.textSecondary, naLabel),
+                _buildStatusChip(InspectionStatus.pending, AppColors.textSecondary, pendingLabel),
+              ],
+            ),
+            const SizedBox(height: 6),
+            InspectionNotesField(
+              initialNotes: item.notes,
+              hintText: notesHint,
+              onChanged: onNotesChanged,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _statusIndicator(InspectionStatus status) {
+  Widget _buildStatusChip(InspectionStatus status, Color color, String label) {
+    final selected = item.status == status;
+    return ChoiceChip(
+      label: Text(label, style: TextStyle(
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        color: selected ? Colors.white : color,
+      )),
+      selected: selected,
+      onSelected: (_) => onStatusChanged(status),
+      selectedColor: color,
+      backgroundColor: color.withValues(alpha: 0.08),
+      visualDensity: VisualDensity.compact,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+    );
+  }
+
+  Widget _statusDot(InspectionStatus status) {
     return Container(
       width: 6,
       height: 6,
@@ -163,6 +173,7 @@ class InspectionItemTile extends StatelessWidget {
         color: switch (status) {
           InspectionStatus.pass => AppColors.success,
           InspectionStatus.fail => AppColors.error,
+          InspectionStatus.na => AppColors.textSecondary.withValues(alpha: 0.4),
           InspectionStatus.pending => AppColors.textSecondary.withValues(alpha: 0.3),
         },
       ),

@@ -209,6 +209,7 @@ class En {
   static const String inspectionPass = 'Pass';
   static const String inspectionFail = 'Fail';
   static const String inspectionPending = 'Pending';
+  static const String inspectionNA = 'N/A';
   static const String inspectionCritical = 'Critical';
   static const String inspectionRequired = 'Required';
   static const String inspectionNotes = 'Notes';

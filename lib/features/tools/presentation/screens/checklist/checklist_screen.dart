@@ -85,7 +85,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   }
 
   InspectionSummary get _summary {
-    int passed = 0, failed = 0, pending = 0;
+    int passed = 0, failed = 0, pending = 0, na = 0;
     int criticalTotal = 0, criticalPassed = 0;
     int requiredTotal = 0, requiredPassed = 0;
 
@@ -99,6 +99,8 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
           failed++;
         case InspectionStatus.pending:
           pending++;
+        case InspectionStatus.na:
+          na++;
       }
       if (item.isCritical) criticalTotal++;
       if (item.isRequired) requiredTotal++;
@@ -109,6 +111,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
       passed: passed,
       failed: failed,
       pending: pending,
+      na: na,
       criticalTotal: criticalTotal,
       criticalPassed: criticalPassed,
       requiredTotal: requiredTotal,
@@ -116,20 +119,14 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     );
   }
 
-  void _toggleItemStatus(String itemId) {
+  void _setItemStatus(String itemId, InspectionStatus newStatus) {
     final item = _items[itemId];
-    if (item == null) return;
-    setState(() {
-      item.status = switch (item.status) {
-        InspectionStatus.pending => InspectionStatus.pass,
-        InspectionStatus.pass => InspectionStatus.fail,
-        InspectionStatus.fail => InspectionStatus.pending,
-      };
-    });
+    if (item == null || item.status == newStatus) return;
+    setState(() => item.status = newStatus);
     if (_isProject) {
-      _repository.saveProjectItemStatus(_projectId!, itemId, item.status);
+      _repository.saveProjectItemStatus(_projectId!, itemId, newStatus);
     } else {
-      _repository.saveItemStatus(itemId, item.status);
+      _repository.saveItemStatus(itemId, newStatus);
     }
   }
 
@@ -156,23 +153,45 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
   }
 
   void _resetAll() {
-    setState(() {
-      for (final item in _items.values) {
-        item.status = InspectionStatus.pending;
-        item.notes = null;
-      }
-    });
-    if (_isProject) {
-      _repository.clearProject(_projectId!);
-    } else {
-      _repository.clearAll();
-    }
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        final isArabic = context.read<LanguageProvider>().isArabic;
+        return AlertDialog(
+          title: Text(isArabic ? 'إعادة تعيين قائمة الفحص؟' : 'Reset Checklist?'),
+          content: Text(isArabic
+              ? 'سيتم مسح حالات الفحص والملاحظات الحالية لهذا المشروع وإعادة جميع البنود إلى غير مفحوص.'
+              : 'This will clear the current inspection statuses and notes for this project and return all items to Pending.'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(isArabic ? 'إلغاء' : 'Cancel')),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                setState(() {
+                  for (final item in _items.values) {
+                    item.status = InspectionStatus.pending;
+                    item.notes = null;
+                  }
+                });
+                if (_isProject) {
+                  _repository.clearProject(_projectId!);
+                } else {
+                  _repository.clearAll();
+                }
+              },
+              child: Text(isArabic ? 'إعادة تعيين' : 'Reset',
+                  style: const TextStyle(color: AppColors.error)),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _navigateToCategory(InspectionCategory category, L10n l10n,
       String passLabel, String failLabel, String pendingLabel,
-      String criticalLabel, String requiredLabel, String notesHint,
-      String codeRefLabel) {
+      String naLabel, String criticalLabel, String requiredLabel,
+      String notesHint, String codeRefLabel) {
     final items = kItemsForCategory(category.id)
         .map((seed) => _items[seed.id]!)
         .toList();
@@ -186,11 +205,12 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
           passLabel: passLabel,
           failLabel: failLabel,
           pendingLabel: pendingLabel,
+          naLabel: naLabel,
           criticalLabel: criticalLabel,
           requiredLabel: requiredLabel,
           notesHint: notesHint,
           codeRefLabel: codeRefLabel,
-          onItemStatusChanged: _toggleItemStatus,
+          onItemStatusChanged: _setItemStatus,
           onItemNotesChanged: _updateItemNotes,
         ),
       ),
@@ -210,6 +230,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final passLabel = tr(Ar.inspectionPass, En.inspectionPass);
     final failLabel = tr(Ar.inspectionFail, En.inspectionFail);
     final pendingLabel = tr(Ar.inspectionPending, En.inspectionPending);
+    final naLabel = tr(Ar.inspectionNA, En.inspectionNA);
     final criticalLabel = tr(Ar.inspectionCritical, En.inspectionCritical);
     final requiredLabel = tr(Ar.inspectionRequired, En.inspectionRequired);
     final notesHint = tr(Ar.inspectionNotes, En.inspectionNotes);
@@ -229,6 +250,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
             passLabel: passLabel,
             failLabel: failLabel,
             pendingLabel: pendingLabel,
+            naLabel: naLabel,
             criticalLabel: criticalLabel,
             requiredLabel: requiredLabel,
             totalItemsLabel: tr(Ar.inspectionTotalItems, En.inspectionTotalItems),
@@ -276,9 +298,9 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                     .map((seed) => _items[seed.id]!)
                     .toList(),
                 l10n: l10n,
-                onTap: () => _navigateToCategory(cat, l10n, passLabel,
-                    failLabel, pendingLabel, criticalLabel, requiredLabel,
-                    notesHint, codeRefLabel),
+              onTap: () => _navigateToCategory(cat, l10n, passLabel,
+                  failLabel, pendingLabel, naLabel, criticalLabel,
+                  requiredLabel, notesHint, codeRefLabel),
               ),
             );
           }),

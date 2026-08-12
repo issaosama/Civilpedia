@@ -49,6 +49,7 @@ class InspectionStatusChip extends StatelessWidget {
       InspectionStatus.pass => passLabel,
       InspectionStatus.fail => failLabel,
       InspectionStatus.pending => pendingLabel,
+      InspectionStatus.na => 'N/A',
     };
   }
 
@@ -57,6 +58,7 @@ class InspectionStatusChip extends StatelessWidget {
       InspectionStatus.pass => AppColors.success.withValues(alpha: 0.1),
       InspectionStatus.fail => AppColors.error.withValues(alpha: 0.1),
       InspectionStatus.pending => AppColors.textSecondary.withValues(alpha: 0.08),
+      InspectionStatus.na => AppColors.textSecondary.withValues(alpha: 0.08),
     };
   }
 
@@ -65,6 +67,7 @@ class InspectionStatusChip extends StatelessWidget {
       InspectionStatus.pass => AppColors.success.withValues(alpha: 0.4),
       InspectionStatus.fail => AppColors.error.withValues(alpha: 0.4),
       InspectionStatus.pending => AppColors.textSecondary.withValues(alpha: 0.2),
+      InspectionStatus.na => AppColors.textSecondary.withValues(alpha: 0.2),
     };
   }
 
@@ -73,6 +76,7 @@ class InspectionStatusChip extends StatelessWidget {
       InspectionStatus.pass => AppColors.success,
       InspectionStatus.fail => AppColors.error,
       InspectionStatus.pending => AppColors.textSecondary,
+      InspectionStatus.na => AppColors.textSecondary,
     };
   }
 
@@ -81,6 +85,7 @@ class InspectionStatusChip extends StatelessWidget {
       InspectionStatus.pass => AppColors.success,
       InspectionStatus.fail => AppColors.error,
       InspectionStatus.pending => AppColors.textSecondary,
+      InspectionStatus.na => AppColors.textSecondary,
     };
   }
 
@@ -89,6 +94,7 @@ class InspectionStatusChip extends StatelessWidget {
       InspectionStatus.pass => Icons.check_circle,
       InspectionStatus.fail => Icons.cancel,
       InspectionStatus.pending => Icons.schedule,
+      InspectionStatus.na => Icons.block,
     };
   }
 }

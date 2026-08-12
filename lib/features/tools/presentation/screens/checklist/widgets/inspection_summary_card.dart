@@ -13,6 +13,7 @@ class InspectionSummaryCard extends StatelessWidget {
   final String passLabel;
   final String failLabel;
   final String pendingLabel;
+  final String naLabel;
   final String criticalLabel;
   final String requiredLabel;
   final String totalItemsLabel;
@@ -27,6 +28,7 @@ class InspectionSummaryCard extends StatelessWidget {
     required this.passLabel,
     required this.failLabel,
     required this.pendingLabel,
+    required this.naLabel,
     required this.criticalLabel,
     required this.requiredLabel,
     required this.totalItemsLabel,
@@ -56,7 +58,7 @@ class InspectionSummaryCard extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${summary.passed + summary.failed} / ${summary.totalItems}',
+                '${summary.inspected} / ${summary.totalItems}',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
@@ -69,21 +71,18 @@ class InspectionSummaryCard extends StatelessWidget {
           AppSpacing.gapSm,
           Row(
             children: [
-              _stat(AppColors.success, passLabel, '${summary.passed}', isDark: isDark),
-              const SizedBox(width: 16),
-              _stat(AppColors.error, failLabel, '${summary.failed}', isDark: isDark),
-              const SizedBox(width: 16),
-              _stat(isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, pendingLabel, '${summary.pending}', isDark: isDark),
+              Expanded(child: _stat(AppColors.success, passLabel, '${summary.passed}', isDark: isDark)),
+              Expanded(child: _stat(AppColors.error, failLabel, '${summary.failed}', isDark: isDark)),
+              Expanded(child: _stat(isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, naLabel, '${summary.na}', isDark: isDark)),
+              Expanded(child: _stat(isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, pendingLabel, '${summary.pending}', isDark: isDark)),
             ],
           ),
           const Divider(height: 20),
           Row(
             children: [
-              _stat(AppColors.error, criticalLabel, '${summary.criticalPassed}/${summary.criticalTotal}', isDark: isDark),
-              const SizedBox(width: 16),
-              _stat(AppColors.warning, requiredLabel, '${summary.requiredPassed}/${summary.requiredTotal}', isDark: isDark),
-              const Spacer(),
-              _stat(isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, totalItemsLabel, '${summary.totalItems}', isDark: isDark),
+              Expanded(child: _stat(AppColors.error, criticalLabel, '${summary.criticalPassed}/${summary.criticalTotal}', isDark: isDark)),
+              Expanded(child: _stat(AppColors.warning, requiredLabel, '${summary.requiredPassed}/${summary.requiredTotal}', isDark: isDark)),
+              Expanded(child: _stat(isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, totalItemsLabel, '${summary.totalItems}', isDark: isDark)),
             ],
           ),
           AppSpacing.gapSm,
