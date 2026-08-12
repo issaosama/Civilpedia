@@ -6,6 +6,9 @@ import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
 import '../../../../tools/domain/tile/tile_quantity_calculator.dart';
+import '../../widgets/calculator/calculator_error_card.dart';
+import '../../widgets/calculator/calculator_primary_button.dart';
+import '../../widgets/calculator/calculator_result_row.dart';
 
 enum _TileUnit { mm, cm }
 enum _PriceMode { perTile, perBox }
@@ -218,19 +221,76 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
           if (_calculated) ...[AppSpacing.gapLg, _buildResultsCard(theme)],
           if (_error != null) ...[
             AppSpacing.gapMd,
-            Container(
-              width: double.infinity, padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.error.withValues(alpha: 0.06),
-                borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-                border: Border.all(color: theme.colorScheme.error.withValues(alpha: 0.12)),
-              ),
-              child: Text(_error!, style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.error), textAlign: TextAlign.center),
-            ),
+            CalculatorErrorCard(message: _error!),
           ],
           AppSpacing.gapLg,
           _buildEstimatesCard(theme),
           AppSpacing.gapXl,
+        ],
+      ),
+      bottomNavigationBar: _calculated ? _buildBottomBar(theme) : null,
+    );
+  }
+
+  Widget _buildBottomBar(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        border: Border(
+          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+            ),
+            child: Icon(Icons.grid_view, color: AppColors.primary, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  Ar.finalTileCount,
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '$_finalTiles',
+                  key: const Key('tile_bottom_bar_value'),
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -319,12 +379,9 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
             _buildField(Ar.wastePercent, _customPercentCtrl, theme),
           ],
           const SizedBox(height: 16),
-          SizedBox(width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: _calc, icon: const Icon(Icons.calculate, size: 20), label: Text(Ar.calcTile),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 14), elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(DesignTokens.radiusMd))),
-            ),
+          CalculatorPrimaryButton(
+            onPressed: _calc,
+            label: Ar.calcTile,
           ),
         ]),
       ),
@@ -422,12 +479,10 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
   }
 
   Widget _row(String label, String value, ThemeData theme, {bool isBold = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: theme.textTheme.bodyMedium),
-        Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: isBold ? FontWeight.bold : FontWeight.w600)),
-      ]),
+    return CalculatorResultRow(
+      label: label,
+      value: value,
+      isBold: isBold,
     );
   }
 

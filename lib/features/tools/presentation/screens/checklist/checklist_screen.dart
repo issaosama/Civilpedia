@@ -238,7 +238,13 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isProject ? _projectName! : tr(Ar.siteChecklist, En.siteChecklist)),
+        title: Text(
+          _isProject ? _projectName! : tr(Ar.siteChecklist, En.siteChecklist),
+          style: const TextStyle(color: Colors.white),
+        ),
+        backgroundColor: AppColors.primary,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),

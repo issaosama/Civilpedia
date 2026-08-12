@@ -6,6 +6,9 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
+import '../../widgets/calculator/calculator_error_card.dart';
+import '../../widgets/calculator/calculator_primary_button.dart';
+import '../../widgets/calculator/calculator_result_row.dart';
 import '../../../../tools/domain/concrete/concrete_volume_calculator.dart';
 import '../../../../tools/domain/steel/steel_weight_calculator.dart';
 import '../../../../tools/domain/masonry/masonry_quantity_calculator.dart';
@@ -999,47 +1002,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildCalcButton(int index, ThemeData theme) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () => _calcCard(index),
-        icon: const Icon(Icons.calculate, size: 20),
-        label: Text(Ar.calculate),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 14),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          ),
-        ),
-      ),
+    return CalculatorPrimaryButton(
+      onPressed: () => _calcCard(index),
+      label: Ar.calculate,
     );
   }
 
   Widget _buildErrorResult(_ElementCardData card, ThemeData theme) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.error.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-          border: Border.all(
-            color: theme.colorScheme.error.withValues(alpha: 0.12),
-          ),
-        ),
-        child: Text(
-          card.error!,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: theme.colorScheme.error,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
+    return CalculatorErrorCard(message: card.error!);
   }
 
   Widget _buildVolumeResult(_ElementCardData card, ThemeData theme) {
@@ -1548,22 +1518,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               _buildCardField(Ar.additionalPercent, _steelCustomWasteCtrl),
             ],
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _calcSteelWeight,
-                icon: const Icon(Icons.calculate, size: 20),
-                label: Text(Ar.calculate),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-                  ),
-                ),
-              ),
+            CalculatorPrimaryButton(
+              onPressed: _calcSteelWeight,
+              label: Ar.calculate,
             ),
           ],
         ),
@@ -1740,24 +1697,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildSteelErrorCard(ThemeData theme) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.error.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(
-          color: theme.colorScheme.error.withValues(alpha: 0.12),
-        ),
-      ),
-      child: Text(
-        _steelError!,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.error,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
+    return CalculatorErrorCard(message: _steelError!);
   }
 
   Widget _buildSteelBottomBar(ThemeData theme) {
@@ -1841,22 +1781,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _steelResultRow(String label, String value, {bool isBold = false}) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label,
-              style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary, fontSize: 14)),
-          Text(value,
-              style: TextStyle(
-                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                fontSize: 14,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              )),
-        ],
-      ),
+    return CalculatorResultRow(
+      label: label,
+      value: value,
+      isBold: isBold,
     );
   }
 
@@ -2156,22 +2084,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               _buildCardField(Ar.additionalPercent, _brickCustomPercentCtrl),
             ],
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _calcBrickWeight,
-                icon: const Icon(Icons.calculate, size: 20),
-                label: Text(Ar.calculate),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-                  ),
-                ),
-              ),
+            CalculatorPrimaryButton(
+              onPressed: _calcBrickWeight,
+              label: Ar.calculate,
             ),
           ],
         ),
@@ -2223,24 +2138,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   Widget _buildBrickErrorCard(ThemeData theme) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.error.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-        border: Border.all(
-          color: theme.colorScheme.error.withValues(alpha: 0.12),
-        ),
-      ),
-      child: Text(
-        _brickError!,
-        style: theme.textTheme.bodyMedium?.copyWith(
-          color: theme.colorScheme.error,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
+    return CalculatorErrorCard(message: _brickError!);
   }
 
   Widget _buildBrickBottomBar(ThemeData theme) {

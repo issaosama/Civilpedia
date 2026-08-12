@@ -30,7 +30,7 @@ void main() {
       await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
       await _calc(tester);
       // 20 / 0.36 = 55.56 → ceil 56
-      expect(find.text('56'), findsNWidgets(2)); // net tiles + final tiles
+      expect(find.text('56'), findsNWidgets(3)); // net tiles + final tiles + bottom bar
     });
 
     testWidgets('quantity 2 doubles the count', (tester) async {
@@ -39,7 +39,7 @@ void main() {
       await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
       await _enter(tester, Ar.tileQuantity, '2');
       await _calc(tester);
-      expect(find.text('112'), findsNWidgets(2)); // 40 / 0.36 = 111.11 → ceil 112
+      expect(find.text('112'), findsNWidgets(3)); // 40 / 0.36 = 111.11 → ceil 112
     });
 
     testWidgets('excluded area reduces tile count', (tester) async {
@@ -49,7 +49,7 @@ void main() {
       await _enter(tester, Ar.tileExcludedArea, '2');
       await _calc(tester);
       // 18 / 0.36 = 50
-      expect(find.text('50'), findsNWidgets(2));
+      expect(find.text('50'), findsNWidgets(3));
     });
 
     testWidgets('30×30 cm preset works', (tester) async {
@@ -60,7 +60,7 @@ void main() {
       await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
       await _calc(tester);
       // 20 / 0.09 = 222.22 → ceil 223
-      expect(find.text('223'), findsNWidgets(2));
+      expect(find.text('223'), findsNWidgets(3));
     });
 
     testWidgets('custom tile size works', (tester) async {
@@ -73,7 +73,7 @@ void main() {
       await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
       await _calc(tester);
       // 20 / 0.64 = 31.25 → ceil 32
-      expect(find.text('32'), findsNWidgets(2));
+      expect(find.text('32'), findsNWidgets(3));
     });
 
     testWidgets('additional 5% adds extra tiles', (tester) async {
@@ -84,7 +84,7 @@ void main() {
       await tester.pump();
       await _calc(tester);
       // ceil(55.56*1.05=58.33)=59 final, 59-56=3 additional
-      expect(find.text('59'), findsOneWidget); // final row
+      expect(find.text('59'), findsNWidgets(2)); // final row + bottom bar
       expect(find.text('3'), findsOneWidget); // additional
     });
 
@@ -287,7 +287,7 @@ void main() {
       await _enter(tester, '${Ar.areaLength} (${Ar.meters})', '5');
       await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
       await _calc(tester);
-      expect(find.text('56'), findsNWidgets(2));
+      expect(find.text('56'), findsNWidgets(3));
     });
 
     testWidgets('returning from Custom to preset hides the unit selector',
@@ -300,6 +300,77 @@ void main() {
       await tester.tap(find.widgetWithText(ChoiceChip, '60×60 سم'));
       await tester.pump();
       expect(find.widgetWithText(ChoiceChip, Ar.unitCm), findsNothing);
+    });
+
+    // ── Bottom Result Bar ──
+    testWidgets('bottom bar is not present before calculation', (tester) async {
+      await _pump(tester);
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsNothing);
+      expect(find.text(Ar.finalTileCount), findsNothing);
+    });
+
+    testWidgets('valid calculation shows the bottom result bar', (tester) async {
+      await _pump(tester);
+      await _enter(tester, '${Ar.areaLength} (${Ar.meters})', '5');
+      await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
+      await _calc(tester);
+
+      expect(find.text(Ar.finalTileCount), findsOneWidget);
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsOneWidget);
+    });
+
+    testWidgets('bottom bar value equals the approved final tile result',
+        (tester) async {
+      await _pump(tester);
+      await _enter(tester, '${Ar.areaLength} (${Ar.meters})', '5');
+      await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
+      await _calc(tester);
+
+      // Result card and bottom bar should show the same approved value.
+      expect(find.text('56'), findsNWidgets(3));
+      final valueText = tester.widget<Text>(
+          find.byKey(const Key('tile_bottom_bar_value')));
+      expect(valueText.data, '56');
+    });
+
+    testWidgets('changing a core input hides the bottom result bar',
+        (tester) async {
+      await _pump(tester);
+      await _enter(tester, '${Ar.areaLength} (${Ar.meters})', '5');
+      await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
+      await _calc(tester);
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsOneWidget);
+
+      await _enter(tester, '${Ar.areaLength} (${Ar.meters})', '6');
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsNothing);
+      expect(find.text(Ar.finalTileCount), findsNothing);
+    });
+
+    testWidgets('changing tile preset hides the bottom result bar',
+        (tester) async {
+      await _pump(tester);
+      await _enter(tester, '${Ar.areaLength} (${Ar.meters})', '5');
+      await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
+      await _calc(tester);
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsOneWidget);
+
+      await tester.tap(find.widgetWithText(ChoiceChip, '40×40 سم'));
+      await tester.pump();
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsNothing);
+      expect(find.text(Ar.finalTileCount), findsNothing);
+    });
+
+    testWidgets('reset hides the bottom result bar', (tester) async {
+      await _pump(tester);
+      await _enter(tester, '${Ar.areaLength} (${Ar.meters})', '5');
+      await _enter(tester, '${Ar.areaWidth} (${Ar.meters})', '4');
+      await _calc(tester);
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.refresh));
+      await tester.pump();
+      expect(find.byKey(const Key('tile_bottom_bar_value')), findsNothing);
+      expect(find.text(Ar.finalTileCount), findsNothing);
     });
   });
 }
