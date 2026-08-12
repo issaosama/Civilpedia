@@ -8,6 +8,8 @@ import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
 import '../../../../tools/domain/concrete/concrete_volume_calculator.dart';
 import '../../../../tools/domain/steel/steel_weight_calculator.dart';
+import '../../../../tools/domain/masonry/masonry_quantity_calculator.dart';
+import '../../../../tools/domain/masonry/masonry_presets.dart';
 
 const Color _fieldFill = AppColors.surface;
 
@@ -84,6 +86,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   bool _steelCalculated = false;
   String? _steelError;
 
+  // --- brick calculator state ---
+  MasonryType _masonryType = MasonryType.block;
+  MasonryPreset _masonryPreset = MasonryPreset.block20x20x40;
+  bool _isCustomMasonry = false;
+  final _masonryCustomHeightCtrl = TextEditingController();
+  final _masonryCustomLengthCtrl = TextEditingController();
+  final _masonryOpeningsCtrl = TextEditingController();
+  double _brickAdditionalPercent = 0;
+  final _brickCustomPercentCtrl = TextEditingController();
+  bool _brickIsCustomPercent = false;
+  bool _brickCalculated = false;
+  String? _brickError;
+
   String get _title {
     switch (widget.type) {
       case 'concrete':
@@ -147,6 +162,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       _steelCustomWasteCtrl.addListener(_invalidateSteel);
       _steelStockLengthCtrl.addListener(_onSecondaryInputChanged);
       _steelCostPerTonCtrl.addListener(_onSecondaryInputChanged);
+    } else if (widget.type == 'brick') {
+      _qtyCtrl.text = '1';
+      _lengthCtrl.addListener(_invalidateBrick);
+      _heightCtrl.addListener(_invalidateBrick);
+      _qtyCtrl.addListener(_invalidateBrick);
+      _masonryOpeningsCtrl.addListener(_invalidateBrick);
+      _masonryCustomHeightCtrl.addListener(_invalidateBrick);
+      _masonryCustomLengthCtrl.addListener(_invalidateBrick);
+      _brickCustomPercentCtrl.addListener(_invalidateBrick);
     }
   }
 
@@ -161,6 +185,123 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   void _onSecondaryInputChanged() {
     if (!mounted) return;
     setState(() {});
+  }
+
+  // --- brick methods ---
+
+  void _invalidateBrick() {
+    if (!mounted) return;
+    setState(() {
+      _brickCalculated = false;
+      _brickError = null;
+    });
+  }
+
+  double get _brickLen => double.tryParse(_lengthCtrl.text) ?? 0;
+  double get _brickHeight => double.tryParse(_heightCtrl.text) ?? 0;
+  int get _brickQty => int.tryParse(_qtyCtrl.text) ?? 0;
+  double get _brickOpenings =>
+      double.tryParse(_masonryOpeningsCtrl.text) ?? 0;
+
+  double get _brickFaceLengthCm => _isCustomMasonry
+      ? (double.tryParse(_masonryCustomLengthCtrl.text) ?? 0)
+      : _masonryPreset.faceLengthCm;
+  double get _brickFaceHeightCm => _isCustomMasonry
+      ? (double.tryParse(_masonryCustomHeightCtrl.text) ?? 0)
+      : _masonryPreset.faceHeightCm;
+
+  double get _brickGross =>
+      MasonryQuantityCalculator.grossWallArea(
+          lengthM: _brickLen, heightM: _brickHeight, quantity: _brickQty);
+  double get _brickNet =>
+      MasonryQuantityCalculator.netWallArea(
+          grossAreaM2: _brickGross, openingsAreaM2: _brickOpenings);
+  double get _brickModuleArea => MasonryQuantityCalculator.moduleFaceAreaM2(
+      faceLengthCm: _brickFaceLengthCm, faceHeightCm: _brickFaceHeightCm);
+  double get _brickRaw => MasonryQuantityCalculator.rawUnitCount(
+      netAreaM2: _brickNet, moduleFaceAreaM2: _brickModuleArea);
+  double get _brickUnitsPerM2 =>
+      MasonryQuantityCalculator.unitsPerM2(moduleFaceAreaM2: _brickModuleArea);
+  int get _brickNetUnits =>
+      MasonryQuantityCalculator.netWholeUnits(rawUnitCount: _brickRaw);
+  int get _brickFinalUnits => MasonryQuantityCalculator.finalUnits(
+      rawUnitCount: _brickRaw, additionalPercent: _brickAdditionalPercent);
+  int get _brickAdditionalUnits => MasonryQuantityCalculator.additionalUnits(
+      rawUnitCount: _brickRaw, additionalPercent: _brickAdditionalPercent);
+
+  String get _brickPercentLabel {
+    final p = _brickAdditionalPercent;
+    return p == p.truncateToDouble() ? p.toInt().toString() : p.toString();
+  }
+
+  void _calcBrickWeight() {
+    if (_brickLen <= 0 || _brickHeight <= 0) {
+      setState(() {
+        _brickError = Ar.invalidInputs;
+        _brickCalculated = false;
+      });
+      return;
+    }
+    if (_brickQty <= 0) {
+      setState(() {
+        _brickError = Ar.invalidQuantity;
+        _brickCalculated = false;
+      });
+      return;
+    }
+    if (_brickFaceLengthCm <= 0 || _brickFaceHeightCm <= 0) {
+      setState(() {
+        _brickError = Ar.invalidInputs;
+        _brickCalculated = false;
+      });
+      return;
+    }
+    if (_brickOpenings < 0 || _brickOpenings > _brickGross) {
+      setState(() {
+        _brickError = Ar.masonryOpeningsExceed;
+        _brickCalculated = false;
+      });
+      return;
+    }
+    if (_brickIsCustomPercent) {
+      final pct = double.tryParse(_brickCustomPercentCtrl.text);
+      if (pct == null || pct < 0) {
+        setState(() {
+          _brickError = Ar.invalidInputs;
+          _brickCalculated = false;
+        });
+        return;
+      }
+      setState(() {
+        _brickAdditionalPercent = pct;
+        _brickError = null;
+        _brickCalculated = true;
+      });
+      return;
+    }
+    setState(() {
+      _brickError = null;
+      _brickCalculated = true;
+    });
+  }
+
+  void _resetBrick() {
+    _lengthCtrl.clear();
+    _heightCtrl.clear();
+    _qtyCtrl.text = '1';
+    _masonryOpeningsCtrl.clear();
+    _masonryCustomHeightCtrl.clear();
+    _masonryCustomLengthCtrl.clear();
+    _brickCustomPercentCtrl.clear();
+    setState(() {
+      _masonryType = MasonryType.block;
+      _masonryPreset = MasonryPreset.block20x20x40;
+      _isCustomMasonry = false;
+      _brickAdditionalPercent = 0;
+      _brickIsCustomPercent = false;
+      _brickCalculated = false;
+      _brickError = null;
+    });
   }
 
   void _addCard() {
@@ -541,6 +682,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _steelCustomWasteCtrl.dispose();
     _steelCostPerTonCtrl.dispose();
     _steelStockLengthCtrl.dispose();
+    _masonryCustomHeightCtrl.dispose();
+    _masonryCustomLengthCtrl.dispose();
+    _masonryOpeningsCtrl.dispose();
+    _brickCustomPercentCtrl.dispose();
     super.dispose();
   }
 
@@ -567,6 +712,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   Widget build(BuildContext context) {
     if (widget.type == 'concrete') return _buildConcreteScreen();
     if (widget.type == 'steel') return _buildSteelScreen();
+    if (widget.type == 'brick') return _buildBrickScreen();
     return _buildSimpleScreen();
   }
 
@@ -1755,6 +1901,426 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+      ),
+    );
+  }
+
+  // ───────────── brick calculator screen ─────────────
+
+  Widget _buildBrickScreen() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
+      appBar: AppBar(
+        title: Text(_title, style: const TextStyle(color: Colors.white)),
+        backgroundColor: AppColors.primary,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: Ar.reset,
+            color: Colors.white,
+            onPressed: _resetBrick,
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        children: [
+          _buildBrickInputCard(theme),
+          if (_brickCalculated) ...[
+            AppSpacing.gapLg,
+            _buildBrickResultsCard(theme),
+          ],
+          if (_brickError != null) ...[
+            AppSpacing.gapMd,
+            _buildBrickErrorCard(theme),
+          ],
+          AppSpacing.gapXl,
+        ],
+      ),
+      bottomNavigationBar: _buildBrickBottomBar(theme),
+    );
+  }
+
+  Widget _buildBrickInputCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final presets = MasonryPreset.forType(_masonryType);
+    return CustomCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Ar.masonryInputSection,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            // masonry type
+            Text(
+              Ar.masonryUnitType,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: ChoiceChip(
+                    label: Text(Ar.concreteBlock),
+                    selected: _masonryType == MasonryType.block,
+                    onSelected: (_) => setState(() {
+                      _masonryType = MasonryType.block;
+                      _masonryPreset = MasonryPreset.forType(MasonryType.block).first;
+                      _isCustomMasonry = false;
+                      _brickCalculated = false;
+                      _brickError = null;
+                    }),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: _masonryType == MasonryType.block
+                          ? AppColors.primary
+                          : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ChoiceChip(
+                    label: Text(Ar.clayBrick),
+                    selected: _masonryType == MasonryType.brick,
+                    onSelected: (_) => setState(() {
+                      _masonryType = MasonryType.brick;
+                      _masonryPreset = MasonryPreset.forType(MasonryType.brick).first;
+                      _isCustomMasonry = false;
+                      _brickCalculated = false;
+                      _brickError = null;
+                    }),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: _masonryType == MasonryType.brick
+                          ? AppColors.primary
+                          : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // presets
+            Text(
+              Ar.masonryPresets,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final p in presets)
+                  ChoiceChip(
+                    label: Text('${p.label} ${Ar.cm}'),
+                    selected: !_isCustomMasonry && _masonryPreset == p,
+                    onSelected: (_) => setState(() {
+                      _masonryPreset = p;
+                      _isCustomMasonry = false;
+                      _brickCalculated = false;
+                      _brickError = null;
+                    }),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: !_isCustomMasonry && _masonryPreset == p
+                          ? AppColors.primary
+                          : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ChoiceChip(
+                  label: Text(Ar.masonryCustomTitle),
+                  selected: _isCustomMasonry,
+                  onSelected: (_) => setState(() {
+                    _isCustomMasonry = true;
+                    _brickCalculated = false;
+                    _brickError = null;
+                  }),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: _isCustomMasonry
+                        ? AppColors.primary
+                        : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            if (_isCustomMasonry) ...[
+              const SizedBox(height: 12),
+              _buildCardField(Ar.masonryCustomFaceHeight,
+                  _masonryCustomHeightCtrl),
+              const SizedBox(height: 8),
+              _buildCardField(Ar.masonryCustomFaceLength,
+                  _masonryCustomLengthCtrl),
+              const SizedBox(height: 4),
+              Text(
+                Ar.masonryCustomModuleHint,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            _buildCardField(Ar.masonryWallLength, _lengthCtrl),
+            const SizedBox(height: 8),
+            _buildCardField(Ar.masonryWallHeight, _heightCtrl),
+            const SizedBox(height: 8),
+            _buildCardField(Ar.masonryWallQuantity, _qtyCtrl,
+                isInteger: true),
+            const SizedBox(height: 8),
+            _buildCardField(Ar.masonryOpenings, _masonryOpeningsCtrl),
+            const SizedBox(height: 16),
+            Text(
+              Ar.additionalPercent,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final pct in [0, 3, 5, 7])
+                  ChoiceChip(
+                    label: Text('$pct%'),
+                    selected: !_brickIsCustomPercent &&
+                        _brickAdditionalPercent == pct,
+                    onSelected: (_) => setState(() {
+                      _brickAdditionalPercent = pct.toDouble();
+                      _brickIsCustomPercent = false;
+                      _brickCalculated = false;
+                      _brickError = null;
+                    }),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: !_brickIsCustomPercent &&
+                              _brickAdditionalPercent == pct
+                          ? AppColors.primary
+                          : isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ChoiceChip(
+                  label: Text(Ar.wasteCustom),
+                  selected: _brickIsCustomPercent,
+                  onSelected: (_) => setState(() {
+                    _brickIsCustomPercent = true;
+                    _brickCalculated = false;
+                    _brickError = null;
+                  }),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: _brickIsCustomPercent
+                        ? AppColors.primary
+                        : isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            if (_brickIsCustomPercent) ...[
+              const SizedBox(height: 8),
+              _buildCardField(Ar.additionalPercent, _brickCustomPercentCtrl),
+            ],
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _calcBrickWeight,
+                icon: const Icon(Icons.calculate, size: 20),
+                label: Text(Ar.calculate),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBrickResultsCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return CustomCard(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              Ar.masonryResults,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _steelResultRow('${Ar.masonryGrossArea}:',
+                '${_brickGross.toStringAsFixed(2)} ${Ar.squareMeters}'),
+            if (_brickOpenings > 0)
+              _steelResultRow('${Ar.masonryOpeningsDeducted}:',
+                  '${_brickOpenings.toStringAsFixed(2)} ${Ar.squareMeters}'),
+            _steelResultRow('${Ar.masonryNetArea}:',
+                '${_brickNet.toStringAsFixed(2)} ${Ar.squareMeters}',
+                isBold: true),
+            if (_brickUnitsPerM2 > 0)
+              _steelResultRow(
+                  '${Ar.masonryUnitsPerM2}:', _brickUnitsPerM2.toStringAsFixed(1)),
+            const Divider(height: 24),
+            _steelResultRow(
+                '${Ar.masonryNetUnits}:', '$_brickNetUnits'),
+            if (_brickAdditionalPercent > 0)
+              _steelResultRow(
+                  '${Ar.masonryAdditionalUnits} ($_brickPercentLabel%):',
+                  '$_brickAdditionalUnits'),
+            _steelResultRow('${Ar.masonryFinalUnits}:',
+                '$_brickFinalUnits',
+                isBold: true),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBrickErrorCard(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.error.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+        border: Border.all(
+          color: theme.colorScheme.error.withValues(alpha: 0.12),
+        ),
+      ),
+      child: Text(
+        _brickError!,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.error,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildBrickBottomBar(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      padding: EdgeInsets.only(
+        left: 24,
+        right: 24,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : Colors.white,
+        border: Border(
+          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+            ),
+            child: Icon(Icons.grid_view, color: AppColors.primary, size: 24),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  Ar.masonryFinalUnits,
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _brickCalculated
+                      ? '$_brickFinalUnits'
+                      : '0',
+                  style: TextStyle(
+                    color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+            ),
+            child: Text(
+              _isCustomMasonry
+                  ? '${Ar.masonryCustomTitle} ${Ar.cm}'
+                  : '${_masonryPreset.label} ${Ar.cm}',
+              style: TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
