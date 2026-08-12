@@ -217,6 +217,21 @@ class En {
   static const String inspectionResetAll = 'Reset All';
   static const String inspectionTotalItems = 'Total Items';
 
+  // Checklist Projects
+  static const String checklistMyProjects = 'My Projects';
+  static const String projectCreateTitle = 'Project name';
+  static const String projectRenameTitle = 'Rename project';
+  static const String projectDeleteTitle = 'Delete project';
+  static const String projectNameHint = 'Enter project name';
+  static const String projectNoProjects = 'No projects yet';
+  static const String projectCreateFirst = 'Tap + to create your first project';
+  static const String projectRename = 'Rename';
+  static const String projectArchive = 'Archive';
+  static const String delete = 'Delete';
+  static String projectDeleteConfirm(String name) =>
+      'Delete "$name"? This cannot be undone.';
+  static String projectCreatedDate(String date) => 'Created $date';
+
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'Concrete Works';
   static const String inspectionCatReinforcement = 'Reinforcement Works';

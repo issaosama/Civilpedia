@@ -221,6 +221,21 @@ class Ar {
   static const String inspectionResetAll = 'إعادة تعيين الكل';
   static const String inspectionTotalItems = 'إجمالي البنود';
 
+  // Checklist Projects
+  static const String checklistMyProjects = 'مشاريعي';
+  static const String projectCreateTitle = 'اسم المشروع';
+  static const String projectRenameTitle = 'إعادة تسمية المشروع';
+  static const String projectDeleteTitle = 'حذف المشروع';
+  static const String projectNameHint = 'أدخل اسم المشروع';
+  static const String projectNoProjects = 'لا توجد مشاريع بعد';
+  static const String projectCreateFirst = 'اضغط + لإنشاء مشروعك الأول';
+  static const String projectRename = 'إعادة تسمية';
+  static const String projectArchive = 'أرشفة';
+  static const String delete = 'حذف';
+  static String projectDeleteConfirm(String name) =>
+      'هل تريد حذف المشروع "$name"؟ لا يمكن التراجع عن هذا الإجراء.';
+  static String projectCreatedDate(String date) => 'تم الإنشاء في $date';
+
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'أعمال الخرسانة';
   static const String inspectionCatReinforcement = 'أعمال التسليح';

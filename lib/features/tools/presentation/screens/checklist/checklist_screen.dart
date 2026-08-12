@@ -282,7 +282,7 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
-                        'My Projects',
+                        tr(Ar.checklistMyProjects, En.checklistMyProjects),
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),

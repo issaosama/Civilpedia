@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../domain/checklist/entities/project.dart';
 import '../../../domain/checklist/project_repository.dart';
 import '../../../data/checklist/checklist_local_data_source.dart';
@@ -6,9 +7,12 @@ import '../../../data/checklist/local_checklist_repository.dart';
 import '../../../data/checklist/project_local_data_source.dart';
 import '../../../data/checklist/local_project_repository.dart';
 import 'checklist_screen.dart';
+import '../../../../../core/services/language_provider.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../localization/ar.dart';
+import '../../../../../localization/en.dart';
 
 class ProjectListScreen extends StatefulWidget {
   const ProjectListScreen({super.key});
@@ -45,18 +49,30 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   }
 
   Future<void> _createProject() async {
-    final name = await _showNameDialog(context, 'Project name', '');
+    final name = await _showNameDialog(
+      context,
+      _isArabic ? Ar.projectCreateTitle : En.projectCreateTitle,
+      '',
+    );
     if (name == null || name.isEmpty) return;
     await _repository.createProject(name);
     await _loadProjects();
   }
 
   Future<void> _renameProject(Project project) async {
-    final name = await _showNameDialog(context, 'Rename project', project.name);
+    final name = await _showNameDialog(
+      context,
+      _isArabic ? Ar.projectRenameTitle : En.projectRenameTitle,
+      project.name,
+    );
     if (name == null || name.isEmpty) return;
     await _repository.updateProject(project.copyWith(name: name));
     await _loadProjects();
   }
+
+  bool get _isArabic => context.read<LanguageProvider>().isArabic;
+
+  String _tr(String ar, String en) => _isArabic ? ar : en;
 
   Future<void> _archiveProject(Project project) async {
     await _repository.archiveProject(project.id);
@@ -67,13 +83,23 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete project'),
-        content: Text('Delete "${project.name}"? This cannot be undone.'),
+        title: Text(_tr(Ar.projectDeleteTitle, En.projectDeleteTitle)),
+        content: Text(
+          _isArabic
+              ? Ar.projectDeleteConfirm(project.name)
+              : En.projectDeleteConfirm(project.name),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(_tr(Ar.cancel, En.cancel)),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete', style: TextStyle(color: AppColors.error)),
+            child: Text(
+              _tr(Ar.delete, En.delete),
+              style: const TextStyle(color: AppColors.error),
+            ),
           ),
         ],
       ),
@@ -85,7 +111,11 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     await _loadProjects();
   }
 
-  Future<String?> _showNameDialog(BuildContext context, String title, String initial) {
+  Future<String?> _showNameDialog(
+    BuildContext context,
+    String title,
+    String initial,
+  ) {
     final controller = TextEditingController(text: initial);
     return showDialog<String>(
       context: context,
@@ -94,14 +124,19 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Enter project name'),
+          decoration: InputDecoration(
+            hintText: _tr(Ar.projectNameHint, En.projectNameHint),
+          ),
           onSubmitted: (v) => Navigator.pop(ctx, v.trim()),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(_tr(Ar.cancel, En.cancel)),
+          ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Save'),
+            child: Text(_tr(Ar.save, En.save)),
           ),
         ],
       ),
@@ -110,10 +145,12 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
     final theme = Theme.of(context);
+    String tr(String ar, String en) => isArabic ? ar : en;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Projects')),
+      appBar: AppBar(title: Text(tr(Ar.checklistMyProjects, En.checklistMyProjects))),
       floatingActionButton: FloatingActionButton(
         onPressed: _createProject,
         child: const Icon(Icons.add),
@@ -130,12 +167,12 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                         Icon(Icons.folder_open, size: 64, color: AppColors.textSecondary.withValues(alpha: 0.4)),
                         AppSpacing.gapMd,
                         Text(
-                          'No projects yet',
+                          tr(Ar.projectNoProjects, En.projectNoProjects),
                           style: theme.textTheme.titleMedium?.copyWith(color: AppColors.textSecondary),
                         ),
                         AppSpacing.gapSm,
                         Text(
-                          'Tap + to create your first project',
+                          tr(Ar.projectCreateFirst, En.projectCreateFirst),
                           style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
                         ),
                       ],
@@ -185,7 +222,9 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Created ${_formatDate(project.createdAt)}',
+                                        isArabic
+                                            ? Ar.projectCreatedDate(_formatDate(project.createdAt))
+                                            : En.projectCreatedDate(_formatDate(project.createdAt)),
                                         style: theme.textTheme.bodySmall?.copyWith(
                                           color: AppColors.textSecondary,
                                           fontSize: 12,
@@ -206,11 +245,20 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                                     }
                                   },
                                   itemBuilder: (_) => [
-                                    const PopupMenuItem(value: 'rename', child: Text('Rename')),
-                                    const PopupMenuItem(value: 'archive', child: Text('Archive')),
-                                    const PopupMenuItem(
+                                    PopupMenuItem(
+                                      value: 'rename',
+                                      child: Text(tr(Ar.projectRename, En.projectRename)),
+                                    ),
+                                    PopupMenuItem(
+                                      value: 'archive',
+                                      child: Text(tr(Ar.projectArchive, En.projectArchive)),
+                                    ),
+                                    PopupMenuItem(
                                       value: 'delete',
-                                      child: Text('Delete', style: TextStyle(color: AppColors.error)),
+                                      child: Text(
+                                        tr(Ar.delete, En.delete),
+                                        style: const TextStyle(color: AppColors.error),
+                                      ),
                                     ),
                                   ],
                                 ),
