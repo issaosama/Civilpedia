@@ -165,14 +165,18 @@ class Ar {
 
   // Steel Calculator
   static const String steelWeightPerMeter = 'الوزن لكل متر';
+  static const String steelWeightPerBar = 'وزن السيخ الواحد';
+  static const String steelAdditionalWeight = 'الوزن الإضافي';
   static const String steelTotalLength = 'الطول الإجمالي';
   static const String steelNetWeight = 'الوزن الصافي';
-  static const String steelWasteWeight = 'وزن الهدر';
   static const String steelTotalRequiredWeight = 'الإجمالي المطلوب';
   static const String steelTotalTons = 'الإجمالي (طن)';
-  static const String steelPricePerKg = 'سعر الكيلوغرام';
+  static const String steelBarsPerTon = 'عدد الأسياخ للطن';
+  static const String steelApproximate = 'تقديري';
+  static const String steelBarLength = 'طول السيخ (م)';
+  static const String steelPricePerTon = 'سعر طن الحديد';
+  static const String steelCostHint = 'التكلفة التقديرية';
   static const String steelNetCost = 'صافي التكلفة';
-  static const String steelWasteCost = 'تكلفة الهدر';
   static const String steelTotalCost = 'التكلفة الإجمالية';
   static const String steelStockLength = 'طول السيخ التجاري';
   static const String steelBarsRequired = 'عدد الأسياخ المطلوبة';
@@ -182,6 +186,12 @@ class Ar {
   static const String steelResults = 'النتائج';
   static const String steelInputSection = 'بيانات التسليح';
   static const String steelProcurementSection = 'المشتريات';
+  static const String steelAdditionalEstimates = 'تقديرات إضافية';
+  static const String steelProcurementEstimate = 'تقدير الشراء';
+  static const String steelCostEstimate = 'تقدير الكلفة';
+  static const String steelBarsPerStockBar = 'أسياخ في السيخ التجاري';
+  static const String steelStockShorter = 'طول السيخ التجاري أقل من طول السيخ المطلوب';
+  static const String steelStockLengthInvalid = 'أدخل طول سيخ تجاري صحيح';
 
   // Inspection Checklist - UI
   static const String inspectionPass = 'ناجح';

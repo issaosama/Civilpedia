@@ -7,6 +7,7 @@ import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
 import '../../../../tools/domain/concrete/concrete_volume_calculator.dart';
+import '../../../../tools/domain/steel/steel_weight_calculator.dart';
 
 const Color _fieldFill = AppColors.surface;
 
@@ -67,13 +68,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   final List<String> _brickSizes = ['20×20×40', '10×20×40', '15×20×40', '25×12×6'];
 
   // --- steel calculator state ---
+  static const List<int> _steelDiameterPresets = [
+    6, 8, 10, 12, 14, 16, 18, 20, 22, 25, 28, 32, 36, 40,
+  ];
   int _steelDiameter = 12;
+  bool _steelIsCustomDiameter = false;
+  final _steelCustomDiameterCtrl = TextEditingController();
   double _steelWastePercent = 0;
   final _steelCustomWasteCtrl = TextEditingController();
   bool _steelIsCustomWaste = false;
-  final _steelCostPerKgCtrl = TextEditingController();
+  final _steelCostPerTonCtrl = TextEditingController();
   bool _showSteelCost = false;
   final _steelStockLengthCtrl = TextEditingController(text: '12');
+  bool _showSteelProcurement = false;
   bool _steelCalculated = false;
   String? _steelError;
 
@@ -126,22 +133,34 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         ConcreteDimensionUnit.millimeters => Ar.unitMm,
       };
 
-  static const Map<int, double> _steelWeightPerMeter = {
-    8: 0.395,
-    10: 0.617,
-    12: 0.888,
-    16: 1.58,
-    20: 2.47,
-    25: 3.85,
-    32: 6.31,
-  };
-
   @override
   void initState() {
     super.initState();
     if (widget.type == 'concrete') {
       _cards.add(_ElementCardData());
+    } else if (widget.type == 'steel') {
+      _lengthCtrl.text = '12';
+      _qtyCtrl.text = '1';
+      _lengthCtrl.addListener(_invalidateSteel);
+      _qtyCtrl.addListener(_invalidateSteel);
+      _steelCustomDiameterCtrl.addListener(_invalidateSteel);
+      _steelCustomWasteCtrl.addListener(_invalidateSteel);
+      _steelStockLengthCtrl.addListener(_onSecondaryInputChanged);
+      _steelCostPerTonCtrl.addListener(_onSecondaryInputChanged);
     }
+  }
+
+  void _invalidateSteel() {
+    if (!mounted) return;
+    setState(() {
+      _steelCalculated = false;
+      _steelError = null;
+    });
+  }
+
+  void _onSecondaryInputChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   void _addCard() {
@@ -266,20 +285,53 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   // --- steel getters ---
+  String get _steelDiaLabel => _steelIsCustomDiameter
+      ? _steelCustomDiameterCtrl.text
+      : '$_steelDiameter';
+  double get _steelDiameterMm => _steelIsCustomDiameter
+      ? (double.tryParse(_steelCustomDiameterCtrl.text) ?? 0)
+      : _steelDiameter.toDouble();
   double get _steelLen => double.tryParse(_lengthCtrl.text) ?? 0;
   int get _steelBars => int.tryParse(_qtyCtrl.text) ?? 0;
-  double get _steelWPM => 0.00617 * _steelDiameter * _steelDiameter;
-  double get _steelTotalLen => _steelLen * _steelBars;
-  double get _steelNetW => _steelTotalLen * _steelWPM;
-  double get _steelWasteW => _steelNetW * _steelWastePercent / 100;
-  double get _steelTotalW => _steelNetW + _steelWasteW;
-  double? get _steelPriceKg => double.tryParse(_steelCostPerKgCtrl.text);
-  bool get _steelHasCost => _showSteelCost && _steelPriceKg != null && _steelPriceKg! > 0;
-  double get _steelStockLen => double.tryParse(_steelStockLengthCtrl.text) ?? 12;
-  int get _steelReqBars => _steelStockLen > 0 ? (_steelTotalLen / _steelStockLen).ceil() : 0;
-  double get _steelPurchLen => _steelReqBars * _steelStockLen;
-  double get _steelRemainLen => _steelPurchLen - _steelTotalLen;
-  double get _steelPurchW => _steelPurchLen * _steelWPM;
+  double get _steelWPM =>
+      SteelWeightCalculator.unitWeightKgPerM(diameterMm: _steelDiameterMm);
+  double get _steelWeightPerBar => SteelWeightCalculator.weightPerBar(
+      unitWeightKgPerM: _steelWPM, lengthM: _steelLen);
+  double get _steelTotalLen =>
+      SteelWeightCalculator.totalLengthM(lengthM: _steelLen, quantity: _steelBars);
+  double get _steelNetW => SteelWeightCalculator.netWeightKg(
+      totalLengthM: _steelTotalLen, unitWeightKgPerM: _steelWPM);
+  double get _steelAdditionalW => SteelWeightCalculator.additionalWeightKg(
+      netWeightKg: _steelNetW, additionalPercent: _steelWastePercent);
+  double get _steelTotalW => SteelWeightCalculator.finalWeightKg(
+      netWeightKg: _steelNetW, additionalPercent: _steelWastePercent);
+  double get _steelFinalTon =>
+      SteelWeightCalculator.finalWeightTon(finalWeightKg: _steelTotalW);
+  String get _steelWastePercentLabel {
+    final p = _steelWastePercent;
+    return p == p.truncateToDouble() ? p.toInt().toString() : p.toString();
+  }
+  int get _steelBarsPerTon =>
+      SteelWeightCalculator.barsPerTon(weightPerBarKg: _steelWeightPerBar);
+  double? get _steelPriceTon => double.tryParse(_steelCostPerTonCtrl.text);
+  bool get _steelHasCost => _showSteelCost && _steelPriceTon != null && _steelPriceTon! > 0;
+  double get _steelStockLen => double.tryParse(_steelStockLengthCtrl.text) ?? 0;
+  bool get _steelProcurementValid =>
+      _steelStockLen > 0 && _steelStockLen >= _steelLen;
+  int get _steelBarsPerStockBar => SteelWeightCalculator.barsPerStockBar(
+      stockBarLengthM: _steelStockLen, barLengthM: _steelLen);
+  int get _steelReqBars => _steelProcurementValid
+      ? SteelWeightCalculator.requiredStockBars(
+          barLengthM: _steelLen,
+          quantity: _steelBars,
+          stockBarLengthM: _steelStockLen)
+      : 0;
+  double get _steelPurchLen => SteelWeightCalculator.purchasedLengthM(
+      stockBars: _steelReqBars, stockBarLengthM: _steelStockLen);
+  double get _steelRemainLen => SteelWeightCalculator.remainingLengthM(
+      purchasedLengthM: _steelPurchLen, requiredLengthM: _steelTotalLen);
+  double get _steelPurchW => SteelWeightCalculator.purchasedWeightKg(
+      purchasedLengthM: _steelPurchLen, unitWeightKgPerM: _steelWPM);
 
   /// Dimension fields and their explicit labels for the selected element type.
   /// Only the fields required by the geometry are shown.
@@ -406,7 +458,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       setState(() => _result = Ar.enterPositiveValues);
       return;
     }
-    final w = l * q * 0.00617 * (d * d);
+    final w = l *
+        q *
+        SteelWeightCalculator.unitWeightKgPerM(diameterMm: d);
     final display = w >= 1000
         ? '${(w / 1000).toStringAsFixed(2)} ${Ar.tons}'
         : '${w.toStringAsFixed(2)} ${Ar.kg}';
@@ -434,10 +488,33 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   void _calcSteelWeight() {
-    if (_steelLen <= 0 || _steelBars <= 0 || _steelWPM <= 0) {
+    if (_steelDiameterMm <= 0 || _steelLen <= 0) {
       setState(() {
         _steelError = Ar.invalidInputs;
         _steelCalculated = false;
+      });
+      return;
+    }
+    if (_steelBars <= 0) {
+      setState(() {
+        _steelError = Ar.invalidQuantity;
+        _steelCalculated = false;
+      });
+      return;
+    }
+    if (_steelIsCustomWaste) {
+      final pct = double.tryParse(_steelCustomWasteCtrl.text);
+      if (pct == null || pct < 0) {
+        setState(() {
+          _steelError = Ar.invalidInputs;
+          _steelCalculated = false;
+        });
+        return;
+      }
+      setState(() {
+        _steelWastePercent = pct;
+        _steelError = null;
+        _steelCalculated = true;
       });
       return;
     }
@@ -460,10 +537,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     _customWasteCtrl.dispose();
     _truckCapacityCtrl.dispose();
     _costPerCubicCtrl.dispose();
+    _steelCustomDiameterCtrl.dispose();
     _steelCustomWasteCtrl.dispose();
-    _steelCostPerKgCtrl.dispose();
+    _steelCostPerTonCtrl.dispose();
     _steelStockLengthCtrl.dispose();
     super.dispose();
+  }
+
+  void _resetSteel() {
+    _lengthCtrl.text = '12';
+    _qtyCtrl.text = '1';
+    _steelCustomDiameterCtrl.clear();
+    _steelCustomWasteCtrl.clear();
+    _steelCostPerTonCtrl.clear();
+    _steelStockLengthCtrl.text = '12';
+    setState(() {
+      _steelDiameter = 12;
+      _steelIsCustomDiameter = false;
+      _steelWastePercent = 0;
+      _steelIsCustomWaste = false;
+      _showSteelProcurement = false;
+      _showSteelCost = false;
+      _steelCalculated = false;
+      _steelError = null;
+    });
   }
 
   @override
@@ -1112,13 +1209,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         title: Text(_title, style: const TextStyle(color: Colors.white)),
         backgroundColor: AppColors.primary,
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: Ar.reset,
+            color: Colors.white,
+            onPressed: _resetSteel,
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
           _buildSteelInputCard(theme),
-          AppSpacing.gapLg,
-          _buildSteelOptionsCard(theme),
           if (_steelCalculated) ...[
             AppSpacing.gapLg,
             _buildSteelResultsCard(theme),
@@ -1127,6 +1230,8 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             AppSpacing.gapMd,
             _buildSteelErrorCard(theme),
           ],
+          AppSpacing.gapLg,
+          _buildSteelEstimatesCard(theme),
           AppSpacing.gapXl,
         ],
       ),
@@ -1150,29 +1255,69 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildCardField(Ar.length, _lengthCtrl),
+            Text(
+              '${Ar.diameter} (${Ar.unitMm})',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
             const SizedBox(height: 8),
-            _buildCardField(Ar.quantity, _qtyCtrl, isInteger: true),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<int>(
-              value: _steelDiameter,
-              decoration: _inputDecoration(Ar.diameter),
-              items: _steelWeightPerMeter.keys
-                  .map((d) => DropdownMenuItem(
-                        value: d,
-                        child: Text('$d ${Ar.unitMm}'),
-                      ))
-                  .toList(),
-              onChanged: (v) {
-                if (v != null) {
-                  setState(() {
-                    _steelDiameter = v;
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final d in _steelDiameterPresets)
+                  ChoiceChip(
+                    label: Text('$d'),
+                    selected: !_steelIsCustomDiameter && _steelDiameter == d,
+                    onSelected: (_) => setState(() {
+                      _steelDiameter = d;
+                      _steelIsCustomDiameter = false;
+                      _steelCalculated = false;
+                      _steelError = null;
+                    }),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: !_steelIsCustomDiameter && _steelDiameter == d
+                          ? AppColors.primary
+                          : isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ChoiceChip(
+                  label: Text(Ar.wasteCustom),
+                  selected: _steelIsCustomDiameter,
+                  onSelected: (_) => setState(() {
+                    _steelIsCustomDiameter = true;
                     _steelCalculated = false;
                     _steelError = null;
-                  });
-                }
-              },
+                  }),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: _steelIsCustomDiameter
+                        ? AppColors.primary
+                        : isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
+            if (_steelIsCustomDiameter) ...[
+              const SizedBox(height: 8),
+              _buildCardField(
+                  '${Ar.diameter} (${Ar.unitMm})', _steelCustomDiameterCtrl),
+            ],
+            const SizedBox(height: 12),
+            _buildCardField(Ar.steelBarLength, _lengthCtrl),
+            const SizedBox(height: 8),
+            _buildCardField(Ar.quantity, _qtyCtrl, isInteger: true),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.all(12),
@@ -1198,6 +1343,65 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            Text(
+              Ar.additionalPercent,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (final pct in [0, 3, 5, 7])
+                  ChoiceChip(
+                    label: Text('$pct%'),
+                    selected: !_steelIsCustomWaste && _steelWastePercent == pct,
+                    onSelected: (_) => setState(() {
+                      _steelWastePercent = pct.toDouble();
+                      _steelIsCustomWaste = false;
+                      _steelCalculated = false;
+                      _steelError = null;
+                    }),
+                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                    labelStyle: TextStyle(
+                      color: !_steelIsCustomWaste && _steelWastePercent == pct
+                          ? AppColors.primary
+                          : isDark
+                              ? AppColors.darkTextPrimary
+                              : AppColors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ChoiceChip(
+                  label: Text(Ar.wasteCustom),
+                  selected: _steelIsCustomWaste,
+                  onSelected: (_) => setState(() {
+                    _steelIsCustomWaste = true;
+                    _steelCalculated = false;
+                    _steelError = null;
+                  }),
+                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                  labelStyle: TextStyle(
+                    color: _steelIsCustomWaste
+                        ? AppColors.primary
+                        : isDark
+                            ? AppColors.darkTextPrimary
+                            : AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            if (_steelIsCustomWaste) ...[
+              const SizedBox(height: 8),
+              _buildCardField(Ar.additionalPercent, _steelCustomWasteCtrl),
+            ],
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -1221,7 +1425,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 
-  Widget _buildSteelOptionsCard(ThemeData theme) {
+  Widget _buildSteelEstimatesCard(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
     return CustomCard(
       child: Padding(
@@ -1230,67 +1434,75 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              Ar.options,
+              Ar.steelAdditionalEstimates,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
-            Text(
-              Ar.wasteFactor,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 4,
-              children: [
-                for (final pct in [0, 3, 5, 7])
-                  ChoiceChip(
-                    label: Text('$pct%'),
-                    selected:
-                        !_steelIsCustomWaste && _steelWastePercent == pct,
-                    onSelected: (_) => setState(() {
-                      _steelWastePercent = pct.toDouble();
-                      _steelIsCustomWaste = false;
-                    }),
-                    selectedColor: AppColors.primary.withValues(alpha: 0.15),
-                    labelStyle: TextStyle(
-                      color: !_steelIsCustomWaste && _steelWastePercent == pct
-                          ? AppColors.primary
-                          : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                    ),
-                  ),
-                ChoiceChip(
-                  label: Text(Ar.wasteCustom),
-                  selected: _steelIsCustomWaste,
-                  onSelected: (_) =>
-                      setState(() => _steelIsCustomWaste = true),
-                  selectedColor: AppColors.primary.withValues(alpha: 0.15),
-                  labelStyle: TextStyle(
-                    color: _steelIsCustomWaste ? AppColors.primary : isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-            if (_steelIsCustomWaste) ...[
-              const SizedBox(height: 8),
-              _buildCardField(Ar.wasteFactor, _steelCustomWasteCtrl),
-            ],
-            const Divider(height: 32),
+            // A. Procurement Estimate
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    Ar.steelPricePerKg,
+                    Ar.steelProcurementEstimate,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Switch(
+                  value: _showSteelProcurement,
+                  activeColor: AppColors.primary,
+                  onChanged: (v) => setState(() => _showSteelProcurement = v),
+                ),
+              ],
+            ),
+            if (_showSteelProcurement) ...[
+              const SizedBox(height: 8),
+              _buildCardField(
+                  '${Ar.steelStockLength} (${Ar.meters})', _steelStockLengthCtrl),
+              if (_steelCalculated) ...[
+                const SizedBox(height: 12),
+                if (_steelStockLen <= 0) ...[
+                  Text(
+                    Ar.steelStockLengthInvalid,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ] else if (_steelStockLen < _steelLen) ...[
+                  Text(
+                    Ar.steelStockShorter,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ] else ...[
+                  _steelResultRow('${Ar.steelBarsPerStockBar}:',
+                      '$_steelBarsPerStockBar'),
+                  _steelResultRow('${Ar.steelBarsRequired}:',
+                      '$_steelReqBars'),
+                  _steelResultRow('${Ar.steelPurchasedLength}:',
+                      '${_steelPurchLen.toStringAsFixed(2)} ${Ar.meters}'),
+                  _steelResultRow('${Ar.steelRemainingLength}:',
+                      '${_steelRemainLen.toStringAsFixed(2)} ${Ar.meters}'),
+                  _steelResultRow('${Ar.steelPurchasedWeight}:',
+                      '${_steelPurchW.toStringAsFixed(2)} ${Ar.kg}'),
+                ],
+              ],
+            ],
+            const Divider(height: 32),
+            // B. Cost Estimate
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    Ar.steelCostEstimate,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                       fontWeight: FontWeight.w600,
@@ -1306,18 +1518,30 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
             if (_showSteelCost) ...[
               const SizedBox(height: 8),
-              _buildCardField(Ar.steelPricePerKg, _steelCostPerKgCtrl),
+              _buildCardField(Ar.steelPricePerTon, _steelCostPerTonCtrl),
+              if (_steelCalculated && _steelHasCost) ...[
+                const SizedBox(height: 12),
+                Text(
+                  Ar.steelCostHint,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _steelResultRow('${Ar.steelNetCost}:',
+                    SteelWeightCalculator.estimatedCost(
+                            finalWeightTon: _steelNetW / 1000,
+                            pricePerTon: _steelPriceTon!)
+                        .toStringAsFixed(0)),
+                _steelResultRow('${Ar.steelTotalCost}:',
+                    SteelWeightCalculator.estimatedCost(
+                            finalWeightTon: _steelTotalW / 1000,
+                            pricePerTon: _steelPriceTon!)
+                        .toStringAsFixed(0),
+                    isBold: true),
+              ],
             ],
-            const Divider(height: 32),
-            Text(
-              Ar.steelProcurementSection,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildCardField(Ar.steelStockLength, _steelStockLengthCtrl),
           ],
         ),
       ),
@@ -1341,60 +1565,28 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             ),
             const SizedBox(height: 16),
             _steelResultRow(
-                '${Ar.diameter}:', '$_steelDiameter ${Ar.unitMm}'),
+                '${Ar.diameter}:', '$_steelDiaLabel ${Ar.unitMm}'),
             _steelResultRow('${Ar.steelWeightPerMeter}:',
                 '${_steelWPM.toStringAsFixed(3)} ${Ar.kg}/${Ar.meters}'),
-            _steelResultRow(
-                '${Ar.length}:', '${_steelLen.toStringAsFixed(2)} ${Ar.meters}'),
-            _steelResultRow('${Ar.quantity}:', '$_steelBars'),
+            _steelResultRow('${Ar.steelWeightPerBar}:',
+                '${_steelWeightPerBar.toStringAsFixed(3)} ${Ar.kg}'),
             _steelResultRow('${Ar.steelTotalLength}:',
                 '${_steelTotalLen.toStringAsFixed(2)} ${Ar.meters}'),
             const Divider(height: 24),
-            _steelResultRow('${Ar.steelNetWeight}:',
-                '${_steelNetW.toStringAsFixed(2)} ${Ar.kg}'),
+            if (_steelWastePercent > 0)
+              _steelResultRow('${Ar.steelNetWeight}:',
+                  '${_steelNetW.toStringAsFixed(2)} ${Ar.kg}'),
             if (_steelWastePercent > 0)
               _steelResultRow(
-                  '${Ar.steelWasteWeight} ($_steelWastePercent%):',
-                  '${_steelWasteW.toStringAsFixed(2)} ${Ar.kg}'),
+                  '${Ar.steelAdditionalWeight} ($_steelWastePercentLabel%):',
+                  '${_steelAdditionalW.toStringAsFixed(2)} ${Ar.kg}'),
             _steelResultRow('${Ar.steelTotalRequiredWeight}:',
                 '${_steelTotalW.toStringAsFixed(2)} ${Ar.kg}',
                 isBold: true),
             _steelResultRow('${Ar.steelTotalTons}:',
-                '${(_steelTotalW / 1000).toStringAsFixed(3)} ${Ar.tons}'),
-            if (_steelHasCost) ...[
-              const Divider(height: 24),
-              _steelResultRow('${Ar.steelNetCost}:',
-                  (_steelNetW * _steelPriceKg!).toStringAsFixed(0)),
-              if (_steelWastePercent > 0)
-                _steelResultRow('${Ar.steelWasteCost}:',
-                    (_steelWasteW * _steelPriceKg!).toStringAsFixed(0)),
-              _steelResultRow('${Ar.steelTotalCost}:',
-                  (_steelTotalW * _steelPriceKg!).toStringAsFixed(0),
-                  isBold: true),
-            ],
-            if (_steelTotalLen > 0) ...[
-              const Divider(height: 24),
-              Text(
-                Ar.steelProcurementSection,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _steelResultRow('${Ar.steelStockLength}:',
-                  '${_steelStockLen.toStringAsFixed(2)} ${Ar.meters}'),
-              _steelResultRow('${Ar.steelTotalLength}:',
-                  '${_steelTotalLen.toStringAsFixed(2)} ${Ar.meters}'),
-              _steelResultRow(
-                  '${Ar.steelBarsRequired}:', '$_steelReqBars'),
-              _steelResultRow('${Ar.steelPurchasedLength}:',
-                  '${_steelPurchLen.toStringAsFixed(2)} ${Ar.meters}'),
-              _steelResultRow('${Ar.steelRemainingLength}:',
-                  '${_steelRemainLen.toStringAsFixed(2)} ${Ar.meters}'),
-              _steelResultRow('${Ar.steelPurchasedWeight}:',
-                  '${_steelPurchW.toStringAsFixed(2)} ${Ar.kg}'),
-            ],
+                '${_steelFinalTon.toStringAsFixed(3)} ${Ar.tons}'),
+            _steelResultRow('${Ar.steelBarsPerTon} (${Ar.steelApproximate}):',
+                '$_steelBarsPerTon'),
           ],
         ),
       ),
@@ -1489,7 +1681,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
             ),
             child: Text(
-              '$_steelDiameter ${Ar.unitMm}',
+              '$_steelDiaLabel ${Ar.unitMm}',
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,

@@ -161,14 +161,18 @@ class En {
 
   // Steel Calculator
   static const String steelWeightPerMeter = 'Weight per Meter';
+  static const String steelWeightPerBar = 'Weight per Bar';
+  static const String steelAdditionalWeight = 'Additional Weight';
   static const String steelTotalLength = 'Total Length';
   static const String steelNetWeight = 'Net Weight';
-  static const String steelWasteWeight = 'Waste Weight';
   static const String steelTotalRequiredWeight = 'Total Required';
   static const String steelTotalTons = 'Total (tons)';
-  static const String steelPricePerKg = 'Price per kg';
+  static const String steelBarsPerTon = 'Bars per Ton';
+  static const String steelApproximate = 'approximate';
+  static const String steelBarLength = 'Bar Length (m)';
+  static const String steelPricePerTon = 'Steel price per ton';
+  static const String steelCostHint = 'Estimated Cost';
   static const String steelNetCost = 'Net Cost';
-  static const String steelWasteCost = 'Waste Cost';
   static const String steelTotalCost = 'Total Cost';
   static const String steelStockLength = 'Stock Bar Length';
   static const String steelBarsRequired = 'Bars Required';
@@ -178,6 +182,12 @@ class En {
   static const String steelResults = 'Results';
   static const String steelInputSection = 'Steel Data';
   static const String steelProcurementSection = 'Procurement';
+  static const String steelAdditionalEstimates = 'Additional Estimates';
+  static const String steelProcurementEstimate = 'Procurement Estimate';
+  static const String steelCostEstimate = 'Cost Estimate';
+  static const String steelBarsPerStockBar = 'Bars per Stock Bar';
+  static const String steelStockShorter = 'Stock bar length is shorter than the required bar length';
+  static const String steelStockLengthInvalid = 'Enter a valid stock bar length';
 
   // Inspection Checklist - UI
   static const String inspectionPass = 'Pass';
