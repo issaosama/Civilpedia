@@ -4,6 +4,8 @@ class Ar {
   static const String tools = 'الأدوات';
   static const String saved = 'المحفوظات';
   static const String profile = 'الملف الشخصي';
+  static const String account = 'حسابي';
+  static const String encyclopedia = 'الموسوعة';
   static const String search = 'ابحث عن مقالات...';
   static const String offline = 'لا يوجد اتصال بالإنترنت';
   static const String online = 'متصل';

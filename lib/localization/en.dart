@@ -4,6 +4,8 @@ class En {
   static const String tools = 'Tools';
   static const String saved = 'Saved';
   static const String profile = 'Profile';
+  static const String account = 'Account';
+  static const String encyclopedia = 'Encyclopedia';
   static const String search = 'Search articles...';
   static const String offline = 'No internet connection';
   static const String online = 'Online';

@@ -1,28 +1,57 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../data/repositories/article_repository.dart';
-import '../../../../localization/ar.dart';
+import 'package:provider/provider.dart';
 
-class CategoriesScreen extends StatelessWidget {
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
+import '../../../../core/widgets/state_widgets.dart';
+import '../../../../localization/ar.dart';
+import '../../presentation/providers/encyclopedia_provider.dart';
+import '../widgets/encyclopedia_category_card.dart';
+
+/// Full-screen view of all engineering encyclopedia categories.
+///
+/// Phase B realigned this route with the authoritative catalog. It no longer
+/// consumes the legacy [ArticleRepository]; the source of truth is now the
+/// shared [EncyclopediaProvider]. Tapping a category enters the same
+/// `/encyclopedia/topics/:categoryId` flow used everywhere else.
+class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
 
-  static const _categoryImages = {
-    'خرسانة': 'https://images.unsplash.com/photo-1581578731546-c64695cc6942?w=400',
-    'حديد': 'https://images.unsplash.com/photo-1614444442667-9e9d9c7a7a9a?w=400',
-    'تربة': 'https://images.unsplash.com/photo-1531834685032-c34bf0d84c77?w=400',
-    'طرق': 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400',
-    'إدارة مشاريع': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
-    'مساحة': 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400',
-  };
+  @override
+  State<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<EncyclopediaProvider>();
+      if (provider.allTopics.isEmpty && !provider.isLoading) {
+        provider.loadAllTopics();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final categories = ArticleRepository.categories;
+    final provider = context.watch<EncyclopediaProvider>();
+    final categories = provider.categories.values.toList();
+
     return Scaffold(
       appBar: AppBar(title: const Text(Ar.categories)),
-      body: GridView.builder(
+      body: _buildBody(context, provider, categories),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    EncyclopediaProvider provider,
+    List<dynamic> categories,
+  ) {
+    if (provider.isLoading && categories.isEmpty) {
+      return GridView.builder(
         padding: const EdgeInsets.all(AppConstants.paddingMedium),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
@@ -30,51 +59,39 @@ class CategoriesScreen extends StatelessWidget {
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
         ),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final cat = categories[index];
-          final imageUrl = _categoryImages[cat.name] ?? '';
-          return GestureDetector(
-            onTap: () => context.push('/articles/${cat.name}'),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-              child: Stack(
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: double.infinity,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: Colors.grey.shade200),
-                    errorWidget: (_, __, ___) => Container(color: Colors.grey.shade200, child: const Icon(Icons.broken_image)),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [cat.color.withValues(alpha: 0.85), cat.color.withValues(alpha: 0.3)],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 12,
-                    left: 12,
-                    right: 12,
-                    child: Row(
-                      children: [
-                        Icon(cat.icon, color: Colors.white, size: 20),
-                        const SizedBox(width: 8),
-                        Text(cat.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        itemCount: 6,
+        itemBuilder: (_, __) => const ShimmerCategoryCard(),
+      );
+    }
+
+    if (provider.error != null && categories.isEmpty) {
+      return ErrorStateWidget(
+        onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
+      );
+    }
+
+    if (categories.isEmpty) {
+      return const EmptyStateWidget(icon: Icons.menu_book_outlined);
+    }
+
+    return GridView.builder(
+      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 1,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
+      itemCount: categories.length,
+      itemBuilder: (context, index) {
+        final category = categories[index];
+        return EncyclopediaCategoryCard(
+          width: double.infinity,
+          height: double.infinity,
+          title: category.titleAr,
+          onTap: () => context.push('/encyclopedia/topics/${category.id}'),
+        );
+      },
     );
   }
 }

@@ -48,6 +48,21 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
   }
 
   @override
+  void didUpdateWidget(EncyclopediaScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newQuery = widget.initialQuery?.trim() ?? '';
+    final oldQuery = oldWidget.initialQuery?.trim() ?? '';
+    if (newQuery == oldQuery) return;
+
+    _searchController.text = newQuery;
+    if (newQuery.isNotEmpty) {
+      context.read<EncyclopediaProvider>().searchTopics(newQuery);
+    } else {
+      context.read<EncyclopediaProvider>().clearSearch();
+    }
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();

@@ -25,11 +25,14 @@ final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
 /// Screen builders for each shell branch, keyed by the branch route declared
 /// in [kShellDestinations]. Branch order and indices live only in that list;
 /// this map only resolves a destination to its content screen.
-final Map<String, WidgetBuilder> _shellBranchBuilders = {
-  '/home': (_) => const HomeMainScreen(),
-  '/tools': (_) => const ToolsScreen(),
-  '/saved': (_) => const SavedScreen(),
-  '/profile': (_) => const ProfileScreen(),
+final Map<String, GoRouterWidgetBuilder> _shellBranchBuilders = {
+  '/home': (_, __) => const HomeMainScreen(),
+  '/encyclopedia': (_, state) => EncyclopediaScreen(
+        initialQuery: state.uri.queryParameters['q'],
+      ),
+  '/tools': (_, __) => const ToolsScreen(),
+  '/saved': (_, __) => const SavedScreen(),
+  '/profile': (_, __) => const ProfileScreen(),
 };
 
 final GoRouter appRouter = GoRouter(
@@ -68,13 +71,6 @@ final GoRouter appRouter = GoRouter(
       ),
     ),
     GoRoute(
-      path: '/encyclopedia',
-      parentNavigatorKey: _rootNavigator,
-      builder: (context, state) => EncyclopediaScreen(
-        initialQuery: state.uri.queryParameters['q'],
-      ),
-    ),
-    GoRoute(
       path: '/encyclopedia/topic/:topicId',
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => TopicDetailScreen(
@@ -91,8 +87,7 @@ final GoRouter appRouter = GoRouter(
             routes: [
               GoRoute(
                 path: destination.route,
-                builder: (context, state) =>
-                    _shellBranchBuilders[destination.route]!(context),
+                builder: _shellBranchBuilders[destination.route]!,
               ),
             ],
           ),

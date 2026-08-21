@@ -47,6 +47,12 @@ const List<ShellDestination> kShellDestinations = [
     label: Ar.home,
   ),
   ShellDestination(
+    route: '/encyclopedia',
+    icon: Icons.menu_book_outlined,
+    activeIcon: Icons.menu_book,
+    label: Ar.encyclopedia,
+  ),
+  ShellDestination(
     route: '/tools',
     icon: Icons.build_outlined,
     activeIcon: Icons.build,
@@ -62,7 +68,7 @@ const List<ShellDestination> kShellDestinations = [
     route: '/profile',
     icon: Icons.person_outline,
     activeIcon: Icons.person,
-    label: Ar.profile,
+    label: Ar.account,
   ),
 ];
 
@@ -86,8 +92,10 @@ class _AppShellState extends State<AppShell> {
   DateTime? _lastBackPress;
 
   bool get _isAtShellRoot {
-    final location = GoRouterState.of(context).uri.toString();
-    return kShellDestinations.any((destination) => destination.route == location);
+    // Compare path only so that query parameters (e.g. /encyclopedia?q=...)
+    // do not disable the shell-level double-back-to-exit behavior.
+    final path = GoRouterState.of(context).uri.path;
+    return kShellDestinations.any((destination) => destination.route == path);
   }
 
   Future<bool> _onWillPop() async {

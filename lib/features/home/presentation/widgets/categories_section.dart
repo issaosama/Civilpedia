@@ -1,62 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../data/repositories/article_repository.dart';
+import 'package:provider/provider.dart';
 
-class CategoriesSection extends StatelessWidget {
+import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/shimmer_loading.dart';
+import '../../../../core/widgets/state_widgets.dart';
+import '../../../encyclopedia/presentation/providers/encyclopedia_provider.dart';
+import '../../../encyclopedia/presentation/widgets/encyclopedia_category_card.dart';
+
+/// Home's horizontal category strip.
+///
+/// Phase B corrected the data ownership: categories now come from the shared
+/// [EncyclopediaProvider] (authoritative catalog), NOT from the legacy
+/// [ArticleRepository]. Tapping a category routes into the same
+/// category→topics→detail flow used by the Encyclopedia tab.
+class CategoriesSection extends StatefulWidget {
   const CategoriesSection({super.key});
 
-  static const _categoryImages = {
-    'خرسانة': 'https://images.unsplash.com/photo-1581578731546-c64695cc6942?w=400',
-    'حديد': 'https://images.unsplash.com/photo-1614444442667-9e9d9c7a7a9a?w=400',
-    'تربة': 'https://images.unsplash.com/photo-1531834685032-c34bf0d84c77?w=400',
-    'طرق': 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=400',
-    'إدارة مشاريع': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400',
-    'مساحة': 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=400',
-  };
+  @override
+  State<CategoriesSection> createState() => _CategoriesSectionState();
+}
+
+class _CategoriesSectionState extends State<CategoriesSection> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<EncyclopediaProvider>();
+      if (provider.allTopics.isEmpty && !provider.isLoading) {
+        provider.loadAllTopics();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final categories = ArticleRepository.categories;
+    final provider = context.watch<EncyclopediaProvider>();
+    final categories = provider.categories.values.toList();
+
+    if (provider.isLoading && categories.isEmpty) {
+      return SizedBox(
+        height: 130,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppConstants.paddingMedium,
+          ),
+          itemCount: 4,
+          separatorBuilder: (_, __) => const SizedBox(width: 12),
+          itemBuilder: (_, __) => const ShimmerCategoryCard(),
+        ),
+      );
+    }
+
+    if (provider.error != null && categories.isEmpty) {
+      return SizedBox(
+        height: 130,
+        child: ErrorStateWidget(
+          onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
+        ),
+      );
+    }
+
+    if (categories.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return SizedBox(
       height: 130,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppConstants.paddingMedium),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppConstants.paddingMedium,
+        ),
         itemCount: categories.length,
         separatorBuilder: (_, __) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
-          final cat = categories[index];
-          final imageUrl = _categoryImages[cat.name] ?? '';
-          return GestureDetector(
-            onTap: () => context.push('/articles/${cat.name}'),
-            child: Container(
-              width: 110,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-                image: DecorationImage(
-                  image: CachedNetworkImageProvider(imageUrl),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-                  gradient: LinearGradient(
-                    colors: [cat.color.withValues(alpha: 0.85), cat.color.withValues(alpha: 0.4)],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                  ),
-                ),
-                alignment: Alignment.bottomCenter,
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  cat.name,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
-                ),
-              ),
-            ),
+          final category = categories[index];
+          return EncyclopediaCategoryCard(
+            width: 110,
+            height: 130,
+            title: category.titleAr,
+            onTap: () => context.push('/encyclopedia/topics/${category.id}'),
           );
         },
       ),

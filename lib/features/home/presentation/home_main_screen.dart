@@ -17,12 +17,12 @@ import 'widgets/quick_tools_section.dart';
 import 'widgets/categories_section.dart';
 import 'widgets/home_data_section.dart';
 
-/// Opens the Encyclopedia search experience with [query] already applied.
+/// Activates the Encyclopedia shell branch with [query] already applied.
 /// Home only collects the query; Encyclopedia owns the search logic.
 void openEncyclopediaSearch(BuildContext context, String query) {
   final trimmed = query.trim();
   if (trimmed.isEmpty) return;
-  context.push('/encyclopedia?q=${Uri.encodeComponent(trimmed)}');
+  context.go('/encyclopedia?q=${Uri.encodeComponent(trimmed)}');
 }
 
 /// Real pull-to-refresh for Home data. Completes only when the Encyclopedia
