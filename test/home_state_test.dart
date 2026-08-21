@@ -8,9 +8,9 @@ import 'package:civilpedia/features/encyclopedia/domain/entities/engineering_top
 import 'package:civilpedia/features/encyclopedia/domain/entities/topic_section.dart';
 import 'package:civilpedia/features/encyclopedia/domain/repositories/encyclopedia_repository.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
-import 'package:civilpedia/features/encyclopedia/presentation/widgets/topic_compact_card.dart';
 import 'package:civilpedia/features/home/presentation/home_main_screen.dart';
-import 'package:civilpedia/features/home/presentation/widgets/home_data_section.dart';
+import 'package:civilpedia/features/home/presentation/widgets/home_topic_card.dart';
+import 'package:civilpedia/features/home/presentation/widgets/engineering_topics_section.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -86,7 +86,7 @@ Widget _wrap(EncyclopediaProvider provider) {
     value: provider,
     child: const MaterialApp(
       home: Scaffold(
-        body: SingleChildScrollView(child: HomeDataSection()),
+        body: SingleChildScrollView(child: EngineeringTopicsSection()),
       ),
     ),
   );
@@ -120,14 +120,14 @@ void main() {
 
       expect(repo.getAllTopicsCalls, 1);
       expect(find.byType(ShimmerSection), findsOneWidget);
-      expect(find.byType(TopicCompactCard), findsNothing);
+      expect(find.byType(HomeTopicCard), findsNothing);
       expect(find.byType(ErrorStateWidget), findsNothing);
 
       await tester.pump(const Duration(milliseconds: 200));
       await tester.pump();
 
       expect(find.byType(ShimmerSection), findsNothing);
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
       await _unmount(tester);
     });
 
@@ -166,7 +166,7 @@ void main() {
       await tester.pump();
 
       expect(repo.getAllTopicsCalls, 1);
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
       expect(find.byType(ShimmerSection), findsNothing);
       await _unmount(tester);
     });
@@ -214,7 +214,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(ErrorStateWidget), findsNothing);
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
       await _unmount(tester);
     });
 
@@ -228,7 +228,7 @@ void main() {
       await tester.pump();
 
       expect(find.byType(EmptyStateWidget), findsOneWidget);
-      expect(find.byType(TopicCompactCard), findsNothing);
+      expect(find.byType(HomeTopicCard), findsNothing);
       expect(find.byType(ErrorStateWidget), findsNothing);
       await _unmount(tester);
     });
@@ -280,7 +280,7 @@ void main() {
 
       await tester.pumpWidget(_wrap(provider));
       await tester.pump();
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
 
       repo.delay = const Duration(milliseconds: 300);
       unawaited(provider.loadAllTopics());
@@ -290,12 +290,12 @@ void main() {
       expect(provider.allTopics, isNotEmpty);
       expect(find.byType(ShimmerSection), findsNothing);
       expect(find.byType(ErrorStateWidget), findsNothing);
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
 
       await tester.pump(const Duration(milliseconds: 300));
       await tester.pump();
       expect(provider.isLoading, isFalse);
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
       await _unmount(tester);
     });
 
@@ -306,7 +306,7 @@ void main() {
 
       await tester.pumpWidget(_wrap(provider));
       await tester.pump();
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
 
       repo.error = StateError('reload failed');
       await provider.loadAllTopics();
@@ -315,7 +315,7 @@ void main() {
       expect(provider.error, isNotNull);
       expect(provider.allTopics, isNotEmpty);
       expect(find.byType(ErrorStateWidget), findsNothing);
-      expect(find.byType(TopicCompactCard), findsWidgets);
+      expect(find.byType(HomeTopicCard), findsWidgets);
       await _unmount(tester);
     });
   });

@@ -6,6 +6,7 @@ import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/widgets/state_widgets.dart';
 import '../../../../localization/ar.dart';
+import '../../domain/entities/category_info.dart';
 import '../../presentation/providers/encyclopedia_provider.dart';
 import '../widgets/encyclopedia_category_card.dart';
 
@@ -45,10 +46,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
+  int _topicCountFor(EncyclopediaProvider provider, String categoryId) {
+    return provider.allTopics.where((t) => t.categoryId == categoryId).length;
+  }
+
   Widget _buildBody(
     BuildContext context,
     EncyclopediaProvider provider,
-    List<dynamic> categories,
+    List<CategoryInfo> categories,
   ) {
     if (provider.isLoading && categories.isEmpty) {
       return GridView.builder(
@@ -89,6 +94,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           width: double.infinity,
           height: double.infinity,
           title: category.titleAr,
+          topicCount: _topicCountFor(provider, category.id),
           onTap: () => context.push('/encyclopedia/topics/${category.id}'),
         );
       },

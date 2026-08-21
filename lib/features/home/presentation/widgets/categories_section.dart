@@ -10,12 +10,16 @@ import '../../../encyclopedia/presentation/widgets/encyclopedia_category_card.da
 
 /// Home's horizontal category strip.
 ///
-/// Phase B corrected the data ownership: categories now come from the shared
+/// Phase B corrected the data ownership: categories come from the shared
 /// [EncyclopediaProvider] (authoritative catalog), NOT from the legacy
-/// [ArticleRepository]. Tapping a category routes into the same
-/// category→topics→detail flow used by the Encyclopedia tab.
+/// [ArticleRepository]. Phase C polishes presentation and limits Home to a
+/// compact, useful subset while keeping the full catalog reachable via View All.
 class CategoriesSection extends StatefulWidget {
   const CategoriesSection({super.key});
+
+  /// Maximum number of category cards shown on Home. The full catalog remains
+  /// available through the dedicated categories screen.
+  static const int homeCategoryLimit = 6;
 
   @override
   State<CategoriesSection> createState() => _CategoriesSectionState();
@@ -33,6 +37,13 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     });
   }
 
+  int _topicCountFor(
+    EncyclopediaProvider provider,
+    String categoryId,
+  ) {
+    return provider.allTopics.where((t) => t.categoryId == categoryId).length;
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<EncyclopediaProvider>();
@@ -40,13 +51,13 @@ class _CategoriesSectionState extends State<CategoriesSection> {
 
     if (provider.isLoading && categories.isEmpty) {
       return SizedBox(
-        height: 130,
+        height: 150,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(
             horizontal: AppConstants.paddingMedium,
           ),
-          itemCount: 4,
+          itemCount: CategoriesSection.homeCategoryLimit,
           separatorBuilder: (_, __) => const SizedBox(width: 12),
           itemBuilder: (_, __) => const ShimmerCategoryCard(),
         ),
@@ -55,7 +66,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
 
     if (provider.error != null && categories.isEmpty) {
       return SizedBox(
-        height: 130,
+        height: 150,
         child: ErrorStateWidget(
           onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
         ),
@@ -66,21 +77,25 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       return const SizedBox.shrink();
     }
 
+    final displayCategories = categories.take(CategoriesSection.homeCategoryLimit).toList();
+
     return SizedBox(
-      height: 130,
+      height: 112,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(
           horizontal: AppConstants.paddingMedium,
         ),
-        itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemCount: displayCategories.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 9),
         itemBuilder: (context, index) {
-          final category = categories[index];
+          final category = displayCategories[index];
           return EncyclopediaCategoryCard(
-            width: 110,
-            height: 130,
+            compact: true,
+            width: 100,
+            height: 112,
             title: category.titleAr,
+            topicCount: _topicCountFor(provider, category.id),
             onTap: () => context.push('/encyclopedia/topics/${category.id}'),
           );
         },

@@ -9,6 +9,7 @@ import 'package:civilpedia/features/encyclopedia/presentation/screens/encycloped
 import 'package:civilpedia/features/encyclopedia/presentation/widgets/topic_compact_card.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/widgets/topic_list_card.dart';
 import 'package:civilpedia/features/home/presentation/home_main_screen.dart';
+import 'package:civilpedia/localization/ar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -112,6 +113,7 @@ class _SearchHarness extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: SearchBarWidget(
+            hintText: Ar.homeEngineeringSearchHint,
             onSubmitted: (query) => openEncyclopediaSearch(context, query),
           ),
         ),
@@ -168,6 +170,34 @@ void main() {
 
       expect(submitted, 'فحص الخرسانة');
     });
+
+    testWidgets('uses the generic Ar.search hint by default', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SearchBarWidget(),
+          ),
+        ),
+      );
+
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.decoration?.hintText, Ar.search);
+      expect(field.decoration?.hintText, isNot(Ar.homeEngineeringSearchHint));
+    });
+
+    testWidgets('uses a custom hintText when provided', (tester) async {
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: SearchBarWidget(hintText: Ar.homeEngineeringSearchHint),
+          ),
+        ),
+      );
+
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.decoration?.hintText, Ar.homeEngineeringSearchHint);
+      expect(field.decoration?.hintText, isNot(Ar.search));
+    });
   });
 
   group('Home search navigation contract', () {
@@ -185,6 +215,9 @@ void main() {
           ),
         );
         await tester.pump();
+
+        final homeField = tester.widget<TextField>(find.byType(TextField));
+        expect(homeField.decoration?.hintText, Ar.homeEngineeringSearchHint);
 
         await tester.enterText(find.byType(TextField), '  فحص الخرسانة  ');
         await tester.testTextInput.receiveAction(TextInputAction.search);

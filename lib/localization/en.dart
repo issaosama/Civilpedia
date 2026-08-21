@@ -7,6 +7,7 @@ class En {
   static const String account = 'Account';
   static const String encyclopedia = 'Encyclopedia';
   static const String search = 'Search articles...';
+  static const String homeEngineeringSearchHint = 'Search engineering content...';
   static const String offline = 'No internet connection';
   static const String online = 'Online';
   static const String quickTools = 'Quick Tools';
@@ -396,6 +397,17 @@ class En {
   // UI Strings
   static const String welcome = 'Welcome';
   static const String viewAll = 'View All';
+  static const String engineeringTopics = 'Engineering Selections';
+  static const String topic = 'topic';
+  static const String topics = 'topics';
+  static const String quickAccess = 'Quick Access';
+  static const String exploreEngineeringContent = 'Explore Engineering Content';
+  static const String siteTools = 'Site Tools';
+  static const String articles = 'Articles';
+  static const String engineeringKnowledge = 'Engineering Knowledge';
+  static const String calculatorsAndTools = 'Calculators & Tools';
+  static const String savedItems = 'Saved & Downloads';
+  static const String allArticles = 'All Articles';
   static const String engineeringEncyclopedia = 'Engineering Encyclopedia';
   static const String engineeringTools = 'Engineering Calculators & Tools';
   static const String toolsDescription = 'Interactive tools designed to help you with calculations and quick field inspections.';

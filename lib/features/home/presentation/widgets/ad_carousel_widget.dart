@@ -19,7 +19,7 @@ class AdCarouselWidget extends StatefulWidget {
 
 class _AdCarouselWidgetState extends State<AdCarouselWidget> {
   final _dataSource = LocalAdDataSource();
-  final _pageController = PageController(viewportFraction: 0.92);
+  final _pageController = PageController(viewportFraction: 0.94);
 
   List<AdBanner> _ads = [];
   bool _isLoading = true;
@@ -71,7 +71,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          height: 170,
+          height: 200,
           child: Stack(
             children: [
               PageView.builder(
@@ -233,7 +233,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
           width: isActive ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: isActive ? const Color(0xFFFFD700) : Colors.grey.shade300,
+            color: isActive ? AppColors.primary : Colors.grey.shade300,
             borderRadius: BorderRadius.circular(4),
           ),
         );
@@ -245,7 +245,7 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: Container(
-        height: 170,
+        height: 200,
         decoration: BoxDecoration(
           color: Colors.grey.shade200,
           borderRadius: BorderRadius.circular(DesignTokens.radiusLg),

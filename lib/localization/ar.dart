@@ -7,6 +7,7 @@ class Ar {
   static const String account = 'حسابي';
   static const String encyclopedia = 'الموسوعة';
   static const String search = 'ابحث عن مقالات...';
+  static const String homeEngineeringSearchHint = 'ابحث في المحتوى الهندسي...';
   static const String offline = 'لا يوجد اتصال بالإنترنت';
   static const String online = 'متصل';
   static const String quickTools = 'أدوات سريعة';
@@ -400,6 +401,17 @@ class Ar {
   // UI Strings
   static const String welcome = 'مرحباً';
   static const String viewAll = 'عرض الكل';
+  static const String engineeringTopics = 'مختارات هندسية';
+  static const String topic = 'موضوع';
+  static const String topics = 'مواضيع';
+  static const String quickAccess = 'الوصول السريع';
+  static const String exploreEngineeringContent = 'استكشف المحتوى الهندسي';
+  static const String siteTools = 'أدوات الموقع';
+  static const String articles = 'المقالات';
+  static const String engineeringKnowledge = 'المعرفة الهندسية';
+  static const String calculatorsAndTools = 'حاسبات وأدوات';
+  static const String savedItems = 'مفضلاتك وتنزيلاتك';
+  static const String allArticles = 'كل المقالات';
   static const String engineeringEncyclopedia = 'الموسوعة الهندسية';
   static const String engineeringTools = 'الحاسبات والأدوات الهندسية';
   static const String toolsDescription = 'أدوات تفاعلية صُممت خصيصاً لمساعدتك في العمليات الحسابية والتحقق الميداني السريع في الموقع.';
