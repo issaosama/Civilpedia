@@ -7,7 +7,7 @@ import '../features/encyclopedia/presentation/screens/categories_screen.dart';
 import '../features/encyclopedia/presentation/screens/encyclopedia_screen.dart';
 import '../features/encyclopedia/presentation/screens/topic_list_screen.dart';
 import '../features/encyclopedia/presentation/screens/topic_detail_screen.dart';
-import '../features/home/presentation/home_screen.dart';
+import '../core/navigation/app_shell.dart';
 import '../features/home/presentation/home_main_screen.dart';
 import '../features/tools/presentation/screens/tools_screen.dart';
 import '../features/tools/presentation/screens/calculators/calculator_screen.dart';
@@ -21,6 +21,16 @@ import '../features/profile/presentation/screens/profile_setup_screen.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
+
+/// Screen builders for each shell branch, keyed by the branch route declared
+/// in [kShellDestinations]. Branch order and indices live only in that list;
+/// this map only resolves a destination to its content screen.
+final Map<String, WidgetBuilder> _shellBranchBuilders = {
+  '/home': (_) => const HomeMainScreen(),
+  '/tools': (_) => const ToolsScreen(),
+  '/saved': (_) => const SavedScreen(),
+  '/profile': (_) => const ProfileScreen(),
+};
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigator,
@@ -73,41 +83,19 @@ final GoRouter appRouter = GoRouter(
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        return HomeScreen(navigationShell: navigationShell);
+        return AppShell(navigationShell: navigationShell);
       },
       branches: [
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) => const HomeMainScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/tools',
-              builder: (context, state) => const ToolsScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/saved',
-              builder: (context, state) => const SavedScreen(),
-            ),
-          ],
-        ),
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/profile',
-              builder: (context, state) => const ProfileScreen(),
-            ),
-          ],
-        ),
+        for (final destination in kShellDestinations)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: destination.route,
+                builder: (context, state) =>
+                    _shellBranchBuilders[destination.route]!(context),
+              ),
+            ],
+          ),
       ],
     ),
     GoRoute(

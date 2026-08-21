@@ -1,31 +1,99 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import '../../../localization/ar.dart';
-import '../../../core/theme/design_tokens.dart';
-import '../../../core/theme/app_colors.dart';
 
-class HomeScreen extends StatefulWidget {
-  final StatefulNavigationShell navigationShell;
+import '../../localization/ar.dart';
+import '../theme/app_colors.dart';
+import '../theme/design_tokens.dart';
 
-  const HomeScreen({super.key, required this.navigationShell});
+/// Metadata for one bottom-navigation destination of the application shell.
+///
+/// The order of [kShellDestinations] IS the branch index contract shared with
+/// `StatefulShellRoute.indexedStack` in the app router. Adding a future
+/// domain (Encyclopedia, Engineering Directory) means appending an entry here
+/// and registering its branch builder in the router - never editing magic
+/// integers scattered across the app.
+class ShellDestination {
+  final String route;
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  /// Icon shown when the branch is not selected.
+  final IconData icon;
+
+  /// Icon shown when the branch is selected.
+  final IconData activeIcon;
+
+  final String label;
+
+  const ShellDestination({
+    required this.route,
+    required this.icon,
+    required this.activeIcon,
+    required this.label,
+  });
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+/// The current, user-visible shell destinations.
+///
+/// Phase A intentionally preserves the existing four-tab navigation. The
+/// approved long-term layout (Home, Encyclopedia, Tools, Directory, Profile)
+/// grows from this list in later phases; do not extend it preemptively.
+const List<ShellDestination> kShellDestinations = [
+  ShellDestination(
+    route: '/home',
+    icon: Icons.home_outlined,
+    activeIcon: Icons.home,
+    label: Ar.home,
+  ),
+  ShellDestination(
+    route: '/tools',
+    icon: Icons.build_outlined,
+    activeIcon: Icons.build,
+    label: Ar.tools,
+  ),
+  ShellDestination(
+    route: '/saved',
+    icon: Icons.bookmark_outline,
+    activeIcon: Icons.bookmark,
+    label: Ar.saved,
+  ),
+  ShellDestination(
+    route: '/profile',
+    icon: Icons.person_outline,
+    activeIcon: Icons.person,
+    label: Ar.profile,
+  ),
+];
+
+/// The Civilpedia application shell.
+///
+/// Owns navigation chrome only: the IndexedStack navigation shell host, the
+/// floating bottom navigation bar built from [kShellDestinations], and the
+/// double-back-to-exit behavior at any branch root. Dashboard/knowledge/tool
+/// content belongs to the screens routed inside each branch (for example
+/// `HomeMainScreen` for `/home`) - never to this widget.
+class AppShell extends StatefulWidget {
+  final StatefulNavigationShell navigationShell;
+
+  const AppShell({super.key, required this.navigationShell});
+
+  @override
+  State<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends State<AppShell> {
   DateTime? _lastBackPress;
 
   bool get _isAtShellRoot {
     final location = GoRouterState.of(context).uri.toString();
-    return location == '/home' || location == '/tools' || location == '/saved' || location == '/profile';
+    return kShellDestinations.any((destination) => destination.route == location);
   }
 
   Future<bool> _onWillPop() async {
     final now = DateTime.now();
-    if (_lastBackPress == null || now.difference(_lastBackPress!) > const Duration(seconds: 2)) {
+    if (_lastBackPress == null ||
+        now.difference(_lastBackPress!) > const Duration(seconds: 2)) {
       _lastBackPress = now;
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -43,11 +111,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final router = GoRouter.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final currentIndex = widget.navigationShell.currentIndex;
-    debugPrint('[Navigation] ${router.routerDelegate.currentConfiguration}');
 
     return PopScope(
       canPop: !_isAtShellRoot,
@@ -94,10 +160,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildNavItem(0, Icons.home_outlined, Icons.home, Ar.home, theme, currentIndex),
-                    _buildNavItem(1, Icons.build_outlined, Icons.build, Ar.tools, theme, currentIndex),
-                    _buildNavItem(2, Icons.bookmark_outline, Icons.bookmark, Ar.saved, theme, currentIndex),
-                    _buildNavItem(3, Icons.person_outline, Icons.person, Ar.profile, theme, currentIndex),
+                    for (var i = 0; i < kShellDestinations.length; i++)
+                      _buildNavItem(
+                        index: i,
+                        destination: kShellDestinations[i],
+                        theme: theme,
+                        currentIndex: currentIndex,
+                      ),
                   ],
                 ),
               ),
@@ -108,7 +177,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNavItem(int index, IconData outlineIcon, IconData filledIcon, String label, ThemeData theme, int currentIndex) {
+  Widget _buildNavItem({
+    required int index,
+    required ShellDestination destination,
+    required ThemeData theme,
+    required int currentIndex,
+  }) {
     final isSelected = currentIndex == index;
     final isDark = theme.brightness == Brightness.dark;
     final activeColor = AppColors.primary;
@@ -138,22 +212,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                 ),
                 child: Icon(
-                  isSelected ? filledIcon : outlineIcon,
+                  isSelected ? destination.activeIcon : destination.icon,
                   color: isSelected
                       ? activeColor
-                      : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                      : (isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary),
                   size: 24,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
-                label,
+                destination.label,
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? activeColor
-                      : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                      : (isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary),
                 ),
               ),
             ],
