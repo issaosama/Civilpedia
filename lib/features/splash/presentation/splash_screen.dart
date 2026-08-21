@@ -3,13 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/logger_service.dart';
-import '../../../core/services/language_provider.dart';
 import '../../../data/local/preferences_helper.dart';
 import '../../../core/location/baghdad_area.dart';
 import '../../../features/profile/domain/user_profile.dart';
 import '../../../features/profile/presentation/providers/user_profile_provider.dart';
-import '../../../localization/ar.dart';
-import '../../../localization/en.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -64,38 +61,29 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = context.watch<LanguageProvider>().isArabic;
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Colors.white,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnim,
           child: ScaleTransition(
             scale: _scaleAnim,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.engineering, size: 80, color: Colors.white),
-                const SizedBox(height: 16),
-                Text(
-                  AppConstants.appName,
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  isArabic ? Ar.splashSubtitle : En.splashSubtitle,
-                  style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.8)),
-                ),
-                const SizedBox(height: 48),
-                SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white.withValues(alpha: 0.7)),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth * 0.82,
+                      maxHeight: constraints.maxHeight * 0.6,
+                    ),
+                    child: Image.asset(
+                      'assets/branding/splash_logo_display.png',
+                      fit: BoxFit.contain,
+                    ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),

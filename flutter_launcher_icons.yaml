@@ -1,0 +1,14 @@
+# flutter_launcher_icons configuration
+# Standard icon uses the owner's final app_icon.png directly.
+# Adaptive foreground is a same-size transparent version of app_icon.png
+# with an 18% inset so the C stays inside Android's adaptive-icon safe zone
+# while appearing slightly larger on the home screen.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/branding/app_icon.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/branding/app_icon_adaptive_foreground.png"
+  adaptive_icon_foreground_inset: 18
+  remove_alpha_ios: true
+  min_sdk_android: 21
