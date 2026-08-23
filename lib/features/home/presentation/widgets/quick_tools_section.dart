@@ -26,7 +26,7 @@ class QuickToolsSection extends StatelessWidget {
         final cardWidth = (availableWidth - (gap * 3)) / 4;
 
         return SizedBox(
-          height: 100,
+          height: 108,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
@@ -66,9 +66,9 @@ class _ToolCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         onTap: () => context.push('/${tool.route}'),
-        child: Container(
+          child: Container(
           width: width,
-          height: 100,
+          height: 108,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
@@ -94,7 +94,7 @@ class _ToolCard extends StatelessWidget {
                 Text(
                   tool.name,
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: isDark ? AppColors.darkTextPrimary : AppColors.mainText,
                   ),
@@ -106,7 +106,7 @@ class _ToolCard extends StatelessWidget {
                 Text(
                   tool.description,
                   style: TextStyle(
-                    fontSize: 9,
+                    fontSize: 10,
                     color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
                   ),
                   textAlign: TextAlign.center,

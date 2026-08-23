@@ -19,7 +19,7 @@ class QuickAccessSection extends StatelessWidget {
         const gap = 8.0;
         const horizontalPadding = 16.0;
         const count = 4;
-        const cardHeight = 84.0;
+        const cardHeight = 88.0;
         final availableWidth = constraints.maxWidth - (horizontalPadding * 2);
         final cardWidth = (availableWidth - (gap * (count - 1))) / count;
 
@@ -101,7 +101,7 @@ class _QuickAccessCard extends StatelessWidget {
       width: width,
       height: height,
       child: Material(
-        color: isDark ? AppColors.darkSurface : Colors.white,
+        color: isDark ? AppColors.darkSurface : AppColors.surfaceWhite,
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         child: InkWell(
           onTap: () {
@@ -137,14 +137,14 @@ class _QuickAccessCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 32,
-                  height: 32,
+                  width: 34,
+                  height: 34,
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
                     color: accent.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
                   ),
-                  child: Icon(icon, size: 20, color: accent),
+                  child: Icon(icon, size: 22, color: accent),
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,7 +153,7 @@ class _QuickAccessCard extends StatelessWidget {
                     Text(
                       title,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.bold,
                         color: isDark ? AppColors.darkTextPrimary : AppColors.mainText,
                       ),

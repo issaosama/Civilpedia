@@ -50,7 +50,7 @@ class EncyclopediaCategoryCard extends StatelessWidget {
     final iconContainerSize = compact ? 32.0 : 40.0;
     final iconPadding = compact ? 6.0 : 8.0;
     final iconSize = compact ? 18.0 : 22.0;
-    final titleFontSize = compact ? 11.0 : 13.0;
+    final titleFontSize = compact ? 12.0 : 13.0;
     final countFontSize = compact ? 10.0 : 11.0;
     final contentSpacing = compact ? 8.0 : 12.0;
 
@@ -85,7 +85,7 @@ class EncyclopediaCategoryCard extends StatelessWidget {
                 height: iconContainerSize,
                 padding: EdgeInsets.all(iconPadding),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
                 ),
                 child: Icon(

@@ -62,8 +62,7 @@ class _EngineeringTopicsSectionState extends State<EngineeringTopicsSection> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: SizedBox(
-        height: 166,
+      child: IntrinsicHeight(
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
