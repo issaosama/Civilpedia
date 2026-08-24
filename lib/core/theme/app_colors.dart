@@ -4,9 +4,11 @@ class AppColors {
   AppColors._();
 
   // ── Light Theme ──
-  static const Color background = Color(0xFFDBD6CB);      // cement/warm concrete
-  static const Color surface = Color(0xFFF6F1E8);          // warm off-white card
+  static const Color background = Color(0xFFDBD6CB);      // cement/warm concrete (legacy; preserved for compat)
+  static const Color surface = Color(0xFFF6F1E8);          // warm off-white card / panel
   static const Color surfaceWhite = Color(0xFFFFFFFF);     // pure white where needed
+  static const Color surfacePrimary = surfaceWhite;        // canonical primary elevated surface
+  static const Color surfaceWarm = surface;                // canonical warm secondary surface
   static const Color mainText = Color(0xFF221F18);          // dark warm text
   static const Color textPrimary = Color(0xFF221F18);       // alias for mainText (backward compat)
   static const Color textSecondary = Color(0xFF6D6258);    // medium warm grey, readable on light surfaces
@@ -28,8 +30,9 @@ class AppColors {
   static const Color brandBlue = Color(0xFF2E6BC6);        // Civilpedia logo blue, used sparingly
   static const Color brandNeutral = Color(0xFF8B7D6B);     // calm warm neutral support tone
 
-  // ── Home-specific surfaces ──
-  static const Color homeBackground = Color(0xFFFAF7F2);   // warm off-white page background
+  // ── Page / Home surfaces ──
+  static const Color pageBackground = Color(0xFFFAF7F2);   // canonical warm off-white page background
+  static const Color homeBackground = pageBackground;      // backward-compatible alias
 
   // ── Dark Surface / Text ──
   static const Color darkSurfaceText = Color(0xFF2A2620);  // dark construction text/surface
