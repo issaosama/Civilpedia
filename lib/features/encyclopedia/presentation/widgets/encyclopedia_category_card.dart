@@ -74,7 +74,7 @@ class EncyclopediaCategoryCard extends StatelessWidget {
             ),
             boxShadow: isDark
                 ? null
-                : DesignTokens.softShadow(AppColors.cardShadow),
+                : DesignTokens.cardShadow(AppColors.cardShadow),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

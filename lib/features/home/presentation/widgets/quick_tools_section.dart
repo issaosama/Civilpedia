@@ -75,7 +75,7 @@ class _ToolCard extends StatelessWidget {
             border: Border.all(
               color: isDark ? AppColors.darkBorder : AppColors.border,
             ),
-            boxShadow: isDark ? null : DesignTokens.softShadow(AppColors.cardShadow),
+            boxShadow: isDark ? null : DesignTokens.cardShadow(AppColors.cardShadow),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

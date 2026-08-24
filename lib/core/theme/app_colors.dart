@@ -9,7 +9,7 @@ class AppColors {
   static const Color surfaceWhite = Color(0xFFFFFFFF);     // pure white where needed
   static const Color mainText = Color(0xFF221F18);          // dark warm text
   static const Color textPrimary = Color(0xFF221F18);       // alias for mainText (backward compat)
-  static const Color textSecondary = Color(0xFF938C7E);    // muted warm grey
+  static const Color textSecondary = Color(0xFF6D6258);    // medium warm grey, readable on light surfaces
   static const Color border = Color(0xFFE6DDCD);           // soft warm border
   static const Color cardShadow = Color(0x1A000000);       // shadow tint
 
@@ -23,6 +23,13 @@ class AppColors {
   static const Color primarySoft = Color(0xFFFBEAD3);     // soft amber background
   static const Color accentYellow = Color(0xFFF2C500);     // yellow highlight
   static const Color accentYellowSoft = Color(0xFFFFF8E1); // soft yellow bg
+
+  // ── Brand Secondary Accents ──
+  static const Color brandBlue = Color(0xFF2E6BC6);        // Civilpedia logo blue, used sparingly
+  static const Color brandNeutral = Color(0xFF8B7D6B);     // calm warm neutral support tone
+
+  // ── Home-specific surfaces ──
+  static const Color homeBackground = Color(0xFFFAF7F2);   // warm off-white page background
 
   // ── Dark Surface / Text ──
   static const Color darkSurfaceText = Color(0xFF2A2620);  // dark construction text/surface

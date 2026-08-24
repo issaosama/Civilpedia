@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/services/language_provider.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../data/repositories/article_repository.dart';
@@ -49,6 +50,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
+      backgroundColor: AppColors.homeBackground,
       body: RefreshIndicator(
         onRefresh: _onRefresh,
         child: ListView(

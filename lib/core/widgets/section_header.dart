@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_colors.dart';
 
 /// Consistent section header used across the Home feed.
 ///
@@ -34,6 +35,7 @@ class SectionHeader extends StatelessWidget {
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: AppColors.mainText,
                 ),
           ),
           if (actionLabel != null)

@@ -26,15 +26,17 @@ class SearchBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final textColor = lightSurface ? AppColors.mainText : const Color(0xFFF0ECE2);
     final hintColor = lightSurface
-        ? AppColors.textSecondary.withValues(alpha: 0.8)
+        ? AppColors.textSecondary.withValues(alpha: 0.75)
         : const Color(0xFFF0ECE2).withValues(alpha: 0.6);
     final iconColor = lightSurface
         ? AppColors.textSecondary
         : const Color(0xFFF0ECE2).withValues(alpha: 0.7);
     final fillColor = lightSurface
-        ? AppColors.surface.withValues(alpha: 0.8)
+        ? AppColors.surfaceWhite.withValues(alpha: 0.95)
         : const Color(0xFFF0ECE2).withValues(alpha: 0.12);
-    final borderColor = lightSurface ? AppColors.border : Colors.transparent;
+    final borderColor = lightSurface
+        ? AppColors.border.withValues(alpha: 0.8)
+        : Colors.transparent;
 
     return TextField(
       controller: controller,

@@ -44,7 +44,7 @@ class QuickAccessSection extends StatelessWidget {
                 subtitle: Ar.calculatorsAndTools,
                 icon: Icons.build_outlined,
                 route: '/tools',
-                accent: AppColors.success,
+                accent: AppColors.brandBlue,
               ),
               const SizedBox(width: gap),
               _QuickAccessCard(
@@ -54,7 +54,7 @@ class QuickAccessSection extends StatelessWidget {
                 subtitle: Ar.latestArticles,
                 icon: Icons.article_outlined,
                 route: '/articles',
-                accent: AppColors.info,
+                accent: AppColors.brandNeutral,
               ),
               const SizedBox(width: gap),
               _QuickAccessCard(
@@ -64,7 +64,7 @@ class QuickAccessSection extends StatelessWidget {
                 subtitle: Ar.savedItems,
                 icon: Icons.bookmark_outline,
                 route: '/saved',
-                accent: AppColors.warning,
+                accent: AppColors.primary,
               ),
             ],
           ),
@@ -130,7 +130,7 @@ class _QuickAccessCard extends StatelessWidget {
                     ? AppColors.darkBorder.withValues(alpha: 0.6)
                     : AppColors.border.withValues(alpha: 0.6),
               ),
-              boxShadow: isDark ? null : DesignTokens.softShadow(AppColors.cardShadow),
+              boxShadow: isDark ? null : DesignTokens.cardShadow(AppColors.cardShadow),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

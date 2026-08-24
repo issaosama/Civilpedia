@@ -36,7 +36,7 @@ class HomeTopicCard extends StatelessWidget {
           color: isDark ? AppColors.darkSurface : AppColors.surfaceWhite,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
           border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.border),
-          boxShadow: isDark ? null : DesignTokens.softShadow(AppColors.cardShadow),
+          boxShadow: isDark ? null : DesignTokens.cardShadow(AppColors.cardShadow),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

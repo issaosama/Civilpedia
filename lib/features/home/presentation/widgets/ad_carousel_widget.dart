@@ -233,7 +233,9 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
           width: isActive ? 24 : 8,
           height: 8,
           decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : Colors.grey.shade300,
+            color: isActive
+                ? AppColors.primary
+                : AppColors.textSecondary.withValues(alpha: 0.35),
             borderRadius: BorderRadius.circular(4),
           ),
         );
