@@ -4,8 +4,8 @@ import '../../core/theme/app_colors.dart';
 
 /// Consistent section header used across the Home feed.
 ///
-/// Title is positioned at the start (right in RTL), with an optional action
-/// label at the end (left in RTL). Horizontal margins match the rest of the
+/// Title is positioned at the start (right in RTL, left in LTR), with an
+/// optional action label at the end. Horizontal margins match the rest of the
 /// Home sections.
 class SectionHeader extends StatelessWidget {
   final String title;
@@ -22,25 +22,25 @@ class SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppConstants.paddingMedium,
-        6,
-        AppConstants.paddingMedium,
-        6,
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppConstants.paddingMedium,
+        vertical: 6,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
+            textAlign: TextAlign.start,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: AppColors.mainText,
+                  color: AppColors.textPrimary,
                 ),
           ),
           if (actionLabel != null)
             TextButton(
               style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(0, 32),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -48,6 +48,7 @@ class SectionHeader extends StatelessWidget {
               onPressed: onAction,
               child: Text(
                 actionLabel!,
+                textAlign: TextAlign.start,
                 style: const TextStyle(fontSize: 12),
               ),
             ),

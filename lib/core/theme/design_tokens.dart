@@ -10,6 +10,7 @@ class DesignTokens {
   static const double radiusMd = 18;    // cards / tiles
   static const double radiusLg = 26;    // large containers
   static const double radiusXl = 30;    // bottom nav / extra large
+  static const double radiusSearch = 28; // search bar pill
   static const double radiusFull = 999;
 
   static const Duration durationFast = Duration(milliseconds: 200);
