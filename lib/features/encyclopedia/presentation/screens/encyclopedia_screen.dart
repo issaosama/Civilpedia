@@ -6,6 +6,9 @@ import '../../domain/entities/engineering_topic.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/async_value_widget.dart';
+import '../../../../core/widgets/civil_app_bar.dart';
+import '../../../../core/widgets/search_bar_widget.dart';
+import '../../../../core/widgets/section_header.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
 import '../widgets/topic_compact_card.dart';
@@ -68,42 +71,6 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
     super.dispose();
   }
 
-  Widget _buildSearchField({required bool isDark}) {
-    final bgColor = isDark ? AppColors.darkSurface : AppColors.surface;
-    final textColor = isDark ? AppColors.darkTextPrimary : AppColors.mainText;
-    final hintColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
-    final iconColor = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
-    final borderColor = isDark ? AppColors.darkBorder : AppColors.border;
-    return TextField(
-      controller: _searchController,
-      onChanged: (query) {
-        context.read<EncyclopediaProvider>().searchTopics(query);
-      },
-      textAlign: TextAlign.right,
-      decoration: InputDecoration(
-        hintText: Ar.search,
-        hintStyle: TextStyle(color: hintColor),
-        prefixIcon: Icon(Icons.search, color: iconColor),
-        filled: true,
-        fillColor: bgColor,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: borderColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: borderColor.withValues(alpha: 0.5)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(28),
-          borderSide: BorderSide(color: borderColor, width: 1.5),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-      ),
-      style: TextStyle(color: textColor),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<EncyclopediaProvider>();
@@ -112,12 +79,23 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
     String tr(String ar, String en) => isArabic ? ar : en;
 
     return Scaffold(
-      appBar: AppBar(title: Text(tr(Ar.engineeringEncyclopedia, En.engineeringEncyclopedia))),
+      appBar: CivilAppBar(
+        showBackButton: false,
+        showDivider: true,
+        title: Text(tr(Ar.engineeringEncyclopedia, En.engineeringEncyclopedia)),
+      ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: _buildSearchField(isDark: isDark),
+            padding: AppSpacing.hPadLgVSm,
+            child: SearchBarWidget(
+              controller: _searchController,
+              hintText: Ar.search,
+              lightSurface: true,
+              onChanged: (query) {
+                context.read<EncyclopediaProvider>().searchTopics(query);
+              },
+            ),
           ),
           Expanded(
             child: AsyncValueWidget(
@@ -127,12 +105,14 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
               onRetry: () => provider.loadAllTopics(),
               onEmpty: () => Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(32),
+                  padding: AppSpacing.padXl,
                   child: Text(
                     provider.isSearchActive
                         ? 'لا توجد نتائج للبحث عن "${_searchController.text}"'
                         : tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
-                    style: TextStyle(color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -169,13 +149,15 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
       return Center(
         child: Text(
           tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
-          style: TextStyle(color: isDark ? AppColors.darkTextMuted : AppColors.textMuted),
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              ),
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 24),
+      padding: const EdgeInsetsDirectional.only(bottom: 24),
       itemCount: orderedKeys.length,
       itemBuilder: (context, index) {
         final categoryId = orderedKeys[index];
@@ -189,46 +171,24 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
     const previewCount = 4;
     final showAll = topics.length > previewCount;
     final displayTopics = showAll ? topics.take(previewCount).toList() : topics;
-    final countColor = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
     final catLabel = context.read<EncyclopediaProvider>().categoryLabel(categoryId);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 20, 8, 0),
-          child: Row(
-            children: [
-              Text(
-                catLabel,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '(${topics.length})',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: countColor,
-                ),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () => context.push('/encyclopedia/topics/$categoryId'),
-                child: Text(tr(Ar.viewAll, En.viewAll), style: const TextStyle(fontSize: 13)),
-              ),
-            ],
-          ),
+        SectionHeader(
+          title: '$catLabel (${topics.length})',
+          actionLabel: tr(Ar.viewAll, En.viewAll),
+          onAction: () => context.push('/encyclopedia/topics/$categoryId'),
         ),
-        const SizedBox(height: 8),
+        AppSpacing.gapSm,
         SizedBox(
           height: 180,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: AppSpacing.hPadLg,
             itemCount: displayTopics.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, __) => AppSpacing.gapMd,
             itemBuilder: (context, index) => TopicCompactCard(
               topic: displayTopics[index],
               isDark: isDark,

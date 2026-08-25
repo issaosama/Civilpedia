@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/encyclopedia_provider.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../../../core/widgets/async_value_widget.dart';
+import '../../../../core/widgets/civil_app_bar.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/services/language_provider.dart';
@@ -38,8 +39,11 @@ class _TopicListScreenState extends State<TopicListScreen> {
     String tr(String ar, String en) => isArabic ? ar : en;
     final provider = context.watch<EncyclopediaProvider>();
     final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
+
     return Scaffold(
-      appBar: AppBar(title: Text(provider.categoryLabel(widget.categoryId, isArabic: isArabic))),
+      appBar: CivilAppBar(
+        title: Text(provider.categoryLabel(widget.categoryId, isArabic: isArabic)),
+      ),
       body: AsyncValueWidget(
         isLoading: provider.isLoading,
         error: provider.error,
@@ -50,9 +54,13 @@ class _TopicListScreenState extends State<TopicListScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.menu_book, size: 48, color: mutedText),
-              const SizedBox(height: 12),
-              Text(tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
-                  style: TextStyle(color: mutedText)),
+              AppSpacing.gapMd,
+              Text(
+                tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    ),
+              ),
             ],
           ),
         ),
@@ -74,5 +82,4 @@ class _TopicListScreenState extends State<TopicListScreen> {
       onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
     );
   }
-
 }

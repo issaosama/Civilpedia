@@ -23,7 +23,7 @@ class TopicListCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasCover =
         topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
-    final cardColor = isDark ? AppColors.darkSurface : AppColors.surface;
+    final cardColor = isDark ? AppColors.darkSurface : AppColors.surfaceWarm;
     final secondaryText =
         isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
     final mutedText =
@@ -107,7 +107,7 @@ class TopicListCard extends StatelessWidget {
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                         )
-                      : Icon(Icons.chevron_left, color: mutedText),
+                      : Icon(_forwardIcon(context), color: mutedText),
                 ],
               ),
               const SizedBox(height: 10),
@@ -127,6 +127,12 @@ class TopicListCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  IconData _forwardIcon(BuildContext context) {
+    return Directionality.of(context) == TextDirection.rtl
+        ? Icons.chevron_left
+        : Icons.chevron_right;
   }
 
   Widget _defaultTopicIcon({

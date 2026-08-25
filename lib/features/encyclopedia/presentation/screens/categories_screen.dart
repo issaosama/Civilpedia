@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/widgets/civil_app_bar.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/widgets/state_widgets.dart';
 import '../../../../localization/ar.dart';
@@ -41,7 +42,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final categories = provider.categories.values.toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text(Ar.categories)),
+      appBar: const CivilAppBar(
+        title: Text(Ar.categories),
+      ),
       body: _buildBody(context, provider, categories),
     );
   }
@@ -57,7 +60,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   ) {
     if (provider.isLoading && categories.isEmpty) {
       return GridView.builder(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
+        padding: const EdgeInsetsDirectional.all(AppConstants.paddingMedium),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: 1,
@@ -80,7 +83,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(AppConstants.paddingMedium),
+      padding: const EdgeInsetsDirectional.all(AppConstants.paddingMedium),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         childAspectRatio: 1,

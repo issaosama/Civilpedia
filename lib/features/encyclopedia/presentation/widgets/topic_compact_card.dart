@@ -81,7 +81,7 @@ class TopicCompactCard extends StatelessWidget {
       child: Container(
         width: config.width,
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : AppColors.surface,
+          color: isDark ? AppColors.darkSurface : AppColors.surfaceWarm,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
           border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.border),
           boxShadow: isDark ? null : DesignTokens.softShadow(AppColors.cardShadow),
