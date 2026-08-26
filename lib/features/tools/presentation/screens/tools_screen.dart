@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/services/language_provider.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/spacing.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/civil_app_bar.dart';
+import '../../../../core/widgets/civil_surface_card.dart';
 import '../../../../data/repositories/article_repository.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
@@ -16,142 +20,132 @@ class ToolsScreen extends StatelessWidget {
     String tr(String ar, String en) => isArabic ? ar : en;
     final tools = ArticleRepository.tools;
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          Ar.tools,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        elevation: 0,
+      appBar: const CivilAppBar(
+        title: Text(Ar.tools),
+        showBackButton: false,
       ),
       body: CustomScrollView(
         slivers: [
-          // Top introductory header banner
+          // Lightweight intro surface explaining the Tools area.
           SliverToBoxAdapter(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    theme.primaryColor,
-                    theme.primaryColor.withValues(alpha: 0.7),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
+            child: Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.lg,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    tr(Ar.engineeringTools, En.engineeringTools),
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+              child: CivilSurfaceCard(
+                warm: true,
+                padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsetsDirectional.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: AppColors.primarySoft,
+                            borderRadius: BorderRadius.circular(
+                              DesignTokens.radiusIcon,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.architecture,
+                            size: 22,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Expanded(
+                          child: Text(
+                            tr(Ar.engineeringTools, En.engineeringTools),
+                            textAlign: TextAlign.start,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    tr(Ar.toolsDescription, En.toolsDescription),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: Colors.white70,
-                      height: 1.5,
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      tr(Ar.toolsDescription, En.toolsDescription),
+                      textAlign: TextAlign.start,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        height: 1.5,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
 
-          // Tools Grid
+          // Tools grid
           SliverPadding(
-            padding: const EdgeInsets.fromLTRB(
-              16,
-              24,
-              16,
-              100,
-            ), // extra bottom padding for floating bar
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.huge,
+            ),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 childAspectRatio: 0.95,
-                crossAxisSpacing: 16,
-                mainAxisSpacing: 16,
+                crossAxisSpacing: AppSpacing.lg,
+                mainAxisSpacing: AppSpacing.lg,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
                 final tool = tools[index];
-                return Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => context.push('/${tool.route}'),
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isDark
-                            ? theme.colorScheme.surface
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          DesignTokens.radiusMd,
-                        ),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.05)
-                              : Colors.black.withValues(alpha: 0.05),
-                          width: 1,
-                        ),
-                        boxShadow: DesignTokens.softShadow(theme.shadowColor),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Icon container
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: theme.primaryColor.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              tool.icon,
-                              size: 28,
-                              color: theme.primaryColor,
-                            ),
+                return CivilSurfaceCard(
+                  onTap: () => context.push('/${tool.route}'),
+                  padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsetsDirectional.all(AppSpacing.sm),
+                        decoration: BoxDecoration(
+                          color: AppColors.primarySoft,
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusIcon,
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                tool.name,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                tool.description,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: isDark
-                                      ? Colors.white60
-                                      : Colors.black54,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                        ),
+                        child: Icon(
+                          tool.icon,
+                          size: 24,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            tool.name,
+                            textAlign: TextAlign.start,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            tool.description,
+                            textAlign: TextAlign.start,
+                            style: theme.textTheme.bodySmall,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
                 );
               }, childCount: tools.length),
