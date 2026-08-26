@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
-import '../../core/theme/app_colors.dart';
 
 /// Consistent section header used across the Home feed.
 ///
 /// Title is positioned at the start (right in RTL, left in LTR), with an
 /// optional action label at the end. Horizontal margins match the rest of the
-/// Home sections.
+/// Home sections. Title color is theme-aware; action color remains the brand
+/// primary accent.
 class SectionHeader extends StatelessWidget {
   final String title;
   final String? actionLabel;
@@ -21,6 +21,8 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsetsDirectional.symmetric(
         horizontal: AppConstants.paddingMedium,
@@ -34,16 +36,16 @@ class SectionHeader extends StatelessWidget {
               title,
               textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+                  ) ??
+                  const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
           if (actionLabel != null)
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primary,
+                foregroundColor: theme.colorScheme.primary,
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(0, 32),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,

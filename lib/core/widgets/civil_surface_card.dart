@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
 
-/// Canonical reusable surface primitive for the Civilpedia light design system.
+/// Canonical reusable surface primitive for the Civilpedia design system.
 ///
 /// Owns surface color, border, radius, shadow, clip and generic tap behavior.
 /// Feature widgets compose this primitive and remain responsible for their own
 /// content, icons, business meaning and navigation.
+///
+/// Defaults are theme-aware: the primary surface uses [ColorScheme.surface] and
+/// the warm variant uses [ColorScheme.surfaceContainer]. Explicit [color]
+/// overrides are still respected.
 class CivilSurfaceCard extends StatelessWidget {
   /// Child widget rendered inside the card surface.
   final Widget child;
@@ -16,14 +19,14 @@ class CivilSurfaceCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   /// Explicit surface color. When null, [warm] selects between the canonical
-  /// primary and warm surfaces.
+  /// primary and warm surfaces derived from the active theme.
   final Color? color;
 
-  /// Use the warm secondary surface ([AppColors.surfaceWarm]) instead of the
-  /// default primary elevated surface.
+  /// Use the warm secondary surface ([ColorScheme.surfaceContainer]) instead of
+  /// the default primary elevated surface.
   final bool warm;
 
-  /// Whether to draw the canonical subtle border.
+  /// Whether to draw the canonical subtle border using the theme divider color.
   final bool hasBorder;
 
   /// Internal padding. Defaults to a direction-aware 16 logical pixels.
@@ -53,13 +56,15 @@ class CivilSurfaceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveColor = color ?? (warm ? AppColors.surfaceWarm : AppColors.surfacePrimary);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final effectiveColor = color ?? (warm ? colorScheme.surfaceContainer : colorScheme.surface);
     final effectiveRadius = radius ?? DesignTokens.radiusMd;
     final effectiveElevation = elevation ?? DesignTokens.elevation2;
 
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(effectiveRadius),
-      side: hasBorder ? const BorderSide(color: AppColors.border) : BorderSide.none,
+      side: hasBorder ? BorderSide(color: theme.dividerTheme.color ?? colorScheme.outline) : BorderSide.none,
     );
 
     final borderRadius = BorderRadius.circular(effectiveRadius);
@@ -79,7 +84,7 @@ class CivilSurfaceCard extends StatelessWidget {
     return Material(
       color: effectiveColor,
       elevation: effectiveElevation,
-      shadowColor: AppColors.cardShadow,
+      shadowColor: theme.shadowColor,
       surfaceTintColor: Colors.transparent,
       shape: shape,
       clipBehavior: clipBehavior,

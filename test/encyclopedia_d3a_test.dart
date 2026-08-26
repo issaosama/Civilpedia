@@ -1,4 +1,5 @@
 import 'package:civilpedia/core/theme/app_colors.dart';
+import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/core/widgets/civil_app_bar.dart';
 import 'package:civilpedia/core/widgets/search_bar_widget.dart';
 import 'package:civilpedia/core/widgets/section_header.dart';
@@ -106,6 +107,7 @@ Future<void> _pumpScreen(
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ],
       child: MaterialApp(
+        theme: AppTheme.lightTheme,
         locale: const Locale('ar'),
         supportedLocales: const [Locale('ar'), Locale('en')],
         localizationsDelegates: const [
@@ -129,7 +131,7 @@ void main() {
 
       expect(find.byType(CivilAppBar), findsOneWidget);
       final appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, AppColors.pageBackground);
+      expect(appBar.backgroundColor, AppTheme.lightTheme.scaffoldBackgroundColor);
       expect(appBar.elevation, 0);
     });
 
@@ -252,7 +254,7 @@ void main() {
 
       expect(find.byType(CivilAppBar), findsOneWidget);
       final appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, AppColors.pageBackground);
+      expect(appBar.backgroundColor, AppTheme.lightTheme.scaffoldBackgroundColor);
     });
 
     testWidgets('renders real categories with EncyclopediaCategoryCard', (
@@ -320,7 +322,7 @@ void main() {
       expect(find.byType(CivilAppBar), findsOneWidget);
       expect(find.text('الخرسانة'), findsOneWidget);
       final appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, AppColors.pageBackground);
+      expect(appBar.backgroundColor, AppTheme.lightTheme.scaffoldBackgroundColor);
     });
 
     testWidgets('renders TopicListCards and tap navigates to topic detail', (

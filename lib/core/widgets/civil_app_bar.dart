@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../theme/app_colors.dart';
 
-/// Shared header primitive for the Civilpedia light design system.
+/// Shared header primitive for the Civilpedia design system.
 ///
-/// Provides the approved header hierarchy (dark title on page-background or
-/// light surface) without forcing every feature screen to look identical.
-/// Feature AppBars are *not* migrated to this primitive in D2B; the widget is
-/// built and tested here so later phases can adopt it screen-by-screen.
+/// Provides the approved header hierarchy without forcing every feature screen
+/// to look identical. Defaults are theme-aware; explicit color overrides remain
+/// supported for feature-specific needs.
 class CivilAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Primary title widget, typically a [Text].
   final Widget? title;
@@ -32,15 +30,15 @@ class CivilAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// optional divider.
   final double? elevation;
 
-  /// AppBar background color. Defaults to the canonical page background.
+  /// AppBar background color. Defaults to the theme scaffold/page background.
   final Color? backgroundColor;
 
-  /// Foreground color for icons and the automatic back button. Defaults to
-  /// the canonical primary text color.
+  /// Foreground color for icons and the automatic back button. Defaults to the
+  /// theme onSurface color.
   final Color? foregroundColor;
 
   /// Title text color when [title] is a string-less widget. Defaults to the
-  /// canonical primary text color.
+  /// theme onSurface color.
   final Color? titleColor;
 
   const CivilAppBar({
@@ -59,14 +57,17 @@ class CivilAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final effectiveBackground = backgroundColor ?? AppColors.pageBackground;
-    final effectiveForeground = foregroundColor ?? AppColors.textPrimary;
-    final effectiveTitleColor = titleColor ?? AppColors.textPrimary;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final effectiveBackground = backgroundColor ?? theme.scaffoldBackgroundColor;
+    final effectiveForeground = foregroundColor ?? colorScheme.onSurface;
+    final effectiveTitleColor = titleColor ?? colorScheme.onSurface;
     final effectiveElevation = elevation ?? 0;
+    final isDark = theme.brightness == Brightness.dark;
 
     final titleWidget = title is Text
         ? DefaultTextStyle.merge(
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+            style: theme.textTheme.titleLarge?.copyWith(
                   color: effectiveTitleColor,
                   fontWeight: FontWeight.bold,
                 ),
@@ -76,9 +77,9 @@ class CivilAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     PreferredSizeWidget? bottomWidget = bottom;
     if (showDivider && bottom == null) {
-      bottomWidget = const PreferredSize(
-        preferredSize: Size.fromHeight(1),
-        child: Divider(height: 1, thickness: 1, color: AppColors.border),
+      bottomWidget = PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Divider(height: 1, thickness: 1, color: theme.dividerTheme.color ?? colorScheme.outline),
       );
     }
 
@@ -93,7 +94,7 @@ class CivilAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: effectiveElevation,
       scrolledUnderElevation: 0,
       centerTitle: true,
-      systemOverlayStyle: SystemUiOverlayStyle.dark,
+      systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
   }
 

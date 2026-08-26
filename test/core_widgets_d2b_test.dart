@@ -1,4 +1,4 @@
-import 'package:civilpedia/core/theme/app_colors.dart';
+import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/core/theme/design_tokens.dart';
 import 'package:civilpedia/core/widgets/civil_app_bar.dart';
 import 'package:civilpedia/core/widgets/civil_surface_card.dart';
@@ -27,30 +27,52 @@ void main() {
           matching: find.byType(Material),
         );
 
-    testWidgets('defaults to primary surface color', (tester) async {
+    testWidgets('defaults to theme surface color', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(
             body: CivilSurfaceCard(child: SizedBox()),
           ),
         ),
       );
 
       final material = tester.widget<Material>(cardMaterial());
-      expect(material.color, AppColors.surfacePrimary);
+      expect(material.color, AppTheme.lightTheme.colorScheme.surface);
     });
 
-    testWidgets('warm variant uses warm surface', (tester) async {
+    testWidgets('warm variant uses theme surface container', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(
             body: CivilSurfaceCard(warm: true, child: SizedBox()),
           ),
         ),
       );
 
       final material = tester.widget<Material>(cardMaterial());
-      expect(material.color, AppColors.surfaceWarm);
+      expect(material.color, AppTheme.lightTheme.colorScheme.surfaceContainer);
+    });
+
+    testWidgets('adapts to dark theme surface colors', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: const Scaffold(
+            body: Column(
+              children: [
+                CivilSurfaceCard(child: SizedBox()),
+                CivilSurfaceCard(warm: true, child: SizedBox()),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final materials = tester.widgetList<Material>(cardMaterial()).toList();
+      expect(materials[0].color, AppTheme.darkTheme.colorScheme.surface);
+      expect(materials[1].color, AppTheme.darkTheme.colorScheme.surfaceContainer);
     });
 
     testWidgets('tap callback is invoked', (tester) async {
@@ -128,21 +150,37 @@ void main() {
       expect(find.byIcon(Icons.search), findsOneWidget);
     });
 
-    testWidgets('uses page background and dark foreground by default', (
+    testWidgets('uses theme page background and onSurface foreground by default', (
       tester,
     ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(
             appBar: CivilAppBar(title: Text('Page Title')),
           ),
         ),
       );
 
       final appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, AppColors.pageBackground);
-      expect(appBar.foregroundColor, AppColors.textPrimary);
+      expect(appBar.backgroundColor, AppTheme.lightTheme.scaffoldBackgroundColor);
+      expect(appBar.foregroundColor, AppTheme.lightTheme.colorScheme.onSurface);
       expect(appBar.elevation, 0);
+    });
+
+    testWidgets('adapts to dark theme app bar colors', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: const Scaffold(
+            appBar: CivilAppBar(title: Text('Page Title')),
+          ),
+        ),
+      );
+
+      final appBar = tester.widget<AppBar>(find.byType(AppBar));
+      expect(appBar.backgroundColor, AppTheme.darkTheme.scaffoldBackgroundColor);
+      expect(appBar.foregroundColor, AppTheme.darkTheme.colorScheme.onSurface);
     });
 
     testWidgets('shows back button when there is a route to pop', (
@@ -337,10 +375,11 @@ void main() {
       expect(find.text('عرض الكل'), findsOneWidget);
     });
 
-    testWidgets('uses semantic text color', (tester) async {
+    testWidgets('uses theme onSurface text color', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const Scaffold(
             body: SectionHeader(title: 'Title'),
           ),
         ),
@@ -348,7 +387,22 @@ void main() {
 
       final text = tester.widget<Text>(find.text('Title'));
       final style = text.style ?? DefaultTextStyle.of(tester.element(find.text('Title'))).style;
-      expect(style.color, AppColors.textPrimary);
+      expect(style.color, AppTheme.lightTheme.colorScheme.onSurface);
+    });
+
+    testWidgets('adapts title color to dark theme', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.darkTheme,
+          home: const Scaffold(
+            body: SectionHeader(title: 'Title'),
+          ),
+        ),
+      );
+
+      final text = tester.widget<Text>(find.text('Title'));
+      final style = text.style ?? DefaultTextStyle.of(tester.element(find.text('Title'))).style;
+      expect(style.color, AppTheme.darkTheme.colorScheme.onSurface);
     });
 
     testWidgets('RTL layout places title at the visual start', (tester) async {
