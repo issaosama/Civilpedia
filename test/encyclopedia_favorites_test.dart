@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:civilpedia/core/constants/app_constants.dart';
+import 'package:civilpedia/core/storage/app_storage_keys.dart';
 import 'package:civilpedia/data/local/hive_helper.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/category_info.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/content_block.dart';
@@ -170,7 +170,7 @@ void main() {
 
     test('corrupted persisted data does not crash load', () async {
       await Hive.box(_boxName).put(
-        AppConstants.encyclopediaFavoritesKey,
+        AppStorageKeys.encyclopediaFavorites,
         <dynamic>['topic-1', 42, 'topic-2', null],
       );
 
@@ -246,11 +246,11 @@ void main() {
 
       final favoritesBox = Hive.box(_boxName);
       final legacy = favoritesBox.get(
-        AppConstants.favoritesKey,
+        AppStorageKeys.favorites,
         defaultValue: <String>[],
       );
       final encyclopedia = favoritesBox.get(
-        AppConstants.encyclopediaFavoritesKey,
+        AppStorageKeys.encyclopediaFavorites,
         defaultValue: <String>[],
       );
 

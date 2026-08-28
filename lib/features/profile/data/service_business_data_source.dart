@@ -1,7 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/storage/app_storage_keys.dart';
+
 class ServiceBusinessDataSource {
-  static const _key = 'sb_profiles';
+  static const _key = AppStorageKeys.sbProfiles;
 
   Future<String?> read() async {
     final prefs = await SharedPreferences.getInstance();

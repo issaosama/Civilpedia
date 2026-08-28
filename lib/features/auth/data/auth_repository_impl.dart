@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/storage/app_storage_keys.dart';
 import '../../../models/user_model.dart';
 
 class AuthRepositoryImpl {
@@ -19,8 +20,8 @@ class AuthRepositoryImpl {
 
   Future<void> _loadUser() async {
     final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('auth_email');
-    final name = prefs.getString('auth_name');
+    final email = prefs.getString(AppStorageKeys.authEmail);
+    final name = prefs.getString(AppStorageKeys.authName);
     if (email != null && name != null) {
       _user = UserModel(name: name, email: email);
     }
@@ -28,41 +29,41 @@ class AuthRepositoryImpl {
 
   Future<void> login({required String name, required String email}) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_email', email);
-    await prefs.setString('auth_name', name);
+    await prefs.setString(AppStorageKeys.authEmail, email);
+    await prefs.setString(AppStorageKeys.authName, name);
     _user = UserModel(name: name, email: email);
   }
 
   Future<String?> loginWithPassword(String email, String password) async {
     final prefs = await SharedPreferences.getInstance();
-    final storedPassword = prefs.getString('register_$email');
+    final storedPassword = prefs.getString(AppStorageKeys.registerEmail(email));
     if (storedPassword == null) return 'البريد الإلكتروني غير مسجل';
     if (storedPassword != password) return 'كلمة المرور غير صحيحة';
 
-    final name = prefs.getString('register_${email}_name') ?? 'مستخدم';
-    await prefs.setString('auth_email', email);
-    await prefs.setString('auth_name', name);
+    final name = prefs.getString(AppStorageKeys.registerEmailName(email)) ?? 'مستخدم';
+    await prefs.setString(AppStorageKeys.authEmail, email);
+    await prefs.setString(AppStorageKeys.authName, name);
     _user = UserModel(name: name, email: email);
     return null;
   }
 
   Future<String?> register(String name, String email, String password) async {
     final prefs = await SharedPreferences.getInstance();
-    final existingEmail = prefs.getString('register_$email');
+    final existingEmail = prefs.getString(AppStorageKeys.registerEmail(email));
     if (existingEmail != null) return 'البريد الإلكتروني مستخدم بالفعل';
 
-    await prefs.setString('register_$email', password);
-    await prefs.setString('register_${email}_name', name);
-    await prefs.setString('auth_email', email);
-    await prefs.setString('auth_name', name);
+    await prefs.setString(AppStorageKeys.registerEmail(email), password);
+    await prefs.setString(AppStorageKeys.registerEmailName(email), name);
+    await prefs.setString(AppStorageKeys.authEmail, email);
+    await prefs.setString(AppStorageKeys.authName, name);
     _user = UserModel(name: name, email: email);
     return null;
   }
 
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_email');
-    await prefs.remove('auth_name');
+    await prefs.remove(AppStorageKeys.authEmail);
+    await prefs.remove(AppStorageKeys.authName);
     _user = null;
   }
 }

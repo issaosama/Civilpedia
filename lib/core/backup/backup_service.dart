@@ -9,6 +9,7 @@ import '../../features/profile/domain/user_profile_repository.dart';
 import '../../features/tools/domain/checklist/checklist_repository.dart';
 import '../../features/tools/domain/checklist/project_repository.dart';
 import '../schema/schema_constants.dart';
+import '../storage/app_storage_keys.dart';
 import 'backup_data.dart';
 import 'backup_file_service.dart';
 
@@ -234,7 +235,7 @@ class BackupService {
           await PreferencesHelper.setDarkMode(prefs['isDarkMode'] as bool);
         }
         final sp = await SharedPreferences.getInstance();
-        await sp.setString('app_language', 'ar');
+        await sp.setString(AppStorageKeys.appLanguage, 'ar');
         // onboardingSeen is restored on next app launch when user
         // already completed onboarding; skip explicit set.
         restored++;

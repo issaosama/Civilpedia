@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/storage/app_storage_keys.dart';
+
 class ProjectLocalDataSource {
-  static const String _key = 'projects_list';
+  static const String _key = AppStorageKeys.projectsList;
 
   Future<List<Map<String, dynamic>>> readProjects() async {
     final prefs = await SharedPreferences.getInstance();

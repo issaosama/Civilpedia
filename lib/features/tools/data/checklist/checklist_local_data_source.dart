@@ -1,9 +1,12 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ChecklistLocalDataSource {
-  static const String _key = 'checklist_data';
+import '../../../../core/storage/app_storage_keys.dart';
 
-  static String _projectKey(String projectId) => 'checklist_project_$projectId';
+class ChecklistLocalDataSource {
+  static const _key = AppStorageKeys.checklistData;
+
+  static String _projectKey(String projectId) =>
+      AppStorageKeys.projectChecklist(projectId);
 
   Future<String?> readChecklistData() async {
     final prefs = await SharedPreferences.getInstance();

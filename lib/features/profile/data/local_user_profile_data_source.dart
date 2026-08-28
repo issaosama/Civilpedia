@@ -1,7 +1,9 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/storage/app_storage_keys.dart';
+
 class LocalUserProfileDataSource {
-  static const _key = 'local_user_profile';
+  static const _key = AppStorageKeys.localUserProfile;
 
   Future<String?> read() async {
     final prefs = await SharedPreferences.getInstance();

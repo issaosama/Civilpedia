@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../core/constants/app_constants.dart';
+import '../../core/storage/app_storage_keys.dart';
 import '../../models/article_model.dart';
 
 class HiveHelper {
@@ -11,7 +11,7 @@ class HiveHelper {
     } else {
       await Hive.initFlutter();
     }
-    _box = await Hive.openBox(boxName ?? AppConstants.hiveBoxName);
+    _box = await Hive.openBox(boxName ?? AppStorageKeys.hiveBoxName);
   }
 
   static List<String> _asStringList(Object? value) {
@@ -22,7 +22,7 @@ class HiveHelper {
   }
 
   static List<String> getFavorites() {
-    final data = _box.get(AppConstants.favoritesKey, defaultValue: <String>[]);
+    final data = _box.get(AppStorageKeys.favorites, defaultValue: <String>[]);
     return List<String>.from(data as List);
   }
 
@@ -33,7 +33,7 @@ class HiveHelper {
     } else {
       favorites.add(articleId);
     }
-    await _box.put(AppConstants.favoritesKey, favorites);
+    await _box.put(AppStorageKeys.favorites, favorites);
   }
 
   static bool isFavorite(String articleId) {
@@ -41,21 +41,21 @@ class HiveHelper {
   }
 
   static List<String> getEncyclopediaFavorites() {
-    return _asStringList(_box.get(AppConstants.encyclopediaFavoritesKey));
+    return _asStringList(_box.get(AppStorageKeys.encyclopediaFavorites));
   }
 
   static Future<void> addEncyclopediaFavorite(String topicId) async {
     final favorites = getEncyclopediaFavorites();
     if (favorites.contains(topicId)) return;
     favorites.insert(0, topicId);
-    await _box.put(AppConstants.encyclopediaFavoritesKey, favorites);
+    await _box.put(AppStorageKeys.encyclopediaFavorites, favorites);
   }
 
   static Future<void> removeEncyclopediaFavorite(String topicId) async {
     final favorites = getEncyclopediaFavorites();
     if (!favorites.contains(topicId)) return;
     favorites.remove(topicId);
-    await _box.put(AppConstants.encyclopediaFavoritesKey, favorites);
+    await _box.put(AppStorageKeys.encyclopediaFavorites, favorites);
   }
 
   static bool isEncyclopediaFavorite(String topicId) {
@@ -63,7 +63,7 @@ class HiveHelper {
   }
 
   static List<String> getDownloads() {
-    final data = _box.get(AppConstants.downloadsKey, defaultValue: <String>[]);
+    final data = _box.get(AppStorageKeys.downloads, defaultValue: <String>[]);
     return List<String>.from(data as List);
   }
 
@@ -71,14 +71,14 @@ class HiveHelper {
     final downloads = getDownloads();
     if (downloads.contains(articleId)) {
       downloads.remove(articleId);
-      await _box.delete('offline_$articleId');
+      await _box.delete(AppStorageKeys.offlineArticle(articleId));
     } else {
       downloads.add(articleId);
       if (article != null) {
-        await _box.put('offline_$articleId', article.toJson());
+        await _box.put(AppStorageKeys.offlineArticle(articleId), article.toJson());
       }
     }
-    await _box.put(AppConstants.downloadsKey, downloads);
+    await _box.put(AppStorageKeys.downloads, downloads);
   }
 
   static bool isDownloaded(String articleId) {
@@ -86,7 +86,7 @@ class HiveHelper {
   }
 
   static ArticleModel? getOfflineArticle(String articleId) {
-    final data = _box.get('offline_$articleId');
+    final data = _box.get(AppStorageKeys.offlineArticle(articleId));
     if (data == null) return null;
     return ArticleModel.fromJson(Map<String, dynamic>.from(data as Map));
   }
