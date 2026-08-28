@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../localization/ar.dart';
+import '../../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
 
@@ -41,31 +42,31 @@ class ShellDestination {
 /// grows from this list in later phases; do not extend it preemptively.
 const List<ShellDestination> kShellDestinations = [
   ShellDestination(
-    route: '/home',
+    route: AppRoutes.home,
     icon: Icons.home_outlined,
     activeIcon: Icons.home,
     label: Ar.home,
   ),
   ShellDestination(
-    route: '/encyclopedia',
+    route: AppRoutes.encyclopedia,
     icon: Icons.menu_book_outlined,
     activeIcon: Icons.menu_book,
     label: Ar.encyclopedia,
   ),
   ShellDestination(
-    route: '/tools',
+    route: AppRoutes.tools,
     icon: Icons.build_outlined,
     activeIcon: Icons.build,
     label: Ar.tools,
   ),
   ShellDestination(
-    route: '/saved',
+    route: AppRoutes.saved,
     icon: Icons.bookmark_outline,
     activeIcon: Icons.bookmark,
     label: Ar.saved,
   ),
   ShellDestination(
-    route: '/profile',
+    route: AppRoutes.profile,
     icon: Icons.person_outline,
     activeIcon: Icons.person,
     label: Ar.account,

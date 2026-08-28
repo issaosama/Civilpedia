@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'app_routes.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
@@ -27,52 +28,52 @@ final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
 /// in [kShellDestinations]. Branch order and indices live only in that list;
 /// this map only resolves a destination to its content screen.
 final Map<String, GoRouterWidgetBuilder> _shellBranchBuilders = {
-  '/home': (_, __) => const HomeMainScreen(),
-  '/encyclopedia': (_, state) => EncyclopediaScreen(
+  AppRoutes.home: (_, __) => const HomeMainScreen(),
+  AppRoutes.encyclopedia: (_, state) => EncyclopediaScreen(
         initialQuery: state.uri.queryParameters['q'],
       ),
-  '/tools': (_, __) => const ToolsScreen(),
-  '/saved': (_, __) => const SavedScreen(),
-  '/profile': (_, __) => const ProfileScreen(),
+  AppRoutes.tools: (_, __) => const ToolsScreen(),
+  AppRoutes.saved: (_, __) => const SavedScreen(),
+  AppRoutes.profile: (_, __) => const ProfileScreen(),
 };
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigator,
-  initialLocation: '/splash',
+  initialLocation: AppRoutes.splash,
   debugLogDiagnostics: true,
   errorBuilder: (context, state) => const NotFoundScreen(),
   routes: [
     GoRoute(
-      path: '/splash',
+      path: AppRoutes.splash,
       builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
-      path: '/onboarding',
+      path: AppRoutes.onboarding,
       builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
-      path: '/profile-setup',
+      path: AppRoutes.profileSetup,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const ProfileSetupScreen(),
     ),
     GoRoute(
-      path: '/auth',
+      path: AppRoutes.auth,
       builder: (context, state) => const AuthScreen(),
     ),
     GoRoute(
-      path: '/categories',
+      path: AppRoutes.categories,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const CategoriesScreen(),
     ),
     GoRoute(
-      path: '/encyclopedia/topics/:categoryId',
+      path: AppRoutes.topicListPattern,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => TopicListScreen(
         categoryId: state.pathParameters['categoryId'] ?? '',
       ),
     ),
     GoRoute(
-      path: '/encyclopedia/topic/:topicId',
+      path: AppRoutes.topicDetailPattern,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => TopicDetailScreen(
         topicId: state.pathParameters['topicId'] ?? '',
@@ -95,12 +96,12 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
     GoRoute(
-      path: '/articles',
+      path: AppRoutes.articles,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const AllArticlesScreen(),
     ),
     GoRoute(
-      path: '/articles/:category',
+      path: AppRoutes.articlesByCategoryPattern,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) {
         return ArticlesScreen(
@@ -109,7 +110,7 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/article/:id',
+      path: AppRoutes.articlePattern,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) {
         return ArticleDetailsScreen(
@@ -118,27 +119,27 @@ final GoRouter appRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/calculator/concrete',
+      path: AppRoutes.calculatorConcrete,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const CalculatorScreen(type: 'concrete'),
     ),
     GoRoute(
-      path: '/calculator/steel',
+      path: AppRoutes.calculatorSteel,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const CalculatorScreen(type: 'steel'),
     ),
     GoRoute(
-      path: '/calculator/brick',
+      path: AppRoutes.calculatorBrick,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const CalculatorScreen(type: 'brick'),
     ),
     GoRoute(
-      path: '/calculator/checklist',
+      path: AppRoutes.calculatorChecklist,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const ChecklistScreen(),
     ),
     GoRoute(
-      path: '/calculator/tile',
+      path: AppRoutes.calculatorTile,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const TileCalculatorScreen(),
     ),
