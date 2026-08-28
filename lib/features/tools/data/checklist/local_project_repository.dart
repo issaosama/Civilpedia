@@ -63,6 +63,12 @@ class LocalProjectRepository implements ProjectRepository {
     await _flush();
   }
 
+  @override
+  Future<void> replaceAll(List<Project> projects) async {
+    _cache = List.of(projects);
+    await _flush();
+  }
+
   String _generateId() {
     final timestamp = DateTime.now().microsecondsSinceEpoch;
     final suffix = Random().nextInt(9999);

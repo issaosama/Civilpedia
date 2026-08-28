@@ -90,4 +90,24 @@ class HiveHelper {
     if (data == null) return null;
     return ArticleModel.fromJson(Map<String, dynamic>.from(data as Map));
   }
+
+  /// Replaces the whole favorites list (used by Backup / Restore).
+  static Future<void> restoreFavorites(List<String> ids) async {
+    await _box.put(AppStorageKeys.favorites, List.of(ids));
+  }
+
+  /// Replaces the whole encyclopedia-favorites list (used by Backup /
+  /// Restore).
+  static Future<void> restoreEncyclopediaFavorites(List<String> ids) async {
+    await _box.put(AppStorageKeys.encyclopediaFavorites, List.of(ids));
+  }
+
+  /// Replaces the whole downloads-reference list (used by Backup / Restore).
+  ///
+  /// Only the download *references* are restored. The offline article
+  /// artifacts (the 'offline_' + articleId payloads) are re-acquirable and
+  /// deferred per BACKUP-1A scope.
+  static Future<void> restoreDownloads(List<String> ids) async {
+    await _box.put(AppStorageKeys.downloads, List.of(ids));
+  }
 }

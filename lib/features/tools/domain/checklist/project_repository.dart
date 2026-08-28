@@ -10,4 +10,10 @@ abstract class ProjectRepository {
   Future<void> archiveProject(String projectId);
 
   Future<void> deleteProject(String projectId);
+
+  /// Replaces the whole project list with the given projects (IDs preserved).
+  ///
+  /// Used by Backup / Restore to reproduce the persisted project records
+  /// exactly, including original [Project.id] values.
+  Future<void> replaceAll(List<Project> projects);
 }

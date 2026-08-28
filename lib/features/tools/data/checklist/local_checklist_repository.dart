@@ -91,6 +91,27 @@ class LocalChecklistRepository implements ChecklistRepository {
     await _dataSource.clearProjectChecklistData(projectId);
   }
 
+  @override
+  Future<void> saveItemStates(
+      Map<String, ChecklistItemData> states) async {
+    _cache = states.map((k, v) => MapEntry(
+          k,
+          ChecklistItemState(status: v.status.name, notes: v.notes),
+        ));
+    await _flush();
+  }
+
+  @override
+  Future<void> saveProjectItemStates(
+      String projectId, Map<String, ChecklistItemData> states) async {
+    _projectCaches ??= <String, Map<String, ChecklistItemState>>{};
+    _projectCaches![projectId] = states.map((k, v) => MapEntry(
+          k,
+          ChecklistItemState(status: v.status.name, notes: v.notes),
+        ));
+    await _flushProject(projectId);
+  }
+
   Map<String, ChecklistItemData> _fromCache() {
     return _convertCache(_cache ?? {});
   }

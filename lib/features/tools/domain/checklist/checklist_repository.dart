@@ -27,4 +27,14 @@ abstract class ChecklistRepository {
   Future<void> saveProjectItemNotes(String projectId, String itemId, String? notes);
 
   Future<void> clearProject(String projectId);
+
+  /// Replaces all quick-checklist item states (used by Backup / Restore).
+  Future<void> saveItemStates(Map<String, ChecklistItemData> states);
+
+  /// Replaces all project-scoped checklist item states (used by Backup /
+  /// Restore).
+  Future<void> saveProjectItemStates(
+    String projectId,
+    Map<String, ChecklistItemData> states,
+  );
 }

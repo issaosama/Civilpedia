@@ -7,6 +7,7 @@ class BackupSections {
   final Map<String, Map<String, Map<String, dynamic>>>? projectChecklists;
   final Map<String, dynamic>? preferences;
   final List<String>? favorites;
+  final List<String>? encyclopediaFavorites;
   final List<String>? downloads;
 
   const BackupSections({
@@ -16,6 +17,7 @@ class BackupSections {
     this.projectChecklists,
     this.preferences,
     this.favorites,
+    this.encyclopediaFavorites,
     this.downloads,
   });
 
@@ -27,6 +29,8 @@ class BackupSections {
           'projectChecklists': projectChecklists,
         if (preferences != null) 'preferences': preferences,
         if (favorites != null) 'favorites': favorites,
+        if (encyclopediaFavorites != null)
+          'encyclopediaFavorites': encyclopediaFavorites,
         if (downloads != null) 'downloads': downloads,
       };
 
@@ -54,6 +58,8 @@ class BackupSections {
       preferences: json['preferences'] as Map<String, dynamic>?,
       favorites:
           (json['favorites'] as List<dynamic>?)?.cast<String>(),
+      encyclopediaFavorites:
+          (json['encyclopediaFavorites'] as List<dynamic>?)?.cast<String>(),
       downloads:
           (json['downloads'] as List<dynamic>?)?.cast<String>(),
     );
