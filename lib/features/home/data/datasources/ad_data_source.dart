@@ -5,7 +5,27 @@ abstract class AdDataSource {
   Future<List<AdBanner>> fetchActiveAds();
 }
 
+/// Production / default advertisement source.
+///
+/// F0.4 (honest ads): there is no real/current campaign source in production,
+/// so this returns an EMPTY result. An ad exists only when a campaign supplies
+/// one (W7 Monetization). Honest contract: no campaign => no ad => no blank slot.
+///
+/// This source NEVER auto-consumes mock ads.
 class LocalAdDataSource implements AdDataSource {
+  @override
+  Future<List<AdBanner>> fetchActiveAds() async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    return const [];
+  }
+}
+
+/// Explicit DEVELOPMENT / PREVIEW / TEST ad source.
+///
+/// Provides sample [AdBanner]s so the existing ad carousel can still be
+/// visually reviewed before a real campaign exists. This is an EXPLICIT
+/// fixture only — it must never be the default production data contract.
+class MockAdDataSource implements AdDataSource {
   @override
   Future<List<AdBanner>> fetchActiveAds() async {
     await Future.delayed(const Duration(milliseconds: 100));

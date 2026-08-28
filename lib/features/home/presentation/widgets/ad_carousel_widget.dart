@@ -11,14 +11,20 @@ import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
 
 class AdCarouselWidget extends StatefulWidget {
-  const AdCarouselWidget({super.key});
+  const AdCarouselWidget({super.key, this.dataSource});
+
+  /// Optional [AdDataSource]. When null, the honest production
+  /// [LocalAdDataSource] is used (no campaign => no ad => no blank slot).
+  /// A [MockAdDataSource] may be injected explicitly for dev/preview/tests.
+  final AdDataSource? dataSource;
 
   @override
   State<AdCarouselWidget> createState() => _AdCarouselWidgetState();
 }
 
 class _AdCarouselWidgetState extends State<AdCarouselWidget> {
-  final _dataSource = LocalAdDataSource();
+  late final AdDataSource _dataSource =
+      widget.dataSource ?? LocalAdDataSource();
   final _pageController = PageController(viewportFraction: 0.94);
 
   List<AdBanner> _ads = [];
@@ -67,28 +73,35 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
   Widget build(BuildContext context) {
     if (_isLoading) return _shimmerPlaceholder();
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        SizedBox(
-          height: 200,
-          child: Stack(
-            children: [
-              PageView.builder(
-                controller: _pageController,
-                onPageChanged: (i) => setState(() => _currentPage = i),
-                itemCount: _ads.length,
-                itemBuilder: (context, index) {
-                  final ad = _ads[index];
-                  return _adCard(context, ad);
-                },
-              ),
-            ],
+    // F0.4 (honest ads): no campaign => no ads => render nothing, reserving
+    // no vertical gap on Home. Content below flows up into the freed space.
+    if (_ads.isEmpty) return const SizedBox.shrink();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 200,
+            child: Stack(
+              children: [
+                PageView.builder(
+                  controller: _pageController,
+                  onPageChanged: (i) => setState(() => _currentPage = i),
+                  itemCount: _ads.length,
+                  itemBuilder: (context, index) {
+                    final ad = _ads[index];
+                    return _adCard(context, ad);
+                  },
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 10),
-        _indicatorRow(),
-      ],
+          const SizedBox(height: 10),
+          _indicatorRow(),
+        ],
+      ),
     );
   }
 

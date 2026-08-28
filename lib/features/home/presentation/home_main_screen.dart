@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../../data/repositories/article_repository.dart';
 import '../../../features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
+import '../data/datasources/ad_data_source.dart';
 import 'widgets/ad_carousel_widget.dart';
 import 'widgets/categories_section.dart';
 import 'widgets/engineering_topics_section.dart';
@@ -63,9 +65,8 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
                 onSubmitted: (query) => openEncyclopediaSearch(context, query),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: AdCarouselWidget(),
+            AdCarouselWidget(
+              dataSource: kDebugMode ? MockAdDataSource() : LocalAdDataSource(),
             ),
             SectionHeader(title: Ar.quickAccess),
             const QuickAccessSection(),
