@@ -23,8 +23,6 @@ class AppColors {
   static const Color primaryDark = Color(0xFFC26A0C);      // darker amber for readable elements
   static const Color primaryLight = Color(0xFFF19A38);     // lighter amber
   static const Color primarySoft = Color(0xFFFBEAD3);     // soft amber background
-  static const Color accentYellow = Color(0xFFF2C500);     // yellow highlight
-  static const Color accentYellowSoft = Color(0xFFFFF8E1); // soft yellow bg
 
   // ── Brand Secondary Accents ──
   static const Color brandBlue = Color(0xFF2E6BC6);        // Civilpedia logo blue, used sparingly
@@ -35,15 +33,12 @@ class AppColors {
   static const Color homeBackground = pageBackground;      // backward-compatible alias
 
   // ── Dark Surface / Text ──
-  static const Color darkSurfaceText = Color(0xFF2A2620);  // dark construction text/surface
   static const Color onPrimary = Color(0xFFFFFFFF);
-  static const Color onPrimaryDark = Color(0xFFFFFFFF);
 
   // ── Semantic ──
   static const Color success = Color(0xFF4CAF50);
   static const Color error = Color(0xFFE53935);
   static const Color warning = Color(0xFFFFA726);
-  static const Color info = Color(0xFF2196F3);
 
   // ── Legacy aliases (backward compat for untouched screens) ──
   static const Color surfaceTint = Color(0xFFF0F0FF);
