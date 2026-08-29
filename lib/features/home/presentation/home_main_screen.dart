@@ -27,6 +27,18 @@ void openEncyclopediaSearch(BuildContext context, String query) {
   context.go('/encyclopedia?q=${Uri.encodeComponent(trimmed)}');
 }
 
+/// Home / platform semantic search entry (W1.2).
+///
+/// Expresses USER INTENT ("open Home search") rather than the current
+/// destination, so Home presentation does not couple directly to an
+/// Encyclopedia-specific helper. The current compatibility implementation
+/// delegates to the established Encyclopedia search flow; W2.4 will switch this
+/// same entry to the future Global Search destination (`/search`) without
+/// changing how Home invokes it.
+void openHomeSearch(BuildContext context, String query) {
+  openEncyclopediaSearch(context, query);
+}
+
 /// Real pull-to-refresh for Home data. Completes only when the Encyclopedia
 /// reload finishes; there is no synthetic delay or fake success.
 Future<void> refreshHomeData(BuildContext context) async {
@@ -62,7 +74,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
               child: SearchBarWidget(
                 lightSurface: true,
                 hintText: Ar.homeEngineeringSearchHint,
-                onSubmitted: (query) => openEncyclopediaSearch(context, query),
+                onSubmitted: (query) => openHomeSearch(context, query),
               ),
             ),
             AdCarouselWidget(
