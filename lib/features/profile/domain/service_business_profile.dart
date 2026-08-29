@@ -52,8 +52,34 @@ enum BusinessType {
   }
 }
 
-enum VerificationStatus { unverified, pending, verified, rejected }
+/// Approved semantic verification lifecycle (F0.6 contract groundwork).
+///
+/// Five distinct states. `rejected` and `suspended` are semantically different
+/// and MUST never be aliased:
+///  - [unverified]:      not yet submitted/decided.
+///  - [pending]:         a submission is awaiting a decision.
+///  - [verified]:        a verification decision was accepted.
+///  - [rejected]:        a verification decision was denied/rejected.
+///  - [suspended]:       an entity that may previously have been valid/listed
+///                       is administratively suspended.
+///
+/// These string spellings are also the persisted serialization values
+/// (`unverified`, `pending`, `verified`, `rejected`, `suspended`). The legacy
+/// four-state values remain byte-for-byte readable; `suspended` is additive.
+enum VerificationStatus { unverified, pending, verified, rejected, suspended }
 
+/// Core Directory service-business entity (seed; F0.6 contract groundwork).
+///
+/// This entity models **organic** Directory identity: id, type, name, contact,
+/// location, categories, verification and listing data. Core construction does
+/// NOT depend on any Monetization plan/access scaffolding.
+///
+/// The following fields are **non-core, legacy/compat-only** and are preserved
+/// ONLY for read-compatibility of persisted data (M8 B-04 de-coupling):
+/// [planType], [featured], [foundingPartner]. They are carried through
+/// serialization but are explicitly NOT part of core Directory identity and
+/// must never gate organic listing/search/detail. Future Monetization owns
+/// campaigns/sponsorship/promoted placement; it is NOT implemented in F0.6.
 class ServiceBusinessProfile {
   final String id;
   final String name;
@@ -66,11 +92,20 @@ class ServiceBusinessProfile {
   final String? whatsapp;
   final String? description;
   final VerificationStatus verificationStatus;
+
+  // --- Non-core, legacy/compat-only (Monetization-adjacent; see class doc) ---
+  /// Non-core: legacy sponsored/promoted-placement flag. Read-compat only.
   final bool featured;
+
+  /// Non-core: legacy founding-partner marketing flag. Read-compat only.
   final bool foundingPartner;
+
   final DateTime createdAt;
   final DateTime updatedAt;
   final String? futureOwnerUserId;
+
+  /// Non-core: legacy Monetization plan-tier string. Read-compat only; never
+  /// gates core organic Directory identity or behavior.
   final String? planType;
   final int schemaVersion;
 
@@ -93,8 +128,8 @@ class ServiceBusinessProfile {
     this.futureOwnerUserId,
     this.planType,
     this.schemaVersion = SchemaConstants.currentDataSchemaVersion,
-  })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+  }) : createdAt = createdAt ?? DateTime.now(),
+       updatedAt = updatedAt ?? DateTime.now();
 
   ServiceBusinessProfile copyWith({
     String? id,
@@ -139,44 +174,40 @@ class ServiceBusinessProfile {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'type': type.key,
-        'categories': categories,
-        'subCategories': subCategories,
-        'baghdadArea': baghdadArea.name,
-        'address': address,
-        'phones': phones,
-        'whatsapp': whatsapp,
-        'description': description,
-        'verificationStatus': verificationStatus.name,
-        'featured': featured,
-        'foundingPartner': foundingPartner,
-        'createdAt': createdAt.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-        'futureOwnerUserId': futureOwnerUserId,
-        'planType': planType,
-        'schemaVersion': schemaVersion,
-      };
+    'id': id,
+    'name': name,
+    'type': type.key,
+    'categories': categories,
+    'subCategories': subCategories,
+    'baghdadArea': baghdadArea.name,
+    'address': address,
+    'phones': phones,
+    'whatsapp': whatsapp,
+    'description': description,
+    'verificationStatus': verificationStatus.name,
+    'featured': featured,
+    'foundingPartner': foundingPartner,
+    'createdAt': createdAt.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+    'futureOwnerUserId': futureOwnerUserId,
+    'planType': planType,
+    'schemaVersion': schemaVersion,
+  };
 
   factory ServiceBusinessProfile.fromJson(Map<String, dynamic> json) {
     return ServiceBusinessProfile(
       id: json['id'] as String,
       name: json['name'] as String? ?? '',
       type: BusinessType.fromKey(json['type'] as String? ?? 'other'),
-      categories: (json['categories'] as List<dynamic>?)
-              ?.cast<String>() ??
-          [],
-      subCategories: (json['subCategories'] as List<dynamic>?)
-              ?.cast<String>() ??
-          [],
+      categories: (json['categories'] as List<dynamic>?)?.cast<String>() ?? [],
+      subCategories:
+          (json['subCategories'] as List<dynamic>?)?.cast<String>() ?? [],
       baghdadArea: BaghdadArea.values.firstWhere(
         (e) => e.name == json['baghdadArea'],
         orElse: () => BaghdadArea.unknown,
       ),
       address: json['address'] as String?,
-      phones:
-          (json['phones'] as List<dynamic>?)?.cast<String>() ?? [],
+      phones: (json['phones'] as List<dynamic>?)?.cast<String>() ?? [],
       whatsapp: json['whatsapp'] as String?,
       description: json['description'] as String?,
       verificationStatus: VerificationStatus.values.firstWhere(
@@ -185,13 +216,16 @@ class ServiceBusinessProfile {
       ),
       featured: json['featured'] as bool? ?? false,
       foundingPartner: json['foundingPartner'] as bool? ?? false,
-      createdAt: DateTime.tryParse(json['createdAt'] as String? ?? '') ??
+      createdAt:
+          DateTime.tryParse(json['createdAt'] as String? ?? '') ??
           DateTime.now(),
-      updatedAt: DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
+      updatedAt:
+          DateTime.tryParse(json['updatedAt'] as String? ?? '') ??
           DateTime.now(),
       futureOwnerUserId: json['futureOwnerUserId'] as String?,
       planType: json['planType'] as String?,
-      schemaVersion: json['schemaVersion'] as int? ??
+      schemaVersion:
+          json['schemaVersion'] as int? ??
           SchemaConstants.currentDataSchemaVersion,
     );
   }
