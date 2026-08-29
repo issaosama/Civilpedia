@@ -5,8 +5,8 @@
 /// migration, no redirects, no hierarchy change, and no change to Bottom
 /// Navigation.
 ///
-/// Future target routes (`/knowledge`, `/projects`, `/directory`, `/user`,
-/// `/search`, ...) are intentionally **not** declared here. They are
+/// Future target routes (`/knowledge`, `/projects`, `/directory`, `/user`, ...)
+/// are intentionally **not** declared here. They are
 /// introduced only when their own implementation phase begins. This contract
 /// models current canonical identities first; see M8 §27 (resolved).
 ///
@@ -51,6 +51,8 @@ abstract final class AppRoutes {
   // --- Global Search (W2.3) ---
   // Root-level, full-screen route ABOVE the StatefulShellRoute. It is NOT a
   // bottom-navigation shell destination and must never enter kShellDestinations.
+  // The canonical route takes no query parameters: the query is typed only
+  // inside Global Search.
   static const String search = '/search';
 
   // --- Tools / calculators ---

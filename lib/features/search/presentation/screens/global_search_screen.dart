@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -13,13 +15,18 @@ import '../../domain/search_aggregator.dart';
 import '../../domain/search_result.dart';
 import '../../navigation/search_route_resolver.dart';
 
-/// W2.3 — Global Search V1 aggregator shell.
+/// W2.3 — Global Search V1 aggregator shell (W2.4 live search).
 ///
 /// Reuses the shared [SearchBarWidget], consumes the W2.2 [SearchAggregator],
 /// and routes results via the W2.1 [SearchRouteResolver] (the single
 /// compatibility boundary). It renders a unified Knowledge + Tools result list
 /// in aggregator order with no filters/tabs/ranking/history. This is a root
 /// full-screen route above the app shell; it owns no detail screens.
+///
+/// The field is the SOLE query entry point: Home pushes a plain `/search` and
+/// the user types only here. Typing searches automatically through a short
+/// debounce; a request-generation token discards stale async completions so a
+/// newer query's results are never overwritten by an older in-flight search.
 class GlobalSearchScreen extends StatefulWidget {
   /// Search aggregator to query. Defaults to the production composition; tests
   /// inject a fake so the screen stays decoupled from data/repositories.
@@ -32,8 +39,16 @@ class GlobalSearchScreen extends StatefulWidget {
 }
 
 class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
+  /// Debounce window: typing pauses briefly before the aggregator runs, so each
+  /// pause triggers one search rather than one per keystroke.
+  static const Duration _debounceDuration = Duration(milliseconds: 280);
+
   late final SearchAggregator _aggregator;
   final SearchRouteResolver _resolver = const SearchRouteResolver();
+  final TextEditingController _searchController = TextEditingController();
+
+  Timer? _debounce;
+  int _requestId = 0;
 
   String _query = '';
   bool _loading = false;
@@ -45,18 +60,62 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
     _aggregator = widget.aggregator ?? productionSearchAggregator();
   }
 
-  Future<void> _search(String raw) async {
+  /// Live-search handler bound to [SearchBarWidget.onChanged].
+  void _onQueryChanged(String raw) {
+    _debounce?.cancel();
+    // Invalidate any in-flight search for the previous text immediately, so a
+    // late older completion can never overwrite the current query's results.
+    _requestId++;
     final query = raw.trim();
+    if (query.isEmpty) {
+      // Empty/whitespace: cancel pending debounce, no aggregator run, clear
+      // any previous results and restore the initial-search prompt.
+      setState(() {
+        _query = '';
+        _loading = false;
+        _results = const [];
+      });
+      return;
+    }
+    _debounce = Timer(_debounceDuration, () => _runSearch(query));
+  }
+
+  /// Keyboard search action. Harmless fallback only: live search makes it
+  /// unnecessary, so it just cancels a pending debounce and searches now.
+  void _onSubmitted(String raw) {
+    _debounce?.cancel();
+    _requestId++;
+    final query = raw.trim();
+    if (query.isEmpty) {
+      setState(() {
+        _query = '';
+        _loading = false;
+        _results = const [];
+      });
+      return;
+    }
+    _runSearch(query);
+  }
+
+  Future<void> _runSearch(String query) async {
+    final requestId = _requestId;
     setState(() {
       _query = query;
       _loading = true;
     });
     final results = await _aggregator.search(query);
-    if (!mounted) return;
+    if (!mounted || requestId != _requestId) return;
     setState(() {
       _loading = false;
       _results = results;
     });
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _openResult(SearchResult result) {
@@ -82,9 +141,12 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
               AppSpacing.xs,
             ),
             child: SearchBarWidget(
-              onSubmitted: _search,
+              controller: _searchController,
+              onChanged: _onQueryChanged,
+              onSubmitted: _onSubmitted,
               hintText: Ar.globalSearchHint,
               lightSurface: !isDark,
+              autofocus: true,
             ),
           ),
           Expanded(child: _buildResults(context, isDark, mutedText)),

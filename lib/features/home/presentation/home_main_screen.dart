@@ -7,6 +7,7 @@ import '../../../core/services/language_provider.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
+import '../../../routes/app_routes.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../data/datasources/ad_data_source.dart';
@@ -20,23 +21,24 @@ import 'widgets/quick_access_section.dart';
 import 'widgets/quick_tools_section.dart';
 
 /// Activates the Encyclopedia shell branch with [query] already applied.
-/// Home only collects the query; Encyclopedia owns the search logic.
+///
+/// Retained for the encyclopedia-internal `/encyclopedia?q=` flow. Home's own
+/// search no longer uses this path since W2.4; see [openHomeSearch].
 void openEncyclopediaSearch(BuildContext context, String query) {
   final trimmed = query.trim();
   if (trimmed.isEmpty) return;
   context.go('/encyclopedia?q=${Uri.encodeComponent(trimmed)}');
 }
 
-/// Home / platform semantic search entry (W1.2).
+/// Acts as a single Home search entry point (W1.2/W2.4).
 ///
-/// Expresses USER INTENT ("open Home search") rather than the current
-/// destination, so Home presentation does not couple directly to an
-/// Encyclopedia-specific helper. The current compatibility implementation
-/// delegates to the established Encyclopedia search flow; W2.4 will switch this
-/// same entry to the future Global Search destination (`/search`) without
-/// changing how Home invokes it.
-void openHomeSearch(BuildContext context, String query) {
-  openEncyclopediaSearch(context, query);
+/// Expresses USER INTENT ("open Home search") rather than a specific
+/// destination, so Home presentation does not couple to any search screen. The
+/// current (W2.4) implementation PUSHES the root Global Search screen at
+/// `/search`; the user types the query only once, inside Global Search, so
+/// nothing is entered or forwarded from Home.
+void openHomeSearch(BuildContext context) {
+  context.push(AppRoutes.search);
 }
 
 /// Real pull-to-refresh for Home data. Completes only when the Encyclopedia
@@ -74,7 +76,8 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
               child: SearchBarWidget(
                 lightSurface: true,
                 hintText: Ar.homeEngineeringSearchHint,
-                onSubmitted: (query) => openHomeSearch(context, query),
+                readOnly: true,
+                onTap: () => openHomeSearch(context),
               ),
             ),
             AdCarouselWidget(

@@ -13,6 +13,11 @@ class SearchBarWidget extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+
+  /// Invoked when the user taps the field. Used by the Home launcher to open
+  /// `/search` without editing text on Home.
+  final VoidCallback? onTap;
+
   final String hintText;
 
   /// When true, the search field renders with dark text/icons on a light
@@ -20,13 +25,24 @@ class SearchBarWidget extends StatelessWidget {
   /// surface styling used by EncyclopediaScreen.
   final bool lightSurface;
 
+  /// When true, the field is non-editable (used by the Home launcher). Defaults
+  /// to false, preserving every existing caller's editing behavior.
+  final bool readOnly;
+
+  /// When true, the field requests focus on entry, so the Global Search input
+  /// is ready for typing immediately. Defaults to false.
+  final bool autofocus;
+
   const SearchBarWidget({
     super.key,
     this.controller,
     this.onChanged,
     this.onSubmitted,
+    this.onTap,
     this.hintText = Ar.search,
     this.lightSurface = false,
+    this.readOnly = false,
+    this.autofocus = false,
   });
 
   @override
@@ -57,13 +73,19 @@ class SearchBarWidget extends StatelessWidget {
     );
     final focusedBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(DesignTokens.radiusSearch),
-      borderSide: BorderSide(color: borderColor.withValues(alpha: 0.8), width: 1.5),
+      borderSide: BorderSide(
+        color: borderColor.withValues(alpha: 0.8),
+        width: 1.5,
+      ),
     );
 
     return TextField(
       controller: controller,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
+      onTap: onTap,
+      readOnly: readOnly,
+      autofocus: autofocus,
       textInputAction: TextInputAction.search,
       textAlign: TextAlign.start,
       decoration: InputDecoration(
