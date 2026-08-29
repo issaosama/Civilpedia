@@ -48,6 +48,11 @@ abstract final class AppRoutes {
   static const String saved = '/saved';
   static const String profile = '/profile';
 
+  // --- Global Search (W2.3) ---
+  // Root-level, full-screen route ABOVE the StatefulShellRoute. It is NOT a
+  // bottom-navigation shell destination and must never enter kShellDestinations.
+  static const String search = '/search';
+
   // --- Tools / calculators ---
   // NOTE: the current `ArticleRepository`/`ToolModel` registry stores these
   // tool identities WITHOUT the leading slash (e.g. `calculator/concrete`) and

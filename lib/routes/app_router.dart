@@ -20,6 +20,7 @@ import '../features/articles/presentation/screens/article_details_screen.dart';
 import '../features/saved/presentation/saved_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/screens/profile_setup_screen.dart';
+import '../features/search/presentation/screens/global_search_screen.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
@@ -29,9 +30,8 @@ final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
 /// this map only resolves a destination to its content screen.
 final Map<String, GoRouterWidgetBuilder> _shellBranchBuilders = {
   AppRoutes.home: (_, __) => const HomeMainScreen(),
-  AppRoutes.encyclopedia: (_, state) => EncyclopediaScreen(
-        initialQuery: state.uri.queryParameters['q'],
-      ),
+  AppRoutes.encyclopedia: (_, state) =>
+      EncyclopediaScreen(initialQuery: state.uri.queryParameters['q']),
   AppRoutes.tools: (_, __) => const ToolsScreen(),
   AppRoutes.saved: (_, __) => const SavedScreen(),
   AppRoutes.profile: (_, __) => const ProfileScreen(),
@@ -66,18 +66,21 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const CategoriesScreen(),
     ),
     GoRoute(
+      path: AppRoutes.search,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const GlobalSearchScreen(),
+    ),
+    GoRoute(
       path: AppRoutes.topicListPattern,
       parentNavigatorKey: _rootNavigator,
-      builder: (context, state) => TopicListScreen(
-        categoryId: state.pathParameters['categoryId'] ?? '',
-      ),
+      builder: (context, state) =>
+          TopicListScreen(categoryId: state.pathParameters['categoryId'] ?? ''),
     ),
     GoRoute(
       path: AppRoutes.topicDetailPattern,
       parentNavigatorKey: _rootNavigator,
-      builder: (context, state) => TopicDetailScreen(
-        topicId: state.pathParameters['topicId'] ?? '',
-      ),
+      builder: (context, state) =>
+          TopicDetailScreen(topicId: state.pathParameters['topicId'] ?? ''),
     ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
@@ -104,9 +107,7 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.articlesByCategoryPattern,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) {
-        return ArticlesScreen(
-          category: state.pathParameters['category'] ?? '',
-        );
+        return ArticlesScreen(category: state.pathParameters['category'] ?? '');
       },
     ),
     GoRoute(

@@ -8,6 +8,11 @@ class Ar {
   static const String encyclopedia = 'الموسوعة';
   static const String search = 'ابحث عن مقالات...';
   static const String homeEngineeringSearchHint = 'ابحث في المحتوى الهندسي...';
+  static const String globalSearchHint = 'ابحث عن موضوع أو أداة...';
+  static const String globalSearchTitle = 'البحث الشامل';
+  static const String noSearchResults = 'لا توجد نتائج مطابقة';
+  static const String initialSearchPrompt =
+      'ابحث عن موضوع من الموسوعة أو أداة حسابية';
   static const String offline = 'لا يوجد اتصال بالإنترنت';
   static const String online = 'متصل';
   static const String quickTools = 'أدوات سريعة';
@@ -58,7 +63,8 @@ class Ar {
   static const String masonryNetUnits = 'عدد الوحدات الصافي';
   static const String masonryAdditionalUnits = 'وحدات إضافية';
   static const String masonryFinalUnits = 'العدد النهائي المطلوب';
-  static const String masonryOpeningsExceed = 'مساحة الفتحات تتجاوز مساحة الجدار';
+  static const String masonryOpeningsExceed =
+      'مساحة الفتحات تتجاوز مساحة الجدار';
   static const String siteChecklist = 'قائمة التفتيش الموقعي';
   static const String length = 'الطول';
   static const String width = 'العرض';
@@ -85,7 +91,8 @@ class Ar {
   static const String onboardingTitle2 = 'حاسبات ذكية';
   static const String onboardingDesc2 = 'أدوات حسابية دقيقة وسريعة';
   static const String onboardingTitle3 = 'اعمل بدون إنترنت';
-  static const String onboardingDesc3 = 'احفظ المقالات واستخدم الحاسبات في أي وقت';
+  static const String onboardingDesc3 =
+      'احفظ المقالات واستخدم الحاسبات في أي وقت';
   static const String articleDetails = 'تفاصيل المقال';
   static const String login = 'تسجيل الدخول';
   static const String register = 'إنشاء حساب';
@@ -146,7 +153,8 @@ class Ar {
   static const String tileTilesPerBoxLabel = 'عدد البلاطات في الكرتون';
   static const String tileCostEstimate = 'تقدير الكلفة';
   static const String tilePriceEstimate = 'التكلفة التقديرية';
-  static const String tileExcludedExceed = 'المساحة المستثناة تتجاوز المساحة الإجمالية';
+  static const String tileExcludedExceed =
+      'المساحة المستثناة تتجاوز المساحة الإجمالية';
   static const String tilePresets = 'مقاسات جاهزة';
   static const String tileCustomSize = 'مقاس مخصص';
   static const String invalidInputs = 'يرجى إدخال قيم موجبة صحيحة';
@@ -159,12 +167,14 @@ class Ar {
   static const String wallLabel = 'جدار';
   static const String footingLabel = 'قاعدة';
   static const String elementType = 'نوع العنصر';
-  static const String addElementsInfo = 'أضف العناصر الخرسانية المطلوبة لحساب إجمالي حجم الخرسانة';
+  static const String addElementsInfo =
+      'أضف العناصر الخرسانية المطلوبة لحساب إجمالي حجم الخرسانة';
   static const String grandTotal = 'المجموع الكلي للخرسانة';
   static const String thickness = 'السمك';
   static const String depth = 'العمق';
   static const String dimensionUnit = 'وحدة الأبعاد';
-  static const String dimensionUnitHint = 'تُفسَّر جميع الأبعاد بالوحدة المختارة، والنتيجة دائماً بالمتر المكعب (م³)';
+  static const String dimensionUnitHint =
+      'تُفسَّر جميع الأبعاد بالوحدة المختارة، والنتيجة دائماً بالمتر المكعب (م³)';
   static const String reset = 'إعادة تعيين';
   static const String invalidQuantity = 'أدخل كمية صحيحة (1 أو أكثر)';
   static const String singleElementVolume = 'حجم العنصر الواحد';
@@ -209,7 +219,8 @@ class Ar {
   static const String steelProcurementEstimate = 'تقدير الشراء';
   static const String steelCostEstimate = 'تقدير الكلفة';
   static const String steelBarsPerStockBar = 'أسياخ في السيخ التجاري';
-  static const String steelStockShorter = 'طول السيخ التجاري أقل من طول السيخ المطلوب';
+  static const String steelStockShorter =
+      'طول السيخ التجاري أقل من طول السيخ المطلوب';
   static const String steelStockLengthInvalid = 'أدخل طول سيخ تجاري صحيح';
 
   // Inspection Checklist - UI
@@ -254,47 +265,65 @@ class Ar {
 
   // Inspection Checklist - Concrete Works
   static const String inspectionItemConc01 = 'فحص نتائج اختبار الهبوط (Slump)';
-  static const String inspectionItemConc01Desc = 'التأكد من أن الهبوط ضمن الحدود المسموحة حسب ASTM C143';
+  static const String inspectionItemConc01Desc =
+      'التأكد من أن الهبوط ضمن الحدود المسموحة حسب ASTM C143';
   static const String inspectionItemConc02 = 'أخذ مكعبات اختبار الضغط';
-  static const String inspectionItemConc02Desc = 'أخذ 6 مكعبات على الأقل لكل 100 م³ حسب ASTM C39';
+  static const String inspectionItemConc02Desc =
+      'أخذ 6 مكعبات على الأقل لكل 100 م³ حسب ASTM C39';
   static const String inspectionItemConc03 = 'فحص جاهزية الهزاز الميكانيكي';
-  static const String inspectionItemConc03Desc = 'سرعة الهزاز 8000-12000 دورة/دقيقة حسب ACI 309R';
-  static const String inspectionItemConc04 = 'فحص نظافة الفرم من الأتربة والشوائب';
+  static const String inspectionItemConc03Desc =
+      'سرعة الهزاز 8000-12000 دورة/دقيقة حسب ACI 309R';
+  static const String inspectionItemConc04 =
+      'فحص نظافة الفرم من الأتربة والشوائب';
   static const String inspectionItemConc05 = 'فحص تثبيت الكفرات البلاستيكية';
-  static const String inspectionItemConc05Desc = 'التأكد من التغطية الخرسانية حسب ACI 318 §20.6';
+  static const String inspectionItemConc05Desc =
+      'التأكد من التغطية الخرسانية حسب ACI 318 §20.6';
   static const String inspectionItemConc06 = 'فحص ربط حديد التسليح وثباته';
   static const String inspectionItemConc07 = 'فتح مسارات الصب (Pour Sequence)';
-  static const String inspectionItemConc07Desc = 'تجنب الفواصل الباردة (Cold Joints) حسب ACI 304R';
+  static const String inspectionItemConc07Desc =
+      'تجنب الفواصل الباردة (Cold Joints) حسب ACI 304R';
   static const String inspectionItemConc08 = 'فحص توفر مصدر ماء للمعالجة';
   static const String inspectionItemConc09 = 'فحص درجة حرارة الخرسانة عند الصب';
-  static const String inspectionItemConc09Desc = 'ألا تتجاوز 32°C في الجو الحار حسب ACI 305R';
-  static const String inspectionItemConc10 = 'فحص جاهزية الفرم للتسليح والتثبيت';
+  static const String inspectionItemConc09Desc =
+      'ألا تتجاوز 32°C في الجو الحار حسب ACI 305R';
+  static const String inspectionItemConc10 =
+      'فحص جاهزية الفرم للتسليح والتثبيت';
   static const String inspectionItemConc11 = 'فحص دعامات الفرم (Shoring)';
   static const String inspectionItemConc12 = 'فحص أخذ عينات إضافية للاختبار';
   static const String inspectionItemConc13 = 'فحص مدة نقل الخرسانة';
-  static const String inspectionItemConc13Desc = 'ألا تزيد عن 90 دقيقة من الخلط إلى الصب حسب ACI 304R';
+  static const String inspectionItemConc13Desc =
+      'ألا تزيد عن 90 دقيقة من الخلط إلى الصب حسب ACI 304R';
   static const String inspectionItemConc14 = 'فحص تسوية سطح الخرسانة بعد الصب';
 
   // Inspection Checklist - Reinforcement
   static const String inspectionItemReinf01 = 'فحص شهادات المنشأ والمواصفات';
   static const String inspectionItemReinf02 = 'قياس أقطار الحديد بالقدمة';
-  static const String inspectionItemReinf02Desc = 'مطابقة أقطار الحديد للمواصفات ASTM A615 §6';
+  static const String inspectionItemReinf02Desc =
+      'مطابقة أقطار الحديد للمواصفات ASTM A615 §6';
   static const String inspectionItemReinf03 = 'فحص عدد وتباعد الأسياخ';
   static const String inspectionItemReinf03Desc = 'حسب ACI 318 §25.2';
   static const String inspectionItemReinf04 = 'فحص أطوال الوصلات (Lap Splices)';
-  static const String inspectionItemReinf04Desc = 'لا تقل عن 60 قطر للسيخ حسب ACI 318 §25.5';
+  static const String inspectionItemReinf04Desc =
+      'لا تقل عن 60 قطر للسيخ حسب ACI 318 §25.5';
   static const String inspectionItemReinf05 = 'فحص زوايا الثني والخطاطيف';
-  static const String inspectionItemReinf05Desc = 'ثني 135° للكانات المغلقة حسب ACI 318 §25.3';
-  static const String inspectionItemReinf06 = 'فحص التغطية الخرسانية (Concrete Cover)';
+  static const String inspectionItemReinf05Desc =
+      'ثني 135° للكانات المغلقة حسب ACI 318 §25.3';
+  static const String inspectionItemReinf06 =
+      'فحص التغطية الخرسانية (Concrete Cover)';
   static const String inspectionItemReinf06Desc = 'حسب ACI 318 §20.6.1';
-  static const String inspectionItemReinf07 = 'فحص نظافة الحديد من الصدأ والأتربة';
+  static const String inspectionItemReinf07 =
+      'فحص نظافة الحديد من الصدأ والأتربة';
   static const String inspectionItemReinf08 = 'فحص أسياخ القص (Stirrups/Ties)';
   static const String inspectionItemReinf08Desc = 'حسب ACI 318 §9.6';
-  static const String inspectionItemReinf09 = 'فحص توزيع الكانات والمسافات بينها';
-  static const String inspectionItemReinf09Desc = 'لا تزيد المسافة عن 16 قطر للسيخ الطولي حسب ACI 318 §25.7';
-  static const String inspectionItemReinf10 = 'فحص تطابق أقطار الحديد مع المخططات';
+  static const String inspectionItemReinf09 =
+      'فحص توزيع الكانات والمسافات بينها';
+  static const String inspectionItemReinf09Desc =
+      'لا تزيد المسافة عن 16 قطر للسيخ الطولي حسب ACI 318 §25.7';
+  static const String inspectionItemReinf10 =
+      'فحص تطابق أقطار الحديد مع المخططات';
   static const String inspectionItemReinf11 = 'فحص الحديد الإضافي عند الفتحات';
-  static const String inspectionItemReinf12 = 'فحص تأريض الحديد للاختبارات الكهربائية';
+  static const String inspectionItemReinf12 =
+      'فحص تأريض الحديد للاختبارات الكهربائية';
 
   // Inspection Checklist - Masonry
   static const String inspectionItemMas01 = 'فحص رأسية الجدار (Plumb)';
@@ -302,10 +331,12 @@ class Ar {
   static const String inspectionItemMas03 = 'فحص خلطة المونة (Mortar Mix)';
   static const String inspectionItemMas03Desc = 'مطابقة النسب للكود العراقي §9';
   static const String inspectionItemMas04 = 'فحص ربطة الطابوق (Bond Pattern)';
-  static const String inspectionItemMas05 = 'فحص فواصل التمدد (Expansion Joints)';
+  static const String inspectionItemMas05 =
+      'فحص فواصل التمدد (Expansion Joints)';
   static const String inspectionItemMas06 = 'فحص ربط الجدار بالعمود';
   static const String inspectionItemMas07 = 'فحص استقامة الزوايا والقوائم';
-  static const String inspectionItemMas08 = 'فحص تطابق أبعاد الفتحات مع المخططات';
+  static const String inspectionItemMas08 =
+      'فحص تطابق أبعاد الفتحات مع المخططات';
 
   // Inspection Checklist - Plastering
   static const String inspectionItemPlas01 = 'فحص تجهيز السطح ونظافته';
@@ -343,20 +374,23 @@ class Ar {
   // Inspection Checklist - Painting
   static const String inspectionItemPaint01 = 'فحص تجهيز السطح (صنفرة وتنظيف)';
   static const String inspectionItemPaint01Desc = 'حسب BS 6150';
-  static const String inspectionItemPaint02 = 'فحص تطبيق الطبقة الأساسية (Primer)';
+  static const String inspectionItemPaint02 =
+      'فحص تطبيق الطبقة الأساسية (Primer)';
   static const String inspectionItemPaint03 = 'فحص الظروف الجوية أثناء الدهان';
   static const String inspectionItemPaint04 = 'فحص تغطية الدهان وتجانسه';
   static const String inspectionItemPaint05 = 'فحص حماية الأعمال المجاورة';
   static const String inspectionItemPaint06 = 'فحص تطابق اللون مع المخططات';
 
   // Inspection Checklist - Excavation & Soil
-  static const String inspectionItemExc01 = 'فحص مناسيب الحفر (Excavation Levels)';
+  static const String inspectionItemExc01 =
+      'فحص مناسيب الحفر (Excavation Levels)';
   static const String inspectionItemExc01Desc = 'حسب ACI 336';
   static const String inspectionItemExc02 = 'فحص تدعيم الجوانب (Shoring)';
   static const String inspectionItemExc03 = 'فحص نظام سحب المياه (Dewatering)';
   static const String inspectionItemExc04 = 'فحص قاع الحفر من التربة الرخوة';
   static const String inspectionItemExc05 = 'فحص أبعاد الحفر بالنسبة للمخططات';
-  static const String inspectionItemExc06 = 'فحص تربة التأسيس والتقرير الجيوتقني';
+  static const String inspectionItemExc06 =
+      'فحص تربة التأسيس والتقرير الجيوتقني';
   static const String inspectionItemExc07 = 'فحص موقع مخلفات الحفر (Spoil)';
   static const String inspectionItemExc08 = 'فحص تأمين الموقع وشرائط التحذير';
   static const String inspectionItemExc09 = 'فحص منسوب الماء الجوفي';
@@ -369,13 +403,16 @@ class Ar {
   static const String inspectionItemAsph02Desc = 'حسب ASTM D6927';
   static const String inspectionItemAsph03 = 'فحص سمك الطبقة الأسفلتية';
   static const String inspectionItemAsph04 = 'فحص استواء السطح (Levelness)';
-  static const String inspectionItemAsph05 = 'فحص وصلات التمدد والوصلات الطولية';
-  static const String inspectionItemAsph06 = 'فحص طبقة المادة الرابطة (Tack Coat)';
+  static const String inspectionItemAsph05 =
+      'فحص وصلات التمدد والوصلات الطولية';
+  static const String inspectionItemAsph06 =
+      'فحص طبقة المادة الرابطة (Tack Coat)';
   static const String inspectionItemAsph07 = 'فحص رش المياه للتبريد';
   static const String inspectionItemAsph08 = 'فحص تنظيف السطح بعد الرش';
 
   // Inspection Checklist - MEP
-  static const String inspectionItemMep01 = 'فحص مدخلات الكهرباء في الخرسانة (Conduits)';
+  static const String inspectionItemMep01 =
+      'فحص مدخلات الكهرباء في الخرسانة (Conduits)';
   static const String inspectionItemMep02 = 'فحص ميول مواسير الصرف الصحي';
   static const String inspectionItemMep03 = 'فحص التمديدات الصحية قبل الردم';
   static const String inspectionItemMep04 = 'فحص عزل المواسير الحارة والباردة';
@@ -387,7 +424,8 @@ class Ar {
   static const String inspectionItemMep10 = 'فحص عزل المواسير الحرارية';
 
   // Inspection Checklist - Safety
-  static const String inspectionItemSafe01 = 'فحص معدات الوقاية الشخصية (PPE) للعمال';
+  static const String inspectionItemSafe01 =
+      'فحص معدات الوقاية الشخصية (PPE) للعمال';
   static const String inspectionItemSafe02 = 'فحص سلامة السقالات';
   static const String inspectionItemSafe03 = 'فحص توفر طفاية حريق صالحة';
   static const String inspectionItemSafe04 = 'فحص وجود صندوق إسعافات أولية';
@@ -396,7 +434,8 @@ class Ar {
   static const String inspectionItemSafe07 = 'فحص اللوحات الإرشادية والتحذيرية';
   static const String inspectionItemSafe08 = 'فحص تهوية الأماكن المغلقة';
   static const String inspectionItemSafe09 = 'فحص ترتيب الموقع ونظافته';
-  static const String inspectionItemSafe10 = 'فحص تثبيت المواد في الأماكن المرتفعة';
+  static const String inspectionItemSafe10 =
+      'فحص تثبيت المواد في الأماكن المرتفعة';
 
   // UI Strings
   static const String welcome = 'مرحباً';
@@ -414,7 +453,8 @@ class Ar {
   static const String allArticles = 'كل المقالات';
   static const String engineeringEncyclopedia = 'الموسوعة الهندسية';
   static const String engineeringTools = 'الحاسبات والأدوات الهندسية';
-  static const String toolsDescription = 'أدوات تفاعلية صُممت خصيصاً لمساعدتك في العمليات الحسابية والتحقق الميداني السريع في الموقع.';
+  static const String toolsDescription =
+      'أدوات تفاعلية صُممت خصيصاً لمساعدتك في العمليات الحسابية والتحقق الميداني السريع في الموقع.';
   static const String splashSubtitle = 'الهندسة بين يديك';
   static const String noTopicsInCategory = 'لا توجد مواضيع في هذا التصنيف بعد';
   static const String topicNotFound = 'الموضوع غير موجود';
@@ -498,7 +538,8 @@ class Ar {
   // BACKUP-1B: Backup & Restore
   static const String backupAndRestore = 'النسخ الاحتياطي والاستعادة';
   static const String backupExportButton = 'تصدير نسخة احتياطية';
-  static const String backupExportConfirm = 'سيؤدي هذا إلى إنشاء نسخة احتياطية من ملفك الشخصي والمشاريع وقوائم التفتيش والإعدادات والمراجع.';
+  static const String backupExportConfirm =
+      'سيؤدي هذا إلى إنشاء نسخة احتياطية من ملفك الشخصي والمشاريع وقوائم التفتيش والإعدادات والمراجع.';
   static const String backupExportSuccess = 'تم إنشاء النسخة الاحتياطية بنجاح';
   static const String backupExportFailed = 'فشل النسخ الاحتياطي';
   static const String backupExporting = 'جاري إنشاء النسخة الاحتياطية...';
