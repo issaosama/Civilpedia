@@ -6,11 +6,11 @@ import 'package:provider/provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/section_header.dart';
-import '../../../data/repositories/article_repository.dart';
 import '../../../features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../data/datasources/ad_data_source.dart';
+import '../data/home_content_source.dart';
 import 'widgets/ad_carousel_widget.dart';
 import 'widgets/categories_section.dart';
 import 'widgets/engineering_topics_section.dart';
@@ -94,7 +94,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
               onAction: () => context.push('/articles'),
             ),
             LatestArticlesSection(
-              articles: ArticleRepository().getLatestArticles(),
+              articles: const HomeContentSource().latestArticles,
             ),
             SizedBox(height: bottomPadding + 24),
           ],

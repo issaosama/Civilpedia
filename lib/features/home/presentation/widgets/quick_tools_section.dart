@@ -3,19 +3,20 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
-import '../../../../data/repositories/article_repository.dart';
+import '../../data/home_content_source.dart';
 
 /// Reference-style compact tool rail for Home.
 ///
-/// Uses the existing real tool registry from [ArticleRepository.tools] and
-/// preserves all calculator/checklist navigation contracts. Only presentation
-/// is adjusted to match the approved Home reference layout.
+/// Uses the real tool registry exposed through the Home read-facing boundary
+/// ([HomeContentSource.tools]) and preserves all calculator/checklist
+/// navigation contracts. Only presentation is adjusted to match the approved
+/// Home reference layout.
 class QuickToolsSection extends StatelessWidget {
   const QuickToolsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final tools = ArticleRepository.tools;
+    final tools = const HomeContentSource().tools;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     const horizontalPadding = AppConstants.paddingMedium;
     const gap = 10.0;
