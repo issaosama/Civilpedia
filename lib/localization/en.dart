@@ -258,6 +258,45 @@ class En {
   static const String projectArchived = 'Archived';
   static const String projectNoArchived = 'No archived projects';
 
+  // Calculation History
+  static const String calcHistoryNoCalculations = 'No saved calculations yet';
+  static const String calcHistoryInputSection = 'Input';
+  static const String calcHistoryResultSection = 'Result';
+  static const String calcHistorySavedOn = 'Saved on';
+  static const String calcHistoryCalculator = 'Calculator';
+  static const String calcHistoryVersion = 'Version';
+  static const String calcHistoryLoadFailed = "Couldn't load calculations";
+  static const String calcHistoryYes = 'Yes';
+  static const String calcHistoryNo = 'No';
+  static const String calcHistoryUnitCm = 'cm';
+  static const String calcHistoryUnitMm = 'mm';
+  static const String calcHistoryPerBox = 'Per box';
+  static const String calcHistoryPerTile = 'Per tile';
+  static const String calcHistoryLabelAreaLength = 'Area length';
+  static const String calcHistoryLabelAreaWidth = 'Area width';
+  static const String calcHistoryLabelQuantity = 'Quantity';
+  static const String calcHistoryLabelExcludedArea = 'Excluded area';
+  static const String calcHistoryLabelTileLengthCm = 'Tile length';
+  static const String calcHistoryLabelTileWidthCm = 'Tile width';
+  static const String calcHistoryLabelUnit = 'Unit';
+  static const String calcHistoryLabelIsCustomTile = 'Custom tile';
+  static const String calcHistoryLabelAdditionalPercent = 'Additional %';
+  static const String calcHistoryLabelIsCustomPercent = 'Custom percent';
+  static const String calcHistoryLabelBoxEstimateEnabled = 'Box estimate';
+  static const String calcHistoryLabelCostEnabled = 'Cost estimate';
+  static const String calcHistoryLabelTilesPerBox = 'Tiles per box';
+  static const String calcHistoryLabelPrice = 'Price';
+  static const String calcHistoryLabelPriceMode = 'Price mode';
+  static const String calcHistoryLabelGross = 'Gross';
+  static const String calcHistoryLabelNet = 'Net';
+  static const String calcHistoryLabelTileArea = 'Tile area';
+  static const String calcHistoryLabelTilesPerM2 = 'Tiles per m\u00B2';
+  static const String calcHistoryLabelNetTiles = 'Net tiles';
+  static const String calcHistoryLabelAdditionalTiles = 'Additional tiles';
+  static const String calcHistoryLabelFinalTiles = 'Final tiles';
+  static const String calcHistoryLabelRequiredBoxes = 'Required boxes';
+  static const String calcHistoryLabelTotalCost = 'Total cost';
+
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'Concrete Works';
   static const String inspectionCatReinforcement = 'Reinforcement Works';

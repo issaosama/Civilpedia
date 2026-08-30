@@ -259,6 +259,45 @@ class Ar {
   static const String projectNoActiveProjects = 'لا توجد مشاريع نشطة';
   static const String projectsSaveFailed = 'فشل الحفظ في المشروع';
 
+  // Calculation History
+  static const String calcHistoryNoCalculations = 'لا توجد حسابات محفوظة بعد';
+  static const String calcHistoryInputSection = 'المدخلات';
+  static const String calcHistoryResultSection = 'النتيجة';
+  static const String calcHistorySavedOn = 'تم الحفظ في';
+  static const String calcHistoryCalculator = 'الحاسبة';
+  static const String calcHistoryVersion = 'الإصدار';
+  static const String calcHistoryLoadFailed = 'تعذر تحميل الحسابات';
+  static const String calcHistoryYes = 'نعم';
+  static const String calcHistoryNo = 'لا';
+  static const String calcHistoryUnitCm = 'سم';
+  static const String calcHistoryUnitMm = 'مم';
+  static const String calcHistoryPerBox = 'لكل علبة';
+  static const String calcHistoryPerTile = 'لكل بلاطة';
+  static const String calcHistoryLabelAreaLength = 'طول المساحة';
+  static const String calcHistoryLabelAreaWidth = 'عرض المساحة';
+  static const String calcHistoryLabelQuantity = 'الكمية';
+  static const String calcHistoryLabelExcludedArea = 'المساحة المستثناة';
+  static const String calcHistoryLabelTileLengthCm = 'طول الكاشي';
+  static const String calcHistoryLabelTileWidthCm = 'عرض الكاشي';
+  static const String calcHistoryLabelUnit = 'الوحدة';
+  static const String calcHistoryLabelIsCustomTile = 'مقاس مخصص';
+  static const String calcHistoryLabelAdditionalPercent = 'نسبة إضافية';
+  static const String calcHistoryLabelIsCustomPercent = 'نسبة مخصصة';
+  static const String calcHistoryLabelBoxEstimateEnabled = 'تقدير الكراتين';
+  static const String calcHistoryLabelCostEnabled = 'تقدير الكلفة';
+  static const String calcHistoryLabelTilesPerBox = 'عدد الكاشي في العلبة';
+  static const String calcHistoryLabelPrice = 'السعر';
+  static const String calcHistoryLabelPriceMode = 'نظام السعر';
+  static const String calcHistoryLabelGross = 'الإجمالي';
+  static const String calcHistoryLabelNet = 'الصافي';
+  static const String calcHistoryLabelTileArea = 'مساحة البلاطة الواحدة';
+  static const String calcHistoryLabelTilesPerM2 = 'عدد البلاط لكل م²';
+  static const String calcHistoryLabelNetTiles = 'عدد البلاط الصافي';
+  static const String calcHistoryLabelAdditionalTiles = 'عدد إضافي';
+  static const String calcHistoryLabelFinalTiles = 'العدد النهائي المطلوب';
+  static const String calcHistoryLabelRequiredBoxes = 'عدد الكراتين المطلوبة';
+  static const String calcHistoryLabelTotalCost = 'تكلفة المواد';
+
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'أعمال الخرسانة';
   static const String inspectionCatReinforcement = 'أعمال التسليح';
