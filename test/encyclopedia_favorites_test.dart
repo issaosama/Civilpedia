@@ -10,6 +10,7 @@ import 'package:civilpedia/features/encyclopedia/domain/repositories/encyclopedi
 import 'package:civilpedia/features/encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/widgets/topic_list_card.dart';
+import 'package:civilpedia/features/saved/domain/saved_reference_resolver.dart';
 import 'package:civilpedia/features/saved/presentation/saved_screen.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,25 @@ EngineeringTopic _topic(String id, String title) => EngineeringTopic(
 class _InMemoryEncyclopediaFavoritesStore
     implements EncyclopediaFavoritesStore {
   final List<String> _ids = [];
+
+  @override
+  Future<List<String>> read() async => List.of(_ids);
+
+  @override
+  Future<void> add(String topicId) async {
+    if (!_ids.contains(topicId)) _ids.insert(0, topicId);
+  }
+
+  @override
+  Future<void> remove(String topicId) async {
+    _ids.remove(topicId);
+  }
+}
+
+class _ListBackedEncyclopediaFavoritesStore
+    implements EncyclopediaFavoritesStore {
+  final List<String> _ids;
+  _ListBackedEncyclopediaFavoritesStore(this._ids);
 
   @override
   Future<List<String>> read() async => List.of(_ids);
@@ -311,12 +331,17 @@ void main() {
         _topic('t1', 'الموضوع الأول'),
         _topic('t2', 'الموضوع الثاني'),
       ]);
+      final savedIds = <String>[];
       final favoritesProvider = EncyclopediaFavoritesProvider(
-        store: _InMemoryEncyclopediaFavoritesStore(),
+        store: _ListBackedEncyclopediaFavoritesStore(savedIds),
       );
       await favoritesProvider.load();
       await favoritesProvider.save('t1');
       await favoritesProvider.save('t2');
+      final resolver = SavedReferenceResolver(
+        encyclopediaTopicIds: () async => List.of(savedIds),
+        legacyArticleIds: () async => const <String>[],
+      );
 
       await tester.pumpWidget(
         MultiProvider(
@@ -326,7 +351,7 @@ void main() {
             ),
             ChangeNotifierProvider.value(value: favoritesProvider),
           ],
-          child: const MaterialApp(home: SavedScreen()),
+          child: MaterialApp(home: SavedScreen(favoritesResolver: resolver)),
         ),
       );
       await tester.pumpAndSettle();
@@ -349,10 +374,15 @@ void main() {
       final repository = _FakeEncyclopediaRepository([
         _topic('t1', 'الموضوع الأول'),
       ]);
+      final savedIds = <String>[];
       final favoritesProvider = EncyclopediaFavoritesProvider(
-        store: _InMemoryEncyclopediaFavoritesStore(),
+        store: _ListBackedEncyclopediaFavoritesStore(savedIds),
       );
       await favoritesProvider.load();
+      final resolver = SavedReferenceResolver(
+        encyclopediaTopicIds: () async => List.of(savedIds),
+        legacyArticleIds: () async => const <String>[],
+      );
 
       await tester.pumpWidget(
         MultiProvider(
@@ -362,7 +392,7 @@ void main() {
             ),
             ChangeNotifierProvider.value(value: favoritesProvider),
           ],
-          child: const MaterialApp(home: SavedScreen()),
+          child: MaterialApp(home: SavedScreen(favoritesResolver: resolver)),
         ),
       );
       await tester.pumpAndSettle();
