@@ -253,6 +253,11 @@ class Ar {
   static const String projectRestore = 'استعادة';
   static const String projectArchived = 'المؤرشفة';
   static const String projectNoArchived = 'لا توجد مشاريع مؤرشفة';
+  static const String projectSaveToProject = 'حفظ في المشروع';
+  static const String projectChooseProject = 'اختر المشروع';
+  static const String projectSavedToProject = 'تم الحفظ في المشروع';
+  static const String projectNoActiveProjects = 'لا توجد مشاريع نشطة';
+  static const String projectsSaveFailed = 'فشل الحفظ في المشروع';
 
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'أعمال الخرسانة';

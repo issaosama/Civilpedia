@@ -249,6 +249,11 @@ class En {
   static String projectDeleteConfirm(String name) =>
       'Delete "$name"? This cannot be undone.';
   static String projectCreatedDate(String date) => 'Created $date';
+  static const String projectSaveToProject = 'Save to Project';
+  static const String projectChooseProject = 'Choose Project';
+  static const String projectSavedToProject = 'Saved to Project';
+  static const String projectNoActiveProjects = 'No active projects';
+  static const String projectsSaveFailed = 'Failed to save to project';
   static const String projectRestore = 'Restore';
   static const String projectArchived = 'Archived';
   static const String projectNoArchived = 'No archived projects';

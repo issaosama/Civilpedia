@@ -5,10 +5,14 @@ import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
 import '../../../../../localization/ar.dart';
+import '../../../../tools/domain/tile/tile_calculation_snapshot.dart';
 import '../../../../tools/domain/tile/tile_quantity_calculator.dart';
+import '../../../../projects/data/local_project_calculation_repository.dart';
+import '../../../../projects/domain/entities/project.dart';
 import '../../widgets/calculator/calculator_error_card.dart';
 import '../../widgets/calculator/calculator_primary_button.dart';
 import '../../widgets/calculator/calculator_result_row.dart';
+import '../../widgets/project_picker_dialog.dart';
 
 enum _TileUnit { mm, cm }
 enum _PriceMode { perTile, perBox }
@@ -49,6 +53,9 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
   final _tileWidthCtrl = TextEditingController();
   final _tilesPerBoxCtrl = TextEditingController();
   final _priceCtrl = TextEditingController();
+
+  final LocalProjectCalculationRepository _calcRepository =
+      LocalProjectCalculationRepository();
 
   _TileUnit _unit = _TileUnit.cm;
   _TilePreset _tilePreset = _TilePreset.default_;
@@ -198,6 +205,80 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
     });
   }
 
+  // ── Save to Project (W4.5) ──
+  Future<void> _saveToProject() async {
+    final project = await showDialog<Project>(
+      context: context,
+      builder: (_) => const ProjectPickerDialog(),
+    );
+    if (project == null) return;
+
+    final input = TileCalculationSnapshot.buildInputSnapshot(
+      areaLength: _areaL,
+      areaWidth: _areaW,
+      quantity: _qty,
+      excludedArea: _excludedArea,
+      tileLengthCm: _tileLCm,
+      tileWidthCm: _tileWCm,
+      unit: _unit == _TileUnit.mm ? 'mm' : 'cm',
+      isCustomTile: _isCustomTile,
+      additionalPercent: _additionalPercent,
+      isCustomPercent: _isCustomPercent,
+      boxEstimateEnabled: _showBoxEstimate,
+      costEnabled: _showCost,
+      tilesPerBox: _showBoxEstimate ? _tpb : null,
+      price: _showCost ? _price : null,
+      priceMode: _showCost
+          ? (_priceMode == _PriceMode.perBox ? 'perBox' : 'perTile')
+          : null,
+    );
+
+    int? requiredBoxes;
+    if (_showBoxEstimate && _tpb > 0) requiredBoxes = _boxes;
+
+    double? totalCost;
+    if (_showCost && _price != null && _price! > 0) {
+      totalCost = _priceMode == _PriceMode.perTile
+          ? TileQuantityCalculator.estimatedCostPerTile(
+              finalTiles: _finalTiles, pricePerTile: _price!)
+          : (_tpb > 0
+              ? TileQuantityCalculator.estimatedCostPerBox(
+                  requiredBoxes: _boxes, pricePerBox: _price!)
+              : null);
+    }
+
+    final output = TileCalculationSnapshot.buildOutputSnapshot(
+      gross: _gross,
+      net: _net,
+      tileArea: _tileArea,
+      tilesPerM2: _tilesPerM2,
+      netTiles: _netTiles,
+      additionalTiles: _additional,
+      finalTiles: _finalTiles,
+      requiredBoxes: requiredBoxes,
+      totalCost: totalCost,
+    );
+
+    final record = TileCalculationSnapshot.record(
+      projectId: project.id,
+      inputSnapshot: input,
+      outputSnapshot: output,
+    );
+
+    try {
+      await _calcRepository.saveCalculation(record);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(Ar.projectSavedToProject)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(Ar.projectsSaveFailed)),
+      );
+    }
+  }
+
   // ── Build ──
   @override
   Widget build(BuildContext context) {
@@ -290,6 +371,16 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
                 ),
               ],
             ),
+          ),
+          const SizedBox(width: 8),
+          TextButton.icon(
+            onPressed: _saveToProject,
+            icon: const Icon(Icons.save_outlined, size: 18),
+            label: Text(
+              Ar.projectSaveToProject,
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            ),
+            style: TextButton.styleFrom(foregroundColor: AppColors.primary),
           ),
         ],
       ),

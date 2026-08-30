@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/storage/app_storage_keys.dart';
 import '../domain/entities/project.dart';
+import '../domain/entities/project_calculation_record.dart';
 
 /// W4.1 — Projects-domain persistence compatibility boundary.
 ///
@@ -75,6 +76,62 @@ class ProjectPersistenceGateway {
   Future<void> clearProjectChecklist(String projectId) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(AppStorageKeys.projectChecklist(projectId));
+  }
+
+  /// Reads the persisted calculation records for [projectId]. Returns an empty
+  /// list when the project has no saved records. Read is side-effect free.
+  Future<List<ProjectCalculationRecord>> readProjectCalculations(
+      String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString(AppStorageKeys.projectCalculations(projectId));
+    if (json == null) return [];
+    final decoded = jsonDecode(json);
+    if (decoded is! List) return [];
+    return decoded
+        .cast<Map<String, dynamic>>()
+        .map(_calcFromMap)
+        .where((r) => r != null)
+        .cast<ProjectCalculationRecord>()
+        .toList();
+  }
+
+  /// Writes the whole calculation list for [projectId] to
+  /// `calculations_project_<projectId>`.
+  Future<void> writeProjectCalculations(
+      String projectId, List<ProjectCalculationRecord> records) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      AppStorageKeys.projectCalculations(projectId),
+      jsonEncode(records.map(_calcToMap).toList()),
+    );
+  }
+
+  Map<String, dynamic> _calcToMap(ProjectCalculationRecord record) => {
+        'id': record.id,
+        'projectId': record.projectId,
+        'calculatorId': record.calculatorId,
+        'calculatorVersion': record.calculatorVersion,
+        if (record.title != null) 'title': record.title,
+        'inputSnapshot': record.inputSnapshot,
+        'outputSnapshot': record.outputSnapshot,
+        'createdAt': record.createdAt.toIso8601String(),
+      };
+
+  ProjectCalculationRecord? _calcFromMap(Map<String, dynamic> map) {
+    try {
+      return ProjectCalculationRecord(
+        id: map['id'] as String,
+        projectId: map['projectId'] as String,
+        calculatorId: map['calculatorId'] as String,
+        calculatorVersion: map['calculatorVersion'] as String,
+        title: map['title'] as String?,
+        inputSnapshot: (map['inputSnapshot'] as Map).cast<String, Object?>(),
+        outputSnapshot: (map['outputSnapshot'] as Map).cast<String, Object?>(),
+        createdAt: DateTime.parse(map['createdAt'] as String),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   Map<String, dynamic> _toMap(Project project) => {
