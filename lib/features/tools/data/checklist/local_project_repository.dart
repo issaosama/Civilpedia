@@ -4,6 +4,19 @@ import '../../domain/checklist/entities/project.dart';
 import '../../domain/checklist/project_repository.dart';
 import 'project_local_data_source.dart';
 
+/// Legacy Tools repository implementation.
+///
+/// W4.1 — the Project record (de)serialization contract and the `projects_list`
+/// key now live exclusively in the Projects-domain
+/// `ProjectPersistenceGateway`. This repository keeps its exact CRUD behavior
+/// and API and accesses persistence through the legacy compatibility facade
+/// [ProjectLocalDataSource]:
+///
+/// ```text
+/// LocalProjectRepository → ProjectLocalDataSource → ProjectPersistenceGateway
+/// ```
+///
+/// Canonical `Project` / `ProjectRepository` ownership remains W4.2's job.
 class LocalProjectRepository implements ProjectRepository {
   final ProjectLocalDataSource _dataSource;
   List<Project>? _cache;
@@ -13,8 +26,7 @@ class LocalProjectRepository implements ProjectRepository {
   @override
   Future<List<Project>> loadProjects() async {
     if (_cache != null) return _cache!;
-    final rawList = await _dataSource.readProjects();
-    _cache = rawList.map(_deserialize).where((p) => p != null).cast<Project>().toList();
+    _cache = await _dataSource.readProjects();
     return _cache!;
   }
 
@@ -81,29 +93,6 @@ class LocalProjectRepository implements ProjectRepository {
   }
 
   Future<void> _flush() async {
-    final rawList = _cache!.map(_serialize).toList();
-    await _dataSource.writeProjects(rawList);
-  }
-
-  Map<String, dynamic> _serialize(Project project) => {
-        'id': project.id,
-        'name': project.name,
-        'createdAt': project.createdAt.toIso8601String(),
-        'updatedAt': project.updatedAt.toIso8601String(),
-        'isArchived': project.isArchived,
-      };
-
-  Project? _deserialize(Map<String, dynamic> map) {
-    try {
-      return Project(
-        id: map['id'] as String,
-        name: map['name'] as String,
-        createdAt: DateTime.parse(map['createdAt'] as String),
-        updatedAt: DateTime.parse(map['updatedAt'] as String),
-        isArchived: map['isArchived'] as bool? ?? false,
-      );
-    } catch (_) {
-      return null;
-    }
+    await _dataSource.writeProjects(_cache!);
   }
 }
