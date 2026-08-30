@@ -72,6 +72,19 @@ class LocalProjectRepository implements ProjectRepository {
   }
 
   @override
+  Future<void> restoreProject(String projectId) async {
+    await _ensureCache();
+    final index = _cache!.indexWhere((p) => p.id == projectId);
+    if (index == -1) return;
+    if (!_cache![index].isArchived) return;
+    _cache![index] = _cache![index].copyWith(
+      isArchived: false,
+      updatedAt: DateTime.now(),
+    );
+    await _flush();
+  }
+
+  @override
   Future<void> deleteProject(String projectId) async {
     await _ensureCache();
     _cache!.removeWhere((p) => p.id == projectId);

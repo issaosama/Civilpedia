@@ -250,6 +250,9 @@ class Ar {
   static String projectDeleteConfirm(String name) =>
       'هل تريد حذف المشروع "$name"؟ لا يمكن التراجع عن هذا الإجراء.';
   static String projectCreatedDate(String date) => 'تم الإنشاء في $date';
+  static const String projectRestore = 'استعادة';
+  static const String projectArchived = 'المؤرشفة';
+  static const String projectNoArchived = 'لا توجد مشاريع مؤرشفة';
 
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'أعمال الخرسانة';

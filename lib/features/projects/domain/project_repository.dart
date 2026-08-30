@@ -14,6 +14,11 @@ abstract class ProjectRepository {
 
   Future<void> archiveProject(String projectId);
 
+  /// Returns an archived project to the active list (isArchived -> false).
+  ///
+  /// No-op if the project does not exist or is not currently archived.
+  Future<void> restoreProject(String projectId);
+
   Future<void> deleteProject(String projectId);
 
   /// Replaces the whole project list with the given projects (IDs preserved).

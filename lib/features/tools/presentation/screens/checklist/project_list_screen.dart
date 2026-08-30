@@ -28,6 +28,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   );
   List<Project> _projects = [];
   bool _loading = true;
+  bool _showArchived = false;
 
   @override
   void initState() {
@@ -40,7 +41,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       final all = await _repository.loadProjects();
       if (!mounted) return;
       setState(() {
-        _projects = all.where((p) => !p.isArchived).toList();
+        _projects = all.where((p) => p.isArchived == _showArchived).toList();
         _loading = false;
       });
     } catch (_) {
@@ -80,6 +81,16 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
   Future<void> _archiveProject(Project project) async {
     await _repository.archiveProject(project.id);
     await _loadProjects();
+  }
+
+  Future<void> _restoreProject(Project project) async {
+    await _repository.restoreProject(project.id);
+    await _loadProjects();
+  }
+
+  void _toggleArchivedView() {
+    setState(() => _showArchived = !_showArchived);
+    _loadProjects();
   }
 
   Future<void> _deleteProject(Project project) async {
@@ -153,11 +164,28 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
     String tr(String ar, String en) => isArabic ? ar : en;
 
     return Scaffold(
-      appBar: AppBar(title: Text(tr(Ar.checklistMyProjects, En.checklistMyProjects))),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createProject,
-        child: const Icon(Icons.add),
+      appBar: AppBar(
+        title: Text(tr(Ar.checklistMyProjects, En.checklistMyProjects)),
+        actions: [
+          TextButton.icon(
+            onPressed: _toggleArchivedView,
+            icon: Icon(
+              _showArchived ? Icons.folder : Icons.inventory_2_outlined,
+            ),
+            label: Text(
+              _showArchived
+                  ? tr(Ar.checklistMyProjects, En.checklistMyProjects)
+                  : tr(Ar.projectArchived, En.projectArchived),
+            ),
+          ),
+        ],
       ),
+      floatingActionButton: _showArchived
+          ? null
+          : FloatingActionButton(
+              onPressed: _createProject,
+              child: const Icon(Icons.add),
+            ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _projects.isEmpty
@@ -170,14 +198,18 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                         Icon(Icons.folder_open, size: 64, color: AppColors.textSecondary.withValues(alpha: 0.4)),
                         AppSpacing.gapMd,
                         Text(
-                          tr(Ar.projectNoProjects, En.projectNoProjects),
+                          _showArchived
+                              ? tr(Ar.projectNoArchived, En.projectNoArchived)
+                              : tr(Ar.projectNoProjects, En.projectNoProjects),
                           style: theme.textTheme.titleMedium?.copyWith(color: AppColors.textSecondary),
                         ),
-                        AppSpacing.gapSm,
-                        Text(
-                          tr(Ar.projectCreateFirst, En.projectCreateFirst),
-                          style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-                        ),
+                        if (!_showArchived) ...[
+                          AppSpacing.gapSm,
+                          Text(
+                            tr(Ar.projectCreateFirst, En.projectCreateFirst),
+                            style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -243,19 +275,28 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                                         _renameProject(project);
                                       case 'archive':
                                         _archiveProject(project);
+                                      case 'restore':
+                                        _restoreProject(project);
                                       case 'delete':
                                         _deleteProject(project);
                                     }
                                   },
                                   itemBuilder: (_) => [
-                                    PopupMenuItem(
-                                      value: 'rename',
-                                      child: Text(tr(Ar.projectRename, En.projectRename)),
-                                    ),
-                                    PopupMenuItem(
-                                      value: 'archive',
-                                      child: Text(tr(Ar.projectArchive, En.projectArchive)),
-                                    ),
+                                    if (!_showArchived)
+                                      PopupMenuItem(
+                                        value: 'rename',
+                                        child: Text(tr(Ar.projectRename, En.projectRename)),
+                                      ),
+                                    if (_showArchived)
+                                      PopupMenuItem(
+                                        value: 'restore',
+                                        child: Text(tr(Ar.projectRestore, En.projectRestore)),
+                                      )
+                                    else
+                                      PopupMenuItem(
+                                        value: 'archive',
+                                        child: Text(tr(Ar.projectArchive, En.projectArchive)),
+                                      ),
                                     PopupMenuItem(
                                       value: 'delete',
                                       child: Text(

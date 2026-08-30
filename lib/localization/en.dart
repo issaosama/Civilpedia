@@ -249,6 +249,9 @@ class En {
   static String projectDeleteConfirm(String name) =>
       'Delete "$name"? This cannot be undone.';
   static String projectCreatedDate(String date) => 'Created $date';
+  static const String projectRestore = 'Restore';
+  static const String projectArchived = 'Archived';
+  static const String projectNoArchived = 'No archived projects';
 
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'Concrete Works';
