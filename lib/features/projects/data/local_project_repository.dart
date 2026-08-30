@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import '../domain/entities/project.dart';
+import '../domain/project_name_policy.dart';
 import '../domain/project_repository.dart';
 import 'project_local_data_source.dart';
 
@@ -35,8 +36,7 @@ class LocalProjectRepository implements ProjectRepository {
 
   @override
   Future<Project> createProject(String name) async {
-    final trimmedName = name.trim();
-    final finalName = trimmedName.isEmpty ? 'Untitled Project' : trimmedName;
+    final finalName = ProjectNamePolicy.createName(name);
     final now = DateTime.now();
     final project = Project(
       id: _generateId(),

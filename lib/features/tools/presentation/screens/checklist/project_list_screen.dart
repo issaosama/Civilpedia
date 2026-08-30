@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../projects/domain/project_name_policy.dart';
 import '../../../domain/checklist/entities/project.dart';
 import '../../../domain/checklist/project_repository.dart';
 import '../../../data/checklist/checklist_local_data_source.dart';
@@ -54,7 +55,7 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       _isArabic ? Ar.projectCreateTitle : En.projectCreateTitle,
       '',
     );
-    if (name == null || name.isEmpty) return;
+    if (name == null) return;
     await _repository.createProject(name);
     await _loadProjects();
   }
@@ -65,8 +66,10 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       _isArabic ? Ar.projectRenameTitle : En.projectRenameTitle,
       project.name,
     );
-    if (name == null || name.isEmpty) return;
-    await _repository.updateProject(project.copyWith(name: name));
+    if (name == null) return;
+    final resolved = ProjectNamePolicy.renameName(name);
+    if (resolved == null) return;
+    await _repository.updateProject(project.copyWith(name: resolved));
     await _loadProjects();
   }
 
