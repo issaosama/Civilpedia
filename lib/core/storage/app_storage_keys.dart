@@ -61,6 +61,10 @@ abstract final class AppStorageKeys {
   static String projectCalculations(String projectId) =>
       'calculations_project_$projectId';
 
+  /// SharedPreferences: per-project list of project notes key:
+  /// `notes_project_<projectId>`.
+  static String projectNotes(String projectId) => 'notes_project_$projectId';
+
   /// Hive: downloaded article content key: `offline_<articleId>`.
   static String offlineArticle(String articleId) => 'offline_$articleId';
 

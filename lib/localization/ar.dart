@@ -298,6 +298,20 @@ class Ar {
   static const String calcHistoryLabelRequiredBoxes = 'عدد الكراتين المطلوبة';
   static const String calcHistoryLabelTotalCost = 'تكلفة المواد';
 
+  // Notes
+  static const String notesTitle = 'الملاحظات';
+  static const String notesEmpty = 'لا توجد ملاحظات بعد';
+  static const String notesAdd = 'إضافة ملاحظة';
+  static const String notesEdit = 'تعديل الملاحظة';
+  static const String notesDelete = 'حذف الملاحظة';
+  static const String notesNote = 'ملاحظة';
+  static const String notesCategory = 'التصنيف';
+  static const String notesDeleteConfirm = 'هل تريد حذف هذه الملاحظة؟';
+  static const String notesCreated = 'تاريخ الإنشاء';
+  static const String notesUpdated = 'تاريخ التحديث';
+  static const String notesLoadFailed = 'تعذر تحميل الملاحظات';
+  static const String notesSaveFailed = 'تعذر حفظ الملاحظة';
+
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'أعمال الخرسانة';
   static const String inspectionCatReinforcement = 'أعمال التسليح';

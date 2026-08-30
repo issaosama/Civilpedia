@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/storage/app_storage_keys.dart';
 import '../domain/entities/project.dart';
 import '../domain/entities/project_calculation_record.dart';
+import '../domain/entities/project_note.dart';
 
 /// W4.1 — Projects-domain persistence compatibility boundary.
 ///
@@ -106,6 +107,33 @@ class ProjectPersistenceGateway {
     );
   }
 
+  /// Reads the persisted project notes for [projectId]. Returns an empty list
+  /// when the project has no notes. Read is side-effect free.
+  Future<List<ProjectNote>> readProjectNotes(String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString(AppStorageKeys.projectNotes(projectId));
+    if (json == null) return [];
+    final decoded = jsonDecode(json);
+    if (decoded is! List) return [];
+    return decoded
+        .cast<Map<String, dynamic>>()
+        .map(_noteFromMap)
+        .where((n) => n != null)
+        .cast<ProjectNote>()
+        .toList();
+  }
+
+  /// Writes the whole note list for [projectId] to
+  /// `notes_project_<projectId>`.
+  Future<void> writeProjectNotes(
+      String projectId, List<ProjectNote> notes) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      AppStorageKeys.projectNotes(projectId),
+      jsonEncode(notes.map(_noteToMap).toList()),
+    );
+  }
+
   Map<String, dynamic> _calcToMap(ProjectCalculationRecord record) => {
         'id': record.id,
         'projectId': record.projectId,
@@ -128,6 +156,32 @@ class ProjectPersistenceGateway {
         inputSnapshot: (map['inputSnapshot'] as Map).cast<String, Object?>(),
         outputSnapshot: (map['outputSnapshot'] as Map).cast<String, Object?>(),
         createdAt: DateTime.parse(map['createdAt'] as String),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> _noteToMap(ProjectNote note) => {
+        'noteId': note.noteId,
+        'projectId': note.projectId,
+        'text': note.text,
+        if (note.category != null) 'category': note.category,
+        if (note.linkedRecordId != null) 'linkedRecordId': note.linkedRecordId,
+        'createdAt': note.createdAt.toIso8601String(),
+        'updatedAt': note.updatedAt.toIso8601String(),
+      };
+
+  ProjectNote? _noteFromMap(Map<String, dynamic> map) {
+    try {
+      return ProjectNote(
+        noteId: map['noteId'] as String,
+        projectId: map['projectId'] as String,
+        text: map['text'] as String,
+        category: map['category'] as String?,
+        linkedRecordId: map['linkedRecordId'] as String?,
+        createdAt: DateTime.parse(map['createdAt'] as String),
+        updatedAt: DateTime.parse(map['updatedAt'] as String),
       );
     } catch (_) {
       return null;

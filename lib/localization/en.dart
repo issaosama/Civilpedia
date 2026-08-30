@@ -297,6 +297,20 @@ class En {
   static const String calcHistoryLabelRequiredBoxes = 'Required boxes';
   static const String calcHistoryLabelTotalCost = 'Total cost';
 
+  // Notes
+  static const String notesTitle = 'Notes';
+  static const String notesEmpty = 'No notes yet';
+  static const String notesAdd = 'Add note';
+  static const String notesEdit = 'Edit note';
+  static const String notesDelete = 'Delete note';
+  static const String notesNote = 'Note';
+  static const String notesCategory = 'Category';
+  static const String notesDeleteConfirm = 'Delete this note?';
+  static const String notesCreated = 'Created';
+  static const String notesUpdated = 'Updated';
+  static const String notesLoadFailed = "Couldn't load notes";
+  static const String notesSaveFailed = "Couldn't save note";
+
   // Inspection Checklist - Categories
   static const String inspectionCatConcrete = 'Concrete Works';
   static const String inspectionCatReinforcement = 'Reinforcement Works';
