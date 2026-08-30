@@ -22,8 +22,7 @@ class HiveHelper {
   }
 
   static List<String> getFavorites() {
-    final data = _box.get(AppStorageKeys.favorites, defaultValue: <String>[]);
-    return List<String>.from(data as List);
+    return _asStringList(_box.get(AppStorageKeys.favorites));
   }
 
   static Future<void> toggleFavorite(String articleId) async {
