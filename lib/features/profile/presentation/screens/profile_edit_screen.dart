@@ -24,7 +24,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   bool _hasChanges = false;
 
   String tr(String ar, String en) =>
-      context.watch<LanguageProvider>().isArabic ? ar : en;
+      context.read<LanguageProvider>().isArabic ? ar : en;
 
   @override
   void initState() {

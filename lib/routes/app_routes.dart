@@ -48,6 +48,19 @@ abstract final class AppRoutes {
   static const String saved = '/saved';
   static const String profile = '/profile';
 
+  // --- Profile (W3.3) ---
+  /// Relative Profile-edit segment, nested under the `/profile` shell branch.
+  /// Canonical authority for the segment so the router never repeats a raw
+  /// literal (`/profile/edit` is composed from [profile] + [profileEditSegment]).
+  static const String profileEditSegment = 'edit';
+
+  /// Routed Profile-edit destination. Pushed on top of the `/profile` shell
+  /// branch, preserving the pre-W3.3 `Navigator.push(ProfileEditScreen)`
+  /// behavior (branch-local push; shell chrome stays visible). W3.4 owns the
+  /// future `/user` hierarchy — this is NOT the User Area and must never enter
+  /// `kShellDestinations`.
+  static const String profileEdit = '$profile/$profileEditSegment';
+
   // --- Global Search (W2.3) ---
   // Root-level, full-screen route ABOVE the StatefulShellRoute. It is NOT a
   // bottom-navigation shell destination and must never enter kShellDestinations.

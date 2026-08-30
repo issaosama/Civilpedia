@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'app_routes.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
@@ -20,6 +21,9 @@ import '../features/articles/presentation/screens/article_details_screen.dart';
 import '../features/saved/presentation/saved_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/screens/profile_setup_screen.dart';
+import '../features/profile/presentation/screens/profile_edit_screen.dart';
+import '../features/profile/domain/user_profile.dart';
+import '../features/profile/presentation/providers/user_profile_provider.dart';
 import '../features/search/presentation/screens/global_search_screen.dart';
 import 'not_found_screen.dart';
 
@@ -36,6 +40,36 @@ final Map<String, GoRouterWidgetBuilder> _shellBranchBuilders = {
   AppRoutes.saved: (_, __) => const SavedScreen(),
   AppRoutes.profile: (_, __) => const ProfileScreen(),
 };
+
+/// Nested routes for shell branches. W3.3 hosts the Profile-edit destination
+/// as a child of the `/profile` branch so the push renders on the branch
+/// navigator (bottom navigation stays visible) — identical to the imperative
+/// `Navigator.push(ProfileEditScreen)` behavior it replaces.
+final Map<String, List<RouteBase>> _shellBranchNestedRoutes = {
+  AppRoutes.profile: [
+    GoRoute(
+      path: AppRoutes.profileEditSegment,
+      builder: _buildProfileEdit,
+    ),
+  ],
+};
+
+/// W3.3 — Profile-edit destination. The canonical push passes the current
+/// [LocalUserProfile] via `state.extra`. For direct dispatch without a valid
+/// extra, falls back to the authoritative [UserProfileProvider]; if no profile
+/// exists, the router error contract (NotFoundScreen) applies instead of an
+/// uncontrolled `state.extra as ...` crash.
+Widget _buildProfileEdit(BuildContext context, GoRouterState state) {
+  final extra = state.extra;
+  if (extra is LocalUserProfile) {
+    return ProfileEditScreen(profile: extra);
+  }
+  final profile = context.read<UserProfileProvider>().profile;
+  if (profile != null) {
+    return ProfileEditScreen(profile: profile);
+  }
+  return const NotFoundScreen();
+}
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigator,
@@ -93,6 +127,9 @@ final GoRouter appRouter = GoRouter(
               GoRoute(
                 path: destination.route,
                 builder: _shellBranchBuilders[destination.route]!,
+                routes:
+                    _shellBranchNestedRoutes[destination.route] ??
+                    const <RouteBase>[],
               ),
             ],
           ),

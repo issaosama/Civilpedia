@@ -11,10 +11,10 @@ import '../../../core/theme/spacing.dart';
 import '../../../core/services/theme_provider.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
+import '../../../routes/app_routes.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
 import '../../profile/domain/user_profile.dart';
 import '../../profile/presentation/providers/user_profile_provider.dart';
-import '../../profile/presentation/screens/profile_edit_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -441,11 +441,9 @@ class ProfileScreen extends StatelessWidget {
               fontSize: 13,
             ),
           ),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProfileEditScreen(profile: profile),
-            ),
+          onTap: () => context.push(
+            AppRoutes.profileEdit,
+            extra: profile,
           ),
         ),
         const Divider(height: 1),
@@ -461,11 +459,9 @@ class ProfileScreen extends StatelessWidget {
               fontSize: 13,
             ),
           ),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProfileEditScreen(profile: profile),
-            ),
+          onTap: () => context.push(
+            AppRoutes.profileEdit,
+            extra: profile,
           ),
         ),
       ],
