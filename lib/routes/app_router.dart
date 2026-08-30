@@ -25,6 +25,7 @@ import '../features/profile/presentation/screens/profile_edit_screen.dart';
 import '../features/profile/domain/user_profile.dart';
 import '../features/profile/presentation/providers/user_profile_provider.dart';
 import '../features/search/presentation/screens/global_search_screen.dart';
+import '../features/user_area/presentation/user_area_screen.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
@@ -47,10 +48,7 @@ final Map<String, GoRouterWidgetBuilder> _shellBranchBuilders = {
 /// `Navigator.push(ProfileEditScreen)` behavior it replaces.
 final Map<String, List<RouteBase>> _shellBranchNestedRoutes = {
   AppRoutes.profile: [
-    GoRoute(
-      path: AppRoutes.profileEditSegment,
-      builder: _buildProfileEdit,
-    ),
+    GoRoute(path: AppRoutes.profileEditSegment, builder: _buildProfileEdit),
   ],
 };
 
@@ -103,6 +101,37 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.search,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const GlobalSearchScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.user,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const UserAreaScreen(),
+      routes: [
+        GoRoute(
+          path: AppRoutes.userProfileSegment,
+          parentNavigatorKey: _rootNavigator,
+          builder: (context, state) =>
+              ProfileScreen(profileEditRoute: AppRoutes.userProfileEdit),
+          routes: [
+            GoRoute(
+              path: AppRoutes.profileEditSegment,
+              parentNavigatorKey: _rootNavigator,
+              builder: _buildProfileEdit,
+            ),
+          ],
+        ),
+        GoRoute(
+          path: AppRoutes.userSavedSegment,
+          parentNavigatorKey: _rootNavigator,
+          builder: (context, state) => const SavedScreen(initialTabIndex: 0),
+        ),
+        GoRoute(
+          // Downloads tab index within SavedScreen (0 = Favorites, 1 = Downloads).
+          path: AppRoutes.userDownloadsSegment,
+          parentNavigatorKey: _rootNavigator,
+          builder: (context, state) => const SavedScreen(initialTabIndex: 1),
+        ),
+      ],
     ),
     GoRoute(
       path: AppRoutes.topicListPattern,

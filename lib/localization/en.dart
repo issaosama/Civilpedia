@@ -5,6 +5,7 @@ class En {
   static const String saved = 'Saved';
   static const String profile = 'Profile';
   static const String account = 'Account';
+  static const String userArea = 'User Area';
   static const String encyclopedia = 'Encyclopedia';
   static const String search = 'Search articles...';
   static const String homeEngineeringSearchHint =

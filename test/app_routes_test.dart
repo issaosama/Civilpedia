@@ -47,8 +47,10 @@ void main() {
     });
 
     test('topicDetailFor builds a correct navigable path', () {
-      expect(AppRoutes.topicDetailFor('t-concrete-1'),
-          '/encyclopedia/topic/t-concrete-1');
+      expect(
+        AppRoutes.topicDetailFor('t-concrete-1'),
+        '/encyclopedia/topic/t-concrete-1',
+      );
     });
 
     test('articleFor builds a correct navigable path', () {
@@ -73,10 +75,7 @@ void main() {
         AppRoutes.topicDetailFor('one') == AppRoutes.topicDetailFor('two'),
         isFalse,
       );
-      expect(
-        AppRoutes.articleFor('1') == AppRoutes.articleFor('11'),
-        isFalse,
-      );
+      expect(AppRoutes.articleFor('1') == AppRoutes.articleFor('11'), isFalse);
     });
   });
 
@@ -98,14 +97,22 @@ void main() {
         AppRoutes.profile,
       ];
       for (var i = 0; i < kShellDestinations.length; i++) {
-        expect(kShellDestinations[i].route, expected[i],
-            reason: 'shell branch $i drifted from AppRoutes');
+        expect(
+          kShellDestinations[i].route,
+          expected[i],
+          reason: 'shell branch $i drifted from AppRoutes',
+        );
       }
     });
 
     test('branch count and order are unchanged', () {
-      expect(kShellDestinations.map((d) => d.route).toList(),
-          ['/home', '/encyclopedia', '/tools', '/saved', '/profile']);
+      expect(kShellDestinations.map((d) => d.route).toList(), [
+        '/home',
+        '/encyclopedia',
+        '/tools',
+        '/saved',
+        '/profile',
+      ]);
     });
   });
 
@@ -126,6 +133,11 @@ void main() {
       AppRoutes.tools,
       AppRoutes.saved,
       AppRoutes.profile,
+      AppRoutes.user,
+      AppRoutes.userProfile,
+      AppRoutes.userProfileEdit,
+      AppRoutes.userSaved,
+      AppRoutes.userDownloads,
       AppRoutes.calculatorConcrete,
       AppRoutes.calculatorSteel,
       AppRoutes.calculatorBrick,
@@ -138,7 +150,6 @@ void main() {
         '/knowledge',
         '/projects',
         '/directory',
-        '/user',
         '/search',
       ];
       for (final path in declaredPaths) {
@@ -146,8 +157,9 @@ void main() {
           expect(
             path == prefix || path.startsWith('$prefix/'),
             isFalse,
-            reason: 'future route "$prefix" must not be reachable in F0.1 '
-                'but found "$path"',
+            reason:
+                'future route "$prefix" must not be reachable but found '
+                '"$path"',
           );
         }
       }

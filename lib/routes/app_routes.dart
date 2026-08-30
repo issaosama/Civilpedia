@@ -61,6 +61,34 @@ abstract final class AppRoutes {
   /// `kShellDestinations`.
   static const String profileEdit = '$profile/$profileEditSegment';
 
+  // --- User Area (W3.4) ---
+  /// Root of the full-screen User Area hub.
+  ///
+  /// W3.4 builds the User Area target surface (hub + nested `/user/*`
+  /// routes); the visible Avatar→`/user` navigation entry is deferred to W6.3.
+  /// This is a top-level root route — NOT a Bottom Navigation slot, NOT a
+  /// StatefulShell branch, never a modal/bottom-sheet (M8 §11). It must never
+  /// enter `kShellDestinations`.
+  static const String user = '/user';
+
+  /// Relative Profile segment nested under `/user` (canonical segment
+  /// authority — children of `/user` register with this, never the full path).
+  static const String userProfileSegment = 'profile';
+
+  /// Relative Saved segment nested under `/user`.
+  static const String userSavedSegment = 'saved';
+
+  /// Relative Downloads segment nested under `/user`.
+  static const String userDownloadsSegment = 'downloads';
+
+  /// Full navigable paths (for dispatch via push/go). Nested routers register
+  /// the relative segment constants above; these composed paths are the
+  /// canonical navigation targets.
+  static const String userProfile = '$user/$userProfileSegment';
+  static const String userProfileEdit = '$userProfile/$profileEditSegment';
+  static const String userSaved = '$user/$userSavedSegment';
+  static const String userDownloads = '$user/$userDownloadsSegment';
+
   // --- Global Search (W2.3) ---
   // Root-level, full-screen route ABOVE the StatefulShellRoute. It is NOT a
   // bottom-navigation shell destination and must never enter kShellDestinations.

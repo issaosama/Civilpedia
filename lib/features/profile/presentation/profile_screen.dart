@@ -17,7 +17,19 @@ import '../../profile/domain/user_profile.dart';
 import '../../profile/presentation/providers/user_profile_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({
+    super.key,
+    this.profileEditRoute = AppRoutes.profileEdit,
+  });
+
+  /// W3.4 — canonical route pushed by both edit entry points, with the current
+  /// [LocalUserProfile] passed as `state.extra`.
+  ///
+  /// Legacy `/profile` keeps the default ([AppRoutes.profileEdit] →
+  /// `/profile/edit`). The User Area variant (`/user/profile`) supplies
+  /// [AppRoutes.userProfileEdit] so the same screen navigates to the nested
+  /// `/user/profile/edit` destination without any UI change or duplication.
+  final String profileEditRoute;
 
   void _shareApp(BuildContext context) {
     Share.share(
@@ -159,25 +171,25 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-    Text(
-      auth.isLoggedIn && (auth.currentName?.isNotEmpty ?? false)
-          ? auth.currentName!
-          : tr(Ar.visitor, En.visitor),
-      style: theme.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
-    ),
+                Text(
+                  auth.isLoggedIn && (auth.currentName?.isNotEmpty ?? false)
+                      ? auth.currentName!
+                      : tr(Ar.visitor, En.visitor),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
 
-    const SizedBox(height: 4),
+                const SizedBox(height: 4),
 
-    Text(
-      auth.isLoggedIn && (auth.currentEmail?.isNotEmpty ?? false)
-          ? auth.currentEmail!
-          : tr(Ar.notRegistered, En.notRegistered),
-      style: theme.textTheme.bodyMedium?.copyWith(
-        color: isDark ? Colors.white70 : Colors.black54,
-      ),
-    ),
+                Text(
+                  auth.isLoggedIn && (auth.currentEmail?.isNotEmpty ?? false)
+                      ? auth.currentEmail!
+                      : tr(Ar.notRegistered, En.notRegistered),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                ),
 
                 const SizedBox(height: 20),
 
@@ -243,9 +255,11 @@ class ProfileScreen extends StatelessWidget {
             children: [
               SwitchListTile(
                 title: const Text(Ar.darkMode),
-                subtitle: Text(themeProvider.isDarkMode
-                    ? tr(Ar.enabled, En.enabled)
-                    : tr(Ar.disabled, En.disabled)),
+                subtitle: Text(
+                  themeProvider.isDarkMode
+                      ? tr(Ar.enabled, En.enabled)
+                      : tr(Ar.disabled, En.disabled),
+                ),
                 value: themeProvider.isDarkMode,
                 onChanged: (_) {
                   HapticFeedback.selectionClick();
@@ -409,12 +423,21 @@ class ProfileScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(Icons.person_outline, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+            Icon(
+              Icons.person_outline,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
+            ),
             AppSpacing.gapMd,
             Expanded(
               child: Text(
                 tr(Ar.profileNotSet, En.profileNotSet),
-                style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                style: TextStyle(
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
               ),
             ),
           ],
@@ -423,7 +446,9 @@ class ProfileScreen extends StatelessWidget {
     }
 
     final role = _userTypeName(isArabic, profile.userType);
-    final area = isArabic ? profile.baghdadArea.arName : profile.baghdadArea.enName;
+    final area = isArabic
+        ? profile.baghdadArea.arName
+        : profile.baghdadArea.enName;
 
     return _buildSettingsGroup(
       context,
@@ -441,10 +466,7 @@ class ProfileScreen extends StatelessWidget {
               fontSize: 13,
             ),
           ),
-          onTap: () => context.push(
-            AppRoutes.profileEdit,
-            extra: profile,
-          ),
+          onTap: () => context.push(profileEditRoute, extra: profile),
         ),
         const Divider(height: 1),
         ListTile(
@@ -459,10 +481,7 @@ class ProfileScreen extends StatelessWidget {
               fontSize: 13,
             ),
           ),
-          onTap: () => context.push(
-            AppRoutes.profileEdit,
-            extra: profile,
-          ),
+          onTap: () => context.push(profileEditRoute, extra: profile),
         ),
       ],
     );
@@ -498,8 +517,7 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(tr(Ar.backupExportButton, En.backupExportButton)),
-        content:
-            Text(tr(Ar.backupExportConfirm, En.backupExportConfirm)),
+        content: Text(tr(Ar.backupExportConfirm, En.backupExportConfirm)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -507,8 +525,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child:
-                Text(tr(Ar.backupConfirmExport, En.backupConfirmExport)),
+            child: Text(tr(Ar.backupConfirmExport, En.backupConfirmExport)),
           ),
         ],
       ),
@@ -528,11 +545,11 @@ class ProfileScreen extends StatelessWidget {
           '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       final timeStr =
           '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}${now.second.toString().padLeft(2, '0')}';
-      final fileName =
-          'Civilpedia_Backup_${dateStr}_$timeStr.json';
+      final fileName = 'Civilpedia_Backup_${dateStr}_$timeStr.json';
 
-      final fullPath =
-          await AppDependencies.backupService.exportToFile(fileName);
+      final fullPath = await AppDependencies.backupService.exportToFile(
+        fileName,
+      );
       debugPrint('Backup exported: $fullPath');
 
       messenger.hideCurrentSnackBar();
@@ -551,7 +568,8 @@ class ProfileScreen extends StatelessWidget {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-              '${tr(Ar.backupExportFailed, En.backupExportFailed)}: $e'),
+            '${tr(Ar.backupExportFailed, En.backupExportFailed)}: $e',
+          ),
           behavior: SnackBarBehavior.floating,
           backgroundColor: AppColors.error,
         ),

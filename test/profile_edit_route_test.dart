@@ -66,8 +66,7 @@ Future<void> _open(
   await tester.pumpAndSettle();
 }
 
-String _currentPath() =>
-    appRouter.routerDelegate.currentConfiguration.uri.path;
+String _currentPath() => appRouter.routerDelegate.currentConfiguration.uri.path;
 
 void _useTallViewport(WidgetTester tester) {
   tester.view.physicalSize = const Size(800, 1600);
@@ -85,13 +84,17 @@ void main() {
         '/profile/edit',
         reason: 'public destination must remain unchanged',
       );
-      expect(AppRoutes.profileEdit, '${AppRoutes.profile}/${AppRoutes.profileEditSegment}');
+      expect(
+        AppRoutes.profileEdit,
+        '${AppRoutes.profile}/${AppRoutes.profileEditSegment}',
+      );
     },
   );
 
   testWidgets(
     'W3.3 first entry point pushes ProfileEditScreen through the canonical '
-    'route', (tester) async {
+    'route',
+    (tester) async {
       _useTallViewport(tester);
       final repository = _FakeUserProfileRepository(_profile());
       final profileProvider = UserProfileProvider(repository: repository);
@@ -109,27 +112,27 @@ void main() {
     },
   );
 
-  testWidgets(
-    'W3.3 second entry point uses the same canonical route',
-    (tester) async {
-      _useTallViewport(tester);
-      final repository = _FakeUserProfileRepository(_profile());
-      final profileProvider = UserProfileProvider(repository: repository);
-      await profileProvider.loadProfile();
+  testWidgets('W3.3 second entry point uses the same canonical route', (
+    tester,
+  ) async {
+    _useTallViewport(tester);
+    final repository = _FakeUserProfileRepository(_profile());
+    final profileProvider = UserProfileProvider(repository: repository);
+    await profileProvider.loadProfile();
 
-      await _open(tester, profileProvider, AppRoutes.profile);
+    await _open(tester, profileProvider, AppRoutes.profile);
 
-      await tester.tap(find.widgetWithText(ListTile, Ar.profileMainWorkArea));
-      await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(ListTile, Ar.profileMainWorkArea));
+    await tester.pumpAndSettle();
 
-      expect(find.byType(ProfileEditScreen), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
+    expect(find.byType(ProfileEditScreen), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'W3.3 push keeps Profile Edit on the branch navigator (shell chrome '
-    'stays visible)', (tester) async {
+    'stays visible)',
+    (tester) async {
       _useTallViewport(tester);
       final repository = _FakeUserProfileRepository(_profile());
       final profileProvider = UserProfileProvider(repository: repository);
@@ -144,7 +147,8 @@ void main() {
       expect(
         find.text(Ar.account),
         findsOneWidget,
-        reason: 'bottom navigation must remain visible exactly as it was '
+        reason:
+            'bottom navigation must remain visible exactly as it was '
             'before W3.3 (branch-local push, not a root-navigator push)',
       );
     },
@@ -187,38 +191,38 @@ void main() {
     },
   );
 
-  testWidgets(
-    'W3.3 existing Profile Edit save/update behavior remains green',
-    (tester) async {
-      _useTallViewport(tester);
-      final repository = _FakeUserProfileRepository(_profile());
-      final profileProvider = UserProfileProvider(repository: repository);
-      await profileProvider.loadProfile();
+  testWidgets('W3.3 existing Profile Edit save/update behavior remains green', (
+    tester,
+  ) async {
+    _useTallViewport(tester);
+    final repository = _FakeUserProfileRepository(_profile());
+    final profileProvider = UserProfileProvider(repository: repository);
+    await profileProvider.loadProfile();
 
-      await _open(tester, profileProvider, AppRoutes.profile);
-      await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
-      await tester.pumpAndSettle();
+    await _open(tester, profileProvider, AppRoutes.profile);
+    await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
-      await tester.pumpAndSettle();
-      expect(find.text(Ar.profileChangeRole), findsOneWidget);
+    await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
+    await tester.pumpAndSettle();
+    expect(find.text(Ar.profileChangeRole), findsOneWidget);
 
-      await tester.tap(find.text(Ar.consultantEngineer));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text(Ar.consultantEngineer));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text(Ar.profileSaveChanges));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text(Ar.profileSaveChanges));
+    await tester.pumpAndSettle();
 
-      expect(repository.stored!.userType, CivilUserType.consultantEngineer);
-      expect(find.byType(ProfileEditScreen), findsNothing);
-      expect(find.text(Ar.profileUpdated), findsOneWidget);
-      expect(find.text(Ar.consultantEngineer), findsOneWidget);
-    },
-  );
+    expect(repository.stored!.userType, CivilUserType.consultantEngineer);
+    expect(find.byType(ProfileEditScreen), findsNothing);
+    expect(find.text(Ar.profileUpdated), findsOneWidget);
+    expect(find.text(Ar.consultantEngineer), findsOneWidget);
+  });
 
   testWidgets(
     'W3.3 destination is registered in AppRouter and dispatchable with a '
-    'valid extra', (tester) async {
+    'valid extra',
+    (tester) async {
       final repository = _FakeUserProfileRepository(null);
       final profileProvider = UserProfileProvider(repository: repository);
 
@@ -237,7 +241,8 @@ void main() {
 
   testWidgets(
     'W3.3 direct dispatch without extra and without profile shows the router '
-    'error contract instead of crashing', (tester) async {
+    'error contract instead of crashing',
+    (tester) async {
       final repository = _FakeUserProfileRepository(null);
       final profileProvider = UserProfileProvider(repository: repository);
 
@@ -250,7 +255,8 @@ void main() {
 
   testWidgets(
     'W3.3 direct dispatch without extra falls back to the authoritative '
-    'profile provider', (tester) async {
+    'profile provider',
+    (tester) async {
       final repository = _FakeUserProfileRepository(_profile());
       final profileProvider = UserProfileProvider(repository: repository);
       await profileProvider.loadProfile();
@@ -305,12 +311,13 @@ void main() {
   });
 
   testWidgets(
-    'W3.3 does not introduce a W3.4 /user route', (tester) async {
+    'W3.4 inventory-only /user/activity is not implemented (NotFoundScreen)',
+    (tester) async {
       final repository = _FakeUserProfileRepository(_profile());
       final profileProvider = UserProfileProvider(repository: repository);
       await profileProvider.loadProfile();
 
-      await _open(tester, profileProvider, '/user');
+      await _open(tester, profileProvider, '/user/activity');
 
       expect(find.byType(NotFoundScreen), findsOneWidget);
       expect(tester.takeException(), isNull);

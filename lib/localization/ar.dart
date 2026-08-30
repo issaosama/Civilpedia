@@ -5,6 +5,7 @@ class Ar {
   static const String saved = 'المحفوظات';
   static const String profile = 'الملف الشخصي';
   static const String account = 'حسابي';
+  static const String userArea = 'منطقة المستخدم';
   static const String encyclopedia = 'الموسوعة';
   static const String search = 'ابحث عن مقالات...';
   static const String homeEngineeringSearchHint = 'ابحث في المحتوى الهندسي...';

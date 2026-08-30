@@ -16,12 +16,23 @@ import '../domain/saved_item_reference.dart';
 import '../domain/saved_reference_resolver.dart';
 
 class SavedScreen extends StatefulWidget {
-  const SavedScreen({super.key, this.favoritesResolver});
+  const SavedScreen({
+    super.key,
+    this.favoritesResolver,
+    this.initialTabIndex = 0,
+  });
 
   /// W3.2 — canonical Saved-reference resolver used as the Favorites identity
   /// source. Defaults to the production Hive-backed resolver
   /// ([hiveSavedReferenceResolver]).
   final SavedReferenceResolver? favoritesResolver;
+
+  /// W3.4 — tab selected when the screen is first built. `0` = Favorites,
+  /// `1` = Downloads. Applied through `TabController.initialIndex` (created
+  /// once in initState), so existing callers stay untouched and default to
+  /// Favorites. The `/user/downloads` route uses `1` so the Downloads tab is
+  /// genuinely selected on arrival rather than after a post-frame jump.
+  final int initialTabIndex;
 
   @override
   State<SavedScreen> createState() => _SavedScreenState();
@@ -41,7 +52,13 @@ class _SavedScreenState extends State<SavedScreen>
   void initState() {
     super.initState();
     _resolver = widget.favoritesResolver ?? hiveSavedReferenceResolver();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialTabIndex < 0
+          ? 0
+          : (widget.initialTabIndex > 1 ? 1 : widget.initialTabIndex),
+    );
     _tabController.addListener(_onTabChanged);
     _loadFavorites();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -77,19 +94,22 @@ class _SavedScreenState extends State<SavedScreen>
   void _loadFavorites() {
     if (!mounted) return;
     final generation = ++_loadGeneration;
-    _resolver.resolve().then((refs) {
-      if (!mounted || generation != _loadGeneration) return;
-      setState(() {
-        _favorites = refs;
-        _favoritesLoaded = true;
-      });
-    }).catchError((Object _) {
-      if (!mounted || generation != _loadGeneration) return;
-      setState(() {
-        _favorites = const <SavedItemReference>[];
-        _favoritesLoaded = true;
-      });
-    });
+    _resolver
+        .resolve()
+        .then((refs) {
+          if (!mounted || generation != _loadGeneration) return;
+          setState(() {
+            _favorites = refs;
+            _favoritesLoaded = true;
+          });
+        })
+        .catchError((Object _) {
+          if (!mounted || generation != _loadGeneration) return;
+          setState(() {
+            _favorites = const <SavedItemReference>[];
+            _favoritesLoaded = true;
+          });
+        });
   }
 
   @override
@@ -107,10 +127,7 @@ class _SavedScreenState extends State<SavedScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildFavoritesList(),
-          _buildDownloadsList(),
-        ],
+        children: [_buildFavoritesList(), _buildDownloadsList()],
       ),
     );
   }
@@ -149,9 +166,22 @@ class _SavedScreenState extends State<SavedScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.favorite_border, size: 64, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+            Icon(
+              Icons.favorite_border,
+              size: 64,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
+            ),
             const SizedBox(height: 16),
-            Text(Ar.noFavorites, style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
+            Text(
+              Ar.noFavorites,
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
       );
@@ -180,7 +210,9 @@ class _SavedScreenState extends State<SavedScreen>
               child: Row(
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(AppConstants.cardRadius),
+                    borderRadius: BorderRadius.circular(
+                      AppConstants.cardRadius,
+                    ),
                     child: ArticleImage(
                       imageUrl: article.image,
                       width: 60,
@@ -190,7 +222,10 @@ class _SavedScreenState extends State<SavedScreen>
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(article.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    child: Text(
+                      article.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
@@ -207,17 +242,18 @@ class _SavedScreenState extends State<SavedScreen>
       padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         title,
-        style: Theme.of(context)
-            .textTheme
-            .titleMedium
-            ?.copyWith(fontWeight: FontWeight.w600),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
       ),
     );
   }
 
   Widget _buildDownloadsList() {
     final downloadedIds = HiveHelper.getDownloads();
-    final articles = ArticleRepository.articles.where((a) => downloadedIds.contains(a.id)).toList();
+    final articles = ArticleRepository.articles
+        .where((a) => downloadedIds.contains(a.id))
+        .toList();
 
     if (articles.isEmpty) {
       final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -225,9 +261,22 @@ class _SavedScreenState extends State<SavedScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.download_outlined, size: 64, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+            Icon(
+              Icons.download_outlined,
+              size: 64,
+              color: isDark
+                  ? AppColors.darkTextSecondary
+                  : AppColors.textSecondary,
+            ),
             const SizedBox(height: 16),
-            Text(Ar.noDownloads, style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary)),
+            Text(
+              Ar.noDownloads,
+              style: TextStyle(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+            ),
           ],
         ),
       );
@@ -254,9 +303,16 @@ class _SavedScreenState extends State<SavedScreen>
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: Text(article.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                  article.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-              const Icon(Icons.check_circle, color: AppColors.success, size: 20),
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.success,
+                size: 20,
+              ),
             ],
           ),
         );
