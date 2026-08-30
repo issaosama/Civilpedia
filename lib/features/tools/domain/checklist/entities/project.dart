@@ -1,31 +1,10 @@
-class Project {
-  final String id;
-  final String name;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final bool isArchived;
+/// W4.2 — legacy Tools compatibility shim for the canonical [Project] entity.
+///
+/// The canonical `Project` now lives in the Projects domain at
+/// `lib/features/projects/domain/entities/project.dart`. This file re-exports
+/// it so existing Tools imports (and the persistence contract) keep working
+/// with no consumer changes. It is NOT deleted; it remains a compatibility
+/// re-export.
+library;
 
-  const Project({
-    required this.id,
-    required this.name,
-    required this.createdAt,
-    required this.updatedAt,
-    this.isArchived = false,
-  });
-
-  Project copyWith({
-    String? id,
-    String? name,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    bool? isArchived,
-  }) {
-    return Project(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      isArchived: isArchived ?? this.isArchived,
-    );
-  }
-}
+export '../../../../projects/domain/entities/project.dart';

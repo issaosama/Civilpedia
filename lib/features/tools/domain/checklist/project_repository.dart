@@ -1,19 +1,11 @@
-import 'entities/project.dart';
+/// W4.2 — legacy Tools compatibility shim for the canonical
+/// [ProjectRepository] contract.
+///
+/// The canonical `ProjectRepository` now lives in the Projects domain at
+/// `lib/features/projects/domain/project_repository.dart`. This file
+/// re-exports it so existing Tools imports (and implementers/consumers) keep
+/// working with no consumer changes. It is NOT deleted; it remains a
+/// compatibility re-export.
+library;
 
-abstract class ProjectRepository {
-  Future<List<Project>> loadProjects();
-
-  Future<Project> createProject(String name);
-
-  Future<void> updateProject(Project project);
-
-  Future<void> archiveProject(String projectId);
-
-  Future<void> deleteProject(String projectId);
-
-  /// Replaces the whole project list with the given projects (IDs preserved).
-  ///
-  /// Used by Backup / Restore to reproduce the persisted project records
-  /// exactly, including original [Project.id] values.
-  Future<void> replaceAll(List<Project> projects);
-}
+export '../../../projects/domain/project_repository.dart';

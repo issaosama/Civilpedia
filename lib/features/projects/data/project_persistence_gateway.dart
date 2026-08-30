@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/storage/app_storage_keys.dart';
-import '../../tools/domain/checklist/entities/project.dart';
+import '../domain/entities/project.dart';
 
 /// W4.1 — Projects-domain persistence compatibility boundary.
 ///
@@ -19,13 +19,11 @@ import '../../tools/domain/checklist/entities/project.dart';
 /// facade, `LocalProjectRepository`, and `ChecklistLocalDataSource`) and the
 /// new Projects-domain path can never drift apart.
 ///
-/// It is deliberately NOT a canonical repository: the `Project` entity and
-/// `ProjectRepository` ownership remain untouched — W4.2 owns canonical
-/// repository ownership. Global checklist persistence (`checklist_data`)
-/// remains Tools-owned and is never touched here.
-///
-/// Minimal temporary coupling: this boundary references the existing `Project`
-/// model (still owned by Tools) until W4.2 re-parents entity ownership.
+/// It is deliberately NOT a repository: the canonical `Project` entity and
+/// `ProjectRepository` contract now live in the Projects domain (W4.2), and
+/// this boundary only performs low-level persistence. Global checklist
+/// persistence (`checklist_data`) remains Tools-owned and is never touched
+/// here.
 class ProjectPersistenceGateway {
   /// Reads the persisted project list. Read is side-effect free: it never
   /// rewrites, reorders, or re-times stored records. Malformed entries are

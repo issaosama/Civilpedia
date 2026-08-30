@@ -1,98 +1,11 @@
-import 'dart:math';
-
-import '../../domain/checklist/entities/project.dart';
-import '../../domain/checklist/project_repository.dart';
-import 'project_local_data_source.dart';
-
-/// Legacy Tools repository implementation.
+/// W4.2 — legacy Tools compatibility shim for the canonical
+/// [LocalProjectRepository].
 ///
-/// W4.1 — the Project record (de)serialization contract and the `projects_list`
-/// key now live exclusively in the Projects-domain
-/// `ProjectPersistenceGateway`. This repository keeps its exact CRUD behavior
-/// and API and accesses persistence through the legacy compatibility facade
-/// [ProjectLocalDataSource]:
-///
-/// ```text
-/// LocalProjectRepository → ProjectLocalDataSource → ProjectPersistenceGateway
-/// ```
-///
-/// Canonical `Project` / `ProjectRepository` ownership remains W4.2's job.
-class LocalProjectRepository implements ProjectRepository {
-  final ProjectLocalDataSource _dataSource;
-  List<Project>? _cache;
+/// The canonical `LocalProjectRepository` now lives in the Projects data layer
+/// at `lib/features/projects/data/local_project_repository.dart`. This file
+/// re-exports it so existing Tools imports (DI wiring, UI screens, backup,
+/// tests) keep working with no consumer changes. It is NOT deleted; it remains
+/// a compatibility re-export.
+library;
 
-  LocalProjectRepository(this._dataSource);
-
-  @override
-  Future<List<Project>> loadProjects() async {
-    if (_cache != null) return _cache!;
-    _cache = await _dataSource.readProjects();
-    return _cache!;
-  }
-
-  @override
-  Future<Project> createProject(String name) async {
-    final trimmedName = name.trim();
-    final finalName = trimmedName.isEmpty ? 'Untitled Project' : trimmedName;
-    final now = DateTime.now();
-    final project = Project(
-      id: _generateId(),
-      name: finalName,
-      createdAt: now,
-      updatedAt: now,
-    );
-    await _ensureCache();
-    _cache!.add(project);
-    await _flush();
-    return project;
-  }
-
-  @override
-  Future<void> updateProject(Project project) async {
-    await _ensureCache();
-    final index = _cache!.indexWhere((p) => p.id == project.id);
-    if (index == -1) return;
-    _cache![index] = project.copyWith(updatedAt: DateTime.now());
-    await _flush();
-  }
-
-  @override
-  Future<void> archiveProject(String projectId) async {
-    await _ensureCache();
-    final index = _cache!.indexWhere((p) => p.id == projectId);
-    if (index == -1) return;
-    _cache![index] = _cache![index].copyWith(
-      isArchived: true,
-      updatedAt: DateTime.now(),
-    );
-    await _flush();
-  }
-
-  @override
-  Future<void> deleteProject(String projectId) async {
-    await _ensureCache();
-    _cache!.removeWhere((p) => p.id == projectId);
-    await _flush();
-  }
-
-  @override
-  Future<void> replaceAll(List<Project> projects) async {
-    _cache = List.of(projects);
-    await _flush();
-  }
-
-  String _generateId() {
-    final timestamp = DateTime.now().microsecondsSinceEpoch;
-    final suffix = Random().nextInt(9999);
-    return 'project_${timestamp}_$suffix';
-  }
-
-  Future<void> _ensureCache() async {
-    if (_cache != null) return;
-    await loadProjects();
-  }
-
-  Future<void> _flush() async {
-    await _dataSource.writeProjects(_cache!);
-  }
-}
+export '../../../projects/data/local_project_repository.dart';
