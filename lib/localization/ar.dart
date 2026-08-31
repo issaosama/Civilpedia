@@ -653,4 +653,11 @@ class Ar {
   static const String directoryWhatsApp = 'واتساب';
   static const String directoryNoContactInformation = 'لا توجد معلومات اتصال';
   static const String directoryUnableToOpenApp = 'تعذر فتح التطبيق';
+
+  // W5.5 — Verification display (5-state)
+  static const String verificationUnverified = 'غير موثّق';
+  static const String verificationPending = 'قيد المراجعة';
+  static const String verificationVerified = 'موثّق';
+  static const String verificationRejected = 'مرفوض';
+  static const String verificationSuspended = 'موقوف';
 }

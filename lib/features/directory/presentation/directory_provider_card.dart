@@ -9,14 +9,17 @@ import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/civil_surface_card.dart';
 import '../../profile/domain/service_business_profile.dart';
 import 'directory_category_presentation.dart';
+import 'directory_verification_badge.dart';
 
 /// W5.4 — canonical reusable Directory provider/listing card.
 ///
 /// Scannable listing identity only: BusinessType icon, provider name, localized
-/// BusinessType, localized BaghdadArea, and a coarse single-line category
-/// summary. Deliberately excludes contact, address, description, verification,
-/// saved/bookmark and any Monetization signals (`featured`/`foundingPartner`/
-/// `planType`) — the detail surface owns full provider information (W5.4).
+/// BusinessType, localized BaghdadArea, a coarse single-line category summary
+/// and a compact verification badge (W5.5). Deliberately excludes contact,
+/// address, description, saved/bookmark and any Monetization signals
+/// (`featured`/`foundingPartner`/`planType`) — the detail surface owns full
+/// provider information (W5.4). Verification is display metadata only: it never
+/// filters, reorders or hides the card.
 class DirectoryProviderCard extends StatelessWidget {
   /// The provider to present.
   final ServiceBusinessProfile profile;
@@ -129,6 +132,13 @@ class DirectoryProviderCard extends StatelessWidget {
                     ),
                   ),
                 ],
+                const SizedBox(height: AppSpacing.sm),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: DirectoryVerificationBadge(
+                    status: profile.verificationStatus,
+                  ),
+                ),
               ],
             ),
           ),

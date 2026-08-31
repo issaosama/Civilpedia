@@ -12,13 +12,16 @@ import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../profile/domain/service_business_profile.dart';
 import 'directory_category_presentation.dart';
+import 'directory_verification_badge.dart';
 import 'services/directory_contact_launcher.dart';
 
 /// W5.4 — canonical reusable Directory provider detail surface.
 ///
-/// Deliberately excludes verification (W5.5), saved/bookmark (W5.6) and any
-/// Monetization signals (W7). Maps launch is deferred: the entity has address +
-/// BaghdadArea but no coordinates, so W5.4 displays location text only.
+/// Deliberately excludes saved/bookmark (W5.6) and any Monetization signals
+/// (W7). Maps launch is deferred: the entity has address + BaghdadArea but no
+/// coordinates, so W5.4 displays location text only. Verification is displayed
+/// as a compact badge in the identity/header block (W5.5) — display only, never
+/// filtering, ranking or contact-altering.
 class DirectoryProviderDetailScreen extends StatefulWidget {
   /// The provider to display, passed directly from the listing.
   final ServiceBusinessProfile profile;
@@ -188,6 +191,10 @@ class _DirectoryProviderDetailScreenState
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: AppColors.textMuted,
                       ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    DirectoryVerificationBadge(
+                      status: profile.verificationStatus,
                     ),
                   ],
                 ),

@@ -43,10 +43,20 @@ class DirectorySearchScreen extends StatefulWidget {
   /// [AppDependencies.directoryRepo]. Tests inject a fake.
   final DirectoryRepository? repository;
 
+  /// Bottom scroll clearance for the result list.
+  ///
+  /// Mirrors the W5.2 shell-independent seam: this screen must NOT know the
+  /// AppShell floating-nav geometry (bar height, margin, safe offsets). Callers
+  /// that host the search below chrome (e.g. a future shell branch) supply the
+  /// required content clearance here; the default is normal Directory/design
+  /// bottom spacing. The device bottom SafeArea inset is added at build time.
+  final double bottomContentPadding;
+
   const DirectorySearchScreen({
     super.key,
     this.initialCategory,
     this.repository,
+    this.bottomContentPadding = AppSpacing.huge,
   });
 
   @override
@@ -235,8 +245,14 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
       );
     }
 
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return ListView.separated(
-      padding: AppSpacing.padLg,
+      padding: EdgeInsetsDirectional.only(
+        start: AppSpacing.lg,
+        end: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: widget.bottomContentPadding + bottomInset,
+      ),
       itemCount: results.length,
       separatorBuilder: (_, __) => AppSpacing.gapMd,
       itemBuilder: (context, index) => DirectoryProviderCard(

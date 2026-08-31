@@ -216,11 +216,12 @@ void main() {
       expect(find.byIcon(Icons.directions), findsNothing);
     });
 
-    testWidgets('32. no verification display', (tester) async {
+    testWidgets('32. detail displays verification badge in identity (W5.5)', (tester) async {
       final p = _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified);
       await _pump(tester, p);
-      expect(find.text('verified'), findsNothing);
-      expect(find.byIcon(Icons.verified), findsNothing);
+      // LanguageProvider defaults to Arabic → verified label is موثّق; icon confirms badge.
+      expect(find.text('موثّق'), findsOneWidget);
+      expect(find.byIcon(Icons.verified), findsOneWidget);
     });
 
     testWidgets('33. no Saved UI', (tester) async {

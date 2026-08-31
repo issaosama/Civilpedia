@@ -304,13 +304,18 @@ void main() {
       expect(find.byIcon(Icons.phone), findsNothing);
     });
 
-    testWidgets('45. result row does not show verification', (tester) async {
+    testWidgets('45. result row shows verification badge but filter is absent (W5.5)', (tester) async {
       final profiles = [
         _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified),
       ];
       await _pump(tester, profiles: profiles);
-      expect(find.text('verified'), findsNothing);
-      expect(find.byIcon(Icons.verified), findsNothing);
+      // Verification is displayed on the listing card (W5.5). LanguageProvider
+      // defaults to Arabic → verified label is موثّق; the icon confirms the badge.
+      expect(find.text('موثّق'), findsOneWidget);
+      expect(find.byIcon(Icons.verified), findsOneWidget);
+      // Display only: no verification filter UI is introduced.
+      expect(find.text('Verified only'), findsNothing);
+      expect(find.text('مراجعة'), findsNothing);
     });
 
     testWidgets('46. result row does not show Saved', (tester) async {

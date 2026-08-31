@@ -671,4 +671,11 @@ class En {
   static const String directoryWhatsApp = 'WhatsApp';
   static const String directoryNoContactInformation = 'No contact information';
   static const String directoryUnableToOpenApp = 'Unable to open app';
+
+  // W5.5 — Verification display (5-state)
+  static const String verificationUnverified = 'Unverified';
+  static const String verificationPending = 'Pending review';
+  static const String verificationVerified = 'Verified';
+  static const String verificationRejected = 'Rejected';
+  static const String verificationSuspended = 'Suspended';
 }

@@ -113,11 +113,12 @@ void main() {
       expect(find.byIcon(Icons.phone), findsNothing);
     });
 
-    testWidgets('9. card has no verification', (tester) async {
+    testWidgets('9. card displays verification badge (W5.5)', (tester) async {
       final p = _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified);
       await tester.pumpWidget(_app(p));
-      expect(find.text('verified'), findsNothing);
-      expect(find.byIcon(Icons.verified), findsNothing);
+      // LanguageProvider defaults to Arabic → label is موثّق; the icon confirms the badge.
+      expect(find.text('موثّق'), findsOneWidget);
+      expect(find.byIcon(Icons.verified), findsOneWidget);
     });
 
     testWidgets('10. card has no saved/bookmark', (tester) async {
