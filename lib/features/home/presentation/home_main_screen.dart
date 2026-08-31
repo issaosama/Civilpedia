@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/section_header.dart';
@@ -62,7 +63,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final bottomSpacer = shellSafeBottomPadding(context);
 
     return Scaffold(
       body: RefreshIndicator(
@@ -111,7 +112,7 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
             LatestArticlesSection(
               articles: const HomeContentSource().latestArticles,
             ),
-            SizedBox(height: bottomPadding + 24),
+            SizedBox(height: bottomSpacer),
           ],
         ),
       ),

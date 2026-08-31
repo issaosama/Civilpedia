@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/di/app_dependencies.dart';
+import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
@@ -114,7 +115,12 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 24, 16, 100),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          24,
+          16,
+          shellSafeBottomPadding(context),
+        ),
         children: [
           Container(
             padding: const EdgeInsets.all(24),

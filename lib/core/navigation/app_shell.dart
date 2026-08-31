@@ -8,6 +8,7 @@ import '../../localization/ar.dart';
 import '../../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
+import 'shell_content_insets.dart';
 
 /// Metadata for one bottom-navigation destination of the application shell.
 ///
@@ -80,7 +81,25 @@ const List<ShellDestination> kShellDestinations = [
 /// double-back-to-exit behavior at any branch root. Dashboard/knowledge/tool
 /// content belongs to the screens routed inside each branch (for example
 /// `HomeMainScreen` for `/home`) - never to this widget.
+///
+/// Single source of truth for the floating bottom-navigation content
+/// obstruction. The same metrics drive both the nav bar layout ([_navHeight],
+/// [_navBottomMargin]) and the [ShellContentInsets] published to branch
+/// content so screens can clear it without knowing any geometry details.
 class AppShell extends StatefulWidget {
+  /// Height of the floating bottom-navigation container.
+  static const double _navHeight = 70;
+
+  /// Bottom margin of the floating bottom-navigation container.
+  static const double _navBottomMargin = 16;
+
+  /// Persistent content obstruction from the screen bottom caused by the
+  /// floating bottom navigation bar: its height plus its bottom margin.
+  ///
+  /// This does NOT include the device safe-area inset, which is handled
+  /// separately by each screen via `MediaQuery.paddingOf(context).bottom`.
+  static const double shellBottomObstruction =
+      _navHeight + _navBottomMargin;
   final StatefulNavigationShell navigationShell;
 
   const AppShell({super.key, required this.navigationShell});
@@ -137,20 +156,28 @@ class _AppShellState extends State<AppShell> {
         extendBody: true,
         body: SafeArea(
           bottom: false,
-          child: Column(
-            children: [
-              Expanded(child: widget.navigationShell),
-            ],
+          child: ShellContentInsets(
+            bottomObstruction: AppShell.shellBottomObstruction,
+            child: Column(
+              children: [
+                Expanded(child: widget.navigationShell),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            0,
+            16,
+            AppShell._navBottomMargin,
+          ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
               child: Container(
-                height: 70,
+                height: AppShell._navHeight,
                 decoration: BoxDecoration(
                   color: isDark
                       ? AppColors.darkBottomNav.withValues(alpha: 0.85)

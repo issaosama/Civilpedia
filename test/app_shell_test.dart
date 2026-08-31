@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:civilpedia/core/navigation/app_shell.dart';
+import 'package:civilpedia/core/navigation/shell_content_insets.dart';
 import 'package:civilpedia/localization/ar.dart';
 
 /// Minimal stand-in for a branch content screen. Carries per-branch stateful
@@ -220,5 +221,18 @@ void main() {
 
     expect(find.byType(AppShell), findsOneWidget);
     expect(find.byKey(const ValueKey('probe-/home')), findsOneWidget);
+  });
+
+  testWidgets(
+      'AppShell publishes shellBottomObstruction through ShellContentInsets',
+      (tester) async {
+    await _pumpShell(tester);
+
+    final probeElement = tester.element(find.byKey(const ValueKey('probe-/home')));
+    final insets = ShellContentInsets.maybeOf(probeElement);
+    expect(insets, isNotNull,
+        reason: 'branch content must be inside ShellContentInsets');
+    expect(insets!.bottomObstruction, AppShell.shellBottomObstruction,
+        reason: 'published obstruction must equal canonical constant (86)');
   });
 }

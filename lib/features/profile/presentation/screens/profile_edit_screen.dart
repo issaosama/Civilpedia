@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/navigation/shell_content_insets.dart';
 import '../../../../core/location/baghdad_area.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -231,7 +232,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         elevation: 0,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          top: AppSpacing.lg,
+          bottom: shellSafeBottomPadding(context),
+        ),
         children: [
           _buildSection(
             icon: Icons.badge_outlined,

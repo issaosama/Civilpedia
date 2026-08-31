@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../providers/encyclopedia_provider.dart';
 import '../../domain/entities/engineering_topic.dart';
+import '../../../../core/navigation/shell_content_insets.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/async_value_widget.dart';
@@ -129,7 +130,12 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
 
   Widget _buildSearchResults(EncyclopediaProvider provider, {required bool isDark}) {
     return ListView.separated(
-      padding: AppSpacing.padLg,
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.lg,
+        bottom: shellSafeBottomPadding(context),
+      ),
       itemCount: provider.topics.length,
       separatorBuilder: (_, __) => AppSpacing.gapMd,
       itemBuilder: (context, index) => _topicCard(context, provider.topics[index], isDark: isDark),
@@ -157,7 +163,7 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsetsDirectional.only(bottom: 24),
+      padding: EdgeInsets.only(bottom: shellSafeBottomPadding(context)),
       itemCount: orderedKeys.length,
       itemBuilder: (context, index) {
         final categoryId = orderedKeys[index];
