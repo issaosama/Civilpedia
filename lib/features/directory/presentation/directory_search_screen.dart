@@ -10,7 +10,6 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/civil_app_bar.dart';
-import '../../../core/widgets/civil_surface_card.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/state_widgets.dart';
 import '../../../localization/ar.dart';
@@ -20,6 +19,8 @@ import '../domain/directory_query.dart';
 import '../domain/directory_query_engine.dart';
 import '../domain/directory_repository.dart';
 import 'directory_category_presentation.dart';
+import 'directory_provider_card.dart';
+import 'directory_provider_detail_screen.dart';
 
 /// Directory-local search + location/category filter surface (W5.3).
 ///
@@ -28,9 +29,10 @@ import 'directory_category_presentation.dart';
 /// applies search/filter purely in memory via [DirectoryQueryEngine].
 ///
 /// W5.3 owns search/filter only. W5.4 owns the canonical provider listing and
-/// detail; W5.3 renders only a minimal non-navigating result row showing name,
-/// localized [BusinessType] and localized [BaghdadArea]. No contact,
-/// verification, saved, or sponsored/featured/plan signals are shown.
+/// detail; results render via [DirectoryProviderCard] and tapping opens
+/// [DirectoryProviderDetailScreen] through an internal (production-unexposed)
+/// Navigator push. No contact, verification, saved, or sponsored/featured/plan
+/// signals are shown on the listing card itself.
 class DirectorySearchScreen extends StatefulWidget {
   /// Pre-selected [BusinessType] to start with, used by the W5.2
   /// [DirectoryLandingScreen.onCategorySelected] seam. Null starts in browse
@@ -237,102 +239,18 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
       padding: AppSpacing.padLg,
       itemCount: results.length,
       separatorBuilder: (_, __) => AppSpacing.gapMd,
-      itemBuilder: (context, index) => _ResultRow(
+      itemBuilder: (context, index) => DirectoryProviderCard(
         profile: results[index],
-        isArabic: isArabic,
+        onTap: () => _openDetail(context, results[index]),
       ),
     );
   }
-}
 
-/// Minimal W5.3 result row — NOT the canonical W5.4 provider card.
-///
-/// Shows only identity needed to identify a search result: name, localized
-/// BusinessType, localized BaghdadArea. Deliberately non-navigating and free of
-/// contact/verification/saved/sponsored/featured/plan signals.
-class _ResultRow extends StatelessWidget {
-  final ServiceBusinessProfile profile;
-  final bool isArabic;
-
-  const _ResultRow({required this.profile, required this.isArabic});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final typeLabel = DirectoryCategoryPresentation.labelFor(
-      profile.type,
-      isArabic: isArabic,
-    );
-    final locationLabel =
-        profile.baghdadArea == BaghdadArea.unknown
-            ? null
-            : (isArabic ? profile.baghdadArea.arName : profile.baghdadArea.enName);
-
-    return CivilSurfaceCard(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
-            ),
-            child: Icon(
-              DirectoryCategoryPresentation.iconFor(profile.type),
-              color: AppColors.primaryDark,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  profile.name,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    Flexible(
-                      child: Text(
-                        typeLabel,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    if (locationLabel != null) ...[
-                      const SizedBox(width: AppSpacing.sm),
-                      Flexible(
-                        child: Text(
-                          locationLabel,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
+  void _openDetail(BuildContext context, ServiceBusinessProfile profile) {
+    Navigator.push(
+      context,
+      MaterialPageRoute<void>(
+        builder: (_) => DirectoryProviderDetailScreen(profile: profile),
       ),
     );
   }

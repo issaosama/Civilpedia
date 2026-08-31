@@ -660,4 +660,15 @@ class En {
   static const String directoryFilterLocation = 'Location';
   static const String directoryNoResults = 'No results found';
   static const String directoryEmptyDirectory = 'No providers yet';
+
+  // W5.4 — Provider listing + detail + contact
+  static const String directoryNotSpecified = 'Not specified';
+  static const String directoryDescription = 'Description';
+  static const String directoryAddress = 'Address';
+  static const String directoryServices = 'Services';
+  static const String directoryContact = 'Contact Information';
+  static const String directoryCall = 'Call';
+  static const String directoryWhatsApp = 'WhatsApp';
+  static const String directoryNoContactInformation = 'No contact information';
+  static const String directoryUnableToOpenApp = 'Unable to open app';
 }

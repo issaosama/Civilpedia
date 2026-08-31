@@ -9,6 +9,7 @@ import 'package:civilpedia/core/navigation/app_shell.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/features/directory/domain/directory_repository.dart';
+import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/directory/presentation/directory_search_screen.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
 import 'package:civilpedia/localization/ar.dart';
@@ -80,11 +81,11 @@ ServiceBusinessProfile _p({
 }
 
 Widget _app(_FakeDirectoryRepository repo, {BusinessType? initialCategory}) {
-  return MaterialApp(
-    theme: AppTheme.lightTheme,
-    home: ChangeNotifierProvider(
-      create: (_) => LanguageProvider(),
-      child: DirectorySearchScreen(
+  return ChangeNotifierProvider(
+    create: (_) => LanguageProvider(),
+    child: MaterialApp(
+      theme: AppTheme.lightTheme,
+      home: DirectorySearchScreen(
         repository: repo,
         initialCategory: initialCategory,
       ),
@@ -319,13 +320,13 @@ void main() {
       expect(find.byIcon(Icons.bookmark_border), findsNothing);
     });
 
-    testWidgets('47. result row does not navigate to detail', (tester) async {
+    testWidgets('47. result navigates to provider detail (W5.4)', (tester) async {
       final profiles = [_p(id: 'a', name: 'Alpha Co')];
       await _pump(tester, profiles: profiles);
       await tester.tap(find.text('Alpha Co'));
       await tester.pumpAndSettle();
-      // Screen still shows; no detail route pushed.
-      expect(find.byType(DirectorySearchScreen), findsOneWidget);
+      // Internal (production-unexposed) Navigator push opens the detail.
+      expect(find.byType(DirectoryProviderDetailScreen), findsOneWidget);
     });
   });
 

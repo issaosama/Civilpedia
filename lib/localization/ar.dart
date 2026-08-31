@@ -642,4 +642,15 @@ class Ar {
   static const String directoryFilterLocation = 'المنطقة';
   static const String directoryNoResults = 'لا توجد نتائج';
   static const String directoryEmptyDirectory = 'لا يوجد مزودون بعد';
+
+  // W5.4 — Provider listing + detail + contact
+  static const String directoryNotSpecified = 'غير محدد';
+  static const String directoryDescription = 'الوصف';
+  static const String directoryAddress = 'العنوان';
+  static const String directoryServices = 'الخدمات';
+  static const String directoryContact = 'معلومات الاتصال';
+  static const String directoryCall = 'اتصال';
+  static const String directoryWhatsApp = 'واتساب';
+  static const String directoryNoContactInformation = 'لا توجد معلومات اتصال';
+  static const String directoryUnableToOpenApp = 'تعذر فتح التطبيق';
 }
