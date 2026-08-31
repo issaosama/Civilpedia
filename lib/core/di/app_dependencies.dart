@@ -1,5 +1,7 @@
 import 'package:path_provider/path_provider.dart';
 
+import '../../features/directory/data/sb_profiles_directory_repository.dart';
+import '../../features/directory/domain/directory_repository.dart';
 import '../../features/encyclopedia/data/datasources/encyclopedia_json_datasource.dart';
 import '../../features/encyclopedia/data/datasources/encyclopedia_local_datasource.dart';
 import '../../features/encyclopedia/data/repositories/encyclopedia_repository_impl.dart';
@@ -31,6 +33,7 @@ class AppDependencies {
 
   static late final ServiceBusinessDataSource _businessDataSource;
   static late final ServiceBusinessRepository _businessRepo;
+  static late final DirectoryRepository _directoryRepo;
 
   static late final ChecklistLocalDataSource _checklistDataSource;
   static late final ChecklistRepository _checklistRepo;
@@ -54,6 +57,7 @@ class AppDependencies {
 
     _businessDataSource = ServiceBusinessDataSource();
     _businessRepo = LocalServiceBusinessRepository(_businessDataSource);
+    _directoryRepo = SbProfilesDirectoryRepository(businessRepo: _businessRepo);
 
     _checklistDataSource = ChecklistLocalDataSource();
     _checklistRepo = LocalChecklistRepository(_checklistDataSource);
@@ -77,6 +81,8 @@ class AppDependencies {
   static UserProfileRepository get userProfileRepo => _userProfileRepo;
 
   static ServiceBusinessRepository get businessRepo => _businessRepo;
+
+  static DirectoryRepository get directoryRepo => _directoryRepo;
 
   static ChecklistRepository get checklistRepo => _checklistRepo;
 
