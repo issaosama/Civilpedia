@@ -651,4 +651,13 @@ class En {
   static const String directoryTypeMaterialShop = 'Material Shop';
   static const String directoryTypeConsultantOffice = 'Consultant Office';
   static const String directoryTypeOther = 'Other';
+
+  // W5.3 — Directory search + location/category filter
+  static const String directorySearchTitle = 'Search Directory';
+  static const String directorySearchHint = 'Search providers or services...';
+  static const String directoryFilterAll = 'All';
+  static const String directoryFilterCategory = 'Category';
+  static const String directoryFilterLocation = 'Location';
+  static const String directoryNoResults = 'No results found';
+  static const String directoryEmptyDirectory = 'No providers yet';
 }

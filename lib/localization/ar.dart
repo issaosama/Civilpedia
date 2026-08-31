@@ -633,4 +633,13 @@ class Ar {
   static const String directoryTypeMaterialShop = 'محل مواد';
   static const String directoryTypeConsultantOffice = 'مكتب استشاري';
   static const String directoryTypeOther = 'أخرى';
+
+  // W5.3 — Directory search + location/category filter
+  static const String directorySearchTitle = 'البحث في الدليل';
+  static const String directorySearchHint = 'ابحث عن مزود أو خدمة...';
+  static const String directoryFilterAll = 'الكل';
+  static const String directoryFilterCategory = 'الفئة';
+  static const String directoryFilterLocation = 'المنطقة';
+  static const String directoryNoResults = 'لا توجد نتائج';
+  static const String directoryEmptyDirectory = 'لا يوجد مزودون بعد';
 }
