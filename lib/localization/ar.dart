@@ -618,4 +618,19 @@ class Ar {
   static const String profileNotSet = 'غير محدد';
   static const String profileChangeRole = 'تغيير الدور';
   static const String profileChangeWorkArea = 'تغيير منطقة العمل';
+
+  // Directory
+  static const String directoryLandingTitle = 'الدليل الهندسي';
+  static const String directoryTypeSupplier = 'مورّد';
+  static const String directoryTypeTechnician = 'فني';
+  static const String directoryTypeEquipmentOwner = 'مالك معدات';
+  static const String directoryTypeEngineeringOffice = 'مكتب هندسي';
+  static const String directoryTypeConstructionCompany = 'شركة إنشاءات';
+  static const String directoryTypeBuildingOffice = 'مكتب بناء';
+  static const String directoryTypeTestingLab = 'مختبر فحص';
+  static const String directoryTypeSurveyor = 'مساح';
+  static const String directoryTypeContractor = 'مقاول';
+  static const String directoryTypeMaterialShop = 'محل مواد';
+  static const String directoryTypeConsultantOffice = 'مكتب استشاري';
+  static const String directoryTypeOther = 'أخرى';
 }

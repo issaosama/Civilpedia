@@ -636,4 +636,19 @@ class En {
   static const String profileNotSet = 'Not set';
   static const String profileChangeRole = 'Change role';
   static const String profileChangeWorkArea = 'Change work area';
+
+  // Directory
+  static const String directoryLandingTitle = 'Engineering Directory';
+  static const String directoryTypeSupplier = 'Supplier';
+  static const String directoryTypeTechnician = 'Technician';
+  static const String directoryTypeEquipmentOwner = 'Equipment Owner';
+  static const String directoryTypeEngineeringOffice = 'Engineering Office';
+  static const String directoryTypeConstructionCompany = 'Construction Company';
+  static const String directoryTypeBuildingOffice = 'Building Office';
+  static const String directoryTypeTestingLab = 'Testing Laboratory';
+  static const String directoryTypeSurveyor = 'Surveyor';
+  static const String directoryTypeContractor = 'Contractor';
+  static const String directoryTypeMaterialShop = 'Material Shop';
+  static const String directoryTypeConsultantOffice = 'Consultant Office';
+  static const String directoryTypeOther = 'Other';
 }
