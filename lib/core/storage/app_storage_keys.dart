@@ -65,6 +65,15 @@ abstract final class AppStorageKeys {
   /// `notes_project_<projectId>`.
   static String projectNotes(String projectId) => 'notes_project_$projectId';
 
+  /// SharedPreferences: per-project list of checklist execution records key:
+  /// `checklist_executions_project_<projectId>`.
+  ///
+  /// W4.8 — canonical Projects-owned store for [ProjectChecklistExecution]
+  /// records. Distinct from the Tools-owned legacy `checklist_project_<id>`
+  /// working sheet and the global `checklist_data`. Legacy keys MUST remain.
+  static String projectChecklistExecutions(String projectId) =>
+      'checklist_executions_project_$projectId';
+
   /// Hive: downloaded article content key: `offline_<articleId>`.
   static String offlineArticle(String articleId) => 'offline_$articleId';
 

@@ -1,16 +1,23 @@
 import 'dart:convert';
 
+import '../../../projects/data/local_project_checklist_execution_repository.dart';
+import '../../../projects/domain/project_checklist_execution_repository.dart';
 import '../../domain/checklist/checklist_repository.dart';
+import '../../domain/checklist/checklist_template_contract.dart';
 import '../../presentation/screens/checklist/models/inspection_status.dart';
 import 'checklist_item_state.dart';
 import 'checklist_local_data_source.dart';
 
 class LocalChecklistRepository implements ChecklistRepository {
   final ChecklistLocalDataSource _dataSource;
+  final ProjectChecklistExecutionRepository _executions;
   Map<String, ChecklistItemState>? _cache;
   Map<String, Map<String, ChecklistItemState>>? _projectCaches;
 
-  LocalChecklistRepository(this._dataSource);
+  LocalChecklistRepository(
+    this._dataSource, [
+    ProjectChecklistExecutionRepository? executions,
+  ]) : _executions = executions ?? LocalProjectChecklistExecutionRepository();
 
   @override
   Future<Map<String, ChecklistItemData>> loadItemStates() async {
@@ -58,6 +65,7 @@ class LocalChecklistRepository implements ChecklistRepository {
     final cache = json != null ? _deserialize(json) : <String, ChecklistItemState>{};
     _projectCaches ??= <String, Map<String, ChecklistItemState>>{};
     _projectCaches![projectId] = cache;
+    await _adoptLegacyExecution(projectId, cache);
     return _convertCache(cache);
   }
 
@@ -70,6 +78,7 @@ class LocalChecklistRepository implements ChecklistRepository {
       notes: _projectCaches![projectId]![itemId]?.notes,
     );
     await _flushProject(projectId);
+    await _recordExecution(projectId);
   }
 
   @override
@@ -83,10 +92,18 @@ class LocalChecklistRepository implements ChecklistRepository {
       notes: notes,
     );
     await _flushProject(projectId);
+    await _recordExecution(projectId);
   }
 
   @override
   Future<void> clearProject(String projectId) async {
+    await _ensureProjectCache(projectId);
+    final cache = _projectCaches?[projectId] ?? <String, ChecklistItemState>{};
+    await _adoptLegacyExecution(projectId, cache);
+    await _executions.finalizeActive(
+      projectId: projectId,
+      completedAt: DateTime.now(),
+    );
     _projectCaches?.remove(projectId);
     await _dataSource.clearProjectChecklistData(projectId);
   }
@@ -110,6 +127,7 @@ class LocalChecklistRepository implements ChecklistRepository {
           ChecklistItemState(status: v.status.name, notes: v.notes),
         ));
     await _flushProject(projectId);
+    await _recordExecution(projectId);
   }
 
   Map<String, ChecklistItemData> _fromCache() {
@@ -142,6 +160,31 @@ class LocalChecklistRepository implements ChecklistRepository {
     final cache = json != null ? _deserialize(json) : <String, ChecklistItemState>{};
     _projectCaches ??= <String, Map<String, ChecklistItemState>>{};
     _projectCaches![projectId] = cache;
+  }
+
+  Future<void> _adoptLegacyExecution(
+    String projectId,
+    Map<String, ChecklistItemState> cache,
+  ) {
+    if (cache.isEmpty) return Future.value();
+    return _executions.adoptLegacyState(
+      projectId: projectId,
+      templateId: ChecklistTemplateContract.templateId,
+      statusesByItemId: cache.map((k, v) => MapEntry(k, v.status)),
+      notesByItemId: cache.map((k, v) => MapEntry(k, v.notes)),
+    );
+  }
+
+  Future<void> _recordExecution(String projectId) {
+    final cache = _projectCaches?[projectId];
+    if (cache == null || cache.isEmpty) return Future.value();
+    return _executions.recordSnapshot(
+      projectId: projectId,
+      templateId: ChecklistTemplateContract.templateId,
+      templateVersion: ChecklistTemplateContract.templateVersion,
+      statusesByItemId: cache.map((k, v) => MapEntry(k, v.status)),
+      notesByItemId: cache.map((k, v) => MapEntry(k, v.notes)),
+    );
   }
 
   Future<void> _flush() async {

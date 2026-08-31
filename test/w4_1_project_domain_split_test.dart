@@ -283,6 +283,7 @@ void main() {
         equals({
           AppStorageKeys.projectChecklist('pX'),
           AppStorageKeys.projectChecklist('pY'),
+          AppStorageKeys.projectChecklistExecutions('pX'),
         }),
       );
     });

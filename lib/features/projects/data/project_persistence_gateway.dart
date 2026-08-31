@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/storage/app_storage_keys.dart';
 import '../domain/entities/project.dart';
 import '../domain/entities/project_calculation_record.dart';
+import '../domain/entities/project_checklist_execution.dart';
 import '../domain/entities/project_note.dart';
 
 /// W4.1 — Projects-domain persistence compatibility boundary.
@@ -132,6 +133,75 @@ class ProjectPersistenceGateway {
       AppStorageKeys.projectNotes(projectId),
       jsonEncode(notes.map(_noteToMap).toList()),
     );
+  }
+
+  /// Reads the persisted checklist execution records for [projectId]. Returns
+  /// an empty list when the project has none. Read is side-effect free.
+  Future<List<ProjectChecklistExecution>> readProjectChecklistExecutions(
+      String projectId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final json =
+        prefs.getString(AppStorageKeys.projectChecklistExecutions(projectId));
+    if (json == null) return [];
+    final decoded = jsonDecode(json);
+    if (decoded is! List) return [];
+    return decoded
+        .cast<Map<String, dynamic>>()
+        .map(_execFromMap)
+        .where((e) => e != null)
+        .cast<ProjectChecklistExecution>()
+        .toList();
+  }
+
+  /// Writes the whole checklist execution list for [projectId] to
+  /// `checklist_executions_project_<projectId>`.
+  Future<void> writeProjectChecklistExecutions(
+      String projectId, List<ProjectChecklistExecution> executions) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      AppStorageKeys.projectChecklistExecutions(projectId),
+      jsonEncode(executions.map(_execToMap).toList()),
+    );
+  }
+
+  Map<String, dynamic> _execToMap(ProjectChecklistExecution execution) => {
+        'executionId': execution.executionId,
+        'projectId': execution.projectId,
+        'templateId': execution.templateId,
+        if (execution.templateVersion != null)
+          'templateVersion': execution.templateVersion,
+        'executedItemSnapshot': execution.executedItemSnapshot,
+        if (execution.startedAt != null)
+          'startedAt': execution.startedAt!.toIso8601String(),
+        if (execution.completedAt != null)
+          'completedAt': execution.completedAt!.toIso8601String(),
+        if (execution.result != null) 'result': execution.result,
+        if (execution.notes != null) 'notes': execution.notes,
+      };
+
+  ProjectChecklistExecution? _execFromMap(Map<String, dynamic> map) {
+    try {
+      return ProjectChecklistExecution(
+        executionId: map['executionId'] as String,
+        projectId: map['projectId'] as String,
+        templateId: map['templateId'] as String,
+        templateVersion: map['templateVersion'] as String?,
+        executedItemSnapshot: ((map['executedItemSnapshot'] as List?) ??
+                const [])
+            .map((e) => (e as Map).cast<String, Object?>())
+            .toList(),
+        startedAt: map['startedAt'] == null
+            ? null
+            : DateTime.parse(map['startedAt'] as String),
+        completedAt: map['completedAt'] == null
+            ? null
+            : DateTime.parse(map['completedAt'] as String),
+        result: map['result'] as String?,
+        notes: map['notes'] as String?,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 
   Map<String, dynamic> _calcToMap(ProjectCalculationRecord record) => {
