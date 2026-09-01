@@ -32,6 +32,10 @@ void main() {
       expect(AppRoutes.profile, '/profile');
     });
 
+    test('projects canonical route path matches production literal', () {
+      expect(AppRoutes.projects, '/projects');
+    });
+
     test('calculator paths match production literals', () {
       expect(AppRoutes.calculatorConcrete, '/calculator/concrete');
       expect(AppRoutes.calculatorSteel, '/calculator/steel');
@@ -138,6 +142,7 @@ void main() {
       AppRoutes.userProfileEdit,
       AppRoutes.userSaved,
       AppRoutes.userDownloads,
+      AppRoutes.projects,
       AppRoutes.calculatorConcrete,
       AppRoutes.calculatorSteel,
       AppRoutes.calculatorBrick,
@@ -148,7 +153,6 @@ void main() {
     test('no future domain route is declared', () {
       const futurePrefixes = [
         '/knowledge',
-        '/projects',
         '/directory',
         '/search',
       ];
@@ -173,7 +177,6 @@ void main() {
         AppRoutes.articlesFor('x'),
       ]) {
         expect(built.startsWith('/knowledge/'), isFalse);
-        expect(built.startsWith('/projects'), isFalse);
         expect(built.startsWith('/directory'), isFalse);
         expect(built.startsWith('/user'), isFalse);
         expect(built.startsWith('/search'), isFalse);

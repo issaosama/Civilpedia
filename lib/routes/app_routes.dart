@@ -5,10 +5,11 @@
 /// migration, no redirects, no hierarchy change, and no change to Bottom
 /// Navigation.
 ///
-/// Future target routes (`/knowledge`, `/projects`, `/directory`, `/user`, ...)
-/// are intentionally **not** declared here. They are
-/// introduced only when their own implementation phase begins. This contract
-/// models current canonical identities first; see M8 §27 (resolved).
+/// Future target routes (`/knowledge`, `/directory`) are intentionally **not**
+/// declared here. They are introduced only when their own implementation phase
+/// begins. This contract models current canonical identities first; see M8 §27
+/// (resolved). `/projects` was declared in W6.1 as the canonical Projects V1
+/// route (navigation-ready, no visible launcher).
 ///
 /// Distinction: a **route identity/name** (e.g. `home`) is different from a
 /// **route path** (e.g. `/home`). This contract exposes canonical path
@@ -40,6 +41,18 @@ abstract final class AppRoutes {
   static const String articles = '/articles';
   static const String articlesByCategoryPattern = '/articles/:category';
   static const String articlePattern = '/article/:id';
+
+  // --- Projects (W6.1) ---
+  /// Canonical Projects V1 list route.
+  ///
+  /// W6.1 establishes this as the permanent GoRouter route for the canonical
+  /// Projects [ProjectListScreen]. It is navigation-ready but has NO visible
+  /// production launcher in W6.1 — it is NOT a Bottom Navigation destination
+  /// and must never enter `kShellDestinations`. Projects becomes a visible
+  /// shell slot only in the later phase (M3 NAV-4) when a slot is freed.
+  /// The legacy `Tools → Checklist → My Projects` entry remains the production
+  /// access in W6.1.
+  static const String projects = '/projects';
 
   // --- Shell destinations (values mirror kShellDestinations in app_shell) ---
   static const String home = '/home';

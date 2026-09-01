@@ -22,6 +22,7 @@ import '../features/saved/presentation/saved_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/screens/profile_setup_screen.dart';
 import '../features/profile/presentation/screens/profile_edit_screen.dart';
+import '../features/projects/presentation/project_list_screen.dart';
 import '../features/profile/domain/user_profile.dart';
 import '../features/profile/presentation/providers/user_profile_provider.dart';
 import '../features/search/presentation/screens/global_search_screen.dart';
@@ -91,6 +92,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.auth,
       builder: (context, state) => const AuthScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.projects,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const ProjectListScreen(),
     ),
     GoRoute(
       path: AppRoutes.categories,
