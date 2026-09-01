@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -32,10 +33,12 @@ class DirectoryLandingScreen extends StatelessWidget {
   /// Bottom scroll padding for the category grid.
   ///
   /// W5.2 stays shell-independent: this screen must NOT know the AppShell
-  /// floating-nav geometry (bar height, margin, safe offsets). Callers that
-  /// host the Landing below chrome (e.g. a future shell branch) supply the
-  /// required content clearance here; the default is normal Directory/design
-  /// bottom spacing. The device bottom SafeArea inset is added at build time.
+  /// floating-nav geometry (bar height, margin, safe offsets). When hosted
+  /// STANDALONE (W5.2/W5.3 default), the final bottom clearance is
+  /// `bottomContentPadding + device bottom SafeArea inset`. When hosted inside
+  /// the AppShell (W6.3), the screen detects the shell ancestor and instead
+  /// applies the closed UI-SAFE-1 contract via [shellSafeBottomPadding], so the
+  /// shell obstruction and device inset are never summed.
   final double bottomContentPadding;
 
   const DirectoryLandingScreen({
@@ -48,7 +51,16 @@ class DirectoryLandingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final types = DirectoryCategoryPresentation.orderedTypes;
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    // W6.3 UI-SAFE-1 — explicit dual-host clean bottom clearance. When hosted
+    // inside the AppShell (ShellContentInsets present) the closed
+    // max(obstruction, deviceInset) + breathing contract applies, so the shell
+    // obstruction and device inset are never summed. When hosted standalone the
+    // original W5 seam (bottomContentPadding + deviceInset) is preserved.
+    final isShellHosted = ShellContentInsets.maybeOf(context) != null;
+    final effectiveBottomPadding = isShellHosted
+        ? shellSafeBottomPadding(context)
+        : bottomContentPadding + MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
       appBar: CivilAppBar(
@@ -62,7 +74,7 @@ class DirectoryLandingScreen extends StatelessWidget {
               start: AppSpacing.lg,
               end: AppSpacing.lg,
               top: AppSpacing.lg,
-              bottom: bottomContentPadding + bottomInset,
+              bottom: effectiveBottomPadding,
             ),
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

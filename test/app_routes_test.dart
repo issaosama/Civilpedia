@@ -84,12 +84,12 @@ void main() {
   });
 
   group('AppRoutes — shell destination linkage (AppShell adoption)', () {
-    test('kShellDestinations still expose the exact production routes', () {
+    test('kShellDestinations expose the exact W6.3 production routes', () {
       expect(kShellDestinations[0].route, '/home');
       expect(kShellDestinations[1].route, '/encyclopedia');
       expect(kShellDestinations[2].route, '/tools');
-      expect(kShellDestinations[3].route, '/saved');
-      expect(kShellDestinations[4].route, '/profile');
+      expect(kShellDestinations[3].route, '/projects');
+      expect(kShellDestinations[4].route, '/directory');
     });
 
     test('shell destinations resolve to the canonical AppRoutes constants', () {
@@ -97,8 +97,8 @@ void main() {
         AppRoutes.home,
         AppRoutes.encyclopedia,
         AppRoutes.tools,
-        AppRoutes.saved,
-        AppRoutes.profile,
+        AppRoutes.projects,
+        AppRoutes.directory,
       ];
       for (var i = 0; i < kShellDestinations.length; i++) {
         expect(
@@ -114,13 +114,13 @@ void main() {
         '/home',
         '/encyclopedia',
         '/tools',
-        '/saved',
-        '/profile',
+        '/projects',
+        '/directory',
       ]);
     });
   });
 
-  group('AppRoutes — no future/unimplemented domain route', () {
+  group('AppRoutes — only /knowledge remains a future domain', () {
     final declaredPaths = <String>[
       AppRoutes.splash,
       AppRoutes.onboarding,
@@ -137,12 +137,16 @@ void main() {
       AppRoutes.tools,
       AppRoutes.saved,
       AppRoutes.profile,
+      AppRoutes.profileEdit,
       AppRoutes.user,
       AppRoutes.userProfile,
       AppRoutes.userProfileEdit,
       AppRoutes.userSaved,
       AppRoutes.userDownloads,
       AppRoutes.projects,
+      AppRoutes.directory,
+      AppRoutes.directorySearch,
+      AppRoutes.search,
       AppRoutes.calculatorConcrete,
       AppRoutes.calculatorSteel,
       AppRoutes.calculatorBrick,
@@ -151,11 +155,7 @@ void main() {
     ];
 
     test('no future domain route is declared', () {
-      const futurePrefixes = [
-        '/knowledge',
-        '/directory',
-        '/search',
-      ];
+      const futurePrefixes = ['/knowledge'];
       for (final path in declaredPaths) {
         for (final prefix in futurePrefixes) {
           expect(

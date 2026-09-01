@@ -349,15 +349,15 @@ void main() {
       expect(DirectorySearchScreen, isNotNull);
     });
 
-    testWidgets('51. shell destinations unchanged', (tester) async {
-      // Five tabs preserved; no Directory destination.
+    testWidgets('51. shell destinations = W6.3 target shell', (tester) async {
+      // Five tabs preserved with the directory destination.
       final routes = kShellDestinations.map((d) => d.route).toList();
       expect(routes, [
         AppRoutes.home,
         AppRoutes.encyclopedia,
         AppRoutes.tools,
-        AppRoutes.saved,
-        AppRoutes.profile,
+        AppRoutes.projects,
+        AppRoutes.directory,
       ]);
       expect(find.byType(DirectorySearchScreen), findsNothing);
     });

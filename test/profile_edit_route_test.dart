@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:civilpedia/core/location/baghdad_area.dart';
+import 'package:civilpedia/core/navigation/app_shell.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/services/theme_provider.dart';
 import 'package:civilpedia/features/auth/presentation/providers/auth_provider.dart';
@@ -130,8 +131,8 @@ void main() {
   });
 
   testWidgets(
-    'W3.3 push keeps Profile Edit on the branch navigator (shell chrome '
-    'stays visible)',
+    'W6.3 /profile is a root compatibility route: Profile Edit renders above '
+    'the root navigator (no shell chrome)',
     (tester) async {
       _useTallViewport(tester);
       final repository = _FakeUserProfileRepository(_profile());
@@ -144,12 +145,16 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ProfileEditScreen), findsOneWidget);
+      // W6.3 moved /profile out of the Bottom Navigation shell into a root
+      // compatibility route; the edit push therefore renders above the root
+      // navigator with NO shell chrome. The pre-W6.3 "branch-local push keeps
+      // shell chrome visible" assertion is superseded, not deleted.
       expect(
-        find.text(Ar.account),
-        findsOneWidget,
+        find.byType(AppShell),
+        findsNothing,
         reason:
-            'bottom navigation must remain visible exactly as it was '
-            'before W3.3 (branch-local push, not a root-navigator push)',
+            '/profile is no longer a shell branch in W6.3; Profile Edit is a '
+            'root compatibility route rendered above the root navigator',
       );
     },
   );
@@ -286,7 +291,7 @@ void main() {
     },
   );
 
-  testWidgets('W3.3 existing /profile branch still works', (tester) async {
+  testWidgets('W6.3 existing /profile route still works', (tester) async {
     final repository = _FakeUserProfileRepository(_profile());
     final profileProvider = UserProfileProvider(repository: repository);
     await profileProvider.loadProfile();

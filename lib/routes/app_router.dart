@@ -42,17 +42,17 @@ final Map<String, GoRouterWidgetBuilder> _shellBranchBuilders = {
   AppRoutes.encyclopedia: (_, state) =>
       EncyclopediaScreen(initialQuery: state.uri.queryParameters['q']),
   AppRoutes.tools: (_, __) => const ToolsScreen(),
-  AppRoutes.saved: (_, __) => const SavedScreen(),
-  AppRoutes.profile: (_, __) => const ProfileScreen(),
+  AppRoutes.projects: (_, __) => const ProjectListScreen(),
+  AppRoutes.directory: _buildDirectoryLanding,
 };
 
-/// Nested routes for shell branches. W3.3 hosts the Profile-edit destination
-/// as a child of the `/profile` branch so the push renders on the branch
-/// navigator (bottom navigation stays visible) — identical to the imperative
-/// `Navigator.push(ProfileEditScreen)` behavior it replaces.
+/// Nested routes for shell branches. W6.3 hosts the Directory search engine as
+/// a child of the `/directory` branch so a Landing → Search push renders on the
+/// branch navigator (bottom navigation stays visible) and direct
+/// `/directory/search` deep links land inside the shell.
 final Map<String, List<RouteBase>> _shellBranchNestedRoutes = {
-  AppRoutes.profile: [
-    GoRoute(path: AppRoutes.profileEditSegment, builder: _buildProfileEdit),
+  AppRoutes.directory: [
+    GoRoute(path: AppRoutes.directorySearchSegment, builder: _buildDirectorySearch),
   ],
 };
 
@@ -73,13 +73,16 @@ Widget _buildProfileEdit(BuildContext context, GoRouterState state) {
   return const NotFoundScreen();
 }
 
-/// W6.2 — canonical Directory Landing route builder.
+/// W6.2 — canonical Directory Landing builder (W6.3 shell branch root).
 ///
 /// Hosts the real [DirectoryLandingScreen]. Wire its existing
 /// [DirectoryLandingScreen.onCategorySelected] seam to a GoRouter push of
 /// [AppRoutes.directorySearch], carrying the selected [BusinessType] via
 /// `state.extra`. The smallest transport is used — no query-string
-/// serialization, no navigation DTO.
+/// serialization, no navigation DTO. Bottom clearance is handled by the screen
+/// itself: it detects the AppShell ancestor (via [ShellContentInsets]) and
+/// applies the closed UI-SAFE-1 contract, so no numeric obstruction is passed
+/// through the standalone padding seam.
 Widget _buildDirectoryLanding(BuildContext context, GoRouterState state) {
   return DirectoryLandingScreen(
     onCategorySelected: (type) => context.push(
@@ -89,11 +92,13 @@ Widget _buildDirectoryLanding(BuildContext context, GoRouterState state) {
   );
 }
 
-/// W6.2 — canonical Directory Search route builder.
+/// W6.2 — canonical Directory Search builder (W6.3 branch-nested child).
 ///
 /// Hosts the real [DirectorySearchScreen]. Resolves the selected [BusinessType]
 /// from `state.extra` when supplied; direct navigation with no extra opens
-/// browse mode ([DirectorySearchScreen.initialCategory] null).
+/// browse mode ([DirectorySearchScreen.initialCategory] null). Bottom clearance
+/// is handled by the screen itself: it detects the AppShell ancestor and
+/// applies the closed UI-SAFE-1 contract.
 Widget _buildDirectorySearch(BuildContext context, GoRouterState state) {
   final extra = state.extra;
   return DirectorySearchScreen(
@@ -125,21 +130,6 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const AuthScreen(),
     ),
     GoRoute(
-      path: AppRoutes.projects,
-      parentNavigatorKey: _rootNavigator,
-      builder: (context, state) => const ProjectListScreen(),
-    ),
-    GoRoute(
-      path: AppRoutes.directory,
-      parentNavigatorKey: _rootNavigator,
-      builder: _buildDirectoryLanding,
-    ),
-    GoRoute(
-      path: AppRoutes.directorySearch,
-      parentNavigatorKey: _rootNavigator,
-      builder: _buildDirectorySearch,
-    ),
-    GoRoute(
       path: AppRoutes.categories,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const CategoriesScreen(),
@@ -148,6 +138,23 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.search,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const GlobalSearchScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.saved,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const SavedScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.profile,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const ProfileScreen(),
+      routes: [
+        GoRoute(
+          path: AppRoutes.profileEditSegment,
+          parentNavigatorKey: _rootNavigator,
+          builder: _buildProfileEdit,
+        ),
+      ],
     ),
     GoRoute(
       path: AppRoutes.user,

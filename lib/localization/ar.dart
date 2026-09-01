@@ -621,6 +621,9 @@ class Ar {
 
   // Directory
   static const String directoryLandingTitle = 'الدليل الهندسي';
+
+  // W6.3 — Bottom Navigation tab label for the Directory branch (short form).
+  static const String directory = 'الدليل';
   static const String directoryTypeSupplier = 'مورّد';
   static const String directoryTypeTechnician = 'فني';
   static const String directoryTypeEquipmentOwner = 'مالك معدات';

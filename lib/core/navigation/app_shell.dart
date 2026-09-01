@@ -38,9 +38,12 @@ class ShellDestination {
 
 /// The current, user-visible shell destinations.
 ///
-/// Phase A intentionally preserves the existing four-tab navigation. The
-/// approved long-term layout (Home, Encyclopedia, Tools, Directory, Profile)
-/// grows from this list in later phases; do not extend it preemptively.
+/// W6.3 performs the real Bottom Navigation transition to the target shell:
+/// Saved and Profile leave the visible bar (they remain routable as root
+/// compatibility routes) and the freed slots are filled by Projects (M3 NAV-4)
+/// and the Engineering Directory (M3 NAV-5). Exactly 5 destinations, in order.
+/// The order of every entry is the branch-index contract shared with
+/// `StatefulShellRoute.indexedStack` — never reorder casually.
 const List<ShellDestination> kShellDestinations = [
   ShellDestination(
     route: AppRoutes.home,
@@ -61,16 +64,16 @@ const List<ShellDestination> kShellDestinations = [
     label: Ar.tools,
   ),
   ShellDestination(
-    route: AppRoutes.saved,
-    icon: Icons.bookmark_outline,
-    activeIcon: Icons.bookmark,
-    label: Ar.saved,
+    route: AppRoutes.projects,
+    icon: Icons.folder_outlined,
+    activeIcon: Icons.folder,
+    label: Ar.checklistMyProjects,
   ),
   ShellDestination(
-    route: AppRoutes.profile,
-    icon: Icons.person_outline,
-    activeIcon: Icons.person,
-    label: Ar.account,
+    route: AppRoutes.directory,
+    icon: Icons.business_center_outlined,
+    activeIcon: Icons.business_center,
+    label: Ar.directory,
   ),
 ];
 

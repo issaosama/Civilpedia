@@ -75,11 +75,11 @@ void main() {
     expect(AppRoutes.directorySearch, '/directory/search');
   });
 
-  test('W6.2 Directory is NOT a Bottom Navigation destination yet', () {
+  test('W6.3 Directory IS a Bottom Navigation destination at index 4', () {
     final routes = kShellDestinations.map((d) => d.route).toList();
-    expect(routes, ['/home', '/encyclopedia', '/tools', '/saved', '/profile']);
+    expect(routes, ['/home', '/encyclopedia', '/tools', '/projects', '/directory']);
+    expect(routes.indexOf('/directory'), 4);
     expect(routes.length, 5);
-    expect(routes.contains('/directory'), isFalse);
     expect(routes.contains('/directory/search'), isFalse);
   });
 
@@ -114,9 +114,10 @@ void main() {
       await tester.tap(supplierCard, warnIfMissed: false);
       await tester.pumpAndSettle();
 
-      // A GoRouter context.push onto the root navigator renders the pushed
-      // DirectorySearchScreen; the widget's presence + initialCategory prove the
-      // landing -> search navigation carried the selected BusinessType.
+      // W6.3: a GoRouter context.push onto the /directory branch navigator
+      // renders the pushed DirectorySearchScreen with the shell chrome visible;
+      // the widget's presence + initialCategory prove the landing -> search
+      // navigation carried the selected BusinessType.
       expect(find.byType(DirectorySearchScreen), findsOneWidget);
       final search = tester.widget<DirectorySearchScreen>(
         find.byType(DirectorySearchScreen),

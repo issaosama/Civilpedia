@@ -63,11 +63,10 @@ void main() {
     },
   );
 
-  test('W6.1 Projects is NOT a Bottom Navigation destination yet', () {
+  test('W6.3 Projects IS a Bottom Navigation destination at index 3', () {
     final routes = kShellDestinations.map((d) => d.route).toList();
-    expect(routes, ['/home', '/encyclopedia', '/tools', '/saved', '/profile']);
-    expect(routes, contains('/tools'));
-    expect(routes.contains('/projects'), isFalse);
+    expect(routes, ['/home', '/encyclopedia', '/tools', '/projects', '/directory']);
+    expect(routes.indexOf('/projects'), 3);
     expect(routes.length, 5);
   });
 
@@ -77,7 +76,15 @@ void main() {
     await _open(tester, AppRoutes.projects);
 
     expect(find.byType(canonical.ProjectListScreen), findsOneWidget);
-    expect(find.text(Ar.checklistMyProjects), findsOneWidget);
+    // W6.3: the same label appears once in the AppBar title and once as the
+    // Bottom Navigation tab label; assert the AppBar title specifically.
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text(Ar.checklistMyProjects),
+      ),
+      findsOneWidget,
+    );
     expect(_currentPath(), AppRoutes.projects);
     expect(tester.takeException(), isNull);
   });

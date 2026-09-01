@@ -377,16 +377,16 @@ void main() {
       expect(File('lib/features/directory/ui').existsSync(), isFalse);
     });
 
-    test('29. shell destinations unchanged (5 routes, no /directory)', () {
+    test('29. shell destinations = W6.3 target shell (5 routes, /directory)', () {
       final routes = kShellDestinations.map((d) => d.route).toList();
       expect(routes, [
         AppRoutes.home,
         AppRoutes.encyclopedia,
         AppRoutes.tools,
-        AppRoutes.saved,
-        AppRoutes.profile,
+        AppRoutes.projects,
+        AppRoutes.directory,
       ]);
-      expect(routes.any((r) => r.endsWith('directory')), isFalse);
+      expect(routes.any((r) => r.endsWith('directory')), isTrue);
       expect(kShellDestinations.length, 5);
     });
 

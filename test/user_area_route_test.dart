@@ -291,10 +291,10 @@ void main() {
       final shellRoutes = kShellDestinations.map((d) => d.route).toList();
       expect(
         shellRoutes,
-        ['/home', '/encyclopedia', '/tools', '/saved', '/profile'],
+        ['/home', '/encyclopedia', '/tools', '/projects', '/directory'],
         reason:
-            'W6.3 owns the navigation transition; W3.4 must not alter or '
-            'extend the shell destinations',
+            'W6.3 completed the shell transition; /user must never join the '
+            'shell destinations (it is a root full-screen surface)',
       );
       expect(shellRoutes.contains(AppRoutes.user), isFalse);
     });
@@ -660,26 +660,25 @@ void main() {
       expect(_topMatchedLocation(), AppRoutes.userDownloads);
     });
 
-    testWidgets('bottom navigation destinations remain exactly the legacy '
-        'five (W6.3 freeze)', (tester) async {
-      final profileProvider = _profileProvider(stored: _profile());
-      await profileProvider.loadProfile();
-      await _open(tester, profileProvider, AppRoutes.profile);
-
-      for (final label in [
-        Ar.home,
-        Ar.encyclopedia,
-        Ar.tools,
-        Ar.saved,
-        Ar.account,
-      ]) {
-        expect(
-          find.text(label),
-          findsWidgets,
-          reason: 'legacy 5-tab Bottom Navigation must stay visible',
-        );
-      }
+    test('bottom navigation destinations are exactly the W6.3 target five', () {
       expect(kShellDestinations.length, 5);
+      expect(kShellDestinations.map((d) => d.route).toList(), [
+        '/home',
+        '/encyclopedia',
+        '/tools',
+        '/projects',
+        '/directory',
+      ]);
+      // Saved and Profile are no longer visible shell destinations (they
+      // remain directly routable root compatibility routes).
+      expect(
+        kShellDestinations.map((d) => d.route),
+        isNot(contains('/saved')),
+      );
+      expect(
+        kShellDestinations.map((d) => d.route),
+        isNot(contains('/profile')),
+      );
     });
 
     testWidgets('inventory-only /user/account is NOT implemented', (

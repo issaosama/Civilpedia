@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/services/connectivity_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../../../../routes/app_routes.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
 /// Light, compact Home header matching the approved reference composition.
@@ -60,7 +62,10 @@ class HomeHeader extends StatelessWidget {
               ),
               const Spacer(),
               // Existing user/profile and connectivity affordances.
-              _AvatarChip(auth: auth),
+              _AvatarChip(
+                auth: auth,
+                onTap: () => context.push(AppRoutes.user),
+              ),
               const SizedBox(width: 8),
               _ConnectivityDot(connectivity: connectivity),
             ],
@@ -84,20 +89,30 @@ class HomeHeader extends StatelessWidget {
 
 class _AvatarChip extends StatelessWidget {
   final AuthProvider auth;
+  final VoidCallback? onTap;
 
-  const _AvatarChip({required this.auth});
+  const _AvatarChip({required this.auth, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 16,
-      backgroundColor: AppColors.primary.withValues(alpha: 0.12),
-      child: Text(
-        auth.isLoggedIn ? auth.userName[0].toUpperCase() : 'Z',
-        style: TextStyle(
-          color: AppColors.primary,
-          fontSize: 13,
-          fontWeight: FontWeight.bold,
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    return Semantics(
+      button: true,
+      label: isArabic ? Ar.userArea : En.userArea,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: CircleAvatar(
+          radius: 16,
+          backgroundColor: AppColors.primary.withValues(alpha: 0.12),
+          child: Text(
+            auth.isLoggedIn ? auth.userName[0].toUpperCase() : 'Z',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ),
     );

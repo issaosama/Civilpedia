@@ -102,7 +102,7 @@ void _mockSystemNavigatorPop(WidgetTester tester, List<bool> log) {
 }
 
 void main() {
-  testWidgets('renders all five Phase-B destinations with RTL Arabic labels',
+  testWidgets('renders all five W6.3 destinations with RTL Arabic labels',
       (tester) async {
     await _pumpShell(tester);
 
@@ -110,20 +110,20 @@ void main() {
     expect(find.text(Ar.home), findsOneWidget);
     expect(find.text(Ar.encyclopedia), findsOneWidget);
     expect(find.text(Ar.tools), findsOneWidget);
-    expect(find.text(Ar.saved), findsOneWidget);
-    expect(find.text(Ar.account), findsOneWidget);
+    expect(find.text(Ar.checklistMyProjects), findsOneWidget);
+    expect(find.text(Ar.directory), findsOneWidget);
     expect(find.byKey(const ValueKey('probe-/home')), findsOneWidget);
     expect(
       Directionality.of(tester.element(find.text(Ar.home))),
       TextDirection.rtl,
     );
 
-    // Order contract required for Phase B.
+    // Order contract required by W6.3 (indexed-stack branch order).
     expect(kShellDestinations[0].route, '/home');
     expect(kShellDestinations[1].route, '/encyclopedia');
     expect(kShellDestinations[2].route, '/tools');
-    expect(kShellDestinations[3].route, '/saved');
-    expect(kShellDestinations[4].route, '/profile');
+    expect(kShellDestinations[3].route, '/projects');
+    expect(kShellDestinations[4].route, '/directory');
   });
 
   testWidgets('every destination reaches its branch', (tester) async {

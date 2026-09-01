@@ -8,10 +8,11 @@
 /// Future target routes (`/knowledge`) are intentionally **not** declared here.
 /// They are introduced only when their own implementation phase begins. This
 /// contract models current canonical identities first; see M8 §27 (resolved).
-/// `/projects` was declared in W6.1 as the canonical Projects V1 route
-/// (navigation-ready, no visible launcher). `/directory` and `/directory/search`
-/// were declared in W6.2 as the canonical Directory routes (navigation-ready,
-/// no visible launcher).
+/// `/projects` was declared in W6.1 as the canonical Projects V1 route and
+/// became the visible Projects shell branch in W6.3. `/directory` and
+/// `/directory/search` were declared in W6.2 as the canonical Directory routes
+/// and became the visible Directory shell branch (with a nested search child)
+/// in W6.3.
 ///
 /// Distinction: a **route identity/name** (e.g. `home`) is different from a
 /// **route path** (e.g. `/home`). This contract exposes canonical path
@@ -44,62 +45,68 @@ abstract final class AppRoutes {
   static const String articlesByCategoryPattern = '/articles/:category';
   static const String articlePattern = '/article/:id';
 
-  // --- Projects (W6.1) ---
+  // --- Projects (W6.1 → W6.3) ---
   /// Canonical Projects V1 list route.
   ///
-  /// W6.1 establishes this as the permanent GoRouter route for the canonical
-  /// Projects [ProjectListScreen]. It is navigation-ready but has NO visible
-  /// production launcher in W6.1 — it is NOT a Bottom Navigation destination
-  /// and must never enter `kShellDestinations`. Projects becomes a visible
-  /// shell slot only in the later phase (M3 NAV-4) when a slot is freed.
-  /// The legacy `Tools → Checklist → My Projects` entry remains the production
-  /// access in W6.1.
+  /// W6.1 established this as the permanent GoRouter route for the canonical
+  /// [ProjectListScreen] (navigation-ready, no visible launcher). W6.3 makes it
+  /// the `/projects` StatefulShellBranch root: it IS a Bottom Navigation
+  /// destination at kShellDestinations index 3. The legacy
+  /// `Tools → Checklist → My Projects` entry remains valid too.
   static const String projects = '/projects';
 
-  // --- Directory (W6.2) ---
+  // --- Directory (W6.2 → W6.3) ---
   /// Canonical Directory [DirectoryLandingScreen] route.
   ///
-  /// W6.2 establishes this as the permanent GoRouter root route exposing the
-  /// production-ready W5 Directory flow. It is navigation-ready but has NO
-  /// visible production launcher in W6.2 — it is NOT a Bottom Navigation
-  /// destination and must never enter `kShellDestinations`. Directory becomes a
-  /// visible shell slot only in the later phase (M3 NAV-5) when a slot is
-  /// freed (W6.3).
+  /// W6.2 established the canonical `/directory` root flow (navigation-ready,
+  /// no visible launcher). W6.3 makes it the `/directory` StatefulShellBranch
+  /// root: it IS a Bottom Navigation destination at kShellDestinations index 4.
   static const String directory = '/directory';
+
+  /// Relative search segment nested under the `/directory` branch. Canonical
+  /// segment authority so the router never repeats a raw literal (`/directory/search`
+  /// is composed from [directory] + [directorySearchSegment]).
+  static const String directorySearchSegment = 'search';
 
   /// Canonical Directory search route.
   ///
   /// Renders the real [DirectorySearchScreen]. Reached from `/directory` with
   /// the selected [BusinessType] carried via `state.extra`; direct navigation
-  /// with no category opens browse mode (initialCategory null). This is a ROOT
-  /// route — NOT a StatefulShell branch and never a `kShellDestinations` entry.
-  static const String directorySearch = '/directory/search';
+  /// with no category opens browse mode (initialCategory null). Since W6.3 this
+  /// is a branch-nested child of the `/directory` StatefulShellBranch (shell
+  /// chrome stays visible); it is never a `kShellDestinations` entry itself.
+  static const String directorySearch = '$directory/$directorySearchSegment';
 
   // --- Shell destinations (values mirror kShellDestinations in app_shell) ---
+  // W6.3: the visible shell is /home · /encyclopedia · /tools · /projects ·
+  // /directory. /saved and /profile left the visible bar but remain directly
+  // routable root compatibility routes (never deleted).
   static const String home = '/home';
   static const String encyclopedia = '/encyclopedia';
   static const String tools = '/tools';
   static const String saved = '/saved';
   static const String profile = '/profile';
 
-  // --- Profile (W3.3) ---
-  /// Relative Profile-edit segment, nested under the `/profile` shell branch.
-  /// Canonical authority for the segment so the router never repeats a raw
-  /// literal (`/profile/edit` is composed from [profile] + [profileEditSegment]).
+  // --- Profile (W3.3 → W6.3) ---
+  /// Relative Profile-edit segment. Since W6.3 `/profile` is a root
+  /// compatibility route and this segment is nested under it; `/user/profile/edit`
+  /// is the canonical User Area variant. Canonical authority for the segment so
+  /// the router never repeats a raw literal (`/profile/edit` is composed from
+  /// [profile] + [profileEditSegment]).
   static const String profileEditSegment = 'edit';
 
-  /// Routed Profile-edit destination. Pushed on top of the `/profile` shell
-  /// branch, preserving the pre-W3.3 `Navigator.push(ProfileEditScreen)`
-  /// behavior (branch-local push; shell chrome stays visible). W3.4 owns the
-  /// future `/user` hierarchy — this is NOT the User Area and must never enter
-  /// `kShellDestinations`.
+  /// Routed Profile-edit destination for the legacy `/profile` compatibility
+  /// route. W6.3 moved `/profile` out of the Bottom Navigation shell into a
+  /// root route; this edit destination renders above the root navigator (no
+  /// shell chrome), preserving direct `/profile/edit` navigation. Never a
+  /// `kShellDestinations` entry.
   static const String profileEdit = '$profile/$profileEditSegment';
 
   // --- User Area (W3.4) ---
   /// Root of the full-screen User Area hub.
   ///
-  /// W3.4 builds the User Area target surface (hub + nested `/user/*`
-  /// routes); the visible Avatar→`/user` navigation entry is deferred to W6.3.
+  /// W3.4 built the User Area target surface (hub + nested `/user/*` routes);
+  /// W6.3 wires the visible Avatar→`/user` navigation entry (Home header).
   /// This is a top-level root route — NOT a Bottom Navigation slot, NOT a
   /// StatefulShell branch, never a modal/bottom-sheet (M8 §11). It must never
   /// enter `kShellDestinations`.

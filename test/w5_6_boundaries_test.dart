@@ -9,26 +9,30 @@ import 'package:civilpedia/routes/app_routes.dart';
 
 void main() {
   group('W5.6 navigation / boundaries', () {
-    test('50. no permanent /directory route is added', () {
+    test('50. /directory routes are wired through canonical constants only '
+        '(no raw literals, no provider detail route)', () {
       final routesFile = File(
         'lib/routes/app_router.dart',
       ).readAsStringSync();
-      // No GoRoute registration for any /directory form.
+      // W6.3 made /directory a shell branch. The router must reference the
+      // canonical AppRoutes constants — never raw literals — and provider
+      // detail stays a MaterialPageRoute (no /directory/provider/:id).
       expect(routesFile.contains("'/directory'"), isFalse);
       expect(routesFile.contains('"/directory"'), isFalse);
       expect(routesFile.contains('/directory/provider'), isFalse);
     });
 
-    test('51. shell destinations unchanged (5 routes, no directory)', () {
+    test('51. shell destinations = W6.3 target shell (5 routes, /directory)',
+        () {
       final routes = kShellDestinations.map((d) => d.route).toList();
       expect(routes, [
         AppRoutes.home,
         AppRoutes.encyclopedia,
         AppRoutes.tools,
-        AppRoutes.saved,
-        AppRoutes.profile,
+        AppRoutes.projects,
+        AppRoutes.directory,
       ]);
-      expect(routes.any((r) => r.endsWith('directory')), isFalse);
+      expect(routes.any((r) => r.endsWith('directory')), isTrue);
       expect(kShellDestinations.length, 5);
     });
 

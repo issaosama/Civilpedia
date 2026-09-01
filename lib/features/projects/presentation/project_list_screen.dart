@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:civilpedia/core/navigation/shell_content_insets.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_colors.dart';
 import 'package:civilpedia/core/theme/design_tokens.dart';
@@ -27,13 +28,12 @@ import 'package:civilpedia/localization/en.dart';
 /// `Tools → Checklist → My Projects → ProjectListScreen` workflow keep working
 /// with no consumer changes and no duplicated implementation.
 ///
-/// W6.1 registers the canonical root route `AppRoutes.projects` (`/projects`)
-/// to this screen. The route is navigation-ready but has NO visible production
-/// launcher yet — it is NOT a Bottom Navigation destination. Because this
-/// screen is root-hosted in W6.1, it is NOT migrated to `ShellContentInsets`;
-/// it continues honoring ordinary `SafeArea`/device insets. The shell-hosted
-/// adaptation is deferred to the phase where Projects actually becomes a Bottom
-/// Navigation branch.
+/// W6.3 makes `/projects` the `/projects` StatefulShellBranch root (visible
+/// Bottom Navigation destination at index 3) and the legacy Tools push both
+/// host this screen inside the AppShell, so it is migrated to the UI-SAFE-1
+/// contract: scroll content bottom clearance and the floating action button
+/// ride above the shell obstruction via [shellSafeBottomPadding]. No screen
+/// redesign — W4 domain/data contracts are untouched.
 class ProjectListScreen extends StatefulWidget {
   const ProjectListScreen({super.key});
 
@@ -201,16 +201,26 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
       ),
       floatingActionButton: _showArchived
           ? null
-          : FloatingActionButton(
-              onPressed: _createProject,
-              child: const Icon(Icons.add),
+          : Padding(
+              padding: EdgeInsets.only(
+                bottom: shellSafeBottomPadding(context),
+              ),
+              child: FloatingActionButton(
+                onPressed: _createProject,
+                child: const Icon(Icons.add),
+              ),
             ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _projects.isEmpty
               ? Center(
                   child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.xxl),
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.xxl,
+                      AppSpacing.xxl,
+                      AppSpacing.xxl,
+                      shellSafeBottomPadding(context),
+                    ),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -234,7 +244,12 @@ class _ProjectListScreenState extends State<ProjectListScreen> {
                   ),
                 )
               : ListView.builder(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  padding: EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                    shellSafeBottomPadding(context),
+                  ),
                   itemCount: _projects.length,
                   itemBuilder: (context, index) {
                     final project = _projects[index];

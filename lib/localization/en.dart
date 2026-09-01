@@ -639,6 +639,9 @@ class En {
 
   // Directory
   static const String directoryLandingTitle = 'Engineering Directory';
+
+  // W6.3 — Bottom Navigation tab label for the Directory branch (short form).
+  static const String directory = 'Directory';
   static const String directoryTypeSupplier = 'Supplier';
   static const String directoryTypeTechnician = 'Technician';
   static const String directoryTypeEquipmentOwner = 'Equipment Owner';

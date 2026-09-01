@@ -629,14 +629,14 @@ void main() {
       expect(AppRoutes.search, isNot(contains('/directory')));
     });
 
-    test('60. shell destinations unchanged', () {
+    test('60. shell destinations = W6.3 target shell', () {
       final routes = kShellDestinations.map((d) => d.route).toList();
       expect(routes, [
         AppRoutes.home,
         AppRoutes.encyclopedia,
         AppRoutes.tools,
-        AppRoutes.saved,
-        AppRoutes.profile,
+        AppRoutes.projects,
+        AppRoutes.directory,
       ]);
     });
   });

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'package:civilpedia/core/navigation/shell_content_insets.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/core/theme/spacing.dart';
@@ -145,6 +146,66 @@ void main() {
       await tester.drag(find.byType(Scrollable).last, const Offset(0, -2000));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('W6.3 SEARCH UI-SAFE-1 dual-host bottom clearance', () {
+    // Unusual obstruction (137) proves the screen consumes the closed MAX
+    // contract via the shell ancestor, not current AppShell metrics (86).
+    const shellObstruction = 137.0;
+    const deviceInset = 24.0;
+    const breathing = AppSpacing.lg; // 16
+
+    Widget shellHostedSearch({
+      List<ServiceBusinessProfile> profiles = const [],
+    }) {
+      return MediaQuery(
+        data: MediaQueryData(
+          size: const Size(412, 900),
+          padding: const EdgeInsets.only(bottom: deviceInset),
+        ),
+        child: ShellContentInsets(
+          bottomObstruction: shellObstruction,
+          child: ChangeNotifierProvider(
+            create: (_) => LanguageProvider(),
+            child: MaterialApp(
+              theme: AppTheme.lightTheme,
+              home: DirectorySearchScreen(
+                repository: _FakeDirectoryRepository(profiles),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('A. shell-hosted uses MAX(obstruction, inset) + breathing, '
+        'NOT sum', (tester) async {
+      final profiles = [_p('a')];
+      await tester.pumpWidget(shellHostedSearch(profiles: profiles));
+      await tester.pumpAndSettle();
+      final list = tester.widget<ListView>(find.byType(ListView));
+      final padding = list.padding as EdgeInsetsDirectional;
+      // max(137, 24) + 16 = 153, never 137 + 24 = 161.
+      expect(padding.bottom, shellObstruction + breathing);
+      expect(padding.bottom, isNot(shellObstruction + deviceInset));
+    });
+
+    testWidgets('B. standalone keeps bottomContentPadding + deviceInset seam',
+        (tester) async {
+      final profiles = [_p('a')];
+      await tester.pumpWidget(MediaQuery(
+        data: MediaQueryData(
+          size: const Size(412, 900),
+          padding: const EdgeInsets.only(bottom: deviceInset),
+        ),
+        child: _searchApp(profiles, bottomContentPadding: 96),
+      ));
+      await tester.pumpAndSettle();
+      final list = tester.widget<ListView>(find.byType(ListView));
+      final padding = list.padding as EdgeInsetsDirectional;
+      // Standalone W5 seam: 96 + 24 = 120.
+      expect(padding.bottom, 96 + deviceInset);
     });
   });
 }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/di/app_dependencies.dart';
 import '../../../core/location/baghdad_area.dart';
+import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -46,10 +47,12 @@ class DirectorySearchScreen extends StatefulWidget {
   /// Bottom scroll clearance for the result list.
   ///
   /// Mirrors the W5.2 shell-independent seam: this screen must NOT know the
-  /// AppShell floating-nav geometry (bar height, margin, safe offsets). Callers
-  /// that host the search below chrome (e.g. a future shell branch) supply the
-  /// required content clearance here; the default is normal Directory/design
-  /// bottom spacing. The device bottom SafeArea inset is added at build time.
+  /// AppShell floating-nav geometry (bar height, margin, safe offsets). When
+  /// hosted STANDALONE (W5.3 default), the final bottom clearance is
+  /// `bottomContentPadding + device bottom SafeArea inset`. When hosted inside
+  /// the AppShell (W6.3), the screen detects the shell ancestor and instead
+  /// applies the closed UI-SAFE-1 contract via [shellSafeBottomPadding], so the
+  /// shell obstruction and device inset are never summed.
   final double bottomContentPadding;
 
   const DirectorySearchScreen({
@@ -245,13 +248,20 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
       );
     }
 
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // W6.3 UI-SAFE-1 — explicit dual-host clean bottom clearance (identical to
+    // DirectoryLandingScreen): shell-hosted uses the closed MAX contract,
+    // standalone preserves the W5 bottomContentPadding + deviceInset seam.
+    final isShellHosted = ShellContentInsets.maybeOf(context) != null;
+    final effectiveBottomPadding = isShellHosted
+        ? shellSafeBottomPadding(context)
+        : widget.bottomContentPadding + MediaQuery.paddingOf(context).bottom;
+
     return ListView.separated(
       padding: EdgeInsetsDirectional.only(
         start: AppSpacing.lg,
         end: AppSpacing.lg,
         top: AppSpacing.lg,
-        bottom: widget.bottomContentPadding + bottomInset,
+        bottom: effectiveBottomPadding,
       ),
       itemCount: results.length,
       separatorBuilder: (_, __) => AppSpacing.gapMd,

@@ -5,8 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 import 'package:civilpedia/core/navigation/app_shell.dart';
+import 'package:civilpedia/core/navigation/shell_content_insets.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
+import 'package:civilpedia/core/theme/spacing.dart';
 import 'package:civilpedia/features/directory/presentation/directory_category_presentation.dart';
 import 'package:civilpedia/features/directory/presentation/directory_landing_screen.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
@@ -285,29 +287,100 @@ void main() {
     });
   });
 
+  group('W6.3 LANDING UI-SAFE-1 dual-host bottom clearance', () {
+    // Shell-hosted with an unusual obstruction (137) proves the screen consumes
+    // the closed MAX contract via the shell ancestor, not the current AppShell
+    // metrics (86).
+    const shellObstruction = 137.0;
+    const deviceInset = 24.0;
+    const breathing = AppSpacing.lg; // 16
+
+    Widget shellHostedLanding() {
+      return MediaQuery(
+        data: MediaQueryData(
+          size: const Size(412, 900),
+          padding: const EdgeInsets.only(bottom: deviceInset),
+        ),
+        child: ShellContentInsets(
+          bottomObstruction: shellObstruction,
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: ChangeNotifierProvider(
+              create: (_) => LanguageProvider(),
+              child: const DirectoryLandingScreen(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('A. shell-hosted uses MAX(obstruction, inset) + breathing, '
+        'NOT sum', (tester) async {
+      await tester.pumpWidget(shellHostedLanding());
+      await tester.pumpAndSettle();
+      final slivers = tester.widgetList<SliverPadding>(find.byType(SliverPadding));
+      final bottom = slivers
+          .map((s) => s.padding.resolve(TextDirection.ltr).bottom)
+          .toList();
+      // max(137, 24) + 16 = 153, never 137 + 24 = 161.
+      expect(bottom, contains(shellObstruction + breathing));
+      expect(bottom, isNot(contains(shellObstruction + deviceInset)));
+    });
+
+    testWidgets('B. standalone keeps bottomContentPadding + deviceInset seam',
+        (tester) async {
+      const custom = 96.0;
+      await tester.pumpWidget(MediaQuery(
+        data: MediaQueryData(
+          size: const Size(412, 900),
+          padding: const EdgeInsets.only(bottom: deviceInset),
+        ),
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: ChangeNotifierProvider(
+            create: (_) => LanguageProvider(),
+            child: const DirectoryLandingScreen(
+              bottomContentPadding: custom,
+            ),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      final slivers = tester.widgetList<SliverPadding>(find.byType(SliverPadding));
+      final bottom = slivers
+          .map((s) => s.padding.resolve(TextDirection.ltr).bottom)
+          .toList();
+      // Standalone W5 seam: custom + deviceInset (96 + 24 = 120).
+      expect(bottom, contains(custom + deviceInset));
+    });
+  });
+
   group('W5.2 NAVIGATION FREEZE', () {
-    test('27. /directory is a registered route constant (W6.2 canonical)', () {
+    test('27. /directory is a registered route constant (W6.3 shell branch root)', () {
       final routes = File('lib/routes/app_routes.dart').readAsStringSync();
-      // W6.2 adds the canonical /directory route (navigation-ready, no visible
-      // launcher). The navigation freeze now lives at the shell level: /directory
-      // must remain a root route, NOT a bottom-navigation destination.
+      // W6.2 declared the canonical /directory route; W6.3 makes it the visible
+      // Directory shell branch. The app_routes constant must stay declared and
+      // remain the single canonical identity.
       expect(RegExp(r"static const String directory = '/directory';").hasMatch(routes), isTrue);
     });
 
-    test('28. shell destinations remain unchanged', () {
+    test('28. shell destinations = W6.3 target shell', () {
       final routes = kShellDestinations.map((d) => d.route).toList();
       expect(routes, [
         AppRoutes.home,
         AppRoutes.encyclopedia,
         AppRoutes.tools,
-        AppRoutes.saved,
-        AppRoutes.profile,
+        AppRoutes.projects,
+        AppRoutes.directory,
       ]);
     });
 
     test('29. bottom navigation remains unchanged (5 destinations)', () {
       expect(kShellDestinations.length, 5);
-      expect(kShellDestinations.any((d) => d.route.contains('directory')), isFalse);
+      expect(
+        kShellDestinations.where((d) => d.route.contains('directory')),
+        hasLength(1),
+      );
     });
 
     test('30. global search constant unchanged', () {
