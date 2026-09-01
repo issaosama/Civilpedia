@@ -5,11 +5,13 @@
 /// migration, no redirects, no hierarchy change, and no change to Bottom
 /// Navigation.
 ///
-/// Future target routes (`/knowledge`, `/directory`) are intentionally **not**
-/// declared here. They are introduced only when their own implementation phase
-/// begins. This contract models current canonical identities first; see M8 §27
-/// (resolved). `/projects` was declared in W6.1 as the canonical Projects V1
-/// route (navigation-ready, no visible launcher).
+/// Future target routes (`/knowledge`) are intentionally **not** declared here.
+/// They are introduced only when their own implementation phase begins. This
+/// contract models current canonical identities first; see M8 §27 (resolved).
+/// `/projects` was declared in W6.1 as the canonical Projects V1 route
+/// (navigation-ready, no visible launcher). `/directory` and `/directory/search`
+/// were declared in W6.2 as the canonical Directory routes (navigation-ready,
+/// no visible launcher).
 ///
 /// Distinction: a **route identity/name** (e.g. `home`) is different from a
 /// **route path** (e.g. `/home`). This contract exposes canonical path
@@ -53,6 +55,25 @@ abstract final class AppRoutes {
   /// The legacy `Tools → Checklist → My Projects` entry remains the production
   /// access in W6.1.
   static const String projects = '/projects';
+
+  // --- Directory (W6.2) ---
+  /// Canonical Directory [DirectoryLandingScreen] route.
+  ///
+  /// W6.2 establishes this as the permanent GoRouter root route exposing the
+  /// production-ready W5 Directory flow. It is navigation-ready but has NO
+  /// visible production launcher in W6.2 — it is NOT a Bottom Navigation
+  /// destination and must never enter `kShellDestinations`. Directory becomes a
+  /// visible shell slot only in the later phase (M3 NAV-5) when a slot is
+  /// freed (W6.3).
+  static const String directory = '/directory';
+
+  /// Canonical Directory search route.
+  ///
+  /// Renders the real [DirectorySearchScreen]. Reached from `/directory` with
+  /// the selected [BusinessType] carried via `state.extra`; direct navigation
+  /// with no category opens browse mode (initialCategory null). This is a ROOT
+  /// route — NOT a StatefulShell branch and never a `kShellDestinations` entry.
+  static const String directorySearch = '/directory/search';
 
   // --- Shell destinations (values mirror kShellDestinations in app_shell) ---
   static const String home = '/home';

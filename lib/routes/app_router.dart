@@ -27,6 +27,9 @@ import '../features/profile/domain/user_profile.dart';
 import '../features/profile/presentation/providers/user_profile_provider.dart';
 import '../features/search/presentation/screens/global_search_screen.dart';
 import '../features/user_area/presentation/user_area_screen.dart';
+import '../features/directory/presentation/directory_landing_screen.dart';
+import '../features/directory/presentation/directory_search_screen.dart';
+import '../features/profile/domain/service_business_profile.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
@@ -70,6 +73,34 @@ Widget _buildProfileEdit(BuildContext context, GoRouterState state) {
   return const NotFoundScreen();
 }
 
+/// W6.2 — canonical Directory Landing route builder.
+///
+/// Hosts the real [DirectoryLandingScreen]. Wire its existing
+/// [DirectoryLandingScreen.onCategorySelected] seam to a GoRouter push of
+/// [AppRoutes.directorySearch], carrying the selected [BusinessType] via
+/// `state.extra`. The smallest transport is used — no query-string
+/// serialization, no navigation DTO.
+Widget _buildDirectoryLanding(BuildContext context, GoRouterState state) {
+  return DirectoryLandingScreen(
+    onCategorySelected: (type) => context.push(
+      AppRoutes.directorySearch,
+      extra: type,
+    ),
+  );
+}
+
+/// W6.2 — canonical Directory Search route builder.
+///
+/// Hosts the real [DirectorySearchScreen]. Resolves the selected [BusinessType]
+/// from `state.extra` when supplied; direct navigation with no extra opens
+/// browse mode ([DirectorySearchScreen.initialCategory] null).
+Widget _buildDirectorySearch(BuildContext context, GoRouterState state) {
+  final extra = state.extra;
+  return DirectorySearchScreen(
+    initialCategory: extra is BusinessType ? extra : null,
+  );
+}
+
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigator,
   initialLocation: AppRoutes.splash,
@@ -97,6 +128,16 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.projects,
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => const ProjectListScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.directory,
+      parentNavigatorKey: _rootNavigator,
+      builder: _buildDirectoryLanding,
+    ),
+    GoRoute(
+      path: AppRoutes.directorySearch,
+      parentNavigatorKey: _rootNavigator,
+      builder: _buildDirectorySearch,
     ),
     GoRoute(
       path: AppRoutes.categories,

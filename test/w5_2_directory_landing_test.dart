@@ -286,10 +286,12 @@ void main() {
   });
 
   group('W5.2 NAVIGATION FREEZE', () {
-    test('27. no /directory route is registered/buildable', () {
+    test('27. /directory is a registered route constant (W6.2 canonical)', () {
       final routes = File('lib/routes/app_routes.dart').readAsStringSync();
-      // Only the doc comment may mention /directory as a future target; no route constant.
-      expect(RegExp(r"static const String directory\b").hasMatch(routes), isFalse);
+      // W6.2 adds the canonical /directory route (navigation-ready, no visible
+      // launcher). The navigation freeze now lives at the shell level: /directory
+      // must remain a root route, NOT a bottom-navigation destination.
+      expect(RegExp(r"static const String directory = '/directory';").hasMatch(routes), isTrue);
     });
 
     test('28. shell destinations remain unchanged', () {
