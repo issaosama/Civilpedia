@@ -13,6 +13,8 @@ import 'package:civilpedia/features/directory/presentation/directory_provider_de
 import 'package:civilpedia/features/directory/presentation/directory_verification_badge.dart';
 import 'package:civilpedia/features/directory/presentation/services/directory_contact_launcher.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
+import 'package:civilpedia/features/saved/domain/saved_item_reference.dart';
+import 'package:civilpedia/features/saved/domain/saved_reference_store.dart';
 import 'package:civilpedia/routes/app_routes.dart';
 
 ServiceBusinessProfile _p({
@@ -66,6 +68,29 @@ class _FakeLauncher implements DirectoryContactLauncher {
   }
 }
 
+/// In-memory fake [SavedReferenceStore] so detail widget tests never touch
+/// real persistence (or the uninitialized `AppDependencies` singleton).
+class _FakeSavedStore implements SavedReferenceStore {
+  final List<SavedItemReference> _refs = [];
+
+  @override
+  Future<List<SavedItemReference>> loadAll() async => List.of(_refs);
+
+  @override
+  Future<bool> contains(String referenceId) async =>
+      _refs.any((r) => r.id == referenceId);
+
+  @override
+  Future<void> save(SavedItemReference reference) async {
+    if (!_refs.any((r) => r.id == reference.id)) _refs.add(reference);
+  }
+
+  @override
+  Future<void> remove(String referenceId) async {
+    _refs.removeWhere((r) => r.id == referenceId);
+  }
+}
+
 Widget _badgeApp(VerificationStatus status) {
   return ChangeNotifierProvider(
     create: (_) => LanguageProvider(),
@@ -91,6 +116,7 @@ Future<_FakeLauncher> _pumpDetail(
         home: DirectoryProviderDetailScreen(
           profile: profile,
           contactLauncher: launcher,
+          savedReferenceStore: _FakeSavedStore(),
         ),
       ),
     ),
@@ -575,11 +601,23 @@ void main() {
       expect(find.text('Suspended'), findsNothing);
     });
 
-    testWidgets('57. no Saved button introduced', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
-      expect(find.byIcon(Icons.bookmark), findsNothing);
-      expect(find.byIcon(Icons.bookmark_border), findsNothing);
-    });
+    testWidgets(
+      '57. W5.6 Save bookmark action present (unsaved shows bookmark_border)',
+      (tester) async {
+        await _pumpDetail(
+          tester,
+          _p(
+            id: 'a',
+            name: 'Alpha',
+            verificationStatus: VerificationStatus.verified,
+          ),
+        );
+        // W5.6 supersedes W5.5's "no Saved button": the canonical Save action
+        // is now present. Not yet saved => bookmark_border (only once).
+        expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
+        expect(find.byIcon(Icons.bookmark), findsNothing);
+      },
+    );
 
     testWidgets('58. no sponsored badge introduced', (tester) async {
       await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));

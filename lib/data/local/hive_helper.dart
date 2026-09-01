@@ -109,4 +109,20 @@ class HiveHelper {
   static Future<void> restoreDownloads(List<String> ids) async {
     await _box.put(AppStorageKeys.downloads, List.of(ids));
   }
+
+  /// Returns the raw structured Saved-reference list, or an empty list when
+  /// the key is absent. Type-agnostic: entries are returned as persisted and
+  /// the Saved store decodes them safely (malformed entries are skipped, never
+  /// a crash).
+  static List<Object?> getSavedReferences() {
+    final data = _box.get(AppStorageKeys.savedReferences, defaultValue: <dynamic>[]);
+    if (data is List) return data.cast<Object?>();
+    return <Object?>[];
+  }
+
+  /// Stores the structured Saved-reference list. Brave new W5.6 store; legacy
+  /// keys (`favorites`, `encyclopediaFavorites`) are never touched here.
+  static Future<void> putSavedReferences(List<Object?> references) async {
+    await _box.put(AppStorageKeys.savedReferences, List<Object?>.of(references));
+  }
 }

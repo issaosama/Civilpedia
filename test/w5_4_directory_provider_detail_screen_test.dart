@@ -8,6 +8,8 @@ import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/directory/presentation/services/directory_contact_launcher.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
+import 'package:civilpedia/features/saved/domain/saved_item_reference.dart';
+import 'package:civilpedia/features/saved/domain/saved_reference_store.dart';
 import 'package:civilpedia/localization/ar.dart';
 
 class _FakeLauncher implements DirectoryContactLauncher {
@@ -27,6 +29,32 @@ class _FakeLauncher implements DirectoryContactLauncher {
     if (!succeed) return false;
     launchedWhatsApps.add(digits);
     return true;
+  }
+}
+
+/// In-memory fake [SavedReferenceStore] so detail widget tests never touch
+/// real persistence.
+class _FakeSavedStore implements SavedReferenceStore {
+  final List<SavedItemReference> _refs = [];
+  bool failWrites = false;
+
+  @override
+  Future<List<SavedItemReference>> loadAll() async => List.of(_refs);
+
+  @override
+  Future<bool> contains(String referenceId) async =>
+      _refs.any((r) => r.id == referenceId);
+
+  @override
+  Future<void> save(SavedItemReference reference) async {
+    if (failWrites) throw Exception('persist failure');
+    if (!_refs.any((r) => r.id == reference.id)) _refs.add(reference);
+  }
+
+  @override
+  Future<void> remove(String referenceId) async {
+    if (failWrites) throw Exception('persist failure');
+    _refs.removeWhere((r) => r.id == referenceId);
   }
 }
 
@@ -64,7 +92,8 @@ ServiceBusinessProfile _p({
   );
 }
 
-Widget _app(ServiceBusinessProfile profile, _FakeLauncher launcher) {
+Widget _app(ServiceBusinessProfile profile, _FakeLauncher launcher,
+    {_FakeSavedStore? store}) {
   return ChangeNotifierProvider(
     create: (_) => LanguageProvider(),
     child: MaterialApp(
@@ -72,6 +101,7 @@ Widget _app(ServiceBusinessProfile profile, _FakeLauncher launcher) {
       home: DirectoryProviderDetailScreen(
         profile: profile,
         contactLauncher: launcher,
+        savedReferenceStore: store ?? _FakeSavedStore(),
       ),
     ),
   );
@@ -81,9 +111,10 @@ Future<_FakeLauncher> _pump(
   WidgetTester tester,
   ServiceBusinessProfile profile, {
   _FakeLauncher? launcher,
+  _FakeSavedStore? store,
 }) async {
   final l = launcher ?? _FakeLauncher();
-  await tester.pumpWidget(_app(profile, l));
+  await tester.pumpWidget(_app(profile, l, store: store));
   await tester.pumpAndSettle();
   return l;
 }
@@ -224,10 +255,12 @@ void main() {
       expect(find.byIcon(Icons.verified), findsOneWidget);
     });
 
-    testWidgets('33. no Saved UI', (tester) async {
+    testWidgets('33. W5.6 unsaved detail shows the bookmark_border Save action',
+        (tester) async {
       await _pump(tester, _p(id: 'a', name: 'Alpha'));
+      await tester.pumpAndSettle();
+      expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
       expect(find.byIcon(Icons.bookmark), findsNothing);
-      expect(find.byIcon(Icons.bookmark_border), findsNothing);
     });
 
     testWidgets('34. no sponsored/featured/plan display', (tester) async {

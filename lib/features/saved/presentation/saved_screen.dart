@@ -2,16 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/di/app_dependencies.dart';
+import '../../../core/location/baghdad_area.dart';
 import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/spacing.dart';
+import '../../../core/widgets/civil_surface_card.dart';
 import '../../../core/widgets/custom_card.dart';
 import '../../../data/local/hive_helper.dart';
 import '../../../data/repositories/article_repository.dart';
 import '../../../localization/ar.dart';
 import '../../articles/presentation/widgets/article_image.dart';
+import '../../directory/domain/directory_repository.dart';
+import '../../directory/presentation/directory_category_presentation.dart';
+import '../../directory/presentation/directory_provider_detail_screen.dart';
 import '../../encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import '../../encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import '../../encyclopedia/presentation/widgets/topic_list_card.dart';
+import '../../profile/domain/service_business_profile.dart';
+import '../../saved/domain/saved_reference_store.dart';
 import '../data/hive_saved_reference_resolver.dart';
 import '../domain/saved_item_reference.dart';
 import '../domain/saved_reference_resolver.dart';
@@ -20,6 +30,8 @@ class SavedScreen extends StatefulWidget {
   const SavedScreen({
     super.key,
     this.favoritesResolver,
+    this.directoryRepository,
+    this.savedReferenceStore,
     this.initialTabIndex = 0,
   });
 
@@ -27,6 +39,22 @@ class SavedScreen extends StatefulWidget {
   /// source. Defaults to the production Hive-backed resolver
   /// ([hiveSavedReferenceResolver]).
   final SavedReferenceResolver? favoritesResolver;
+
+  /// Directory-domain repository used to resolve saved provider references.
+  ///
+  /// W5.6 — SavedScreen resolves directory/provider refs ONLY through
+  /// [DirectoryRepository.loadById]; it never reads `sb_profiles` or the raw
+  /// Directory storage. Defaults to [AppDependencies.directoryRepo]; tests
+  /// inject a fake.
+  final DirectoryRepository? directoryRepository;
+
+  /// Canonical User-owned Saved store.
+  ///
+  /// W5.6 — forwarded to the [DirectoryProviderDetailScreen] pushed from a
+  /// saved Directory row so its bookmark stays consistent. Defaults to
+  /// [AppDependencies.savedReferenceStore]; tests inject a fake in-memory store
+  /// to avoid real persistent writes.
+  final SavedReferenceStore? savedReferenceStore;
 
   /// W3.4 — tab selected when the screen is first built. `0` = Favorites,
   /// `1` = Downloads. Applied through `TabController.initialIndex` (created
@@ -44,15 +72,27 @@ class _SavedScreenState extends State<SavedScreen>
   late TabController _tabController;
   late final SavedReferenceResolver _resolver;
 
+  /// Optional injected Directory repository override. When null the effective
+  /// repo is resolved lazily ([AppDependencies.directoryRepo]) only when a
+  /// directory ref must be resolved — never eagerly at initState, so contexts
+  /// that never need the Directory backend (e.g. Knowledge-only Favorites)
+  /// stay lightweight and never touch the lazy singleton.
+  late final DirectoryRepository? _directoryRepoOverride;
+
   List<SavedItemReference> _favorites = const [];
   bool _favoritesLoaded = false;
   int _loadGeneration = 0;
   EncyclopediaFavoritesProvider? _favoritesProvider;
 
+  /// Resolved Directory providers, in reference/source order. Null entries mark
+  /// provider refs whose entity can no longer be resolved (shown unavailable).
+  List<ServiceBusinessProfile?> _directoryProviders = const [];
+
   @override
   void initState() {
     super.initState();
     _resolver = widget.favoritesResolver ?? hiveSavedReferenceResolver();
+    _directoryRepoOverride = widget.directoryRepository;
     _tabController = TabController(
       length: 2,
       vsync: this,
@@ -97,10 +137,13 @@ class _SavedScreenState extends State<SavedScreen>
     final generation = ++_loadGeneration;
     _resolver
         .resolve()
-        .then((refs) {
+        .then((refs) async {
+          if (!mounted || generation != _loadGeneration) return;
+          final providers = await _resolveDirectoryProviders(refs);
           if (!mounted || generation != _loadGeneration) return;
           setState(() {
             _favorites = refs;
+            _directoryProviders = providers;
             _favoritesLoaded = true;
           });
         })
@@ -108,9 +151,40 @@ class _SavedScreenState extends State<SavedScreen>
           if (!mounted || generation != _loadGeneration) return;
           setState(() {
             _favorites = const <SavedItemReference>[];
+            _directoryProviders = const [];
             _favoritesLoaded = true;
           });
         });
+  }
+
+  /// W5.6 — resolves directory/provider Saved refs through the canonical
+  /// [DirectoryRepository.loadById], preserving reference/source order and
+  /// marking unresolvable entries as null (shown "unavailable"). Never deletes
+  /// the Saved ref and ranks nothing.
+  Future<List<ServiceBusinessProfile?>> _resolveDirectoryProviders(
+    List<SavedItemReference> refs,
+  ) async {
+    final result = <ServiceBusinessProfile?>[];
+    for (final ref in refs) {
+      if (ref.ownerDomain != SavedReferenceOwners.directory) continue;
+      if (ref.entityType != SavedReferenceEntityTypes.provider) continue;
+      final entityId = ref.entityId;
+      if (entityId.isEmpty) {
+        result.add(null);
+        continue;
+      }
+      // Lazy: the production Directory backend is obtained only when an actual
+      // provider ref must be resolved, not at screen construction.
+      final repo = _directoryRepoOverride ?? AppDependencies.directoryRepo;
+      ServiceBusinessProfile? provider;
+      try {
+        provider = await repo.loadById(entityId);
+      } catch (_) {
+        provider = null;
+      }
+      result.add(provider);
+    }
+    return result;
   }
 
   @override
@@ -161,8 +235,9 @@ class _SavedScreenState extends State<SavedScreen>
 
     final hasEncyclopedia = encyclopediaTopics.isNotEmpty;
     final hasLegacy = favoriteArticles.isNotEmpty;
+    final hasDirectory = _directoryProviders.isNotEmpty;
 
-    if (!hasEncyclopedia && !hasLegacy) {
+    if (!hasEncyclopedia && !hasLegacy && !hasDirectory) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -239,8 +314,113 @@ class _SavedScreenState extends State<SavedScreen>
             const SizedBox(height: 12),
           ],
         ],
+        if (hasDirectory) ...[
+          _sectionHeader(Ar.savedEngineeringDirectory),
+          for (final provider in _directoryProviders) ...[
+            _buildDirectoryRow(provider),
+            const SizedBox(height: 12),
+          ],
+        ],
       ],
     );
+  }
+
+  /// W5.6 — smallest reusable presentation of one saved Directory provider.
+  ///
+  /// Resolved provider: name + localized BusinessType + localized BaghdadArea
+  /// (when meaningful) + a Directory identity icon, opening the provider detail
+  /// on tap. Unavailable (null) provider: a non-navigating "Provider
+  /// unavailable" row. Directory identity icon is always shown. No
+  /// verification/ranking/sponsored/plan signals, and no saved button inside
+  /// the already-Saved list.
+  Widget _buildDirectoryRow(ServiceBusinessProfile? provider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final icon = DirectoryCategoryPresentation.iconFor(
+      provider?.type ?? BusinessType.other,
+    );
+    return CivilSurfaceCard(
+      onTap: provider == null ? null : () => _openSavedProvider(provider),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.primarySoft.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
+            ),
+            child: Icon(icon, color: AppColors.primaryDark, size: 22),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (provider != null)
+                  Text(
+                    provider.name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  )
+                else
+                  Text(
+                    Ar.savedProviderUnavailable,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                if (provider != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    _providerSubtitle(provider),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _providerSubtitle(ServiceBusinessProfile provider) {
+    final typeLabel = DirectoryCategoryPresentation.labelFor(
+      provider.type,
+      isArabic: true,
+    );
+    final locationLabel = provider.baghdadArea == BaghdadArea.unknown
+        ? null
+        : provider.baghdadArea.arName;
+    if (locationLabel == null) return typeLabel;
+    return '$typeLabel · $locationLabel';
+  }
+
+  Future<void> _openSavedProvider(ServiceBusinessProfile provider) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => DirectoryProviderDetailScreen(
+          profile: provider,
+          savedReferenceStore: widget.savedReferenceStore,
+        ),
+      ),
+    );
+    if (mounted) _loadFavorites();
   }
 
   Widget _sectionHeader(String title) {

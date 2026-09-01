@@ -678,4 +678,10 @@ class En {
   static const String verificationVerified = 'Verified';
   static const String verificationRejected = 'Rejected';
   static const String verificationSuspended = 'Suspended';
+
+  // W5.6 — Save provider (User-owned Saved ref)
+  static const String savedSaveProvider = 'Save provider';
+  static const String savedRemoveFromSaved = 'Remove from saved';
+  static const String savedEngineeringDirectory = 'Engineering Directory';
+  static const String savedProviderUnavailable = 'Provider unavailable';
 }

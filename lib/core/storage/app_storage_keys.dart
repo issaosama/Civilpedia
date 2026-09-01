@@ -48,6 +48,17 @@ abstract final class AppStorageKeys {
   /// Hive: favorite encyclopedia topics.
   static const String encyclopediaFavorites = 'encyclopediaFavorites';
 
+  /// Hive: structured, cross-domain Saved references (W5.6).
+  ///
+  /// NEW additive key. Persists a JSON list of canonical [SavedItemReference]
+  /// maps (ownerDomain/entityType/entityId/savedAt). Intentionally generic and
+  /// domain-independent so the User-owned Saved system can hold any entity type
+  /// here. Unlike the legacy bare-id lists (`favorites`,
+  /// `encyclopediaFavorites`), records carry their real `savedAt`. This is a
+  /// NEW store — NOT a migration: legacy keys stay untouched and are never
+  /// rewritten into it.
+  static const String savedReferences = 'savedReferences';
+
   /// Hive: downloaded article ids.
   static const String downloads = 'downloads';
 

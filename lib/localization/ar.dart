@@ -660,4 +660,10 @@ class Ar {
   static const String verificationVerified = 'موثّق';
   static const String verificationRejected = 'مرفوض';
   static const String verificationSuspended = 'موقوف';
+
+  // W5.6 — Save provider (User-owned Saved ref)
+  static const String savedSaveProvider = 'حفظ المزود';
+  static const String savedRemoveFromSaved = 'إزالة من المحفوظات';
+  static const String savedEngineeringDirectory = 'الدليل الهندسي';
+  static const String savedProviderUnavailable = 'مزود غير متاح';
 }

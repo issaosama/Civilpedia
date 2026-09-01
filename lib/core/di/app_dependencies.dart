@@ -12,6 +12,8 @@ import '../../features/profile/data/local_service_business_repository.dart';
 import '../../features/profile/data/service_business_data_source.dart';
 import '../../features/profile/domain/user_profile_repository.dart';
 import '../../features/profile/domain/service_business_repository.dart';
+import '../../features/saved/data/hive_saved_reference_store.dart';
+import '../../features/saved/domain/saved_reference_store.dart';
 import '../../features/tools/data/checklist/checklist_local_data_source.dart';
 import '../../features/tools/data/checklist/local_checklist_repository.dart';
 import '../../features/tools/data/checklist/local_project_repository.dart';
@@ -34,6 +36,8 @@ class AppDependencies {
   static late final ServiceBusinessDataSource _businessDataSource;
   static late final ServiceBusinessRepository _businessRepo;
   static late final DirectoryRepository _directoryRepo;
+
+  static late final SavedReferenceStore _savedReferenceStore;
 
   static late final ChecklistLocalDataSource _checklistDataSource;
   static late final ChecklistRepository _checklistRepo;
@@ -59,6 +63,8 @@ class AppDependencies {
     _businessRepo = LocalServiceBusinessRepository(_businessDataSource);
     _directoryRepo = SbProfilesDirectoryRepository(businessRepo: _businessRepo);
 
+    _savedReferenceStore = const HiveSavedReferenceStore();
+
     _checklistDataSource = ChecklistLocalDataSource();
     _checklistRepo = LocalChecklistRepository(_checklistDataSource);
 
@@ -83,6 +89,8 @@ class AppDependencies {
   static ServiceBusinessRepository get businessRepo => _businessRepo;
 
   static DirectoryRepository get directoryRepo => _directoryRepo;
+
+  static SavedReferenceStore get savedReferenceStore => _savedReferenceStore;
 
   static ChecklistRepository get checklistRepo => _checklistRepo;
 

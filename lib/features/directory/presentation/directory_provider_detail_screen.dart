@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/di/app_dependencies.dart';
 import '../../../core/location/baghdad_area.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -11,17 +12,24 @@ import '../../../core/widgets/civil_surface_card.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../profile/domain/service_business_profile.dart';
+import '../../saved/domain/saved_item_reference.dart';
+import '../../saved/domain/saved_reference_store.dart';
 import 'directory_category_presentation.dart';
 import 'directory_verification_badge.dart';
 import 'services/directory_contact_launcher.dart';
 
 /// W5.4 — canonical reusable Directory provider detail surface.
 ///
-/// Deliberately excludes saved/bookmark (W5.6) and any Monetization signals
-/// (W7). Maps launch is deferred: the entity has address + BaghdadArea but no
-/// coordinates, so W5.4 displays location text only. Verification is displayed
-/// as a compact badge in the identity/header block (W5.5) — display only, never
-/// filtering, ranking or contact-altering.
+/// Deliberately excludes any Monetization signals (W7). Maps launch is deferred:
+/// the entity has address + BaghdadArea but no coordinates, so W5.4 displays
+/// location text only. Verification is displayed as a compact badge in the
+/// identity/header block (W5.5) — display only, never filtering, ranking or
+/// contact-altering.
+///
+/// W5.6 — adds ONE AppBar Save/Unsave bookmark action backed by the canonical
+/// User-owned [SavedReferenceStore]. Save state is purely local (works offline)
+/// and never touches `ServiceBusinessProfile`, contact, verification or
+/// Monetization fields.
 class DirectoryProviderDetailScreen extends StatefulWidget {
   /// The provider to display, passed directly from the listing.
   final ServiceBusinessProfile profile;
@@ -30,10 +38,16 @@ class DirectoryProviderDetailScreen extends StatefulWidget {
   /// inject a fake so widget tests never open a real external app.
   final DirectoryContactLauncher? contactLauncher;
 
+  /// Canonical User-owned Saved store. Production default is
+  /// [AppDependencies.savedReferenceStore]; tests inject a fake in-memory store
+  /// so widget tests never perform real persistent writes.
+  final SavedReferenceStore? savedReferenceStore;
+
   const DirectoryProviderDetailScreen({
     super.key,
     required this.profile,
     this.contactLauncher,
+    this.savedReferenceStore,
   });
 
   @override
@@ -45,11 +59,78 @@ class _DirectoryProviderDetailScreenState
     extends State<DirectoryProviderDetailScreen> {
   late final DirectoryContactLauncher _launcher;
 
+  /// Optional injected Saved-store override. The effective store
+  /// ([_store]) is resolved lazily ONLY inside guarded try/catch blocks, never
+  /// eagerly at initState, so an uninitialized production singleton degrades
+  /// the Save feature gracefully (reads as unsaved) instead of crashing the
+  /// whole detail surface. Tests may inject a fake.
+  late final SavedReferenceStore? _savedStoreOverride;
+
+  /// null while the initial saved-state query is in flight, to avoid a visual
+  /// flash. Bookmark is only interactive once resolved.
+  bool? _isSaved;
+
+  /// Canonical deterministic directory/provider ref id from `profile.id`.
+  late final String _providerRefId;
+
+  SavedReferenceStore get _store =>
+      _savedStoreOverride ?? AppDependencies.savedReferenceStore;
+
   @override
   void initState() {
     super.initState();
     _launcher =
         widget.contactLauncher ?? const UrlLauncherDirectoryContactLauncher();
+    _savedStoreOverride = widget.savedReferenceStore;
+    final profile = widget.profile;
+    _providerRefId = SavedItemReference(
+      ownerDomain: SavedReferenceOwners.directory,
+      entityType: SavedReferenceEntityTypes.provider,
+      entityId: profile.id,
+    ).id;
+    _loadSavedState();
+  }
+
+  Future<void> _loadSavedState() async {
+    bool saved;
+    try {
+      saved = await _store.contains(_providerRefId);
+    } catch (_) {
+      saved = false;
+    }
+    if (!mounted) return;
+    setState(() => _isSaved = saved);
+  }
+
+  Future<void> _toggleSaved() async {
+    final isSaved = _isSaved;
+    if (isSaved == null) return;
+    try {
+      if (isSaved) {
+        await _store.remove(_providerRefId);
+      } else {
+        await _store.save(
+          SavedItemReference(
+            ownerDomain: SavedReferenceOwners.directory,
+            entityType: SavedReferenceEntityTypes.provider,
+            entityId: widget.profile.id,
+            savedAt: DateTime.now().toUtc(),
+          ),
+        );
+      }
+      if (!mounted) return;
+      setState(() => _isSaved = !isSaved);
+    } catch (_) {
+      if (!mounted) return;
+      final isArabic = context.read<LanguageProvider>().isArabic;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isArabic ? Ar.errorOccurred : En.errorOccurred,
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _launchPhone(String trimmedPhone) async {
@@ -74,12 +155,33 @@ class _DirectoryProviderDetailScreenState
     );
   }
 
+  /// W5.6 — the one Save/Unsave AppBar bookmark action.
+  ///
+  /// Unsaved → `bookmark_border` / "Save provider"; Saved → `bookmark` /
+  /// "Remove from saved". The current action is exposed semantically via the
+  /// tooltip (never icon-fill alone). Hidden until the initial saved-state query
+  /// resolves (no flashing bookmark).
+  Widget _buildSaveAction(bool isArabic) {
+    final isSaved = _isSaved;
+    if (isSaved == null) {
+      return const SizedBox.shrink();
+    }
+    final unsaved = isSaved == false;
+    final tooltip = unsaved
+        ? (isArabic ? Ar.savedSaveProvider : En.savedSaveProvider)
+        : (isArabic ? Ar.savedRemoveFromSaved : En.savedRemoveFromSaved);
+    return IconButton(
+      icon: Icon(unsaved ? Icons.bookmark_border : Icons.bookmark),
+      tooltip: tooltip,
+      onPressed: _toggleSaved,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final profile = widget.profile;
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final theme = Theme.of(context);
-
     final description = profile.description?.trim();
     final address = profile.address?.trim();
     final services = _nonEmptyList([...profile.categories, ...profile.subCategories]);
@@ -88,7 +190,10 @@ class _DirectoryProviderDetailScreenState
     final hasActionableContact = phones.isNotEmpty || whatsappDigits.isNotEmpty;
 
     return Scaffold(
-      appBar: CivilAppBar(title: Text(profile.name)),
+      appBar: CivilAppBar(
+        title: Text(profile.name),
+        actions: [_buildSaveAction(isArabic)],
+      ),
       body: ListView(
         padding: AppSpacing.padLg,
         children: [

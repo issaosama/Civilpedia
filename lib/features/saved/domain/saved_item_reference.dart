@@ -34,6 +34,45 @@ class SavedItemReference {
   /// Deterministic composite saved id, e.g. `knowledge:article:<articleId>`.
   String get id => '$ownerDomain:$entityType:$entityId';
 
+  /// Serializes this reference to a plain map, preserving
+  /// [ownerDomain], [entityType], [entityId] and [savedAt].
+  ///
+  /// The deterministic composite [id] is intentionally NOT persisted because it
+  /// is always derived from the three identity fields.
+  Map<String, dynamic> toJson() => {
+    'ownerDomain': ownerDomain,
+    'entityType': entityType,
+    'entityId': entityId,
+    'savedAt': savedAt?.toUtc().toIso8601String(),
+  };
+
+  /// Reconstructs a [SavedItemReference] from a serialized map.
+  ///
+  /// Returns null when any identity field is missing or malformed so that a
+  /// single bad structured record never crashes the Saved system (callers skip
+  /// nulls). A missing/unparseable [savedAt] resolves to null (no fabricated
+  /// history) without dropping the reference.
+  static SavedItemReference? tryFromJson(Object? raw) {
+    if (raw is! Map) return null;
+    final ownerDomain = raw['ownerDomain'];
+    final entityType = raw['entityType'];
+    final entityId = raw['entityId'];
+    if (ownerDomain is! String || ownerDomain.isEmpty) return null;
+    if (entityType is! String || entityType.isEmpty) return null;
+    if (entityId is! String || entityId.isEmpty) return null;
+    final savedAtRaw = raw['savedAt'];
+    DateTime? savedAt;
+    if (savedAtRaw is String) {
+      savedAt = DateTime.tryParse(savedAtRaw)?.toUtc();
+    }
+    return SavedItemReference(
+      ownerDomain: ownerDomain,
+      entityType: entityType,
+      entityId: entityId,
+      savedAt: savedAt,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other is! SavedItemReference) return false;
@@ -54,6 +93,9 @@ class SavedItemReference {
 abstract final class SavedReferenceOwners {
   /// Knowledge domain (articles + encyclopedia topics).
   static const String knowledge = 'knowledge';
+
+  /// Directory domain (service-business providers).
+  static const String directory = 'directory';
 }
 
 /// Entity-type vocabulary used by Saved references today (M7 §12 table).
@@ -63,4 +105,7 @@ abstract final class SavedReferenceEntityTypes {
 
   /// Encyclopedia topic favorites.
   static const String topic = 'topic';
+
+  /// Directory service-business provider.
+  static const String provider = 'provider';
 }
