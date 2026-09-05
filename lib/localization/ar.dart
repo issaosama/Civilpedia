@@ -669,4 +669,7 @@ class Ar {
   static const String savedRemoveFromSaved = 'إزالة من المحفوظات';
   static const String savedEngineeringDirectory = 'الدليل الهندسي';
   static const String savedProviderUnavailable = 'مزود غير متاح';
+
+  // RR.1 — Missing topic image fallback
+  static const String imageUnavailable = 'الصورة غير متوفرة حالياً';
 }

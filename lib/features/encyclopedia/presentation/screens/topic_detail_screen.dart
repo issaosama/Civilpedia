@@ -17,6 +17,7 @@ import '../../../../localization/ar.dart';
 import '../theme/encyclopedia_card_colors.dart';
 import '../theme/encyclopedia_topic_theme.dart';
 import '../widgets/content_block_widget.dart';
+import '../widgets/image_unavailable_fallback.dart';
 
 class TopicDetailScreen extends StatefulWidget {
   final String topicId;
@@ -524,7 +525,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             url,
             fit: BoxFit.cover,
             width: double.infinity,
-            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            errorBuilder: (_, __, ___) =>
+                ImageUnavailableFallback(height: 200, borderRadius: DesignTokens.radiusSm),
           ),
         ),
       ),

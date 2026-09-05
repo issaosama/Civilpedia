@@ -687,4 +687,7 @@ class En {
   static const String savedRemoveFromSaved = 'Remove from saved';
   static const String savedEngineeringDirectory = 'Engineering Directory';
   static const String savedProviderUnavailable = 'Provider unavailable';
+
+  // RR.1 — Missing topic image fallback
+  static const String imageUnavailable = 'Image unavailable for now';
 }

@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../domain/entities/content_block.dart';
 import '../theme/encyclopedia_card_colors.dart';
+import 'image_unavailable_fallback.dart';
 
 class ImageBlockWidget extends StatelessWidget {
   final ImageBlock block;
@@ -24,23 +24,8 @@ class ImageBlockWidget extends StatelessWidget {
               block.imageUrl,
               fit: BoxFit.contain,
               width: double.infinity,
-              errorBuilder: (_, __, ___) {
-                if (kReleaseMode) return const SizedBox.shrink();
-                return Container(
-                  width: double.infinity,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey.shade700 : Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'تعذر تحميل الصورة\n${block.imageUrl}',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, color: isDark ? Colors.grey.shade300 : Colors.grey),
-                  ),
-                );
-              },
+              errorBuilder: (_, __, ___) =>
+                  const ImageUnavailableFallback(),
             ),
           ),
           if (block.caption != null && block.caption!.trim().isNotEmpty)
