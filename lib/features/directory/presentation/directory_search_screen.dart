@@ -15,13 +15,16 @@ import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/state_widgets.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
+import '../../monetization/domain/services/campaign_source.dart';
 import '../../profile/domain/service_business_profile.dart';
+import '../application/directory_sponsored_placement_coordinator.dart';
 import '../domain/directory_query.dart';
 import '../domain/directory_query_engine.dart';
 import '../domain/directory_repository.dart';
 import 'directory_category_presentation.dart';
 import 'directory_provider_card.dart';
 import 'directory_provider_detail_screen.dart';
+import 'widgets/directory_sponsored_provider_card.dart';
 
 /// Directory-local search + location/category filter surface (W5.3).
 ///
@@ -34,6 +37,14 @@ import 'directory_provider_detail_screen.dart';
 /// [DirectoryProviderDetailScreen] through an internal (production-unexposed)
 /// Navigator push. No contact, verification, saved, or sponsored/featured/plan
 /// signals are shown on the listing card itself.
+///
+/// W7.2 — adds ONE optional, clearly disclosed sponsored provider slot ABOVE the
+/// organic results. Organic results remain exactly as [DirectoryQueryEngine]
+/// produces them (sponsorship-blind). Sponsored resolution runs in parallel and
+/// fails closed: with no active eligible campaign, an unconfigured (honest-empty)
+/// campaign source, or any resolution failure, NO sponsored slot is rendered and
+/// no blank space is left. The listing card itself stays organic-neutral — the
+/// sponsored disclosure lives on the wrapper, not the card.
 class DirectorySearchScreen extends StatefulWidget {
   /// Pre-selected [BusinessType] to start with, used by the W5.2
   /// [DirectoryLandingScreen.onCategorySelected] seam. Null starts in browse
@@ -43,6 +54,15 @@ class DirectorySearchScreen extends StatefulWidget {
   /// Repository to load profiles from. Defaults to the canonical W5.1
   /// [AppDependencies.directoryRepo]. Tests inject a fake.
   final DirectoryRepository? repository;
+
+  /// W7.2 — Campaign source for the sponsored search slot. Production default is
+  /// the honest-empty [AppDependencies.campaignSource]; tests inject a fake.
+  /// When absent, an unconfigured build renders no sponsored content.
+  final CampaignSource? campaignSource;
+
+  /// W7.2 — Injected clock for deterministic sponsored eligibility evaluation.
+  /// Defaults to [DateTime.now]. Tests inject a fixed time.
+  final DateTime Function()? now;
 
   /// Bottom scroll clearance for the result list.
   ///
@@ -59,6 +79,8 @@ class DirectorySearchScreen extends StatefulWidget {
     super.key,
     this.initialCategory,
     this.repository,
+    this.campaignSource,
+    this.now,
     this.bottomContentPadding = AppSpacing.huge,
   });
 
@@ -78,6 +100,13 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   bool _loading = true;
   bool _loadFailed = false;
 
+  DirectorySponsoredPlacement? _sponsored;
+
+  /// Monotonic guard so an older sponsored resolution never overwrites a newer
+  /// one if the screen reloads, and no stale sponsored update is applied after
+  /// the load that owns it has been superseded (W7.2 §19 async safety).
+  int _sponsoredRequest = 0;
+
   String _text = '';
   BusinessType? _category;
   BaghdadArea? _location;
@@ -88,6 +117,7 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
     _repository = widget.repository ?? AppDependencies.directoryRepo;
     _category = widget.initialCategory;
     _load();
+    _loadSponsored();
   }
 
   @override
@@ -116,6 +146,29 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
         _loadFailed = true;
       });
     }
+  }
+
+  /// W7.2 — Resolves the single sponsored slot in PARALLEL to organic loading.
+  ///
+  /// Fails closed: a source error yields no sponsored content and never affects
+  /// organic results. A stale resolution (superseded reload or post-disposal) is
+  /// dropped via [mounted] + [_sponsoredRequest].
+  Future<void> _loadSponsored() async {
+    final requestToken = ++_sponsoredRequest;
+    final coordinator = DirectorySponsoredPlacementCoordinator(
+      campaignSource: widget.campaignSource ?? AppDependencies.campaignSource,
+      directoryRepository: _repository,
+    );
+    DirectorySponsoredPlacement? result;
+    try {
+      result = await coordinator.resolveFirstRenderable(
+        at: (widget.now ?? DateTime.now)(),
+      );
+    } catch (_) {
+      result = null;
+    }
+    if (!mounted || requestToken != _sponsoredRequest) return;
+    setState(() => _sponsored = result);
   }
 
   void _onTextChanged(String raw) {
@@ -233,18 +286,20 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
     }
 
     final loaded = _loaded ?? const <ServiceBusinessProfile>[];
-    if (loaded.isEmpty) {
-      return EmptyStateWidget(
-        icon: Icons.business_center_outlined,
-        message: isArabic ? Ar.directoryEmptyDirectory : En.directoryEmptyDirectory,
-      );
-    }
-
     final results = _results;
-    if (results.isEmpty) {
+    final sponsored = _sponsored;
+    final showSponsored = sponsored != null;
+
+    // The sponsored slot renders INDEPENDENTLY of organic results (W7.2 §P):
+    // a sponsored provider need not match the current organic query, category,
+    // or location filter. Only when there is NO sponsored content do we fall
+    // through to the organic-only empty states.
+    if (results.isEmpty && !showSponsored) {
       return EmptyStateWidget(
-        icon: Icons.search_off,
-        message: isArabic ? Ar.directoryNoResults : En.directoryNoResults,
+        icon: loaded.isEmpty ? Icons.business_center_outlined : Icons.search_off,
+        message: isArabic
+            ? (loaded.isEmpty ? Ar.directoryEmptyDirectory : Ar.directoryNoResults)
+            : (loaded.isEmpty ? En.directoryEmptyDirectory : En.directoryNoResults),
       );
     }
 
@@ -256,6 +311,28 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
         ? shellSafeBottomPadding(context)
         : widget.bottomContentPadding + MediaQuery.paddingOf(context).bottom;
 
+    // Assemble the scroll body: optional sponsored slot FIRST (clearly
+    // disclosed), then organic results in their untouched DirectoryQueryEngine
+    // order. Both share one scroll body/insets — no fixed-position overlay.
+    final itemWidgets = <Widget>[];
+    if (showSponsored) {
+      itemWidgets.add(
+        DirectorySponsoredProviderCard(
+          placement: sponsored.placement,
+          profile: sponsored.profile,
+          onTap: () => _openDetail(context, sponsored.profile),
+        ),
+      );
+    }
+    for (final profile in results) {
+      itemWidgets.add(
+        DirectoryProviderCard(
+          profile: profile,
+          onTap: () => _openDetail(context, profile),
+        ),
+      );
+    }
+
     return ListView.separated(
       padding: EdgeInsetsDirectional.only(
         start: AppSpacing.lg,
@@ -263,12 +340,9 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
         top: AppSpacing.lg,
         bottom: effectiveBottomPadding,
       ),
-      itemCount: results.length,
+      itemCount: itemWidgets.length,
       separatorBuilder: (_, __) => AppSpacing.gapMd,
-      itemBuilder: (context, index) => DirectoryProviderCard(
-        profile: results[index],
-        onTap: () => _openDetail(context, results[index]),
-      ),
+      itemBuilder: (context, index) => itemWidgets[index],
     );
   }
 

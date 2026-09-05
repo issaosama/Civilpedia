@@ -2,6 +2,8 @@ import 'package:path_provider/path_provider.dart';
 
 import '../../features/directory/data/sb_profiles_directory_repository.dart';
 import '../../features/directory/domain/directory_repository.dart';
+import '../../features/monetization/data/empty_campaign_source.dart';
+import '../../features/monetization/domain/services/campaign_source.dart';
 import '../../features/encyclopedia/data/datasources/encyclopedia_json_datasource.dart';
 import '../../features/encyclopedia/data/datasources/encyclopedia_local_datasource.dart';
 import '../../features/encyclopedia/data/repositories/encyclopedia_repository_impl.dart';
@@ -89,6 +91,11 @@ class AppDependencies {
   static ServiceBusinessRepository get businessRepo => _businessRepo;
 
   static DirectoryRepository get directoryRepo => _directoryRepo;
+
+  /// W7.2 — Production campaign source. HONEST-EMPTY: with no configured
+  /// campaign authority it yields no candidates, so an unconfigured build
+  /// renders no sponsored content. Stateless; safe as a shared const default.
+  static const CampaignSource campaignSource = EmptyCampaignSource();
 
   static SavedReferenceStore get savedReferenceStore => _savedReferenceStore;
 
