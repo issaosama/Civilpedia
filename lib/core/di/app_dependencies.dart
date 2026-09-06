@@ -24,6 +24,7 @@ import '../../features/tools/domain/checklist/checklist_repository.dart';
 import '../../features/tools/domain/checklist/project_repository.dart';
 import '../backup/backup_file_service.dart';
 import '../backup/backup_service.dart';
+import '../backend/supabase_service.dart';
 
 class AppDependencies {
   AppDependencies._();
@@ -49,6 +50,8 @@ class AppDependencies {
 
   static late final BackupFileService _backupFileService;
   static late final BackupService _backupService;
+
+  static late final SupabaseService _supabaseService;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -82,6 +85,13 @@ class AppDependencies {
       projectRepo: _projectRepo,
       fileService: _backupFileService,
     );
+
+    // A5.1 — backend initialization boundary. Reads the compile-time
+    // environment configuration and initializes Supabase only when it is
+    // fully configured. Absent configuration keeps the service unavailable
+    // without affecting current guest/local behavior.
+    _supabaseService = SupabaseService();
+    await _supabaseService.init();
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -106,4 +116,9 @@ class AppDependencies {
   static BackupService get backupService => _backupService;
 
   static BackupFileService get backupFileService => _backupFileService;
+
+  /// A5.1 — Supabase initialization/service boundary. Feature code in later
+  /// phases consumes this through a repository/data-source chain, never by
+  /// calling the global Supabase API directly.
+  static SupabaseService get supabaseService => _supabaseService;
 }
