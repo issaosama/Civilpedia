@@ -25,8 +25,13 @@ import '../../features/tools/domain/checklist/project_repository.dart';
 import '../backup/backup_file_service.dart';
 import '../backup/backup_service.dart';
 import '../backend/supabase_service.dart';
+import '../ownership/guest_install_identity.dart';
+import '../ownership/local_data_claim_coordinator.dart';
+import '../ownership/local_favorites_gateway.dart';
+import '../ownership/ownership_registry_store.dart';
 import '../../features/auth/data/supabase_auth_gateway.dart';
 import '../../features/auth/domain/repositories/auth_gateway.dart';
+import '../../features/projects/data/project_persistence_gateway.dart';
 
 class AppDependencies {
   AppDependencies._();
@@ -56,6 +61,10 @@ class AppDependencies {
   static late final SupabaseService _supabaseService;
 
   static late final AuthGateway _authGateway;
+
+  static late final OwnershipRegistryStore _ownershipRegistryStore;
+  static late final GuestInstallIdentity _guestInstallIdentity;
+  static late final LocalDataClaimCoordinator _ownershipClaimCoordinator;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -101,6 +110,20 @@ class AppDependencies {
     // backend is unconfigured the gateway stays unavailable and the app runs
     // fully in guest mode.
     _authGateway = SupabaseAuthGateway(service: _supabaseService);
+
+    // A5.5 — ownership boundary. The claim coordinator never moves or rewrites
+    // user data; it only records ownership in a single sidecar registry key.
+    _ownershipRegistryStore = const SharedPreferencesOwnershipRegistryStore();
+    _guestInstallIdentity = GuestInstallIdentity(
+      userProfileRepository: _userProfileRepo,
+    );
+    _ownershipClaimCoordinator = LocalDataClaimCoordinator(
+      registryStore: _ownershipRegistryStore,
+      guestIdentity: _guestInstallIdentity,
+      projectGateway: ProjectPersistenceGateway(),
+      savedReferenceStore: _savedReferenceStore,
+      favoritesGateway: const HiveLocalFavoritesGateway(),
+    );
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -134,4 +157,9 @@ class AppDependencies {
   /// A5.4 — production [AuthGateway] consumed by [AuthProvider]. Never
   /// accessed by widgets directly.
   static AuthGateway get authGateway => _authGateway;
+
+  /// A5.5 — production local-data claim coordinator, invoked through the
+  /// [AuthProvider] `onAuthenticated` seam.
+  static LocalDataClaimCoordinator get ownershipClaimCoordinator =>
+      _ownershipClaimCoordinator;
 }

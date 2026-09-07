@@ -30,6 +30,20 @@ abstract final class AppStorageKeys {
   /// SharedPreferences: currently authenticated user display name.
   static const String authName = 'auth_name';
 
+  /// SharedPreferences: stable install-scoped guest identity fallback (A5.5).
+  ///
+  /// Used only when no [LocalUserProfile.anonymousInstallId] exists (guests
+  /// who never completed profile setup). Generated once, persisted, reused on
+  /// every resolution so the guest→account claim is deterministic and retry-safe.
+  static const String anonymousInstallId = 'anonymous_install_id';
+
+  /// SharedPreferences: A5.5 ownership registry JSON.
+  ///
+  /// NEW additive store, NOT a migration: a sidecar that maps stable local
+  /// record/store identities to their owner (guest or Supabase `auth.users.id`).
+  /// User data records are never rewritten, moved, or deleted by it.
+  static const String ownershipRegistry = 'ownership_registry';
+
   /// SharedPreferences: locally saved civil engineer profile.
   static const String localUserProfile = 'local_user_profile';
 

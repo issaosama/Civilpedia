@@ -48,8 +48,13 @@ void _runApp() {
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
 
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(gateway: AppDependencies.authGateway)
-            ..restoreSession(),
+          create: (_) => AuthProvider(
+            gateway: AppDependencies.authGateway,
+            onAuthenticated: (session) async {
+              await AppDependencies.ownershipClaimCoordinator
+                  .claimFor(session.userId);
+            },
+          )..restoreSession(),
         ),
 
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/services/logger_service.dart';
@@ -34,9 +36,19 @@ enum AuthStatus {
 /// * [signOut] never deletes user-local application data.
 /// * The canonical identity is the Supabase `auth.users.id`.
 class AuthProvider extends ChangeNotifier {
-  AuthProvider({AuthGateway? gateway}) : _gateway = gateway;
+  AuthProvider({
+    AuthGateway? gateway,
+    Future<void> Function(AuthSession session)? onAuthenticated,
+  }) : _gateway = gateway,
+       _onAuthenticated = onAuthenticated;
 
   final AuthGateway? _gateway;
+
+  /// A5.5 seam: invoked (fire-and-forget) only when a real authenticated
+  /// Supabase session becomes available — never for picker-open, attempt
+  /// start, cancellation, or failure. The app stays fully usable in guest
+  /// mode while this runs, and a throwing callback is never surfaced.
+  final Future<void> Function(AuthSession session)? _onAuthenticated;
 
   AuthSession? _session;
   AuthStatus _status = AuthStatus.guest;
@@ -92,6 +104,7 @@ class AuthProvider extends ChangeNotifier {
     if (restored != null) {
       _session = restored;
       _setStatus(AuthStatus.authenticated);
+      _notifyAuthenticated(restored);
     } else {
       _setStatus(AuthStatus.guest);
     }
@@ -128,6 +141,22 @@ class AuthProvider extends ChangeNotifier {
     }
     _session = session;
     _setStatus(AuthStatus.authenticated);
+    _notifyAuthenticated(session);
+  }
+
+  /// Fires the [onAuthenticated] seam without blocking the authenticated UI.
+  /// Errors are logged and swallowed — a failed claim must never surface a
+  /// sign-in failure.
+  void _notifyAuthenticated(AuthSession session) {
+    final callback = _onAuthenticated;
+    if (callback == null) return;
+    unawaited(() async {
+      try {
+        await callback(session);
+      } catch (error) {
+        LoggerService.error('Post-auth ownership claim failed', error);
+      }
+    }());
   }
 
   /// Ends the session. The UI flips to GUEST immediately (offline-first) and
