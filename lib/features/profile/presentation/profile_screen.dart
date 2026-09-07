@@ -227,7 +227,7 @@ class ProfileScreen extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: () {
                         HapticFeedback.lightImpact();
-                        auth.logout();
+                        auth.signOut();
                       },
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(

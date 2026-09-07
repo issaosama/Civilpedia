@@ -25,6 +25,8 @@ import '../../features/tools/domain/checklist/project_repository.dart';
 import '../backup/backup_file_service.dart';
 import '../backup/backup_service.dart';
 import '../backend/supabase_service.dart';
+import '../../features/auth/data/supabase_auth_gateway.dart';
+import '../../features/auth/domain/repositories/auth_gateway.dart';
 
 class AppDependencies {
   AppDependencies._();
@@ -52,6 +54,8 @@ class AppDependencies {
   static late final BackupService _backupService;
 
   static late final SupabaseService _supabaseService;
+
+  static late final AuthGateway _authGateway;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -92,6 +96,11 @@ class AppDependencies {
     // without affecting current guest/local behavior.
     _supabaseService = SupabaseService();
     await _supabaseService.init();
+
+    // A5.4 — auth boundary. Wires the Supabase-backed gateway; when the
+    // backend is unconfigured the gateway stays unavailable and the app runs
+    // fully in guest mode.
+    _authGateway = SupabaseAuthGateway(service: _supabaseService);
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -121,4 +130,8 @@ class AppDependencies {
   /// phases consumes this through a repository/data-source chain, never by
   /// calling the global Supabase API directly.
   static SupabaseService get supabaseService => _supabaseService;
+
+  /// A5.4 — production [AuthGateway] consumed by [AuthProvider]. Never
+  /// accessed by widgets directly.
+  static AuthGateway get authGateway => _authGateway;
 }

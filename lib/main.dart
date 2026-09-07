@@ -47,7 +47,10 @@ void _runApp() {
 
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
 
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(gateway: AppDependencies.authGateway)
+            ..restoreSession(),
+        ),
 
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
 

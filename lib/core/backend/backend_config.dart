@@ -14,6 +14,7 @@ class BackendConfig {
     required this.appEnvRaw,
     required this.supabaseUrl,
     required this.supabaseAnonKey,
+    this.googleServerClientId = '',
   });
 
   /// The raw `APP_ENV` dart-define string.
@@ -24,6 +25,14 @@ class BackendConfig {
 
   /// The public/anon (publishable) Supabase client key, or empty when unset.
   final String supabaseAnonKey;
+
+  /// The public Google OAuth 2.0 Web client id passed to `GOOGLE_SERVER_CLIENT_ID`.
+  ///
+  /// This is a PUBLIC identifier (like the anon key) — NEVER a client secret.
+  /// It drives both the native `GoogleSignIn` handshake and the audience
+  /// expectation of the Supabase `sign_in_with_id_token` exchange. An empty
+  /// value disables Google sign-in while keeping the backend otherwise usable.
+  final String googleServerClientId;
 
   /// True only when a Supabase endpoint AND a public anon key are configured
   /// AND `APP_ENV` explicitly resolves to a supported environment.
@@ -52,5 +61,9 @@ class BackendConfig {
         supabaseUrl: String.fromEnvironment('SUPABASE_URL', defaultValue: ''),
         supabaseAnonKey:
             String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: ''),
+        googleServerClientId: String.fromEnvironment(
+          'GOOGLE_SERVER_CLIENT_ID',
+          defaultValue: '',
+        ),
       );
 }

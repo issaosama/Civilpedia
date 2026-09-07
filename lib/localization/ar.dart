@@ -102,6 +102,15 @@ class Ar {
   static const String confirmPassword = 'تأكيد كلمة المرور';
   static const String fullName = 'الاسم الكامل';
   static const String logout = 'تسجيل الخروج';
+  static const String continueWithGoogle = 'المتابعة باستخدام Google';
+  static const String googleSignInGuestNotice =
+      'أنت تستخدم Civilpedia كضيف. سجّل الدخول لمزامنة بياناتك عبر أجهزتك.';
+  static const String googleSignInUnavailable =
+      'تسجيل الدخول غير متاح حاليًا. يرجى المحاولة لاحقًا.';
+  static const String googleSignInFailed =
+      'تعذّر تسجيل الدخول. يرجى المحاولة مرة أخرى.';
+  static const String signedInAs = 'مسجّل الدخول باسم';
+  static const String goToProfile = 'الذهاب إلى الملف الشخصي';
   static const String noAccount = 'ليس لديك حساب؟';
   static const String haveAccount = 'لديك حساب بالفعل؟';
   static const String editProfile = 'تعديل الملف الشخصي';

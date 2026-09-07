@@ -28,6 +28,9 @@ class AppColors {
   static const Color brandBlue = Color(0xFF2E6BC6);        // Civilpedia logo blue, used sparingly
   static const Color brandNeutral = Color(0xFF8B7D6B);     // calm warm neutral support tone
 
+  // ── Google brand accent (authenticated identity "G" mark, A5.4) ──
+  static const Color googleBlue = Color(0xFF4285F4);
+
   // ── Page / Home surfaces ──
   static const Color pageBackground = Color(0xFFFAF7F2);   // canonical warm off-white page background
   static const Color homeBackground = pageBackground;      // backward-compatible alias

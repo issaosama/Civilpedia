@@ -102,6 +102,15 @@ class En {
   static const String confirmPassword = 'Confirm Password';
   static const String fullName = 'Full Name';
   static const String logout = 'Logout';
+  static const String continueWithGoogle = 'Continue with Google';
+  static const String googleSignInGuestNotice =
+      'You are using Civilpedia as a guest. Sign in to sync your data across your devices.';
+  static const String googleSignInUnavailable =
+      'Sign-in is not available right now. Please try again later.';
+  static const String googleSignInFailed =
+      'Sign-in failed. Please try again.';
+  static const String signedInAs = 'Signed in as';
+  static const String goToProfile = 'Go to your profile';
   static const String noAccount = "Don't have an account?";
   static const String haveAccount = 'Already have an account?';
   static const String editProfile = 'Edit Profile';

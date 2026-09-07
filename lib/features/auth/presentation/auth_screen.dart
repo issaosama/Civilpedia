@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/services/language_provider.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/design_tokens.dart';
+import '../../../core/theme/spacing.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
+import '../../../routes/app_routes.dart';
+import '../../auth/domain/entities/auth_error.dart';
 import 'providers/auth_provider.dart';
 
+/// A5.4 — Google Sign-In surface (replaces the legacy plaintext
+/// login/register forms on the same `/auth` route).
+///
+/// Reachable only from the User/Profile area — there is no login wall, the
+/// app stays fully usable as a guest. This screen:
+/// * explains the guest state,
+/// * offers native "Continue with Google",
+/// * maps [AuthError] to localized, non-blocking messages,
+/// * returns to the profile area on success.
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -13,226 +28,201 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-class _AuthScreenState extends State<AuthScreen> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final _loginFormKey = GlobalKey<FormState>();
-  final _registerFormKey = GlobalKey<FormState>();
-  final _loginEmail = TextEditingController();
-  final _loginPassword = TextEditingController();
-  final _registerName = TextEditingController();
-  final _registerEmail = TextEditingController();
-  final _registerPassword = TextEditingController();
-  final _registerConfirmPassword = TextEditingController();
-  String? _loginError;
-  String? _registerError;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        setState(() {
-          _loginError = null;
-          _registerError = null;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _loginEmail.dispose();
-    _loginPassword.dispose();
-    _registerName.dispose();
-    _registerEmail.dispose();
-    _registerPassword.dispose();
-    _registerConfirmPassword.dispose();
-    super.dispose();
+class _AuthScreenState extends State<AuthScreen> {
+  Future<void> _signIn() async {
+    final auth = context.read<AuthProvider>();
+    await auth.signInWithGoogle();
+    if (!mounted) return;
+    if (auth.isLoggedIn) {
+      context.go(AppRoutes.userProfile);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(title: Text(Ar.appName)),
-      body: Column(
-        children: [
-          TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: Ar.login),
-              Tab(text: Ar.register),
+      appBar: AppBar(
+        title: const Text(
+          Ar.login,
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: 32,
+          ),
+          children: [
+            Icon(
+              Icons.account_circle,
+              size: 88,
+              color: theme.primaryColor,
+            ),
+            AppSpacing.gapLg,
+            Text(
+              tr(Ar.googleSignInGuestNotice, En.googleSignInGuestNotice),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+            ),
+            AppSpacing.gapXl,
+            if (auth.isLoggedIn)
+              _buildSignedInCard(context, auth, tr)
+            else if (!auth.isAvailable)
+              _UnavailableNotice(tr: tr)
+            else ...[
+              _GoogleSignInButton(
+                label: tr(Ar.continueWithGoogle, En.continueWithGoogle),
+                onPressed:
+                    auth.isRestoring ? null : () => _signIn(),
+                restoring: auth.isRestoring,
+              ),
+              if (auth.error != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: AppSpacing.md),
+                  child: Text(
+                    auth.error == AuthError.unavailable
+                        ? tr(
+                            Ar.googleSignInUnavailable,
+                            En.googleSignInUnavailable,
+                          )
+                        : tr(
+                            Ar.googleSignInFailed,
+                            En.googleSignInFailed,
+                          ),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.error,
+                    ),
+                  ),
+                ),
             ],
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildLoginForm(tr),
-                _buildRegisterForm(tr),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoginForm(String Function(String ar, String en) tr) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Form(
-        key: _loginFormKey,
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            Icon(Icons.account_circle, size: 80, color: Theme.of(context).primaryColor),
-            const SizedBox(height: 32),
-            if (_loginError != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(_loginError!, style: const TextStyle(color: Colors.red)),
-              ),
-            TextFormField(
-              controller: _loginEmail,
-              decoration: const InputDecoration(
-                labelText: Ar.email,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
-              ),
-              keyboardType: TextInputType.emailAddress,
-              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterEmail, En.enterEmail) : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _loginPassword,
-              decoration: const InputDecoration(
-                labelText: Ar.password,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
-              ),
-              obscureText: true,
-              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterPassword, En.enterPassword) : null,
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _handleLogin,
-                child: const Text(Ar.login),
-              ),
-            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildRegisterForm(String Function(String ar, String en) tr) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Form(
-        key: _registerFormKey,
-        child: Column(
-          children: [
-            const SizedBox(height: 32),
-            Icon(Icons.person_add, size: 80, color: Theme.of(context).primaryColor),
-            const SizedBox(height: 32),
-            if (_registerError != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(_registerError!, style: const TextStyle(color: Colors.red)),
+  Widget _buildSignedInCard(
+    BuildContext context,
+    AuthProvider auth,
+    String Function(String ar, String en) tr,
+  ) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        Text(
+          '${tr(Ar.signedInAs, En.signedInAs)}: ${auth.currentName ?? auth.currentEmail ?? ''}',
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge,
+        ),
+        AppSpacing.gapXl,
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton(
+            onPressed: () => context.go(AppRoutes.userProfile),
+            child: Text(tr(Ar.goToProfile, En.goToProfile)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GoogleSignInButton extends StatelessWidget {
+  const _GoogleSignInButton({
+    required this.label,
+    required this.onPressed,
+    required this.restoring,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool restoring;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: OutlinedButton(
+        onPressed: onPressed,
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(color: AppColors.primary.withValues(alpha: 0.5)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+          ),
+        ),
+        child: restoring
+            ? const SizedBox.square(
+                dimension: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const _GoogleG(),
+                  const SizedBox(width: 12),
+                  Text(label),
+                ],
               ),
-            TextFormField(
-              controller: _registerName,
-              decoration: const InputDecoration(
-                labelText: Ar.fullName,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.person),
-              ),
-              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterName, En.enterName) : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _registerEmail,
-              decoration: const InputDecoration(
-                labelText: Ar.email,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.email),
-              ),
-              keyboardType: TextInputType.emailAddress,
-              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterEmail, En.enterEmail) : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _registerPassword,
-              decoration: const InputDecoration(
-                labelText: Ar.password,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
-              ),
-              obscureText: true,
-              validator: (v) => (v == null || v.isEmpty) ? tr(Ar.enterPassword, En.enterPassword) : null,
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _registerConfirmPassword,
-              decoration: const InputDecoration(
-                labelText: Ar.confirmPassword,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock_outline),
-              ),
-              obscureText: true,
-              validator: (v) {
-                if (v == null || v.isEmpty) return tr(Ar.confirmPasswordHint, En.confirmPasswordHint);
-                if (v != _registerPassword.text) return tr(Ar.passwordsNotMatch, En.passwordsNotMatch);
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _handleRegister,
-                child: const Text(Ar.register),
-              ),
-            ),
-          ],
+      ),
+    );
+  }
+}
+
+/// Minimal monochrome-bordered "G" mark (Google wordmark colors one letter).
+class _GoogleG extends StatelessWidget {
+  const _GoogleG();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 22,
+      height: 22,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: Colors.grey.shade400, width: 1),
+      ),
+      child: const Text(
+        'G',
+        style: TextStyle(
+          color: AppColors.googleBlue,
+          fontWeight: FontWeight.w800,
+          fontSize: 14,
         ),
       ),
     );
   }
+}
 
-  Future<void> _handleLogin() async {
-    if (!_loginFormKey.currentState!.validate()) return;
-    final auth = context.read<AuthProvider>();
-    final error = await auth.loginWithPassword(_loginEmail.text.trim(), _loginPassword.text);
-    if (!mounted) return;
-    if (error != null) {
-      setState(() => _loginError = error);
-    } else {
-      context.go('/home');
-    }
-  }
+class _UnavailableNotice extends StatelessWidget {
+  const _UnavailableNotice({required this.tr});
 
-  Future<void> _handleRegister() async {
-    if (!_registerFormKey.currentState!.validate()) return;
-    final auth = context.read<AuthProvider>();
-    final error = await auth.register(
-      _registerName.text.trim(),
-      _registerEmail.text.trim(),
-      _registerPassword.text,
+  final String Function(String ar, String en) tr;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      tr(Ar.googleSignInUnavailable, En.googleSignInUnavailable),
+      textAlign: TextAlign.center,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: AppColors.error,
+      ),
     );
-    if (!mounted) return;
-    if (error != null) {
-      setState(() => _registerError = error);
-    } else {
-      context.go('/home');
-    }
   }
 }
