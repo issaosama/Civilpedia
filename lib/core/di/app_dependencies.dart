@@ -36,7 +36,9 @@ import '../ownership/local_favorites_gateway.dart';
 import '../ownership/ownership_registry_store.dart';
 import '../../features/auth/data/supabase_auth_gateway.dart';
 import '../../features/auth/domain/repositories/auth_gateway.dart';
+import '../../features/business/data/supabase_business_application_gateway.dart';
 import '../../features/business/data/supabase_business_membership_gateway.dart';
+import '../../features/business/domain/business_application_gateway.dart';
 import '../../features/business/domain/business_membership_gateway.dart';
 import '../../features/projects/data/project_persistence_gateway.dart';
 
@@ -79,6 +81,7 @@ class AppDependencies {
   static late final RegionPreferenceGateway _regionPreferenceGateway;
 
   static late final BusinessMembershipGateway _businessMembershipGateway;
+  static late final BusinessApplicationGateway _businessApplicationGateway;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -163,6 +166,14 @@ class AppDependencies {
     _businessMembershipGateway = SupabaseBusinessMembershipGateway(
       service: _supabaseService,
     );
+
+    // A6.2 — business application foundation. Read-own + safe DRAFT INSERT only
+    // (RLS 00010/00011): no client UPDATE/transition, no ownership side
+    // effects. Claim safety uses the read-only membership gateway above.
+    _businessApplicationGateway = SupabaseBusinessApplicationGateway(
+      service: _supabaseService,
+      membershipGateway: _businessMembershipGateway,
+    );
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -220,4 +231,10 @@ class AppDependencies {
   /// widgets directly. Strictly read-only (own memberships only).
   static BusinessMembershipGateway get businessMembershipGateway =>
       _businessMembershipGateway;
+
+  /// A6.2 — production [BusinessApplicationGateway]. Read-own + safe DRAFT
+  /// INSERT only; privileged transitions remain server-authorized and
+  /// unavailable from the client. Never called from widgets.
+  static BusinessApplicationGateway get businessApplicationGateway =>
+      _businessApplicationGateway;
 }
