@@ -1,10 +1,10 @@
 import '../domain/user_profile.dart';
 
-/// A5.6 — Immutable representation of a single `public.profiles` row stored in
-/// Supabase, keyed 1:1 by the canonical `auth.users.id` ([userId]).
+/// A5.6/A5.7 — Immutable representation of a single `public.profiles` row
+/// stored in Supabase, keyed 1:1 by the canonical `auth.users.id` ([userId]).
 ///
-/// Only the columns that A5.6 is allowed to read/derive are surfaced here.
-/// It deliberately exposes no token, email, or provider-raw metadata.
+/// Only the columns that A5.6/A5.7 is allowed to read/derive are surfaced
+/// here. It deliberately exposes no token, email, or provider-raw metadata.
 class CloudProfile {
   const CloudProfile({
     required this.userId,
@@ -12,6 +12,7 @@ class CloudProfile {
     this.photoUrl,
     this.roleCode,
     this.preferredRegionId,
+    this.regionPreferenceId,
     this.phone,
   });
 
@@ -27,8 +28,14 @@ class CloudProfile {
   /// `profiles.role_code` (snake_case, CHECK-constrained).
   final String? roleCode;
 
-  /// `profiles.preferred_region_id` (uuid FK to regions).
+  /// LEGACY `profiles.preferred_region_id` (uuid FK to `regions`, physical
+  /// geography). Preserved for compatibility; A5.7 never writes it and never
+  /// compares it to a preference.
   final String? preferredRegionId;
+
+  /// `profiles.region_preference_id` (uuid FK to `region_preferences`, the
+  /// frozen six Zone Region Preference). Never written by A5.7 bootstrap.
+  final String? regionPreferenceId;
 
   /// `profiles.phone`.
   final String? phone;

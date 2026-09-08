@@ -1,12 +1,11 @@
-import '../../../core/location/baghdad_area.dart';
 import '../domain/user_profile.dart';
 import '../domain/user_profile_repository.dart';
 import 'cloud_profile.dart';
 import 'personal_profile_remote_gateway.dart';
 import 'profile_bootstrap_outcome.dart';
 
-/// A5.6 — Coordinates safe cloud ownership/bootstrap for the user's PERSONAL
-/// profile after a REAL authenticated Supabase session.
+/// A5.6/A5.7 — Coordinates safe cloud ownership/bootstrap for the user's
+/// PERSONAL profile after a REAL authenticated Supabase session.
 ///
 /// Contracts enforced here (all fail-closed):
 /// * Canonical identity is ALWAYS `profiles.user_id == auth.users.id`.
@@ -17,20 +16,32 @@ import 'profile_bootstrap_outcome.dart';
 /// * An existing cloud profile is never blind-upserted over with local values.
 ///   Equal/compatible → local association. Meaningful differences → both sides
 ///   preserved and a `profileConflict` outcome returned (no conflict UI yet).
-/// * Region is fail-closed: equality between the local [BaghdadArea] enum and
-///   a cloud `preferred_region_id` UUID cannot be proven in A5.6 (regions are
-///   not seeded and no enum → region mapping contract exists). When BOTH sides
-///   carry a meaningful region, compatibility is NOT assumed → conflict. A
-///   region on only one side never blocks association (the other side is
-///   preserved untouched; nothing is written to cloud).
+///
+/// A5.7 REGION PREFERENCE ≠ BAGHDAD DIRECTORY AREA (architect correction):
+/// * Region Preference is the SIX frozen user/market zones (Baghdad-Karkh,
+///   Baghdad-Rusafa, North, Central, South, All Iraq) in `region_preferences`
+///   (migration 00013).
+/// * The local `baghdadArea` field is a PHYSICAL, Directory-only locality
+///   (legacy/local representation) — it is NOT a Region Preference and is never
+///   mapped to one. There is currently NO local preference model at all, so
+///   this bootstrap NEVER writes, fills, or invents any cloud region
+///   preference, and NEVER conflicts on region fields.
+/// * Cloud region values (legacy `preferred_region_id` and the new
+///   `region_preference_id`) are PRESERVED untouched — the bootstrap performs
+///   no region UPDATE and omits region columns from CREATE. This is documented
+///   migration debt: persisting a real preference requires a corrected local
+///   onboarding preference model (UI/onboarding is out of A5.7 scope).
+/// * Association is therefore never blocked by legacy local/geographic region
+///   values; authentication is never blocked, and no region value is invented.
+///
 /// * Every failure leaves local data untouched and the local binding unmarked;
-///   the next authenticated session retries safely. The DB
-///   `user_id` primary key is the final duplicate defense (insert-race is
-///   caught, re-read, and re-evaluated as an existing-cloud case).
+///   the next authenticated session retries safely. The DB `user_id` primary
+///   key is the final duplicate defense (insert-race is caught, re-read, and
+///   re-evaluated as an existing-cloud case).
 ///
 /// Ordering contract: A5.5 record ownership runs first on the same
-/// authenticated seam; A5.6 profile bootstrap is fire-and-forget after it and
-/// never blocks or is blocked by it.
+/// authenticated seam; A5.6/A5.7 profile bootstrap is fire-and-forget after it
+/// and never blocks or is blocked by it.
 class PersonalProfileBootstrapCoordinator {
   PersonalProfileBootstrapCoordinator({
     required UserProfileRepository localRepository,
@@ -157,12 +168,11 @@ class PersonalProfileBootstrapCoordinator {
   /// A field only conflicts when BOTH sides hold meaningful, different values;
   /// a genuinely-missing side never destroys information (no silent fills).
   ///
-  /// Region exemption: when the region is present on only ONE side, that side
-  /// is preserved without a write — CASE 1 (local region, cloud NULL) keeps
-  /// the local region local; CASE 2 (cloud region, no local region) keeps the
-  /// cloud region. When BOTH sides carry a meaningful region, equality is
-  /// UNPROVABLE in A5.6, so this MUST yield a conflict even if every other
-  /// field matches.
+  /// A5.7 — region fields are EXCLUDED from conflict and from writes entirely:
+  /// the local `baghdadArea` is physical/Directory-only (not a preference) and
+  /// there is no local preference model to compare — legacy/geographic values
+  /// never block association and are preserved untouched (no invention, no
+  /// silent overwrite).
   bool _detectConflict(LocalUserProfile local, CloudProfile cloud) {
     final localRole = civilUserTypeToRoleCode(local.userType);
     final cloudRole = _meaningful(cloud.roleCode);
@@ -174,19 +184,16 @@ class PersonalProfileBootstrapCoordinator {
       return true;
     }
 
-    final hasLocalRegion = local.baghdadArea != BaghdadArea.unknown;
-    final hasCloudRegion = _meaningful(cloud.preferredRegionId) != null;
-    if (hasLocalRegion && hasCloudRegion) return true;
-
     return false;
   }
 
   /// Builds the initial cloud profile from known-safe local/auth values only.
   ///
   /// Notable audit decisions:
-  /// * `preferred_region_id` is deliberately OMITTED: the local [BaghdadArea]
-  ///   enum has no established mapping to `regions.id` UUIDs (regions are not
-  ///   seeded) — inventing a UUID or guessing a region code is forbidden.
+  /// * All region columns are deliberately OMITTED — `preferred_region_id` is
+  ///   a legacy geographic reference and no local Region Preference exists in
+  ///   A5.7, so persisting either column cannot be proven intentional; a
+  ///   UUID/code is never invented. Cloud region preference data stays unset.
   /// * `phone` is deliberately OMITTED: it is not collected by any current
   ///   intentional flow, so persisting it cannot be proven intentionally
   ///   collected.

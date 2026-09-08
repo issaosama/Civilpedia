@@ -3,12 +3,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'cloud_profile.dart';
 import 'personal_profile_remote_gateway.dart';
 
-/// A5.6 — Production [PersonalProfileRemoteGateway] backed by the shared
+/// A5.6/A5.7 — Production [PersonalProfileRemoteGateway] backed by the shared
 /// Supabase client's PostgREST `profiles` table.
 ///
 /// Rows are gated by existing RLS: an `authenticated` user may SELECT/INSERT/
 /// UPDATE only their own row (`user_id = auth.uid()`). This gateway never uses
 /// service_role and never reads rows it is not authorized to see.
+///
+/// Region contract (A5.7 correction): the CREATE payload NEVER contains a
+/// region column — `preferred_region_id` (legacy geographic) and
+/// `region_preference_id` (six-zone preference) are surfaced on READ for
+/// preservation/clarity but are never written by this gateway. No invented
+/// region value can therefore reach the DB through the personal-profile seam.
 ///
 /// The unique `user_id` primary key is the final duplicate-defense used by the
 /// caller to resolve insert races deterministically.
@@ -40,19 +46,21 @@ class SupabasePersonalProfileRemoteGateway
       photoUrl: rows['photo_url'] as String?,
       roleCode: rows['role_code'] as String?,
       preferredRegionId: rows['preferred_region_id'] as String?,
+      regionPreferenceId: rows['region_preference_id'] as String?,
       phone: rows['phone'] as String?,
     );
   }
 
   @override
   Future<void> createProfile(CloudProfile profile) async {
+    // Region columns are deliberately absent: no local Region Preference model
+    // exists in A5.7, so no region value (legacy or preference) may reach the
+    // DB through create — nothing is invented, nothing is guessed.
     final payload = <String, dynamic>{
       'user_id': profile.userId,
       if (profile.displayName != null) 'display_name': profile.displayName,
       if (profile.photoUrl != null) 'photo_url': profile.photoUrl,
       if (profile.roleCode != null) 'role_code': profile.roleCode,
-      if (profile.preferredRegionId != null)
-        'preferred_region_id': profile.preferredRegionId,
       if (profile.phone != null) 'phone': profile.phone,
     };
     try {

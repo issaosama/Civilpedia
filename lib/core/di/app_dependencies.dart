@@ -13,8 +13,10 @@ import '../../features/profile/data/local_user_profile_repository.dart';
 import '../../features/profile/data/local_service_business_repository.dart';
 import '../../features/profile/data/personal_profile_bootstrap_coordinator.dart';
 import '../../features/profile/data/personal_profile_remote_gateway.dart';
+import '../../features/profile/data/region_preference_gateway.dart';
 import '../../features/profile/data/service_business_data_source.dart';
 import '../../features/profile/data/supabase_personal_profile_remote_gateway.dart';
+import '../../features/profile/data/supabase_region_preference_gateway.dart';
 import '../../features/profile/domain/user_profile_repository.dart';
 import '../../features/profile/domain/service_business_repository.dart';
 import '../../features/saved/data/hive_saved_reference_store.dart';
@@ -72,6 +74,7 @@ class AppDependencies {
   static late final PersonalProfileRemoteGateway _personalProfileRemoteGateway;
   static late final PersonalProfileBootstrapCoordinator
       _personalProfileBootstrapCoordinator;
+  static late final RegionPreferenceGateway _regionPreferenceGateway;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -132,10 +135,16 @@ class AppDependencies {
       favoritesGateway: const HiveLocalFavoritesGateway(),
     );
 
-    // A5.6 — personal-profile ownership boundary. The bootstrap coordinator
-    // only associates the local personal profile with the canonical
-    // auth.users.id after a real authenticated session; it never syncs or
-    // overwrites cloud values blindly.
+    // A5.6/A5.7 — personal-profile ownership boundary. The bootstrap
+    // coordinator only associates the local personal profile with the
+    // canonical auth.users.id after a real authenticated session; it never
+    // syncs or overwrites cloud values blindly. Region Preference (the frozen
+    // six-zone contract, migration 00013) is a SEPARATE concept from the
+    // physical regions taxonomy; the preference gateway resolves zone codes →
+    // ids for future preference persistence and is not consumed by bootstrap
+    // until a local preference model exists (A5.7 keeps cloud preference
+    // unset; local BaghdadArea is Directory geography, never mapped).
+    _regionPreferenceGateway = SupabaseRegionPreferenceGateway();
     _personalProfileRemoteGateway =
         SupabasePersonalProfileRemoteGateway();
     _personalProfileBootstrapCoordinator = PersonalProfileBootstrapCoordinator(
@@ -181,9 +190,16 @@ class AppDependencies {
   static LocalDataClaimCoordinator get ownershipClaimCoordinator =>
       _ownershipClaimCoordinator;
 
-  /// A5.6 — production personal-profile bootstrap coordinator, invoked through
-  /// the same `onAuthenticated` seam after the A5.5 claim.
+  /// A5.6/A5.7 — production personal-profile bootstrap coordinator, invoked
+  /// through the same `onAuthenticated` seam after the A5.5 claim.
   static PersonalProfileBootstrapCoordinator get
       personalProfileBootstrapCoordinator =>
           _personalProfileBootstrapCoordinator;
+
+  /// A5.7 — production Region Preference gateway (stable zone code →
+  /// `region_preferences.id`). The six frozen zones are a SEPARATE concept
+  /// from `public.regions` physical geography; this resolves preference codes
+  /// only. Never called from widgets; not yet consumed by bootstrap.
+  static RegionPreferenceGateway get regionPreferenceGateway =>
+      _regionPreferenceGateway;
 }

@@ -643,7 +643,7 @@ void main() {
     });
   });
 
-  group('A5.6 region compatibility — fail-closed hardening', () {
+  group('A5.7 region compatibility — preference ≠ Directory area', () {
     test('1. local region present + cloud region NULL → compatible + local '
         'region preserved + cloud untouched', () async {
       final repo = _MemoryProfileRepository(
@@ -660,9 +660,9 @@ void main() {
       expect(outcome, ProfileBootstrapOutcome.associated);
       expect(repo.profile!.futureCloudUserId, _userA);
       expect(repo.profile!.baghdadArea, BaghdadArea.karrada,
-          reason: 'local region must be preserved, never written up');
+          reason: 'local area must be preserved, never written up');
       expect(gateway.cloudProfile!.preferredRegionId, isNull,
-          reason: 'cloud region remains NULL');
+          reason: 'cloud region remains NULL (no invented preference write)');
       expect(gateway.createCalls, 0, reason: 'no remote mutation');
     });
 
@@ -688,8 +688,8 @@ void main() {
       expect(gateway.createCalls, 0, reason: 'no remote mutation');
     });
 
-    test('3. local region present + cloud region present → profileConflict, '
-        'no binding, no local mutation, no remote mutation', () async {
+    test('3. local area + cloud region present → compatible, BOTH preserved '
+        '(region never blocks association in A5.7)', () async {
       final repo = _MemoryProfileRepository(
         profile: _localProfile(
           userType: CivilUserType.siteEngineer,
@@ -702,20 +702,19 @@ void main() {
 
       final outcome = await coordinator.bootstrap(userId: _userA);
 
-      expect(outcome, ProfileBootstrapOutcome.profileConflict);
-      expect(repo.profile!.futureCloudUserId, isNull,
-          reason: 'must not bind while regional equality is unprovable');
+      expect(outcome, ProfileBootstrapOutcome.associated,
+          reason: 'physical local area ≠ cloud preference → never a conflict');
+      expect(repo.profile!.futureCloudUserId, _userA);
       expect(repo.profile!.baghdadArea, BaghdadArea.karrada,
           reason: 'local profile unmutated');
-      expect(repo.saveCalls, 0, reason: 'no local write');
       expect(gateway.cloudProfile!.preferredRegionId,
           '11111111-2222-3333-4444-555555555555',
           reason: 'cloud unmutated');
       expect(gateway.createCalls, 0, reason: 'no remote mutation');
     });
 
-    test('4. same role/name but both regions meaningful → MUST still conflict',
-        () async {
+    test('4. same role/name, both regions meaningful → compatible, both '
+        'preserved (regions are conceptually separate)', () async {
       final repo = _MemoryProfileRepository(
         profile: _localProfile(
           userType: CivilUserType.siteEngineer,
@@ -734,12 +733,16 @@ void main() {
 
       final outcome = await coordinator.bootstrap(userId: _userA);
 
-      // Role and name match exactly — the ONLY reason to conflict is the
-      // unresolved (unmappable) region. Equality must not mask it.
-      expect(outcome, ProfileBootstrapOutcome.profileConflict);
-      expect(repo.profile!.futureCloudUserId, isNull);
-      expect(repo.saveCalls, 0);
-      expect(gateway.createCalls, 0);
+      expect(outcome, ProfileBootstrapOutcome.associated,
+          reason: 'role and name match; region fields never produce a '
+              'conflict because local area is Directory geography, not a '
+              'Region Preference');
+      expect(repo.profile!.futureCloudUserId, _userA);
+      expect(repo.profile!.baghdadArea, BaghdadArea.karrada,
+          reason: 'local preserved');
+      expect(gateway.cloudProfile!.preferredRegionId,
+          'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+          reason: 'cloud preserved (no write, no clear)');
     });
 
     test('5. NO cloud profile + local region exists → create with region NULL, '
@@ -760,6 +763,8 @@ void main() {
       final created = gateway.created.single;
       expect(created.preferredRegionId, isNull,
           reason: 'create never invents a region UUID');
+      expect(created.regionPreferenceId, isNull,
+          reason: 'create never invents a preference zone code');
       expect(repo.profile!.baghdadArea, BaghdadArea.baya,
           reason: 'local region stays safe locally');
       expect(repo.profile!.futureCloudUserId, _userA,
@@ -767,8 +772,8 @@ void main() {
       expect(gateway.createCalls, 1);
     });
 
-    test('6. retry after region conflict → deterministic conflict, no mutation '
-        'on either side', () async {
+    test('6. retry with existing cloud region → deterministic association, '
+        'no mutation on either side', () async {
       final repo = _MemoryProfileRepository(
         profile: _localProfile(
           userType: CivilUserType.siteEngineer,
@@ -782,15 +787,16 @@ void main() {
       final first = await coordinator.bootstrap(userId: _userA);
       final second = await coordinator.bootstrap(userId: _userA);
 
-      expect(first, ProfileBootstrapOutcome.profileConflict);
-      expect(second, ProfileBootstrapOutcome.profileConflict,
-          reason: 'deterministic — same local+cloud state, same outcome');
-      expect(repo.profile!.futureCloudUserId, isNull);
-      expect(repo.saveCalls, 0);
-      expect(gateway.createCalls, 0);
+      expect(first, ProfileBootstrapOutcome.associated);
+      expect(second, ProfileBootstrapOutcome.associated,
+          reason: 'deterministic — region never blocks, both sides preserved');
+      expect(repo.profile!.futureCloudUserId, _userA);
       expect(gateway.cloudProfile!.preferredRegionId,
-          '11111111-2222-3333-4444-555555555555');
-      expect(repo.profile!.baghdadArea, BaghdadArea.karrada);
+          '11111111-2222-3333-4444-555555555555',
+          reason: 'cloud untouched');
+      expect(repo.profile!.baghdadArea, BaghdadArea.karrada,
+          reason: 'local untouched');
+      expect(gateway.createCalls, 0);
     });
   });
 }
