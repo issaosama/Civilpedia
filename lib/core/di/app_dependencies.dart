@@ -36,6 +36,8 @@ import '../ownership/local_favorites_gateway.dart';
 import '../ownership/ownership_registry_store.dart';
 import '../../features/auth/data/supabase_auth_gateway.dart';
 import '../../features/auth/domain/repositories/auth_gateway.dart';
+import '../../features/business/data/supabase_business_membership_gateway.dart';
+import '../../features/business/domain/business_membership_gateway.dart';
 import '../../features/projects/data/project_persistence_gateway.dart';
 
 class AppDependencies {
@@ -75,6 +77,8 @@ class AppDependencies {
   static late final PersonalProfileBootstrapCoordinator
       _personalProfileBootstrapCoordinator;
   static late final RegionPreferenceGateway _regionPreferenceGateway;
+
+  static late final BusinessMembershipGateway _businessMembershipGateway;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -151,6 +155,14 @@ class AppDependencies {
       remoteGateway: _personalProfileRemoteGateway,
       regionPreferenceGateway: _regionPreferenceGateway,
     );
+
+    // A6.1 — ownership/membership foundation. The gateway reads only the
+    // authenticated user's OWN business memberships (RLS, migration 00010). It
+    // is strictly read-only: no insert/update/delete surface. Canonical
+    // identity is always auth.users.id from the authenticated session.
+    _businessMembershipGateway = SupabaseBusinessMembershipGateway(
+      service: _supabaseService,
+    );
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -202,4 +214,10 @@ class AppDependencies {
   /// only and is consumed by the profile bootstrap. Never called from widgets.
   static RegionPreferenceGateway get regionPreferenceGateway =>
       _regionPreferenceGateway;
+
+  /// A6.1 — production [BusinessMembershipGateway]. Consumed through the
+  /// domain capability resolver with the authenticated user id; never by
+  /// widgets directly. Strictly read-only (own memberships only).
+  static BusinessMembershipGateway get businessMembershipGateway =>
+      _businessMembershipGateway;
 }
