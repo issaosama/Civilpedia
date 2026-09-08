@@ -11,7 +11,10 @@ import '../../features/encyclopedia/domain/repositories/encyclopedia_repository.
 import '../../features/profile/data/local_user_profile_data_source.dart';
 import '../../features/profile/data/local_user_profile_repository.dart';
 import '../../features/profile/data/local_service_business_repository.dart';
+import '../../features/profile/data/personal_profile_bootstrap_coordinator.dart';
+import '../../features/profile/data/personal_profile_remote_gateway.dart';
 import '../../features/profile/data/service_business_data_source.dart';
+import '../../features/profile/data/supabase_personal_profile_remote_gateway.dart';
 import '../../features/profile/domain/user_profile_repository.dart';
 import '../../features/profile/domain/service_business_repository.dart';
 import '../../features/saved/data/hive_saved_reference_store.dart';
@@ -65,6 +68,10 @@ class AppDependencies {
   static late final OwnershipRegistryStore _ownershipRegistryStore;
   static late final GuestInstallIdentity _guestInstallIdentity;
   static late final LocalDataClaimCoordinator _ownershipClaimCoordinator;
+
+  static late final PersonalProfileRemoteGateway _personalProfileRemoteGateway;
+  static late final PersonalProfileBootstrapCoordinator
+      _personalProfileBootstrapCoordinator;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -124,6 +131,17 @@ class AppDependencies {
       savedReferenceStore: _savedReferenceStore,
       favoritesGateway: const HiveLocalFavoritesGateway(),
     );
+
+    // A5.6 — personal-profile ownership boundary. The bootstrap coordinator
+    // only associates the local personal profile with the canonical
+    // auth.users.id after a real authenticated session; it never syncs or
+    // overwrites cloud values blindly.
+    _personalProfileRemoteGateway =
+        SupabasePersonalProfileRemoteGateway();
+    _personalProfileBootstrapCoordinator = PersonalProfileBootstrapCoordinator(
+      localRepository: _userProfileRepo,
+      remoteGateway: _personalProfileRemoteGateway,
+    );
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -162,4 +180,10 @@ class AppDependencies {
   /// [AuthProvider] `onAuthenticated` seam.
   static LocalDataClaimCoordinator get ownershipClaimCoordinator =>
       _ownershipClaimCoordinator;
+
+  /// A5.6 — production personal-profile bootstrap coordinator, invoked through
+  /// the same `onAuthenticated` seam after the A5.5 claim.
+  static PersonalProfileBootstrapCoordinator get
+      personalProfileBootstrapCoordinator =>
+          _personalProfileBootstrapCoordinator;
 }

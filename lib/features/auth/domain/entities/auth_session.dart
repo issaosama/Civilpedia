@@ -9,6 +9,7 @@ class AuthSession {
     required this.userId,
     required this.email,
     required this.displayName,
+    this.photoUrl,
   });
 
   /// Canonical Civilpedia user id (`auth.users.id`). Never a provider id.
@@ -19,4 +20,9 @@ class AuthSession {
 
   /// Display name surfaced in the profile area, or empty when unknown.
   final String displayName;
+
+  /// Optional avatar/photo URL from the provider's auth metadata
+  /// (`avatar_url` / `picture`). Used ONLY for `profiles.photo_url` mapping;
+  /// never logged and never an identity.
+  final String? photoUrl;
 }

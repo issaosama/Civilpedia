@@ -176,10 +176,13 @@ class SupabaseAuthGateway implements AuthGateway {
   AuthSession _toSession(User user) {
     final metadata = user.userMetadata;
     final googleName = (metadata?['full_name'] ?? metadata?['name']) as String?;
+    final googlePhoto =
+        (metadata?['avatar_url'] ?? metadata?['picture']) as String?;
     return AuthSession(
       userId: user.id,
       email: user.email ?? '',
       displayName: googleName ?? user.email ?? '',
+      photoUrl: googlePhoto,
     );
   }
 }

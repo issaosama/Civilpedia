@@ -51,8 +51,17 @@ void _runApp() {
           create: (_) => AuthProvider(
             gateway: AppDependencies.authGateway,
             onAuthenticated: (session) async {
+              // Deterministic order: A5.5 record-ownership claim first, then
+              // A5.6 personal-profile bootstrap. Both run fire-and-forget
+              // after authentication and never block the authenticated UI.
               await AppDependencies.ownershipClaimCoordinator
                   .claimFor(session.userId);
+              await AppDependencies.personalProfileBootstrapCoordinator
+                  .bootstrap(
+                    userId: session.userId,
+                    authDisplayName: session.displayName,
+                    authPhotoUrl: session.photoUrl,
+                  );
             },
           )..restoreSession(),
         ),
