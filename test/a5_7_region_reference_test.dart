@@ -45,8 +45,9 @@ class _MemoryProfileRepository implements UserProfileRepository {
   }
 }
 
-/// Programmable [PersonalProfileRemoteGateway] fake: fetch + create only
-/// (the corrected A5.7 seam has NO region-write method at all).
+/// Programmable [PersonalProfileRemoteGateway] fake: fetch + create, plus the
+/// A5.8 single-column preference update (legacy `preferred_region_id` is never
+/// written by this seam).
 class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
   CloudProfile? cloudProfile;
   Object? fetchError;
@@ -54,6 +55,7 @@ class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
 
   int fetchCalls = 0;
   int createCalls = 0;
+  int updatePreferenceCalls = 0;
   final List<CloudProfile> created = [];
 
   @override
@@ -69,6 +71,23 @@ class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
     if (createError != null) throw createError!;
     created.add(profile);
     cloudProfile = profile;
+  }
+
+  @override
+  Future<void> updateRegionPreferenceId({
+    required String userId,
+    required String regionPreferenceId,
+  }) async {
+    updatePreferenceCalls++;
+    cloudProfile = CloudProfile(
+      userId: userId,
+      displayName: cloudProfile?.displayName,
+      photoUrl: cloudProfile?.photoUrl,
+      roleCode: cloudProfile?.roleCode,
+      preferredRegionId: cloudProfile?.preferredRegionId,
+      regionPreferenceId: regionPreferenceId,
+      phone: cloudProfile?.phone,
+    );
   }
 }
 
@@ -113,6 +132,7 @@ PersonalProfileBootstrapCoordinator _coordinator(
   return PersonalProfileBootstrapCoordinator(
     localRepository: repo,
     remoteGateway: gateway,
+    regionPreferenceGateway: _FakePreferenceGateway(),
   );
 }
 

@@ -9,9 +9,16 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/services/language_provider.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../../data/region_preference.dart';
 import '../../domain/user_profile.dart';
 import '../providers/user_profile_provider.dart';
 
+/// A5.8 first-launch setup — exactly TWO required steps:
+/// 1/2 Role → 2/2 Region Preference → Home.
+///
+/// BaghdadArea is deliberately NOT shown here: it is legacy/local,
+/// Directory-only, preserved for compatibility, and never requested during
+/// first-launch (nor mapped to a Region Preference).
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
 
@@ -22,10 +29,29 @@ class ProfileSetupScreen extends StatefulWidget {
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   int _step = 1;
   CivilUserType? _selectedType;
-  BaghdadArea? _selectedArea;
+  String? _selectedPreference;
 
   String tr(String ar, String en) =>
       context.watch<LanguageProvider>().isArabic ? ar : en;
+
+  String _regionPreferenceName(String code, {required bool isArabic}) {
+    switch (code) {
+      case RegionPreferenceCode.baghdadKarkh:
+        return isArabic ? Ar.regionBaghdadKarkh : En.regionBaghdadKarkh;
+      case RegionPreferenceCode.baghdadRusafa:
+        return isArabic ? Ar.regionBaghdadRusafa : En.regionBaghdadRusafa;
+      case RegionPreferenceCode.north:
+        return isArabic ? Ar.regionNorth : En.regionNorth;
+      case RegionPreferenceCode.central:
+        return isArabic ? Ar.regionCentral : En.regionCentral;
+      case RegionPreferenceCode.south:
+        return isArabic ? Ar.regionSouth : En.regionSouth;
+      case RegionPreferenceCode.allIraq:
+        return isArabic ? Ar.regionAllIraq : En.regionAllIraq;
+      default:
+        return code;
+    }
+  }
 
   String _userTypeName(CivilUserType type) {
     switch (type) {
@@ -85,7 +111,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final profile = LocalUserProfile(
       anonymousInstallId: _generateId(),
       userType: _selectedType ?? CivilUserType.generalUser,
-      baghdadArea: _selectedArea ?? BaghdadArea.unknown,
+      // A5.8: first-launch never requests BaghdadArea; the legacy locality is
+      // left at its neutral `unknown` default (Directory-only, preserved).
+      baghdadArea: BaghdadArea.unknown,
+      regionPreferenceCode: _selectedPreference,
     );
     if (!mounted) return;
     await context.read<UserProfileProvider>().saveProfile(profile);
@@ -109,17 +138,19 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: _step == 2
+        leading: _step > 1
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: () => setState(() => _step = 1),
+                onPressed: () => setState(() => _step = _step - 1),
               )
             : null,
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(AppSpacing.xxl, AppSpacing.lg, AppSpacing.xxl, AppSpacing.xxl),
-          child: _step == 1 ? _buildStep1(isArabic, isDark) : _buildStep2(isArabic, isDark),
+          child: _step == 1
+              ? _buildStep1(isArabic, isDark)
+              : _buildStep2(isArabic, isDark),
         ),
       ),
     );
@@ -204,8 +235,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   }
 
   Widget _buildStep2(bool isArabic, bool isDark) {
-    final areas = BaghdadArea.values.where((a) => a != BaghdadArea.unknown).toList();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -242,16 +271,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         const SizedBox(height: AppSpacing.xxl),
         Expanded(
           child: ListView.separated(
-            itemCount: areas.length,
+            itemCount: RegionPreferenceCode.all.length,
             separatorBuilder: (_, __) => AppSpacing.gapSm,
             itemBuilder: (context, index) {
-              final area = areas[index];
-              final isSelected = _selectedArea == area;
+              final code = RegionPreferenceCode.all[index];
+              final isSelected = _selectedPreference == code;
               return _buildOptionCard(
-                icon: Icons.location_on_outlined,
-                title: isArabic ? area.arName : area.enName,
+                icon: Icons.public_outlined,
+                title: _regionPreferenceName(code, isArabic: isArabic),
                 isSelected: isSelected,
-                onTap: () => setState(() => _selectedArea = area),
+                onTap: () => setState(() => _selectedPreference = code),
                 isDark: isDark,
               );
             },
@@ -262,7 +291,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           width: double.infinity,
           height: 50,
           child: ElevatedButton(
-            onPressed: _selectedArea != null ? _complete : null,
+            onPressed: _selectedPreference != null ? _complete : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.onPrimary,

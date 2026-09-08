@@ -604,8 +604,8 @@ class En {
       'Help us customize Civilpedia for you';
   static const String profileSetupSubtitle = 'You can change this later';
   static const String profileStep1Title = 'What best describes you?';
-  static const String profileStep2Title = 'Where do you mainly work?';
-  static const String profileStep2Subtitle = 'in Baghdad';
+  static const String profileStep2Title = 'What is your preferred region?';
+  static const String profileStep2Subtitle = 'To show relevant content';
   static const String profileContinue = 'Continue';
   static const String profileComplete = 'Complete';
   static const String profileStep1Of2 = 'Step 1 of 2';
@@ -639,12 +639,24 @@ class En {
   static const String profileMyCivilpediaProfile = 'My Civilpedia Profile';
   static const String profileRole = 'Role';
   static const String profileMainWorkArea = 'Main work area';
+  static const String profileRegionPreference = 'Region';
   static const String profileEditPreferences = 'Edit';
   static const String profileSaveChanges = 'Save changes';
   static const String profileUpdated = 'Profile updated';
   static const String profileNotSet = 'Not set';
   static const String profileChangeRole = 'Change role';
   static const String profileChangeWorkArea = 'Change work area';
+  static const String profileChangeRegionPreference = 'Change region';
+
+  // A5.8 — Region Preference display labels (presentation only; the stable
+  // `IQ_PREF_*` code is the persisted identity, never these labels).
+  static const String regionPreference = 'Region';
+  static const String regionBaghdadKarkh = 'Baghdad - Karkh';
+  static const String regionBaghdadRusafa = 'Baghdad - Rusafa';
+  static const String regionNorth = 'Northern governorates';
+  static const String regionCentral = 'Central governorates';
+  static const String regionSouth = 'Southern governorates';
+  static const String regionAllIraq = 'All Iraq';
 
   // Directory
   static const String directoryLandingTitle = 'Engineering Directory';

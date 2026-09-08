@@ -14,6 +14,7 @@ import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../profile/data/region_preference.dart';
 import '../../profile/domain/user_profile.dart';
 import '../../profile/presentation/providers/user_profile_provider.dart';
 
@@ -406,6 +407,25 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
+  String _regionPreferenceName(String? code, {required bool isArabic}) {
+    switch (code) {
+      case RegionPreferenceCode.baghdadKarkh:
+        return isArabic ? Ar.regionBaghdadKarkh : En.regionBaghdadKarkh;
+      case RegionPreferenceCode.baghdadRusafa:
+        return isArabic ? Ar.regionBaghdadRusafa : En.regionBaghdadRusafa;
+      case RegionPreferenceCode.north:
+        return isArabic ? Ar.regionNorth : En.regionNorth;
+      case RegionPreferenceCode.central:
+        return isArabic ? Ar.regionCentral : En.regionCentral;
+      case RegionPreferenceCode.south:
+        return isArabic ? Ar.regionSouth : En.regionSouth;
+      case RegionPreferenceCode.allIraq:
+        return isArabic ? Ar.regionAllIraq : En.regionAllIraq;
+      default:
+        return isArabic ? Ar.profileNotSet : En.profileNotSet;
+    }
+  }
+
   Widget _buildProfileCard(
     BuildContext context,
     UserProfileProvider profileProvider,
@@ -479,6 +499,24 @@ class ProfileScreen extends StatelessWidget {
           leading: Icon(Icons.location_on_outlined, color: theme.primaryColor),
           title: Text(tr(Ar.profileMainWorkArea, En.profileMainWorkArea)),
           subtitle: Text(area),
+          trailing: Text(
+            tr(Ar.profileEditPreferences, En.profileEditPreferences),
+            style: TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
+          ),
+          onTap: () => context.push(profileEditRoute, extra: profile),
+        ),
+        const Divider(height: 1),
+        ListTile(
+          leading: Icon(Icons.public_outlined, color: theme.primaryColor),
+          title: Text(tr(Ar.profileRegionPreference, En.profileRegionPreference)),
+          subtitle: Text(
+            _regionPreferenceName(profile.regionPreferenceCode,
+                isArabic: isArabic),
+          ),
           trailing: Text(
             tr(Ar.profileEditPreferences, En.profileEditPreferences),
             style: TextStyle(

@@ -292,6 +292,7 @@ void main() {
   );
 
   testWidgets('W6.3 existing /profile route still works', (tester) async {
+    _useTallViewport(tester);
     final repository = _FakeUserProfileRepository(_profile());
     final profileProvider = UserProfileProvider(repository: repository);
     await profileProvider.loadProfile();

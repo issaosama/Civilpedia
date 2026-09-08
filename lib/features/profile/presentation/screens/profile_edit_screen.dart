@@ -8,6 +8,7 @@ import '../../../../core/theme/spacing.dart';
 import '../../../../core/services/language_provider.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../../data/region_preference.dart';
 import '../../domain/user_profile.dart';
 import '../providers/user_profile_provider.dart';
 
@@ -22,6 +23,7 @@ class ProfileEditScreen extends StatefulWidget {
 class _ProfileEditScreenState extends State<ProfileEditScreen> {
   late CivilUserType _selectedType;
   late BaghdadArea _selectedArea;
+  String? _selectedPreference;
   bool _hasChanges = false;
 
   String tr(String ar, String en) =>
@@ -32,6 +34,26 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     super.initState();
     _selectedType = widget.profile.userType;
     _selectedArea = widget.profile.baghdadArea;
+    _selectedPreference = widget.profile.regionPreferenceCode;
+  }
+
+  String _regionPreferenceName(String? code, {required bool isArabic}) {
+    switch (code) {
+      case RegionPreferenceCode.baghdadKarkh:
+        return isArabic ? Ar.regionBaghdadKarkh : En.regionBaghdadKarkh;
+      case RegionPreferenceCode.baghdadRusafa:
+        return isArabic ? Ar.regionBaghdadRusafa : En.regionBaghdadRusafa;
+      case RegionPreferenceCode.north:
+        return isArabic ? Ar.regionNorth : En.regionNorth;
+      case RegionPreferenceCode.central:
+        return isArabic ? Ar.regionCentral : En.regionCentral;
+      case RegionPreferenceCode.south:
+        return isArabic ? Ar.regionSouth : En.regionSouth;
+      case RegionPreferenceCode.allIraq:
+        return isArabic ? Ar.regionAllIraq : En.regionAllIraq;
+      default:
+        return tr(Ar.profileNotSet, En.profileNotSet);
+    }
   }
 
   String _userTypeName(CivilUserType type) {
@@ -146,6 +168,47 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
+  void _pickRegionPreference() {
+    final isArabic = context.read<LanguageProvider>().isArabic;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => SimpleDialog(
+        title: Text(
+          tr(Ar.profileChangeRegionPreference, En.profileChangeRegionPreference),
+        ),
+        children: RegionPreferenceCode.all.map((code) {
+          final isSelected = _selectedPreference == code;
+          return SimpleDialogOption(
+            onPressed: () {
+              setState(() {
+                _selectedPreference = code;
+                _hasChanges = true;
+              });
+              Navigator.pop(ctx);
+            },
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _regionPreferenceName(code, isArabic: isArabic),
+                    style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected ? AppColors.primary : null,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  Icon(Icons.check, color: AppColors.primary, size: 20),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
   String _civilUserTypeEn(CivilUserType type) {
     switch (type) {
       case CivilUserType.siteEngineer:
@@ -204,6 +267,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     final updatedProfile = widget.profile.copyWith(
       userType: _selectedType,
       baghdadArea: _selectedArea,
+      regionPreferenceCode: _selectedPreference,
       updatedAt: DateTime.now(),
     );
     await context.read<UserProfileProvider>().saveProfile(updatedProfile);
@@ -257,6 +321,17 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             textColor: textColor,
             isDark: isDark,
             onTap: _pickBaghdadArea,
+          ),
+          AppSpacing.gapMd,
+          _buildSection(
+            icon: Icons.public_outlined,
+            label: tr(Ar.profileRegionPreference, En.profileRegionPreference),
+            value: _regionPreferenceName(_selectedPreference,
+                isArabic: isArabic),
+            subtitleColor: subtitleColor,
+            textColor: textColor,
+            isDark: isDark,
+            onTap: _pickRegionPreference,
           ),
           const SizedBox(height: AppSpacing.xxl),
           SizedBox(

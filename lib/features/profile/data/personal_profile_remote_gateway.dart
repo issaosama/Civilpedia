@@ -28,4 +28,13 @@ abstract class PersonalProfileRemoteGateway {
   /// Throws [CloudProfileAlreadyExistsException] when the insert races an
   /// already-existing row, and any other [Exception] on a generic failure.
   Future<void> createProfile(CloudProfile profile);
+
+  /// Single-column safe update of `profiles.region_preference_id` for
+  /// [userId]. Used ONLY for the A5.8 conditional fill path (cloud
+  /// `region_preference_id` NULL + a locally-selected preference). Never used
+  /// to overwrite an existing cloud preference. A network failure MUST throw.
+  Future<void> updateRegionPreferenceId({
+    required String userId,
+    required String regionPreferenceId,
+  });
 }

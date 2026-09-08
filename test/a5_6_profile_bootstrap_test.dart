@@ -7,6 +7,8 @@ import 'package:civilpedia/features/profile/data/cloud_profile.dart';
 import 'package:civilpedia/features/profile/data/personal_profile_bootstrap_coordinator.dart';
 import 'package:civilpedia/features/profile/data/personal_profile_remote_gateway.dart';
 import 'package:civilpedia/features/profile/data/profile_bootstrap_outcome.dart';
+import 'package:civilpedia/features/profile/data/region_preference.dart';
+import 'package:civilpedia/features/profile/data/region_preference_gateway.dart';
 import 'package:civilpedia/features/profile/domain/user_profile.dart';
 import 'package:civilpedia/features/profile/domain/user_profile_repository.dart';
 
@@ -63,6 +65,7 @@ class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
 
   int fetchCalls = 0;
   int createCalls = 0;
+  int updatePreferenceCalls = 0;
   final List<CloudProfile> created = [];
 
   @override
@@ -83,6 +86,46 @@ class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
     created.add(profile);
     cloudProfile = profile;
   }
+
+  @override
+  Future<void> updateRegionPreferenceId({
+    required String userId,
+    required String regionPreferenceId,
+  }) async {
+    updatePreferenceCalls++;
+    cloudProfile = CloudProfile(
+      userId: userId,
+      displayName: cloudProfile?.displayName,
+      photoUrl: cloudProfile?.photoUrl,
+      roleCode: cloudProfile?.roleCode,
+      preferredRegionId: cloudProfile?.preferredRegionId,
+      regionPreferenceId: regionPreferenceId,
+      phone: cloudProfile?.phone,
+    );
+  }
+}
+
+/// Programmable [RegionPreferenceGateway] fake mirroring migration 00013.
+class _FakePreferenceGateway implements RegionPreferenceGateway {
+  static const Map<String, String> seededCodes = {
+    'IQ_PREF_BAGHDAD_KARKH': '10000000-0000-4000-8000-000000000101',
+    'IQ_PREF_BAGHDAD_RUSAFA': '10000000-0000-4000-8000-000000000102',
+    'IQ_PREF_NORTH': '10000000-0000-4000-8000-000000000103',
+    'IQ_PREF_CENTRAL': '10000000-0000-4000-8000-000000000104',
+    'IQ_PREF_SOUTH': '10000000-0000-4000-8000-000000000105',
+    'IQ_PREF_ALL': '10000000-0000-4000-8000-000000000106',
+  };
+
+  final Map<String, String> codes = seededCodes;
+  Object? resolveError;
+  int resolveCalls = 0;
+
+  @override
+  Future<String?> resolvePreferenceIdByCode(String code) async {
+    resolveCalls++;
+    if (resolveError != null) throw resolveError!;
+    return codes[code];
+  }
 }
 
 LocalUserProfile _localProfile({
@@ -91,6 +134,7 @@ LocalUserProfile _localProfile({
   BaghdadArea area = BaghdadArea.karrada,
   String? name,
   String? futureCloudUserId,
+  String? regionPreferenceCode,
 }) {
   return LocalUserProfile(
     anonymousInstallId: installId,
@@ -98,16 +142,19 @@ LocalUserProfile _localProfile({
     baghdadArea: area,
     name: name,
     futureCloudUserId: futureCloudUserId,
+    regionPreferenceCode: regionPreferenceCode,
   );
 }
 
 PersonalProfileBootstrapCoordinator _coordinator(
   _MemoryProfileRepository repo,
-  _FakeRemoteGateway gateway,
-) {
+  _FakeRemoteGateway gateway, {
+  _FakePreferenceGateway? preferenceGateway,
+}) {
   return PersonalProfileBootstrapCoordinator(
     localRepository: repo,
     remoteGateway: gateway,
+    regionPreferenceGateway: preferenceGateway ?? _FakePreferenceGateway(),
   );
 }
 
@@ -797,6 +844,238 @@ void main() {
       expect(repo.profile!.baghdadArea, BaghdadArea.karrada,
           reason: 'local untouched');
       expect(gateway.createCalls, 0);
+    });
+  });
+
+  group('A5.8 region preference bootstrap — safe cloud integration', () {
+    const pref = RegionPreferenceCode.allIraq;
+    const prefId = '10000000-0000-4000-8000-000000000106';
+
+    test('1. create with resolved preference writes region_preference_id and '
+        'binds only after a confirmed create', () async {
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: pref,
+        ),
+      );
+      final gateway = _FakeRemoteGateway();
+      final coordinator = _coordinator(repo, gateway);
+
+      final outcome = await coordinator.bootstrap(userId: _userA);
+
+      expect(outcome, ProfileBootstrapOutcome.associated);
+      final created = gateway.created.single;
+      expect(created.regionPreferenceId, prefId,
+          reason: 'canonical resolved id must reach the new cloud row');
+      expect(created.preferredRegionId, isNull,
+          reason: 'legacy preferred_region_id is never written');
+      expect(repo.profile!.futureCloudUserId, _userA,
+          reason: 'binding persisted only after confirmed create');
+      expect(repo.profile!.regionPreferenceCode, pref,
+          reason: 'local preference preserved');
+    });
+
+    test('2. existing cloud, same preference → associate safely, no mutation',
+        () async {
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: pref,
+        ),
+      );
+      final gateway = _FakeRemoteGateway()
+        ..cloudProfile = const CloudProfile(
+          userId: _userA,
+          roleCode: 'site_engineer',
+          regionPreferenceId: prefId,
+        );
+      final coordinator = _coordinator(repo, gateway);
+
+      final outcome = await coordinator.bootstrap(userId: _userA);
+
+      expect(outcome, ProfileBootstrapOutcome.associated);
+      expect(repo.profile!.futureCloudUserId, _userA);
+      expect(gateway.createCalls, 0, reason: 'no create');
+      expect(gateway.updatePreferenceCalls, 0, reason: 'no fill needed');
+      expect(gateway.cloudProfile!.regionPreferenceId, prefId);
+    });
+
+    test('3. cloud preference NULL + local preference → conditional '
+        'single-column fill, then bind', () async {
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: pref,
+        ),
+      );
+      final gateway = _FakeRemoteGateway()
+        ..cloudProfile = const CloudProfile(
+          userId: _userA,
+          roleCode: 'site_engineer',
+        );
+      final coordinator = _coordinator(repo, gateway);
+
+      final outcome = await coordinator.bootstrap(userId: _userA);
+
+      expect(outcome, ProfileBootstrapOutcome.associated);
+      expect(gateway.updatePreferenceCalls, 1,
+          reason: 'single-column safe fill attempted');
+      expect(gateway.cloudProfile!.regionPreferenceId, prefId,
+          reason: 'fill wrote the resolved id only');
+      expect(gateway.cloudProfile!.roleCode, 'site_engineer',
+          reason: 'other cloud columns untouched');
+      expect(repo.profile!.futureCloudUserId, _userA,
+          reason: 'bind after safe result');
+      expect(gateway.createCalls, 0);
+    });
+
+    test('4. cloud preference DIFFERENT from local → profileConflict, no '
+        'overwrite, no rebind', () async {
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: pref,
+        ),
+      );
+      final gateway = _FakeRemoteGateway()
+        ..cloudProfile = const CloudProfile(
+          userId: _userA,
+          roleCode: 'site_engineer',
+          regionPreferenceId: '10000000-0000-4000-8000-000000000104',
+        );
+      final coordinator = _coordinator(repo, gateway);
+
+      final outcome = await coordinator.bootstrap(userId: _userA);
+
+      expect(outcome, ProfileBootstrapOutcome.profileConflict);
+      expect(repo.profile!.futureCloudUserId, isNull,
+          reason: 'no rebind on conflict');
+      expect(gateway.updatePreferenceCalls, 0, reason: 'no overwrite');
+      expect(gateway.cloudProfile!.regionPreferenceId,
+          '10000000-0000-4000-8000-000000000104',
+          reason: 'cloud preserved');
+      expect(repo.profile!.regionPreferenceCode, pref,
+          reason: 'local preserved');
+    });
+
+    test('5. FAIL-CLOSED: lookup failure + NO cloud profile → no create, no '
+        'binding, retryable failure', () async {
+      final preferenceGateway = _FakePreferenceGateway()
+        ..resolveError = Exception('db down');
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: pref,
+        ),
+      );
+      final gateway = _FakeRemoteGateway();
+      final coordinator = _coordinator(repo, gateway,
+          preferenceGateway: preferenceGateway);
+
+      final outcome = await coordinator.bootstrap(userId: _userA);
+
+      expect(outcome, ProfileBootstrapOutcome.failure,
+          reason: 'meaningful preference + unresolved canonical id → retryable '
+              'failure');
+      expect(gateway.createCalls, 0,
+          reason: 'must NOT create a cloud row when the id cannot be proven');
+      expect(repo.profile!.futureCloudUserId, isNull,
+          reason: 'must NOT bind the local profile');
+      expect(repo.profile!.regionPreferenceCode, pref,
+          reason: 'local untouched');
+    });
+
+    test('6. FAIL-CLOSED: lookup failure + existing cloud profile → no '
+        'association, no mutation, retryable failure', () async {
+      final preferenceGateway = _FakePreferenceGateway()
+        ..resolveError = Exception('offline');
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: pref,
+        ),
+      );
+      final gateway = _FakeRemoteGateway()
+        ..cloudProfile = const CloudProfile(
+          userId: _userA,
+          roleCode: 'site_engineer',
+        );
+      final coordinator = _coordinator(repo, gateway,
+          preferenceGateway: preferenceGateway);
+
+      final outcome = await coordinator.bootstrap(userId: _userA);
+
+      expect(outcome, ProfileBootstrapOutcome.failure,
+          reason: 'cannot prove the existing cloud preference is compatible; '
+              'never bypass conflict detection');
+      expect(repo.profile!.futureCloudUserId, isNull,
+          reason: 'no binding without a proven-safe association');
+      expect(gateway.createCalls, 0, reason: 'no remote create');
+      expect(gateway.updatePreferenceCalls, 0, reason: 'no remote update');
+      expect(gateway.cloudProfile!.regionPreferenceId, isNull,
+          reason: 'cloud untouched');
+      expect(repo.profile!.regionPreferenceCode, pref,
+          reason: 'local untouched');
+    });
+
+    test('7. retry after a lookup failure succeeds → normal safe create '
+        'semantics resume', () async {
+      final preferenceGateway = _FakePreferenceGateway()
+        ..resolveError = Exception('flaky');
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: pref,
+        ),
+      );
+      final gateway = _FakeRemoteGateway();
+      final coordinator = _coordinator(repo, gateway,
+          preferenceGateway: preferenceGateway);
+
+      final first = await coordinator.bootstrap(userId: _userA);
+      expect(first, ProfileBootstrapOutcome.failure);
+      expect(gateway.createCalls, 0);
+      expect(repo.profile!.futureCloudUserId, isNull);
+
+      preferenceGateway.resolveError = null;
+      final second = await coordinator.bootstrap(userId: _userA);
+
+      expect(second, ProfileBootstrapOutcome.associated);
+      expect(gateway.createCalls, 1, reason: 'create after proven-safe id');
+      final created = gateway.created.single;
+      expect(created.regionPreferenceId, prefId);
+      expect(repo.profile!.futureCloudUserId, _userA);
+    });
+
+    test('8. local preference NULL + existing cloud preference → associate '
+        'and preserve cloud, no lookup required', () async {
+      final repo = _MemoryProfileRepository(
+        profile: _localProfile(
+          userType: CivilUserType.siteEngineer,
+          regionPreferenceCode: null,
+        ),
+      );
+      final gateway = _FakeRemoteGateway()
+        ..cloudProfile = const CloudProfile(
+          userId: _userA,
+          roleCode: 'site_engineer',
+          regionPreferenceId: prefId,
+        );
+      final preferenceGateway = _FakePreferenceGateway();
+      final coordinator = _coordinator(repo, gateway,
+          preferenceGateway: preferenceGateway);
+
+      final outcome = await coordinator.bootstrap(userId: _userA);
+
+      expect(outcome, ProfileBootstrapOutcome.associated);
+      expect(repo.profile!.futureCloudUserId, _userA);
+      expect(gateway.cloudProfile!.regionPreferenceId, prefId,
+          reason: 'cloud preference preserved, never unset');
+      expect(preferenceGateway.resolveCalls, 0,
+          reason: 'no lookup needed when local is NULL');
+      expect(gateway.createCalls, 0);
+      expect(gateway.updatePreferenceCalls, 0);
     });
   });
 }

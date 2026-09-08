@@ -53,14 +53,18 @@ class SupabasePersonalProfileRemoteGateway
 
   @override
   Future<void> createProfile(CloudProfile profile) async {
-    // Region columns are deliberately absent: no local Region Preference model
-    // exists in A5.7, so no region value (legacy or preference) may reach the
-    // DB through create — nothing is invented, nothing is guessed.
+    // Region columns are deliberately constrained: `preferred_region_id` is a
+    // legacy geographic reference that is NEVER written here; the A5.8
+    // six-zone `region_preference_id` is written only when the local profile
+    // carries a stable preference code resolved through RegionPreferenceGateway
+    // (a UUID is never invented, and legacy BaghdadArea is never mapped).
     final payload = <String, dynamic>{
       'user_id': profile.userId,
       if (profile.displayName != null) 'display_name': profile.displayName,
       if (profile.photoUrl != null) 'photo_url': profile.photoUrl,
       if (profile.roleCode != null) 'role_code': profile.roleCode,
+      if (profile.regionPreferenceId != null)
+        'region_preference_id': profile.regionPreferenceId,
       if (profile.phone != null) 'phone': profile.phone,
     };
     try {
@@ -74,5 +78,18 @@ class SupabasePersonalProfileRemoteGateway
       }
       rethrow;
     }
+  }
+
+  @override
+  Future<void> updateRegionPreferenceId({
+    required String userId,
+    required String regionPreferenceId,
+  }) async {
+    // Only the six-zone preference column is touched. RLS guarantees the
+    // authenticated user can UPDATE only their own row.
+    await _client
+        .from(_table)
+        .update({'region_preference_id': regionPreferenceId})
+        .eq('user_id', userId);
   }
 }

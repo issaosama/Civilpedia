@@ -563,6 +563,7 @@ void main() {
 
   group('W3.4 legacy preservation', () {
     testWidgets('/profile remains reachable and unchanged', (tester) async {
+      _useTallViewport(tester);
       final profileProvider = _profileProvider(stored: _profile());
       await profileProvider.loadProfile();
       await _open(tester, profileProvider, AppRoutes.profile);

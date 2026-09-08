@@ -135,21 +135,21 @@ class AppDependencies {
       favoritesGateway: const HiveLocalFavoritesGateway(),
     );
 
-    // A5.6/A5.7 — personal-profile ownership boundary. The bootstrap
+    // A5.6/A5.7/A5.8 — personal-profile ownership boundary. The bootstrap
     // coordinator only associates the local personal profile with the
     // canonical auth.users.id after a real authenticated session; it never
     // syncs or overwrites cloud values blindly. Region Preference (the frozen
     // six-zone contract, migration 00013) is a SEPARATE concept from the
     // physical regions taxonomy; the preference gateway resolves zone codes →
-    // ids for future preference persistence and is not consumed by bootstrap
-    // until a local preference model exists (A5.7 keeps cloud preference
-    // unset; local BaghdadArea is Directory geography, never mapped).
+    // ids for A5.8 persistence (create + safe fill), and legacy BaghdadArea is
+    // Directory geography, never mapped to a preference.
     _regionPreferenceGateway = SupabaseRegionPreferenceGateway();
     _personalProfileRemoteGateway =
         SupabasePersonalProfileRemoteGateway();
     _personalProfileBootstrapCoordinator = PersonalProfileBootstrapCoordinator(
       localRepository: _userProfileRepo,
       remoteGateway: _personalProfileRemoteGateway,
+      regionPreferenceGateway: _regionPreferenceGateway,
     );
   }
 
@@ -196,10 +196,10 @@ class AppDependencies {
       personalProfileBootstrapCoordinator =>
           _personalProfileBootstrapCoordinator;
 
-  /// A5.7 — production Region Preference gateway (stable zone code →
+  /// A5.7/A5.8 — production Region Preference gateway (stable zone code →
   /// `region_preferences.id`). The six frozen zones are a SEPARATE concept
   /// from `public.regions` physical geography; this resolves preference codes
-  /// only. Never called from widgets; not yet consumed by bootstrap.
+  /// only and is consumed by the profile bootstrap. Never called from widgets.
   static RegionPreferenceGateway get regionPreferenceGateway =>
       _regionPreferenceGateway;
 }

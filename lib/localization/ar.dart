@@ -586,8 +586,8 @@ class Ar {
   static const String profileSetupTitle = 'ساعدنا في تخصيص Civilpedia لك';
   static const String profileSetupSubtitle = 'يمكنك تغيير هذا لاحقًا';
   static const String profileStep1Title = 'ما الذي يصفك بشكل أفضل؟';
-  static const String profileStep2Title = 'أين تعمل بشكل أساسي؟';
-  static const String profileStep2Subtitle = 'في بغداد';
+  static const String profileStep2Title = 'ما منطقتك المفضلة؟';
+  static const String profileStep2Subtitle = 'لعرض المحتوى المناسب';
   static const String profileContinue = 'متابعة';
   static const String profileComplete = 'إكمال';
   static const String profileStep1Of2 = 'الخطوة 1 من 2';
@@ -621,12 +621,24 @@ class Ar {
   static const String profileMyCivilpediaProfile = 'ملفي في Civilpedia';
   static const String profileRole = 'الدور';
   static const String profileMainWorkArea = 'منطقة العمل الرئيسية';
+  static const String profileRegionPreference = 'المنطقة';
   static const String profileEditPreferences = 'تعديل';
   static const String profileSaveChanges = 'حفظ التغييرات';
   static const String profileUpdated = 'تم تحديث الملف الشخصي';
   static const String profileNotSet = 'غير محدد';
   static const String profileChangeRole = 'تغيير الدور';
   static const String profileChangeWorkArea = 'تغيير منطقة العمل';
+  static const String profileChangeRegionPreference = 'تغيير المنطقة';
+
+  // A5.8 — Region Preference display labels (presentation only; the stable
+  // `IQ_PREF_*` code is the persisted identity, never these labels).
+  static const String regionPreference = 'المنطقة';
+  static const String regionBaghdadKarkh = 'بغداد - الكرخ';
+  static const String regionBaghdadRusafa = 'بغداد - الرصافة';
+  static const String regionNorth = 'المحافظات الشمالية';
+  static const String regionCentral = 'المحافظات الوسطى';
+  static const String regionSouth = 'المحافظات الجنوبية';
+  static const String regionAllIraq = 'كل العراق';
 
   // Directory
   static const String directoryLandingTitle = 'الدليل الهندسي';

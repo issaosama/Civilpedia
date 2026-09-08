@@ -3,8 +3,10 @@ import '../domain/user_profile_repository.dart';
 import 'cloud_profile.dart';
 import 'personal_profile_remote_gateway.dart';
 import 'profile_bootstrap_outcome.dart';
+import 'region_preference.dart';
+import 'region_preference_gateway.dart';
 
-/// A5.6/A5.7 — Coordinates safe cloud ownership/bootstrap for the user's
+/// A5.6/A5.7/A5.8 — Coordinates safe cloud ownership/bootstrap for the user's
 /// PERSONAL profile after a REAL authenticated Supabase session.
 ///
 /// Contracts enforced here (all fail-closed):
@@ -23,16 +25,36 @@ import 'profile_bootstrap_outcome.dart';
 ///   (migration 00013).
 /// * The local `baghdadArea` field is a PHYSICAL, Directory-only locality
 ///   (legacy/local representation) — it is NOT a Region Preference and is never
-///   mapped to one. There is currently NO local preference model at all, so
-///   this bootstrap NEVER writes, fills, or invents any cloud region
-///   preference, and NEVER conflicts on region fields.
-/// * Cloud region values (legacy `preferred_region_id` and the new
-///   `region_preference_id`) are PRESERVED untouched — the bootstrap performs
-///   no region UPDATE and omits region columns from CREATE. This is documented
-///   migration debt: persisting a real preference requires a corrected local
-///   onboarding preference model (UI/onboarding is out of A5.7 scope).
-/// * Association is therefore never blocked by legacy local/geographic region
-///   values; authentication is never blocked, and no region value is invented.
+///   mapped to one.
+/// * Cloud region values: the legacy `preferred_region_id` is PRESERVED
+///   untouched — this bootstrap never reads, writes, or compares it.
+///
+/// A5.8 REGION PREFERENCE WIRING (first-launch model):
+/// * The local profile now carries a stable `regionPreferenceCode` (one of the
+///   frozen `IQ_PREF_*` codes) selected during first-launch setup.
+/// * Local code → canonical `region_preferences.id` is resolved EXCLUSIVELY via
+///   [RegionPreferenceGateway]; a UUID is never invented or hardcoded.
+/// * FAIL-CLOSED LOOKUP: when the local preference is meaningful
+///   (`regionPreferenceCode` present and known) and its canonical id cannot be
+///   resolved (lookup/network failure), the bootstrap returns a RETRYABLE
+///   `failure` outcome. No cloud row is created, no local binding persisted,
+///   no association performed, and no cloud data is updated — the existing
+///   cloud profile, if any, may already carry a DIFFERENT preference, so
+///   association cannot be proven safe until the canonical id is resolved.
+///   Authentication itself stays successful; the next authenticated session
+///   retries the whole bootstrap.
+/// * CREATE: when resolution succeeds, the new cloud row receives
+///   `region_preference_id`; the local binding is persisted only after the
+///   remote create is confirmed.
+/// * EXISTING cloud profile:
+///     - same resolved preference → compatible → associate.
+///     - cloud `region_preference_id` NULL + local preference → conditional
+///       single-column safe fill (never touches other cloud columns), then
+///       bind after a safe result.
+///     - cloud preference present AND differs → `profileConflict`. Never
+///       overwritten silently.
+///     - local preference NULL + cloud preference present → associate and
+///       preserve the cloud preference (no push, no unset, no lookup needed).
 ///
 /// * Every failure leaves local data untouched and the local binding unmarked;
 ///   the next authenticated session retries safely. The DB `user_id` primary
@@ -40,17 +62,20 @@ import 'profile_bootstrap_outcome.dart';
 ///   re-evaluated as an existing-cloud case).
 ///
 /// Ordering contract: A5.5 record ownership runs first on the same
-/// authenticated seam; A5.6/A5.7 profile bootstrap is fire-and-forget after it
-/// and never blocks or is blocked by it.
+/// authenticated seam; A5.6/A5.7/A5.8 profile bootstrap is fire-and-forget
+/// after it and never blocks or is blocked by it.
 class PersonalProfileBootstrapCoordinator {
   PersonalProfileBootstrapCoordinator({
     required UserProfileRepository localRepository,
     required PersonalProfileRemoteGateway remoteGateway,
+    required RegionPreferenceGateway regionPreferenceGateway,
   }) : _localRepository = localRepository,
-       _remoteGateway = remoteGateway;
+       _remoteGateway = remoteGateway,
+       _regionPreferenceGateway = regionPreferenceGateway;
 
   final UserProfileRepository _localRepository;
   final PersonalProfileRemoteGateway _remoteGateway;
+  final RegionPreferenceGateway _regionPreferenceGateway;
 
   Future<ProfileBootstrapOutcome>? _inFlight;
 
@@ -110,12 +135,30 @@ class PersonalProfileBootstrapCoordinator {
     }
 
     if (cloud == null) {
-      // CASE A — create using only known-safe mapped values.
+      // CASE A — create using only known-safe mapped values. A5.8: resolve a
+      // stable local preference code to its canonical id when possible. On
+      // lookup/network failure the field is safely omitted — authentication
+      // stays successful, local data is untouched, and a later session retries.
+      // A5.8 FAIL-CLOSED CASE A: the local preference is meaningful and its
+      // canonical id must be proven BEFORE any remote write. On lookup/network
+      // failure return a retryable failure: NO cloud row is created, NO local
+      // binding is persisted, and no data is mutated. Authentication itself
+      // stays successful; the next authenticated session retries.
+      String? regionPreferenceId;
+      if (_hasPreference(local)) {
+        try {
+          regionPreferenceId = await _regionPreferenceGateway
+              .resolvePreferenceIdByCode(local.regionPreferenceCode!);
+        } catch (_) {
+          return ProfileBootstrapOutcome.failure;
+        }
+      }
       final toCreate = _buildCloudProfile(
         local: local,
         userId: userId,
         authDisplayName: authDisplayName,
         authPhotoUrl: authPhotoUrl,
+        regionPreferenceId: regionPreferenceId,
       );
       try {
         await _remoteGateway.createProfile(toCreate);
@@ -151,6 +194,42 @@ class PersonalProfileBootstrapCoordinator {
     required CloudProfile cloud,
     required String userId,
   }) async {
+    // A5.8 FAIL-CLOSED Region Preference association: when the local
+    // preference is meaningful, its canonical id MUST be resolved before any
+    // compare/fill/associate can be proven safe (an existing cloud profile may
+    // already carry a different preference). On lookup/network failure return
+    // a retryable failure — NO association, NO local binding, NO cloud
+    // mutation; retried on a later authenticated session.
+    String? localPreferenceId;
+    if (_hasPreference(local)) {
+      try {
+        localPreferenceId = await _regionPreferenceGateway
+            .resolvePreferenceIdByCode(local.regionPreferenceCode!);
+      } catch (_) {
+        return ProfileBootstrapOutcome.failure;
+      }
+    }
+    if (localPreferenceId != null) {
+      final cloudPreferenceId = cloud.regionPreferenceId;
+      if (cloudPreferenceId == null) {
+        // cloud NULL + local preference → conditional single-column safe fill.
+        // A failure here never fails the association: the fill is retried on
+        // a later session without any local or other cloud mutation.
+        try {
+          await _remoteGateway.updateRegionPreferenceId(
+            userId: userId,
+            regionPreferenceId: localPreferenceId,
+          );
+        } catch (_) {
+          // non-fatal; see above.
+        }
+      } else if (cloudPreferenceId != localPreferenceId) {
+        // Different cloud/local preference → preserve BOTH sides and never
+        // overwrite silently; local binding is not persisted.
+        return ProfileBootstrapOutcome.profileConflict;
+      }
+    }
+
     final conflict = _detectConflict(local, cloud);
     if (conflict) {
       // Preserve BOTH sides. The device local profile stays unchanged; the
@@ -168,11 +247,9 @@ class PersonalProfileBootstrapCoordinator {
   /// A field only conflicts when BOTH sides hold meaningful, different values;
   /// a genuinely-missing side never destroys information (no silent fills).
   ///
-  /// A5.7 — region fields are EXCLUDED from conflict and from writes entirely:
-  /// the local `baghdadArea` is physical/Directory-only (not a preference) and
-  /// there is no local preference model to compare — legacy/geographic values
-  /// never block association and are preserved untouched (no invention, no
-  /// silent overwrite).
+  /// A5.7/A5.8 — `baghdadArea` (physical Directory locality) is NEVER
+  /// compared here. Region Preference comparison happens separately in
+  /// `_associateOrConflict` before this role/name check.
   bool _detectConflict(LocalUserProfile local, CloudProfile cloud) {
     final localRole = civilUserTypeToRoleCode(local.userType);
     final cloudRole = _meaningful(cloud.roleCode);
@@ -190,10 +267,13 @@ class PersonalProfileBootstrapCoordinator {
   /// Builds the initial cloud profile from known-safe local/auth values only.
   ///
   /// Notable audit decisions:
-  /// * All region columns are deliberately OMITTED — `preferred_region_id` is
-  ///   a legacy geographic reference and no local Region Preference exists in
-  ///   A5.7, so persisting either column cannot be proven intentional; a
-  ///   UUID/code is never invented. Cloud region preference data stays unset.
+  /// * `preferred_region_id` is ALWAYS omitted — it is a legacy geographic
+  ///   reference, never written by this bootstrap.
+  /// * `region_preference_id` is written ONLY from the [regionPreferenceId]
+  ///   provided by the caller, which is itself the result of resolving a
+  ///   stable local `RegionPreferenceCode` through [RegionPreferenceGateway]
+  ///   (A5.8). A UUID is never invented; on resolution failure the caller
+  ///   passes null and the column is safely omitted.
   /// * `phone` is deliberately OMITTED: it is not collected by any current
   ///   intentional flow, so persisting it cannot be proven intentionally
   ///   collected.
@@ -202,13 +282,24 @@ class PersonalProfileBootstrapCoordinator {
     required String userId,
     String? authDisplayName,
     String? authPhotoUrl,
+    String? regionPreferenceId,
   }) {
     return CloudProfile(
       userId: userId,
       displayName: _meaningful(local.name) ?? _meaningful(authDisplayName),
       photoUrl: _meaningful(authPhotoUrl),
       roleCode: civilUserTypeToRoleCode(local.userType),
+      regionPreferenceId: regionPreferenceId,
     );
+  }
+
+  /// True when the local profile carries a known, non-empty stable preference
+  /// code from the frozen six-zone contract.
+  bool _hasPreference(LocalUserProfile local) {
+    final code = local.regionPreferenceCode;
+    return code != null &&
+        code.trim().isNotEmpty &&
+        RegionPreferenceCode.isKnown(code);
   }
 
   Future<bool> _persistLocalBinding(

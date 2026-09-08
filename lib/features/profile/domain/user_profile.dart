@@ -19,6 +19,7 @@ class LocalUserProfile {
   final String anonymousInstallId;
   final CivilUserType userType;
   final BaghdadArea baghdadArea;
+  final String? regionPreferenceCode;
   final String? name;
   final String? title;
   final String? company;
@@ -34,6 +35,7 @@ class LocalUserProfile {
     required this.anonymousInstallId,
     this.userType = CivilUserType.generalUser,
     this.baghdadArea = BaghdadArea.unknown,
+    this.regionPreferenceCode,
     this.name,
     this.title,
     this.company,
@@ -51,6 +53,7 @@ class LocalUserProfile {
     String? anonymousInstallId,
     CivilUserType? userType,
     BaghdadArea? baghdadArea,
+    String? regionPreferenceCode,
     String? name,
     String? title,
     String? company,
@@ -66,6 +69,7 @@ class LocalUserProfile {
       anonymousInstallId: anonymousInstallId ?? this.anonymousInstallId,
       userType: userType ?? this.userType,
       baghdadArea: baghdadArea ?? this.baghdadArea,
+      regionPreferenceCode: regionPreferenceCode ?? this.regionPreferenceCode,
       name: name ?? this.name,
       title: title ?? this.title,
       company: company ?? this.company,
@@ -83,6 +87,7 @@ class LocalUserProfile {
         'anonymousInstallId': anonymousInstallId,
         'userType': userType.name,
         'baghdadArea': baghdadArea.name,
+        'regionPreferenceCode': regionPreferenceCode,
         'name': name,
         'title': title,
         'company': company,
@@ -106,6 +111,7 @@ class LocalUserProfile {
         (e) => e.name == json['baghdadArea'],
         orElse: () => BaghdadArea.unknown,
       ),
+      regionPreferenceCode: json['regionPreferenceCode'] as String?,
       name: json['name'] as String?,
       title: json['title'] as String?,
       company: json['company'] as String?,
