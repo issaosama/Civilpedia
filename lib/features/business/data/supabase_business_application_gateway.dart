@@ -4,19 +4,23 @@ import '../../../core/backend/supabase_service.dart';
 import '../domain/business_application.dart';
 import '../domain/business_application_gateway.dart';
 import '../domain/business_application_policy.dart';
-import '../domain/business_application_type.dart';
 import '../domain/business_membership_gateway.dart';
 
-/// A6.3 — Production [BusinessApplicationGateway] backed by the shared Supabase
-/// client's PostgREST `business_applications` table.
+/// A6.3.1 — Production [BusinessApplicationGateway] backed by the shared
+/// Supabase client.
 ///
-/// RLS contract preserved exactly (00010/00011): SELECT own + INSERT own with
-/// `WITH CHECK applicant_user_id = auth.uid()`; UPDATE is REVOKED. This
-/// gateway exposes NO update/delete path and never uses service_role.
+/// Table mutation privileges are closed for `authenticated`: INSERT and UPDATE
+/// are revoked, and DELETE was never granted. Creation and lifecycle mutations
+/// use narrow SECURITY DEFINER RPCs; this gateway exposes no generic table
+/// insert/update/delete path and never uses service_role.
 ///
-/// Mutations are server-authorized RPCs (migration 00016) only:
-///   `submit_business_application` / `resubmit_business_application`.
-/// This file performs no direct PostgREST table modification for transitions.
+/// Server-authorized RPCs:
+/// * creation (00017): `create_new_business_application` /
+///   `create_claim_business_application`;
+/// * lifecycle (00016): `submit_business_application` /
+///   `resubmit_business_application`.
+/// Applicant identity is derived by each RPC from `auth.uid()` and is never
+/// sent as a parameter.
 ///
 /// Claim safety is enforced in three layers:
 /// * domain policy ([BusinessApplicationPolicy]) using the current user's OWN
@@ -104,33 +108,29 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
       return BusinessApplicationCreateDenied(decision.cause);
     }
 
-    final payload = <String, dynamic>{
-      'applicant_user_id': currentUserId,
-      'application_type': BusinessApplicationType.newApplication.code,
-      'status': 'DRAFT',
-      if (metadata != null && metadata.isNotEmpty) 'metadata': metadata,
-    };
-
     try {
-      final row = await _client
-          .from(_table)
-          .insert(payload)
-          .select()
-          .single();
+      final row = await _client.rpc(
+        'create_new_business_application',
+        params: <String, dynamic>{
+          'p_metadata': metadata == null || metadata.isEmpty ? null : metadata,
+        },
+      );
+      if (row is! Map<String, dynamic>) {
+        throw const PostgrestException(
+          message: 'Created application row could not be parsed',
+        );
+      }
       final application = BusinessApplication.tryFromRow(row);
       if (application == null) {
         throw const PostgrestException(
-          message: 'Inserted application row could not be parsed',
+          message: 'Created application row could not be parsed',
         );
       }
       return BusinessApplicationCreated(application);
     } on PostgrestException catch (e) {
-      // 42501 = row-level security violation: the supplied applicant_user_id
-      // is not the authenticated session user. The caller supplied a different
-      // id (or no valid session) → fail closed.
-      if (e.code == '42501') {
+      if (e.code?.toUpperCase() == 'P0AUT') {
         return const BusinessApplicationCreateDenied(
-          BusinessApplicationRejectionCause.applicantMismatch,
+          BusinessApplicationRejectionCause.guestUser,
         );
       }
       rethrow;
@@ -156,33 +156,28 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
       return BusinessApplicationCreateDenied(decision.cause);
     }
 
-    final payload = <String, dynamic>{
-      'applicant_user_id': currentUserId,
-      'application_type': BusinessApplicationType.claim.code,
-      'target_entity_id': targetEntityId,
-      'status': 'DRAFT',
-    };
-
     try {
-      final row = await _client
-          .from(_table)
-          .insert(payload)
-          .select()
-          .single();
+      final row = await _client.rpc(
+        'create_claim_business_application',
+        params: <String, dynamic>{'p_target_entity_id': targetEntityId},
+      );
+      if (row is! Map<String, dynamic>) {
+        throw const PostgrestException(
+          message: 'Created application row could not be parsed',
+        );
+      }
       final application = BusinessApplication.tryFromRow(row);
       if (application == null) {
         throw const PostgrestException(
-          message: 'Inserted application row could not be parsed',
+          message: 'Created application row could not be parsed',
         );
       }
       return BusinessApplicationCreated(application);
     } on PostgrestException catch (e) {
       switch (e.code?.toUpperCase()) {
-        case '42501':
-          // Row-level security violation: supplied applicant_user_id is not
-          // the authenticated session user → fail closed.
+        case 'P0AUT':
           return const BusinessApplicationCreateDenied(
-            BusinessApplicationRejectionCause.applicantMismatch,
+            BusinessApplicationRejectionCause.guestUser,
           );
         case '23503':
           // Foreign-key violation: the target entity does not exist (or the
@@ -204,6 +199,10 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
           // its canonical claim_status is not 'unclaimed' → not claimable.
           return const BusinessApplicationCreateDenied(
             BusinessApplicationRejectionCause.targetNotClaimable,
+          );
+        case 'P0DAT':
+          return const BusinessApplicationCreateDenied(
+            BusinessApplicationRejectionCause.missingTarget,
           );
         default:
           rethrow;

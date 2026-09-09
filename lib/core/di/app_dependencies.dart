@@ -167,9 +167,11 @@ class AppDependencies {
       service: _supabaseService,
     );
 
-    // A6.2 — business application foundation. Read-own + safe DRAFT INSERT only
-    // (RLS 00010/00011): no client UPDATE/transition, no ownership side
-    // effects. Claim safety uses the read-only membership gateway above.
+    // A6.3.1 — business application boundary. Reads remain own-row only;
+    // creation and lifecycle mutations use narrow server-authorized RPCs
+    // (00016/00017). The client has no generic table INSERT/UPDATE/DELETE and
+    // no ownership side effects. Claim safety uses the read-only membership
+    // gateway above plus the authoritative 00014/00015 database backstops.
     _businessApplicationGateway = SupabaseBusinessApplicationGateway(
       service: _supabaseService,
       membershipGateway: _businessMembershipGateway,
@@ -232,9 +234,9 @@ class AppDependencies {
   static BusinessMembershipGateway get businessMembershipGateway =>
       _businessMembershipGateway;
 
-  /// A6.2 — production [BusinessApplicationGateway]. Read-own + safe DRAFT
-  /// INSERT only; privileged transitions remain server-authorized and
-  /// unavailable from the client. Never called from widgets.
+  /// A6.3.1 — production [BusinessApplicationGateway]. Read-own plus narrow
+  /// server-authorized creation/lifecycle RPCs; never a generic table mutation
+  /// and never called from widgets.
   static BusinessApplicationGateway get businessApplicationGateway =>
       _businessApplicationGateway;
 }

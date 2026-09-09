@@ -525,7 +525,7 @@ void main() {
     });
   });
 
-  group('A6.2 fake-gateway workflow (target validation & mismatches)', () {
+  group('A6.2 fake-gateway workflow (target validation & server denials)', () {
     test('4. CLAIM DRAFT references the target entity', () async {
       final gateway = _ScriptedGateway();
       final result = await gateway.createClaimDraft(
@@ -539,13 +539,19 @@ void main() {
       expect(created.status, BusinessApplicationStatus.draft);
     });
 
-    test('5. caller-supplied different applicant id is rejected (fail closed)', () async {
-      // RLS 42501 (inserted applicant != session user) maps to a typed denial.
-      final deniedResult = await _ScriptedGateway(forceRlsMismatch: true)
-          .createNewDraft(currentUserId: _userB);
+    test('5. server P0AUT after local guard maps to guestUser (fail closed)', () async {
+      // A session can expire after the non-empty local user-id guard but before
+      // the creation RPC executes. The authoritative P0AUT denial remains a
+      // typed guestUser result and creates no application.
+      final gateway = _ScriptedGateway(forceRpcUnauthenticated: true);
+      final deniedResult = await gateway.createNewDraft(currentUserId: _userA);
       expect(
         (deniedResult as BusinessApplicationCreateDenied).cause,
-        BusinessApplicationRejectionCause.applicantMismatch,
+        BusinessApplicationRejectionCause.guestUser,
+      );
+      expect(
+        gateway.lastRejectedCause,
+        BusinessApplicationRejectionCause.guestUser,
       );
     });
 
@@ -699,10 +705,10 @@ void main() {
 }
 
 /// Deterministic fake [BusinessApplicationGateway] used to exercise the
-/// insertion/RLS/FK mapping contract without a live Supabase.
+/// creation-RPC/FK/trigger/index contract without a live Supabase.
 class _ScriptedGateway implements BusinessApplicationGateway {
   _ScriptedGateway({
-    this.forceRlsMismatch = false,
+    this.forceRpcUnauthenticated = false,
     this.forceTargetMissing = false,
     this.forceReadError = false,
     this.forceClaimedTarget = false,
@@ -710,7 +716,9 @@ class _ScriptedGateway implements BusinessApplicationGateway {
     this.dupOnSecondCall = false,
   });
 
-  final bool forceRlsMismatch;
+  /// Simulates the creation RPC rejecting an expired/missing server session
+  /// with SQLSTATE P0AUT after the local non-empty user-id guard passed.
+  final bool forceRpcUnauthenticated;
   final bool forceTargetMissing;
   final bool forceReadError;
 
@@ -757,10 +765,10 @@ class _ScriptedGateway implements BusinessApplicationGateway {
       lastRejectedCause = BusinessApplicationRejectionCause.guestUser;
       return BusinessApplicationCreateDenied(BusinessApplicationRejectionCause.guestUser);
     }
-    if (forceRlsMismatch) {
-      lastRejectedCause = BusinessApplicationRejectionCause.applicantMismatch;
+    if (forceRpcUnauthenticated) {
+      lastRejectedCause = BusinessApplicationRejectionCause.guestUser;
       return const BusinessApplicationCreateDenied(
-        BusinessApplicationRejectionCause.applicantMismatch,
+        BusinessApplicationRejectionCause.guestUser,
       );
     }
     return BusinessApplicationCreated(

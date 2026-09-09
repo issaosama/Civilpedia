@@ -6,7 +6,7 @@ sealed class BusinessApplicationCreateResult {
   const BusinessApplicationCreateResult();
 }
 
-/// The application was created (INSERT succeeded under RLS).
+/// The application was created by the server-authorized creation RPC.
 class BusinessApplicationCreated extends BusinessApplicationCreateResult {
   const BusinessApplicationCreated(this.application);
 
@@ -102,22 +102,22 @@ enum BusinessApplicationSubmitCause {
   }
 }
 
-/// A6.2 — Read-only + safe-DRAFT-INSERT boundary to `public.business_applications`.
+/// A6.3.1 — Read-only + server-authorized creation/lifecycle boundary for
+/// `public.business_applications`.
 ///
 /// Canonical identity: [BusinessApplication.id]. The applicant is always the
 /// authenticated Supabase `auth.users.id` — never a Google provider id or
 /// email.
 ///
-/// RLS contract (00010 + 00011): `authenticated` may INSERT own and SELECT
-/// own; UPDATE is REVOKED (00011); no DELETE. A6.2 preserves this exactly:
+/// Database contract (00010 + 00011 + 00017): `authenticated` may SELECT its
+/// own rows; generic INSERT and UPDATE are revoked; no DELETE. Creation is
+/// available only through narrow RPCs that derive applicant identity from
+/// `auth.uid()` and force DRAFT:
 ///   * safe operations implemented:
 ///       - list own applications
 ///       - fetch own application
-///       - create NEW draft / CLAIM draft (pure INSERT of DRAFT rows; RLS
-///         `WITH CHECK applicant_user_id = auth.uid()` is the backstop)
-///   * privileged operations declared but UNAVAILABLE:
-///       - submit / resubmit (and every reviewer/staff transition) — future
-///         server-authorized mutation contract, NO client UPDATE path.
+///       - create NEW draft / CLAIM draft through migration-00017 RPCs
+///       - submit / resubmit through migration-00016 RPCs
 ///
 /// An application is never a membership and never mutates
 /// `directory_entities.claim_status` / verification. No ownership side effects.
@@ -139,11 +139,12 @@ abstract class BusinessApplicationGateway {
     String applicationId,
   );
 
-  /// Creates a NEW DRAFT application row (safe initial INSERT, status DRAFT,
-  /// type NEW, applicant = [currentUserId]).
+  /// Creates a NEW DRAFT application through the server RPC. [currentUserId]
+  /// is used only for the local guest guard; it is never sent to the RPC.
+  /// Server identity comes exclusively from `auth.uid()`.
   ///
-  /// Returns [BusinessApplicationCreateDenied] for policy guards (guest) and
-  /// for RLS applicant-mismatch. [metadata] may carry candidate
+  /// Returns [BusinessApplicationCreateDenied] for policy/server guards.
+  /// [metadata] may carry candidate
   /// profile/contact/geography for the future entity; it is never staff-owned
   /// data and never creates an entity/membership.
   Future<BusinessApplicationCreateResult> createNewDraft({
@@ -151,7 +152,8 @@ abstract class BusinessApplicationGateway {
     Map<String, dynamic>? metadata,
   });
 
-  /// Creates a CLAIM DRAFT application row for [targetEntityId].
+  /// Creates a CLAIM DRAFT application through the server RPC for
+  /// [targetEntityId]. [currentUserId] is never sent as identity.
   ///
   /// Domain guards (fail closed): guest, missing target, current user already
   /// OWNER of the target, or an existing live CLAIM for the same target.
