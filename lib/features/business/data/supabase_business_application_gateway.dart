@@ -7,13 +7,16 @@ import '../domain/business_application_policy.dart';
 import '../domain/business_application_type.dart';
 import '../domain/business_membership_gateway.dart';
 
-/// A6.2 — Production [BusinessApplicationGateway] backed by the shared Supabase
+/// A6.3 — Production [BusinessApplicationGateway] backed by the shared Supabase
 /// client's PostgREST `business_applications` table.
 ///
 /// RLS contract preserved exactly (00010/00011): SELECT own + INSERT own with
 /// `WITH CHECK applicant_user_id = auth.uid()`; UPDATE is REVOKED. This
-/// gateway exposes NO update/delete/transition path and never uses
-/// service_role.
+/// gateway exposes NO update/delete path and never uses service_role.
+///
+/// Mutations are server-authorized RPCs (migration 00016) only:
+///   `submit_business_application` / `resubmit_business_application`.
+/// This file performs no direct PostgREST table modification for transitions.
 ///
 /// Claim safety is enforced in three layers:
 /// * domain policy ([BusinessApplicationPolicy]) using the current user's OWN
@@ -209,18 +212,57 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
   }
 
   @override
-  BusinessApplicationSubmitResult submitApplication(
+  Future<BusinessApplicationSubmitResult> submitApplication(
     BusinessApplication application,
   ) {
-    // UPDATE on business_applications is revoked for authenticated (00011).
-    // Submission is a future server-authorized mutation contract.
-    return const BusinessApplicationSubmitUnavailable();
+    // Server-authorized RPC mutation (00016). UPDATE on business_applications
+    // remains revoked for authenticated (00011); the client only names the
+    // application id.
+    return _callApplicantMutation(
+      rpcName: 'submit_business_application',
+      application: application,
+    );
   }
 
   @override
-  BusinessApplicationSubmitResult resubmitApplication(
+  Future<BusinessApplicationSubmitResult> resubmitApplication(
     BusinessApplication application,
   ) {
-    return const BusinessApplicationSubmitUnavailable();
+    return _callApplicantMutation(
+      rpcName: 'resubmit_business_application',
+      application: application,
+    );
+  }
+
+  Future<BusinessApplicationSubmitResult> _callApplicantMutation({
+    required String rpcName,
+    required BusinessApplication application,
+  }) async {
+    try {
+      final response = await _client
+          .rpc(rpcName, params: {'p_application_id': application.id});
+      if (response is! Map<String, dynamic>) {
+        return const BusinessApplicationSubmitDenied(
+          BusinessApplicationSubmitCause.unexpected,
+        );
+      }
+      final parsed = BusinessApplication.tryFromRow(response);
+      if (parsed == null) {
+        return const BusinessApplicationSubmitDenied(
+          BusinessApplicationSubmitCause.unexpected,
+        );
+      }
+      return BusinessApplicationSubmitted(parsed);
+    } on PostgrestException catch (e) {
+      // Deterministic custom SQLSTATE (00016) → typed cause. Unknown server
+      // errors fail closed to `unexpected`; raw error text never reaches UI.
+      return BusinessApplicationSubmitDenied(
+        BusinessApplicationSubmitCause.fromServerCode(e.code),
+      );
+    } catch (_) {
+      return const BusinessApplicationSubmitDenied(
+        BusinessApplicationSubmitCause.unexpected,
+      );
+    }
   }
 }

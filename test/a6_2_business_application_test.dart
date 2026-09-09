@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:civilpedia/core/backend/backend_config.dart';
@@ -431,15 +433,38 @@ void main() {
     });
   });
 
-  group('A6.2 gateway contract (no mutation / no side effects)', () {
-    test('13. no client submission/transition path exists', () async {
-      final gateway = SupabaseBusinessApplicationGateway(
-        service: await _service(initialized: true),
-      );
-      final app = _app();
-      // Submitting/resubmitting is UNAVAILABLE from the client.
-      expect(gateway.submitApplication(app), isA<BusinessApplicationSubmitUnavailable>());
-      expect(gateway.resubmitApplication(app), isA<BusinessApplicationSubmitUnavailable>());
+  group('A6.2/A6.3 gateway contract (server-only mutations / no side effects)',
+      () {
+    test('13. no client table-UPDATE path exists; mutations are RPCs', () async {
+      // A6.3: submit/resubmit are server-authorized RPC mutations. The client
+      // must NEVER issue a PostgREST UPDATE/DELETE on business_applications.
+      final applicantSource = File(
+        'lib/features/business/data/supabase_business_application_gateway.dart',
+      ).readAsStringSync();
+      final staffSource = File(
+        'lib/features/business/data/supabase_business_application_staff_gateway.dart',
+      ).readAsStringSync();
+      expect(applicantSource.contains('.update('), isFalse,
+          reason: 'applicant gateway must not issue a PostgREST update');
+      expect(applicantSource.contains('.delete('), isFalse,
+          reason: 'applicant gateway must not issue a PostgREST delete');
+      expect(staffSource.contains('.update('), isFalse,
+          reason: 'staff gateway must not issue a PostgREST update');
+      expect(staffSource.contains('.delete('), isFalse,
+          reason: 'staff gateway must not issue a PostgREST delete');
+      expect(applicantSource.contains('.rpc('), isTrue,
+          reason: 'applicant mutations must flow through server RPCs');
+      expect(staffSource.contains('.rpc('), isTrue,
+          reason: 'staff mutations must flow through server RPCs');
+
+      // Mutations return typed async results (never a raw row write here).
+      final gateway = _ScriptedGateway();
+      final submitted =
+          await gateway.submitApplication(_app(id: 'app-submit'));
+      expect(submitted, isA<BusinessApplicationSubmitted>());
+      final resubmitted =
+          await gateway.resubmitApplication(_app(id: 'app-resubmit'));
+      expect(resubmitted, isA<BusinessApplicationSubmitted>());
     });
 
     test('21. application creation never creates a membership', () async {
@@ -804,10 +829,32 @@ class _ScriptedGateway implements BusinessApplicationGateway {
   }
 
   @override
-  BusinessApplicationSubmitResult submitApplication(BusinessApplication application) =>
-      const BusinessApplicationSubmitUnavailable();
+  Future<BusinessApplicationSubmitResult> submitApplication(
+    BusinessApplication application,
+  ) async {
+    return BusinessApplicationSubmitted(
+      _app(
+        id: application.id,
+        applicant: application.applicantUserId,
+        type: application.type,
+        target: application.targetEntityId,
+        status: BusinessApplicationStatus.submitted,
+      ),
+    );
+  }
 
   @override
-  BusinessApplicationSubmitResult resubmitApplication(BusinessApplication application) =>
-      const BusinessApplicationSubmitUnavailable();
+  Future<BusinessApplicationSubmitResult> resubmitApplication(
+    BusinessApplication application,
+  ) async {
+    return BusinessApplicationSubmitted(
+      _app(
+        id: application.id,
+        applicant: application.applicantUserId,
+        type: application.type,
+        target: application.targetEntityId,
+        status: BusinessApplicationStatus.submitted,
+      ),
+    );
+  }
 }
