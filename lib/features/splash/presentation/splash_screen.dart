@@ -4,8 +4,6 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../data/local/preferences_helper.dart';
-import '../../../core/location/baghdad_area.dart';
-import '../../../features/profile/domain/user_profile.dart';
 import '../../../features/profile/presentation/providers/user_profile_provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -42,9 +40,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     await profileProvider.loadProfile();
     if (!mounted) return;
     final profile = profileProvider.profile;
-    if (profile == null ||
-        profile.userType == CivilUserType.generalUser ||
-        profile.baghdadArea == BaghdadArea.unknown) {
+    if (profile == null || !profile.isProfileSetupComplete) {
       context.go('/profile-setup');
       LoggerService.info('Splash → profile-setup');
     } else {

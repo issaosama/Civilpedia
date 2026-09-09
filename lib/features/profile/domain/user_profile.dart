@@ -83,6 +83,21 @@ class LocalUserProfile {
     );
   }
 
+  /// A5.8 — first-launch setup completeness signal.
+  ///
+  /// The journey is complete when a real role was chosen (not
+  /// [CivilUserType.generalUser]) AND a region preference was explicitly
+  /// selected (non-empty stable [regionPreferenceCode]).
+  ///
+  /// [baghdadArea] is deliberately NOT part of this signal: it is a legacy,
+  /// Directory-only locality (A5.7/A5.8) that first-launch never requests and
+  /// never maps, so it stays [BaghdadArea.unknown] on every completed profile.
+  /// Routing must not re-ask a completed user just because that locality is
+  /// still unset.
+  bool get isProfileSetupComplete =>
+      userType != CivilUserType.generalUser &&
+      (regionPreferenceCode?.trim().isNotEmpty ?? false);
+
   Map<String, dynamic> toJson() => {
         'anonymousInstallId': anonymousInstallId,
         'userType': userType.name,
