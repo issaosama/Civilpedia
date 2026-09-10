@@ -12,6 +12,10 @@ enum BusinessApplicationRejectionCause {
   /// No target entity id supplied for a CLAIM application.
   missingTarget,
 
+  /// P0DAT — NEW metadata is missing or invalid at the authoritative server
+  /// creation boundary. Required canonical keys are `name` and `entity_type`.
+  invalidMetadata,
+
   /// The target entity does not exist (authoritative DB foreign-key signal).
   targetNotFound,
 

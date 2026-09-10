@@ -128,12 +128,18 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
       }
       return BusinessApplicationCreated(application);
     } on PostgrestException catch (e) {
-      if (e.code?.toUpperCase() == 'P0AUT') {
-        return const BusinessApplicationCreateDenied(
-          BusinessApplicationRejectionCause.guestUser,
-        );
+      switch (e.code?.toUpperCase()) {
+        case 'P0AUT':
+          return const BusinessApplicationCreateDenied(
+            BusinessApplicationRejectionCause.guestUser,
+          );
+        case 'P0DAT':
+          return const BusinessApplicationCreateDenied(
+            BusinessApplicationRejectionCause.invalidMetadata,
+          );
+        default:
+          rethrow;
       }
-      rethrow;
     }
   }
 

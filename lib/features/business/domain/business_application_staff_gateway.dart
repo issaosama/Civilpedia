@@ -48,6 +48,14 @@ enum BusinessApplicationStaffCause {
   /// or scheduled visit time).
   requiredDataMissing,
 
+  /// P0CLM — a CLAIM target is no longer unclaimed when activation obtains the
+  /// authoritative entity lock.
+  targetNotClaimable,
+
+  /// P0OWN — ownership/provisioning state conflicts with an initial activation
+  /// or an ACTIVATED replay no longer satisfies its canonical invariants.
+  ownershipProvisioningConflict,
+
   /// Any unclassified server failure. Carries no raw SQL/error text.
   unexpected;
 
@@ -69,13 +77,18 @@ enum BusinessApplicationStaffCause {
         return BusinessApplicationStaffCause.rejectionReasonRequired;
       case 'P0DAT':
         return BusinessApplicationStaffCause.requiredDataMissing;
+      case 'P0CLM':
+        return BusinessApplicationStaffCause.targetNotClaimable;
+      case 'P0OWN':
+        return BusinessApplicationStaffCause.ownershipProvisioningConflict;
       default:
         return BusinessApplicationStaffCause.unexpected;
     }
   }
 }
 
-/// A6.3 — Server-authorized staff boundary to `public.business_applications`.
+/// A6.3/A6.4 — Server-authorized staff boundary to
+/// `public.business_applications`.
 ///
 /// Every operation is a SECURITY DEFINER RPC (migration 00016) that derives
 /// the actor exclusively from `auth.uid()` and requires a matching permission
@@ -83,11 +96,10 @@ enum BusinessApplicationStaffCause {
 /// The methods deliberately accept NO user/role/email: staff identity cannot
 /// be injected by the caller.
 ///
-/// No method here performs ownership side effects:
-///   * approval is a decision, NOT activation (APPROVED awaits A6.4 atomic
-///     entity/membership provisioning);
-///   * nothing creates a business_memberships row, never writes
-///     directory_entities.claim_status / verification_status.
+/// Approval remains a decision without ownership side effects. A6.4 activation
+/// is the sole method here that atomically creates/reuses the Directory entity,
+/// provisions OWNER membership, and marks the entity claimed. It never changes
+/// verification or subscription state.
 ///
 /// Transition matrix (server-enforced, acyclic):
 ///   beginReview: SUBMITTED → UNDER_REVIEW
@@ -134,6 +146,11 @@ abstract class BusinessApplicationStaffGateway {
   /// `business_applications.approve`. Approval is NOT activation and creates
   /// no membership/ownership.
   Future<BusinessApplicationStaffResult> approve(String applicationId);
+
+  /// APPROVED → ACTIVATED with atomic NEW/CLAIM ownership provisioning.
+  /// Requires `business_applications.activate`. A valid ACTIVATED replay is an
+  /// idempotent success. The authoritative result has a non-null targetEntityId.
+  Future<BusinessApplicationStaffResult> activate(String applicationId);
 
   /// UNDER_REVIEW / CONTACTED / VISIT_SCHEDULED → REJECTED. Requires
   /// `business_applications.reject` and a non-empty reason.

@@ -11,8 +11,9 @@ import 'business_application_type.dart';
 ///   [BusinessApplicationType.claim].
 /// * [status] is one of the nine lifecycle statuses ([BusinessApplicationStatus]).
 ///
-/// An application is NOT a Directory Entity, NOT a membership, and NOT a
-/// verification state. Approved/activated alone never grants ownership.
+/// An application is not itself a Directory Entity, membership, or verification
+/// state. APPROVED grants no ownership. A6.4 ACTIVATED is returned only after
+/// the server atomically provisions the canonical OWNER membership and entity.
 ///
 /// Immutable value object. Staff/operational fields (reviewer id, timestamps,
 /// reasons) are surfaced READ-ONLY for applicant transparency and must never
@@ -47,8 +48,9 @@ class BusinessApplication {
   /// NEW (create entity) or CLAIM (claim existing entity).
   final BusinessApplicationType type;
 
-  /// Target Directory Entity id (`directory_entities.id`) for CLAIM
-  /// applications, else null. The DB enforces CLAIM ⇒ target present.
+  /// Canonical associated Directory Entity id (`directory_entities.id`). CLAIM
+  /// applications carry it from creation; NEW applications receive it during
+  /// successful activation. It is null for a pre-activation NEW application.
   final String? targetEntityId;
 
   /// Applicant-provided payload (jsonb `metadata`) for NEW applications before

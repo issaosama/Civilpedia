@@ -4,8 +4,8 @@ import '../../../core/backend/supabase_service.dart';
 import '../domain/business_application.dart';
 import '../domain/business_application_staff_gateway.dart';
 
-/// A6.3 — Production [BusinessApplicationStaffGateway] calling the
-/// SECURITY DEFINER staff RPCs of migration 00016.
+/// A6.3/A6.4 — Production [BusinessApplicationStaffGateway] calling the
+/// SECURITY DEFINER staff RPCs of migrations 00016 and 00018.
 ///
 /// Every call goes through PostgREST RPC only — this file performs no direct
 /// PostgREST table modification (`business_applications` update privilege is
@@ -87,6 +87,13 @@ class SupabaseBusinessApplicationStaffGateway
   @override
   Future<BusinessApplicationStaffResult> approve(String applicationId) {
     return _callRpc('staff_approve_business_application', {
+      'p_application_id': applicationId,
+    });
+  }
+
+  @override
+  Future<BusinessApplicationStaffResult> activate(String applicationId) {
+    return _callRpc('staff_activate_business_application', {
       'p_application_id': applicationId,
     });
   }

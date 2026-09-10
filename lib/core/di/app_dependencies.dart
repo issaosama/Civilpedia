@@ -37,8 +37,10 @@ import '../ownership/ownership_registry_store.dart';
 import '../../features/auth/data/supabase_auth_gateway.dart';
 import '../../features/auth/domain/repositories/auth_gateway.dart';
 import '../../features/business/data/supabase_business_application_gateway.dart';
+import '../../features/business/data/supabase_business_application_staff_gateway.dart';
 import '../../features/business/data/supabase_business_membership_gateway.dart';
 import '../../features/business/domain/business_application_gateway.dart';
+import '../../features/business/domain/business_application_staff_gateway.dart';
 import '../../features/business/domain/business_membership_gateway.dart';
 import '../../features/projects/data/project_persistence_gateway.dart';
 
@@ -82,6 +84,8 @@ class AppDependencies {
 
   static late final BusinessMembershipGateway _businessMembershipGateway;
   static late final BusinessApplicationGateway _businessApplicationGateway;
+  static late final BusinessApplicationStaffGateway
+      _businessApplicationStaffGateway;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -176,6 +180,9 @@ class AppDependencies {
       service: _supabaseService,
       membershipGateway: _businessMembershipGateway,
     );
+    _businessApplicationStaffGateway = SupabaseBusinessApplicationStaffGateway(
+      service: _supabaseService,
+    );
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -239,4 +246,9 @@ class AppDependencies {
   /// and never called from widgets.
   static BusinessApplicationGateway get businessApplicationGateway =>
       _businessApplicationGateway;
+
+  /// A6.4 — production staff application RPC boundary. Activation derives the
+  /// actor from the authenticated session and provisions ownership server-side.
+  static BusinessApplicationStaffGateway get businessApplicationStaffGateway =>
+      _businessApplicationStaffGateway;
 }

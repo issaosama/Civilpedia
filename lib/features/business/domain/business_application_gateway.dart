@@ -1,4 +1,5 @@
 import 'business_application.dart';
+import 'business_application_metadata.dart';
 import 'business_application_policy.dart';
 
 /// A6.2 — Outcome of a business-application creation attempt.
@@ -109,7 +110,7 @@ enum BusinessApplicationSubmitCause {
 /// authenticated Supabase `auth.users.id` — never a Google provider id or
 /// email.
 ///
-/// Database contract (00010 + 00011 + 00017): `authenticated` may SELECT its
+/// Database contract (00010 + 00011 + 00017 + 00018): `authenticated` may SELECT its
 /// own rows; generic INSERT and UPDATE are revoked; no DELETE. Creation is
 /// available only through narrow RPCs that derive applicant identity from
 /// `auth.uid()` and force DRAFT:
@@ -144,9 +145,10 @@ abstract class BusinessApplicationGateway {
   /// Server identity comes exclusively from `auth.uid()`.
   ///
   /// Returns [BusinessApplicationCreateDenied] for policy/server guards.
-  /// [metadata] may carry candidate
-  /// profile/contact/geography for the future entity; it is never staff-owned
-  /// data and never creates an entity/membership.
+  /// [metadata] must contain the canonical [BusinessApplicationMetadata.name]
+  /// and [BusinessApplicationMetadata.entityType] keys. Migration 00018
+  /// validates both server-side; no profile `BusinessType` translation occurs.
+  /// Creation itself never creates an entity or membership.
   Future<BusinessApplicationCreateResult> createNewDraft({
     required String currentUserId,
     Map<String, dynamic>? metadata,

@@ -390,6 +390,12 @@ class _ScriptedStaffGateway implements BusinessApplicationStaffGateway {
     return BusinessApplicationStaffSucceeded(_apps[applicationId]!);
   }
 
+  @override
+  Future<BusinessApplicationStaffResult> activate(String applicationId) async {
+    // A6.3 regression fake intentionally has no A6.4 provisioning behavior.
+    return _denied(BusinessApplicationStaffCause.invalidTransition);
+  }
+
   void expectApprove(BusinessApplication app) {
     // Approval is NOT activation and creates no ownership.
     expect(app.status, BusinessApplicationStatus.approved);
@@ -923,17 +929,31 @@ void main() {
       }
     });
 
-    test('25. activation is NOT reachable in A6.3 (deferred to A6.4)', () async {
+    test('25. A6.3 has no activation RPC; A6.4 owns that boundary', () async {
+      final a63Migration = File(
+        'supabase/migrations/00016_business_application_server_mutations.sql',
+      ).readAsStringSync();
       final domain = File(
         'lib/features/business/domain/business_application_staff_gateway.dart',
       ).readAsStringSync();
       final data = File(
         'lib/features/business/data/supabase_business_application_staff_gateway.dart',
       ).readAsStringSync();
-      expect(domain.contains('activate'), isFalse,
-          reason: 'no client-facing activation surface exists in A6.3');
-      expect(data.contains('activate'), isFalse,
-          reason: 'no activation RPC is called by the staff gateway');
+      expect(
+        a63Migration.contains('staff_activate_business_application'),
+        isFalse,
+        reason: 'migration 00016 must remain free of activation behavior',
+      );
+      expect(
+        domain.contains('activate(String applicationId)'),
+        isTrue,
+        reason: 'A6.4 extends the existing staff gateway explicitly',
+      );
+      expect(
+        data.contains('staff_activate_business_application'),
+        isTrue,
+        reason: 'activation is routed only through the A6.4 RPC',
+      );
       expect(BusinessApplicationStatus.approved.isFinal, isFalse,
           reason: 'APPROVED still awaits the A6.4 atomic provisioning');
     });
