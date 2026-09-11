@@ -4,12 +4,16 @@ import 'package:provider/provider.dart';
 
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/directory/presentation/services/directory_contact_launcher.dart';
-import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
+import 'package:civilpedia/features/profile/domain/service_business_profile.dart'
+    show VerificationStatus;
 import 'package:civilpedia/features/saved/domain/saved_item_reference.dart';
 import 'package:civilpedia/features/saved/domain/saved_reference_store.dart';
 import 'package:civilpedia/localization/ar.dart';
+
+import 'helpers/canonical_directory_test_helpers.dart';
 
 class _FakeLauncher implements DirectoryContactLauncher {
   @override
@@ -42,26 +46,24 @@ class FakeSavedStore implements SavedReferenceStore {
   }
 }
 
-ServiceBusinessProfile _p({
+CanonicalDirectoryEntity _p({
   required String id,
   String name = 'Alpha',
   VerificationStatus verificationStatus = VerificationStatus.unverified,
-  List<String> phones = const [],
-  String? whatsapp,
+  List<CanonicalDirectoryContact> contacts = const [],
 }) {
-  return ServiceBusinessProfile(
+  return fakeEntity(
     id: id,
     name: name,
-    type: BusinessType.other,
-    phones: phones,
-    whatsapp: whatsapp,
+    entityType: 'other',
     verificationStatus: verificationStatus,
+    contacts: contacts,
   );
 }
 
 Future<FakeSavedStore> _pump(
   WidgetTester tester, {
-  required ServiceBusinessProfile profile,
+  required CanonicalDirectoryEntity entity,
   FakeSavedStore? store,
 }) async {
   final s = store ?? FakeSavedStore();
@@ -71,7 +73,7 @@ Future<FakeSavedStore> _pump(
       child: MaterialApp(
         theme: AppTheme.lightTheme,
         home: DirectoryProviderDetailScreen(
-          profile: profile,
+          entity: entity,
           contactLauncher: _FakeLauncher(),
           savedReferenceStore: s,
         ),
@@ -85,7 +87,7 @@ Future<FakeSavedStore> _pump(
 void main() {
   group('W5.6 DETAIL SAVE UI', () {
     testWidgets('24. unsaved provider shows bookmark_border', (tester) async {
-      await _pump(tester, profile: _p(id: 'p-1'));
+      await _pump(tester, entity: _p(id: 'p-1'));
       expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
       expect(find.byIcon(Icons.bookmark), findsNothing);
     });
@@ -100,13 +102,13 @@ void main() {
           savedAt: DateTime.utc(2026),
         ),
       );
-      await _pump(tester, profile: _p(id: 'p-1'), store: store);
+      await _pump(tester, entity: _p(id: 'p-1'), store: store);
       expect(find.byIcon(Icons.bookmark), findsOneWidget);
       expect(find.byIcon(Icons.bookmark_border), findsNothing);
     });
 
     testWidgets('26. unsaved tooltip is Save provider', (tester) async {
-      await _pump(tester, profile: _p(id: 'p-1'));
+      await _pump(tester, entity: _p(id: 'p-1'));
       final icon = tester.widget<IconButton>(
         find.ancestor(
           of: find.byIcon(Icons.bookmark_border),
@@ -126,7 +128,7 @@ void main() {
           savedAt: DateTime.utc(2026),
         ),
       );
-      await _pump(tester, profile: _p(id: 'p-1'), store: store);
+      await _pump(tester, entity: _p(id: 'p-1'), store: store);
       final icon = tester.widget<IconButton>(
         find.ancestor(
           of: find.byIcon(Icons.bookmark),
@@ -137,7 +139,7 @@ void main() {
     });
 
     testWidgets('28. tapping unsaved saves the canonical ref', (tester) async {
-      final store = await _pump(tester, profile: _p(id: 'p-7'));
+      final store = await _pump(tester, entity: _p(id: 'p-7'));
       await tester.tap(find.byIcon(Icons.bookmark_border));
       await tester.pumpAndSettle();
       expect(store.refs, hasLength(1));
@@ -149,7 +151,7 @@ void main() {
     });
 
     testWidgets('29. UI changes to saved after successful write', (tester) async {
-      await _pump(tester, profile: _p(id: 'p-7'));
+      await _pump(tester, entity: _p(id: 'p-7'));
       await tester.tap(find.byIcon(Icons.bookmark_border));
       await tester.pumpAndSettle();
       expect(find.byIcon(Icons.bookmark), findsOneWidget);
@@ -166,7 +168,7 @@ void main() {
           savedAt: DateTime.utc(2026),
         ),
       );
-      await _pump(tester, profile: _p(id: 'p-7'), store: store);
+      await _pump(tester, entity: _p(id: 'p-7'), store: store);
       await tester.tap(find.byIcon(Icons.bookmark));
       await tester.pumpAndSettle();
       expect(store.refs, isEmpty);
@@ -182,7 +184,7 @@ void main() {
           savedAt: DateTime.utc(2026),
         ),
       );
-      await _pump(tester, profile: _p(id: 'p-7'), store: store);
+      await _pump(tester, entity: _p(id: 'p-7'), store: store);
       await tester.tap(find.byIcon(Icons.bookmark));
       await tester.pumpAndSettle();
       expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
@@ -191,7 +193,7 @@ void main() {
 
     testWidgets('32. failed Save does not falsely show saved', (tester) async {
       final store = FakeSavedStore()..failWrites = true;
-      await _pump(tester, profile: _p(id: 'p-7'), store: store);
+      await _pump(tester, entity: _p(id: 'p-7'), store: store);
       expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
       await tester.tap(find.byIcon(Icons.bookmark_border));
       await tester.pumpAndSettle();
@@ -212,7 +214,7 @@ void main() {
         ),
       );
       store.failWrites = true;
-      await _pump(tester, profile: _p(id: 'p-7'), store: store);
+      await _pump(tester, entity: _p(id: 'p-7'), store: store);
       expect(find.byIcon(Icons.bookmark), findsOneWidget);
       await tester.tap(find.byIcon(Icons.bookmark));
       await tester.pumpAndSettle();
@@ -223,7 +225,7 @@ void main() {
 
     testWidgets('34. save then remove then save creates one canonical ref',
         (tester) async {
-      final store = await _pump(tester, profile: _p(id: 'p-7'));
+      final store = await _pump(tester, entity: _p(id: 'p-7'));
       await tester.tap(find.byIcon(Icons.bookmark_border));
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.bookmark));
@@ -239,7 +241,7 @@ void main() {
       for (final status in VerificationStatus.values) {
         await _pump(
           tester,
-          profile: _p(id: 'v-$status', verificationStatus: status),
+          entity: _p(id: 'v-$status', verificationStatus: status),
         );
         expect(find.byIcon(Icons.bookmark_border), findsOneWidget);
         await tester.pumpWidget(const SizedBox.shrink());
@@ -250,7 +252,10 @@ void main() {
     testWidgets('36. phones/WhatsApp remain unchanged by save', (tester) async {
       final store = await _pump(
         tester,
-        profile: _p(id: 'p-c', phones: ['0771111111'], whatsapp: '07801234567'),
+        entity: _p(
+          id: 'p-c',
+          contacts: [fakePhone('0771111111'), fakeWhatsApp('07801234567')],
+        ),
       );
       expect(find.textContaining('0771111111'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.bookmark_border));

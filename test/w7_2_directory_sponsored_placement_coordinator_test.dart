@@ -1,14 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:civilpedia/core/location/baghdad_area.dart';
 import 'package:civilpedia/features/directory/application/directory_sponsored_placement_coordinator.dart';
-import 'package:civilpedia/features/directory/domain/directory_repository.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
+import 'package:civilpedia/features/directory/domain/cloud_directory_repository.dart';
 import 'package:civilpedia/features/monetization/domain/entities/advertisement_campaign.dart';
 import 'package:civilpedia/features/monetization/domain/monetization_reference.dart';
 import 'package:civilpedia/features/monetization/domain/services/campaign_placement_resolver.dart';
 import 'package:civilpedia/features/monetization/domain/services/campaign_source.dart';
 import 'package:civilpedia/features/monetization/domain/value_objects/campaign_destination.dart';
-import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
+
+import 'helpers/canonical_directory_test_helpers.dart';
 
 const _directorySponsored = 'directory_sponsored';
 
@@ -49,44 +50,31 @@ class _FakeCampaignSource implements CampaignSource {
   }
 }
 
-class _FakeDirectoryRepository implements DirectoryRepository {
-  _FakeDirectoryRepository(this.profiles);
-  final List<ServiceBusinessProfile> profiles;
+class _ThrowingLoadCloudDirectoryRepository implements CloudDirectoryRepository {
+  @override
+  bool get isAvailable => true;
 
   @override
-  Future<List<ServiceBusinessProfile>> loadAll() async => profiles;
+  Future<DirectoryCachedData?> readCache() async => null;
 
   @override
-  Future<ServiceBusinessProfile?> loadById(String id) async {
-    for (final p in profiles) {
-      if (p.id == id) return p;
-    }
-    return null;
+  Future<DirectoryRefreshResult> refresh() async =>
+      const DirectoryRefreshResult(status: DirectoryRefreshStatus.failure);
+
+  @override
+  Future<CanonicalDirectoryEntity?> loadByCanonicalId(String id) async {
+    throw Exception('loadByCanonicalId failed');
   }
 
   @override
-  Future<void> save(ServiceBusinessProfile profile) async {}
-
-  @override
-  Future<void> delete(String id) async {}
-
-  @override
-  Future<void> clearAll() async {}
-}
-
-ServiceBusinessProfile _provider(String id, {String name = ''}) {
-  return ServiceBusinessProfile(
-    id: id,
-    name: name.isEmpty ? 'Provider $id' : name,
-    type: BusinessType.other,
-    baghdadArea: BaghdadArea.unknown,
-  );
+  Future<DirectoryLoadResult> load() async =>
+      const DirectoryLoadResult(state: DirectoryLoadState.empty);
 }
 
 void main() {
   DirectorySponsoredPlacementCoordinator coordinator(
     CampaignSource source,
-    DirectoryRepository repo,
+    CloudDirectoryRepository repo,
   ) {
     return DirectorySponsoredPlacementCoordinator(
       campaignSource: source,
@@ -99,7 +87,7 @@ void main() {
     test('A: zero campaigns → null', () async {
       final c = coordinator(
         _FakeCampaignSource(() async => const []),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       expect(
         await c.resolveFirstRenderable(at: _at),
@@ -110,7 +98,7 @@ void main() {
     test('B: source throws → null (fail closed)', () async {
       final c = coordinator(
         _FakeCampaignSource(() async => throw Exception('source down')),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
     });
@@ -118,7 +106,7 @@ void main() {
     test('C: inactive campaign → null', () async {
       final c = coordinator(
         _FakeCampaignSource(() async => [_campaign(id: 'c1', isEnabled: false)]),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
     });
@@ -128,7 +116,7 @@ void main() {
         _FakeCampaignSource(
           () async => [_campaign(id: 'c1', placementKey: 'home_banner')],
         ),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
     });
@@ -140,7 +128,7 @@ void main() {
         _FakeCampaignSource(
           () async => [_campaign(id: 'c1', disclosureLabel: '   ')],
         ),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
     });
@@ -155,7 +143,7 @@ void main() {
             ),
           ],
         ),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
     });
@@ -172,25 +160,25 @@ void main() {
             _campaign(id: 'c1', subject: foreign, destination: CampaignDestination.internal(foreign)),
           ],
         ),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
     });
 
-    test('J: missing provider (loadById null) → placement omitted', () async {
+    test('J: missing entity (loadByCanonicalId null) → placement omitted', () async {
       final c = coordinator(
         _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
-        _FakeDirectoryRepository([_provider('p-other')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-other')]),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
     });
 
-    test('J2: loadById throws → placement omitted', () async {
-      final throwing = _FakeDirectoryRepository([_provider('p-1')]);
-      // Force a throw via a repo whose loadById throws.
+    test('J2: loadByCanonicalId throws → placement omitted', () async {
+      final throwing = FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]);
+      // Force a throw via a repo whose loadByCanonicalId throws.
       final c = coordinator(
         _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
-        _ThrowingLoadDirectoryRepository(),
+        _ThrowingLoadCloudDirectoryRepository(),
       );
       expect(await c.resolveFirstRenderable(at: _at), isNull);
       expect(throwing, isNotNull);
@@ -198,9 +186,11 @@ void main() {
   });
 
   group('W7.2 COORDINATOR — selection & pairing', () {
-    test('D: one eligible + renderable → one placement pairing the real profile',
+    test('D: one eligible + renderable → one placement pairing the real entity',
         () async {
-      final repo = _FakeDirectoryRepository([_provider('p-1', name: 'Acme')]);
+      final repo = FakeCloudDirectoryRepository(
+        [fakeEntity(id: 'p-1', name: 'Acme')],
+      );
       final c = coordinator(
         _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
         repo,
@@ -209,10 +199,10 @@ void main() {
       expect(result, isNotNull);
       expect(result!.placement.campaignId, 'c1');
       expect(result.placement.disclosureLabel, 'Sponsored');
-      // Pairing references the REAL Directory-owned profile, never a clone.
-      expect(result.profile, isA<ServiceBusinessProfile>());
-      expect(result.profile.id, 'p-1');
-      expect(result.profile.name, 'Acme');
+      // Pairing references the REAL Directory-owned entity, never a clone.
+      expect(result.entity, isA<CanonicalDirectoryEntity>());
+      expect(result.entity.id, 'p-1');
+      expect(result.entity.name, 'Acme');
     });
 
     test('M: first eligible unrenderable + second renderable → second renders',
@@ -225,7 +215,7 @@ void main() {
             _campaign(id: 'c-good'),
           ],
         ),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       final result = await c.resolveFirstRenderable(at: _at);
       expect(result, isNotNull);
@@ -238,7 +228,7 @@ void main() {
         _FakeCampaignSource(
           () async => [_campaign(id: 'c-a'), _campaign(id: 'c-b')],
         ),
-        _FakeDirectoryRepository([_provider('p-1')]),
+        FakeCloudDirectoryRepository([fakeEntity(id: 'p-1')]),
       );
       final result = await c.resolveFirstRenderable(at: _at);
       expect(result, isNotNull);
@@ -246,8 +236,11 @@ void main() {
       expect(result!.placement.campaignId, 'c-a');
     });
 
-    test('F: resolves REAL ServiceBusinessProfile via loadById', () async {
-      final repo = _FakeDirectoryRepository([_provider('p-7', name: 'RealCo')]);
+    test('F: resolves REAL CanonicalDirectoryEntity via loadByCanonicalId',
+        () async {
+      final repo = FakeCloudDirectoryRepository(
+        [fakeEntity(id: 'p-7', name: 'RealCo')],
+      );
       final c = coordinator(
         _FakeCampaignSource(
           () async => [
@@ -257,27 +250,8 @@ void main() {
         repo,
       );
       final result = await c.resolveFirstRenderable(at: _at);
-      expect(result!.profile.id, 'p-7');
-      expect(result.profile.name, 'RealCo');
+      expect(result!.entity.id, 'p-7');
+      expect(result.entity.name, 'RealCo');
     });
   });
-}
-
-class _ThrowingLoadDirectoryRepository implements DirectoryRepository {
-  @override
-  Future<List<ServiceBusinessProfile>> loadAll() async => [];
-
-  @override
-  Future<ServiceBusinessProfile?> loadById(String id) async {
-    throw Exception('loadById failed');
-  }
-
-  @override
-  Future<void> save(ServiceBusinessProfile profile) async {}
-
-  @override
-  Future<void> delete(String id) async {}
-
-  @override
-  Future<void> clearAll() async {}
 }

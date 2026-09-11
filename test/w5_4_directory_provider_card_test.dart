@@ -2,49 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'package:civilpedia/core/location/baghdad_area.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
+import 'package:civilpedia/features/directory/presentation/canonical_entity_type_presentation.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_card.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
 
-ServiceBusinessProfile _p({
+import 'helpers/canonical_directory_test_helpers.dart';
+
+CanonicalDirectoryEntity _p({
   required String id,
   String name = '',
-  BusinessType type = BusinessType.other,
-  List<String> categories = const [],
-  List<String> subCategories = const [],
-  BaghdadArea baghdadArea = BaghdadArea.unknown,
-  List<String> phones = const [],
-  String whatsapp = '',
+  String entityType = 'other',
+  List<CanonicalDirectoryCategory> categories = const [],
+  List<CanonicalDirectoryLocation> locations = const [],
+  List<CanonicalDirectoryContact> contacts = const [],
   VerificationStatus verificationStatus = VerificationStatus.unverified,
-  bool featured = false,
-  bool foundingPartner = false,
-  String? planType,
 }) {
-  return ServiceBusinessProfile(
+  return fakeEntity(
     id: id,
     name: name,
-    type: type,
+    entityType: entityType,
     categories: categories,
-    subCategories: subCategories,
-    baghdadArea: baghdadArea,
-    phones: phones,
-    whatsapp: whatsapp,
+    locations: locations,
+    contacts: contacts,
     verificationStatus: verificationStatus,
-    featured: featured,
-    foundingPartner: foundingPartner,
-    planType: planType,
   );
 }
 
-Widget _app(ServiceBusinessProfile profile, {VoidCallback? onTap}) {
+Widget _app(CanonicalDirectoryEntity entity, {VoidCallback? onTap}) {
   return MaterialApp(
     theme: AppTheme.lightTheme,
     home: ChangeNotifierProvider(
       create: (_) => LanguageProvider(),
       child: Scaffold(
-        body: DirectoryProviderCard(profile: profile, onTap: onTap),
+        body: DirectoryProviderCard(entity: entity, onTap: onTap),
       ),
     ),
   );
@@ -58,15 +51,23 @@ void main() {
       expect(find.text('Alpha Steel Co'), findsOneWidget);
     });
 
-    testWidgets('2. card renders localized BusinessType', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', type: BusinessType.supplier);
+    testWidgets('2. card renders localized entity type', (tester) async {
+      final p = _p(id: 'a', name: 'Alpha', entityType: 'supplier');
       await tester.pumpWidget(_app(p));
       // LanguageProvider defaults to Arabic.
-      expect(find.text('مورّد'), findsOneWidget);
+      final expected = CanonicalEntityTypePresentation.labelFor(
+        'supplier',
+        isArabic: true,
+      );
+      expect(find.text(expected), findsOneWidget);
     });
 
-    testWidgets('3. card renders localized BaghdadArea', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', baghdadArea: BaghdadArea.karrada);
+    testWidgets('3. card renders location region name', (tester) async {
+      final p = _p(
+        id: 'a',
+        name: 'Alpha',
+        locations: [fakeLocation('karrada', regionName: 'كرادة')],
+      );
       await tester.pumpWidget(_app(p));
       expect(find.text('كرادة'), findsOneWidget);
     });
@@ -75,10 +76,9 @@ void main() {
       final p = _p(
         id: 'a',
         name: 'Alpha',
-        categories: ['Steel', '  ', 'Concrete'],
+        categories: [fakeCategory('Steel'), fakeCategory('Concrete')],
       );
       await tester.pumpWidget(_app(p));
-      // Trims + drops empties, preserves order.
       expect(find.text('Steel · Concrete'), findsOneWidget);
     });
 
@@ -106,7 +106,11 @@ void main() {
     });
 
     testWidgets('8. card has no contact button', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', phones: ['07701234567'], whatsapp: '07801234567');
+      final p = _p(
+        id: 'a',
+        name: 'Alpha',
+        contacts: [fakePhone('07701234567'), fakeWhatsApp('07801234567')],
+      );
       await tester.pumpWidget(_app(p));
       expect(find.text('07701234567'), findsNothing);
       expect(find.text('07801234567'), findsNothing);
@@ -114,7 +118,11 @@ void main() {
     });
 
     testWidgets('9. card displays verification badge (W5.5)', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified);
+      final p = _p(
+        id: 'a',
+        name: 'Alpha',
+        verificationStatus: VerificationStatus.verified,
+      );
       await tester.pumpWidget(_app(p));
       // LanguageProvider defaults to Arabic → label is موثّق; the icon confirms the badge.
       expect(find.text('موثّق'), findsOneWidget);
@@ -128,25 +136,28 @@ void main() {
       expect(find.byIcon(Icons.bookmark_border), findsNothing);
     });
 
-    testWidgets('11. featured does not change card', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', featured: true);
+    testWidgets('11. card only shows expected fields — no extra keyword signals', (tester) async {
+      final p = _p(id: 'a', name: 'Alpha');
       await tester.pumpWidget(_app(p));
       expect(find.text('Alpha'), findsOneWidget);
       expect(find.textContaining('featured'), findsNothing);
-    });
-
-    testWidgets('12. foundingPartner does not change card', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', foundingPartner: true);
-      await tester.pumpWidget(_app(p));
-      expect(find.text('Alpha'), findsOneWidget);
       expect(find.textContaining('founding'), findsNothing);
+      expect(find.textContaining('premium'), findsNothing);
     });
 
-    testWidgets('13. planType does not change card', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', planType: 'premium');
+    testWidgets('12. extra entity metadata does not leak into card', (tester) async {
+      final p = _p(id: 'a', name: 'Alpha');
       await tester.pumpWidget(_app(p));
       expect(find.text('Alpha'), findsOneWidget);
-      expect(find.text('premium'), findsNothing);
+      expect(find.textContaining('claim'), findsNothing);
+      expect(find.textContaining('lifecycle'), findsNothing);
+    });
+
+    testWidgets('13. description does not appear on card', (tester) async {
+      final p = _p(id: 'a', name: 'Alpha');
+      await tester.pumpWidget(_app(p));
+      expect(find.text('Alpha'), findsOneWidget);
+      expect(find.textContaining('description'), findsNothing);
     });
   });
 }

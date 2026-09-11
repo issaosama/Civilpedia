@@ -10,35 +10,31 @@ import '../../../core/widgets/civil_app_bar.dart';
 import '../../../core/widgets/civil_surface_card.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
-import '../../profile/domain/service_business_profile.dart';
-import 'directory_category_presentation.dart';
+import 'canonical_entity_type_presentation.dart';
 
-/// Directory Landing — heading + BusinessType category browse grid.
+/// Directory Landing — heading + canonical entity type browse grid.
 ///
-/// W5.2 — first Directory presentation surface. PRODUCTION-UNEXPOSED: nothing
-/// routes or navigates to this screen until the W6 readiness gate wires it.
+/// V1-R05 — adapted to canonical cloud `directory_entities.entity_type`
+/// taxonomy (9 values) from the canonical [CanonicalEntityTypePresentation].
+/// The legacy local fixed [BusinessType] taxonomy is no longer authoritative
+/// on the production Directory path.
 ///
-/// The Landing represents the taxonomy (all 12 [BusinessType] categories), not
-/// current data volume: it performs ZERO profile reads, shows no counts, and
-/// renders identically whether or not `sb_profiles` has any data.
+/// The Landing represents the taxonomy, not current data volume: it performs
+/// ZERO entity reads, shows no counts, and renders identically whether or not
+/// the cloud Directory has any data.
 ///
-/// A category tap invokes [onCategorySelected] with the tapped [BusinessType].
-/// When [onCategorySelected] is null the cards are inert (no navigation).
+/// A category tap invokes [onCategorySelected] with the tapped canonical
+/// entity type string. When [onCategorySelected] is null the cards are inert.
 class DirectoryLandingScreen extends StatelessWidget {
-  /// Reusable presentation seam for a future listing phase. When provided,
-  /// tapping a category invokes it with the [BusinessType]. When null, no
-  /// navigation and no action (W5.2 never pushes a route).
-  final ValueChanged<BusinessType>? onCategorySelected;
+  /// Reusable presentation seam for listing phase. When provided,
+  /// tapping a category invokes it with the canonical entity type string.
+  /// When null, no navigation and no action.
+  final ValueChanged<String>? onCategorySelected;
 
   /// Bottom scroll padding for the category grid.
   ///
-  /// W5.2 stays shell-independent: this screen must NOT know the AppShell
-  /// floating-nav geometry (bar height, margin, safe offsets). When hosted
-  /// STANDALONE (W5.2/W5.3 default), the final bottom clearance is
-  /// `bottomContentPadding + device bottom SafeArea inset`. When hosted inside
-  /// the AppShell (W6.3), the screen detects the shell ancestor and instead
-  /// applies the closed UI-SAFE-1 contract via [shellSafeBottomPadding], so the
-  /// shell obstruction and device inset are never summed.
+  /// Shell-independent: this screen detects the AppShell ancestor and
+  /// applies the closed UI-SAFE-1 contract when hosted inside the shell.
   final double bottomContentPadding;
 
   const DirectoryLandingScreen({
@@ -50,13 +46,8 @@ class DirectoryLandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
-    final types = DirectoryCategoryPresentation.orderedTypes;
+    final types = CanonicalEntityTypePresentation.orderedTypes;
 
-    // W6.3 UI-SAFE-1 — explicit dual-host clean bottom clearance. When hosted
-    // inside the AppShell (ShellContentInsets present) the closed
-    // max(obstruction, deviceInset) + breathing contract applies, so the shell
-    // obstruction and device inset are never summed. When hosted standalone the
-    // original W5 seam (bottomContentPadding + deviceInset) is preserved.
     final isShellHosted = ShellContentInsets.maybeOf(context) != null;
     final effectiveBottomPadding = isShellHosted
         ? shellSafeBottomPadding(context)
@@ -79,19 +70,17 @@ class DirectoryLandingScreen extends StatelessWidget {
             sliver: SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                // Fixed compact row height (~140px) so card density is stable
-                // across widths and long labels never overflow.
                 mainAxisExtent: 140,
                 crossAxisSpacing: AppSpacing.lg,
                 mainAxisSpacing: AppSpacing.lg,
               ),
               delegate: SliverChildBuilderDelegate((context, index) {
-                final type = types[index];
+                final entityType = types[index];
                 return _CategoryCard(
-                  businessType: type,
+                  entityType: entityType,
                   onTap: onCategorySelected == null
                       ? null
-                      : () => onCategorySelected!(type),
+                      : () => onCategorySelected!(entityType),
                 );
               }, childCount: types.length),
             ),
@@ -103,17 +92,17 @@ class DirectoryLandingScreen extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  final BusinessType businessType;
+  final String entityType;
   final VoidCallback? onTap;
 
-  const _CategoryCard({required this.businessType, this.onTap});
+  const _CategoryCard({required this.entityType, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final theme = Theme.of(context);
-    final label = DirectoryCategoryPresentation.labelFor(
-      businessType,
+    final label = CanonicalEntityTypePresentation.labelFor(
+      entityType,
       isArabic: isArabic,
     );
 
@@ -131,7 +120,7 @@ class _CategoryCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
             ),
             child: Icon(
-              DirectoryCategoryPresentation.iconFor(businessType),
+              CanonicalEntityTypePresentation.iconFor(entityType),
               size: 24,
               color: AppColors.primary,
             ),

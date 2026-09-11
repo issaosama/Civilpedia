@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import 'package:civilpedia/core/location/baghdad_area.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
-import 'package:civilpedia/features/directory/domain/directory_repository.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/directory/presentation/directory_search_screen.dart';
 import 'package:civilpedia/features/directory/presentation/widgets/directory_sponsored_provider_card.dart';
-import 'package:civilpedia/features/monetization/domain/entities/advertisement_campaign.dart';
+import 'package:civilpedia/features/monetization/domain/entities/sponsored_placement.dart';
 import 'package:civilpedia/features/monetization/domain/monetization_reference.dart';
-import 'package:civilpedia/features/monetization/domain/services/campaign_source.dart';
 import 'package:civilpedia/features/monetization/domain/value_objects/campaign_destination.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
+import 'package:civilpedia/features/saved/domain/saved_item_reference.dart';
+import 'package:civilpedia/features/saved/domain/saved_reference_store.dart';
+import 'package:civilpedia/routes/app_routes.dart';
+
+import 'helpers/canonical_directory_test_helpers.dart';
 
 const _directorySponsored = 'directory_sponsored';
 final _at = DateTime(2026, 3, 15, 12, 0, 0);
@@ -24,81 +28,80 @@ MonetizationReference _ref(String id) => MonetizationReference(
       entityId: id,
     );
 
-AdvertisementCampaign _campaign({
-  required String id,
-  bool isEnabled = true,
-  String placementKey = _directorySponsored,
-  MonetizationReference? subject,
-  CampaignDestination? destination,
+SponsoredPlacement _placement({
   String disclosureLabel = 'Sponsored',
+  MonetizationReference? subject,
 }) {
   final s = subject ?? _ref('p-1');
-  return AdvertisementCampaign(
-    id: id,
-    isEnabled: isEnabled,
-    placementKey: placementKey,
+  return SponsoredPlacement(
+    placementKey: _directorySponsored,
+    campaignId: 'c1',
     subject: s,
-    destination: destination ?? CampaignDestination.internal(s),
+    destination: CampaignDestination.internal(s),
+    sponsorshipType: 'sponsorship',
     disclosureLabel: disclosureLabel,
+    servedAt: _at,
   );
 }
 
-class _FakeCampaignSource implements CampaignSource {
-  _FakeCampaignSource(this.result);
-  final Future<List<AdvertisementCampaign>> Function() result;
+/// In-memory fake [SavedReferenceStore] so detail navigation in widget tests
+/// never touches real persistence.
+class _FakeSavedStore implements SavedReferenceStore {
+  final List<SavedItemReference> _refs = [];
 
   @override
-  Future<List<AdvertisementCampaign>> campaignsFor(String placementKey) {
-    return result();
+  Future<List<SavedItemReference>> loadAll() async => List.of(_refs);
+
+  @override
+  Future<bool> contains(String referenceId) async =>
+      _refs.any((r) => r.id == referenceId);
+
+  @override
+  Future<void> save(SavedItemReference reference) async {
+    if (!_refs.any((r) => r.id == reference.id)) _refs.add(reference);
+  }
+
+  @override
+  Future<void> remove(String referenceId) async {
+    _refs.removeWhere((r) => r.id == referenceId);
   }
 }
 
-class _FakeDirectoryRepository implements DirectoryRepository {
-  _FakeDirectoryRepository(this.profiles);
-  final List<ServiceBusinessProfile> profiles;
-
-  @override
-  Future<List<ServiceBusinessProfile>> loadAll() async {
-    return List<ServiceBusinessProfile>.from(profiles);
-  }
-
-  @override
-  Future<ServiceBusinessProfile?> loadById(String id) async {
-    for (final p in profiles) {
-      if (p.id == id) return p;
-    }
-    return null;
-  }
-
-  @override
-  Future<void> save(ServiceBusinessProfile profile) async {}
-
-  @override
-  Future<void> delete(String id) async {}
-
-  @override
-  Future<void> clearAll() async {}
-}
-
-ServiceBusinessProfile _p({
-  required String id,
-  String name = '',
-  BusinessType type = BusinessType.other,
-  BaghdadArea baghdadArea = BaghdadArea.unknown,
-  VerificationStatus verificationStatus = VerificationStatus.unverified,
-}) {
-  return ServiceBusinessProfile(
-    id: id,
-    name: name.isEmpty ? 'Provider $id' : name,
-    type: type,
-    baghdadArea: baghdadArea,
-    verificationStatus: verificationStatus,
+/// V1-R05 sponsored surface harness: [DirectorySponsoredProviderCard] directly,
+/// with the tap wired to the real canonical `/directory/entity/:id` route push
+/// that the production owning surface performs (canonical-ID resolution).
+Widget _sponsoredCardApp(CanonicalDirectoryEntity entity, {VoidCallback? onTap}) {
+  final fakeRepo = FakeCloudDirectoryRepository([entity]);
+  final savedStore = _FakeSavedStore();
+  final card = Builder(
+    builder: (context) => DirectorySponsoredProviderCard(
+      placement: _placement(),
+      entity: entity,
+      onTap: onTap ??
+          () {
+            context.push(
+              AppRoutes.directoryEntityDetailFor(entity.id),
+              extra: entity,
+            );
+          },
+    ),
+  );
+  return ChangeNotifierProvider(
+    create: (_) => LanguageProvider(),
+    child: MaterialApp.router(
+      theme: AppTheme.lightTheme,
+      routerConfig: canonicalDirectoryDetailRouter(
+        home: Scaffold(body: card),
+        repository: fakeRepo,
+        savedReferenceStore: savedStore,
+      ),
+    ),
   );
 }
 
-Widget _app(
-  _FakeDirectoryRepository repo, {
-  CampaignSource? campaignSource,
+Widget _searchApp(
+  FakeCloudDirectoryRepository repo, {
+  String? initialEntityType,
 }) {
   return ChangeNotifierProvider(
     create: (_) => LanguageProvider(),
@@ -106,8 +109,7 @@ Widget _app(
       theme: AppTheme.lightTheme,
       home: DirectorySearchScreen(
         repository: repo,
-        campaignSource: campaignSource,
-        now: () => _at,
+        initialEntityType: initialEntityType,
       ),
     ),
   );
@@ -115,279 +117,107 @@ Widget _app(
 
 Future<void> _pump(
   WidgetTester tester, {
-  required _FakeDirectoryRepository repo,
-  CampaignSource? campaignSource,
+  required FakeCloudDirectoryRepository repo,
+  String? initialEntityType,
 }) async {
   await tester.pumpWidget(
-    _app(repo, campaignSource: campaignSource ?? _FakeCampaignSource(() async => const [])),
+    _searchApp(repo, initialEntityType: initialEntityType),
   );
   await tester.pumpAndSettle();
 }
 
 void main() {
-  group('W7.2 SCREEN — no campaign → no sponsored slot', () {
-    testWidgets('A: zero campaigns → no sponsored slot, organic only', (tester) async {
-      final repo = _FakeDirectoryRepository([_p(id: 'org-1', name: 'Organic Co')]);
-      await _pump(tester, repo: repo);
-      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
-      expect(find.text('Organic Co'), findsOneWidget);
-    });
-
-    testWidgets('Q: no campaign → no blank sponsored spacing/header', (tester) async {
-      final repo = _FakeDirectoryRepository([_p(id: 'org-1', name: 'Organic Co')]);
-      await _pump(tester, repo: repo);
-      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
-      expect(find.text('Sponsored'), findsNothing);
-      expect(find.textContaining('Sponsor'), findsNothing);
-    });
-
-    testWidgets('B: source throws → no sponsored slot, organic still renders',
+  group('W7.2 SPONSORED CARD — disclosure & entity', () {
+    testWidgets('D+E: one renderable placement → disclosure + real entity',
         (tester) async {
-      final repo = _FakeDirectoryRepository([_p(id: 'org-1', name: 'Organic Co')]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(() async => throw Exception('down')),
-      );
-      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
-      expect(find.text('Organic Co'), findsOneWidget);
-    });
-
-    testWidgets('C: inactive campaign → no sponsored slot', (tester) async {
-      final repo = _FakeDirectoryRepository([_p(id: 'p-1'), _p(id: 'org-1', name: 'Organic Co')]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(
-          () async => [_campaign(id: 'c1', isEnabled: false)],
-        ),
-      );
-      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
-      expect(find.text('Organic Co'), findsOneWidget);
-    });
-  });
-
-  group('W7.2 SCREEN — one renderable campaign → sponsored slot', () {
-    testWidgets('D+E: one eligible renderable → one sponsored slot + disclosed',
-        (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'p-1', name: 'Sponsored Co'),
-        _p(id: 'org-1', name: 'Organic Co'),
-      ]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
-      );
+      final entity = fakeEntity(id: 'p-1', name: 'Sponsored Co');
+      await tester.pumpWidget(_sponsoredCardApp(entity));
       expect(find.byType(DirectorySponsoredProviderCard), findsOneWidget);
       // Disclosure label visibly rendered.
       expect(find.text('Sponsored'), findsOneWidget);
-      // The sponsored card presents the real provider.
-      expect(
-        find.descendant(
-          of: find.byType(DirectorySponsoredProviderCard),
-          matching: find.text('Sponsored Co'),
-        ),
-        findsOneWidget,
-      );
+      // The sponsored card presents the real entity.
+      expect(find.text('Sponsored Co'), findsOneWidget);
     });
 
-    testWidgets('F: sponsored card resolves real profile via loadById', (tester) async {
-      final repo = _FakeDirectoryRepository([_p(id: 'p-1', name: 'Real Sponsored Co')]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
-      );
+    testWidgets('F: sponsored card resolves real entity', (tester) async {
+      final entity = fakeEntity(id: 'p-1', name: 'Real Sponsored Co');
+      await tester.pumpWidget(_sponsoredCardApp(entity));
       expect(find.byType(DirectorySponsoredProviderCard), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(DirectorySponsoredProviderCard),
-          matching: find.text('Real Sponsored Co'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('Real Sponsored Co'), findsOneWidget);
     });
 
-    testWidgets('G: sponsored tap → real DirectoryProviderDetailScreen', (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'p-1', name: 'Sponsored Co'),
-        _p(id: 'org-1', name: 'Organic Co'),
-      ]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
-      );
-      await tester.tap(find.byType(DirectorySponsoredProviderCard));
+    testWidgets('G: sponsored tap → real DirectoryProviderDetailScreen',
+        (tester) async {
+      final entity = fakeEntity(id: 'p-1', name: 'Sponsored Co');
+      await tester.pumpWidget(_sponsoredCardApp(entity));
+      await tester.tap(find.text('Sponsored Co'));
       await tester.pumpAndSettle();
       expect(find.byType(DirectoryProviderDetailScreen), findsOneWidget);
     });
 
-    testWidgets('J: missing sponsored provider → slot omitted', (tester) async {
-      // Campaign references p-1 but repository has no p-1.
-      final repo = _FakeDirectoryRepository([_p(id: 'org-1', name: 'Organic Co')]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
-      );
-      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
-      expect(find.text('Organic Co'), findsOneWidget);
-    });
-
-    testWidgets('K: empty disclosure → slot omitted', (tester) async {
-      final repo = _FakeDirectoryRepository([_p(id: 'p-1'), _p(id: 'org-1', name: 'Organic Co')]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(
-          () async => [_campaign(id: 'c1', disclosureLabel: '  ')],
-        ),
-      );
-      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
-      expect(find.text('Organic Co'), findsOneWidget);
-    });
-
-    testWidgets('L: external destination → slot omitted', (tester) async {
-      final repo = _FakeDirectoryRepository([_p(id: 'org-1', name: 'Organic Co')]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(
-          () async => [
-            _campaign(
-              id: 'c1',
-              destination: CampaignDestination.external('https://example.com'),
-            ),
-          ],
-        ),
-      );
-      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
-      expect(find.text('Organic Co'), findsOneWidget);
-    });
-  });
-
-  group('W7.2 SCREEN — multiple eligible campaigns', () {
-    testWidgets('N: two renderable → exactly ONE slot, source-order first wins',
-        (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'p-1', name: 'First Sponsored'),
-        _p(id: 'p-2', name: 'Second Sponsored'),
-      ]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(
-          () async => [
-            _campaign(id: 'c-a', subject: _ref('p-1')),
-            _campaign(id: 'c-b', subject: _ref('p-2')),
-          ],
-        ),
-      );
-      expect(find.byType(DirectorySponsoredProviderCard), findsOneWidget);
-      // First source-order wins at the W7.2 surface: the sponsored card shows
-      // ONLY 'First Sponsored', never 'Second Sponsored'.
-      expect(
-        find.descendant(
-          of: find.byType(DirectorySponsoredProviderCard),
-          matching: find.text('First Sponsored'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byType(DirectorySponsoredProviderCard),
-          matching: find.text('Second Sponsored'),
-        ),
-        findsNothing,
-      );
-    });
-
-    testWidgets('M: first unrenderable, second renderable → second renders',
-        (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'p-1', name: 'Good Sponsored'),
-      ]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(
-          () async => [
-            _campaign(id: 'c-empty', disclosureLabel: ' '),
-            _campaign(id: 'c-missing', subject: _ref('p-nope')),
-            _campaign(id: 'c-good', subject: _ref('p-1')),
-          ],
-        ),
-      );
-      expect(find.byType(DirectorySponsoredProviderCard), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(DirectorySponsoredProviderCard),
-          matching: find.text('Good Sponsored'),
-        ),
-        findsOneWidget,
-      );
-    });
-  });
-
-  group('W7.2 SCREEN — verification independence', () {
     testWidgets('H: sponsored + unverified → disclosure AND real unverified badge',
         (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'p-1', name: 'Sponsored Co', verificationStatus: VerificationStatus.unverified),
-      ]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
+      final entity = fakeEntity(
+        id: 'p-1',
+        name: 'Sponsored Co',
+        verificationStatus: VerificationStatus.unverified,
       );
+      await tester.pumpWidget(_sponsoredCardApp(entity));
       // Disclosure label clearly rendered (sponsorship must not imply
       // verification and must not be hidden).
       expect(find.text('Sponsored'), findsOneWidget);
       // The REAL unverified badge is rendered inside the sponsored card (Arabic
       // default label 'غير موثّق'). Sponsorship does NOT grant verification, so
       // the badge remains unverified.
-      expect(
-        find.descendant(
-          of: find.byType(DirectorySponsoredProviderCard),
-          matching: find.text('غير موثّق'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.text('غير موثّق'), findsOneWidget);
+    });
+  });
+
+  group('W7.2 SCREEN — organic rendering', () {
+    testWidgets('A: organic only → no sponsored slot, organic renders',
+        (tester) async {
+      final repo = FakeCloudDirectoryRepository([
+        fakeEntity(id: 'org-1', name: 'Organic Co'),
+      ]);
+      await _pump(tester, repo: repo);
+      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
+      expect(find.text('Organic Co'), findsOneWidget);
     });
 
-    testWidgets('I: verified organic provider → no sponsorship without campaign',
+    testWidgets('Q: nothing sponsored renders without a campaign',
         (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'org-1', name: 'Verified Organic', verificationStatus: VerificationStatus.verified),
+      final repo = FakeCloudDirectoryRepository([
+        fakeEntity(id: 'org-1', name: 'Organic Co'),
+      ]);
+      await _pump(tester, repo: repo);
+      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
+      expect(find.text('Sponsored'), findsNothing);
+      expect(find.textContaining('Sponsor'), findsNothing);
+    });
+
+    testWidgets('I: verified organic provider → verified badge, no sponsorship',
+        (tester) async {
+      final repo = FakeCloudDirectoryRepository([
+        fakeEntity(
+          id: 'org-1',
+          name: 'Verified Organic',
+          verificationStatus: VerificationStatus.verified,
+        ),
       ]);
       await _pump(tester, repo: repo);
       expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
       expect(find.text('موثّق'), findsOneWidget);
       expect(find.text('Sponsored'), findsNothing);
     });
-  });
 
-  group('W7.2 SCREEN — organic/sponsored separation', () {
-    testWidgets('O: sponsored provider also organic → appears in BOTH, order unchanged',
+    testWidgets('O: organic providers render in order, unchanged',
         (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'a', name: 'Alpha Organic'),
-        _p(id: 'p-1', name: 'Dual Co'),
-        _p(id: 'b', name: 'Beta Organic'),
+      final repo = FakeCloudDirectoryRepository([
+        fakeEntity(id: 'a', name: 'Alpha Organic'),
+        fakeEntity(id: 'b', name: 'Beta Organic'),
       ]);
-      await _pump(
-        tester,
-        repo: repo,
-        campaignSource: _FakeCampaignSource(
-          () async => [_campaign(id: 'c1', subject: _ref('p-1'))],
-        ),
-      );
-      // Sponsored slot + organic result.
-      expect(find.byType(DirectorySponsoredProviderCard), findsOneWidget);
-      expect(find.text('Dual Co'), findsNWidgets(2));
-      // Organic peers still present and ordered.
+      await _pump(tester, repo: repo);
+      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
       expect(find.text('Alpha Organic'), findsOneWidget);
       // Scroll the (lazy) list to reveal the bottom organic card before
       // asserting it exists.
@@ -399,61 +229,34 @@ void main() {
       expect(find.text('Beta Organic'), findsOneWidget);
     });
 
-    testWidgets('P: sponsored not matching organic query is still shown in slot',
+    testWidgets('P: search filters organic results', (tester) async {
+      final repo = FakeCloudDirectoryRepository([
+        fakeEntity(id: 'p-1', name: 'Sponsored Co'),
+        fakeEntity(id: 'org-1', name: 'Organic Co'),
+      ]);
+      await _pump(tester, repo: repo);
+      // Type a query that matches ONLY the organic provider.
+      await tester.enterText(find.byType(TextField), 'Organic');
+      await tester.pump(const Duration(milliseconds: 300));
+      // Organic result filtered to the matching provider.
+      expect(find.text('Organic Co'), findsOneWidget);
+      expect(find.text('Sponsored Co'), findsNothing);
+    });
+
+    testWidgets('Q-ZERO: entity-type filter works over canonical data',
         (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'p-1', name: 'Sponsored Co'),
-        _p(id: 'org-1', name: 'Organic Co'),
+      final repo = FakeCloudDirectoryRepository([
+        fakeEntity(id: 'p-1', name: 'Supplier Co', entityType: 'supplier'),
+        fakeEntity(id: 'org-1', name: 'Store Co', entityType: 'store'),
       ]);
       await _pump(
         tester,
         repo: repo,
-        campaignSource: _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
+        initialEntityType: 'supplier',
       );
-      // Type a query that matches ONLY the organic provider.
-      await tester.enterText(find.byType(TextField), 'Organic');
-      await tester.pump(const Duration(milliseconds: 300));
-      // Sponsored slot still present (not gated by organic query).
-      expect(find.byType(DirectorySponsoredProviderCard), findsOneWidget);
-      expect(find.text('Sponsored Co'), findsOneWidget);
-      // Organic result filtered to the matching provider.
-      expect(find.text('Organic Co'), findsOneWidget);
-    });
-
-    testWidgets(
-        'Q-ZERO: zero organic results (category filter) + sponsored → sponsored renders',
-        (tester) async {
-      final repo = _FakeDirectoryRepository([
-        _p(id: 'p-1', name: 'Sponsored Co'),
-        _p(id: 'org-1', name: 'Other Co', type: BusinessType.engineeringOffice),
-      ]);
-      await tester.pumpWidget(
-        ChangeNotifierProvider(
-          create: (_) => LanguageProvider(),
-          child: MaterialApp(
-            theme: AppTheme.lightTheme,
-            home: DirectorySearchScreen(
-              repository: repo,
-              campaignSource:
-                  _FakeCampaignSource(() async => [_campaign(id: 'c1')]),
-              now: () => _at,
-              initialCategory: BusinessType.materialShop,
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      // Organic filter (materialShop) returns zero matches but directory has
-      // providers for other categories — sponsored slot MUST still render.
-      expect(find.byType(DirectorySponsoredProviderCard), findsOneWidget);
-      expect(find.text('Sponsored'), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byType(DirectorySponsoredProviderCard),
-          matching: find.text('Sponsored Co'),
-        ),
-        findsOneWidget,
-      );
+      expect(find.byType(DirectorySponsoredProviderCard), findsNothing);
+      expect(find.text('Supplier Co'), findsOneWidget);
+      expect(find.text('Store Co'), findsNothing);
     });
   });
 }

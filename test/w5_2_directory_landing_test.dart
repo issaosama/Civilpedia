@@ -9,14 +9,14 @@ import 'package:civilpedia/core/navigation/shell_content_insets.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/core/theme/spacing.dart';
-import 'package:civilpedia/features/directory/presentation/directory_category_presentation.dart';
+import 'package:civilpedia/features/directory/presentation/canonical_entity_type_presentation.dart';
 import 'package:civilpedia/features/directory/presentation/directory_landing_screen.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:civilpedia/localization/en.dart';
 import 'package:civilpedia/routes/app_routes.dart';
 
-Widget _app({ValueChanged<BusinessType>? onCategorySelected, double width = 412}) {
+Widget _app({ValueChanged<String>? onCategorySelected, double width = 412}) {
   return MediaQuery(
     data: MediaQueryData(size: Size(width, 900)),
     child: MaterialApp(
@@ -29,7 +29,10 @@ Widget _app({ValueChanged<BusinessType>? onCategorySelected, double width = 412}
   );
 }
 
-Future<void> _pump(WidgetTester tester, {ValueChanged<BusinessType>? onCategorySelected}) async {
+Future<void> _pump(
+  WidgetTester tester, {
+  ValueChanged<String>? onCategorySelected,
+}) async {
   await tester.pumpWidget(_app(onCategorySelected: onCategorySelected));
   await tester.pumpAndSettle();
 }
@@ -57,121 +60,140 @@ void main() {
       expect(find.text(Ar.directoryLandingTitle), findsOneWidget);
     });
 
-    testWidgets('3. English heading string exists in localization', (tester) async {
+    testWidgets('3. English heading string exists in localization', (
+      tester,
+    ) async {
       expect(En.directoryLandingTitle, 'Engineering Directory');
     });
 
-    testWidgets('4. all 12 categories render', (tester) async {
+    testWidgets('4. all 9 categories render', (tester) async {
       await _pump(tester);
-      for (final type in DirectoryCategoryPresentation.orderedTypes) {
-        final label = DirectoryCategoryPresentation.labelFor(type, isArabic: true);
+      for (final entityType in CanonicalEntityTypePresentation.orderedTypes) {
+        final label = CanonicalEntityTypePresentation.labelFor(
+          entityType,
+          isArabic: true,
+        );
         await _scrollTo(tester, label);
-        expect(find.text(label), findsWidgets,
-            reason: 'category label should render: $label');
+        expect(
+          find.text(label),
+          findsWidgets,
+          reason: 'category label should render: $label',
+        );
       }
     });
 
-    test('5. exactly 12 BusinessType identities are represented', () {
-      expect(DirectoryCategoryPresentation.orderedTypes.toSet().length, 12);
-      expect(DirectoryCategoryPresentation.orderedTypes.length, 12);
-      expect(BusinessType.values.length, 12);
+    test('5. exactly 9 canonical entity types are represented', () {
+      expect(CanonicalEntityTypePresentation.orderedTypes.toSet().length, 9);
+      expect(CanonicalEntityTypePresentation.orderedTypes.length, 9);
     });
 
     test('6. no category duplicated', () {
-      expect(DirectoryCategoryPresentation.orderedTypes.toSet().length,
-          DirectoryCategoryPresentation.orderedTypes.length);
+      expect(
+        CanonicalEntityTypePresentation.orderedTypes.toSet().length,
+        CanonicalEntityTypePresentation.orderedTypes.length,
+      );
     });
 
     test('7. stable presentation order is preserved', () {
-      expect(DirectoryCategoryPresentation.orderedTypes, [
-        BusinessType.supplier,
-        BusinessType.technician,
-        BusinessType.equipmentOwner,
-        BusinessType.engineeringOffice,
-        BusinessType.constructionCompany,
-        BusinessType.buildingOffice,
-        BusinessType.testingLab,
-        BusinessType.surveyor,
-        BusinessType.contractor,
-        BusinessType.materialShop,
-        BusinessType.consultantOffice,
-        BusinessType.other,
+      expect(CanonicalEntityTypePresentation.orderedTypes, [
+        'company',
+        'engineering_office',
+        'contractor',
+        'supplier',
+        'store',
+        'technician',
+        'laboratory',
+        'equipment_provider',
+        'service_provider',
       ]);
     });
   });
 
   group('W5.2 LOCALIZATION', () {
-    test('8. each BusinessType resolves an Arabic label', () {
-      for (final type in BusinessType.values) {
-        expect(DirectoryCategoryPresentation.arLabel(type), isNotEmpty);
-        expect(DirectoryCategoryPresentation.arLabel(type), isNot(type.name));
+    test('8. each canonical entity type resolves an Arabic label', () {
+      for (final entityType in CanonicalEntityTypePresentation.orderedTypes) {
+        expect(CanonicalEntityTypePresentation.arLabel(entityType), isNotEmpty);
+        expect(
+          CanonicalEntityTypePresentation.arLabel(entityType),
+          isNot(entityType),
+        );
       }
     });
 
-    test('9. each BusinessType resolves an English label', () {
-      for (final type in BusinessType.values) {
-        expect(DirectoryCategoryPresentation.enLabel(type), isNotEmpty);
-        expect(DirectoryCategoryPresentation.enLabel(type), isNot(type.name));
+    test('9. each canonical entity type resolves an English label', () {
+      for (final entityType in CanonicalEntityTypePresentation.orderedTypes) {
+        expect(CanonicalEntityTypePresentation.enLabel(entityType), isNotEmpty);
+        expect(
+          CanonicalEntityTypePresentation.enLabel(entityType),
+          isNot(entityType),
+        );
       }
     });
 
-    test('10. labels are presentation-only (persisted stays enum name)', () {
-      // The persisted serialization must keep the stable enum identity.
-      expect(BusinessType.supplier.key, 'supplier');
-      expect(BusinessType.consultantOffice.key, 'consultant_office');
-      expect(DirectoryCategoryPresentation.arLabel(BusinessType.supplier), 'مورّد');
-      expect(DirectoryCategoryPresentation.enLabel(BusinessType.supplier), 'Supplier');
+    test('10. labels are presentation-only (persisted stays canonical code)', () {
+      // The persisted serialization must keep the stable canonical string code.
+      expect(
+        CanonicalEntityTypePresentation.orderedTypes,
+        contains('supplier'),
+      );
+      expect(
+        CanonicalEntityTypePresentation.orderedTypes,
+        contains('engineering_office'),
+      );
+      expect(CanonicalEntityTypePresentation.arLabel('supplier'), 'مورّد');
+      expect(CanonicalEntityTypePresentation.enLabel('supplier'), 'Supplier');
     });
 
-    test('11. enum stable values remain unchanged', () {
-      expect(BusinessType.values.map((e) => e.key).toList(), [
-        'supplier',
-        'technician',
-        'equipment_owner',
+    test('11. canonical codes stable values remain unchanged', () {
+      expect(CanonicalEntityTypePresentation.orderedTypes, [
+        'company',
         'engineering_office',
-        'construction_company',
-        'building_office',
-        'testing_lab',
-        'surveyor',
         'contractor',
-        'material_shop',
-        'consultant_office',
-        'other',
+        'supplier',
+        'store',
+        'technician',
+        'laboratory',
+        'equipment_provider',
+        'service_provider',
       ]);
     });
   });
 
   group('W5.2 INTERACTION', () {
-    testWidgets('12. callback receives correct BusinessType on tap', (tester) async {
-      final selected = <BusinessType>[];
+    testWidgets('12. callback receives correct entity type on tap', (
+      tester,
+    ) async {
+      final selected = <String>[];
       await _pump(tester, onCategorySelected: selected.add);
-      final target = DirectoryCategoryPresentation.labelFor(
-        BusinessType.contractor,
+      final target = CanonicalEntityTypePresentation.labelFor(
+        'contractor',
         isArabic: true,
       );
       await _scrollTo(tester, target);
       await tester.tap(find.text(target).first);
       await tester.pumpAndSettle();
-      expect(selected, [BusinessType.contractor]);
+      expect(selected, ['contractor']);
     });
 
-    testWidgets('13. tapping one category does not invoke another', (tester) async {
-      final selected = <BusinessType>[];
+    testWidgets('13. tapping one category does not invoke another', (
+      tester,
+    ) async {
+      final selected = <String>[];
       await _pump(tester, onCategorySelected: selected.add);
-      final target = DirectoryCategoryPresentation.labelFor(
-        BusinessType.supplier,
+      final target = CanonicalEntityTypePresentation.labelFor(
+        'supplier',
         isArabic: true,
       );
       await tester.tap(find.text(target).first);
       await tester.pumpAndSettle();
-      expect(selected, [BusinessType.supplier]);
-      expect(selected, isNot(contains(BusinessType.technician)));
+      expect(selected, ['supplier']);
+      expect(selected, isNot(contains('technician')));
     });
 
     testWidgets('14. null callback causes no navigation/crash', (tester) async {
       await _pump(tester); // onCategorySelected is null
-      final label = DirectoryCategoryPresentation.labelFor(
-        BusinessType.contractor,
+      final label = CanonicalEntityTypePresentation.labelFor(
+        'contractor',
         isArabic: true,
       );
       await _scrollTo(tester, label);
@@ -180,25 +202,33 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    test('15. no permanent route is required (heading only, callback seam)', () {
-      // The screen constructor only needs the optional callback; no route.
-      const screen = DirectoryLandingScreen();
-      expect(screen.onCategorySelected, isNull);
-    });
+    test(
+      '15. no permanent route is required (heading only, callback seam)',
+      () {
+        // The screen constructor only needs the optional callback; no route.
+        const screen = DirectoryLandingScreen();
+        expect(screen.onCategorySelected, isNull);
+      },
+    );
   });
 
   group('W5.2 DATA INDEPENDENCE', () {
-    testWidgets('16. Landing renders with no sb_profiles data', (tester) async {
-      // No SharedPreferences seed; taxonomy always renders.
+    testWidgets('16. Landing renders with no directory data', (tester) async {
+      // No cloud/SharedPreferences seed; taxonomy always renders.
       await _pump(tester);
-      for (final type in DirectoryCategoryPresentation.orderedTypes) {
-        final label = DirectoryCategoryPresentation.labelFor(type, isArabic: true);
+      for (final entityType in CanonicalEntityTypePresentation.orderedTypes) {
+        final label = CanonicalEntityTypePresentation.labelFor(
+          entityType,
+          isArabic: true,
+        );
         await _scrollTo(tester, label);
         expect(find.text(label), findsWidgets);
       }
     });
 
-    testWidgets('17. Landing requires no DirectoryRepository reads', (tester) async {
+    testWidgets('17. Landing requires no DirectoryRepository reads', (
+      tester,
+    ) async {
       await _pump(tester);
       expect(find.byType(DirectoryLandingScreen), findsOneWidget);
       // No provider-based data loading present.
@@ -206,33 +236,31 @@ void main() {
 
     testWidgets('18. no provider counts appear', (tester) async {
       await _pump(tester);
-      final allText = tester.widgetList<Text>(find.byType(Text))
+      final allText = tester
+          .widgetList<Text>(find.byType(Text))
           .map((t) => t.data ?? '')
           .toList();
       final countSignal = allText.where(
-        (t) => RegExp(r'\(?\d+\s*(providers?|companies?|شركات?|موردين?|مقدمي?)\)?')
-            .hasMatch(t),
+        (t) => RegExp(
+          r'\(?\d+\s*(providers?|companies?|شركات?|موردين?|مقدمي?)\)?',
+        ).hasMatch(t),
       );
       expect(countSignal, isEmpty);
     });
 
     test('19. no profile-dependent ordering occurs', () {
       // Order is the fixed presentation list, not derived from data.
-      expect(DirectoryCategoryPresentation.orderedTypes,
-          const [
-            BusinessType.supplier,
-            BusinessType.technician,
-            BusinessType.equipmentOwner,
-            BusinessType.engineeringOffice,
-            BusinessType.constructionCompany,
-            BusinessType.buildingOffice,
-            BusinessType.testingLab,
-            BusinessType.surveyor,
-            BusinessType.contractor,
-            BusinessType.materialShop,
-            BusinessType.consultantOffice,
-            BusinessType.other,
-          ]);
+      expect(CanonicalEntityTypePresentation.orderedTypes, const [
+        'company',
+        'engineering_office',
+        'contractor',
+        'supplier',
+        'store',
+        'technician',
+        'laboratory',
+        'equipment_provider',
+        'service_provider',
+      ]);
     });
   });
 
@@ -252,7 +280,7 @@ void main() {
     testWidgets('22. no provider listing', (tester) async {
       await _pump(tester);
       // No provider list entries beyond the 12 category labels.
-      expect(DirectoryCategoryPresentation.orderedTypes.length, 12);
+      expect(CanonicalEntityTypePresentation.orderedTypes.length, 9);
     });
 
     testWidgets('23. no verification badge', (tester) async {
@@ -280,10 +308,18 @@ void main() {
 
     testWidgets('26. no featured/sponsored section', (tester) async {
       await _pump(tester);
-      final text = tester.widgetList<Text>(find.byType(Text))
-          .map((t) => t.data ?? '').toList();
-      expect(text.any((t) => t.contains('Sponsored') || t.contains('Featured')), isFalse);
-      expect(text.any((t) => t.contains('مدعوم') || t.contains('مميز')), isFalse);
+      final text = tester
+          .widgetList<Text>(find.byType(Text))
+          .map((t) => t.data ?? '')
+          .toList();
+      expect(
+        text.any((t) => t.contains('Sponsored') || t.contains('Featured')),
+        isFalse,
+      );
+      expect(
+        text.any((t) => t.contains('مدعوم') || t.contains('مميز')),
+        isFalse,
+      );
     });
   });
 
@@ -318,7 +354,9 @@ void main() {
         'NOT sum', (tester) async {
       await tester.pumpWidget(shellHostedLanding());
       await tester.pumpAndSettle();
-      final slivers = tester.widgetList<SliverPadding>(find.byType(SliverPadding));
+      final slivers = tester.widgetList<SliverPadding>(
+        find.byType(SliverPadding),
+      );
       final bottom = slivers
           .map((s) => s.padding.resolve(TextDirection.ltr).bottom)
           .toList();
@@ -327,26 +365,29 @@ void main() {
       expect(bottom, isNot(contains(shellObstruction + deviceInset)));
     });
 
-    testWidgets('B. standalone keeps bottomContentPadding + deviceInset seam',
-        (tester) async {
+    testWidgets('B. standalone keeps bottomContentPadding + deviceInset seam', (
+      tester,
+    ) async {
       const custom = 96.0;
-      await tester.pumpWidget(MediaQuery(
-        data: MediaQueryData(
-          size: const Size(412, 900),
-          padding: const EdgeInsets.only(bottom: deviceInset),
-        ),
-        child: MaterialApp(
-          theme: AppTheme.lightTheme,
-          home: ChangeNotifierProvider(
-            create: (_) => LanguageProvider(),
-            child: const DirectoryLandingScreen(
-              bottomContentPadding: custom,
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(
+            size: const Size(412, 900),
+            padding: const EdgeInsets.only(bottom: deviceInset),
+          ),
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: ChangeNotifierProvider(
+              create: (_) => LanguageProvider(),
+              child: const DirectoryLandingScreen(bottomContentPadding: custom),
             ),
           ),
         ),
-      ));
+      );
       await tester.pumpAndSettle();
-      final slivers = tester.widgetList<SliverPadding>(find.byType(SliverPadding));
+      final slivers = tester.widgetList<SliverPadding>(
+        find.byType(SliverPadding),
+      );
       final bottom = slivers
           .map((s) => s.padding.resolve(TextDirection.ltr).bottom)
           .toList();
@@ -356,13 +397,21 @@ void main() {
   });
 
   group('W5.2 NAVIGATION FREEZE', () {
-    test('27. /directory is a registered route constant (W6.3 shell branch root)', () {
-      final routes = File('lib/routes/app_routes.dart').readAsStringSync();
-      // W6.2 declared the canonical /directory route; W6.3 makes it the visible
-      // Directory shell branch. The app_routes constant must stay declared and
-      // remain the single canonical identity.
-      expect(RegExp(r"static const String directory = '/directory';").hasMatch(routes), isTrue);
-    });
+    test(
+      '27. /directory is a registered route constant (W6.3 shell branch root)',
+      () {
+        final routes = File('lib/routes/app_routes.dart').readAsStringSync();
+        // W6.2 declared the canonical /directory route; W6.3 makes it the visible
+        // Directory shell branch. The app_routes constant must stay declared and
+        // remain the single canonical identity.
+        expect(
+          RegExp(
+            r"static const String directory = '/directory';",
+          ).hasMatch(routes),
+          isTrue,
+        );
+      },
+    );
 
     test('28. shell destinations = W6.3 target shell', () {
       final routes = kShellDestinations.map((d) => d.route).toList();
@@ -419,7 +468,9 @@ void main() {
     });
 
     test('33. sb_profiles key unchanged', () {
-      final keys = File('lib/core/storage/app_storage_keys.dart').readAsStringSync();
+      final keys = File(
+        'lib/core/storage/app_storage_keys.dart',
+      ).readAsStringSync();
       expect(keys.contains("sbProfiles = 'sb_profiles'"), isTrue);
     });
   });

@@ -5,80 +5,50 @@ import '../../monetization/domain/services/campaign_placement_resolver.dart';
 import '../../monetization/domain/services/campaign_source.dart';
 import '../../monetization/domain/value_objects/ad_placement_request.dart';
 import '../../monetization/domain/value_objects/campaign_destination.dart';
-import '../../profile/domain/service_business_profile.dart';
+import '../domain/canonical_directory_entity.dart';
+import '../domain/cloud_directory_repository.dart';
 import '../domain/directory_placement_key.dart';
-import '../domain/directory_repository.dart';
 
-/// W7.2 — The owning-surface result of a resolved Directory sponsored placement.
+/// V1-R05 — The owning-surface result of a resolved Directory sponsored placement.
 ///
 /// A pure, read-only pairing that references the W7.1 [SponsoredPlacement] AND
-/// the real resolved Directory [ServiceBusinessProfile] it should present. It
-/// never contains or copies a second provider entity (sponsored ≠ second
-/// entity, M4 §10 / M6 §13): [profile] IS the real Directory-owned entity.
+/// the real resolved canonical [CanonicalDirectoryEntity] it should present.
+/// Never contains or copies a second entity: [entity] IS the real
+/// Directory-owned entity.
 class DirectorySponsoredPlacement {
   const DirectorySponsoredPlacement({
     required this.placement,
-    required this.profile,
+    required this.entity,
   });
 
-  /// The Monetization-owned resolution (disclosure, campaign identity, subject).
+  /// The Monetization-owned resolution.
   final SponsoredPlacement placement;
 
-  /// The real Directory provider the placement resolves to (never a clone).
-  final ServiceBusinessProfile profile;
+  /// The real canonical Directory entity the placement resolves to.
+  final CanonicalDirectoryEntity entity;
 }
 
-/// W7.2 — Directory owning-surface coordinator for the sponsored search slot.
+/// V1-R05 — Directory owning-surface coordinator for the sponsored search slot.
 ///
-/// Owning-surface bridge between Monetization (campaign/sponsorship) and
-/// Directory (real provider entity). It turns candidate campaigns into the ONE
-/// presentation-ready [DirectorySponsoredPlacement] shown above the organic
-/// Directory search results.
-///
-/// Rendering contract (§GOAL):
-///   campaign source → AdPlacementRequest(directory_sponsored)
-///     → CampaignPlacementResolver.evaluateAll
-///     → FIRST RENDERABLE eligible placement in source order
-///     → resolve REAL Directory provider → presentation
-///
-/// Selection policy (W7.2 §6): with exactly ONE sponsored slot, the first
-/// RENDERABLE eligible placement in campaign-source input order wins. The
-/// [CampaignPlacementResolver] is FROZEN (W7.1) — no priority/bidding/random/
-/// round-robin/campaign-score/paid-rank/first-match is added to it. This
-/// selection policy belongs ONLY to this W7.2 Directory consumer.
-///
-/// "Renderable" means ALL of (W7.2 §6):
-/// - placement remains W7.1-eligible (guaranteed by evaluateAll);
-/// - disclosureLabel is non-empty after trim;
-/// - CampaignDestination is INTERNAL;
-/// - reference identifies ownerDomain=directory and entityType=provider;
-/// - DirectoryRepository.loadById(entityId) returns a real profile.
-///
-/// If the first eligible campaign cannot be rendered, the coordinator continues
-/// to the next eligible placement. If none are renderable it returns null → no
-/// sponsored slot and no blank space.
-///
-/// FAIL CLOSED (W7.2 §6): a throwing source, malformed references, missing
-/// providers, empty disclosure, external destinations — each skips the candidate
-/// and never surfaces an exception to the caller. Organic Directory behavior is
-/// never affected by a monetization failure.
+/// V1-R05 adapted: resolves using [CloudDirectoryRepository] and
+/// [CanonicalDirectoryEntity] instead of the legacy [DirectoryRepository] /
+/// [ServiceBusinessProfile] pair. Rendering contract and fail-closed behavior
+/// remain identical.
 class DirectorySponsoredPlacementCoordinator {
   DirectorySponsoredPlacementCoordinator({
     required CampaignSource campaignSource,
-    required DirectoryRepository directoryRepository,
+    required CloudDirectoryRepository directoryRepository,
     CampaignPlacementResolver resolver = const CampaignPlacementResolver(),
   })  : _campaignSource = campaignSource,
         _directoryRepository = directoryRepository,
         _resolver = resolver;
 
   final CampaignSource _campaignSource;
-  final DirectoryRepository _directoryRepository;
+  final CloudDirectoryRepository _directoryRepository;
   final CampaignPlacementResolver _resolver;
 
-  /// Resolves the single presentation-ready sponsored placement for the
-  /// canonical Directory sponsored placement at [at], or null when none is
-  /// renderable. [at] is injected (W7.1 determinism) so resolution is
-  /// deterministic and fully testable.
+  /// Resolves the single presentation-ready sponsored placement at [at],
+  /// or null when none is renderable. Fails closed on every error path.
   Future<DirectorySponsoredPlacement?> resolveFirstRenderable({
     required DateTime at,
     String placementKey = DirectoryPlacementKeys.directorySponsored,
@@ -87,7 +57,6 @@ class DirectorySponsoredPlacementCoordinator {
     try {
       campaigns = await _campaignSource.campaignsFor(placementKey);
     } catch (_) {
-      // Source error → fail closed, no sponsored placement.
       return null;
     }
 
@@ -95,21 +64,18 @@ class DirectorySponsoredPlacementCoordinator {
     final eligible = _resolver.evaluateAll(request, campaigns, at: at);
 
     for (final placement in eligible) {
-      final profile = await _resolveProfile(placement);
-      if (profile != null) {
+      final entity = await _resolveEntity(placement);
+      if (entity != null) {
         return DirectorySponsoredPlacement(
           placement: placement,
-          profile: profile,
+          entity: entity,
         );
       }
     }
     return null;
   }
 
-  /// Resolves the real Directory provider if [placement] is renderable, else
-  /// null. Each renderability failure skips only this candidate (does not
-  /// abort evaluation of later eligible candidates).
-  Future<ServiceBusinessProfile?> _resolveProfile(
+  Future<CanonicalDirectoryEntity?> _resolveEntity(
     SponsoredPlacement placement,
   ) async {
     if (placement.disclosureLabel.trim().isEmpty) return null;
@@ -121,14 +87,13 @@ class DirectorySponsoredPlacementCoordinator {
     if (reference == null) return null;
     if (!_isDirectoryProviderReference(reference)) return null;
 
-    ServiceBusinessProfile? profile;
+    CanonicalDirectoryEntity? entity;
     try {
-      profile = await _directoryRepository.loadById(reference.entityId);
+      entity = await _directoryRepository.loadByCanonicalId(reference.entityId);
     } catch (_) {
       return null;
     }
-    if (profile == null) return null;
-    return profile;
+    return entity;
   }
 
   bool _isDirectoryProviderReference(MonetizationReference reference) {

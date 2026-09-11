@@ -7,43 +7,58 @@ import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/core/theme/spacing.dart';
 import 'package:civilpedia/core/widgets/state_widgets.dart';
-import 'package:civilpedia/features/directory/domain/directory_repository.dart';
+import 'package:civilpedia/features/business/domain/directory_entity_types.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
+import 'package:civilpedia/features/directory/domain/cloud_directory_repository.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_card.dart';
 import 'package:civilpedia/features/directory/presentation/directory_search_screen.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
 
-class _FakeDirectoryRepository implements DirectoryRepository {
-  final List<ServiceBusinessProfile> profiles;
+class _FakeDirectoryRepository implements CloudDirectoryRepository {
+  final List<CanonicalDirectoryEntity> entities;
 
-  _FakeDirectoryRepository(this.profiles);
-
-  @override
-  Future<List<ServiceBusinessProfile>> loadAll() async =>
-      List<ServiceBusinessProfile>.from(profiles);
+  _FakeDirectoryRepository(this.entities);
 
   @override
-  Future<ServiceBusinessProfile?> loadById(String id) async => null;
+  bool get isAvailable => true;
 
   @override
-  Future<void> save(ServiceBusinessProfile profile) async {}
+  Future<DirectoryCachedData?> readCache() async => null;
 
   @override
-  Future<void> delete(String id) async {}
+  Future<DirectoryRefreshResult> refresh() async =>
+      const DirectoryRefreshResult(status: DirectoryRefreshStatus.failure);
 
   @override
-  Future<void> clearAll() async {}
+  Future<CanonicalDirectoryEntity?> loadByCanonicalId(String id) async => null;
+
+  @override
+  Future<DirectoryLoadResult> load() async {
+    if (entities.isEmpty) {
+      return DirectoryLoadResult(
+        state: DirectoryLoadState.empty,
+        entities: const [],
+        refreshedAt: DateTime.now().toUtc(),
+      );
+    }
+    return DirectoryLoadResult(
+      state: DirectoryLoadState.fresh,
+      entities: List<CanonicalDirectoryEntity>.from(entities),
+      refreshedAt: DateTime.now().toUtc(),
+    );
+  }
 }
 
-ServiceBusinessProfile _p(String id, {String name = '', VerificationStatus v = VerificationStatus.unverified}) {
-  return ServiceBusinessProfile(
+CanonicalDirectoryEntity _p(String id, {String name = '', VerificationStatus v = VerificationStatus.unverified}) {
+  return CanonicalDirectoryEntity(
     id: id,
     name: name == '' ? 'Provider $id' : name,
-    type: BusinessType.other,
+    entityType: DirectoryEntityType.serviceProvider,
     verificationStatus: v,
   );
 }
 
-Widget _searchApp(List<ServiceBusinessProfile> profiles, {double? bottomContentPadding}) {
+Widget _searchApp(List<CanonicalDirectoryEntity> profiles, {double? bottomContentPadding}) {
   return ChangeNotifierProvider(
     create: (_) => LanguageProvider(),
     child: MaterialApp(
@@ -136,7 +151,7 @@ void main() {
       final cards = tester.widgetList<DirectoryProviderCard>(
         find.byType(DirectoryProviderCard),
       );
-      expect(cards.map((c) => c.profile.name).toList(), ['Alpha', 'Beta']);
+      expect(cards.map((c) => c.entity.name).toList(), ['Alpha', 'Beta']);
     });
 
     testWidgets('8. no layout overflow with many results', (tester) async {
@@ -157,7 +172,7 @@ void main() {
     const breathing = AppSpacing.lg; // 16
 
     Widget shellHostedSearch({
-      List<ServiceBusinessProfile> profiles = const [],
+      List<CanonicalDirectoryEntity> profiles = const [],
     }) {
       return MediaQuery(
         data: MediaQueryData(

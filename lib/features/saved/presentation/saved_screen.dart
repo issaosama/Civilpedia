@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/di/app_dependencies.dart';
-import '../../../core/location/baghdad_area.dart';
 import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -13,14 +12,14 @@ import '../../../core/widgets/custom_card.dart';
 import '../../../data/local/hive_helper.dart';
 import '../../../data/repositories/article_repository.dart';
 import '../../../localization/ar.dart';
+import '../../../routes/app_routes.dart';
 import '../../articles/presentation/widgets/article_image.dart';
-import '../../directory/domain/directory_repository.dart';
-import '../../directory/presentation/directory_category_presentation.dart';
-import '../../directory/presentation/directory_provider_detail_screen.dart';
+import '../../directory/domain/canonical_directory_entity.dart';
+import '../../directory/domain/cloud_directory_repository.dart';
+import '../../directory/presentation/canonical_entity_type_presentation.dart';
 import '../../encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import '../../encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import '../../encyclopedia/presentation/widgets/topic_list_card.dart';
-import '../../profile/domain/service_business_profile.dart';
 import '../../saved/domain/saved_reference_store.dart';
 import '../data/hive_saved_reference_resolver.dart';
 import '../domain/saved_item_reference.dart';
@@ -40,13 +39,10 @@ class SavedScreen extends StatefulWidget {
   /// ([hiveSavedReferenceResolver]).
   final SavedReferenceResolver? favoritesResolver;
 
-  /// Directory-domain repository used to resolve saved provider references.
-  ///
-  /// W5.6 — SavedScreen resolves directory/provider refs ONLY through
-  /// [DirectoryRepository.loadById]; it never reads `sb_profiles` or the raw
-  /// Directory storage. Defaults to [AppDependencies.directoryRepo]; tests
-  /// inject a fake.
-  final DirectoryRepository? directoryRepository;
+  /// V1-R05 — Directory-domain repository used to resolve saved provider
+  /// references through canonical `directory_entities.id`. Defaults to
+  /// [AppDependencies.directoryRepo]; tests inject a fake.
+  final CloudDirectoryRepository? directoryRepository;
 
   /// Canonical User-owned Saved store.
   ///
@@ -77,7 +73,6 @@ class _SavedScreenState extends State<SavedScreen>
   /// directory ref must be resolved — never eagerly at initState, so contexts
   /// that never need the Directory backend (e.g. Knowledge-only Favorites)
   /// stay lightweight and never touch the lazy singleton.
-  late final DirectoryRepository? _directoryRepoOverride;
 
   List<SavedItemReference> _favorites = const [];
   bool _favoritesLoaded = false;
@@ -86,13 +81,12 @@ class _SavedScreenState extends State<SavedScreen>
 
   /// Resolved Directory providers, in reference/source order. Null entries mark
   /// provider refs whose entity can no longer be resolved (shown unavailable).
-  List<ServiceBusinessProfile?> _directoryProviders = const [];
+  List<CanonicalDirectoryEntity?> _directoryProviders = const [];
 
   @override
   void initState() {
     super.initState();
     _resolver = widget.favoritesResolver ?? hiveSavedReferenceResolver();
-    _directoryRepoOverride = widget.directoryRepository;
     _tabController = TabController(
       length: 2,
       vsync: this,
@@ -157,14 +151,16 @@ class _SavedScreenState extends State<SavedScreen>
         });
   }
 
-  /// W5.6 — resolves directory/provider Saved refs through the canonical
-  /// [DirectoryRepository.loadById], preserving reference/source order and
-  /// marking unresolvable entries as null (shown "unavailable"). Never deletes
-  /// the Saved ref and ranks nothing.
-  Future<List<ServiceBusinessProfile?>> _resolveDirectoryProviders(
+  /// V1-R05 — resolves directory/provider Saved refs through the canonical
+  /// [CloudDirectoryRepository.loadByCanonicalId] using the canonical entity
+  /// UUID. Preserves reference/source order and marks unresolvable entries as
+  /// null (shown "unavailable"). Never deletes the Saved ref and ranks nothing.
+  /// Unmatched legacy references (non-UUID local ids) are not heuristically
+  /// rebound.
+  Future<List<CanonicalDirectoryEntity?>> _resolveDirectoryProviders(
     List<SavedItemReference> refs,
   ) async {
-    final result = <ServiceBusinessProfile?>[];
+    final result = <CanonicalDirectoryEntity?>[];
     for (final ref in refs) {
       if (ref.ownerDomain != SavedReferenceOwners.directory) continue;
       if (ref.entityType != SavedReferenceEntityTypes.provider) continue;
@@ -173,12 +169,10 @@ class _SavedScreenState extends State<SavedScreen>
         result.add(null);
         continue;
       }
-      // Lazy: the production Directory backend is obtained only when an actual
-      // provider ref must be resolved, not at screen construction.
-      final repo = _directoryRepoOverride ?? AppDependencies.directoryRepo;
-      ServiceBusinessProfile? provider;
+      final repo = widget.directoryRepository ?? AppDependencies.directoryRepo;
+      CanonicalDirectoryEntity? provider;
       try {
-        provider = await repo.loadById(entityId);
+        provider = await repo.loadByCanonicalId(entityId);
       } catch (_) {
         provider = null;
       }
@@ -325,19 +319,18 @@ class _SavedScreenState extends State<SavedScreen>
     );
   }
 
-  /// W5.6 — smallest reusable presentation of one saved Directory provider.
+  /// V1-R05 — smallest reusable presentation of one saved Directory provider.
   ///
-  /// Resolved provider: name + localized BusinessType + localized BaghdadArea
+  /// Resolved entity: name + localized canonical entity type + region summary
   /// (when meaningful) + a Directory identity icon, opening the provider detail
-  /// on tap. Unavailable (null) provider: a non-navigating "Provider
+  /// on tap. Unavailable (null) entity: a non-navigating "Provider
   /// unavailable" row. Directory identity icon is always shown. No
   /// verification/ranking/sponsored/plan signals, and no saved button inside
   /// the already-Saved list.
-  Widget _buildDirectoryRow(ServiceBusinessProfile? provider) {
+  Widget _buildDirectoryRow(CanonicalDirectoryEntity? provider) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final icon = DirectoryCategoryPresentation.iconFor(
-      provider?.type ?? BusinessType.other,
-    );
+    final entityType = provider?.entityType ?? 'other';
+    final icon = CanonicalEntityTypePresentation.iconFor(entityType);
     return CivilSurfaceCard(
       onTap: provider == null ? null : () => _openSavedProvider(provider),
       child: Row(
@@ -399,26 +392,26 @@ class _SavedScreenState extends State<SavedScreen>
     );
   }
 
-  String _providerSubtitle(ServiceBusinessProfile provider) {
-    final typeLabel = DirectoryCategoryPresentation.labelFor(
-      provider.type,
+  String _providerSubtitle(CanonicalDirectoryEntity provider) {
+    final typeLabel = CanonicalEntityTypePresentation.labelFor(
+      provider.entityType,
       isArabic: true,
     );
-    final locationLabel = provider.baghdadArea == BaghdadArea.unknown
-        ? null
-        : provider.baghdadArea.arName;
-    if (locationLabel == null) return typeLabel;
+    final locationLabel = provider.locations.isNotEmpty
+        ? provider.locations.first.regionName
+        : null;
+    if (locationLabel == null || locationLabel.isEmpty) return typeLabel;
     return '$typeLabel · $locationLabel';
   }
 
-  Future<void> _openSavedProvider(ServiceBusinessProfile provider) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => DirectoryProviderDetailScreen(
-          profile: provider,
-          savedReferenceStore: widget.savedReferenceStore,
-        ),
-      ),
+  Future<void> _openSavedProvider(CanonicalDirectoryEntity provider) async {
+    // Navigate through the canonical `/directory/entity/:id` route: the saved
+    // reference is re-resolved against the canonical repository/cache at the
+    // destination. The whole entity is only a non-authoritative first-frame
+    // hint, never the authoritative detail state.
+    await context.push(
+      AppRoutes.directoryEntityDetailFor(provider.id),
+      extra: provider,
     );
     if (mounted) _loadFavorites();
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/di/app_dependencies.dart';
-import '../../../core/location/baghdad_area.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
@@ -11,41 +10,39 @@ import '../../../core/widgets/civil_app_bar.dart';
 import '../../../core/widgets/civil_surface_card.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
-import '../../profile/domain/service_business_profile.dart';
 import '../../saved/domain/saved_item_reference.dart';
 import '../../saved/domain/saved_reference_store.dart';
-import 'directory_category_presentation.dart';
+import '../domain/canonical_directory_entity.dart';
+import '../domain/cloud_directory_repository.dart';
+import 'canonical_entity_type_presentation.dart';
 import 'directory_verification_badge.dart';
 import 'services/directory_contact_launcher.dart';
 
-/// W5.4 — canonical reusable Directory provider detail surface.
+/// V1-R05 — Canonical reusable Directory provider detail surface.
 ///
-/// Deliberately excludes any Monetization signals (W7). Maps launch is deferred:
-/// the entity has address + BaghdadArea but no coordinates, so W5.4 displays
-/// location text only. Verification is displayed as a compact badge in the
-/// identity/header block (W5.5) — display only, never filtering, ranking or
-/// contact-altering.
+/// Displays canonical public data for [CanonicalDirectoryEntity]:
+/// name, canonical type label, verification state, claim state, description,
+/// categories, location/address, public contacts (phone/WhatsApp/email/website).
+/// Do NOT expose owner IDs, membership, applicant metadata, or internal audit
+/// data. Media is optional and handled only when safely available.
 ///
-/// W5.6 — adds ONE AppBar Save/Unsave bookmark action backed by the canonical
-/// User-owned [SavedReferenceStore]. Save state is purely local (works offline)
-/// and never touches `ServiceBusinessProfile`, contact, verification or
-/// Monetization fields.
+/// V1-R05 routing: detail is reached by canonical `directory_entities.id`.
+/// The Save/Unsave bookmark always uses the canonical entity UUID. Legacy local
+/// provider ids are never canonical Directory references.
 class DirectoryProviderDetailScreen extends StatefulWidget {
-  /// The provider to display, passed directly from the listing.
-  final ServiceBusinessProfile profile;
+  final CanonicalDirectoryEntity entity;
 
   /// Injected contact launcher. Production default uses [url_launcher]; tests
   /// inject a fake so widget tests never open a real external app.
   final DirectoryContactLauncher? contactLauncher;
 
   /// Canonical User-owned Saved store. Production default is
-  /// [AppDependencies.savedReferenceStore]; tests inject a fake in-memory store
-  /// so widget tests never perform real persistent writes.
+  /// [AppDependencies.savedReferenceStore]; tests inject a fake in-memory store.
   final SavedReferenceStore? savedReferenceStore;
 
   const DirectoryProviderDetailScreen({
     super.key,
-    required this.profile,
+    required this.entity,
     this.contactLauncher,
     this.savedReferenceStore,
   });
@@ -58,19 +55,11 @@ class DirectoryProviderDetailScreen extends StatefulWidget {
 class _DirectoryProviderDetailScreenState
     extends State<DirectoryProviderDetailScreen> {
   late final DirectoryContactLauncher _launcher;
-
-  /// Optional injected Saved-store override. The effective store
-  /// ([_store]) is resolved lazily ONLY inside guarded try/catch blocks, never
-  /// eagerly at initState, so an uninitialized production singleton degrades
-  /// the Save feature gracefully (reads as unsaved) instead of crashing the
-  /// whole detail surface. Tests may inject a fake.
   late final SavedReferenceStore? _savedStoreOverride;
 
-  /// null while the initial saved-state query is in flight, to avoid a visual
-  /// flash. Bookmark is only interactive once resolved.
   bool? _isSaved;
 
-  /// Canonical deterministic directory/provider ref id from `profile.id`.
+  /// Canonical Directory/provider ref id from `directory_entities.id`.
   late final String _providerRefId;
 
   SavedReferenceStore get _store =>
@@ -82,11 +71,10 @@ class _DirectoryProviderDetailScreenState
     _launcher =
         widget.contactLauncher ?? const UrlLauncherDirectoryContactLauncher();
     _savedStoreOverride = widget.savedReferenceStore;
-    final profile = widget.profile;
     _providerRefId = SavedItemReference(
       ownerDomain: SavedReferenceOwners.directory,
       entityType: SavedReferenceEntityTypes.provider,
-      entityId: profile.id,
+      entityId: widget.entity.id,
     ).id;
     _loadSavedState();
   }
@@ -113,7 +101,7 @@ class _DirectoryProviderDetailScreenState
           SavedItemReference(
             ownerDomain: SavedReferenceOwners.directory,
             entityType: SavedReferenceEntityTypes.provider,
-            entityId: widget.profile.id,
+            entityId: widget.entity.id,
             savedAt: DateTime.now().toUtc(),
           ),
         );
@@ -155,17 +143,9 @@ class _DirectoryProviderDetailScreenState
     );
   }
 
-  /// W5.6 — the one Save/Unsave AppBar bookmark action.
-  ///
-  /// Unsaved → `bookmark_border` / "Save provider"; Saved → `bookmark` /
-  /// "Remove from saved". The current action is exposed semantically via the
-  /// tooltip (never icon-fill alone). Hidden until the initial saved-state query
-  /// resolves (no flashing bookmark).
   Widget _buildSaveAction(bool isArabic) {
     final isSaved = _isSaved;
-    if (isSaved == null) {
-      return const SizedBox.shrink();
-    }
+    if (isSaved == null) return const SizedBox.shrink();
     final unsaved = isSaved == false;
     final tooltip = unsaved
         ? (isArabic ? Ar.savedSaveProvider : En.savedSaveProvider)
@@ -177,27 +157,49 @@ class _DirectoryProviderDetailScreenState
     );
   }
 
+  /// Maps canonical `entity_contacts.contact_type` values to phones and
+  /// WhatsApp digits. Unknown/malformed types fail safe (never crash).
+  (List<String>, String) _contactProjection(CanonicalDirectoryEntity entity) {
+    final phones = <String>[];
+    var whatsapp = '';
+    for (final contact in entity.contacts) {
+      final value = contact.value.trim();
+      if (value.isEmpty) continue;
+      switch (contact.contactType.toLowerCase()) {
+        case 'phone':
+        case 'telephone':
+        case 'mobile':
+        case 'phone_number':
+          phones.add(value);
+        case 'whatsapp':
+          whatsapp = value;
+      }
+    }
+    return (phones, _whatsappDigits(whatsapp));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final profile = widget.profile;
+    final entity = widget.entity;
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final theme = Theme.of(context);
-    final description = profile.description?.trim();
-    final address = profile.address?.trim();
-    final services = _nonEmptyList([...profile.categories, ...profile.subCategories]);
-    final phones = _nonEmptyPhones(profile.phones);
-    final whatsappDigits = _whatsappDigits(profile.whatsapp);
+    final description = entity.description?.trim();
+    final address = _primaryAddress(entity);
+    final services = _nonEmptyList(
+      entity.categories.map((c) => c.name).toList(),
+    );
+    final (phones, whatsappDigits) = _contactProjection(entity);
     final hasActionableContact = phones.isNotEmpty || whatsappDigits.isNotEmpty;
 
     return Scaffold(
       appBar: CivilAppBar(
-        title: Text(profile.name),
+        title: Text(entity.name),
         actions: [_buildSaveAction(isArabic)],
       ),
       body: ListView(
         padding: AppSpacing.padLg,
         children: [
-          _buildIdentity(profile, isArabic, theme),
+          _buildIdentity(entity, isArabic, theme),
           if (description != null && description.isNotEmpty) ...[
             AppSpacing.gapLg,
             _sectionLabel(isArabic ? Ar.directoryDescription : En.directoryDescription),
@@ -231,7 +233,7 @@ class _DirectoryProviderDetailScreenState
           _sectionLabel(isArabic ? Ar.directoryContact : En.directoryContact),
           AppSpacing.gapSm,
           if (hasActionableContact)
-            _buildContactActions(profile, phones, whatsappDigits, isArabic, theme)
+            _buildContactActions(entity, phones, whatsappDigits, isArabic, theme)
           else
             _buildNoContact(theme),
         ],
@@ -240,18 +242,15 @@ class _DirectoryProviderDetailScreenState
   }
 
   Widget _buildIdentity(
-    ServiceBusinessProfile profile,
+    CanonicalDirectoryEntity entity,
     bool isArabic,
     ThemeData theme,
   ) {
-    final typeLabel = DirectoryCategoryPresentation.labelFor(
-      profile.type,
+    final typeLabel = CanonicalEntityTypePresentation.labelFor(
+      entity.entityType,
       isArabic: isArabic,
     );
-    final locationLabel =
-        profile.baghdadArea == BaghdadArea.unknown
-            ? (isArabic ? Ar.directoryNotSpecified : En.directoryNotSpecified)
-            : (isArabic ? profile.baghdadArea.arName : profile.baghdadArea.enName);
+    final locationLabel = _locationLabel(entity, isArabic);
 
     return CivilSurfaceCard(
       child: Column(
@@ -268,7 +267,7 @@ class _DirectoryProviderDetailScreenState
                   borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
                 ),
                 child: Icon(
-                  DirectoryCategoryPresentation.iconFor(profile.type),
+                  CanonicalEntityTypePresentation.iconFor(entity.entityType),
                   color: AppColors.primaryDark,
                   size: 26,
                 ),
@@ -279,7 +278,7 @@ class _DirectoryProviderDetailScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      profile.name,
+                      entity.name,
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
@@ -291,15 +290,17 @@ class _DirectoryProviderDetailScreenState
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    Text(
-                      locationLabel,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textMuted,
+                    if (locationLabel != null) ...[
+                      Text(
+                        locationLabel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.textMuted,
+                        ),
                       ),
-                    ),
+                    ],
                     const SizedBox(height: AppSpacing.xs),
                     DirectoryVerificationBadge(
-                      status: profile.verificationStatus,
+                      status: entity.verificationStatus,
                     ),
                   ],
                 ),
@@ -322,7 +323,7 @@ class _DirectoryProviderDetailScreenState
   }
 
   Widget _buildContactActions(
-    ServiceBusinessProfile profile,
+    CanonicalDirectoryEntity entity,
     List<String> phones,
     String whatsappDigits,
     bool isArabic,
@@ -448,13 +449,23 @@ class _ContactButton extends StatelessWidget {
   }
 }
 
-List<String> _nonEmptyPhones(List<String> phones) {
-  final result = <String>[];
-  for (final raw in phones) {
-    final trimmed = raw.trim();
-    if (trimmed.isNotEmpty) result.add(trimmed);
+/// Resolves the primary region for presentation.
+String? _locationLabel(CanonicalDirectoryEntity entity, bool isArabic) {
+  if (entity.locations.isEmpty) return null;
+  final first = entity.locations.first;
+  final regionName = first.regionName;
+  if (regionName != null && regionName.isNotEmpty) return regionName;
+  return first.regionCode.isNotEmpty
+      ? (isArabic ? Ar.directoryNotSpecified : En.directoryNotSpecified)
+      : null;
+}
+
+String? _primaryAddress(CanonicalDirectoryEntity entity) {
+  for (final loc in entity.locations) {
+    final address = loc.address?.trim();
+    if (address != null && address.isNotEmpty) return address;
   }
-  return result;
+  return null;
 }
 
 List<String> _nonEmptyList(List<String> values) {
@@ -469,4 +480,90 @@ List<String> _nonEmptyList(List<String> values) {
 String _whatsappDigits(String? whatsapp) {
   if (whatsapp == null) return '';
   return extractWhatsAppDigits(whatsapp);
+}
+
+/// V1-R05 — canonical detail destination resolver for the
+/// `/directory/entity/:id` route.
+///
+/// The canonical `directory_entities.id` is the ONLY authoritative detail
+/// state: [entityId] is always resolved through [repository]/cache before the
+/// detail surface is shown. A whole-entity [seedEntity] is used ONLY as a
+/// non-authoritative first-frame presentation optimization (fast paint while
+/// the authoritative resolution is in flight) and is always replaced by the
+/// resolved entity. Unknown/unresolvable ids render the unavailable state
+/// instead of inventing an entity.
+class DirectoryProviderDetailResolver extends StatefulWidget {
+  const DirectoryProviderDetailResolver({
+    super.key,
+    required this.entityId,
+    required this.repository,
+    this.seedEntity,
+    this.savedReferenceStore,
+  });
+
+  /// Canonical `directory_entities.id` (UUID) resolved by the route.
+  final String entityId;
+
+  /// Production repository/cache used for the authoritative resolution.
+  final CloudDirectoryRepository repository;
+
+  /// Non-authoritative first-frame hint; never the authoritative detail state.
+  final CanonicalDirectoryEntity? seedEntity;
+
+  /// Forwarded Saved store override for test/DI consistency.
+  final SavedReferenceStore? savedReferenceStore;
+
+  @override
+  State<DirectoryProviderDetailResolver> createState() =>
+      _DirectoryProviderDetailResolverState();
+}
+
+class _DirectoryProviderDetailResolverState
+    extends State<DirectoryProviderDetailResolver> {
+  CanonicalDirectoryEntity? _entity;
+  bool _resolved = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final seed = widget.seedEntity;
+    _entity = (seed != null && seed.id == widget.entityId) ? seed : null;
+    _resolve();
+  }
+
+  Future<void> _resolve() async {
+    CanonicalDirectoryEntity? resolved;
+    try {
+      resolved = await widget.repository.loadByCanonicalId(widget.entityId);
+    } catch (_) {
+      resolved = null;
+    }
+    if (!mounted) return;
+    setState(() {
+      // Authoritative replacement — even a null (unknown) result replaces
+      // the seed frame so a stale hint can never remain authoritative.
+      _entity = resolved;
+      _resolved = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entity = _entity;
+    if (entity == null) {
+      if (_resolved) {
+        return Scaffold(
+          appBar: CivilAppBar(title: const Text('')),
+          body: const Center(child: Text('Entity not found')),
+        );
+      }
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return DirectoryProviderDetailScreen(
+      entity: entity,
+      savedReferenceStore: widget.savedReferenceStore,
+    );
+  }
 }

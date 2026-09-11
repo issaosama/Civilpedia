@@ -2,15 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'package:civilpedia/core/location/baghdad_area.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/directory/presentation/services/directory_contact_launcher.dart';
 import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
 import 'package:civilpedia/features/saved/domain/saved_item_reference.dart';
 import 'package:civilpedia/features/saved/domain/saved_reference_store.dart';
 import 'package:civilpedia/localization/ar.dart';
+
+import 'helpers/canonical_directory_test_helpers.dart';
 
 class _FakeLauncher implements DirectoryContactLauncher {
   final List<String> launchedPhones = [];
@@ -58,48 +60,36 @@ class _FakeSavedStore implements SavedReferenceStore {
   }
 }
 
-ServiceBusinessProfile _p({
+CanonicalDirectoryEntity _p({
   required String id,
   String name = '',
-  BusinessType type = BusinessType.other,
-  List<String> categories = const [],
-  List<String> subCategories = const [],
-  BaghdadArea baghdadArea = BaghdadArea.unknown,
-  String? address,
+  String entityType = 'other',
   String? description,
-  List<String> phones = const [],
-  String? whatsapp,
+  List<CanonicalDirectoryCategory> categories = const [],
+  List<CanonicalDirectoryLocation> locations = const [],
+  List<CanonicalDirectoryContact> contacts = const [],
   VerificationStatus verificationStatus = VerificationStatus.unverified,
-  bool featured = false,
-  bool foundingPartner = false,
-  String? planType,
 }) {
-  return ServiceBusinessProfile(
+  return fakeEntity(
     id: id,
     name: name,
-    type: type,
-    categories: categories,
-    subCategories: subCategories,
-    baghdadArea: baghdadArea,
-    address: address,
+    entityType: entityType,
     description: description,
-    phones: phones,
-    whatsapp: whatsapp,
+    categories: categories,
+    locations: locations,
+    contacts: contacts,
     verificationStatus: verificationStatus,
-    featured: featured,
-    foundingPartner: foundingPartner,
-    planType: planType,
   );
 }
 
-Widget _app(ServiceBusinessProfile profile, _FakeLauncher launcher,
+Widget _app(CanonicalDirectoryEntity entity, _FakeLauncher launcher,
     {_FakeSavedStore? store}) {
   return ChangeNotifierProvider(
     create: (_) => LanguageProvider(),
     child: MaterialApp(
       theme: AppTheme.lightTheme,
       home: DirectoryProviderDetailScreen(
-        profile: profile,
+        entity: entity,
         contactLauncher: launcher,
         savedReferenceStore: store ?? _FakeSavedStore(),
       ),
@@ -109,12 +99,12 @@ Widget _app(ServiceBusinessProfile profile, _FakeLauncher launcher,
 
 Future<_FakeLauncher> _pump(
   WidgetTester tester,
-  ServiceBusinessProfile profile, {
+  CanonicalDirectoryEntity entity, {
   _FakeLauncher? launcher,
   _FakeSavedStore? store,
 }) async {
   final l = launcher ?? _FakeLauncher();
-  await tester.pumpWidget(_app(profile, l, store: store));
+  await tester.pumpWidget(_app(entity, l, store: store));
   await tester.pumpAndSettle();
   return l;
 }
@@ -127,15 +117,19 @@ void main() {
       expect(find.text('Alpha Steel'), findsAtLeastNWidgets(1));
     });
 
-    testWidgets('15. detail renders BusinessType', (tester) async {
-      await _pump(tester, _p(id: 'a', name: 'Alpha', type: BusinessType.supplier));
+    testWidgets('15. detail renders canonical entity type', (tester) async {
+      await _pump(tester, _p(id: 'a', name: 'Alpha', entityType: 'supplier'));
       expect(find.text('مورّد'), findsOneWidget);
     });
 
-    testWidgets('16. detail renders BaghdadArea', (tester) async {
+    testWidgets('16. detail renders region name', (tester) async {
       await _pump(
         tester,
-        _p(id: 'a', name: 'Alpha', baghdadArea: BaghdadArea.karrada),
+        _p(
+          id: 'a',
+          name: 'Alpha',
+          locations: [fakeLocation('karrada', regionName: 'كرادة')],
+        ),
       );
       expect(find.text('كرادة'), findsOneWidget);
     });
@@ -153,7 +147,12 @@ void main() {
     });
 
     testWidgets('19. address shown when present', (tester) async {
-      await _pump(tester, _p(id: 'a', name: 'Alpha', address: 'Baghdad St'));
+      await _pump(
+        tester,
+        _p(id: 'a', name: 'Alpha', locations: [
+          fakeLocation('central', address: 'Baghdad St'),
+        ]),
+      );
       expect(find.text('Baghdad St'), findsOneWidget);
     });
 
@@ -165,21 +164,32 @@ void main() {
 
   group('W5.4 DETAIL — services', () {
     testWidgets('21. categories shown', (tester) async {
-      await _pump(tester, _p(id: 'a', name: 'Alpha', categories: ['Steel', 'Concrete']));
+      await _pump(
+        tester,
+        _p(
+          id: 'a',
+          name: 'Alpha',
+          categories: [fakeCategory('Steel'), fakeCategory('Concrete')],
+        ),
+      );
       expect(find.text('Steel'), findsOneWidget);
       expect(find.text('Concrete'), findsOneWidget);
     });
 
-    testWidgets('22. subCategories shown', (tester) async {
+    testWidgets('22. all categories shown (no subcategory concept)', (tester) async {
       await _pump(
         tester,
-        _p(id: 'a', name: 'Alpha', subCategories: ['Reinforcement', 'Formwork']),
+        _p(
+          id: 'a',
+          name: 'Alpha',
+          categories: [fakeCategory('Reinforcement'), fakeCategory('Formwork')],
+        ),
       );
       expect(find.text('Reinforcement'), findsOneWidget);
       expect(find.text('Formwork'), findsOneWidget);
     });
 
-    testWidgets('services section hidden when no categories/subCategories', (tester) async {
+    testWidgets('services section hidden when no categories', (tester) async {
       await _pump(tester, _p(id: 'a', name: 'Alpha'));
       expect(find.text(Ar.directoryServices), findsNothing);
     });
@@ -187,27 +197,27 @@ void main() {
 
   group('W5.4 DETAIL — contact', () {
     testWidgets('23. multiple phones all rendered', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', phones: ['0771111111', '0772222222']);
+      final p = _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111'), fakePhone('0772222222')]);
       await _pump(tester, p);
       expect(find.textContaining('0771111111'), findsOneWidget);
       expect(find.textContaining('0772222222'), findsOneWidget);
     });
 
     testWidgets('24. empty phone strings ignored', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', phones: ['   ', '0771111111', '']);
+      final p = _p(id: 'a', name: 'Alpha', contacts: [fakePhone('   '), fakePhone('0771111111'), fakePhone('')]);
       await _pump(tester, p);
       expect(find.textContaining('0771111111'), findsOneWidget);
       expect(find.byIcon(Icons.phone), findsOneWidget);
     });
 
     testWidgets('25. WhatsApp shown when launchable', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', whatsapp: '+964 780 123 4567');
+      final p = _p(id: 'a', name: 'Alpha', contacts: [fakeWhatsApp('+964 780 123 4567')]);
       await _pump(tester, p);
       expect(find.textContaining('9647801234567'), findsOneWidget);
     });
 
     testWidgets('26. WhatsApp hidden when no digits', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', whatsapp: 'whatsapp only');
+      final p = _p(id: 'a', name: 'Alpha', contacts: [fakeWhatsApp('whatsapp only')]);
       await _pump(tester, p);
       expect(find.byIcon(Icons.chat), findsNothing);
     });
@@ -218,7 +228,7 @@ void main() {
     });
 
     testWidgets('28. no-contact state absent when actionable contact exists', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', phones: ['0771111111']);
+      final p = _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]);
       await _pump(tester, p);
       expect(find.text(Ar.directoryNoContactInformation), findsNothing);
     });
@@ -226,21 +236,26 @@ void main() {
 
   group('W5.4 DETAIL — exclusions', () {
     testWidgets('29. no email action', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', phones: ['0771111111']);
+      final p = _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]);
       await _pump(tester, p);
       expect(find.byIcon(Icons.mail_outline), findsNothing);
       expect(find.textContaining('@'), findsNothing);
     });
 
     testWidgets('30. no website action', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', phones: ['0771111111']);
+      final p = _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]);
       await _pump(tester, p);
       expect(find.byIcon(Icons.link), findsNothing);
       expect(find.textContaining('http'), findsNothing);
     });
 
     testWidgets('31. no maps action', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha', address: 'Baghdad', phones: ['0771111111']);
+      final p = _p(
+        id: 'a',
+        name: 'Alpha',
+        locations: [fakeLocation('central', address: 'Baghdad')],
+        contacts: [fakePhone('0771111111')],
+      );
       await _pump(tester, p);
       expect(find.text('Baghdad'), findsOneWidget);
       expect(find.byIcon(Icons.map), findsNothing);
@@ -267,10 +282,7 @@ void main() {
       final p = _p(
         id: 'a',
         name: 'Alpha',
-        featured: true,
-        foundingPartner: true,
-        planType: 'premium',
-        phones: ['0771111111'],
+        contacts: [fakePhone('0771111111')],
       );
       await _pump(tester, p);
       expect(find.textContaining('featured'), findsNothing);
@@ -283,13 +295,13 @@ void main() {
 
   group('W5.4 CONTACT LAUNCH', () {
     testWidgets('35. phone URI uses tel scheme via launcher', (tester) async {
-      final l = await _pump(tester, _p(id: 'a', name: 'Alpha', phones: ['0771111111']));
+      final l = await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]));
       await tester.tap(find.byIcon(Icons.phone));
       expect(l.launchedPhones, ['0771111111']);
     });
 
     testWidgets('36. phone uses trimmed stored value', (tester) async {
-      final l = await _pump(tester, _p(id: 'a', name: 'Alpha', phones: ['  0771111111  ']));
+      final l = await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('  0771111111  ')]));
       await tester.tap(find.byIcon(Icons.phone));
       expect(l.launchedPhones, ['0771111111']);
     });
@@ -297,7 +309,7 @@ void main() {
     testWidgets('37. multiple phone buttons launch their own numbers', (tester) async {
       final l = await _pump(
         tester,
-        _p(id: 'a', name: 'Alpha', phones: ['0771111111', '0772222222']),
+        _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111'), fakePhone('0772222222')]),
       );
       expect(find.byIcon(Icons.phone), findsNWidgets(2));
       await tester.tap(find.byIcon(Icons.phone).first);
@@ -307,7 +319,7 @@ void main() {
     });
 
     testWidgets('40. empty-digit WhatsApp is unavailable', (tester) async {
-      final l = await _pump(tester, _p(id: 'a', name: 'Alpha', whatsapp: 'no digits'));
+      final l = await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakeWhatsApp('no digits')]));
       expect(find.byIcon(Icons.chat), findsNothing);
       expect(l.launchedWhatsApps, isEmpty);
     });
@@ -327,7 +339,11 @@ void main() {
     testWidgets('41. WhatsApp launch uses wa.me and success shows no error', (tester) async {
       final l = await _pump(
         tester,
-        _p(id: 'a', name: 'Alpha', phones: ['0771111111'], whatsapp: '07801234567'),
+        _p(
+          id: 'a',
+          name: 'Alpha',
+          contacts: [fakePhone('0771111111'), fakeWhatsApp('07801234567')],
+        ),
       );
       // WhatsApp is its own button (chat icon), distinct from call (phone).
       await tester.tap(find.byIcon(Icons.chat));
@@ -337,7 +353,7 @@ void main() {
 
     testWidgets('42. launcher failure produces benign error feedback', (tester) async {
       final l = _FakeLauncher()..succeed = false;
-      await _pump(tester, _p(id: 'a', name: 'Alpha', phones: ['0771111111']), launcher: l);
+      await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]), launcher: l);
       await tester.tap(find.byIcon(Icons.phone));
       await tester.pump();
       expect(find.text(Ar.directoryUnableToOpenApp), findsOneWidget);
@@ -345,7 +361,7 @@ void main() {
 
     testWidgets('43. launch failure does not crash', (tester) async {
       final l = _FakeLauncher()..succeed = false;
-      await _pump(tester, _p(id: 'a', name: 'Alpha', phones: ['0771111111']), launcher: l);
+      await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]), launcher: l);
       await tester.tap(find.byIcon(Icons.phone));
       await tester.pump();
       expect(tester.takeException(), isNull);

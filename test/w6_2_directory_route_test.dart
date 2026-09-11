@@ -14,7 +14,6 @@ import 'package:civilpedia/core/widgets/civil_surface_card.dart';
 import 'package:civilpedia/features/auth/presentation/providers/auth_provider.dart';
 import 'package:civilpedia/features/directory/presentation/directory_landing_screen.dart';
 import 'package:civilpedia/features/directory/presentation/directory_search_screen.dart';
-import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:civilpedia/routes/app_router.dart';
 import 'package:civilpedia/routes/app_routes.dart';
@@ -96,16 +95,16 @@ void main() {
 
   testWidgets(
     'W6.2 selecting a category from /directory navigates to /directory/search '
-    'with the selected BusinessType as initialCategory',
+    'with the selected entity type as initialEntityType',
     (tester) async {
       _useTallViewport(tester);
       await _open(tester, AppRoutes.directory);
 
-      final type = BusinessType.supplier;
+      final type = 'company';
       final cards = find.byType(DirectoryLandingScreen);
       expect(cards, findsOneWidget);
 
-      // Tap the first category card (supplier) on the Landing grid.
+      // Tap the first category card (company) on the Landing grid.
       final supplierCard = find.descendant(
         of: cards,
         matching: find.byType(CivilSurfaceCard),
@@ -116,20 +115,20 @@ void main() {
 
       // W6.3: a GoRouter context.push onto the /directory branch navigator
       // renders the pushed DirectorySearchScreen with the shell chrome visible;
-      // the widget's presence + initialCategory prove the landing -> search
-      // navigation carried the selected BusinessType.
+      // the widget's presence + initialEntityType prove the landing -> search
+      // navigation carried the selected entity type.
       expect(find.byType(DirectorySearchScreen), findsOneWidget);
       final search = tester.widget<DirectorySearchScreen>(
         find.byType(DirectorySearchScreen),
       );
-      expect(search.initialCategory, type);
+      expect(search.initialEntityType, type);
       expect(tester.takeException(), isNull);
     },
   );
 
   testWidgets(
     'W6.2 direct /directory/search with no category opens unfiltered browse '
-    'mode (initialCategory null) and renders the real DirectorySearchScreen',
+    'mode (initialEntityType null) and renders the real DirectorySearchScreen',
     (tester) async {
       _useTallViewport(tester);
       await _open(tester, AppRoutes.directorySearch);
@@ -137,7 +136,7 @@ void main() {
       final search = tester.widget<DirectorySearchScreen>(
         find.byType(DirectorySearchScreen),
       );
-      expect(search.initialCategory, isNull);
+      expect(search.initialEntityType, isNull);
       expect(_currentPath(), AppRoutes.directorySearch);
       expect(tester.takeException(), isNull);
     },

@@ -1,6 +1,8 @@
 import 'package:path_provider/path_provider.dart';
 
 import '../../features/directory/data/sb_profiles_directory_repository.dart';
+import '../../features/directory/data/supabase_cloud_directory_repository.dart';
+import '../../features/directory/domain/cloud_directory_repository.dart';
 import '../../features/directory/domain/directory_repository.dart';
 import '../../features/monetization/data/empty_campaign_source.dart';
 import '../../features/monetization/domain/services/campaign_source.dart';
@@ -58,7 +60,8 @@ class AppDependencies {
 
   static late final ServiceBusinessDataSource _businessDataSource;
   static late final ServiceBusinessRepository _businessRepo;
-  static late final DirectoryRepository _directoryRepo;
+  static late final DirectoryRepository _legacyDirectoryRepo;
+  static late final CloudDirectoryRepository _directoryRepo;
 
   static late final SavedReferenceStore _savedReferenceStore;
 
@@ -103,7 +106,11 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
 
     _businessDataSource = ServiceBusinessDataSource();
     _businessRepo = LocalServiceBusinessRepository(_businessDataSource);
-    _directoryRepo = SbProfilesDirectoryRepository(businessRepo: _businessRepo);
+    // Legacy/local compatibility repository. Kept NON-destructively for
+    // degradation compatibility; NOT the production Directory authority.
+    _legacyDirectoryRepo = SbProfilesDirectoryRepository(
+      businessRepo: _businessRepo,
+    );
 
     _savedReferenceStore = const HiveSavedReferenceStore();
 
@@ -129,6 +136,13 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
     // without affecting current guest/local behavior.
     _supabaseService = SupabaseService();
     await _supabaseService.init();
+
+    // V1-R05 — production Directory repository. Cache-first cloud-backed
+    // read-only seam over public.directory_entities + canonical children
+    // (anon + authenticated under public RLS). No mutation surface.
+    _directoryRepo = SupabaseCloudDirectoryRepository(
+      service: _supabaseService,
+    );
 
     // A5.4 — auth boundary. Wires the Supabase-backed gateway; when the
     // backend is unconfigured the gateway stays unavailable and the app runs
@@ -202,7 +216,13 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
 
   static ServiceBusinessRepository get businessRepo => _businessRepo;
 
-  static DirectoryRepository get directoryRepo => _directoryRepo;
+  /// W5.1 legacy compatibility directory repository (sb_profiles-based).
+  /// Kept for sponsored placement coordinator backward compatibility.
+  static DirectoryRepository get legacyDirectoryRepo => _legacyDirectoryRepo;
+
+  /// V1-R05 — Production Directory repository (cloud-backed, cache-first,
+  /// read-only). Canonical `directory_entities.id` is the entity identity.
+  static CloudDirectoryRepository get directoryRepo => _directoryRepo;
 
   /// W7.2 — Production campaign source. HONEST-EMPTY: with no configured
   /// campaign authority it yields no candidates, so an unconfigured build

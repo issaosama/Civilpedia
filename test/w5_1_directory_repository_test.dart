@@ -97,15 +97,43 @@ bool _directorySourceHasNoDirectPrefsAccess() {
       && !source.contains('jsonEncode(');
 }
 
-/// Proves no new physical Directory persistence key is introduced.
-bool _noNewDirectoryKey() {
+/// V1-R05 W5.1 correction — explicit APPROVED static-key baseline: every
+/// pre-existing app key PLUS exactly the single V1-R05 Directory addition
+/// `directory_cloud_cache`.
+///
+/// This is an explicit allow-list, NOT a naming-pattern heuristic. Any new or
+/// renamed static string literal fails the check regardless of its prefix,
+/// name, or placement.
+const Set<String> _approvedStaticKeys = {
+  'civilpedia',
+  'isDarkMode',
+  'onboardingSeen',
+  'app_language',
+  'auth_email',
+  'auth_name',
+  'anonymous_install_id',
+  'ownership_registry',
+  'local_user_profile',
+  'sb_profiles',
+  'directory_cloud_cache',
+  'checklist_data',
+  'projects_list',
+  'favorites',
+  'encyclopediaFavorites',
+  'savedReferences',
+  'downloads',
+};
+
+/// Extracts every simple `static const String ... = 'literal';` key literal
+/// declared in [AppStorageKeys].
+Set<String> _declaredStaticKeyLiterals() {
   final keysSource = File(
     'lib/core/storage/app_storage_keys.dart',
   ).readAsStringSync();
-  return !keysSource.contains('directory_entities')
-      && !keysSource.contains('directory_profiles')
-      && !keysSource.contains('sb_profiles_v1')
-      && !keysSource.contains('directory_');
+  return RegExp(r"static const String \w+ = '([A-Za-z0-9_]+)';")
+      .allMatches(keysSource)
+      .map((m) => m.group(1)!)
+      .toSet();
 }
 
 void main() {
@@ -118,8 +146,23 @@ void main() {
       expect(AppStorageKeys.sbProfiles, _kKey);
     });
 
-    test('2. add no new Directory persistence key', () {
-      expect(_noNewDirectoryKey(), isTrue);
+    test('2. V1-R05 adds exactly one Directory key to the approved baseline',
+        () {
+      final declared = _declaredStaticKeyLiterals();
+      expect(declared, _approvedStaticKeys);
+      expect(declared.contains('directory_cloud_cache'), isTrue);
+    });
+
+    test('2b. arbitrary new key fails the explicit approved baseline', () {
+      // The baseline is explicit, not a naming-pattern guard: any new key
+      // fails regardless of prefix/name.
+      final declared = _declaredStaticKeyLiterals();
+      final withNewKey = Set<String>.from(declared)..add('directory_extra');
+      expect(withNewKey, isNot(_approvedStaticKeys));
+      final renamed = declared
+          .map((k) => k == 'sb_profiles' ? 'sb_profiles_v1' : k)
+          .toSet();
+      expect(renamed, isNot(_approvedStaticKeys));
     });
 
     test('3. legacy raw V0 array is readable through DirectoryRepository',

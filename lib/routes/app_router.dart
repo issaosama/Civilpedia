@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'app_routes.dart';
+import '../core/di/app_dependencies.dart';
+import '../core/widgets/civil_app_bar.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
@@ -29,7 +31,9 @@ import '../features/search/presentation/screens/global_search_screen.dart';
 import '../features/user_area/presentation/user_area_screen.dart';
 import '../features/directory/presentation/directory_landing_screen.dart';
 import '../features/directory/presentation/directory_search_screen.dart';
-import '../features/profile/domain/service_business_profile.dart';
+import '../features/directory/domain/canonical_directory_entity.dart';
+import '../features/directory/domain/cloud_directory_repository.dart';
+import '../features/directory/presentation/directory_provider_detail_screen.dart';
 import '../features/business/presentation/screens/my_applications_screen.dart';
 import '../features/business/presentation/screens/application_detail_screen.dart';
 import '../features/business/presentation/screens/application_new_form_screen.dart';
@@ -53,10 +57,12 @@ final Map<String, GoRouterWidgetBuilder> _shellBranchBuilders = {
 /// Nested routes for shell branches. W6.3 hosts the Directory search engine as
 /// a child of the `/directory` branch so a Landing → Search push renders on the
 /// branch navigator (bottom navigation stays visible) and direct
-/// `/directory/search` deep links land inside the shell.
+/// `/directory/search` deep links land inside the shell. V1-R05 adds the
+/// canonical entity-detail route `/directory/entity/:id`.
 final Map<String, List<RouteBase>> _shellBranchNestedRoutes = {
   AppRoutes.directory: [
     GoRoute(path: AppRoutes.directorySearchSegment, builder: _buildDirectorySearch),
+    GoRoute(path: '${AppRoutes.directoryEntitySegment}/:id', builder: _buildDirectoryEntityDetail),
   ],
 };
 
@@ -79,34 +85,45 @@ Widget _buildProfileEdit(BuildContext context, GoRouterState state) {
 
 /// W6.2 — canonical Directory Landing builder (W6.3 shell branch root).
 ///
-/// Hosts the real [DirectoryLandingScreen]. Wire its existing
-/// [DirectoryLandingScreen.onCategorySelected] seam to a GoRouter push of
-/// [AppRoutes.directorySearch], carrying the selected [BusinessType] via
-/// `state.extra`. The smallest transport is used — no query-string
-/// serialization, no navigation DTO. Bottom clearance is handled by the screen
-/// itself: it detects the AppShell ancestor (via [ShellContentInsets]) and
-/// applies the closed UI-SAFE-1 contract, so no numeric obstruction is passed
-/// through the standalone padding seam.
+/// V1-R05 adapted: category selection carries a canonical entity-type string
+/// instead of the legacy [BusinessType]. Bottom clearance is handled by the
+/// screen itself via the AppShell ancestor (ShellContentInsets).
 Widget _buildDirectoryLanding(BuildContext context, GoRouterState state) {
   return DirectoryLandingScreen(
-    onCategorySelected: (type) => context.push(
+    onCategorySelected: (entityType) => context.push(
       AppRoutes.directorySearch,
-      extra: type,
+      extra: entityType,
     ),
   );
 }
 
 /// W6.2 — canonical Directory Search builder (W6.3 branch-nested child).
 ///
-/// Hosts the real [DirectorySearchScreen]. Resolves the selected [BusinessType]
-/// from `state.extra` when supplied; direct navigation with no extra opens
-/// browse mode ([DirectorySearchScreen.initialCategory] null). Bottom clearance
-/// is handled by the screen itself: it detects the AppShell ancestor and
-/// applies the closed UI-SAFE-1 contract.
+/// V1-R05 adapted: resolves a canonical entity-type string from `state.extra`
+/// when supplied; direct navigation with no extra opens browse mode.
 Widget _buildDirectorySearch(BuildContext context, GoRouterState state) {
   final extra = state.extra;
   return DirectorySearchScreen(
-    initialCategory: extra is BusinessType ? extra : null,
+    initialEntityType: extra is String ? extra : null,
+  );
+}
+
+/// V1-R05 — canonical Directory entity-detail builder.
+///
+/// The destination ALWAYS resolves through the canonical
+/// [CloudDirectoryRepository]/cache keyed by `directory_entities.id`
+/// ([DirectoryProviderDetailResolver]). A whole entity carried via
+/// `state.extra` is used ONLY as a non-authoritative first-frame presentation
+/// hint (fast paint); the route never treats it as the authoritative detail
+/// state. Unknown/unresolvable ids render the unavailable state.
+Widget _buildDirectoryEntityDetail(BuildContext context, GoRouterState state) {
+  final id = state.pathParameters['id'] ?? '';
+  final extra = state.extra;
+  final seed = extra is CanonicalDirectoryEntity ? extra : null;
+  return DirectoryProviderDetailResolver(
+    entityId: id,
+    repository: AppDependencies.directoryRepo,
+    seedEntity: (seed != null && seed.id == id) ? seed : null,
   );
 }
 

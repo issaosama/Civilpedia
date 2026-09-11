@@ -6,9 +6,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'package:civilpedia/data/local/hive_helper.dart';
-import 'package:civilpedia/core/location/baghdad_area.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
-import 'package:civilpedia/features/directory/domain/directory_repository.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
+import 'package:civilpedia/features/directory/domain/cloud_directory_repository.dart';
+import 'package:civilpedia/features/directory/presentation/canonical_entity_type_presentation.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/category_info.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/content_block.dart';
@@ -17,35 +18,13 @@ import 'package:civilpedia/features/encyclopedia/domain/entities/topic_section.d
 import 'package:civilpedia/features/encyclopedia/domain/repositories/encyclopedia_repository.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
-import 'package:civilpedia/features/profile/domain/service_business_profile.dart';
 import 'package:civilpedia/features/saved/domain/saved_item_reference.dart';
 import 'package:civilpedia/features/saved/domain/saved_reference_resolver.dart';
 import 'package:civilpedia/features/saved/domain/saved_reference_store.dart';
 import 'package:civilpedia/features/saved/presentation/saved_screen.dart';
 import 'package:civilpedia/localization/ar.dart';
 
-class _FakeDirectoryRepository implements DirectoryRepository {
-  final List<ServiceBusinessProfile> providers;
-  _FakeDirectoryRepository(this.providers);
-
-  @override
-  Future<List<ServiceBusinessProfile>> loadAll() async => List.of(providers);
-
-  @override
-  Future<ServiceBusinessProfile?> loadById(String id) async {
-    for (final p in providers) {
-      if (p.id == id) return p;
-    }
-    return null;
-  }
-
-  @override
-  Future<void> save(ServiceBusinessProfile profile) async {}
-  @override
-  Future<void> delete(String id) async {}
-  @override
-  Future<void> clearAll() async {}
-}
+import 'helpers/canonical_directory_test_helpers.dart';
 
 class _FakeSavedStore implements SavedReferenceStore {
   final List<SavedItemReference> refs;
@@ -110,8 +89,17 @@ EngineeringTopic _topic(String id, String title) => EngineeringTopic(
   keyTopics: const ['خرسانة'],
 );
 
-ServiceBusinessProfile _provider(String id, {String name = '', BusinessType type = BusinessType.supplier, BaghdadArea area = BaghdadArea.karrada}) {
-  return ServiceBusinessProfile(id: id, name: name, type: type, baghdadArea: area);
+CanonicalDirectoryEntity _provider(
+  String id, {
+  String name = '',
+  String entityType = 'supplier',
+}) {
+  return fakeEntity(
+    id: id,
+    name: name,
+    entityType: entityType,
+    locations: [fakeLocation('karrada', regionName: 'كرادة')],
+  );
 }
 
 SavedItemReference _dirRef(String id) => SavedItemReference(
@@ -123,7 +111,7 @@ SavedItemReference _dirRef(String id) => SavedItemReference(
 
 Future<void> _pump(
   WidgetTester tester, {
-  required DirectoryRepository directoryRepo,
+  required CloudDirectoryRepository directoryRepo,
   required SavedReferenceStore store,
   List<String> topicIds = const [],
   List<String> articleIds = const [],
@@ -148,10 +136,14 @@ Future<void> _pump(
           ),
           ChangeNotifierProvider.value(value: favorites),
         ],
-        child: MaterialApp(
-          home: SavedScreen(
-            favoritesResolver: resolver,
-            directoryRepository: directoryRepo,
+        child: MaterialApp.router(
+          routerConfig: canonicalDirectoryDetailRouter(
+            home: SavedScreen(
+              favoritesResolver: resolver,
+              directoryRepository: directoryRepo,
+              savedReferenceStore: store,
+            ),
+            repository: directoryRepo,
             savedReferenceStore: store,
           ),
         ),
@@ -189,7 +181,7 @@ void main() {
     testWidgets('38. no Directory section when no Directory refs', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([_provider('p1', name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
         store: _FakeSavedStore(const []),
       );
       expect(find.text(Ar.savedEngineeringDirectory), findsNothing);
@@ -199,7 +191,7 @@ void main() {
     testWidgets('39. Directory section appears with provider refs', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([_provider('p1', name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
         store: _FakeSavedStore([_dirRef('p1')]),
       );
       expect(find.text(Ar.savedEngineeringDirectory), findsOneWidget);
@@ -208,28 +200,33 @@ void main() {
     testWidgets('40. resolved provider row shows name', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([_provider('p1', name: 'Alpha Steel')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha Steel')]),
         store: _FakeSavedStore([_dirRef('p1')]),
       );
       expect(find.text('Alpha Steel'), findsOneWidget);
     });
 
-    testWidgets('41. row shows localized BusinessType', (tester) async {
+    testWidgets('41. row shows localized entity type', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([
-          _provider('p1', name: 'Alpha', type: BusinessType.supplier),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider('p1', name: 'Alpha', entityType: 'supplier'),
         ]),
         store: _FakeSavedStore([_dirRef('p1')]),
       );
-      expect(find.textContaining('مورّد'), findsOneWidget);
+      expect(
+        find.textContaining(
+          CanonicalEntityTypePresentation.labelFor('supplier', isArabic: true),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('42. row shows location when meaningful', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([
-          _provider('p1', name: 'Alpha', area: BaghdadArea.karrada),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider('p1', name: 'Alpha'),
         ]),
         store: _FakeSavedStore([_dirRef('p1')]),
       );
@@ -239,7 +236,7 @@ void main() {
     testWidgets('43. source/ref order preserved', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([
+        directoryRepo: FakeCloudDirectoryRepository([
           _provider('p1', name: 'Provider One'),
           _provider('p2', name: 'Provider Two'),
           _provider('p3', name: 'Provider Three'),
@@ -255,7 +252,7 @@ void main() {
     testWidgets('44. row tap opens DirectoryProviderDetailScreen', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([_provider('p1', name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
         store: _FakeSavedStore([_dirRef('p1')]),
       );
       await tester.tap(find.text('Alpha'));
@@ -266,7 +263,7 @@ void main() {
     testWidgets('45. back returns to SavedScreen', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([_provider('p1', name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
         store: _FakeSavedStore([_dirRef('p1')]),
       );
       await tester.tap(find.text('Alpha'));
@@ -280,7 +277,7 @@ void main() {
     testWidgets('46. missing provider renders Provider unavailable', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository(const []),
+        directoryRepo: FakeCloudDirectoryRepository(const []),
         store: _FakeSavedStore([_dirRef('missing')]),
       );
       expect(find.text(Ar.savedProviderUnavailable), findsOneWidget);
@@ -289,7 +286,7 @@ void main() {
     testWidgets('47. missing provider row is non-navigating', (tester) async {
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository(const []),
+        directoryRepo: FakeCloudDirectoryRepository(const []),
         store: _FakeSavedStore([_dirRef('missing')]),
       );
       await tester.tap(find.text(Ar.savedProviderUnavailable));
@@ -301,7 +298,7 @@ void main() {
       final store = _FakeSavedStore([_dirRef('missing')]);
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository(const []),
+        directoryRepo: FakeCloudDirectoryRepository(const []),
         store: store,
       );
       expect(find.text(Ar.savedProviderUnavailable), findsOneWidget);
@@ -314,7 +311,7 @@ void main() {
       // A Knowledge topic still renders alongside a Directory section.
       await _pump(
         tester,
-        directoryRepo: _FakeDirectoryRepository([_provider('p1', name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
         store: _FakeSavedStore([_dirRef('p1')]),
         topicIds: const ['t1'],
         topics: [_topic('t1', 'الموضوع الأول')],

@@ -74,10 +74,10 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R05
-CURRENT_PHASE_TITLE: Directory Cloud Integration
-LAST_CLOSED_PHASE_ID: V1-R04
-LAST_CLOSED_COMMIT: 55a624a
+CURRENT_PHASE_ID: V1-R06
+CURRENT_PHASE_TITLE: Business / Provider Profile Management
+LAST_CLOSED_PHASE_ID: V1-R05
+LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
 ROADMAP_STATUS: ACTIVE
 
 ---
@@ -90,8 +90,8 @@ ROADMAP_STATUS: ACTIVE
 | A6.4 | Business Activation & Ownership Provisioning | CLOSED | Codex | Big Pickle | HIGH | 7aafc9f |
 | V1-R03 | Business Ownership & Management | CLOSED | Codex | Big Pickle | HIGH | c7852ce |
 | V1-R04 | Business Application User Experience | CLOSED | Big Pickle | Codex (backend/security) | MEDIUM | 55a624a |
-| V1-R05 | Directory Cloud Integration | CURRENT | Codex (persistence/cloud) | TBD BY ARCHITECT | HIGH | — |
-| V1-R06 | Business / Provider Profile Management | QUEUED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | — |
+| V1-R05 | Directory Cloud Integration | CLOSED | Codex (persistence/cloud) | Architect | HIGH | PENDING OWNER COMMIT |
+| V1-R06 | Business / Provider Profile Management | CURRENT | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | — |
 | V1-R07 | Staff / Admin Operations Foundation | QUEUED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | — |
 | V1-R08 | Auth + Profile Production Completion | QUEUED | Codex | TBD BY ARCHITECT | HIGH | — |
 | V1-R09 | Offline / Connectivity / Error-State Hardening | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -116,8 +116,8 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R05
-CURRENT_PHASE_TITLE: Directory Cloud Integration
+CURRENT_PHASE_ID: V1-R06
+CURRENT_PHASE_TITLE: Business / Provider Profile Management
 CURRENT_PHASE_STATUS: CURRENT
 CURRENT_PHASE_CONTRACT: NOT_FROZEN
 IMPLEMENTATION_AUTHORIZED: NO
@@ -633,7 +633,7 @@ Must consume existing backend authority rather than reimplement lifecycle logic 
 
 ## V1-R05 — Directory Cloud Integration
 
-STATUS: CURRENT
+STATUS: CLOSED
 
 Primary likely implementer:
 
@@ -664,7 +664,7 @@ No duplicate cloud/local business authority may remain ambiguous at completion.
 
 ## V1-R06 — Business / Provider Profile Management
 
-STATUS: QUEUED
+STATUS: CURRENT
 
 Goal:
 
@@ -1218,11 +1218,11 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R05 — Directory Cloud Integration
+V1-R06 — Business / Provider Profile Management
 
 NEXT AFTER SUCCESSFUL CLOSE:
 
-V1-R06 — Business / Provider Profile Management
+V1-R07 — Staff / Admin Operations Foundation
 
 No other phase may be selected by inference.
 
@@ -1257,3 +1257,32 @@ Next CURRENT phase: V1-R05 — Directory Cloud Integration
 Next contract: NOT_FROZEN
 Implementation authorized: NO
 Owner approval: APPROVED / COMMITTED
+
+### Phase Transition Record
+
+Phase: V1-R05 — Directory Cloud Integration
+Previous status: CURRENT
+New status: CLOSED
+Implementation agent: Big Pickle
+Independent reviewer: Codex
+Architect Final Review: PASS
+Independent Codex final decision: PASS — READY FOR ARCHITECT FINAL REVIEW
+Evidence summary:
+- V1-R05 focused suite 83/83 PASS
+- previous full Flutter suite 1800+ PASS
+- relevant regression evidence 266 PASS
+- git diff --check PASS
+- analyzer crash confirmed environment/SDK — V1-R05 NOT CAUSAL
+- production SupabaseCloudDirectoryRepository behavioral tests PASS
+- production SupabaseDirectoryReadGateway behavioral tests PASS
+- sb_profiles behavioral isolation test PASS
+- historical contract-restore blocker marked SUPERSEDED
+- contract restored verbatim (V1-R05-CONTRACT-v1)
+- Codex final micro recheck PASS
+- Architect Final Review PASS
+Commit: PENDING OWNER COMMIT
+Push verified: NO (owner stages explicit files)
+Next CURRENT phase: V1-R06 — Business / Provider Profile Management
+Next contract: NOT_FROZEN
+Implementation authorized: NO
+Owner approval: PENDING OWNER STAGING

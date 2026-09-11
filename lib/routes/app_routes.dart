@@ -71,11 +71,28 @@ abstract final class AppRoutes {
   /// Canonical Directory search route.
   ///
   /// Renders the real [DirectorySearchScreen]. Reached from `/directory` with
-  /// the selected [BusinessType] carried via `state.extra`; direct navigation
-  /// with no category opens browse mode (initialCategory null). Since W6.3 this
-  /// is a branch-nested child of the `/directory` StatefulShellBranch (shell
-  /// chrome stays visible); it is never a `kShellDestinations` entry itself.
+  /// the selected canonical entity type carried via `state.extra`; direct
+  /// navigation with no type opens browse mode (initialEntityType null). Since
+  /// W6.3 this is a branch-nested child of the `/directory` StatefulShellBranch
+  /// (shell chrome stays visible); it is never a `kShellDestinations` entry
+  /// itself.
   static const String directorySearch = '$directory/$directorySearchSegment';
+
+  /// Relative canonical entity-detail segment under the `/directory` branch.
+  ///
+  /// V1-R05 — the route identity is `directory_entities.id` (UUID). A whole
+  /// `ServiceBusinessProfile` object is never authoritative detail state; the
+  /// detail route resolves the entity through the canonical Directory
+  /// repository/cache.
+  static const String directoryEntitySegment = 'entity';
+
+  /// Canonical Directory entity-detail route: `/directory/entity/:id`.
+  static const String directoryEntityPattern =
+      '$directory/$directoryEntitySegment/:id';
+
+  /// Navigable detail path by canonical [entityId]. See [topicListFor].
+  static String directoryEntityDetailFor(String entityId) =>
+      '$directory/$directoryEntitySegment/$entityId';
 
   // --- Shell destinations (values mirror kShellDestinations in app_shell) ---
   // W6.3: the visible shell is /home · /encyclopedia · /tools · /projects ·

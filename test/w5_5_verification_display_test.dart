@@ -6,8 +6,10 @@ import 'package:civilpedia/core/location/baghdad_area.dart';
 import 'package:civilpedia/core/navigation/app_shell.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/theme/app_theme.dart';
+import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
 import 'package:civilpedia/features/directory/domain/directory_query.dart';
 import 'package:civilpedia/features/directory/domain/directory_query_engine.dart';
+import 'package:civilpedia/features/directory/presentation/canonical_entity_type_presentation.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_card.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/directory/presentation/directory_verification_badge.dart';
@@ -16,6 +18,8 @@ import 'package:civilpedia/features/profile/domain/service_business_profile.dart
 import 'package:civilpedia/features/saved/domain/saved_item_reference.dart';
 import 'package:civilpedia/features/saved/domain/saved_reference_store.dart';
 import 'package:civilpedia/routes/app_routes.dart';
+
+import 'helpers/canonical_directory_test_helpers.dart';
 
 ServiceBusinessProfile _p({
   required String id,
@@ -48,6 +52,29 @@ ServiceBusinessProfile _p({
     featured: featured,
     foundingPartner: foundingPartner,
     planType: planType,
+  );
+}
+
+/// V1-R05 — canonical Directory entity factory for card/detail widget tests.
+CanonicalDirectoryEntity _e({
+  required String id,
+  String name = '',
+  String entityType = 'other',
+  String? description,
+  List<CanonicalDirectoryCategory> categories = const [],
+  List<CanonicalDirectoryLocation> locations = const [],
+  List<CanonicalDirectoryContact> contacts = const [],
+  VerificationStatus verificationStatus = VerificationStatus.unverified,
+}) {
+  return fakeEntity(
+    id: id,
+    name: name,
+    entityType: entityType,
+    description: description,
+    categories: categories,
+    locations: locations,
+    contacts: contacts,
+    verificationStatus: verificationStatus,
   );
 }
 
@@ -105,7 +132,7 @@ Widget _badgeApp(VerificationStatus status) {
 
 Future<_FakeLauncher> _pumpDetail(
   WidgetTester tester,
-  ServiceBusinessProfile profile,
+  CanonicalDirectoryEntity entity,
 ) async {
   final launcher = _FakeLauncher();
   await tester.pumpWidget(
@@ -114,7 +141,7 @@ Future<_FakeLauncher> _pumpDetail(
       child: MaterialApp(
         theme: AppTheme.lightTheme,
         home: DirectoryProviderDetailScreen(
-          profile: profile,
+          entity: entity,
           contactLauncher: launcher,
           savedReferenceStore: _FakeSavedStore(),
         ),
@@ -306,47 +333,47 @@ void main() {
   });
 
   group('W5.5 CARD — five states on listing', () {
-    Widget cardApp(ServiceBusinessProfile p) {
+    Widget cardApp(CanonicalDirectoryEntity e) {
       return ChangeNotifierProvider(
         create: (_) => LanguageProvider(),
         child: MaterialApp(
           theme: AppTheme.lightTheme,
-          home: Scaffold(body: DirectoryProviderCard(profile: p)),
+          home: Scaffold(body: DirectoryProviderCard(entity: e)),
         ),
       );
     }
 
     testWidgets('21. card displays unverified', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.unverified)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.unverified)),
       );
       expect(find.text('غير موثّق'), findsOneWidget);
     });
 
     testWidgets('22. card displays pending', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.pending)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.pending)),
       );
       expect(find.text('قيد المراجعة'), findsOneWidget);
     });
 
     testWidgets('23. card displays verified', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified)),
       );
       expect(find.text('موثّق'), findsOneWidget);
     });
 
     testWidgets('24. card displays rejected', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.rejected)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.rejected)),
       );
       expect(find.text('مرفوض'), findsOneWidget);
     });
 
     testWidgets('25. card displays suspended', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.suspended)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.suspended)),
       );
       expect(find.text('موقوف'), findsOneWidget);
     });
@@ -355,11 +382,11 @@ void main() {
       final longName = 'A' * 200;
       await tester.pumpWidget(
         cardApp(
-          _p(
+          _e(
             id: 'a',
             name: longName,
             verificationStatus: VerificationStatus.verified,
-            categories: ['Steel'],
+            categories: [fakeCategory('Steel')],
           ),
         ),
       );
@@ -369,7 +396,7 @@ void main() {
 
     testWidgets('27. badge does not remove category summary', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', categories: ['Steel'], verificationStatus: VerificationStatus.verified)),
+        cardApp(_e(id: 'a', name: 'Alpha', categories: [fakeCategory('Steel')], verificationStatus: VerificationStatus.verified)),
       );
       expect(find.text('Steel'), findsOneWidget);
       expect(find.text('موثّق'), findsOneWidget);
@@ -377,14 +404,14 @@ void main() {
 
     testWidgets('28. card tap behavior unchanged', (tester) async {
       var tapped = 0;
-      Widget app(ServiceBusinessProfile p) {
+      Widget app(CanonicalDirectoryEntity e) {
         return ChangeNotifierProvider(
           create: (_) => LanguageProvider(),
           child: MaterialApp(
             theme: AppTheme.lightTheme,
             home: Scaffold(
               body: DirectoryProviderCard(
-                profile: p,
+                entity: e,
                 onTap: () => tapped++,
               ),
             ),
@@ -392,28 +419,28 @@ void main() {
         );
       }
 
-      await tester.pumpWidget(app(_p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified)));
+      await tester.pumpWidget(app(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified)));
       await tester.tap(find.text('Alpha'));
       expect(tapped, 1);
     });
 
     testWidgets('29. verification does not display planType', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', planType: 'premium', verificationStatus: VerificationStatus.verified)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified)),
       );
       expect(find.text('premium'), findsNothing);
     });
 
     testWidgets('30. verification does not display featured', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', featured: true, verificationStatus: VerificationStatus.verified)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified)),
       );
       expect(find.textContaining('featured'), findsNothing);
     });
 
     testWidgets('31. verification does not display foundingPartner', (tester) async {
       await tester.pumpWidget(
-        cardApp(_p(id: 'a', name: 'Alpha', foundingPartner: true, verificationStatus: VerificationStatus.verified)),
+        cardApp(_e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified)),
       );
       expect(find.textContaining('founding'), findsNothing);
     });
@@ -421,40 +448,40 @@ void main() {
 
   group('W5.5 DETAIL — five states + frozen W5.4 fields', () {
     testWidgets('32. detail displays verification badge in identity', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
       expect(find.text('موثّق'), findsOneWidget);
       expect(find.byIcon(Icons.verified), findsOneWidget);
     });
 
     testWidgets('33. detail renders unverified', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.unverified));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.unverified));
       expect(find.text('غير موثّق'), findsOneWidget);
     });
 
     testWidgets('34. detail renders pending', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.pending));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.pending));
       expect(find.text('قيد المراجعة'), findsOneWidget);
     });
 
     testWidgets('35. detail renders verified', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
       expect(find.text('موثّق'), findsOneWidget);
     });
 
     testWidgets('36. detail renders rejected', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.rejected));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.rejected));
       expect(find.text('مرفوض'), findsOneWidget);
     });
 
     testWidgets('37. detail renders suspended', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.suspended));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.suspended));
       expect(find.text('موقوف'), findsOneWidget);
     });
 
     testWidgets('38. phones unchanged', (tester) async {
       final launcher = await _pumpDetail(
         tester,
-        _p(id: 'a', name: 'Alpha', phones: ['0770000000', '0780000000'], verificationStatus: VerificationStatus.verified),
+        _e(id: 'a', name: 'Alpha', contacts: [fakePhone('0770000000'), fakePhone('0780000000')], verificationStatus: VerificationStatus.verified),
       );
       expect(find.text('اتصال — 0770000000'), findsOneWidget);
       expect(find.text('اتصال — 0780000000'), findsOneWidget);
@@ -465,7 +492,7 @@ void main() {
     testWidgets('39. WhatsApp unchanged', (tester) async {
       final launcher = await _pumpDetail(
         tester,
-        _p(id: 'a', name: 'Alpha', whatsapp: '0770 000 0000', verificationStatus: VerificationStatus.verified),
+        _e(id: 'a', name: 'Alpha', contacts: [fakeWhatsApp('0770 000 0000')], verificationStatus: VerificationStatus.verified),
       );
       // All digits are extracted (including any leading 0); display only.
       await tester.tap(find.text('واتساب — 07700000000'));
@@ -473,14 +500,14 @@ void main() {
     });
 
     testWidgets('40. no-contact state unchanged', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
       expect(find.text('لا توجد معلومات اتصال'), findsOneWidget);
     });
 
     testWidgets('41. address unchanged', (tester) async {
       await _pumpDetail(
         tester,
-        _p(id: 'a', name: 'Alpha', address: 'Karrada St', verificationStatus: VerificationStatus.verified),
+        _e(id: 'a', name: 'Alpha', locations: [fakeLocation('karrada', address: 'Karrada St')], verificationStatus: VerificationStatus.verified),
       );
       expect(find.text('Karrada St'), findsOneWidget);
     });
@@ -488,7 +515,7 @@ void main() {
     testWidgets('42. services unchanged', (tester) async {
       await _pumpDetail(
         tester,
-        _p(id: 'a', name: 'Alpha', categories: ['Steel'], subCategories: ['Reinforcement'], verificationStatus: VerificationStatus.verified),
+        _e(id: 'a', name: 'Alpha', categories: [fakeCategory('Steel'), fakeCategory('Reinforcement')], verificationStatus: VerificationStatus.verified),
       );
       expect(find.text('Steel'), findsOneWidget);
       expect(find.text('Reinforcement'), findsOneWidget);
@@ -606,7 +633,7 @@ void main() {
       (tester) async {
         await _pumpDetail(
           tester,
-          _p(
+          _e(
             id: 'a',
             name: 'Alpha',
             verificationStatus: VerificationStatus.verified,
@@ -620,7 +647,7 @@ void main() {
     );
 
     testWidgets('58. no sponsored badge introduced', (tester) async {
-      await _pumpDetail(tester, _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
+      await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
       expect(find.text('Sponsored'), findsNothing);
       expect(find.text('مموّل'), findsNothing);
     });

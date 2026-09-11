@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/di/app_dependencies.dart';
-import '../../../core/location/baghdad_area.dart';
 import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
@@ -15,72 +15,40 @@ import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/state_widgets.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
-import '../../monetization/domain/services/campaign_source.dart';
-import '../../profile/domain/service_business_profile.dart';
-import '../application/directory_sponsored_placement_coordinator.dart';
-import '../domain/directory_query.dart';
-import '../domain/directory_query_engine.dart';
-import '../domain/directory_repository.dart';
-import 'directory_category_presentation.dart';
+import '../../../routes/app_routes.dart';
+import '../domain/canonical_directory_entity.dart';
+import '../domain/canonical_directory_query_engine.dart';
+import '../domain/cloud_directory_repository.dart';
+import 'canonical_entity_type_presentation.dart';
 import 'directory_provider_card.dart';
-import 'directory_provider_detail_screen.dart';
-import 'widgets/directory_sponsored_provider_card.dart';
 
-/// Directory-local search + location/category filter surface (W5.3).
+/// V1-R05 — Directory-local search + location/category filter surface.
 ///
-/// PRODUCTION-UNEXPOSED: nothing routes or navigates to this screen until the
-/// W6 readiness gate wires it. It loads [DirectoryRepository.loadAll] once and
-/// applies search/filter purely in memory via [DirectoryQueryEngine].
+/// Uses canonical cloud-backed data from [CloudDirectoryRepository].
+/// Loads the bounded canonical dataset via cache-first + cloud-refresh, then
+/// applies search/filter purely in memory via [CanonicalDirectoryQueryEngine].
 ///
-/// W5.3 owns search/filter only. W5.4 owns the canonical provider listing and
-/// detail; results render via [DirectoryProviderCard] and tapping opens
-/// [DirectoryProviderDetailScreen] through an internal (production-unexposed)
-/// Navigator push. No contact, verification, saved, or sponsored/featured/plan
-/// signals are shown on the listing card itself.
-///
-/// W7.2 — adds ONE optional, clearly disclosed sponsored provider slot ABOVE the
-/// organic results. Organic results remain exactly as [DirectoryQueryEngine]
-/// produces them (sponsorship-blind). Sponsored resolution runs in parallel and
-/// fails closed: with no active eligible campaign, an unconfigured (honest-empty)
-/// campaign source, or any resolution failure, NO sponsored slot is rendered and
-/// no blank space is left. The listing card itself stays organic-neutral — the
-/// sponsored disclosure lives on the wrapper, not the card.
+/// State exposure:
+/// * loading: cloud refresh in progress, no cached data yet;
+/// * fresh: successfully refreshed canonical data;
+/// * stale: rendered from cache, cloud refresh failed/unavailable;
+/// * empty: authoritative empty cloud directory;
+/// * error: neither cache nor cloud produced data.
 class DirectorySearchScreen extends StatefulWidget {
-  /// Pre-selected [BusinessType] to start with, used by the W5.2
-  /// [DirectoryLandingScreen.onCategorySelected] seam. Null starts in browse
-  /// mode (all categories).
-  final BusinessType? initialCategory;
+  /// Pre-selected canonical entity type to start with. Null = browse mode.
+  final String? initialEntityType;
 
-  /// Repository to load profiles from. Defaults to the canonical W5.1
-  /// [AppDependencies.directoryRepo]. Tests inject a fake.
-  final DirectoryRepository? repository;
-
-  /// W7.2 — Campaign source for the sponsored search slot. Production default is
-  /// the honest-empty [AppDependencies.campaignSource]; tests inject a fake.
-  /// When absent, an unconfigured build renders no sponsored content.
-  final CampaignSource? campaignSource;
-
-  /// W7.2 — Injected clock for deterministic sponsored eligibility evaluation.
-  /// Defaults to [DateTime.now]. Tests inject a fixed time.
-  final DateTime Function()? now;
+  /// Repository to load canonical entities from. Production default is
+  /// [AppDependencies.directoryRepo].
+  final CloudDirectoryRepository? repository;
 
   /// Bottom scroll clearance for the result list.
-  ///
-  /// Mirrors the W5.2 shell-independent seam: this screen must NOT know the
-  /// AppShell floating-nav geometry (bar height, margin, safe offsets). When
-  /// hosted STANDALONE (W5.3 default), the final bottom clearance is
-  /// `bottomContentPadding + device bottom SafeArea inset`. When hosted inside
-  /// the AppShell (W6.3), the screen detects the shell ancestor and instead
-  /// applies the closed UI-SAFE-1 contract via [shellSafeBottomPadding], so the
-  /// shell obstruction and device inset are never summed.
   final double bottomContentPadding;
 
   const DirectorySearchScreen({
     super.key,
-    this.initialCategory,
+    this.initialEntityType,
     this.repository,
-    this.campaignSource,
-    this.now,
     this.bottomContentPadding = AppSpacing.huge,
   });
 
@@ -91,33 +59,27 @@ class DirectorySearchScreen extends StatefulWidget {
 class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   static const Duration _debounceDuration = Duration(milliseconds: 280);
 
-  late final DirectoryRepository _repository;
+  late final CloudDirectoryRepository _repository;
   final TextEditingController _searchController = TextEditingController();
 
   Timer? _debounce;
 
-  List<ServiceBusinessProfile>? _loaded;
+  List<CanonicalDirectoryEntity> _entities = const [];
+  DirectoryLoadState _loadState = DirectoryLoadState.error;
   bool _loading = true;
-  bool _loadFailed = false;
-
-  DirectorySponsoredPlacement? _sponsored;
-
-  /// Monotonic guard so an older sponsored resolution never overwrites a newer
-  /// one if the screen reloads, and no stale sponsored update is applied after
-  /// the load that owns it has been superseded (W7.2 §19 async safety).
-  int _sponsoredRequest = 0;
+  DateTime? _refreshedAt;
 
   String _text = '';
-  BusinessType? _category;
-  BaghdadArea? _location;
+  String? _entityType;
+  String? _regionCode;
+  String? _categoryId;
 
   @override
   void initState() {
     super.initState();
     _repository = widget.repository ?? AppDependencies.directoryRepo;
-    _category = widget.initialCategory;
+    _entityType = widget.initialEntityType;
     _load();
-    _loadSponsored();
   }
 
   @override
@@ -130,45 +92,30 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   Future<void> _load() async {
     setState(() {
       _loading = true;
-      _loadFailed = false;
     });
-    try {
-      final profiles = await _repository.loadAll();
-      if (!mounted) return;
-      setState(() {
-        _loaded = profiles;
-        _loading = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _loadFailed = true;
-      });
-    }
+    final result = await _repository.load();
+    if (!mounted) return;
+    setState(() {
+      _entities = result.entities;
+      _loadState = result.state;
+      _refreshedAt = result.refreshedAt;
+      _loading = false;
+    });
   }
 
-  /// W7.2 — Resolves the single sponsored slot in PARALLEL to organic loading.
-  ///
-  /// Fails closed: a source error yields no sponsored content and never affects
-  /// organic results. A stale resolution (superseded reload or post-disposal) is
-  /// dropped via [mounted] + [_sponsoredRequest].
-  Future<void> _loadSponsored() async {
-    final requestToken = ++_sponsoredRequest;
-    final coordinator = DirectorySponsoredPlacementCoordinator(
-      campaignSource: widget.campaignSource ?? AppDependencies.campaignSource,
-      directoryRepository: _repository,
-    );
-    DirectorySponsoredPlacement? result;
-    try {
-      result = await coordinator.resolveFirstRenderable(
-        at: (widget.now ?? DateTime.now)(),
-      );
-    } catch (_) {
-      result = null;
+  Future<void> _refresh() async {
+    final result = await _repository.refresh();
+    if (!mounted) return;
+    if (result.succeeded) {
+      setState(() {
+        _entities = result.entities;
+        _loadState = result.entities.isEmpty
+            ? DirectoryLoadState.empty
+            : DirectoryLoadState.fresh;
+        _refreshedAt = result.refreshedAt;
+      });
     }
-    if (!mounted || requestToken != _sponsoredRequest) return;
-    setState(() => _sponsored = result);
+    // On failure, keep existing state (stale cache).
   }
 
   void _onTextChanged(String raw) {
@@ -184,21 +131,52 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
     });
   }
 
-  void _onCategoryChanged(BusinessType? value) {
-    setState(() => _category = value);
+  void _onEntityTypeChanged(String? value) {
+    setState(() => _entityType = value);
   }
 
-  void _onLocationChanged(BaghdadArea? value) {
-    setState(() => _location = value);
+  void _onRegionChanged(String? value) {
+    setState(() => _regionCode = value);
   }
 
-  List<ServiceBusinessProfile> get _results {
-    final loaded = _loaded ?? const <ServiceBusinessProfile>[];
-    if (loaded.isEmpty) return const [];
-    return DirectoryQueryEngine.apply(
-      loaded,
-      DirectoryQuery(text: _text, category: _category, location: _location),
+  void _onCategoryChanged(String? value) {
+    setState(() => _categoryId = value);
+  }
+
+  List<CanonicalDirectoryEntity> get _results {
+    if (_entities.isEmpty) return const [];
+    return CanonicalDirectoryQueryEngine.apply(
+      _entities,
+      CanonicalDirectoryQuery(
+        text: _text,
+        entityType: _entityType,
+        regionCode: _regionCode,
+        categoryId: _categoryId,
+      ),
     );
+  }
+
+  /// Collect all distinct region codes from the loaded entities for the
+  /// region filter dropdown.
+  List<String> get _availableRegionCodes {
+    final codes = <String>{};
+    for (final entity in _entities) {
+      for (final loc in entity.locations) {
+        if (loc.regionCode.isNotEmpty) codes.add(loc.regionCode);
+      }
+    }
+    return codes.toList()..sort();
+  }
+
+  /// Collect all distinct category ids from the loaded entities.
+  List<CanonicalDirectoryCategory> get _availableCategories {
+    final cats = <String, CanonicalDirectoryCategory>{};
+    for (final entity in _entities) {
+      for (final cat in entity.categories) {
+        cats[cat.id] = cat;
+      }
+    }
+    return cats.values.toList()..sort((a, b) => a.name.compareTo(b.name));
   }
 
   @override
@@ -239,127 +217,156 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
         AppSpacing.lg,
         AppSpacing.sm,
       ),
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: _FilterDropdown<BusinessType>(
+          Row(
+            children: [
+              Expanded(
+                child: _FilterDropdown<String>(
+                  label: isArabic ? Ar.directoryFilterCategory : En.directoryFilterCategory,
+                  value: _entityType,
+                  allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
+                  options: CanonicalEntityTypePresentation.orderedTypes,
+                  optionLabel: (type) =>
+                      CanonicalEntityTypePresentation.labelFor(type, isArabic: isArabic),
+                  onChanged: _onEntityTypeChanged,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _FilterDropdown<String>(
+                  label: isArabic ? Ar.directoryFilterLocation : En.directoryFilterLocation,
+                  value: _regionCode,
+                  allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
+                  options: _availableRegionCodes,
+                  optionLabel: (code) => code,
+                  onChanged: _onRegionChanged,
+                ),
+              ),
+            ],
+          ),
+          if (_availableCategories.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _FilterDropdown<String>(
               label: isArabic ? Ar.directoryFilterCategory : En.directoryFilterCategory,
-              value: _category,
+              value: _categoryId,
               allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
-              options: DirectoryCategoryPresentation.orderedTypes,
-              optionLabel: (type) =>
-                  DirectoryCategoryPresentation.labelFor(type, isArabic: isArabic),
+              options: _availableCategories.map((c) => c.id).toList(),
+              optionLabel: (id) => _availableCategories
+                  .firstWhere((c) => c.id == id, orElse: () => _availableCategories.first)
+                  .name,
               onChanged: _onCategoryChanged,
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: _FilterDropdown<BaghdadArea>(
-              label: isArabic ? Ar.directoryFilterLocation : En.directoryFilterLocation,
-              value: _location,
-              allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
-              options: _selectableLocations,
-              optionLabel: (area) => isArabic ? area.arName : area.enName,
-              onChanged: _onLocationChanged,
-            ),
-          ),
+          ],
         ],
       ),
     );
   }
 
-  /// User-selectable [BaghdadArea] values. `unknown` is a technical sentinel and
-  /// is never a user-facing option. `other` remains selectable.
-  static final List<BaghdadArea> _selectableLocations = BaghdadArea.values
-      .where((area) => area != BaghdadArea.unknown)
-      .toList();
-
   Widget _buildBody(BuildContext context, bool isArabic) {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (_loadFailed) {
+
+    final results = _results;
+
+    // Stale/offline banner.
+    if (_loadState == DirectoryLoadState.stale) {
+      return Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            color: AppColors.warning.withValues(alpha: 0.1),
+            child: Row(
+              children: [
+                Icon(Icons.cloud_off, size: 16, color: AppColors.warning),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    isArabic
+                        ? 'عرض بيانات مخزنة — قد لا تكون محدّثة'
+                        : 'Showing cached data — may not be up to date',
+                    style: TextStyle(fontSize: 12, color: AppColors.warning),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (results.isEmpty && _entities.isEmpty)
+            const Expanded(child: Center(child: CircularProgressIndicator()))
+          else
+            Expanded(child: _buildResultsList(context, results)),
+        ],
+      );
+    }
+
+    if (_loadState == DirectoryLoadState.error) {
       return ErrorStateWidget(
         message: isArabic ? Ar.errorOccurred : En.errorOccurred,
         onRetry: _load,
       );
     }
 
-    final loaded = _loaded ?? const <ServiceBusinessProfile>[];
-    final results = _results;
-    final sponsored = _sponsored;
-    final showSponsored = sponsored != null;
-
-    // The sponsored slot renders INDEPENDENTLY of organic results (W7.2 §P):
-    // a sponsored provider need not match the current organic query, category,
-    // or location filter. Only when there is NO sponsored content do we fall
-    // through to the organic-only empty states.
-    if (results.isEmpty && !showSponsored) {
+    if (_loadState == DirectoryLoadState.empty || (_entities.isEmpty && results.isEmpty)) {
       return EmptyStateWidget(
-        icon: loaded.isEmpty ? Icons.business_center_outlined : Icons.search_off,
-        message: isArabic
-            ? (loaded.isEmpty ? Ar.directoryEmptyDirectory : Ar.directoryNoResults)
-            : (loaded.isEmpty ? En.directoryEmptyDirectory : En.directoryNoResults),
+        icon: Icons.business_center_outlined,
+        message: isArabic ? Ar.directoryEmptyDirectory : En.directoryEmptyDirectory,
       );
     }
 
-    // W6.3 UI-SAFE-1 — explicit dual-host clean bottom clearance (identical to
-    // DirectoryLandingScreen): shell-hosted uses the closed MAX contract,
-    // standalone preserves the W5 bottomContentPadding + deviceInset seam.
+    if (results.isEmpty) {
+      return EmptyStateWidget(
+        icon: Icons.search_off,
+        message: isArabic ? Ar.directoryNoResults : En.directoryNoResults,
+      );
+    }
+
+    return _buildResultsList(context, results);
+  }
+
+  Widget _buildResultsList(
+    BuildContext context,
+    List<CanonicalDirectoryEntity> results,
+  ) {
     final isShellHosted = ShellContentInsets.maybeOf(context) != null;
     final effectiveBottomPadding = isShellHosted
         ? shellSafeBottomPadding(context)
         : widget.bottomContentPadding + MediaQuery.paddingOf(context).bottom;
 
-    // Assemble the scroll body: optional sponsored slot FIRST (clearly
-    // disclosed), then organic results in their untouched DirectoryQueryEngine
-    // order. Both share one scroll body/insets — no fixed-position overlay.
-    final itemWidgets = <Widget>[];
-    if (showSponsored) {
-      itemWidgets.add(
-        DirectorySponsoredProviderCard(
-          placement: sponsored.placement,
-          profile: sponsored.profile,
-          onTap: () => _openDetail(context, sponsored.profile),
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsetsDirectional.only(
+          start: AppSpacing.lg,
+          end: AppSpacing.lg,
+          top: AppSpacing.lg,
+          bottom: effectiveBottomPadding,
         ),
-      );
-    }
-    for (final profile in results) {
-      itemWidgets.add(
-        DirectoryProviderCard(
-          profile: profile,
-          onTap: () => _openDetail(context, profile),
-        ),
-      );
-    }
-
-    return ListView.separated(
-      padding: EdgeInsetsDirectional.only(
-        start: AppSpacing.lg,
-        end: AppSpacing.lg,
-        top: AppSpacing.lg,
-        bottom: effectiveBottomPadding,
+        itemCount: results.length,
+        separatorBuilder: (_, __) => AppSpacing.gapMd,
+        itemBuilder: (context, index) {
+          final entity = results[index];
+          return DirectoryProviderCard(
+            entity: entity,
+            onTap: () => _openDetail(context, entity),
+          );
+        },
       ),
-      itemCount: itemWidgets.length,
-      separatorBuilder: (_, __) => AppSpacing.gapMd,
-      itemBuilder: (context, index) => itemWidgets[index],
     );
   }
 
-  void _openDetail(BuildContext context, ServiceBusinessProfile profile) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (_) => DirectoryProviderDetailScreen(profile: profile),
-      ),
+  /// Opens provider detail through the canonical `/directory/entity/:id`
+  /// route. The canonical `directory_entities.id` is the route identity; the
+  /// whole entity is passed only as a non-authoritative first-frame hint.
+  void _openDetail(BuildContext context, CanonicalDirectoryEntity entity) {
+    context.push(
+      AppRoutes.directoryEntityDetailFor(entity.id),
+      extra: entity,
     );
   }
 }
 
-/// Compact single-select filter dropdown reused for Category and Location.
-///
-/// `value` of null represents "All" ([Ar.directoryFilterAll] /
-/// [En.directoryFilterAll]). Selection applies immediately (no debounce).
 class _FilterDropdown<T> extends StatelessWidget {
   final String label;
   final T? value;

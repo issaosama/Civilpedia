@@ -50,6 +50,14 @@ abstract final class AppStorageKeys {
   /// SharedPreferences: business directory profiles (Legacy/V0).
   static const String sbProfiles = 'sb_profiles';
 
+  /// SharedPreferences: V1-R05 dedicated versioned Directory cloud cache.
+  ///
+  /// NEW additive key — a single versioned snapshot of canonical
+  /// `directory_entities` + public child relationships. It is deliberately
+  /// SEPARATE from `sb_profiles`; legacy local profiles never overwrite
+  /// canonical cached fields and neither store is a migration of the other.
+  static const String directoryCloudCache = 'directory_cloud_cache';
+
   /// SharedPreferences: quick checklist item-state JSON.
   static const String checklistData = 'checklist_data';
 

@@ -1,62 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/location/baghdad_area.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/civil_surface_card.dart';
-import '../../profile/domain/service_business_profile.dart';
-import 'directory_category_presentation.dart';
+import '../domain/canonical_directory_entity.dart';
+import 'canonical_entity_type_presentation.dart';
 import 'directory_verification_badge.dart';
 
-/// W5.4 — canonical reusable Directory provider/listing card.
+/// V1-R05 — Canonical reusable Directory provider/listing card.
 ///
-/// Scannable listing identity only: BusinessType icon, provider name, localized
-/// BusinessType, localized BaghdadArea, a coarse single-line category summary
-/// and a compact verification badge (W5.5). Deliberately excludes contact,
-/// address, description, saved/bookmark and any Monetization signals
-/// (`featured`/`foundingPartner`/`planType`) — the detail surface owns full
-/// provider information (W5.4). Verification is display metadata only: it never
-/// filters, reorders or hides the card.
+/// Scannable listing identity: canonical entity-type icon, name, localized
+/// canonical entity type, canonical region summary, coarse category summary,
+/// and a compact verification badge.
+/// Excludes contact, address, description, saved/bookmark, and monetization
+/// signals — the detail surface owns full provider information.
 class DirectoryProviderCard extends StatelessWidget {
-  /// The provider to present.
-  final ServiceBusinessProfile profile;
-
-  /// Optional tap callback (e.g. opening the provider detail surface). When
-  /// null, the card is not interactive.
+  final CanonicalDirectoryEntity entity;
   final VoidCallback? onTap;
 
   const DirectoryProviderCard({
     super.key,
-    required this.profile,
+    required this.entity,
     this.onTap,
   });
-
-  /// Coarse category summary for the listing.
-  ///
-  /// Trims values, drops empties, preserves source order, joined into a single
-  /// line. No sorting, no counts, no "+N", no persistence.
-  static List<String> _displayCategories(ServiceBusinessProfile profile) {
-    final result = <String>[];
-    for (final raw in profile.categories) {
-      final trimmed = raw.trim();
-      if (trimmed.isNotEmpty) result.add(trimmed);
-    }
-    return result;
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isArabic = context.watch<LanguageProvider>().isArabic;
-    final typeLabel = DirectoryCategoryPresentation.labelFor(
-      profile.type,
+    final typeLabel = CanonicalEntityTypePresentation.labelFor(
+      entity.entityType,
       isArabic: isArabic,
     );
-    final locationLabel = _locationLabel(profile.baghdadArea, isArabic);
-    final categories = _displayCategories(profile);
+    final locationLabel = _locationLabel(entity, isArabic);
+    final categories = _displayCategories(entity);
 
     return CivilSurfaceCard(
       onTap: onTap,
@@ -75,7 +55,7 @@ class DirectoryProviderCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
             ),
             child: Icon(
-              DirectoryCategoryPresentation.iconFor(profile.type),
+              CanonicalEntityTypePresentation.iconFor(entity.entityType),
               color: AppColors.primaryDark,
               size: 22,
             ),
@@ -86,7 +66,7 @@ class DirectoryProviderCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  profile.name,
+                  entity.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -136,7 +116,7 @@ class DirectoryProviderCard extends StatelessWidget {
                 Align(
                   alignment: AlignmentDirectional.centerStart,
                   child: DirectoryVerificationBadge(
-                    status: profile.verificationStatus,
+                    status: entity.verificationStatus,
                   ),
                 ),
               ],
@@ -146,9 +126,22 @@ class DirectoryProviderCard extends StatelessWidget {
       ),
     );
   }
-}
 
-String? _locationLabel(BaghdadArea area, bool isArabic) {
-  if (area == BaghdadArea.unknown) return null;
-  return isArabic ? area.arName : area.enName;
+  static List<String> _displayCategories(CanonicalDirectoryEntity entity) {
+    final result = <String>[];
+    for (final cat in entity.categories) {
+      final name = cat.name.trim();
+      if (name.isNotEmpty) result.add(name);
+    }
+    return result;
+  }
+
+  static String? _locationLabel(CanonicalDirectoryEntity entity, bool isArabic) {
+    if (entity.locations.isEmpty) return null;
+    final first = entity.locations.first;
+    final regionName = first.regionName;
+    if (regionName != null && regionName.isNotEmpty) return regionName;
+    // Fallback to region code when name is not available.
+    return first.regionCode.isNotEmpty ? first.regionCode : null;
+  }
 }
