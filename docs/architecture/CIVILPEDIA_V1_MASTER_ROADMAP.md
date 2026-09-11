@@ -77,7 +77,7 @@ PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
 CURRENT_PHASE_ID: V1-R05
 CURRENT_PHASE_TITLE: Directory Cloud Integration
 LAST_CLOSED_PHASE_ID: V1-R04
-LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
+LAST_CLOSED_COMMIT: 55a624a
 ROADMAP_STATUS: ACTIVE
 
 ---
@@ -89,7 +89,7 @@ ROADMAP_STATUS: ACTIVE
 | A6.3.1 | Creation Authorization Hardening | CLOSED | Codex | Big Pickle | HIGH | 12b1918 |
 | A6.4 | Business Activation & Ownership Provisioning | CLOSED | Codex | Big Pickle | HIGH | 7aafc9f |
 | V1-R03 | Business Ownership & Management | CLOSED | Codex | Big Pickle | HIGH | c7852ce |
-| V1-R04 | Business Application User Experience | CLOSED | Big Pickle | Codex (backend/security) | MEDIUM | PENDING OWNER COMMIT |
+| V1-R04 | Business Application User Experience | CLOSED | Big Pickle | Codex (backend/security) | MEDIUM | 55a624a |
 | V1-R05 | Directory Cloud Integration | CURRENT | Codex (persistence/cloud) | TBD BY ARCHITECT | HIGH | — |
 | V1-R06 | Business / Provider Profile Management | QUEUED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | — |
 | V1-R07 | Staff / Admin Operations Foundation | QUEUED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | — |
@@ -1251,9 +1251,9 @@ Evidence summary:
 - Codex focused recheck completed
 - Codex micro recheck PASS
 - Architect Final Review PASS
-Commit: PENDING OWNER COMMIT
-Push verified: NO — pending Owner commit/push
+Commit: 55a624a
+Push verified: YES
 Next CURRENT phase: V1-R05 — Directory Cloud Integration
 Next contract: NOT_FROZEN
 Implementation authorized: NO
-Owner approval: PENDING COMMIT
+Owner approval: APPROVED / COMMITTED
