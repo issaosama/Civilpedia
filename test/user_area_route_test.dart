@@ -13,6 +13,11 @@ import 'package:civilpedia/core/services/theme_provider.dart';
 import 'package:civilpedia/data/local/hive_helper.dart';
 import 'package:civilpedia/features/auth/presentation/auth_screen.dart';
 import 'package:civilpedia/features/auth/presentation/providers/auth_provider.dart';
+import 'package:civilpedia/features/business/domain/business_application.dart';
+import 'package:civilpedia/features/business/domain/business_application_gateway.dart';
+import 'package:civilpedia/features/business/domain/business_application_policy.dart';
+import 'package:civilpedia/features/business/presentation/providers/business_application_provider.dart';
+import 'package:civilpedia/features/business/presentation/screens/my_applications_screen.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/category_info.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/content_block.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/engineering_topic.dart';
@@ -116,9 +121,52 @@ class _FakeEncyclopediaRepository implements EncyclopediaRepository {
   Future<List<EngineeringTopic>> searchTopics(String query) async => topics;
 }
 
+/// Deterministic [BusinessApplicationGateway] fake for the entry-point test.
+class _FakeBusinessAppGateway implements BusinessApplicationGateway {
+  @override
+  bool get isAvailable => true;
+
+  @override
+  Future<List<BusinessApplication>> listOwnApplications(String userId) async =>
+      const [];
+
+  @override
+  Future<BusinessApplication?> getOwnApplication(
+    String userId,
+    String applicationId,
+  ) async => null;
+
+  @override
+  Future<BusinessApplicationCreateResult> createNewDraft({
+    required String currentUserId,
+    Map<String, dynamic>? metadata,
+  }) async => const BusinessApplicationCreateDenied(
+      BusinessApplicationRejectionCause.invalidMetadata);
+
+  @override
+  Future<BusinessApplicationCreateResult> createClaimDraft({
+    required String currentUserId,
+    required String targetEntityId,
+  }) async => const BusinessApplicationCreateDenied(
+      BusinessApplicationRejectionCause.missingTarget);
+
+  @override
+  Future<BusinessApplicationSubmitResult> submitApplication(
+    BusinessApplication application,
+  ) async => const BusinessApplicationSubmitDenied(
+      BusinessApplicationSubmitCause.invalidTransition);
+
+  @override
+  Future<BusinessApplicationSubmitResult> resubmitApplication(
+    BusinessApplication application,
+  ) async => const BusinessApplicationSubmitDenied(
+      BusinessApplicationSubmitCause.invalidTransition);
+}
+
 Widget _app(
   UserProfileProvider profileProvider, {
   EncyclopediaFavoritesProvider? favorites,
+  BusinessApplicationProvider? businessApplications,
 }) {
   return MultiProvider(
     providers: [
@@ -137,6 +185,15 @@ Widget _app(
         ChangeNotifierProvider(
           create: (_) => EncyclopediaFavoritesProvider(
             store: _ListBackedEncyclopediaFavoritesStore(const []),
+          ),
+        ),
+      if (businessApplications != null)
+        ChangeNotifierProvider.value(value: businessApplications)
+      else
+        ChangeNotifierProvider(
+          create: (_) => BusinessApplicationProvider(
+            gateway: _FakeBusinessAppGateway(),
+            auth: AuthProvider(),
           ),
         ),
     ],
@@ -319,23 +376,42 @@ void main() {
       );
     });
 
-    testWidgets('exposes exactly Profile/Saved/Downloads and no inventory-only '
-        'entries', (tester) async {
+    testWidgets('exposes exactly My Applications/Profile/Saved/Downloads and '
+        'no inventory-only entries', (tester) async {
       final profileProvider = _profileProvider(stored: _profile());
       await _open(tester, profileProvider, AppRoutes.user);
 
+      expect(
+        find.widgetWithText(ListTile, Ar.businessMyApplications),
+        findsOneWidget,
+      );
       expect(find.widgetWithText(ListTile, Ar.profile), findsOneWidget);
       expect(find.widgetWithText(ListTile, Ar.saved), findsOneWidget);
       expect(find.widgetWithText(ListTile, Ar.downloads), findsOneWidget);
       expect(
         find.byType(ListTile),
-        findsNWidgets(3),
+        findsNWidgets(4),
         reason:
             'hub is an aggregation surface for shipped destinations only — '
-            'activity/preferences/theme/language/backup/account are inventory '
-            'and must NOT be surfaced, and there is no avatar/header wiring',
+            'My Applications (V1-R04 §13), Profile, Saved, Downloads are the '
+            'shipped destinations; activity/preferences/theme/language/backup/'
+            'account are inventory and must NOT be surfaced, and there is no '
+            'avatar/header wiring',
       );
       expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('tapping My Applications enters /business/applications', (
+      tester,
+    ) async {
+      final profileProvider = _profileProvider(stored: _profile());
+      await _open(tester, profileProvider, AppRoutes.user);
+
+      await tester.tap(find.widgetWithText(ListTile, Ar.businessMyApplications));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MyApplicationsScreen), findsOneWidget);
+      expect(_topMatchedLocation(), AppRoutes.businessApplications);
     });
 
     testWidgets('tapping Profile enters /user/profile', (tester) async {

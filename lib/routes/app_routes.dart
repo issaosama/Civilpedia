@@ -167,4 +167,25 @@ abstract final class AppRoutes {
   /// Navigable path for the (currently latent) articles-by-category route.
   /// See [topicListFor].
   static String articlesFor(String category) => '/articles/$category';
+
+  // --- Business Applications (V1-R04) ---
+  /// My Applications list (root route, NOT in bottom nav shell).
+  static const String businessApplications = '/business/applications';
+
+  /// NEW application form.
+  static const String businessApplicationsNew =
+      '$businessApplications/new';
+
+  /// CLAIM application form (directory-entity selector).
+  static const String businessApplicationsClaim =
+      '$businessApplications/claim';
+
+  /// Application detail pattern. Canonical segment authority — callers compose
+  /// with [businessApplicationDetailFor].
+  static const String businessApplicationDetailPattern =
+      '$businessApplications/:applicationId';
+
+  /// Navigable detail path by [applicationId]. See [topicListFor].
+  static String businessApplicationDetailFor(String applicationId) =>
+      '$businessApplications/$applicationId';
 }

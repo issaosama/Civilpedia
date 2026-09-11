@@ -693,4 +693,127 @@ class Ar {
 
   // RR.1 — Missing topic image fallback
   static const String imageUnavailable = 'الصورة غير متوفرة حالياً';
+
+  // V1-R04 — Business Application User Experience
+  // Entry point (User Area)
+  static const String businessMyApplications = 'طلباتي التجارية';
+  static const String businessSignInRequired =
+      'يجب تسجيل الدخول لإدارة طلباتك التجارية';
+  static const String businessSignInButton = 'تسجيل الدخول';
+  static const String businessNoApplications = 'لا توجد طلبات تجارية بعد';
+  static const String businessApplicationsError =
+      'تعذر تحميل الطلبات التجارية';
+  static const String businessRefresh = 'تحديث';
+
+  // Screens
+  static const String businessApplicationsTitle = 'طلباتي التجارية';
+  static const String businessNewApplication = 'طلب جديد';
+  static const String businessNewApplicationTitle = 'طلب إنشاء نشاط جديد';
+  static const String businessNewApplicationSubtitle =
+      'أدخل اسم النشاط ونوعه لإنشاء طلبك';
+  static const String businessClaimApplicationTitle = 'طلب ملكية (استحقاق)';
+  static const String businessClaimApplicationSubtitle =
+      'اختر المنشأة التي تريد المطالبة بها';
+  static const String businessClaimTargetsEmpty =
+      'لا توجد منشآت غير مُطالبة حالياً';
+  static const String businessClaimTargetsError =
+      'تعذر تحميل المنشآت المتاحة للمطالبة';
+
+  // Application fields
+  static const String businessNameLabel = 'اسم النشاط';
+  static const String businessNameHint = 'مثال: مكتب هندسي الأفق';
+  static const String businessEntityTypeLabel = 'نوع النشاط';
+  static const String businessEntityTypeHint = 'اختر نوع النشاط';
+  static const String businessMetadata = 'بيانات النشاط (ثابتة عند الإرسال)';
+  static const String businessTargetEntity = 'المنشأة المطلوبة';
+  static const String businessClaimStatus = 'حالة المطالبة';
+  static const String businessVerificationStatus = 'حالة التوثيق';
+  static const String businessCreatedOn = 'تاريخ الإنشاء';
+
+  // Status labels (Arabic-first, all nine canonical + unknown)
+  static const String businessStatusDraft = 'مسودة';
+  static const String businessStatusSubmitted = 'قيد الإرسال';
+  static const String businessStatusUnderReview = 'قيد المراجعة';
+  static const String businessStatusNeedsCorrection = 'يحتاج تصحيح';
+  static const String businessStatusContacted = 'تم التواصل';
+  static const String businessStatusVisitScheduled = 'تمت جدولة الزيارة';
+  static const String businessStatusApproved = 'موافقة';
+  static const String businessStatusRejected = 'مرفوض';
+  static const String businessStatusActivated = 'تم التفعيل';
+  static const String businessStatusUnknown = 'غير معروف';
+
+  // Entity type labels (canonical nine; label-only, identity stays canonical)
+  static const String businessEntityTypeCompany = 'شركة';
+  static const String businessEntityTypeEngineeringOffice = 'مكتب هندسي';
+  static const String businessEntityTypeContractor = 'مقاول';
+  static const String businessEntityTypeSupplier = 'مورّد';
+  static const String businessEntityTypeStore = 'محل';
+  static const String businessEntityTypeTechnician = 'فني';
+  static const String businessEntityTypeLaboratory = 'مختبر';
+  static const String businessEntityTypeEquipmentProvider = 'مزود معدات';
+  static const String businessEntityTypeServiceProvider = 'مزود خدمات';
+
+  // Application type labels
+  static const String businessTypeNew = 'إنشاء نشاط جديد';
+  static const String businessTypeClaim = 'مطالبة بمنشأة قائمة';
+
+  // Actions
+  static const String businessSubmit = 'إرسال الطلب';
+  static const String businessSubmitConfirm = 'تأكيد الإرسال';
+  static const String businessSubmitPending =
+      'سيصبح الطلب قيد المراجعة بعد الإرسال ولا يمكن تعديله. هل تريد المتابعة؟';
+  static const String businessResubmit = 'إعادة الإرسال';
+  static const String businessResubmitPending =
+      'سيتم إعادة الطلب إلى المراجعة بعد إعادة الإرسال. هل تريد المتابعة؟';
+  static const String businessCreateDraft = 'إنشاء المسودة';
+  static const String businessCreating = 'جاري الإنشاء...';
+  static const String businessSubmitting = 'جاري الإرسال...';
+  static const String businessCancel = 'إلغاء';
+  static const String businessClaimTarget = 'طلب هذه المنشأة';
+
+  // Correction
+  static const String businessReturnReasonTitle = 'سبب الإعادة';
+  static const String businessCorrectionNotice =
+      'طلبك يحتاج إلى تصحيح. راجع سبب الإعادة ثم أعد الإرسال بعد المعالجة.';
+
+  // Denial / submit cause messages (Arabic-first, concise)
+  static const String businessCauseGuestUser = 'يجب تسجيل الدخول أولاً';
+  static const String businessCauseMissingTarget =
+      'لم يتم تحديد المنشأة المطلوبة';
+  static const String businessCauseInvalidMetadata =
+      'البيانات المدخلة غير صالحة. تحقق من الاسم والنوع';
+  static const String businessCauseTargetNotFound =
+      'لم يتم العثور على المنشأة المطلوبة';
+  static const String businessCauseTargetNotClaimable =
+      'هذه المنشأة غير متاحة للمطالبة حالياً';
+  static const String businessCauseAlreadyOwner =
+      'أنت مالك هذه المنشأة بالفعل';
+  static const String businessCauseDuplicateClaim =
+      'لديك طلب مطالبة ساري لهذه المنشأة بالفعل';
+  static const String businessCauseApplicantMismatch =
+      'تعذر تأكيد هوية مقدم الطلب';
+  static const String businessCauseUnauthenticated = 'يجب تسجيل الدخول أولاً';
+  static const String businessCauseNotApplicant =
+      'هذا الطلب لا يخص الحساب الحالي';
+  static const String businessCauseApplicationNotFound =
+      'لم يتم العثور على الطلب';
+  static const String businessCauseInvalidTransition =
+      'لا يمكن تنفيذ هذا الإجراء على الطلب في حالته الحالية';
+  static const String businessCausePhoneRequired =
+      'يجب إضافة رقم هاتف إلى ملفك الشخصي قبل الإرسال';
+  static const String businessCauseRequiredDataMissing =
+      'البيانات المطلوبة غير مكتملة';
+  static const String businessCauseUnexpected = 'حدث خطأ غير متوقع، حاول مجدداً';
+  static const String businessCorrectionInfo =
+      'لا يمكن تعديل بيانات الطلب في هذه المرحلة. أعد الإرسال بعد معالجة سبب الإعادة إذا أمكن.';
+
+  // Detail screen — timestamps & staff fields (F4)
+  static const String businessUpdatedAt = 'آخر تحديث';
+  static const String businessReviewedAt = 'تاريخ المراجعة';
+  static const String businessApprovedAt = 'تاريخ الموافقة';
+  static const String businessActivatedAt = 'تاريخ التفعيل';
+  static const String businessRejectionReason = 'سبب الرفض';
+  static const String businessApprovedNote =
+      'تمت الموافقة على الطلب بنجاح. التفعيل قيد المعالجة حالياً.';
+  static const String businessActivatedNote = 'تم تفعيل النشاط بنجاح.';
 }

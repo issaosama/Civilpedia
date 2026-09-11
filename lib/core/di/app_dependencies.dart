@@ -38,9 +38,11 @@ import '../../features/auth/data/supabase_auth_gateway.dart';
 import '../../features/auth/domain/repositories/auth_gateway.dart';
 import '../../features/business/data/supabase_business_application_gateway.dart';
 import '../../features/business/data/supabase_business_application_staff_gateway.dart';
+import '../../features/business/data/supabase_business_claim_target_gateway.dart';
 import '../../features/business/data/supabase_business_membership_gateway.dart';
 import '../../features/business/domain/business_application_gateway.dart';
 import '../../features/business/domain/business_application_staff_gateway.dart';
+import '../../features/business/domain/business_claim_target_gateway.dart';
 import '../../features/business/domain/business_membership_gateway.dart';
 import '../../features/projects/data/project_persistence_gateway.dart';
 
@@ -82,10 +84,11 @@ class AppDependencies {
       _personalProfileBootstrapCoordinator;
   static late final RegionPreferenceGateway _regionPreferenceGateway;
 
-  static late final BusinessMembershipGateway _businessMembershipGateway;
+static late final BusinessMembershipGateway _businessMembershipGateway;
   static late final BusinessApplicationGateway _businessApplicationGateway;
   static late final BusinessApplicationStaffGateway
       _businessApplicationStaffGateway;
+  static late final BusinessClaimTargetGateway _businessClaimTargetGateway;
 
   static Future<void> init() async {
     _encyclopediaDataSource = EncyclopediaLocalDataSource();
@@ -183,6 +186,14 @@ class AppDependencies {
     _businessApplicationStaffGateway = SupabaseBusinessApplicationStaffGateway(
       service: _supabaseService,
     );
+
+    // V1-R04 — claim-target read seam. Authenticated PostgREST SELECT on
+    // public.directory_entities (active + unclaimed) via the existing
+    // directory_entities_select_active RLS. Read-only; the server trigger
+    // (00014) remains the authoritative claimability backstop.
+    _businessClaimTargetGateway = SupabaseBusinessClaimTargetGateway(
+      service: _supabaseService,
+    );
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -251,4 +262,8 @@ class AppDependencies {
   /// actor from the authenticated session and provisions ownership server-side.
   static BusinessApplicationStaffGateway get businessApplicationStaffGateway =>
       _businessApplicationStaffGateway;
+
+  /// V1-R04 — production claim-target read seam for the CLAIM selector.
+  static BusinessClaimTargetGateway get businessClaimTargetGateway =>
+      _businessClaimTargetGateway;
 }

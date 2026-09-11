@@ -9,6 +9,8 @@ import 'core/services/theme_provider.dart';
 import 'core/services/language_provider.dart';
 import 'core/services/connectivity_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
+import 'features/business/presentation/providers/business_application_provider.dart';
+import 'features/business/presentation/providers/business_claim_target_provider.dart';
 import 'features/encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import 'features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import 'features/profile/presentation/providers/user_profile_provider.dart';
@@ -79,6 +81,19 @@ void _runApp() {
         ChangeNotifierProvider(create: (_) => UserProfileProvider(
           repository: AppDependencies.userProfileRepo,
         )),
+
+        ChangeNotifierProvider(
+          create: (context) => BusinessApplicationProvider(
+            gateway: AppDependencies.businessApplicationGateway,
+            auth: context.read<AuthProvider>(),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (_) => BusinessClaimTargetProvider(
+            gateway: AppDependencies.businessClaimTargetGateway,
+          ),
+        ),
       ],
 
       child: CivilpediaApp(),

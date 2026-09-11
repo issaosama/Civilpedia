@@ -74,10 +74,10 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R04
-CURRENT_PHASE_TITLE: Business Application User Experience
-LAST_CLOSED_PHASE_ID: V1-R03
-LAST_CLOSED_COMMIT: c7852ce
+CURRENT_PHASE_ID: V1-R05
+CURRENT_PHASE_TITLE: Directory Cloud Integration
+LAST_CLOSED_PHASE_ID: V1-R04
+LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
 ROADMAP_STATUS: ACTIVE
 
 ---
@@ -89,8 +89,8 @@ ROADMAP_STATUS: ACTIVE
 | A6.3.1 | Creation Authorization Hardening | CLOSED | Codex | Big Pickle | HIGH | 12b1918 |
 | A6.4 | Business Activation & Ownership Provisioning | CLOSED | Codex | Big Pickle | HIGH | 7aafc9f |
 | V1-R03 | Business Ownership & Management | CLOSED | Codex | Big Pickle | HIGH | c7852ce |
-| V1-R04 | Business Application User Experience | CURRENT | Big Pickle | Codex (backend/security) | MEDIUM | — |
-| V1-R05 | Directory Cloud Integration | QUEUED | Codex (persistence/cloud) | TBD BY ARCHITECT | HIGH | — |
+| V1-R04 | Business Application User Experience | CLOSED | Big Pickle | Codex (backend/security) | MEDIUM | PENDING OWNER COMMIT |
+| V1-R05 | Directory Cloud Integration | CURRENT | Codex (persistence/cloud) | TBD BY ARCHITECT | HIGH | — |
 | V1-R06 | Business / Provider Profile Management | QUEUED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | — |
 | V1-R07 | Staff / Admin Operations Foundation | QUEUED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | — |
 | V1-R08 | Auth + Profile Production Completion | QUEUED | Codex | TBD BY ARCHITECT | HIGH | — |
@@ -116,8 +116,8 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R04
-CURRENT_PHASE_TITLE: Business Application User Experience
+CURRENT_PHASE_ID: V1-R05
+CURRENT_PHASE_TITLE: Directory Cloud Integration
 CURRENT_PHASE_STATUS: CURRENT
 CURRENT_PHASE_CONTRACT: NOT_FROZEN
 IMPLEMENTATION_AUTHORIZED: NO
@@ -603,7 +603,7 @@ No implementation scope should be invented beyond the Architect contract.
 
 ## V1-R04 — Business Application User Experience
 
-STATUS: CURRENT
+STATUS: CLOSED
 
 Primary likely implementer:
 
@@ -633,7 +633,7 @@ Must consume existing backend authority rather than reimplement lifecycle logic 
 
 ## V1-R05 — Directory Cloud Integration
 
-STATUS: QUEUED
+STATUS: CURRENT
 
 Primary likely implementer:
 
@@ -1218,11 +1218,11 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R04 — Business Application User Experience
+V1-R05 — Directory Cloud Integration
 
 NEXT AFTER SUCCESSFUL CLOSE:
 
-V1-R05 — Directory Cloud Integration
+V1-R06 — Business / Provider Profile Management
 
 No other phase may be selected by inference.
 
@@ -1234,15 +1234,26 @@ Reusable template. Only the Architect/Owner-authorized closing entry fills this 
 
 ### Phase Transition Record
 
-Phase: V1-R03 — Business Ownership & Management
+Phase: V1-R04 — Business Application User Experience
 Previous status: CURRENT
 New status: CLOSED
-Implementation agent: Codex
-Reviewer: Big Pickle — PASS
-Architect review: PASS
-Tests/evidence: V1-R03 21/21; relevant regressions 143/143; full Flutter 1712/1712; analyzer zero new; DEV QA A–O PASS; migration parity 00019; DB lint clean
-Commit: c7852ce
-Push verified: YES
-Next CURRENT phase: V1-R04 — Business Application User Experience
-Contract status: NOT_FROZEN
-Owner approval: APPROVED / COMMITTED
+Implementation agent: Big Pickle
+Independent reviewer: Codex
+Architect Final Review: PASS
+Evidence summary:
+- 205/205 relevant regressions PASS
+- 1752/1752 full Flutter PASS
+- analyzer zero new diagnostics
+- V1-R04 correction suite 52/52 PASS
+- User Area route tests 29/29 PASS
+- combined focused correction verification 81/81 PASS
+- final canonical CLAIM forwarding behavioral test 1/1 PASS
+- Codex focused recheck completed
+- Codex micro recheck PASS
+- Architect Final Review PASS
+Commit: PENDING OWNER COMMIT
+Push verified: NO — pending Owner commit/push
+Next CURRENT phase: V1-R05 — Directory Cloud Integration
+Next contract: NOT_FROZEN
+Implementation authorized: NO
+Owner approval: PENDING COMMIT

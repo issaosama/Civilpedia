@@ -30,6 +30,10 @@ import '../features/user_area/presentation/user_area_screen.dart';
 import '../features/directory/presentation/directory_landing_screen.dart';
 import '../features/directory/presentation/directory_search_screen.dart';
 import '../features/profile/domain/service_business_profile.dart';
+import '../features/business/presentation/screens/my_applications_screen.dart';
+import '../features/business/presentation/screens/application_detail_screen.dart';
+import '../features/business/presentation/screens/application_new_form_screen.dart';
+import '../features/business/presentation/screens/application_claim_form_screen.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
@@ -186,6 +190,30 @@ final GoRouter appRouter = GoRouter(
           builder: (context, state) => const SavedScreen(initialTabIndex: 1),
         ),
       ],
+    ),
+    // V1-R04 — Business Applications (root routes above the shell; not bottom-
+    // nav destinations, not staff navigation).
+    GoRoute(
+      path: AppRoutes.businessApplications,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const MyApplicationsScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.businessApplicationsNew,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const ApplicationNewFormScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.businessApplicationsClaim,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const ApplicationClaimFormScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.businessApplicationDetailPattern,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => ApplicationDetailScreen(
+        applicationId: state.pathParameters['applicationId'] ?? '',
+      ),
     ),
     GoRoute(
       path: AppRoutes.topicListPattern,

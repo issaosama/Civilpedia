@@ -711,4 +711,131 @@ class En {
 
   // RR.1 — Missing topic image fallback
   static const String imageUnavailable = 'Image unavailable for now';
+
+  // V1-R04 — Business Application User Experience
+  // Entry point (User Area)
+  static const String businessMyApplications = 'My Business Applications';
+  static const String businessSignInRequired =
+      'Sign in to manage your business applications';
+  static const String businessSignInButton = 'Sign in';
+  static const String businessNoApplications =
+      'No business applications yet';
+  static const String businessApplicationsError =
+      'Unable to load business applications';
+  static const String businessRefresh = 'Refresh';
+
+  // Screens
+  static const String businessApplicationsTitle = 'My Applications';
+  static const String businessNewApplication = 'New Application';
+  static const String businessNewApplicationTitle = 'New Business Application';
+  static const String businessNewApplicationSubtitle =
+      'Enter the business name and type to file your application';
+  static const String businessClaimApplicationTitle = 'Claim a Business';
+  static const String businessClaimApplicationSubtitle =
+      'Select the business you want to claim';
+  static const String businessClaimTargetsEmpty =
+      'No unclaimed businesses available right now';
+  static const String businessClaimTargetsError =
+      'Unable to load businesses available for claiming';
+
+  // Application fields
+  static const String businessNameLabel = 'Business name';
+  static const String businessNameHint = 'e.g. Al-Ufuq Engineering Office';
+  static const String businessEntityTypeLabel = 'Business type';
+  static const String businessEntityTypeHint = 'Select the business type';
+  static const String businessMetadata =
+      'Business details (fixed at submission)';
+  static const String businessTargetEntity = 'Claimed business';
+  static const String businessClaimStatus = 'Claim status';
+  static const String businessVerificationStatus = 'Verification status';
+  static const String businessCreatedOn = 'Created on';
+
+  // Status labels (Arabic-first, all nine canonical + unknown)
+  static const String businessStatusDraft = 'Draft';
+  static const String businessStatusSubmitted = 'Submitted';
+  static const String businessStatusUnderReview = 'Under review';
+  static const String businessStatusNeedsCorrection = 'Needs correction';
+  static const String businessStatusContacted = 'Contacted';
+  static const String businessStatusVisitScheduled = 'Visit scheduled';
+  static const String businessStatusApproved = 'Approved';
+  static const String businessStatusRejected = 'Rejected';
+  static const String businessStatusActivated = 'Activated';
+  static const String businessStatusUnknown = 'Unknown';
+
+  // Entity type labels (canonical nine; label-only, identity stays canonical)
+  static const String businessEntityTypeCompany = 'Company';
+  static const String businessEntityTypeEngineeringOffice =
+      'Engineering Office';
+  static const String businessEntityTypeContractor = 'Contractor';
+  static const String businessEntityTypeSupplier = 'Supplier';
+  static const String businessEntityTypeStore = 'Store';
+  static const String businessEntityTypeTechnician = 'Technician';
+  static const String businessEntityTypeLaboratory = 'Laboratory';
+  static const String businessEntityTypeEquipmentProvider =
+      'Equipment Provider';
+  static const String businessEntityTypeServiceProvider = 'Service Provider';
+
+  // Application type labels
+  static const String businessTypeNew = 'New business application';
+  static const String businessTypeClaim = 'Claim an existing business';
+
+  // Actions
+  static const String businessSubmit = 'Submit application';
+  static const String businessSubmitConfirm = 'Confirm submission';
+  static const String businessSubmitPending =
+      'Once submitted the application goes under review and cannot be edited. Continue?';
+  static const String businessResubmit = 'Resubmit';
+  static const String businessResubmitPending =
+      'The application will return to review after resubmission. Continue?';
+  static const String businessCreateDraft = 'Create draft';
+  static const String businessCreating = 'Creating...';
+  static const String businessSubmitting = 'Submitting...';
+  static const String businessCancel = 'Cancel';
+  static const String businessClaimTarget = 'Claim this business';
+
+  // Correction
+  static const String businessReturnReasonTitle = 'Reason for return';
+  static const String businessCorrectionNotice =
+      'Your application needs correction. Review the reason and resubmit once addressed.';
+
+  // Denial / submit cause messages (Arabic-first, concise)
+  static const String businessCauseGuestUser = 'Please sign in first';
+  static const String businessCauseMissingTarget = 'No business was selected';
+  static const String businessCauseInvalidMetadata =
+      'The entered details are invalid. Check the name and type';
+  static const String businessCauseTargetNotFound =
+      'The requested business was not found';
+  static const String businessCauseTargetNotClaimable =
+      'This business is not available for claiming right now';
+  static const String businessCauseAlreadyOwner =
+      'You already own this business';
+  static const String businessCauseDuplicateClaim =
+      'You already have an active claim application for this business';
+  static const String businessCauseApplicantMismatch =
+      'Could not confirm the applicant identity';
+  static const String businessCauseUnauthenticated = 'Please sign in first';
+  static const String businessCauseNotApplicant =
+      'This application does not belong to the current account';
+  static const String businessCauseApplicationNotFound =
+      'The application was not found';
+  static const String businessCauseInvalidTransition =
+      'This action cannot be performed in the application current state';
+  static const String businessCausePhoneRequired =
+      'Add a phone number to your profile before submitting';
+  static const String businessCauseRequiredDataMissing =
+      'Required details are incomplete';
+  static const String businessCauseUnexpected =
+      'An unexpected error occurred, please try again';
+  static const String businessCorrectionInfo =
+      'Application details cannot be edited at this stage. Resubmit after addressing the reason if possible.';
+
+  // Detail screen — timestamps & staff fields (F4)
+  static const String businessUpdatedAt = 'Last updated';
+  static const String businessReviewedAt = 'Reviewed on';
+  static const String businessApprovedAt = 'Approved on';
+  static const String businessActivatedAt = 'Activated on';
+  static const String businessRejectionReason = 'Rejection reason';
+  static const String businessApprovedNote =
+      'Application approved. Activation is in progress.';
+  static const String businessActivatedNote = 'Business activated successfully.';
 }
