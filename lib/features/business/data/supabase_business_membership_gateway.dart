@@ -3,14 +3,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/backend/supabase_service.dart';
 import '../domain/business_membership.dart';
 import '../domain/business_membership_gateway.dart';
+import '../domain/managed_business_summary.dart';
 
 /// A6.1 — Production [BusinessMembershipGateway] backed by the shared Supabase
-/// client's PostgREST `business_memberships` table.
+/// client's PostgREST boundary.
 ///
 /// Reads are gated by the existing RLS policy `business_memberships_select_own`
 /// (migration 00010): an `authenticated` user can SELECT only rows where
 /// `user_id = auth.uid()`. This gateway NEVER broadens that policy, NEVER uses
-/// service_role, and exposes NO insert/update/delete path.
+/// service_role, and exposes NO insert/update/delete path. V1-R03 management
+/// reads use only `list_my_businesses` and `list_business_members` RPCs.
 ///
 /// The query filters on `user_id` defensively to reinforce the read-own
 /// semantics; RLS remains the authoritative backstop. Rows returned are mapped
@@ -53,10 +55,83 @@ class SupabaseBusinessMembershipGateway implements BusinessMembershipGateway {
   }
 
   @override
-  BusinessMembershipListResult listMembersForEntity(String entityId) {
-    // Entity-member listing requires privileged server authorization that the
-    // current RLS does not permit. It remains an interface capability that is
-    // unavailable until the future business-management server phase.
-    return const BusinessMembershipListUnavailable();
+  Future<ManagedBusinessListResult> listMyBusinesses() async {
+    if (!isAvailable) return const ManagedBusinessListUnavailable();
+    try {
+      final response = await _client.rpc('list_my_businesses');
+      final rows = _rpcRows(response);
+      if (rows == null) {
+        return const ManagedBusinessListDenied(
+          BusinessManagementReadCause.unexpected,
+        );
+      }
+      final businesses = <ManagedBusinessSummary>[];
+      for (final row in rows) {
+        final parsed = ManagedBusinessSummary.tryFromRow(row);
+        if (parsed == null) {
+          return const ManagedBusinessListDenied(
+            BusinessManagementReadCause.unexpected,
+          );
+        }
+        businesses.add(parsed);
+      }
+      return ManagedBusinessListAvailable(List.unmodifiable(businesses));
+    } on PostgrestException catch (error) {
+      return ManagedBusinessListDenied(
+        BusinessManagementReadCause.fromServerCode(error.code),
+      );
+    } catch (_) {
+      return const ManagedBusinessListDenied(
+        BusinessManagementReadCause.unexpected,
+      );
+    }
+  }
+
+  @override
+  Future<BusinessMembershipListResult> listMembersForEntity(
+    String entityId,
+  ) async {
+    if (!isAvailable) return const BusinessMembershipListUnavailable();
+    try {
+      final response = await _client.rpc(
+        'list_business_members',
+        params: {'p_entity_id': entityId},
+      );
+      final rows = _rpcRows(response);
+      if (rows == null) {
+        return const BusinessMembershipListDenied(
+          BusinessManagementReadCause.unexpected,
+        );
+      }
+      final memberships = <BusinessMembership>[];
+      for (final row in rows) {
+        final parsed = BusinessMembership.tryFromRow(row);
+        if (parsed == null || parsed.entityId != entityId) {
+          return const BusinessMembershipListDenied(
+            BusinessManagementReadCause.unexpected,
+          );
+        }
+        memberships.add(parsed);
+      }
+      return BusinessMembershipListAvailable(List.unmodifiable(memberships));
+    } on PostgrestException catch (error) {
+      return BusinessMembershipListDenied(
+        BusinessManagementReadCause.fromServerCode(error.code),
+      );
+    } catch (_) {
+      return const BusinessMembershipListDenied(
+        BusinessManagementReadCause.unexpected,
+      );
+    }
+  }
+
+  static List<Map<String, dynamic>>? _rpcRows(dynamic response) {
+    if (response is! List) return null;
+    final rows = <Map<String, dynamic>>[];
+    for (final row in response) {
+      if (row is! Map<String, dynamic>) return null;
+      rows.add(row);
+    }
+    return rows;
   }
 }

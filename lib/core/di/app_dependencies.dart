@@ -163,10 +163,10 @@ class AppDependencies {
       regionPreferenceGateway: _regionPreferenceGateway,
     );
 
-    // A6.1 — ownership/membership foundation. The gateway reads only the
-    // authenticated user's OWN business memberships (RLS, migration 00010). It
-    // is strictly read-only: no insert/update/delete surface. Canonical
-    // identity is always auth.users.id from the authenticated session.
+    // A6.1/V1-R03 — ownership and management read foundation. Direct table
+    // access remains own-membership SELECT only; management projection/roster
+    // reads use the narrow server-authorized RPCs from migration 00019. The
+    // gateway exposes no membership mutation surface.
     _businessMembershipGateway = SupabaseBusinessMembershipGateway(
       service: _supabaseService,
     );
@@ -235,9 +235,9 @@ class AppDependencies {
   static RegionPreferenceGateway get regionPreferenceGateway =>
       _regionPreferenceGateway;
 
-  /// A6.1 — production [BusinessMembershipGateway]. Consumed through the
-  /// domain capability resolver with the authenticated user id; never by
-  /// widgets directly. Strictly read-only (own memberships only).
+  /// A6.1/V1-R03 — production [BusinessMembershipGateway]. Own-membership,
+  /// My Businesses, and authorized roster reads remain strictly read-only and
+  /// feed the centralized domain capability resolver.
   static BusinessMembershipGateway get businessMembershipGateway =>
       _businessMembershipGateway;
 

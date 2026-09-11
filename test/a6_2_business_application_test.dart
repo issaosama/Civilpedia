@@ -52,7 +52,13 @@ class _FakeMembershipGateway implements BusinessMembershipGateway {
   }
 
   @override
-  BusinessMembershipListResult listMembersForEntity(String entityId) =>
+  Future<ManagedBusinessListResult> listMyBusinesses() async =>
+      const ManagedBusinessListUnavailable();
+
+  @override
+  Future<BusinessMembershipListResult> listMembersForEntity(
+    String entityId,
+  ) async =>
       const BusinessMembershipListUnavailable();
 }
 

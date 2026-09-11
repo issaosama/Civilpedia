@@ -74,10 +74,10 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R03
-CURRENT_PHASE_TITLE: Business Ownership & Management
-LAST_CLOSED_PHASE_ID: A6.4
-LAST_CLOSED_COMMIT: 7aafc9f
+CURRENT_PHASE_ID: V1-R04
+CURRENT_PHASE_TITLE: Business Application User Experience
+LAST_CLOSED_PHASE_ID: V1-R03
+LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
 ROADMAP_STATUS: ACTIVE
 
 ---
@@ -88,8 +88,8 @@ ROADMAP_STATUS: ACTIVE
 | --- | --- | --- | --- | --- | --- | --- |
 | A6.3.1 | Creation Authorization Hardening | CLOSED | Codex | Big Pickle | HIGH | 12b1918 |
 | A6.4 | Business Activation & Ownership Provisioning | CLOSED | Codex | Big Pickle | HIGH | 7aafc9f |
-| V1-R03 | Business Ownership & Management | CURRENT | Codex | Big Pickle | HIGH | — |
-| V1-R04 | Business Application User Experience | QUEUED | Big Pickle | Codex (backend/security) | MEDIUM | — |
+| V1-R03 | Business Ownership & Management | CLOSED | Codex | Big Pickle | HIGH | PENDING OWNER COMMIT |
+| V1-R04 | Business Application User Experience | CURRENT | Big Pickle | Codex (backend/security) | MEDIUM | — |
 | V1-R05 | Directory Cloud Integration | QUEUED | Codex (persistence/cloud) | TBD BY ARCHITECT | HIGH | — |
 | V1-R06 | Business / Provider Profile Management | QUEUED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | — |
 | V1-R07 | Staff / Admin Operations Foundation | QUEUED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | — |
@@ -116,8 +116,8 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R03
-CURRENT_PHASE_TITLE: Business Ownership & Management
+CURRENT_PHASE_ID: V1-R04
+CURRENT_PHASE_TITLE: Business Application User Experience
 CURRENT_PHASE_STATUS: CURRENT
 CURRENT_PHASE_CONTRACT: NOT_FROZEN
 IMPLEMENTATION_AUTHORIZED: NO
@@ -559,11 +559,11 @@ This phase must NOT be reopened without concrete regression evidence.
 
 ---
 
-# CURRENT PHASE
+# RECENTLY CLOSED PHASE
 
 ## V1-R03 — Business Ownership & Management
 
-STATUS: CURRENT
+STATUS: CLOSED
 
 Main Implementer:
 
@@ -603,7 +603,7 @@ No implementation scope should be invented beyond the Architect contract.
 
 ## V1-R04 — Business Application User Experience
 
-STATUS: QUEUED
+STATUS: CURRENT
 
 Primary likely implementer:
 
@@ -1218,11 +1218,11 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R03 — Business Ownership & Management
+V1-R04 — Business Application User Experience
 
 NEXT AFTER SUCCESSFUL CLOSE:
 
-V1-R04 — Business Application User Experience
+V1-R05 — Directory Cloud Integration
 
 No other phase may be selected by inference.
 
@@ -1234,15 +1234,15 @@ Reusable template. Only the Architect/Owner-authorized closing entry fills this 
 
 ### Phase Transition Record
 
-Phase:
-Previous status:
-New status:
-Implementation agent:
-Reviewer:
-Architect review:
-Tests/evidence:
-Commit:
-Push verified:
-Next CURRENT phase:
-Contract status:
-Owner approval:
+Phase: V1-R03 — Business Ownership & Management
+Previous status: CURRENT
+New status: CLOSED
+Implementation agent: Codex
+Reviewer: Big Pickle — PASS
+Architect review: PASS
+Tests/evidence: V1-R03 21/21; relevant regressions 143/143; full Flutter 1712/1712; analyzer zero new; DEV QA A–O PASS; migration parity 00019; DB lint clean
+Commit: PENDING OWNER COMMIT
+Push verified: NO — pending Owner commit/push
+Next CURRENT phase: V1-R04 — Business Application User Experience
+Contract status: NOT_FROZEN
+Owner approval: PENDING COMMIT

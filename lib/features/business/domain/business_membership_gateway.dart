@@ -1,4 +1,5 @@
 import 'business_membership.dart';
+import 'managed_business_summary.dart';
 
 /// A6.1 — Read-only boundary to the canonical business ownership model
 /// (`public.business_memberships`).
@@ -8,11 +9,9 @@ import 'business_membership.dart';
 /// session) — never a Google provider id, email, or any local metadata.
 ///
 /// RLS contract (migration 00010): an `authenticated` user may SELECT only
-/// their OWN membership rows. A6.1 does NOT broaden this. Consequently this
-/// gateway exposes:
-///   * own-membership reads (implemented, read-own only);
-///   * entity-member/management listing (interface capability that returns
-///     [unavailable] until the future server-authorized management phase).
+/// their OWN membership rows. V1-R03 preserves that direct read and adds narrow
+/// SECURITY DEFINER RPCs for the authenticated actor's business projection and
+/// OWNER/ADMIN-authorized entity roster.
 ///
 /// This boundary declares NO insert/update/delete and MUST NOT be used as a
 /// path for client membership mutations. It is strictly read-only.
@@ -29,17 +28,55 @@ abstract class BusinessMembershipGateway {
   /// therefore THROWS so the caller can decide how to fail safe.
   Future<List<BusinessMembership>> listOwnMemberships(String userId);
 
-  /// Entity-member listing requires privileged server authorization and is NOT
-  /// permitted by the current RLS. Always returns [unavailable] until the
-  /// future business-management server mutation phase.
-  BusinessMembershipListResult listMembersForEntity(String entityId);
+  /// Returns the minimal canonical entities associated with the authenticated
+  /// actor. The RPC accepts no user identity; `auth.uid()` is authoritative.
+  Future<ManagedBusinessListResult> listMyBusinesses();
+
+  /// Returns the canonical roster for [entityId] only when the authenticated
+  /// actor is OWNER or ADMIN. The server fails closed with P0PER otherwise.
+  Future<BusinessMembershipListResult> listMembersForEntity(String entityId);
 }
 
-/// A6.1 — Outcome of a membership-list operation.
-///
-/// Reads that are permitted return [available] with their rows; operations that
-/// require server authorization this phase does not open return [unavailable]
-/// (no data, no fabricated privileges).
+/// V1-R03 typed failures for server-authorized business management reads.
+enum BusinessManagementReadCause {
+  unauthenticated,
+  permissionDenied,
+  unexpected;
+
+  static BusinessManagementReadCause fromServerCode(String? code) {
+    switch (code?.toUpperCase()) {
+      case 'P0AUT':
+        return BusinessManagementReadCause.unauthenticated;
+      case 'P0PER':
+        return BusinessManagementReadCause.permissionDenied;
+      default:
+        return BusinessManagementReadCause.unexpected;
+    }
+  }
+}
+
+/// Outcome of a My Businesses read.
+sealed class ManagedBusinessListResult {
+  const ManagedBusinessListResult();
+}
+
+class ManagedBusinessListAvailable extends ManagedBusinessListResult {
+  const ManagedBusinessListAvailable(this.businesses);
+
+  final List<ManagedBusinessSummary> businesses;
+}
+
+class ManagedBusinessListDenied extends ManagedBusinessListResult {
+  const ManagedBusinessListDenied(this.cause);
+
+  final BusinessManagementReadCause cause;
+}
+
+class ManagedBusinessListUnavailable extends ManagedBusinessListResult {
+  const ManagedBusinessListUnavailable();
+}
+
+/// Outcome of an entity membership-roster read.
 sealed class BusinessMembershipListResult {
   const BusinessMembershipListResult();
 }
@@ -51,8 +88,13 @@ class BusinessMembershipListAvailable extends BusinessMembershipListResult {
   final List<BusinessMembership> memberships;
 }
 
-/// The requested operation is not available yet (server-authorized future
-/// work). Carries no data and grants no elevated capability.
+class BusinessMembershipListDenied extends BusinessMembershipListResult {
+  const BusinessMembershipListDenied(this.cause);
+
+  final BusinessManagementReadCause cause;
+}
+
+/// The backend is unavailable, so no data or capability can be inferred.
 class BusinessMembershipListUnavailable extends BusinessMembershipListResult {
   const BusinessMembershipListUnavailable();
 }

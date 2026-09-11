@@ -58,7 +58,13 @@ class _FakeMembershipGateway implements BusinessMembershipGateway {
   }
 
   @override
-  BusinessMembershipListResult listMembersForEntity(String entityId) =>
+  Future<ManagedBusinessListResult> listMyBusinesses() async =>
+      const ManagedBusinessListUnavailable();
+
+  @override
+  Future<BusinessMembershipListResult> listMembersForEntity(
+    String entityId,
+  ) async =>
       const BusinessMembershipListUnavailable();
 }
 
@@ -329,13 +335,13 @@ void main() {
       expect(available.isAvailable, isTrue);
     });
 
-    test('listMembersForEntity is unavailable (no client mutation/listing)',
+    test('listMembersForEntity fails closed when backend is unavailable',
         () async {
       final gateway = SupabaseBusinessMembershipGateway(
-        service: await _serviceWithInitialization(initialized: true),
+        service: await _serviceWithInitialization(initialized: false),
       );
       expect(
-        gateway.listMembersForEntity(_entity1),
+        await gateway.listMembersForEntity(_entity1),
         isA<BusinessMembershipListUnavailable>(),
       );
     });
@@ -438,12 +444,12 @@ void main() {
       // listOwnMemberships + a server-authorized (unavailable) listing, and no
       // mutation method exists.
       final gateway = SupabaseBusinessMembershipGateway(
-        service: await _serviceWithInitialization(initialized: true),
+        service: await _serviceWithInitialization(initialized: false),
       );
       // Using a type check that a mutation path is not part of the read
       // contract via the result type for member listing.
       expect(
-        gateway.listMembersForEntity(_entity1),
+        await gateway.listMembersForEntity(_entity1),
         isNot(isA<BusinessMembershipListAvailable>()),
       );
     });
