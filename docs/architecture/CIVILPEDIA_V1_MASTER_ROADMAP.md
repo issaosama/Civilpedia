@@ -77,7 +77,7 @@ PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
 CURRENT_PHASE_ID: V1-R04
 CURRENT_PHASE_TITLE: Business Application User Experience
 LAST_CLOSED_PHASE_ID: V1-R03
-LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
+LAST_CLOSED_COMMIT: c7852ce
 ROADMAP_STATUS: ACTIVE
 
 ---
@@ -88,7 +88,7 @@ ROADMAP_STATUS: ACTIVE
 | --- | --- | --- | --- | --- | --- | --- |
 | A6.3.1 | Creation Authorization Hardening | CLOSED | Codex | Big Pickle | HIGH | 12b1918 |
 | A6.4 | Business Activation & Ownership Provisioning | CLOSED | Codex | Big Pickle | HIGH | 7aafc9f |
-| V1-R03 | Business Ownership & Management | CLOSED | Codex | Big Pickle | HIGH | PENDING OWNER COMMIT |
+| V1-R03 | Business Ownership & Management | CLOSED | Codex | Big Pickle | HIGH | c7852ce |
 | V1-R04 | Business Application User Experience | CURRENT | Big Pickle | Codex (backend/security) | MEDIUM | — |
 | V1-R05 | Directory Cloud Integration | QUEUED | Codex (persistence/cloud) | TBD BY ARCHITECT | HIGH | — |
 | V1-R06 | Business / Provider Profile Management | QUEUED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | — |
@@ -1241,8 +1241,8 @@ Implementation agent: Codex
 Reviewer: Big Pickle — PASS
 Architect review: PASS
 Tests/evidence: V1-R03 21/21; relevant regressions 143/143; full Flutter 1712/1712; analyzer zero new; DEV QA A–O PASS; migration parity 00019; DB lint clean
-Commit: PENDING OWNER COMMIT
-Push verified: NO — pending Owner commit/push
+Commit: c7852ce
+Push verified: YES
 Next CURRENT phase: V1-R04 — Business Application User Experience
 Contract status: NOT_FROZEN
-Owner approval: PENDING COMMIT
+Owner approval: APPROVED / COMMITTED
