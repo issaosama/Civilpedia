@@ -51,6 +51,12 @@ class UserAreaScreen extends StatelessWidget {
             child: Column(
               children: [
                 _EntryTile(
+                  icon: Icons.storefront_outlined,
+                  label: Ar.businessManageMyBusinesses,
+                  onTap: () => context.push(AppRoutes.businessManage),
+                ),
+                const Divider(height: 1),
+                _EntryTile(
                   icon: Icons.business_center_outlined,
                   label: Ar.businessMyApplications,
                   onTap: () => context.push(AppRoutes.businessApplications),

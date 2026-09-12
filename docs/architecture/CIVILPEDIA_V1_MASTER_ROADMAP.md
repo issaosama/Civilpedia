@@ -74,9 +74,9 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R06
-CURRENT_PHASE_TITLE: Business / Provider Profile Management
-LAST_CLOSED_PHASE_ID: V1-R05
+CURRENT_PHASE_ID: V1-R07
+CURRENT_PHASE_TITLE: Staff / Admin Operations Foundation
+LAST_CLOSED_PHASE_ID: V1-R06
 LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
 ROADMAP_STATUS: ACTIVE
 
@@ -91,8 +91,8 @@ ROADMAP_STATUS: ACTIVE
 | V1-R03 | Business Ownership & Management | CLOSED | Codex | Big Pickle | HIGH | c7852ce |
 | V1-R04 | Business Application User Experience | CLOSED | Big Pickle | Codex (backend/security) | MEDIUM | 55a624a |
 | V1-R05 | Directory Cloud Integration | CLOSED | Codex (persistence/cloud) | Architect | HIGH | PENDING OWNER COMMIT |
-| V1-R06 | Business / Provider Profile Management | CURRENT | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | — |
-| V1-R07 | Staff / Admin Operations Foundation | QUEUED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | — |
+| V1-R06 | Business / Provider Profile Management | CLOSED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
+| V1-R07 | Staff / Admin Operations Foundation | CURRENT | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | — |
 | V1-R08 | Auth + Profile Production Completion | QUEUED | Codex | TBD BY ARCHITECT | HIGH | — |
 | V1-R09 | Offline / Connectivity / Error-State Hardening | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R10 | Core App UX Production Completion | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -116,8 +116,8 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R06
-CURRENT_PHASE_TITLE: Business / Provider Profile Management
+CURRENT_PHASE_ID: V1-R07
+CURRENT_PHASE_TITLE: Staff / Admin Operations Foundation
 CURRENT_PHASE_STATUS: CURRENT
 CURRENT_PHASE_CONTRACT: NOT_FROZEN
 IMPLEMENTATION_AUTHORIZED: NO
@@ -664,7 +664,7 @@ No duplicate cloud/local business authority may remain ambiguous at completion.
 
 ## V1-R06 — Business / Provider Profile Management
 
-STATUS: CURRENT
+STATUS: CLOSED
 
 Goal:
 
@@ -695,7 +695,7 @@ Never edit simultaneously.
 
 ## V1-R07 — Staff / Admin Operations Foundation
 
-STATUS: QUEUED
+STATUS: CURRENT
 
 Goal:
 

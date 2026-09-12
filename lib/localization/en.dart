@@ -838,4 +838,92 @@ class En {
   static const String businessApprovedNote =
       'Application approved. Activation is in progress.';
   static const String businessActivatedNote = 'Business activated successfully.';
+
+  // V1-R06 — Business Profile Management
+  static const String businessContactTypePhone = 'Phone';
+  static const String businessContactTypeWhatsApp = 'WhatsApp';
+  static const String businessContactTypeEmail = 'Email';
+  static const String businessContactTypeWebsite = 'Website';
+  static const String businessContactTypeOther = 'Other';
+
+  static const String businessManageMyBusinesses = 'My Managed Businesses';
+  static const String businessManageSignInRequired =
+      'Sign in to manage your businesses';
+  static const String businessManageEmpty =
+      'No owned or managed businesses yet';
+  static const String businessManageError = 'Unable to load your businesses';
+  static const String businessManageTitle = 'My Managed Businesses';
+  static const String businessManageEditProfile = 'Manage public profile';
+  static const String businessManageNotEditable = 'No edit permission';
+
+  static const String businessProfileEditTitle = 'Edit public profile';
+  static const String businessProfileNameLabel = 'Business name';
+  static const String businessProfileDescriptionLabel = 'Description';
+  static const String businessProfileDescriptionHint =
+      'Short description (optional)';
+  static const String businessProfileContactsLabel = 'Contact methods';
+  static const String businessProfileAddContact = 'Add contact';
+  static const String businessProfileCategoriesLabel = 'Categories';
+  static const String businessProfileAddCategory = 'Add category';
+  static const String businessProfileLocationLabel = 'Location';
+  static const String businessProfileAddressLabel = 'Address';
+  static const String businessProfileAddressHint = 'Detailed address';
+  static const String businessProfileRegionLabel = 'Region';
+  static const String businessProfileRegionHint = 'Select region';
+  static const String businessProfileCoordinatesLabel = 'Coordinates';
+  static const String businessProfileLatitude = 'Latitude';
+  static const String businessProfileLongitude = 'Longitude';
+  static const String businessProfileSave = 'Save changes';
+  static const String businessProfileSaving = 'Saving...';
+  static const String businessProfileSaved = 'Changes saved';
+  static const String businessProfileDiscard = 'Discard changes';
+  static const String businessProfileUnsavedTitle = 'Unsaved changes';
+  static const String businessProfileUnsavedMessage =
+      'Discard unsaved changes?';
+  static const String businessProfileConflictTitle =
+      'Profile changed elsewhere';
+  static const String businessProfileConflictMessage =
+      'This profile was updated elsewhere. Please reload.';
+  static const String businessProfileConflictReload = 'Reload';
+  static const String businessProfilePrimary = 'Primary';
+  static const String businessProfileRefreshWarning =
+      'Saved, but the public page refresh failed. You can retry.';
+  static const String businessProfileRetryRefresh = 'Retry public refresh';
+  static const String businessProfileVerificationWarning =
+      'Changing the name or location may reset verification to review';
+  static const String businessProfileNotPublicNotice =
+      'This business is not currently public';
+  static const String businessProfilePreview = 'View public page';
+  static const String businessProfileNoCategories = 'No categories available';
+
+  static const String businessProfileValidationRequired = 'This field is required';
+  static const String businessProfileValidationTooLong = 'Text is too long';
+  static const String businessProfileValidationTooMany = 'Too many items';
+  static const String businessProfileValidationInvalidFormat = 'Invalid format';
+  static const String businessProfileValidationDuplicate = 'Duplicate value';
+  static const String businessProfileValidationDuplicatePrimary =
+      'Only one primary per type';
+  static const String businessProfileValidationMultiplePrimary =
+      'Only one primary category';
+  static const String businessProfileValidationIncompleteLocation =
+      'Location is incomplete';
+  static const String businessProfileValidationIncompletePair =
+      'Latitude and longitude must both be entered';
+  static const String businessProfileValidationOutOfRange =
+      'Value is out of range';
+
+  static const String businessProfileCauseUnauthenticated =
+      'Please sign in first';
+  static const String businessProfileCausePermissionDenied =
+      'You do not have permission to manage this business';
+  static const String businessProfileCauseNotFound = 'Business not found';
+  static const String businessProfileCauseInvalidData = 'Invalid data';
+  static const String businessProfileCauseConflict =
+      'Profile changed elsewhere';
+  static const String businessProfileCauseNetwork =
+      'Connection failed, please try again';
+  static const String businessProfileCauseUnexpected =
+      'An unexpected error occurred';
+  static const String businessProfileCauseUnavailable =
+      'Service unavailable right now';
 }

@@ -38,6 +38,8 @@ import '../features/business/presentation/screens/my_applications_screen.dart';
 import '../features/business/presentation/screens/application_detail_screen.dart';
 import '../features/business/presentation/screens/application_new_form_screen.dart';
 import '../features/business/presentation/screens/application_claim_form_screen.dart';
+import '../features/business/presentation/screens/managed_businesses_screen.dart';
+import '../features/business/presentation/screens/business_profile_edit_screen.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
@@ -230,6 +232,19 @@ final GoRouter appRouter = GoRouter(
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => ApplicationDetailScreen(
         applicationId: state.pathParameters['applicationId'] ?? '',
+      ),
+    ),
+    // V1-R06 — Business Profile Management (root routes above the shell).
+    GoRoute(
+      path: AppRoutes.businessManage,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const ManagedBusinessesScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.businessManageDetailPattern,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => BusinessProfileEditScreen(
+        entityId: state.pathParameters['entityId'] ?? '',
       ),
     ),
     GoRoute(

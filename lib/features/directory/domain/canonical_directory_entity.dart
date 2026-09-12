@@ -232,7 +232,8 @@ class CanonicalDirectoryEntity {
               .map((m) => CanonicalDirectoryLocation.fromJson(
                     Map<String, dynamic>.from(m),
                   ))
-              .where((l) => l.regionCode.isNotEmpty)
+              .where((l) =>
+                  l.regionCode.isNotEmpty || (l.address?.isNotEmpty ?? false))
               .toList()
           : const [],
       contacts: contactsRaw is List
@@ -337,6 +338,7 @@ class CanonicalDirectoryLocation {
     this.regionNameAr,
     this.regionNameEn,
     this.address,
+    this.isPrimary = false,
   });
 
   final String regionCode;
@@ -348,6 +350,7 @@ class CanonicalDirectoryLocation {
   final String? regionNameAr;
   final String? regionNameEn;
   final String? address;
+  final bool isPrimary;
 
   Map<String, dynamic> toJson() => {
     'region_code': regionCode,
@@ -355,6 +358,7 @@ class CanonicalDirectoryLocation {
     if (regionNameAr != null) 'region_name_ar': regionNameAr,
     if (regionNameEn != null) 'region_name_en': regionNameEn,
     if (address != null) 'address': address,
+    'is_primary': isPrimary,
   };
 
   factory CanonicalDirectoryLocation.fromJson(Map<String, dynamic> json) {
@@ -370,6 +374,7 @@ class CanonicalDirectoryLocation {
       regionNameAr: nameAr,
       regionNameEn: nameEn,
       address: json['address'] as String?,
+      isPrimary: json['is_primary'] == true,
     );
   }
 }

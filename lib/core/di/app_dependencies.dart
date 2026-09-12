@@ -42,10 +42,12 @@ import '../../features/business/data/supabase_business_application_gateway.dart'
 import '../../features/business/data/supabase_business_application_staff_gateway.dart';
 import '../../features/business/data/supabase_business_claim_target_gateway.dart';
 import '../../features/business/data/supabase_business_membership_gateway.dart';
+import '../../features/business/data/supabase_business_profile_management_gateway.dart';
 import '../../features/business/domain/business_application_gateway.dart';
 import '../../features/business/domain/business_application_staff_gateway.dart';
 import '../../features/business/domain/business_claim_target_gateway.dart';
 import '../../features/business/domain/business_membership_gateway.dart';
+import '../../features/business/domain/business_profile_management_gateway.dart';
 import '../../features/projects/data/project_persistence_gateway.dart';
 
 class AppDependencies {
@@ -88,6 +90,8 @@ class AppDependencies {
   static late final RegionPreferenceGateway _regionPreferenceGateway;
 
 static late final BusinessMembershipGateway _businessMembershipGateway;
+  static late final BusinessProfileManagementGateway
+      _businessProfileManagementGateway;
   static late final BusinessApplicationGateway _businessApplicationGateway;
   static late final BusinessApplicationStaffGateway
       _businessApplicationStaffGateway;
@@ -188,6 +192,15 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
       service: _supabaseService,
     );
 
+    // V1-R06 — OWNER/ADMIN public business-profile management boundary.
+    // Read/mutation uses ONLY the two frozen SECURITY DEFINER RPCs
+    // (get_managed_business_profile / update_managed_business_profile) from
+    // migration 00020. No direct table write; taxonomy lookups are read-only.
+    _businessProfileManagementGateway =
+        SupabaseBusinessProfileManagementGateway(
+      service: _supabaseService,
+    );
+
     // A6.3.1 — business application boundary. Reads remain own-row only;
     // creation and lifecycle mutations use narrow server-authorized RPCs
     // (00016/00017). The client has no generic table INSERT/UPDATE/DELETE and
@@ -271,6 +284,12 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
   /// feed the centralized domain capability resolver.
   static BusinessMembershipGateway get businessMembershipGateway =>
       _businessMembershipGateway;
+
+  /// V1-R06 — production [BusinessProfileManagementGateway]. OWNER/ADMIN
+  /// public profile read/update via the frozen migration 00020 RPCs.
+  /// Taxonomy lookups are read-only; no direct Directory table mutation.
+  static BusinessProfileManagementGateway get businessProfileManagementGateway =>
+      _businessProfileManagementGateway;
 
   /// A6.3.1 — production [BusinessApplicationGateway]. Read-own plus narrow
   /// server-authorized creation/lifecycle RPCs; never a generic table mutation

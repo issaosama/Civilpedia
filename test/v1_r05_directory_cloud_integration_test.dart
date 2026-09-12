@@ -75,6 +75,7 @@ Map<String, dynamic> _rowWithChildren() {
       <String, dynamic>{
         'region_id': 'r1',
         'address': 'St 1',
+        'is_primary': false,
         'regions': <String, dynamic>{
           'id': 'r1',
           'code': 'karrada',
@@ -85,6 +86,7 @@ Map<String, dynamic> _rowWithChildren() {
       <String, dynamic>{
         'region_id': 'r2',
         'address': null,
+        'is_primary': true,
         'regions': <String, dynamic>{
           'id': 'r2',
           'code': 'mansour',
@@ -1048,6 +1050,13 @@ void main() {
       expect(entity.media.single.mediaType, 'image');
       // Contact parsed.
       expect(entity.contacts.single.value, '07701234567');
+      expect(entity.locations.first.regionCode, 'mansour',
+          reason: 'the database primary location must display first');
+      expect(entity.locations.first.isPrimary, isTrue);
+      final cached = CanonicalDirectoryEntity.tryFromJson(entity.toJson());
+      expect(cached, isNotNull);
+      expect(cached!.locations.first.isPrimary, isTrue,
+          reason: 'the canonical cache round trip must retain primary authority');
     });
 
     test('P2. loadById executes the by-id query and resolves the canonical id',

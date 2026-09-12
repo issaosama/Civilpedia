@@ -816,4 +816,96 @@ class Ar {
   static const String businessApprovedNote =
       'تمت الموافقة على الطلب بنجاح. التفعيل قيد المعالجة حالياً.';
   static const String businessActivatedNote = 'تم تفعيل النشاط بنجاح.';
+
+  // V1-R06 — Business Profile Management
+  static const String businessContactTypePhone = 'هاتف';
+  static const String businessContactTypeWhatsApp = 'واتساب';
+  static const String businessContactTypeEmail = 'بريد إلكتروني';
+  static const String businessContactTypeWebsite = 'موقع إلكتروني';
+  static const String businessContactTypeOther = 'أخرى';
+
+  static const String businessManageMyBusinesses = 'إدارة أعمالي';
+  static const String businessManageSignInRequired =
+      'يجب تسجيل الدخول لإدارة أعمالك';
+  static const String businessManageEmpty =
+      'لا توجد أعمال مملوكة أو مُدارة حالياً';
+  static const String businessManageError = 'تعذر تحميل قائمة الأعمال';
+  static const String businessManageTitle = 'إدارة أعمالي';
+  static const String businessManageEditProfile = 'إدارة الملف العام';
+  static const String businessManageNotEditable = 'لا يوجد صلاحية تعديل';
+
+  static const String businessProfileEditTitle = 'تعديل الملف العام';
+  static const String businessProfileNameLabel = 'اسم النشاط';
+  static const String businessProfileDescriptionLabel = 'الوصف';
+  static const String businessProfileDescriptionHint =
+      'وصف مختصر (اختياري)';
+  static const String businessProfileContactsLabel = 'وسائل التواصل';
+  static const String businessProfileAddContact = 'إضافة وسيلة تواصل';
+  static const String businessProfileCategoriesLabel = 'التصنيفات';
+  static const String businessProfileAddCategory = 'إضافة تصنيف';
+  static const String businessProfileLocationLabel = 'الموقع';
+  static const String businessProfileAddressLabel = 'العنوان';
+  static const String businessProfileAddressHint = 'العنوان التفصيلي';
+  static const String businessProfileRegionLabel = 'المنطقة';
+  static const String businessProfileRegionHint = 'اختر المنطقة';
+  static const String businessProfileCoordinatesLabel = 'الإحداثيات';
+  static const String businessProfileLatitude = 'خط العرض';
+  static const String businessProfileLongitude = 'خط الطول';
+  static const String businessProfileSave = 'حفظ التغييرات';
+  static const String businessProfileSaving = 'جاري الحفظ...';
+  static const String businessProfileSaved = 'تم حفظ التغييرات';
+  static const String businessProfileDiscard = 'تجاهل التغييرات';
+  static const String businessProfileUnsavedTitle = 'تغييرات غير محفوظة';
+  static const String businessProfileUnsavedMessage =
+      'هل تريد تجاهل التغييرات غير المحفوظة؟';
+  static const String businessProfileConflictTitle =
+      'تم تعديل البيانات من جهة أخرى';
+  static const String businessProfileConflictMessage =
+      'تم تحديث هذا الملف من مصدر آخر. يرجى إعادة التحميل.';
+  static const String businessProfileConflictReload = 'إعادة التحميل';
+  static const String businessProfilePrimary = 'رئيسي';
+  static const String businessProfileRefreshWarning =
+      'تم الحفظ، لكن تعذر تحديث الصفحة العامة. يمكنك إعادة المحاولة.';
+  static const String businessProfileRetryRefresh = 'إعادة تحديث الصفحة العامة';
+  static const String businessProfileVerificationWarning =
+      'تغيير الاسم أو الموقع قد يعيد حالة التوثيق للمراجعة';
+  static const String businessProfileNotPublicNotice =
+      'هذا النشاط غير منشور حالياً';
+  static const String businessProfilePreview = 'عرض الصفحة العامة';
+  static const String businessProfileNoCategories = 'لا توجد تصنيفات متاحة';
+
+  static const String businessProfileValidationRequired = 'هذا الحقل مطلوب';
+  static const String businessProfileValidationTooLong =
+      'النص أطول من المسموح';
+  static const String businessProfileValidationTooMany =
+      'العدد أعلى من المسموح';
+  static const String businessProfileValidationInvalidFormat =
+      'تنسيق غير صالح';
+  static const String businessProfileValidationDuplicate = 'قيمة مكررة';
+  static const String businessProfileValidationDuplicatePrimary =
+      'رئيسي واحد فقط لكل نوع';
+  static const String businessProfileValidationMultiplePrimary =
+      'تصنيف رئيسي واحد فقط';
+  static const String businessProfileValidationIncompleteLocation =
+      'الموقع غير مكتمل';
+  static const String businessProfileValidationIncompletePair =
+      'يجب إدخال خطي العرض والطول معاً';
+  static const String businessProfileValidationOutOfRange =
+      'قيمة خارج النطاق المسموح';
+
+  static const String businessProfileCauseUnauthenticated =
+      'يجب تسجيل الدخول أولاً';
+  static const String businessProfileCausePermissionDenied =
+      'ليس لديك صلاحية إدارة هذا النشاط';
+  static const String businessProfileCauseNotFound =
+      'لم يتم العثور على النشاط';
+  static const String businessProfileCauseInvalidData = 'البيانات غير صالحة';
+  static const String businessProfileCauseConflict =
+      'تم تعديل الملف من جهة أخرى';
+  static const String businessProfileCauseNetwork =
+      'تعذر الاتصال، حاول مجدداً';
+  static const String businessProfileCauseUnexpected =
+      'حدث خطأ غير متوقع';
+  static const String businessProfileCauseUnavailable =
+      'الخدمة غير متاحة حالياً';
 }

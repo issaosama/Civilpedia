@@ -37,7 +37,7 @@ class SupabaseDirectoryReadQueryChannel implements DirectoryReadQueryChannel {
       directory_categories(id, code, name_ar, name_en)
     ),
     entity_locations(
-      region_id, address, regions(id, code, name_ar, name_en)
+      region_id, address, regions(id, code, name_ar, name_en), is_primary
     ),
     entity_contacts(id, contact_type, value),
     entity_media(id, url, media_type)
@@ -189,17 +189,27 @@ class SupabaseDirectoryReadGateway {
       final regionNameAr = region is Map ? region['name_ar'] as String? : null;
       final regionNameEn = region is Map ? region['name_en'] as String? : null;
       final address = item['address'] as String?;
-      if (regionCode != null && regionCode.isNotEmpty) {
-        result.add(CanonicalDirectoryLocation(
-          regionCode: regionCode,
-          regionName: _displayName(regionNameEn, regionNameAr),
-          regionNameAr: regionNameAr,
-          regionNameEn: regionNameEn,
-          address: address,
-        ));
+      final isPrimary = item['is_primary'] == true;
+      if ((regionCode != null && regionCode.isNotEmpty) ||
+          (address != null && address.isNotEmpty)) {
+        result.add(
+          CanonicalDirectoryLocation(
+            regionCode: regionCode ?? '',
+            regionName: _displayName(regionNameEn, regionNameAr),
+            regionNameAr: regionNameAr,
+            regionNameEn: regionNameEn,
+            address: address,
+            isPrimary: isPrimary,
+          ),
+        );
       }
     }
-    return result;
+    // V1-R06 compatibility: public presentation consumes the first location,
+    // so put the database-authoritative primary row first deterministically.
+    return [
+      ...result.where((location) => location.isPrimary),
+      ...result.where((location) => !location.isPrimary),
+    ];
   }
 
   static String? _displayName(String? preferred, String? fallback) {

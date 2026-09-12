@@ -205,4 +205,16 @@ abstract final class AppRoutes {
   /// Navigable detail path by [applicationId]. See [topicListFor].
   static String businessApplicationDetailFor(String applicationId) =>
       '$businessApplications/$applicationId';
+
+  // --- Business Profile Management (V1-R06) ---
+  /// My Managed Businesses list (root route, above the shell).
+  static const String businessManage = '/business/manage';
+
+  /// Manage/Edit public profile pattern keyed by canonical entity id.
+  static const String businessManageDetailPattern =
+      '$businessManage/:entityId';
+
+  /// Navigable edit path by canonical [entityId]. See [topicListFor].
+  static String businessManageDetailFor(String entityId) =>
+      '$businessManage/$entityId';
 }

@@ -11,6 +11,8 @@ import 'core/services/connectivity_provider.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/business/presentation/providers/business_application_provider.dart';
 import 'features/business/presentation/providers/business_claim_target_provider.dart';
+import 'features/business/presentation/providers/business_profile_editor_provider.dart';
+import 'features/business/presentation/providers/managed_businesses_provider.dart';
 import 'features/encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import 'features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import 'features/profile/presentation/providers/user_profile_provider.dart';
@@ -92,6 +94,22 @@ void _runApp() {
         ChangeNotifierProvider(
           create: (_) => BusinessClaimTargetProvider(
             gateway: AppDependencies.businessClaimTargetGateway,
+          ),
+        ),
+
+        // V1-R06 — My Managed Businesses + public profile editor.
+        ChangeNotifierProvider(
+          create: (context) => ManagedBusinessesProvider(
+            membershipGateway: AppDependencies.businessMembershipGateway,
+            auth: context.read<AuthProvider>(),
+          ),
+        ),
+
+        ChangeNotifierProvider(
+          create: (context) => BusinessProfileEditorProvider(
+            gateway: AppDependencies.businessProfileManagementGateway,
+            directoryRepository: AppDependencies.directoryRepo,
+            auth: context.read<AuthProvider>(),
           ),
         ),
       ],

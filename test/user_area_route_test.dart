@@ -376,11 +376,15 @@ void main() {
       );
     });
 
-    testWidgets('exposes exactly My Applications/Profile/Saved/Downloads and '
+    testWidgets('exposes exactly My Managed Businesses/My Applications/Profile/Saved/Downloads and '
         'no inventory-only entries', (tester) async {
       final profileProvider = _profileProvider(stored: _profile());
       await _open(tester, profileProvider, AppRoutes.user);
 
+      expect(
+        find.widgetWithText(ListTile, Ar.businessManageMyBusinesses),
+        findsOneWidget,
+      );
       expect(
         find.widgetWithText(ListTile, Ar.businessMyApplications),
         findsOneWidget,
@@ -390,13 +394,13 @@ void main() {
       expect(find.widgetWithText(ListTile, Ar.downloads), findsOneWidget);
       expect(
         find.byType(ListTile),
-        findsNWidgets(4),
+        findsNWidgets(5),
         reason:
             'hub is an aggregation surface for shipped destinations only — '
-            'My Applications (V1-R04 §13), Profile, Saved, Downloads are the '
-            'shipped destinations; activity/preferences/theme/language/backup/'
-            'account are inventory and must NOT be surfaced, and there is no '
-            'avatar/header wiring',
+            'My Managed Businesses (V1-R06), My Applications (V1-R04 §13), '
+            'Profile, Saved, Downloads are the shipped destinations; '
+            'activity/preferences/theme/language/backup/account are inventory '
+            'and must NOT be surfaced, and there is no avatar/header wiring',
       );
       expect(tester.takeException(), isNull);
     });
