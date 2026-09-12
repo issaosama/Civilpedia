@@ -16,7 +16,15 @@ import 'package:civilpedia/features/auth/presentation/providers/auth_provider.da
 import 'package:civilpedia/features/business/domain/business_application.dart';
 import 'package:civilpedia/features/business/domain/business_application_gateway.dart';
 import 'package:civilpedia/features/business/domain/business_application_policy.dart';
+import 'package:civilpedia/features/business/domain/business_application_staff_gateway.dart';
+import 'package:civilpedia/features/business/domain/business_application_status.dart';
+import 'package:civilpedia/features/business/domain/business_application_type.dart';
+import 'package:civilpedia/features/business/domain/staff_application_capabilities.dart';
+import 'package:civilpedia/features/business/domain/staff_application_detail.dart';
+import 'package:civilpedia/features/business/domain/staff_application_summary.dart';
+import 'package:civilpedia/features/business/domain/staff_read_result.dart';
 import 'package:civilpedia/features/business/presentation/providers/business_application_provider.dart';
+import 'package:civilpedia/features/business/presentation/providers/staff_access_provider.dart';
 import 'package:civilpedia/features/business/presentation/screens/my_applications_screen.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/category_info.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/content_block.dart';
@@ -163,6 +171,87 @@ class _FakeBusinessAppGateway implements BusinessApplicationGateway {
       BusinessApplicationSubmitCause.invalidTransition);
 }
 
+/// Minimal staff gateway for the User Area route test. The staff entry must not
+/// crash when the provider is present; it degrades to no read permission.
+class _FakeStaffAccessGateway implements BusinessApplicationStaffGateway {
+  @override
+  bool get isAvailable => true;
+
+  @override
+  Future<StaffReadResult<StaffApplicationCapabilities>>
+      getCapabilities() async {
+    return const StaffReadSuccess(StaffApplicationCapabilities.empty());
+  }
+
+  @override
+  Future<StaffReadResult<StaffApplicationPage>> listApplications({
+    BusinessApplicationStatus? statusFilter,
+    BusinessApplicationType? typeFilter,
+    int limit = 25,
+    StaffApplicationCursor? cursor,
+  }) async => const StaffReadSuccess(StaffApplicationPage(items: []));
+
+  @override
+  Future<StaffReadResult<StaffApplicationDetail>> getApplicationDetail(
+    String applicationId,
+  ) async => const StaffReadDenied(
+    BusinessApplicationStaffCause.applicationNotFound,
+  );
+
+  @override
+  Future<BusinessApplicationStaffResult> beginReview(
+          String applicationId) async =>
+      const BusinessApplicationStaffDenied(
+          BusinessApplicationStaffCause.staffPermissionDenied);
+
+  @override
+  Future<BusinessApplicationStaffResult> returnForCorrection(
+    String applicationId, {
+    required String reason,
+  }) async =>
+      const BusinessApplicationStaffDenied(
+          BusinessApplicationStaffCause.staffPermissionDenied);
+
+  @override
+  Future<BusinessApplicationStaffResult> markContacted(
+    String applicationId, {
+    required String contactType,
+    String? result,
+    String? notes,
+  }) async =>
+      const BusinessApplicationStaffDenied(
+          BusinessApplicationStaffCause.staffPermissionDenied);
+
+  @override
+  Future<BusinessApplicationStaffResult> scheduleVisit(
+    String applicationId, {
+    required DateTime scheduledAt,
+    String? location,
+    String? notes,
+  }) async =>
+      const BusinessApplicationStaffDenied(
+          BusinessApplicationStaffCause.staffPermissionDenied);
+
+  @override
+  Future<BusinessApplicationStaffResult> approve(String applicationId) async =>
+      const BusinessApplicationStaffDenied(
+          BusinessApplicationStaffCause.staffPermissionDenied);
+
+  @override
+  Future<BusinessApplicationStaffResult> reject(
+    String applicationId, {
+    required String reason,
+  }) async =>
+      const BusinessApplicationStaffDenied(
+          BusinessApplicationStaffCause.staffPermissionDenied);
+
+  @override
+  Future<BusinessApplicationStaffResult> activate(
+          String applicationId) async =>
+      const BusinessApplicationStaffDenied(
+          BusinessApplicationStaffCause.staffPermissionDenied);
+}
+
 Widget _app(
   UserProfileProvider profileProvider, {
   EncyclopediaFavoritesProvider? favorites,
@@ -173,6 +262,12 @@ Widget _app(
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(
+        create: (context) => StaffAccessProvider(
+          gateway: _FakeStaffAccessGateway(),
+          auth: context.read<AuthProvider>(),
+        ),
+      ),
       ChangeNotifierProvider.value(value: profileProvider),
       ChangeNotifierProvider.value(
         value: EncyclopediaProvider(

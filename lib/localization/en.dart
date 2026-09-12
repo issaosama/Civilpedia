@@ -926,4 +926,106 @@ class En {
       'An unexpected error occurred';
   static const String businessProfileCauseUnavailable =
       'Service unavailable right now';
+
+  // V1-R07 — Staff / Admin Operations Foundation
+  static const String staffOperations = 'Review Operations';
+  static const String staffApplicationsTitle = 'Review Applications';
+  static const String staffSignInRequired = 'Sign in to access review tools';
+  static const String staffAccessDenied = 'You do not have access to review tools';
+  static const String staffPermissionLost = 'Access was revoked. Please refresh.';
+  static const String staffLoadingAccess = 'Checking permissions...';
+  static const String staffLoadingQueue = 'Loading applications...';
+  static const String staffLoadingDetail = 'Loading application details...';
+  static const String staffEmptyQueue = 'No applications match the current filter';
+  static const String staffQueueError = 'Unable to load applications';
+  static const String staffDetailError = 'Unable to load application details';
+  static const String staffRetry = 'Retry';
+  static const String staffLoadMore = 'Load more';
+  static const String staffLoadingMore = 'Loading...';
+
+  static const String staffFilterDefault = 'In review';
+  static const String staffFilterApproved = 'Pending activation';
+  static const String staffFilterNeedsCorrection = 'Needs correction';
+  static const String staffFilterRejected = 'Rejected';
+  static const String staffFilterActivated = 'Activated';
+  static const String staffFilterAllTypes = 'All types';
+  static const String staffFilterNew = 'New applications';
+  static const String staffFilterClaim = 'Claim applications';
+
+  static const String staffActionBeginReview = 'Begin review';
+  static const String staffActionReturnForCorrection = 'Return for correction';
+  static const String staffActionMarkContacted = 'Mark contacted';
+  static const String staffActionScheduleVisit = 'Schedule visit';
+  static const String staffActionApprove = 'Approve';
+  static const String staffActionReject = 'Reject';
+  static const String staffActionActivate = 'Activate';
+
+  static const String staffConfirmBeginReview = 'Begin reviewing this application?';
+  static const String staffConfirmApprove = 'Approve this application?';
+  static const String staffConfirmActivate = 'Activate this application now?';
+  static const String staffConfirmAction = 'Confirm action';
+
+  static const String staffCorrectionReasonLabel = 'Correction reason';
+  static const String staffCorrectionReasonHint = 'Explain clearly why it is returned';
+  static const String staffRejectionReasonLabel = 'Rejection reason';
+  static const String staffRejectionReasonHint = 'Explain clearly why it is rejected';
+  static const String staffContactTypeLabel = 'Contact method';
+  static const String staffContactResultLabel = 'Contact result (optional)';
+  static const String staffContactNotesLabel = 'Notes (optional)';
+
+  // Localized values for the raw server contact-type codes (finding 12).
+  static const String staffContactTypePhone = 'Phone';
+  static const String staffContactTypeWhatsapp = 'WhatsApp';
+  static const String staffContactTypeEmail = 'Email';
+  static const String staffContactTypeVisit = 'Visit';
+  static const String staffContactTypeOther = 'Other';
+  static const String staffContactTypeUnknown = 'Unknown';
+
+  // Localized values for the raw server visit-status codes (finding 12).
+  static const String staffVisitStatusScheduled = 'Scheduled';
+  static const String staffVisitStatusCompleted = 'Completed';
+  static const String staffVisitStatusCancelled = 'Cancelled';
+  static const String staffVisitStatusNoShow = 'No show';
+  static const String staffVisitStatusUnknown = 'Unknown';
+
+  static const String staffLoadMoreFailed = 'Unable to load more applications';
+  static const String staffVisitScheduledAtLabel = 'Visit date and time';
+  static const String staffVisitLocationLabel = 'Visit location (optional)';
+  static const String staffVisitNotesLabel = 'Visit notes (optional)';
+
+  static const String staffApplicant = 'Applicant';
+  static const String staffApplicantPhone = 'Phone';
+  static const String staffApplicationId = 'Application ID';
+  static const String staffSubmittedAt = 'Submitted';
+  static const String staffUpdatedAt = 'Last updated';
+  static const String staffReviewedAt = 'Reviewed';
+  static const String staffApprovedAt = 'Approved';
+  static const String staffActivatedAt = 'Activated';
+  static const String staffReturnReason = 'Correction reason';
+  static const String staffRejectionReason = 'Rejection reason';
+  static const String staffNoReasonProvided = '—';
+
+  static const String staffNewBusinessContext = 'New business';
+  static const String staffClaimTargetContext = 'Claim target';
+  static const String staffTargetEntityId = 'Entity ID';
+
+  static const String staffContactHistory = 'Contact history';
+  static const String staffVisitHistory = 'Visit history';
+  static const String staffHistoryEmpty = 'No history';
+
+  static const String staffMutationPending = 'Processing...';
+  static const String staffMutationSuccess = 'Action completed';
+  static const String staffMutationFailed = 'Action failed';
+  static const String staffRefreshAfterMutation =
+      'Action completed, but detail refresh failed. You can retry.';
+  static const String staffRefreshDetail = 'Refresh details';
+
+  static const String staffCauseUnauthenticated = 'Please sign in first';
+  static const String staffCausePermissionDenied = 'No permission for this action';
+  static const String staffCauseNotFound = 'Application not found';
+  static const String staffCauseInvalidTransition = 'This action cannot be performed in the current state';
+  static const String staffCauseCorrectionReasonRequired = 'Correction reason is required';
+  static const String staffCauseRejectionReasonRequired = 'Rejection reason is required';
+  static const String staffCauseRequiredDataMissing = 'Required details are incomplete';
+  static const String staffCauseUnexpected = 'An unexpected error occurred, please try again';
 }

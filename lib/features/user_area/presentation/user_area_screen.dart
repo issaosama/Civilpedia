@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../localization/ar.dart';
+import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
+import '../../business/presentation/providers/staff_access_provider.dart';
+import '../../business/presentation/staff_application_messages.dart';
 
 /// W3.4 — full-screen User Area hub at `/user`.
 ///
@@ -62,6 +66,8 @@ class UserAreaScreen extends StatelessWidget {
                   onTap: () => context.push(AppRoutes.businessApplications),
                 ),
                 const Divider(height: 1),
+                const _StaffEntryTile(),
+                const Divider(height: 1),
                 _EntryTile(
                   icon: Icons.person_outline,
                   label: Ar.profile,
@@ -84,6 +90,46 @@ class UserAreaScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _StaffEntryTile extends StatefulWidget {
+  const _StaffEntryTile();
+
+  @override
+  State<_StaffEntryTile> createState() => _StaffEntryTileState();
+}
+
+/// Staff entry tile shown only to sessions with staff read permission.
+///
+/// The provider is always supplied by the production composition root
+/// (`StaffOperationsScope`); resolution failures are assert-time bugs, never a
+/// silent hide (findings 11, 19).
+class _StaffEntryTileState extends State<_StaffEntryTile> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<StaffAccessProvider>().load();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<StaffAccessProvider>(
+      builder: (context, access, _) {
+        if (!access.isAuthorized) return const SizedBox.shrink();
+        return _EntryTile(
+          icon: Icons.admin_panel_settings_outlined,
+          label: StaffApplicationMessages.localized(
+            context,
+            Ar.staffOperations,
+            En.staffOperations,
+          ),
+          onTap: () => context.push(AppRoutes.staffApplications),
+        );
+      },
     );
   }
 }

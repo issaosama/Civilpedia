@@ -15,6 +15,7 @@ import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/services/theme_provider.dart';
 import 'package:civilpedia/data/local/hive_helper.dart';
 import 'package:civilpedia/features/auth/presentation/providers/auth_provider.dart';
+import 'package:civilpedia/features/business/presentation/providers/staff_access_provider.dart';
 import 'package:civilpedia/features/directory/presentation/directory_landing_screen.dart';
 import 'package:civilpedia/features/directory/presentation/directory_search_screen.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/category_info.dart';
@@ -136,6 +137,12 @@ Widget _app(UserProfileProvider profileProvider) {
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => LanguageProvider()),
       ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider(
+        create: (context) => StaffAccessProvider(
+          gateway: AppDependencies.businessApplicationStaffGateway,
+          auth: context.read<AuthProvider>(),
+        ),
+      ),
       ChangeNotifierProvider.value(
         value: EncyclopediaProvider(
           repository: _FakeEncyclopediaRepository(),

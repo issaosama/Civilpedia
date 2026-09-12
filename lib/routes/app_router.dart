@@ -40,6 +40,8 @@ import '../features/business/presentation/screens/application_new_form_screen.da
 import '../features/business/presentation/screens/application_claim_form_screen.dart';
 import '../features/business/presentation/screens/managed_businesses_screen.dart';
 import '../features/business/presentation/screens/business_profile_edit_screen.dart';
+import '../features/business/presentation/screens/staff_application_queue_screen.dart';
+import '../features/business/presentation/screens/staff_application_review_screen.dart';
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
@@ -245,6 +247,19 @@ final GoRouter appRouter = GoRouter(
       parentNavigatorKey: _rootNavigator,
       builder: (context, state) => BusinessProfileEditScreen(
         entityId: state.pathParameters['entityId'] ?? '',
+      ),
+    ),
+    // V1-R07 — Staff Operations (root routes above the shell).
+    GoRoute(
+      path: AppRoutes.staffApplications,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => const StaffApplicationQueueScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.staffApplicationDetailPattern,
+      parentNavigatorKey: _rootNavigator,
+      builder: (context, state) => StaffApplicationReviewScreen(
+        applicationId: state.pathParameters['applicationId'] ?? '',
       ),
     ),
     GoRoute(

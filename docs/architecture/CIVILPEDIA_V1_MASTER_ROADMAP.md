@@ -74,9 +74,9 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R07
-CURRENT_PHASE_TITLE: Staff / Admin Operations Foundation
-LAST_CLOSED_PHASE_ID: V1-R06
+CURRENT_PHASE_ID: V1-R08
+CURRENT_PHASE_TITLE: Auth + Profile Production Completion
+LAST_CLOSED_PHASE_ID: V1-R07
 LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
 ROADMAP_STATUS: ACTIVE
 
@@ -92,8 +92,8 @@ ROADMAP_STATUS: ACTIVE
 | V1-R04 | Business Application User Experience | CLOSED | Big Pickle | Codex (backend/security) | MEDIUM | 55a624a |
 | V1-R05 | Directory Cloud Integration | CLOSED | Codex (persistence/cloud) | Architect | HIGH | PENDING OWNER COMMIT |
 | V1-R06 | Business / Provider Profile Management | CLOSED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
-| V1-R07 | Staff / Admin Operations Foundation | CURRENT | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | — |
-| V1-R08 | Auth + Profile Production Completion | QUEUED | Codex | TBD BY ARCHITECT | HIGH | — |
+| V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
+| V1-R08 | Auth + Profile Production Completion | CURRENT | Codex | TBD BY ARCHITECT | HIGH | — |
 | V1-R09 | Offline / Connectivity / Error-State Hardening | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R10 | Core App UX Production Completion | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -116,8 +116,8 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R07
-CURRENT_PHASE_TITLE: Staff / Admin Operations Foundation
+CURRENT_PHASE_ID: V1-R08
+CURRENT_PHASE_TITLE: Auth + Profile Production Completion
 CURRENT_PHASE_STATUS: CURRENT
 CURRENT_PHASE_CONTRACT: NOT_FROZEN
 IMPLEMENTATION_AUTHORIZED: NO
@@ -695,7 +695,7 @@ Never edit simultaneously.
 
 ## V1-R07 — Staff / Admin Operations Foundation
 
-STATUS: CURRENT
+STATUS: CLOSED
 
 Goal:
 
@@ -721,7 +721,7 @@ The operational V1 scope may be limited, but whatever is included must be produc
 
 ## V1-R08 — Auth + Profile Production Completion
 
-STATUS: QUEUED
+STATUS: CURRENT
 
 Primary:
 
@@ -1218,11 +1218,11 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R06 — Business / Provider Profile Management
+V1-R07 — Staff / Admin Operations Foundation
 
 NEXT AFTER SUCCESSFUL CLOSE:
 
-V1-R07 — Staff / Admin Operations Foundation
+V1-R08 — Auth + Profile Production Completion
 
 No other phase may be selected by inference.
 
@@ -1283,6 +1283,37 @@ Evidence summary:
 Commit: PENDING OWNER COMMIT
 Push verified: NO (owner stages explicit files)
 Next CURRENT phase: V1-R06 — Business / Provider Profile Management
+Next contract: NOT_FROZEN
+Implementation authorized: NO
+Owner approval: PENDING OWNER STAGING
+
+### Phase Transition Record
+
+Phase: V1-R07 — Staff / Admin Operations Foundation
+Previous status: CURRENT
+New status: CLOSED
+Implementation agent: Big Pickle
+Independent reviewer: Codex
+Architect Final Review: PASS
+Independent Codex final decision: PASS — READY FOR ARCHITECT FINAL REVIEW
+Evidence summary:
+- Part 1 server/security focused 28/28 PASS
+- Part 1 A6 server regression 37/37 PASS
+- Part 2 R07 Flutter focused 75/75 PASS
+- production gateway behavioral 17/17 PASS
+- User Area routing 29/29 PASS
+- A6.3 shared interface 38/38 PASS
+- final focused Codex recheck PASS
+- independent review PASS
+- integrated phase gate final 2058/2058 PASS
+- focused confirmations: Steel calculator 25/25 PASS; V1-R06 profile management 81/81 PASS
+- phase-gate root causes resolved: 2 transient environment failures; 1 obsolete V1-R06 roadmap assertion (test-only); 1 W6.3 harness missing StaffAccessProvider (test-only)
+- git diff --check PASS
+- DEV server QA DEFERRED — CREDENTIALS UNAVAILABLE (mandatory in V1-R14)
+- frozen V1-R07 contract preserved unchanged
+Commit: PENDING OWNER COMMIT
+Push verified: NO (owner stages explicit files)
+Next CURRENT phase: V1-R08 — Auth + Profile Production Completion
 Next contract: NOT_FROZEN
 Implementation authorized: NO
 Owner approval: PENDING OWNER STAGING

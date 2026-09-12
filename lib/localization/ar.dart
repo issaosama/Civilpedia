@@ -908,4 +908,106 @@ class Ar {
       'حدث خطأ غير متوقع';
   static const String businessProfileCauseUnavailable =
       'الخدمة غير متاحة حالياً';
+
+  // V1-R07 — Staff / Admin Operations Foundation
+  static const String staffOperations = 'عمليات المراجعة';
+  static const String staffApplicationsTitle = 'طلبات المراجعة';
+  static const String staffSignInRequired = 'يجب تسجيل الدخول للوصول إلى أدوات المراجعة';
+  static const String staffAccessDenied = 'لا توجد صلاحية وصول لأدوات المراجعة';
+  static const String staffPermissionLost = 'تم إلغاء صلاحية الوصول. يرجى تحديث الصفحة.';
+  static const String staffLoadingAccess = 'جاري التحقق من الصلاحيات...';
+  static const String staffLoadingQueue = 'جاري تحميل الطلبات...';
+  static const String staffLoadingDetail = 'جاري تحميل تفاصيل الطلب...';
+  static const String staffEmptyQueue = 'لا توجد طلبات مطابقة للفلتر الحالي';
+  static const String staffQueueError = 'تعذر تحميل الطلبات';
+  static const String staffDetailError = 'تعذر تحميل تفاصيل الطلب';
+  static const String staffRetry = 'إعادة المحاولة';
+  static const String staffLoadMore = 'تحميل المزيد';
+  static const String staffLoadingMore = 'جاري التحميل...';
+
+  static const String staffFilterDefault = 'قيد المراجعة';
+  static const String staffFilterApproved = 'بانتظار التفعيل';
+  static const String staffFilterNeedsCorrection = 'يحتاج تصحيح';
+  static const String staffFilterRejected = 'مرفوض';
+  static const String staffFilterActivated = 'مفعّل';
+  static const String staffFilterAllTypes = 'كل الأنواع';
+  static const String staffFilterNew = 'طلبات جديدة';
+  static const String staffFilterClaim = 'طلبات مطالبة';
+
+  static const String staffActionBeginReview = 'بدء المراجعة';
+  static const String staffActionReturnForCorrection = 'إعادة للتصحيح';
+  static const String staffActionMarkContacted = 'تم التواصل';
+  static const String staffActionScheduleVisit = 'جدولة زيارة';
+  static const String staffActionApprove = 'موافقة';
+  static const String staffActionReject = 'رفض';
+  static const String staffActionActivate = 'تفعيل';
+
+  static const String staffConfirmBeginReview = 'بدء مراجعة هذا الطلب؟';
+  static const String staffConfirmApprove = 'الموافقة على هذا الطلب؟';
+  static const String staffConfirmActivate = 'تفعيل هذا الطلب الآن؟';
+  static const String staffConfirmAction = 'تأكيد الإجراء';
+
+  static const String staffCorrectionReasonLabel = 'سبب الإعادة للتصحيح';
+  static const String staffCorrectionReasonHint = 'اشرح سبب الإعادة بوضوح';
+  static const String staffRejectionReasonLabel = 'سبب الرفض';
+  static const String staffRejectionReasonHint = 'اشرح سبب الرفض بوضوح';
+  static const String staffContactTypeLabel = 'وسيلة التواصل';
+  static const String staffContactResultLabel = 'نتيجة التواصل (اختياري)';
+  static const String staffContactNotesLabel = 'ملاحظات (اختياري)';
+
+  // Localized values for the raw server contact-type codes (finding 12).
+  static const String staffContactTypePhone = 'هاتف';
+  static const String staffContactTypeWhatsapp = 'واتساب';
+  static const String staffContactTypeEmail = 'بريد إلكتروني';
+  static const String staffContactTypeVisit = 'زيارة';
+  static const String staffContactTypeOther = 'أخرى';
+  static const String staffContactTypeUnknown = 'غير معروف';
+
+  // Localized values for the raw server visit-status codes (finding 12).
+  static const String staffVisitStatusScheduled = 'مجدولة';
+  static const String staffVisitStatusCompleted = 'مكتملة';
+  static const String staffVisitStatusCancelled = 'ملغاة';
+  static const String staffVisitStatusNoShow = 'لم يحضر';
+  static const String staffVisitStatusUnknown = 'غير معروف';
+
+  static const String staffLoadMoreFailed = 'تعذر تحميل المزيد من الطلبات';
+  static const String staffVisitScheduledAtLabel = 'تاريخ ووقت الزيارة';
+  static const String staffVisitLocationLabel = 'مكان الزيارة (اختياري)';
+  static const String staffVisitNotesLabel = 'ملاحظات الزيارة (اختياري)';
+
+  static const String staffApplicant = 'مقدم الطلب';
+  static const String staffApplicantPhone = 'الهاتف';
+  static const String staffApplicationId = 'رقم الطلب';
+  static const String staffSubmittedAt = 'تاريخ التقديم';
+  static const String staffUpdatedAt = 'آخر تحديث';
+  static const String staffReviewedAt = 'تاريخ المراجعة';
+  static const String staffApprovedAt = 'تاريخ الموافقة';
+  static const String staffActivatedAt = 'تاريخ التفعيل';
+  static const String staffReturnReason = 'سبب الإعادة للتصحيح';
+  static const String staffRejectionReason = 'سبب الرفض';
+  static const String staffNoReasonProvided = '—';
+
+  static const String staffNewBusinessContext = 'نشاط جديد';
+  static const String staffClaimTargetContext = 'مطالبة بمنشأة';
+  static const String staffTargetEntityId = 'معرّف المنشأة';
+
+  static const String staffContactHistory = 'سجل التواصل';
+  static const String staffVisitHistory = 'سجل الزيارات';
+  static const String staffHistoryEmpty = 'لا يوجد سجل';
+
+  static const String staffMutationPending = 'جاري المعالجة...';
+  static const String staffMutationSuccess = 'تم تنفيذ الإجراء بنجاح';
+  static const String staffMutationFailed = 'تعذر تنفيذ الإجراء';
+  static const String staffRefreshAfterMutation =
+      'تم تنفيذ الإجراء، لكن تعذر تحديث التفاصيل. يمكنك إعادة المحاولة.';
+  static const String staffRefreshDetail = 'تحديث التفاصيل';
+
+  static const String staffCauseUnauthenticated = 'يجب تسجيل الدخول أولاً';
+  static const String staffCausePermissionDenied = 'لا توجد صلاحية لهذا الإجراء';
+  static const String staffCauseNotFound = 'الطلب غير موجود';
+  static const String staffCauseInvalidTransition = 'لا يمكن تنفيذ هذا الإجراء في الحالة الحالية';
+  static const String staffCauseCorrectionReasonRequired = 'سبب الإعادة للتصحيح مطلوب';
+  static const String staffCauseRejectionReasonRequired = 'سبب الرفض مطلوب';
+  static const String staffCauseRequiredDataMissing = 'البيانات المطلوبة غير مكتملة';
+  static const String staffCauseUnexpected = 'حدث خطأ غير متوقع، حاول مجدداً';
 }

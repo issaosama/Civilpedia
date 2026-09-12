@@ -1,4 +1,10 @@
 import 'business_application.dart';
+import 'business_application_status.dart';
+import 'business_application_type.dart';
+import 'staff_application_capabilities.dart';
+import 'staff_application_detail.dart';
+import 'staff_application_summary.dart';
+import 'staff_read_result.dart';
 
 /// A6.3 — Outcome of a staff business-application mutation attempt.
 sealed class BusinessApplicationStaffResult {
@@ -158,4 +164,22 @@ abstract class BusinessApplicationStaffGateway {
     String applicationId, {
     required String reason,
   });
+
+  /// V1-R07 — Returns the current session's granular business-application
+  /// permissions. UX-only; every subsequent RPC authorizes independently.
+  Future<StaffReadResult<StaffApplicationCapabilities>> getCapabilities();
+
+  /// V1-R07 — Bounded staff queue. [statusFilter] null means the server's
+  /// default actionable statuses; [typeFilter] null means no type restriction.
+  Future<StaffReadResult<StaffApplicationPage>> listApplications({
+    BusinessApplicationStatus? statusFilter,
+    BusinessApplicationType? typeFilter,
+    int limit,
+    StaffApplicationCursor? cursor,
+  });
+
+  /// V1-R07 — Bounded staff application detail for [applicationId].
+  Future<StaffReadResult<StaffApplicationDetail>> getApplicationDetail(
+    String applicationId,
+  );
 }

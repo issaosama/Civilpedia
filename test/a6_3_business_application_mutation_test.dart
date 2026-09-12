@@ -8,6 +8,10 @@ import 'package:civilpedia/features/business/domain/business_application_policy.
 import 'package:civilpedia/features/business/domain/business_application_staff_gateway.dart';
 import 'package:civilpedia/features/business/domain/business_application_status.dart';
 import 'package:civilpedia/features/business/domain/business_application_type.dart';
+import 'package:civilpedia/features/business/domain/staff_application_capabilities.dart';
+import 'package:civilpedia/features/business/domain/staff_application_detail.dart';
+import 'package:civilpedia/features/business/domain/staff_application_summary.dart';
+import 'package:civilpedia/features/business/domain/staff_read_result.dart';
 
 const _userA = 'auth-users-uuid-A';
 const _userB = 'auth-users-uuid-B';
@@ -434,6 +438,25 @@ class _ScriptedStaffGateway implements BusinessApplicationStaffGateway {
     );
     return BusinessApplicationStaffSucceeded(_apps[applicationId]!);
   }
+
+  // V1-R07 read stubs: this test file focuses on mutation-only behavior, so
+  // read endpoints return unavailable. They exist only to satisfy the interface.
+  @override
+  Future<StaffReadResult<StaffApplicationCapabilities>>
+      getCapabilities() async => const StaffReadUnavailable();
+
+  @override
+  Future<StaffReadResult<StaffApplicationPage>> listApplications({
+    BusinessApplicationStatus? statusFilter,
+    BusinessApplicationType? typeFilter,
+    int limit = 25,
+    StaffApplicationCursor? cursor,
+  }) async => const StaffReadUnavailable();
+
+  @override
+  Future<StaffReadResult<StaffApplicationDetail>> getApplicationDetail(
+    String applicationId,
+  ) async => const StaffReadUnavailable();
 
   /// Test-only: when the applicant resubmits, the staff-equivalent step goes
   /// back to SUBMITTED (mirrors the resubmit RPC transition).

@@ -32,7 +32,7 @@ void main() {
   });
 
   group('V1-R06 Part 1 contract and authorization', () {
-    test('contract is frozen and roadmap authorizes only current V1-R06', () {
+    test('contract is frozen and roadmap records V1-R06 as closed', () {
       final contract = File(
         'docs/architecture/contracts/'
         'V1-R06_BUSINESS_PROVIDER_PROFILE_MANAGEMENT_CONTRACT.md',
@@ -41,12 +41,18 @@ void main() {
         'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md',
       ).readAsStringSync();
       expect(contract, matches(RegExp(r'CONTRACT_ID:\s*V1-R06-CONTRACT-v1')));
-      expect(roadmap, contains('CURRENT_PHASE_ID: V1-R06'));
-      expect(roadmap, contains('CURRENT_PHASE_CONTRACT: V1-R06-CONTRACT-v1'));
+      expect(
+        roadmap,
+        contains(
+          '| V1-R06 | Business / Provider Profile Management | CLOSED |',
+        ),
+      );
+      expect(roadmap, contains('CURRENT_PHASE_ID: V1-R07'));
+      expect(roadmap, contains('CURRENT_PHASE_CONTRACT: V1-R07-CONTRACT-v1'));
       expect(roadmap, contains('IMPLEMENTATION_AUTHORIZED: YES'));
       expect(
         roadmap,
-        contains('| V1-R07 | Staff / Admin Operations Foundation | QUEUED |'),
+        contains('| V1-R07 | Staff / Admin Operations Foundation | CURRENT |'),
       );
     });
 

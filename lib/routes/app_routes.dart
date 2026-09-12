@@ -217,4 +217,16 @@ abstract final class AppRoutes {
   /// Navigable edit path by canonical [entityId]. See [topicListFor].
   static String businessManageDetailFor(String entityId) =>
       '$businessManage/$entityId';
+
+  // --- Staff Operations (V1-R07) ---
+  /// Staff application queue (root route, outside the shell).
+  static const String staffApplications = '/staff/applications';
+
+  /// Staff application review/detail pattern keyed by application id.
+  static const String staffApplicationDetailPattern =
+      '$staffApplications/:applicationId';
+
+  /// Navigable review path by canonical [applicationId]. See [topicListFor].
+  static String staffApplicationDetailFor(String applicationId) =>
+      '$staffApplications/$applicationId';
 }
