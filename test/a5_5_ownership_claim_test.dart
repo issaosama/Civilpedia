@@ -495,7 +495,12 @@ void main() {
       final coordinator = _buildCoordinator();
       final provider = AuthProvider(
         gateway: FakeAuthGateway(signInResult: fakeSession),
-        onAuthenticated: (s) async => coordinator.claimFor(s.userId),
+        onPostAuth: (s) async {
+          final outcome = await coordinator.claimFor(s.userId);
+          return outcome.executed
+              ? PostAuthOutcome.success
+              : PostAuthOutcome.ownershipConflict;
+        },
       );
 
       await provider.signInWithGoogle();
@@ -824,7 +829,10 @@ void main() {
       final triggered = <AuthSession>[];
       final provider = AuthProvider(
         gateway: FakeAuthGateway(signInResult: fakeSession),
-        onAuthenticated: (s) async => triggered.add(s),
+        onPostAuth: (s) async {
+          triggered.add(s);
+          return PostAuthOutcome.success;
+        },
       );
 
       await provider.signInWithGoogle();
@@ -838,7 +846,10 @@ void main() {
       var triggered = false;
       final provider = AuthProvider(
         gateway: FakeAuthGateway(signInResult: null),
-        onAuthenticated: (s) async => triggered = true,
+        onPostAuth: (s) async {
+          triggered = true;
+          return PostAuthOutcome.success;
+        },
       );
 
       await provider.signInWithGoogle();
@@ -850,7 +861,10 @@ void main() {
       var triggered = false;
       final provider = AuthProvider(
         gateway: FakeAuthGateway(signInError: Exception('boom')),
-        onAuthenticated: (s) async => triggered = true,
+        onPostAuth: (s) async {
+          triggered = true;
+          return PostAuthOutcome.success;
+        },
       );
 
       await provider.signInWithGoogle();
@@ -862,7 +876,10 @@ void main() {
       final triggered = <AuthSession>[];
       final provider = AuthProvider(
         gateway: FakeAuthGateway(restoredSession: fakeSession),
-        onAuthenticated: (s) async => triggered.add(s),
+        onPostAuth: (s) async {
+          triggered.add(s);
+          return PostAuthOutcome.success;
+        },
       );
 
       await provider.restoreSession();
@@ -875,7 +892,10 @@ void main() {
       var triggered = false;
       final provider = AuthProvider(
         gateway: FakeAuthGateway(),
-        onAuthenticated: (s) async => triggered = true,
+        onPostAuth: (s) async {
+          triggered = true;
+          return PostAuthOutcome.success;
+        },
       );
 
       await provider.restoreSession();
@@ -888,9 +908,10 @@ void main() {
       final coordinator = _buildCoordinator();
       final provider = AuthProvider(
         gateway: FakeAuthGateway(restoredSession: fakeSession),
-        onAuthenticated: (s) async {
+        onPostAuth: (s) async {
           triggered++;
           await coordinator.claimFor(s.userId);
+          return PostAuthOutcome.success;
         },
       );
       await provider.restoreSession();
@@ -906,7 +927,7 @@ void main() {
         () async {
       final provider = AuthProvider(
         gateway: FakeAuthGateway(signInResult: fakeSession),
-        onAuthenticated: (s) async => throw Exception('claim boom'),
+        onPostAuth: (s) async => throw Exception('claim boom'),
       );
 
       await provider.signInWithGoogle();

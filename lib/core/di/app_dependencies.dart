@@ -37,7 +37,11 @@ import '../ownership/local_data_claim_coordinator.dart';
 import '../ownership/local_favorites_gateway.dart';
 import '../ownership/ownership_registry_store.dart';
 import '../../features/auth/data/supabase_auth_gateway.dart';
+import '../../features/auth/domain/entities/auth_session.dart';
 import '../../features/auth/domain/repositories/auth_gateway.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../ownership/claim_outcome.dart';
+import '../../features/profile/data/profile_bootstrap_outcome.dart';
 import '../../features/business/data/supabase_business_application_gateway.dart';
 import '../../features/business/data/supabase_business_application_staff_gateway.dart';
 import '../../features/business/data/supabase_business_claim_target_gateway.dart';
@@ -223,6 +227,14 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
     );
   }
 
+  /// V1-R08 (finding 16) — explicit gateway lifecycle. The auth gateway is an
+  /// app-lifetime singleton with ONE auth-state subscription; this is the only
+  /// disposal seam for it. Safe to call exactly once at teardown and a no-op
+  /// for unavailable/unconfigured builds.
+  static void dispose() {
+    _authGateway.dispose();
+  }
+
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
 
   static UserProfileRepository get userProfileRepo => _userProfileRepo;
@@ -262,12 +274,12 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
   static AuthGateway get authGateway => _authGateway;
 
   /// A5.5 — production local-data claim coordinator, invoked through the
-  /// [AuthProvider] `onAuthenticated` seam.
+  /// [AuthProvider] `onPostAuth` seam.
   static LocalDataClaimCoordinator get ownershipClaimCoordinator =>
       _ownershipClaimCoordinator;
 
   /// A5.6/A5.7 — production personal-profile bootstrap coordinator, invoked
-  /// through the same `onAuthenticated` seam after the A5.5 claim.
+  /// through the same `onPostAuth` seam after the A5.5 claim.
   static PersonalProfileBootstrapCoordinator get
       personalProfileBootstrapCoordinator =>
           _personalProfileBootstrapCoordinator;
@@ -278,6 +290,65 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
   /// only and is consumed by the profile bootstrap. Never called from widgets.
   static RegionPreferenceGateway get regionPreferenceGateway =>
       _regionPreferenceGateway;
+
+  /// A5.6/A7.2/A9.1 — production [PersonalProfileRemoteGateway]. The SAME
+  /// instance that backs the bootstrap coordinator; consumed by session-aware
+  /// profile providers for the cloud-bound display-name sync seam. Never
+  /// accessed by widgets directly.
+  static PersonalProfileRemoteGateway get cloudProfileGateway =>
+      _personalProfileRemoteGateway;
+
+  /// V1-R08 — pure mapping from an A5.5 claim result to the observable
+  /// post-auth outcome. A refused (different-user) or corrupt-registry claim
+  /// short-circuits in [runPostAuthPipeline] before any bootstrap runs.
+  static PostAuthOutcome mapClaimOutcome(ClaimOutcome outcome) {
+    if (outcome.blockedCorruptRegistry) {
+      return PostAuthOutcome.corruptOwnershipRegistry;
+    }
+    if (!outcome.executed) {
+      return PostAuthOutcome.ownershipConflict;
+    }
+    return PostAuthOutcome.success;
+  }
+
+  /// V1-R08 — pure mapping from an A5.6/A5.7/A5.8 bootstrap result.
+  ///
+  /// Only a truly transient failure degrades to a retryable outcome
+  /// (authentication itself stays successful). A F7 provisioning failure keeps
+  /// the authenticated session but exposes the distinct typed lifecycle state.
+  /// A profile conflict preserves BOTH sides and is not a
+  /// blocking/session-affecting condition.
+  static PostAuthOutcome mapBootstrapOutcome(ProfileBootstrapOutcome outcome) {
+    switch (outcome) {
+      case ProfileBootstrapOutcome.failure:
+        return PostAuthOutcome.retryableFailure;
+      case ProfileBootstrapOutcome.provisioningFailure:
+        return PostAuthOutcome.provisioningFailure;
+      default:
+        return PostAuthOutcome.success;
+    }
+  }
+
+  /// V1-R08 — deterministic post-auth pipeline invoked through the [AuthProvider]
+  /// `onPostAuth` seam.
+  ///
+  /// Ordering: the A5.5 record-ownership claim runs FIRST; an ownership
+  /// refusal/corruption short-circuits fail-closed BEFORE any cloud bootstrap.
+  /// A5.6/A5.7/A5.8 personal-profile bootstrap then runs; a transient failure
+  /// maps to a retryable outcome while authentication stays successful (the
+  /// next authenticated session retries safely). Exceptions are swallowed by
+  /// the provider's pipeline runner and degrade to a retryable outcome.
+  static Future<PostAuthOutcome> runPostAuthPipeline(AuthSession session) async {
+    final claim = await _ownershipClaimCoordinator.claimFor(session.userId);
+    final claimOutcome = mapClaimOutcome(claim);
+    if (claimOutcome != PostAuthOutcome.success) return claimOutcome;
+    final bootstrap = await _personalProfileBootstrapCoordinator.bootstrap(
+      userId: session.userId,
+      authDisplayName: session.displayName,
+      authPhotoUrl: session.photoUrl,
+    );
+    return mapBootstrapOutcome(bootstrap);
+  }
 
   /// A6.1/V1-R03 — production [BusinessMembershipGateway]. Own-membership,
   /// My Businesses, and authorized roster reads remain strictly read-only and

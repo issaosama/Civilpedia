@@ -29,12 +29,19 @@ class BusinessClaimTargetProvider extends ChangeNotifier {
   List<BusinessClaimTarget> get targets => _targets;
   String? get error => _error;
 
+  /// Canonical session epoch (V1-R08 final pass, finding 1). Advanced on every
+  /// account-bound reset so an in-flight candidate read that resolves after the
+  /// reset is dropped instead of publishing old-session candidates.
+  int _sessionEpoch = 0;
+
   Future<void> reload() async {
+    final epoch = _sessionEpoch;
     _state = BusinessClaimTargetState.loading;
     _error = null;
     notifyListeners();
     try {
       final loaded = await _gateway.listUnclaimedTargets();
+      if (epoch != _sessionEpoch) return; // reset during in-flight read
       final unclaimed =
           loaded.where((t) => t.isUnclaimed).toList(growable: false);
       _targets = unclaimed;
@@ -42,6 +49,7 @@ class BusinessClaimTargetProvider extends ChangeNotifier {
           ? BusinessClaimTargetState.empty
           : BusinessClaimTargetState.data;
     } catch (_) {
+      if (epoch != _sessionEpoch) return;
       _targets = const [];
       _state = BusinessClaimTargetState.error;
     }
@@ -51,5 +59,17 @@ class BusinessClaimTargetProvider extends ChangeNotifier {
   Future<void> load() async {
     if (_state == BusinessClaimTargetState.data) return;
     await reload();
+  }
+
+  /// V1-R08 (finding 8 + final pass 1) — resets the candidate list on a
+  /// canonical identity change and advances the session epoch so no
+  /// claim-candidate state from a previous session survives (including a read
+  /// that is still in flight when the reset fires).
+  void resetForIdentityChange() {
+    _sessionEpoch++;
+    _state = BusinessClaimTargetState.loading;
+    _targets = const [];
+    _error = null;
+    notifyListeners();
   }
 }

@@ -19,4 +19,14 @@ abstract class RegionPreferenceGateway {
   /// A lookup/network failure MUST throw so the caller can fail-safe and never
   /// invent or guess a preference id.
   Future<String?> resolvePreferenceIdByCode(String code);
+
+  /// Reverse lookup used ONLY for display: returns the stable [code] for a
+  /// canonical `region_preferences.id`, or null when the id resolves to no
+  /// active row.
+  ///
+  /// A UUID is never rendered by the UI (frozen contract — Flutter resolves
+  /// preference zones by STABLE CODE, never by UUID literal). A lookup/network
+  /// failure MUST throw so the caller can fail closed to "not set" rather than
+  /// guessing a code.
+  Future<String?> resolveCodeById(String id);
 }

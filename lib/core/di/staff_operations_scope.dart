@@ -51,6 +51,15 @@ class StaffOperationsScope extends ChangeNotifier {
     detail.clear();
   }
 
+  /// V1-R08 (finding 8/9/10) — resets ALL staff providers on a canonical
+  /// identity change so no privileged capability/queue/review state from a
+  /// previous session survives.
+  void resetForAuthChange() {
+    access.reset();
+    queue.clear();
+    detail.clear();
+  }
+
   @override
   void dispose() {
     // Child ChangeNotifierProviders in main.dart are the single disposal

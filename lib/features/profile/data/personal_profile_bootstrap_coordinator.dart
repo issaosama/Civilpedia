@@ -14,7 +14,9 @@ import 'region_preference_gateway.dart';
 /// * A local profile already bound to a different user is never rebound and
 ///   never triggers any remote mutation.
 /// * A missing cloud profile is created ONLY from known-safe, mapped values;
-///   missing/unmappable values are omitted, never invented.
+///   missing/unmappable values are omitted, never invented. This holds even
+///   when NO local profile exists (guest-first installs): the row is then
+///   created from authenticated metadata only (V1-R08 finding 5).
 /// * An existing cloud profile is never blind-upserted over with local values.
 ///   Equal/compatible → local association. Meaningful differences → both sides
 ///   preserved and a `profileConflict` outcome returned (no conflict UI yet).
@@ -114,8 +116,15 @@ class PersonalProfileBootstrapCoordinator {
       return ProfileBootstrapOutcome.failure;
     }
     if (local == null) {
-      // Nothing to associate yet (guest-first: profile setup may be skipped).
-      return ProfileBootstrapOutcome.noLocalProfile;
+      // V1-R08 (finding 5) — provisioning MUST work even when the device has
+      // no local profile yet (guest-first installs). A minimal canonical row is
+      // created from authenticated metadata only; no fabricated values, no
+      // conflict detection possible (there is no local side to compare).
+      return _provisionWithoutLocalProfile(
+        userId: userId,
+        authDisplayName: authDisplayName,
+        authPhotoUrl: authPhotoUrl,
+      );
     }
 
     // 2. Validate local account binding (fail closed).
@@ -174,6 +183,11 @@ class PersonalProfileBootstrapCoordinator {
           return ProfileBootstrapOutcome.failure;
         }
         return _associateOrConflict(local: local, cloud: cloud, userId: userId);
+      } on CloudProfileProvisioningException {
+        // F7 — the canonical row could not be provisioned for a
+        // provisioning-specific reason. Typed outcome; the raw backend message
+        // is never surfaced.
+        return ProfileBootstrapOutcome.provisioningFailure;
       } catch (_) {
         // Remote insert failure → local untouched, binding not persisted.
         return ProfileBootstrapOutcome.failure;
@@ -187,6 +201,53 @@ class PersonalProfileBootstrapCoordinator {
 
     // CASE B — existing cloud profile.
     return _associateOrConflict(local: local, cloud: cloud, userId: userId);
+  }
+
+  /// V1-R08 (finding 5) — provisions the canonical cloud row when there is no
+  /// local profile at all (guest-first install). The row is built ONLY from
+  /// authenticated metadata (display name / photo); no role, no region, no
+  /// invented values. An existing cloud row is simply accepted (associated).
+  Future<ProfileBootstrapOutcome> _provisionWithoutLocalProfile({
+    required String userId,
+    String? authDisplayName,
+    String? authPhotoUrl,
+  }) async {
+    CloudProfile? cloud;
+    try {
+      cloud = await _remoteGateway.fetchByUserId(userId);
+    } catch (_) {
+      return ProfileBootstrapOutcome.failure;
+    }
+    if (cloud != null) {
+      // Canonical row already exists → nothing to create or bind (there is no
+      // local profile to associate on this device).
+      return ProfileBootstrapOutcome.associated;
+    }
+
+    final toCreate = CloudProfile(
+      userId: userId,
+      displayName: _meaningful(authDisplayName),
+      photoUrl: _meaningful(authPhotoUrl),
+    );
+    try {
+      await _remoteGateway.createProfile(toCreate);
+    } on CloudProfileAlreadyExistsException {
+      try {
+        cloud = await _remoteGateway.fetchByUserId(userId);
+      } catch (_) {
+        return ProfileBootstrapOutcome.failure;
+      }
+      return cloud == null
+          ? ProfileBootstrapOutcome.failure
+          : ProfileBootstrapOutcome.associated;
+    } on CloudProfileProvisioningException {
+      // F7 — the canonical row could not be provisioned for a
+      // provisioning-specific reason.
+      return ProfileBootstrapOutcome.provisioningFailure;
+    } catch (_) {
+      return ProfileBootstrapOutcome.failure;
+    }
+    return ProfileBootstrapOutcome.associated;
   }
 
   Future<ProfileBootstrapOutcome> _associateOrConflict({

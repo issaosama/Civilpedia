@@ -18,6 +18,11 @@ import 'personal_profile_remote_gateway.dart';
 ///
 /// The unique `user_id` primary key is the final duplicate-defense used by the
 /// caller to resolve insert races deterministically.
+///
+/// V1-R08 (finding 4): READ is strict — every returned row is validated by
+/// [parseCloudProfileRow] against the expected authenticated user. A row that
+/// fails the schema contract throws [CloudProfileParseException] and is never
+/// surfaced to callers, so malformed backend data always fails closed.
 class SupabasePersonalProfileRemoteGateway
     implements PersonalProfileRemoteGateway {
   SupabasePersonalProfileRemoteGateway({SupabaseClient? client})
@@ -40,15 +45,7 @@ class SupabasePersonalProfileRemoteGateway
         .eq('user_id', userId)
         .maybeSingle();
     if (rows == null) return null;
-    return CloudProfile(
-      userId: (rows['user_id'] as String?) ?? userId,
-      displayName: rows['display_name'] as String?,
-      photoUrl: rows['photo_url'] as String?,
-      roleCode: rows['role_code'] as String?,
-      preferredRegionId: rows['preferred_region_id'] as String?,
-      regionPreferenceId: rows['region_preference_id'] as String?,
-      phone: rows['phone'] as String?,
-    );
+    return parseCloudProfileRow(rows, expectedUserId: userId);
   }
 
   @override
@@ -70,11 +67,21 @@ class SupabasePersonalProfileRemoteGateway
     try {
       await _client.from(_table).insert(payload);
     } on PostgrestException catch (e) {
-      // 23505 = unique_violation on the user_id primary key subjected to a
-      // concurrent/duplicate insert race. Surface it as an explicit signal so
-      // the coordinator can re-read and evaluate as an existing-cloud case.
       if (e.code == '23505') {
+        // Unique violation on the user_id primary key — a concurrent/duplicate
+        // insert race. Surface it as an explicit signal so the coordinator can
+        // re-read and evaluate as an existing-cloud case.
         throw const CloudProfileAlreadyExistsException();
+      }
+      if (_isPermissionDenied(e)) {
+        // RLS denial is NEVER a provisioning failure (F7).
+        throw const CloudProfilePermissionDeniedException();
+      }
+      if (_isProvisioningRejection(e)) {
+        // F7 — the row could not be provisioned for a provisioning-specific
+        // reason (constraint/data violation). Typed; the raw backend message
+        // is never surfaced.
+        throw const CloudProfileProvisioningException();
       }
       rethrow;
     }
@@ -91,5 +98,52 @@ class SupabasePersonalProfileRemoteGateway
         .from(_table)
         .update({'region_preference_id': regionPreferenceId})
         .eq('user_id', userId);
+  }
+
+  @override
+  Future<void> saveEditableFields({
+    required String userId,
+    required String roleCode,
+    String? regionPreferenceId,
+  }) async {
+    // V1-R08 — the ONLY cloud mutation the authenticated optimize foundation
+    // may author. RLS guarantees the user can UPDATE only their own row; a
+    // not-yet-created row is a safe no-op.
+    final payload = <String, dynamic>{
+      'role_code': roleCode,
+      if (regionPreferenceId != null)
+        'region_preference_id': regionPreferenceId,
+    };
+    try {
+      await _client
+          .from(_table)
+          .update(payload)
+          .eq('user_id', userId);
+    } on PostgrestException catch (e) {
+      if (_isPermissionDenied(e)) {
+        throw const CloudProfilePermissionDeniedException();
+      }
+      rethrow;
+    }
+  }
+
+  /// PostgREST surfaces RLS denials as SQLSTATE `42501` (insufficient_privilege)
+  /// or as a PGRST-level parse message mentioning permission.
+  static bool _isPermissionDenied(PostgrestException e) {
+    return e.code == '42501' ||
+        (e.message?.toLowerCase().contains('permission denied') ?? false);
+  }
+
+  /// F7 — SQLSTATE codes that mean the canonical `profiles` row itself could
+  /// not be provisioned: NOT NULL (23502), FK (23503), CHECK (23514),
+  /// exclusion (23P01), and data errors (22000-22012, 22021-2202x exposed as
+  /// e.g. 22P02). A unique violation (23505) and permission (42501) are handled
+  /// BEFORE this check as their own typed conditions.
+  static bool _isProvisioningRejection(PostgrestException e) {
+    return e.code == '23502' ||
+        e.code == '23503' ||
+        e.code == '23514' ||
+        e.code == '23P01' ||
+        (e.code?.startsWith('22') ?? false);
   }
 }

@@ -89,6 +89,24 @@ class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
       phone: cloudProfile?.phone,
     );
   }
+
+  @override
+  Future<void> saveEditableFields({
+    required String userId,
+    required String roleCode,
+    String? regionPreferenceId,
+  }) async {
+    cloudProfile = CloudProfile(
+      userId: userId,
+      displayName: cloudProfile?.displayName,
+      photoUrl: cloudProfile?.photoUrl,
+      roleCode: roleCode,
+      preferredRegionId: cloudProfile?.preferredRegionId,
+      regionPreferenceId:
+          regionPreferenceId ?? cloudProfile?.regionPreferenceId,
+      phone: cloudProfile?.phone,
+    );
+  }
 }
 
 /// Programmable [RegionPreferenceGateway] fake mirroring migration 00013.
@@ -109,6 +127,15 @@ class _FakePreferenceGateway implements RegionPreferenceGateway {
   Future<String?> resolvePreferenceIdByCode(String code) async {
     if (resolveError != null) throw resolveError!;
     return codes[code];
+  }
+
+  @override
+  Future<String?> resolveCodeById(String id) async {
+    if (resolveError != null) throw resolveError!;
+    for (final entry in codes.entries) {
+      if (entry.value == id) return entry.key;
+    }
+    return null;
   }
 }
 

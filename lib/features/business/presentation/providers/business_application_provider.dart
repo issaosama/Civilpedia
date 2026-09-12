@@ -57,6 +57,13 @@ class BusinessApplicationProvider extends ChangeNotifier {
   /// In-flight mutation guard (submit/resubmit/create).
   bool _busy = false;
 
+  /// Canonical session epoch (V1-R08 final pass, finding 1). Advances on every
+  /// account-bound reset; async work captures the epoch before any `await` and
+  /// must LOSE the captured epoch before publishing data/errors/loading or
+  /// privileged follow-ups. A result that lands after a reset is silently
+  /// dropped — it never installs into a different (or guest) session.
+  int _sessionEpoch = 0;
+
   String? get _currentUserId => _auth.session?.userId;
 
   bool get isAuthenticated =>
@@ -64,6 +71,7 @@ class BusinessApplicationProvider extends ChangeNotifier {
 
   /// Loads the authoritative list of the current user's applications.
   Future<void> loadApplications() async {
+    final epoch = _sessionEpoch;
     final userId = _currentUserId;
     if (!isAuthenticated || userId == null || userId.isEmpty) {
       _state = BusinessApplicationState.signInRequired;
@@ -76,11 +84,17 @@ class BusinessApplicationProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _applications = await _gateway.listOwnApplications(userId);
-      _state = _applications.isEmpty
+      final loaded = await _gateway.listOwnApplications(userId);
+      // Drop the result BEFORE touching any account-bound field: a bounded
+      // reset during the in-flight read must never install stale data into a
+      // different (or guest) session.
+      if (epoch != _sessionEpoch) return;
+      _applications = loaded;
+      _state = loaded.isEmpty
           ? BusinessApplicationState.empty
           : BusinessApplicationState.data;
     } catch (_) {
+      if (epoch != _sessionEpoch) return;
       _applications = const [];
       _state = BusinessApplicationState.error;
     }
@@ -89,6 +103,7 @@ class BusinessApplicationProvider extends ChangeNotifier {
 
   /// Loads one authoritative application by id (only if owned by the user).
   Future<void> loadApplication(String applicationId) async {
+    final epoch = _sessionEpoch;
     final userId = _currentUserId;
     if (!isAuthenticated || userId == null || userId.isEmpty) {
       _state = BusinessApplicationState.signInRequired;
@@ -101,11 +116,16 @@ class BusinessApplicationProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      _current = await _gateway.getOwnApplication(userId, applicationId);
-      _state = _current == null
+      final loaded = await _gateway.getOwnApplication(userId, applicationId);
+      // Stale results must be dropped before any field is overwritten (same
+      // bounded reset rule as the list load above).
+      if (epoch != _sessionEpoch) return;
+      _current = loaded;
+      _state = loaded == null
           ? BusinessApplicationState.empty
           : BusinessApplicationState.data;
     } catch (_) {
+      if (epoch != _sessionEpoch) return;
       _current = null;
       _state = BusinessApplicationState.error;
     }
@@ -118,12 +138,14 @@ class BusinessApplicationProvider extends ChangeNotifier {
   }) async {
     if (_busy) return null;
     _busy = true;
+    final epoch = _sessionEpoch;
     notifyListeners();
     try {
       final result = await _gateway.createNewDraft(
         currentUserId: _currentUserId ?? '',
         metadata: metadata,
       );
+      if (epoch != _sessionEpoch) return null; // reset during in-flight write
       if (result is BusinessApplicationCreated) {
         _applications = [result.application, ..._applications];
         _current = result.application;
@@ -131,8 +153,10 @@ class BusinessApplicationProvider extends ChangeNotifier {
       }
       return result;
     } finally {
-      _busy = false;
-      notifyListeners();
+      if (epoch == _sessionEpoch) {
+        _busy = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -142,12 +166,14 @@ class BusinessApplicationProvider extends ChangeNotifier {
   }) async {
     if (_busy) return null;
     _busy = true;
+    final epoch = _sessionEpoch;
     notifyListeners();
     try {
       final result = await _gateway.createClaimDraft(
         currentUserId: _currentUserId ?? '',
         targetEntityId: targetEntityId,
       );
+      if (epoch != _sessionEpoch) return null; // reset during in-flight write
       if (result is BusinessApplicationCreated) {
         _applications = [result.application, ..._applications];
         _current = result.application;
@@ -155,8 +181,12 @@ class BusinessApplicationProvider extends ChangeNotifier {
       }
       return result;
     } finally {
-      _busy = false;
-      notifyListeners();
+      // Stale old-session completion must not release the newer session's
+      // busy state.
+      if (epoch == _sessionEpoch) {
+        _busy = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -168,16 +198,20 @@ class BusinessApplicationProvider extends ChangeNotifier {
       return null;
     }
     _busy = true;
+    final epoch = _sessionEpoch;
     notifyListeners();
     try {
       final result = await _gateway.submitApplication(app);
+      if (epoch != _sessionEpoch) return null; // reset during in-flight write
       if (result is BusinessApplicationSubmitted) {
         _replace(result.application);
       }
       return result;
     } finally {
-      _busy = false;
-      notifyListeners();
+      if (epoch == _sessionEpoch) {
+        _busy = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -193,16 +227,20 @@ class BusinessApplicationProvider extends ChangeNotifier {
       return null;
     }
     _busy = true;
+    final epoch = _sessionEpoch;
     notifyListeners();
     try {
       final result = await _gateway.resubmitApplication(app);
+      if (epoch != _sessionEpoch) return null; // reset during in-flight write
       if (result is BusinessApplicationSubmitted) {
         _replace(result.application);
       }
       return result;
     } finally {
-      _busy = false;
-      notifyListeners();
+      if (epoch == _sessionEpoch) {
+        _busy = false;
+        notifyListeners();
+      }
     }
   }
 
@@ -214,6 +252,22 @@ class BusinessApplicationProvider extends ChangeNotifier {
     if (_current?.id == authoritative.id) {
       _current = authoritative;
     }
+  }
+
+  /// V1-R08 (finding 8/9/10 + final pass 1) — clears all account-bound
+  /// application state on a canonical identity change AND advances the session
+  /// epoch so any still-in-flight read/write captured under the old epoch is
+  /// dropped on arrival (it can never publish into the new session). Wired
+  /// through the account-bound reset seam; the next read re-resolves for the
+  /// new session. Cross-account data never survives.
+  void resetForIdentityChange() {
+    _sessionEpoch++;
+    _state = BusinessApplicationState.loading;
+    _applications = const [];
+    _current = null;
+    _error = null;
+    _busy = false;
+    notifyListeners();
   }
 }
 

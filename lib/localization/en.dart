@@ -1028,4 +1028,52 @@ class En {
   static const String staffCauseRejectionReasonRequired = 'Rejection reason is required';
   static const String staffCauseRequiredDataMissing = 'Required details are incomplete';
   static const String staffCauseUnexpected = 'An unexpected error occurred, please try again';
+
+  // V1-R08 — Auth & Profile Production Completion (Part 2)
+  static const String authErrorRetryable =
+      'A connection problem occurred. Please try again';
+  static const String authErrorUnexpected =
+      'An unexpected error occurred during sign-in';
+  static const String authPostSetupRunning = 'Setting up your account...';
+  static const String authPostSetupRetryable =
+      'Could not finish account setup. You can retry';
+  static const String authPostSetupProvisioning =
+      'There is a temporary problem setting up your account. You can go to your profile';
+  static const String authAccountConflictTitle =
+      'A different account is already linked to this device';
+  static const String authAccountConflictMessage =
+      'The data saved on this device is linked to another account. Use the button below to verify again or to return to sign-in safely.';
+  static const String ownershipConflictReturnToSignIn = 'Return to sign in';
+  static const String authSessionLost = 'Your session ended. Please sign in again';
+  static const String signOutConfirmTitle = 'Sign out';
+  static const String signOutConfirmMessage =
+      'Sign out of the current account? Your profile and data stay saved in the cloud';
+  static const String signOutPendingLabel = 'Signing out...';
+  static const String signOutFailed = 'Sign-out failed. Please try again';
+  static const String profileCloudLoading = 'Loading your profile...';
+  static const String profileCloudLoadFailed = 'Could not load your profile from the cloud';
+  static const String profileNotAvailable = 'Profile is not available right now';
+  static const String profileEditCloudTitle = 'Edit My Civilpedia Profile';
+  static const String profileUnsavedTitle = 'Unsaved changes';
+  static const String profileUnsavedMessage =
+      'You have unsaved changes. Discard them and leave?';
+  static const String profileDiscard = 'Discard changes';
+  static const String profileStay = 'Stay';
+  static const String profileSavePending = 'Saving...';
+  static const String profileSaveFailed = 'Could not save your changes';
+  static const String profileCauseUnauthenticated = 'Please sign in first';
+  static const String profileCausePermissionDenied =
+      'You do not have permission to edit this profile';
+  static const String profileCauseInvalidData = 'The entered data is invalid';
+  static const String profileCauseMalformed =
+      'Invalid response from the server. Try again';
+  static const String profileCauseRetryable = 'Could not reach the server. Try again';
+  static const String profileCauseProvisioning =
+      'Could not set up the profile. Try again';
+  static const String profileCauseOwnershipConflict =
+      'Cannot sync because of an account ownership conflict';
+  static const String profileCauseUnexpected =
+      'An unexpected error occurred while saving';
+  static const String userAreaSignInPrompt =
+      'Sign in to sync and manage your profile';
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -44,7 +46,7 @@ const _categoryId = 'cccccccc-cccc-cccc-cccc-cccccccccccc';
 Future<AuthProvider> _authenticatedAuth() async {
   final auth = AuthProvider(
     gateway: FakeAuthGateway(restoredSession: fakeSession),
-    onAuthenticated: (_) async {},
+    onPostAuth: (_) async => PostAuthOutcome.success,
   );
   await auth.restoreSession();
   return auth;
@@ -53,7 +55,7 @@ Future<AuthProvider> _authenticatedAuth() async {
 Future<AuthProvider> _guestAuth() async {
   final auth = AuthProvider(
     gateway: FakeAuthGateway(restoredSession: null),
-    onAuthenticated: (_) async {},
+    onPostAuth: (_) async => PostAuthOutcome.success,
   );
   await auth.restoreSession();
   return auth;
@@ -1143,7 +1145,7 @@ void main() {
         (tester) async {
       final guestAuth = AuthProvider(
         gateway: FakeAuthGateway(),
-        onAuthenticated: (_) async {},
+        onPostAuth: (_) async => PostAuthOutcome.success,
       );
       final router = GoRouter(
         initialLocation: AppRoutes.businessManage,
@@ -1175,7 +1177,7 @@ void main() {
         (tester) async {
       final guestAuth = AuthProvider(
         gateway: FakeAuthGateway(),
-        onAuthenticated: (_) async {},
+        onPostAuth: (_) async => PostAuthOutcome.success,
       );
       final router = GoRouter(
         initialLocation: AppRoutes.businessManageDetailFor(_entityId),
@@ -1803,6 +1805,129 @@ void main() {
           reason: '$lifecycleStatus must not expose public preview',
         );
       }
+    });
+  });
+
+  group('V1-R08 final pass — account-bound async invalidation (finding 1)', () {
+    test('A. a stale managed-business load after reset is dropped', () async {
+      final completer = Completer<ManagedBusinessListResult>();
+      final gateway = FakeBusinessMembershipGateway()
+        ..onListMyBusinesses = () => completer.future;
+      final provider = ManagedBusinessesProvider(
+        membershipGateway: gateway,
+        auth: await _authenticatedAuth(),
+      );
+
+      final staleLoad = provider.load();
+      provider.reset();
+
+      final summaryForA = ManagedBusinessSummary(
+        entityId: _entityId,
+        name: 'A-owned Co',
+        entityType: 'company',
+        membershipRole: BusinessRole.owner,
+        claimStatus: 'claimed',
+        verificationStatus: 'verified',
+      );
+      completer.complete(ManagedBusinessListAvailable([summaryForA]));
+      await staleLoad;
+
+      expect(provider.items, isEmpty,
+          reason: 'old-session managed businesses must never publish');
+      expect(provider.state, ManagedBusinessesState.loading,
+          reason: 'a stale result must not publish data/empty/error');
+    });
+
+    test('D. a re-load after reset publishes only the new-session result',
+        () async {
+      final completers = <Completer<ManagedBusinessListResult>>[];
+      final gateway = FakeBusinessMembershipGateway()
+        ..onListMyBusinesses = () {
+          final completer = Completer<ManagedBusinessListResult>();
+          completers.add(completer);
+          return completer.future;
+        };
+      final provider = ManagedBusinessesProvider(
+        membershipGateway: gateway,
+        auth: await _authenticatedAuth(),
+      );
+
+      final staleLoad = provider.load();
+      provider.reset();
+      final freshLoad = provider.load();
+      expect(completers, hasLength(2));
+
+      final summaryForB = ManagedBusinessSummary(
+        entityId: _entityId,
+        name: 'B-owned Co',
+        entityType: 'company',
+        membershipRole: BusinessRole.owner,
+        claimStatus: 'claimed',
+        verificationStatus: 'verified',
+      );
+      completers[1].complete(ManagedBusinessListAvailable([summaryForB]));
+      await freshLoad;
+      expect(provider.items.single.summary.name, 'B-owned Co');
+
+      final summaryForA = ManagedBusinessSummary(
+        entityId: _entityId,
+        name: 'A-owned Co',
+        entityType: 'company',
+        membershipRole: BusinessRole.owner,
+        claimStatus: 'claimed',
+        verificationStatus: 'verified',
+      );
+      completers[0].complete(ManagedBusinessListAvailable([summaryForA]));
+      await staleLoad;
+      expect(provider.items.single.summary.name, 'B-owned Co',
+          reason: 'A stale result must never replace B session data');
+    });
+
+    test('A. a stale editor load after reset is dropped', () async {
+      final completer = Completer<ManagedProfileReadResult>();
+      final gateway = FakeBusinessProfileManagementGateway()
+        ..onReadManagedProfile = (_) => completer.future;
+      final provider = BusinessProfileEditorProvider(
+        gateway: gateway,
+        directoryRepository: FakeCloudDirectoryRepository([]),
+        auth: await _authenticatedAuth(),
+      );
+
+      final staleLoad = provider.load(_entityId);
+      provider.reset();
+
+      completer.complete(ManagedProfileReadSuccess(_sampleProfile()));
+      await staleLoad;
+
+      expect(provider.profile, isNull);
+      expect(provider.draft, isNull);
+      expect(provider.state, BusinessProfileEditorState.initial);
+    });
+
+    test('C. a stale editor save after reset is dropped (returns false, '
+        'nothing installed)', () async {
+      final completer = Completer<ManagedProfileUpdateResult>();
+      final gateway = FakeBusinessProfileManagementGateway(
+        readResult: ManagedProfileReadSuccess(_sampleProfile()),
+      )..onUpdateManagedProfile = () => completer.future;
+      final provider = BusinessProfileEditorProvider(
+        gateway: gateway,
+        directoryRepository: FakeCloudDirectoryRepository([]),
+        auth: await _authenticatedAuth(),
+      );
+      await provider.load(_entityId);
+      provider.setName('Changed under session A');
+
+      final staleSave = provider.save();
+      provider.reset();
+
+      completer.complete(ManagedProfileUpdateSuccess(_sampleProfile()));
+      expect(await staleSave, isFalse,
+          reason: 'epoch-mismatched save is dropped');
+      expect(gateway.updateCalls, 1);
+      expect(provider.profile, isNull,
+          reason: 'a stale save must never install the new projection');
+      expect(provider.state, BusinessProfileEditorState.initial);
     });
   });
 }

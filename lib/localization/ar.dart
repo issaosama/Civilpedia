@@ -1010,4 +1010,50 @@ class Ar {
   static const String staffCauseRejectionReasonRequired = 'سبب الرفض مطلوب';
   static const String staffCauseRequiredDataMissing = 'البيانات المطلوبة غير مكتملة';
   static const String staffCauseUnexpected = 'حدث خطأ غير متوقع، حاول مجدداً';
+
+  // V1-R08 — Auth & Profile Production Completion (Part 2)
+  static const String authErrorRetryable = 'تعذر الاتصال. يرجى المحاولة مرة أخرى';
+  static const String authErrorUnexpected = 'حدث خطأ غير متوقع أثناء تسجيل الدخول';
+  static const String authPostSetupRunning = 'جارٍ إعداد حسابك...';
+  static const String authPostSetupRetryable =
+      'تعذر إكمال إعداد الحساب. يمكنك إعادة المحاولة';
+  static const String authPostSetupProvisioning =
+      'توجد مشكلة مؤقتة في إعداد حسابك. يمكنك الانتقال إلى ملفك الشخصي';
+  static const String authAccountConflictTitle = 'يوجد حساب مرتبط بالفعل بهذا الجهاز';
+  static const String authAccountConflictMessage =
+      'البيانات المحفوظة على هذا الجهاز مرتبطة بحساب آخر. اضغط الزر أدناه للتحقق مجددًا أو للعودة إلى تسجيل الدخول بأمان.';
+  static const String ownershipConflictReturnToSignIn = 'العودة إلى تسجيل الدخول';
+  static const String authSessionLost = 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى';
+  static const String signOutConfirmTitle = 'تسجيل الخروج';
+  static const String signOutConfirmMessage =
+      'هل تريد تسجيل الخروج من حسابك الحالي؟ سيظل ملفك الشخصي وبياناتك محفوظة في السحابة';
+  static const String signOutPendingLabel = 'جارٍ تسجيل الخروج...';
+  static const String signOutFailed = 'تعذر تسجيل الخروج. يرجى المحاولة مرة أخرى';
+  static const String profileCloudLoading = 'جارٍ تحميل ملفك الشخصي...';
+  static const String profileCloudLoadFailed =
+      'تعذر تحميل الملف الشخصي من السحابة';
+  static const String profileNotAvailable = 'الملف الشخصي غير متاح حالياً';
+  static const String profileEditCloudTitle = 'تعديل ملفي في Civilpedia';
+  static const String profileUnsavedTitle = 'تغييرات غير محفوظة';
+  static const String profileUnsavedMessage =
+      'لديك تغييرات غير محفوظة. هل تريد تجاهلها والخروج؟';
+  static const String profileDiscard = 'تجاهل التغييرات';
+  static const String profileStay = 'البقاء';
+  static const String profileSavePending = 'جارٍ الحفظ...';
+  static const String profileSaveFailed = 'تعذر حفظ التغييرات';
+  static const String profileCauseUnauthenticated = 'يجب تسجيل الدخول أولاً';
+  static const String profileCausePermissionDenied =
+      'ليس لديك صلاحية تعديل هذا الملف';
+  static const String profileCauseInvalidData = 'البيانات المدخلة غير صالحة';
+  static const String profileCauseMalformed =
+      'استجابة غير صالحة من الخادم. حاول مجدداً';
+  static const String profileCauseRetryable =
+      'تعذر الاتصال بالخادم. حاول مجدداً';
+  static const String profileCauseProvisioning =
+      'تعذر إعداد الملف الشخصي. حاول مجدداً';
+  static const String profileCauseOwnershipConflict =
+      'لا يمكن المزامنة بسبب تعارض ملكية الحساب';
+  static const String profileCauseUnexpected = 'حدث خطأ غير متوقع عند الحفظ';
+  static const String userAreaSignInPrompt =
+      'سجّل الدخول لمزامنة ملفك الشخصي وإدارته';
 }

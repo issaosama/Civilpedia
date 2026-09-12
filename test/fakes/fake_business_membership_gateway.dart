@@ -17,6 +17,11 @@ class FakeBusinessMembershipGateway implements BusinessMembershipGateway {
 
   int listMyBusinessesCalls = 0;
 
+  /// Scriptable in-flight hook. When set, [listMyBusinesses] suspends until the
+  /// hook's future completes, letting tests race a reset against an in-flight
+  /// load (V1-R08 final pass, finding 1).
+  Future<ManagedBusinessListResult> Function()? onListMyBusinesses;
+
   set listResult(ManagedBusinessListResult value) => _listResult = value;
 
   @override
@@ -29,6 +34,8 @@ class FakeBusinessMembershipGateway implements BusinessMembershipGateway {
   @override
   Future<ManagedBusinessListResult> listMyBusinesses() async {
     listMyBusinessesCalls++;
+    final hook = onListMyBusinesses;
+    if (hook != null) return hook();
     return _listResult;
   }
 

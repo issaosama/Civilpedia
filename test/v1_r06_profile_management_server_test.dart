@@ -47,12 +47,12 @@ void main() {
           '| V1-R06 | Business / Provider Profile Management | CLOSED |',
         ),
       );
-      expect(roadmap, contains('CURRENT_PHASE_ID: V1-R07'));
-      expect(roadmap, contains('CURRENT_PHASE_CONTRACT: V1-R07-CONTRACT-v1'));
+      expect(roadmap, contains('CURRENT_PHASE_ID: V1-R08'));
+      expect(roadmap, contains('CURRENT_PHASE_CONTRACT: V1-R08-CONTRACT-v1'));
       expect(roadmap, contains('IMPLEMENTATION_AUTHORIZED: YES'));
       expect(
         roadmap,
-        contains('| V1-R07 | Staff / Admin Operations Foundation | CURRENT |'),
+        contains('| V1-R08 | Auth + Profile Production Completion | CURRENT |'),
       );
     });
 

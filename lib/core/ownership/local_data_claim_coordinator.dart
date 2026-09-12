@@ -11,7 +11,7 @@ import 'ownership_registry_store.dart';
 /// A5.5 — Coordinates the guest → authenticated ownership claim.
 ///
 /// Triggered only after a REAL authenticated Supabase session is available
-/// (the [AuthProvider] `onAuthenticated` seam); never by picker-open, attempt
+/// (the [AuthProvider] `onPostAuth` seam); never by picker-open, attempt
 /// start, or a temporary provider token.
 ///
 /// The claim NEVER moves, deletes, overwrites, or re-encodes user data. It

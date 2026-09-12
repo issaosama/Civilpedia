@@ -9,8 +9,10 @@ import '../../../core/theme/spacing.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
+import '../../auth/domain/auth_return_destination.dart';
 import '../../auth/domain/entities/auth_error.dart';
 import 'providers/auth_provider.dart';
+import 'widgets/ownership_conflict_view.dart';
 
 /// A5.4 — Google Sign-In surface (replaces the legacy plaintext
 /// login/register forms on the same `/auth` route).
@@ -20,7 +22,10 @@ import 'providers/auth_provider.dart';
 /// * explains the guest state,
 /// * offers native "Continue with Google",
 /// * maps [AuthError] to localized, non-blocking messages,
-/// * returns to the profile area on success.
+/// * surfaces the typed post-auth claim/bootstrap lifecycle as an explicit
+///   seam (retryable → retry, provisioning → go to profile),
+/// * blocks sign-in while a second-account ownership conflict is active,
+/// * returns to the profile area only when the post-auth pipeline has settled.
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
 
@@ -33,9 +38,49 @@ class _AuthScreenState extends State<AuthScreen> {
     final auth = context.read<AuthProvider>();
     await auth.signInWithGoogle();
     if (!mounted) return;
-    if (auth.isLoggedIn) {
-      context.go(AppRoutes.userProfile);
+    // V1-R08 — navigate only after the post-auth claim/bootstrap pipeline has
+    // FULLY settled. A retryable/provisioning seam must not be skipped.
+    if (auth.isLoggedIn &&
+        auth.postAuthState == PostAuthLifecycleState.success) {
+      context.go(_returnDestination() ?? AppRoutes.userProfile);
     }
+  }
+
+  Future<void> _retrySetup() async {
+    final auth = context.read<AuthProvider>();
+    await auth.retryPostAuth();
+    if (!mounted) return;
+    if (auth.isLoggedIn &&
+        auth.postAuthState == PostAuthLifecycleState.success) {
+      context.go(_returnDestination() ?? AppRoutes.userProfile);
+    }
+  }
+
+  /// The `?return=` path captured by the protected-route redirect, validated
+  /// through the single [AuthReturnDestination] allowlist so sign-in can only
+  /// resume a vetted protected destination (never an external/open URL).
+  String? _returnDestination() {
+    final state = GoRouterState.of(context);
+    final raw = state.uri.queryParameters['return'];
+    return AuthReturnDestination.resolve(raw);
+  }
+
+  String? _signInErrorMessage(AuthProvider auth, String Function(String, String) tr) {
+    final error = auth.error;
+    if (error == null) return null;
+    return switch (error) {
+      AuthError.unavailable => tr(Ar.googleSignInUnavailable, En.googleSignInUnavailable),
+      AuthError.retryableNetwork => tr(Ar.authErrorRetryable, En.authErrorRetryable),
+      AuthError.signInFailed => tr(Ar.googleSignInFailed, En.googleSignInFailed),
+      AuthError.unexpected => tr(Ar.authErrorUnexpected, En.authErrorUnexpected),
+      AuthError.sessionLost => tr(Ar.authSessionLost, En.authSessionLost),
+      // Cancellation returns to the quiet guest state (no error row).
+      AuthError.signInCancelled ||
+      AuthError.signOutFailed ||
+      AuthError.sessionExpired ||
+      AuthError.ownershipConflict =>
+        null,
+    };
   }
 
   @override
@@ -48,9 +93,9 @@ class _AuthScreenState extends State<AuthScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          Ar.login,
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          tr(Ar.login, En.login),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
       ),
@@ -77,8 +122,15 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
             AppSpacing.gapXl,
-            if (auth.isLoggedIn)
-              _buildSignedInCard(context, auth, tr)
+            // V1-R08 correction (finding 3) — fail closed on ANY conflict-bound
+            // state while no session is present (stuck, restore-in-flight,
+            // neutralized). The shared view offers the accepted recovery
+            // actions; a raw Google sign-in is never available while the
+            // device is still conflict-bound.
+            if (auth.error == AuthError.ownershipConflict && !auth.isLoggedIn)
+              const OwnershipConflictView()
+            else if (auth.isLoggedIn)
+              _buildPostAuthArea(context, auth, tr)
             else if (!auth.isAvailable)
               _UnavailableNotice(tr: tr)
             else ...[
@@ -88,19 +140,11 @@ class _AuthScreenState extends State<AuthScreen> {
                     auth.isRestoring ? null : () => _signIn(),
                 restoring: auth.isRestoring,
               ),
-              if (auth.error != null)
+              if (_signInErrorMessage(auth, tr) case final message?)
                 Padding(
                   padding: const EdgeInsets.only(top: AppSpacing.md),
                   child: Text(
-                    auth.error == AuthError.unavailable
-                        ? tr(
-                            Ar.googleSignInUnavailable,
-                            En.googleSignInUnavailable,
-                          )
-                        : tr(
-                            Ar.googleSignInFailed,
-                            En.googleSignInFailed,
-                          ),
+                    message,
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: AppColors.error,
@@ -112,6 +156,31 @@ class _AuthScreenState extends State<AuthScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildPostAuthArea(
+    BuildContext context,
+    AuthProvider auth,
+    String Function(String ar, String en) tr,
+  ) {
+    final theme = Theme.of(context);
+    switch (auth.postAuthState) {
+      case PostAuthLifecycleState.running:
+        return _PostAuthProgress(tr: tr);
+      case PostAuthLifecycleState.retryableFailure:
+        return _PostAuthRetryable(
+          tr: tr,
+          onRetry: _retrySetup,
+        );
+      case PostAuthLifecycleState.provisioningFailure:
+        return _PostAuthProvisioning(tr: tr);
+      case PostAuthLifecycleState.ownershipConflict:
+      case PostAuthLifecycleState.corruptOwnershipRegistry:
+        return const OwnershipConflictView();
+      case PostAuthLifecycleState.idle:
+      case PostAuthLifecycleState.success:
+        return _buildSignedInCard(context, auth, tr);
+    }
   }
 
   Widget _buildSignedInCard(
@@ -141,6 +210,127 @@ class _AuthScreenState extends State<AuthScreen> {
   }
 }
 
+/// V1-R08 — post-auth claim/bootstrap in flight after a successful Google
+/// sign-in. The user must not be dumped into the app before their account row
+/// is ready; show progress with a way forward.
+class _PostAuthProgress extends StatelessWidget {
+  const _PostAuthProgress({required this.tr});
+
+  final String Function(String ar, String en) tr;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        const SizedBox.square(
+          dimension: 32,
+          child: CircularProgressIndicator(strokeWidth: 3),
+        ),
+        AppSpacing.gapLg,
+        Text(
+          tr(Ar.authPostSetupRunning, En.authPostSetupRunning),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge,
+        ),
+      ],
+    );
+  }
+}
+
+/// V1-R08 — the claim/bootstrap pipeline failed transiently. Authentication is
+/// authoritative; the user may safely retry from here or proceed to the
+/// profile area (the profile seam shows the same lifecycle).
+class _PostAuthRetryable extends StatelessWidget {
+  const _PostAuthRetryable({
+    required this.tr,
+    required this.onRetry,
+  });
+
+  final String Function(String ar, String en) tr;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        Icon(
+          Icons.cloud_off,
+          size: 40,
+          color: theme.colorScheme.error,
+        ),
+        AppSpacing.gapLg,
+        Text(
+          tr(Ar.authPostSetupRetryable, En.authPostSetupRetryable),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge,
+        ),
+        AppSpacing.gapXl,
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton(
+            onPressed: onRetry,
+            child: Text(tr(Ar.retry, En.retry)),
+          ),
+        ),
+        AppSpacing.gapMd,
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton(
+            onPressed: () => context.go(AppRoutes.userProfile),
+            child: Text(tr(Ar.goToProfile, En.goToProfile)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// V1-R08 (F7) — Provisioning failed for a provisioning-specific reason. The
+/// session is authoritative; the profile seam offers the typed recovery path.
+class _PostAuthProvisioning extends StatelessWidget {
+  const _PostAuthProvisioning({required this.tr});
+
+  final String Function(String ar, String en) tr;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        Icon(
+          Icons.info_outline,
+          size: 40,
+          color: theme.colorScheme.primary,
+        ),
+        AppSpacing.gapLg,
+        Text(
+          tr(Ar.authPostSetupProvisioning, En.authPostSetupProvisioning),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge,
+        ),
+        AppSpacing.gapXl,
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: FilledButton(
+            onPressed: () => context.go(AppRoutes.userProfile),
+            child: Text(tr(Ar.goToProfile, En.goToProfile)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// V1-R08 — a second-account ownership conflict is active on this device.
+/// Sign-in is blocked until the conflict is resolved; no new Google session is
+/// allowed while blockingly bound to another account (fail closed). The
+/// recovery actions live in the shared [OwnershipConflictView] (correction
+/// finding 3).
 class _GoogleSignInButton extends StatelessWidget {
   const _GoogleSignInButton({
     required this.label,

@@ -9,6 +9,7 @@ import 'core/services/theme_provider.dart';
 import 'core/services/language_provider.dart';
 import 'core/services/connectivity_provider.dart';
 import 'core/di/staff_operations_scope.dart';
+import 'features/auth/presentation/auth_refresh_listenable.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/business/presentation/providers/business_application_provider.dart';
 import 'features/business/presentation/providers/business_claim_target_provider.dart';
@@ -45,6 +46,65 @@ Future<void> main() async {
 }
 
 void _runApp() {
+  // V1-R08 (finding 8/9/10/16) — account-bound providers are built exactly
+  // once and reset together on any canonical identity change so no
+  // privileged/account-bound state (profile, applications, managed businesses,
+  // staff capabilities/queues) ever survives a session replacement.
+  late final UserProfileProvider userProfileProvider;
+  late final BusinessApplicationProvider businessApplicationProvider;
+  late final BusinessClaimTargetProvider businessClaimTargetProvider;
+  late final ManagedBusinessesProvider managedBusinessesProvider;
+  late final BusinessProfileEditorProvider businessProfileEditorProvider;
+  late final StaffOperationsScope staffOperationsScope;
+
+  void resetAccountBoundState() {
+    userProfileProvider.resetForIdentityChange();
+    businessApplicationProvider.resetForIdentityChange();
+    businessClaimTargetProvider.resetForIdentityChange();
+    managedBusinessesProvider.reset();
+    businessProfileEditorProvider.reset();
+    staffOperationsScope.resetForAuthChange();
+  }
+
+  final auth = AuthProvider(
+    gateway: AppDependencies.authGateway,
+    onPostAuth: AppDependencies.runPostAuthPipeline,
+    onAccountBoundReset: resetAccountBoundState,
+    onSessionRefresh: AuthRefreshListenable.instance.refresh,
+  )..restoreSession();
+
+  userProfileProvider = UserProfileProvider(
+    repository: AppDependencies.userProfileRepo,
+    cloudProfileGateway: AppDependencies.cloudProfileGateway,
+    regionPreferenceGateway: AppDependencies.regionPreferenceGateway,
+    auth: auth,
+  )..loadProfile();
+
+  businessApplicationProvider = BusinessApplicationProvider(
+    gateway: AppDependencies.businessApplicationGateway,
+    auth: auth,
+  );
+
+  businessClaimTargetProvider = BusinessClaimTargetProvider(
+    gateway: AppDependencies.businessClaimTargetGateway,
+  );
+
+  managedBusinessesProvider = ManagedBusinessesProvider(
+    membershipGateway: AppDependencies.businessMembershipGateway,
+    auth: auth,
+  );
+
+  businessProfileEditorProvider = BusinessProfileEditorProvider(
+    gateway: AppDependencies.businessProfileManagementGateway,
+    directoryRepository: AppDependencies.directoryRepo,
+    auth: auth,
+  );
+
+  staffOperationsScope = StaffOperationsScope(
+    gateway: AppDependencies.businessApplicationStaffGateway,
+    auth: auth,
+  );
+
   runApp(
     MultiProvider(
       providers: [
@@ -52,25 +112,7 @@ void _runApp() {
 
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
 
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(
-            gateway: AppDependencies.authGateway,
-            onAuthenticated: (session) async {
-              // Deterministic order: A5.5 record-ownership claim first, then
-              // A5.6 personal-profile bootstrap. Both run fire-and-forget
-              // after authentication and never block the authenticated UI.
-              await AppDependencies.ownershipClaimCoordinator.claimFor(
-                session.userId,
-              );
-              await AppDependencies.personalProfileBootstrapCoordinator
-                  .bootstrap(
-                    userId: session.userId,
-                    authDisplayName: session.displayName,
-                    authPhotoUrl: session.photoUrl,
-                  );
-            },
-          )..restoreSession(),
-        ),
+        ChangeNotifierProvider.value(value: auth),
 
         ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
 
@@ -84,49 +126,21 @@ void _runApp() {
           create: (_) => EncyclopediaFavoritesProvider()..load(),
         ),
 
-        ChangeNotifierProvider(
-          create: (_) =>
-              UserProfileProvider(repository: AppDependencies.userProfileRepo),
-        ),
+        ChangeNotifierProvider.value(value: userProfileProvider),
 
-        ChangeNotifierProvider(
-          create: (context) => BusinessApplicationProvider(
-            gateway: AppDependencies.businessApplicationGateway,
-            auth: context.read<AuthProvider>(),
-          ),
-        ),
+        ChangeNotifierProvider.value(value: businessApplicationProvider),
 
-        ChangeNotifierProvider(
-          create: (_) => BusinessClaimTargetProvider(
-            gateway: AppDependencies.businessClaimTargetGateway,
-          ),
-        ),
+        ChangeNotifierProvider.value(value: businessClaimTargetProvider),
 
         // V1-R06 — My Managed Businesses + public profile editor.
-        ChangeNotifierProvider(
-          create: (context) => ManagedBusinessesProvider(
-            membershipGateway: AppDependencies.businessMembershipGateway,
-            auth: context.read<AuthProvider>(),
-          ),
-        ),
+        ChangeNotifierProvider.value(value: managedBusinessesProvider),
 
-        ChangeNotifierProvider(
-          create: (context) => BusinessProfileEditorProvider(
-            gateway: AppDependencies.businessProfileManagementGateway,
-            directoryRepository: AppDependencies.directoryRepo,
-            auth: context.read<AuthProvider>(),
-          ),
-        ),
+        ChangeNotifierProvider.value(value: businessProfileEditorProvider),
 
         // V1-R07 — Staff Operations providers, composed through a single
         // scope so permission-loss and post-mutation signals stay coherent
         // across access/queue/detail.
-        ChangeNotifierProvider(
-          create: (context) => StaffOperationsScope(
-            gateway: AppDependencies.businessApplicationStaffGateway,
-            auth: context.read<AuthProvider>(),
-          ),
-        ),
+        ChangeNotifierProvider.value(value: staffOperationsScope),
         ChangeNotifierProvider<StaffAccessProvider>(
           lazy: false,
           create: (context) => context.read<StaffOperationsScope>().access,

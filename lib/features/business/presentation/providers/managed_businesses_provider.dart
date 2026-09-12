@@ -54,12 +54,18 @@ class ManagedBusinessesProvider extends ChangeNotifier {
   BusinessManagementReadCause? get errorCause => _errorCause;
   bool get isBusy => _state == ManagedBusinessesState.loading;
 
+  /// Canonical session epoch (V1-R08 final pass, finding 1). Advanced on every
+  /// account-bound reset so a managed-business load captured under the old
+  /// session is dropped on arrival.
+  int _sessionEpoch = 0;
+
   String? get _currentUserId => _auth.session?.userId;
 
   bool get _isAuthenticated =>
       _auth.isLoggedIn && (_currentUserId?.isNotEmpty ?? false);
 
   Future<void> load() async {
+    final epoch = _sessionEpoch;
     if (!_isAuthenticated) {
       _state = ManagedBusinessesState.signInRequired;
       _items = const [];
@@ -81,6 +87,7 @@ class ManagedBusinessesProvider extends ChangeNotifier {
     notifyListeners();
 
     final result = await _membershipGateway.listMyBusinesses();
+    if (epoch != _sessionEpoch) return; // reset during in-flight read
     switch (result) {
       case ManagedBusinessListAvailable():
         final summaries = result.businesses;
@@ -107,8 +114,10 @@ class ManagedBusinessesProvider extends ChangeNotifier {
   }
 
   /// Clears state on sign-out; public callers can invoke this from auth
-  /// listeners if needed.
+  /// listeners if needed. Advances the session epoch so still-in-flight loads
+  /// from the old session never publish (V1-R08 final pass, finding 1).
   void reset() {
+    _sessionEpoch++;
     _state = ManagedBusinessesState.loading;
     _items = const [];
     _errorCause = null;

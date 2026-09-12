@@ -8,9 +8,6 @@ enum ProfileBootstrapOutcome {
   /// No authenticated session was supplied → no cloud operation is performed.
   skippedGuest,
 
-  /// No local profile exists on this device → nothing to associate.
-  noLocalProfile,
-
   /// Bootstrap completed: either a missing cloud profile was created, or an
   /// existing cloud profile was compatible with the local values. The local
   /// profile is now bound to the canonical `auth.users.id`.
@@ -30,4 +27,11 @@ enum ProfileBootstrapOutcome {
   /// remains successful, local data is untouched, the local binding is NOT
   /// falsely marked complete, and a later authenticated session retries safely.
   failure,
+
+  /// F7 — a canonical `public.profiles` row for the authenticated session
+  /// could NOT be provisioned for a provisioning-specific reason (constraint /
+  /// data rejection on INSERT). Sign-in remains successful; the typed state is
+  /// surfaced to the profile/provider boundary so the UI can present a
+  /// provisioning-specific recovery path. Distinct from [failure] (transient).
+  provisioningFailure,
 }

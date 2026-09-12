@@ -74,9 +74,9 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R08
-CURRENT_PHASE_TITLE: Auth + Profile Production Completion
-LAST_CLOSED_PHASE_ID: V1-R07
+CURRENT_PHASE_ID: V1-R09
+CURRENT_PHASE_TITLE: Offline / Connectivity / Error Hardening
+LAST_CLOSED_PHASE_ID: V1-R08
 LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
 ROADMAP_STATUS: ACTIVE
 
@@ -93,8 +93,8 @@ ROADMAP_STATUS: ACTIVE
 | V1-R05 | Directory Cloud Integration | CLOSED | Codex (persistence/cloud) | Architect | HIGH | PENDING OWNER COMMIT |
 | V1-R06 | Business / Provider Profile Management | CLOSED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
-| V1-R08 | Auth + Profile Production Completion | CURRENT | Codex | TBD BY ARCHITECT | HIGH | — |
-| V1-R09 | Offline / Connectivity / Error-State Hardening | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
+| V1-R08 | Auth + Profile Production Completion | CLOSED | Codex | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
+| V1-R09 | Offline / Connectivity / Error Hardening | CURRENT | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R10 | Core App UX Production Completion | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R12 | Tools / Calculators Final Engineering QA | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -116,8 +116,8 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R08
-CURRENT_PHASE_TITLE: Auth + Profile Production Completion
+CURRENT_PHASE_ID: V1-R09
+CURRENT_PHASE_TITLE: Offline / Connectivity / Error Hardening
 CURRENT_PHASE_STATUS: CURRENT
 CURRENT_PHASE_CONTRACT: NOT_FROZEN
 IMPLEMENTATION_AUTHORIZED: NO
@@ -721,7 +721,7 @@ The operational V1 scope may be limited, but whatever is included must be produc
 
 ## V1-R08 — Auth + Profile Production Completion
 
-STATUS: CURRENT
+STATUS: CLOSED
 
 Primary:
 
@@ -745,9 +745,9 @@ Production audit and completion of:
 
 ---
 
-## V1-R09 — Offline / Connectivity / Error-State Hardening
+## V1-R09 — Offline / Connectivity / Error Hardening
 
-STATUS: QUEUED
+STATUS: CURRENT
 
 Primary:
 
@@ -1218,11 +1218,11 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R07 — Staff / Admin Operations Foundation
+V1-R09 — Offline / Connectivity / Error Hardening
 
 NEXT AFTER SUCCESSFUL CLOSE:
 
-V1-R08 — Auth + Profile Production Completion
+V1-R10 — Core App UX Production Completion
 
 No other phase may be selected by inference.
 
@@ -1314,6 +1314,34 @@ Evidence summary:
 Commit: PENDING OWNER COMMIT
 Push verified: NO (owner stages explicit files)
 Next CURRENT phase: V1-R08 — Auth + Profile Production Completion
+Next contract: NOT_FROZEN
+Implementation authorized: NO
+Owner approval: PENDING OWNER STAGING
+
+### Phase Transition Record
+
+Phase: V1-R08 — Auth + Profile Production Completion
+Previous status: CURRENT
+New status: CLOSED
+Implementation agent: Big Pickle
+Independent reviewer: Codex
+Architect Final Review: PASS
+Independent Codex final decision: PASS — READY FOR ARCHITECT FINAL REVIEW
+Evidence summary:
+- Part 1 accepted: PASS — V1-R08 PART 1 ACCEPTED (auth/session lifecycle, auth event stream, epoch/session-generation protection, authoritative remote sign-out, reactive session loss, account-bound invalidation, second-account fail-closed, cloud profile SSOT, strict cloud parsing, typed profile provisioning, role_code + canonical region preference, protected routes/secure return destinations)
+- Part 2 accepted: PASS — V1-R08 PART 2 ACCEPTED (auth/profile production UX, ownership-conflict recovery, authenticated vs guest profile-editor dispatch, Arabic/English R08 localization)
+- final Part 2 correction evidence: 111/111 PASS
+- phase gate: PHASE GATE PASS — READY FOR ARCHITECT FINAL REVIEW
+- initial integrated gate run: 2147 PASS / 2 FAIL (both root causes resolved test-only)
+- phase-gate root causes resolved: 1 obsolete V1-R06 roadmap live-marker assertion advanced to V1-R08 (test-only); 1 R07 Flutter test harness compatibility with accepted R08 interfaces/providers (test-only)
+- final integrated Flutter suite: 2223/2223 PASS (0 FAIL, 0 SKIPPED)
+- git diff --check PASS
+- migration 00022 absent; OPTION A — NO MIGRATION REQUIRED; no schema/RLS/service_role change
+- DEV server QA DEFERRED — CREDENTIALS UNAVAILABLE (mandatory in V1-R14)
+- frozen V1-R08 contract preserved unchanged
+Commit: PENDING OWNER COMMIT
+Push verified: NO (owner stages explicit files)
+Next CURRENT phase: V1-R09 — Offline / Connectivity / Error Hardening
 Next contract: NOT_FROZEN
 Implementation authorized: NO
 Owner approval: PENDING OWNER STAGING

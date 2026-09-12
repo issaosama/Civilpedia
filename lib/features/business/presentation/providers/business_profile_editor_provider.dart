@@ -75,6 +75,12 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
 
   bool _directoryRefreshFailed = false;
 
+  /// Canonical session epoch (V1-R08 final pass, finding 1). Advanced on every
+  /// account-bound reset so a load/save/directory refresh captured under the
+  /// old session is dropped on arrival and can never publish into the new
+  /// (or a guest) session.
+  int _sessionEpoch = 0;
+
   String? get entityId => _entityId;
   BusinessProfileEditorState get state => _state;
   BusinessProfileManagementCause? get lastErrorCause => _lastErrorCause;
@@ -148,6 +154,7 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
 
   /// Loads the authoritative profile + taxonomy for [entityId].
   Future<void> load(String entityId) async {
+    final epoch = _sessionEpoch;
     _entityId = entityId;
 
     if (!_isAuthenticated) {
@@ -184,10 +191,12 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
           (value) => value,
         ).catchError((_) => null),
       ]);
+      if (epoch != _sessionEpoch) return; // reset during in-flight load
       profileResult = results[0] as ManagedProfileReadResult?;
       categories = results[1] as List<ManagedSelectableCategory>?;
       regions = results[2] as List<ManagedSelectableRegion>?;
     } catch (_) {
+      if (epoch != _sessionEpoch) return;
       _state = BusinessProfileEditorState.error;
       _lastErrorCause = BusinessProfileManagementCause.network;
       notifyListeners();
@@ -498,6 +507,7 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
       return false;
     }
 
+    final epoch = _sessionEpoch;
     _state = BusinessProfileEditorState.saving;
     _lastErrorCause = null;
     notifyListeners();
@@ -507,6 +517,8 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
       expectedUpdatedAt: profile.updatedAt,
       draft: draft,
     );
+
+    if (epoch != _sessionEpoch) return false; // reset during in-flight save
 
     switch (result) {
       case ManagedProfileUpdateSuccess(:final profile):
@@ -538,13 +550,16 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
   /// Retries the public Directory cache refresh. This does NOT resubmit the
   /// profile mutation; it only calls [CloudDirectoryRepository.refresh].
   Future<void> retryDirectoryRefresh() async {
+    final epoch = _sessionEpoch;
     final entityId = _entityId;
     if (entityId == null) return;
     try {
       await _directoryRepository.refresh();
+      if (epoch != _sessionEpoch) return; // reset during in-flight refresh
       _directoryRefreshFailed = false;
       notifyListeners();
     } catch (_) {
+      if (epoch != _sessionEpoch) return;
       _directoryRefreshFailed = true;
       notifyListeners();
     }
@@ -566,8 +581,11 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     }
   }
 
-  /// Resets the provider to its initial state (e.g. on sign-out).
+  /// Resets the provider to its initial state (e.g. on sign-out). Advances the
+  /// session epoch so in-flight loads/saves never publish after the reset
+  /// (V1-R08 final pass, finding 1).
   void reset() {
+    _sessionEpoch++;
     _entityId = null;
     _state = BusinessProfileEditorState.initial;
     _clearData();

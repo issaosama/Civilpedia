@@ -3,7 +3,13 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'app_routes.dart';
 import '../core/di/app_dependencies.dart';
+import '../core/services/language_provider.dart';
 import '../core/widgets/civil_app_bar.dart';
+import '../localization/ar.dart';
+import '../localization/en.dart';
+import '../features/auth/domain/entities/auth_error.dart';
+import '../features/auth/presentation/providers/auth_provider.dart';
+import '../features/auth/presentation/widgets/ownership_conflict_view.dart';
 import '../features/splash/presentation/splash_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/auth/presentation/auth_screen.dart';
@@ -12,6 +18,8 @@ import '../features/encyclopedia/presentation/screens/encyclopedia_screen.dart';
 import '../features/encyclopedia/presentation/screens/topic_list_screen.dart';
 import '../features/encyclopedia/presentation/screens/topic_detail_screen.dart';
 import '../core/navigation/app_shell.dart';
+import '../features/auth/domain/auth_return_destination.dart';
+import '../features/auth/presentation/auth_refresh_listenable.dart';
 import '../features/home/presentation/home_main_screen.dart';
 import '../features/tools/presentation/screens/tools_screen.dart';
 import '../features/tools/presentation/screens/calculators/calculator_screen.dart';
@@ -24,6 +32,7 @@ import '../features/saved/presentation/saved_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/profile/presentation/screens/profile_setup_screen.dart';
 import '../features/profile/presentation/screens/profile_edit_screen.dart';
+import '../features/profile/presentation/screens/authenticated_profile_edit_screen.dart';
 import '../features/projects/presentation/project_list_screen.dart';
 import '../features/profile/domain/user_profile.dart';
 import '../features/profile/presentation/providers/user_profile_provider.dart';
@@ -45,6 +54,25 @@ import '../features/business/presentation/screens/staff_application_review_scree
 import 'not_found_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigator = GlobalKey<NavigatorState>();
+
+/// V1-R08 — route prefixes that require an authenticated session.
+///
+/// Covers (2) protected business/cloud families: business applications
+/// (list/new/claim/detail all share the `/business/applications` prefix),
+/// business profile management (`/business/manage`), staff operations
+/// (`/staff/applications`), and the User area profile (`/user/profile`).
+/// The core public families (encyclopedia/articles/tools/projects/directory/
+/// apps) stay fully usable as a guest.
+const List<String> _authRequiredPrefixes = [
+  AppRoutes.businessApplications,
+  AppRoutes.businessManage,
+  AppRoutes.staffApplications,
+  AppRoutes.userProfile,
+];
+
+bool _requiresAuth(String path) {
+  return _authRequiredPrefixes.any((prefix) => path.startsWith(prefix));
+}
 
 /// Screen builders for each shell branch, keyed by the branch route declared
 /// in [kShellDestinations]. Branch order and indices live only in that list;
@@ -75,16 +103,143 @@ final Map<String, List<RouteBase>> _shellBranchNestedRoutes = {
 /// extra, falls back to the authoritative [UserProfileProvider]; if no profile
 /// exists, the router error contract (NotFoundScreen) applies instead of an
 /// uncontrolled `state.extra as ...` crash.
+///
+/// V1-R08 (Part 2) — a SIGNED-IN user is routed to the authenticated
+/// [AuthenticatedProfileEditScreen], which reads the canonical cloud profile
+/// itself. Any `state.extra` you just sent is intentionally ignored: the local
+/// surrogate is never authoritative for an authenticated session.
+///
+/// V1-R08 correction (finding 1) — dispatch on the canonical [AuthStatus], not
+/// on `isLoggedIn`: while a session restore is unresolved the legacy guest
+/// editor must never render (no transient local/private profile exposure), and
+/// an active ownership conflict must stay fail-closed (neither editor).
 Widget _buildProfileEdit(BuildContext context, GoRouterState state) {
-  final extra = state.extra;
-  if (extra is LocalUserProfile) {
-    return ProfileEditScreen(profile: extra);
+  return _ProfileEditDispatch(state: state);
+}
+
+/// V1-R08 correction (findings 1-3, final) — self-healing dispatcher for the
+/// profile-edit routes. It WATCHES the canonical [AuthStatus] and ALWAYS renders
+/// the correct surface for the current settled state, so no stale seam can
+/// remain mounted after a transition — a GoRouter refresh alone does not
+/// re-invoke the route builder for an unchanged match.
+///
+/// Covers every terminal transition:
+/// * resolving → authenticated  → [AuthenticatedProfileEditScreen]
+/// * resolving → guest          → the legacy W3.4 local-edit contract
+/// * resolving → conflict       → the fail-closed [_ProfileEditRouteBlockedScreen]
+/// * conflict Retry → guest     → the legacy guest contract (never a blank shell)
+class _ProfileEditDispatch extends StatelessWidget {
+  const _ProfileEditDispatch({required this.state});
+
+  final GoRouterState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final status = auth.status;
+
+    if (status == AuthStatus.authenticated) {
+      return const AuthenticatedProfileEditScreen();
+    }
+
+    // Fail closed on ANY conflict-bound state while no session is present:
+    // stuck (blocked resolution), restore-in-flight (the blocking error is
+    // retained) and neutralized (guest + conflict error).
+    final conflictBlocked =
+        auth.error == AuthError.ownershipConflict && !auth.isLoggedIn;
+    if (conflictBlocked) {
+      return const _ProfileEditRouteBlockedScreen();
+    }
+
+    // Any non-guest, non-blocked unsettled state (resolving / authenticating /
+    // signOutPending / error) renders the safe resolution surface, never the
+    // legacy local editor.
+    if (status != AuthStatus.guest) {
+      return const _ProfileEditRouteResolvingScreen();
+    }
+
+    // Settled guest — the legacy W3.4 local editor may continue.
+    final extra = state.extra;
+    if (extra is LocalUserProfile) {
+      return ProfileEditScreen(profile: extra);
+    }
+    final profile = context.read<UserProfileProvider>().profile;
+    if (profile != null) {
+      return ProfileEditScreen(profile: profile);
+    }
+    return const NotFoundScreen();
   }
-  final profile = context.read<UserProfileProvider>().profile;
-  if (profile != null) {
-    return ProfileEditScreen(profile: profile);
+}
+
+/// V1-R08 correction (finding 1/3) — safe state for `/profile/edit` while a
+/// session restore is still unresolved. No editor, no local/private flash.
+/// Presentational only: [_ProfileEditDispatch] is authoritative about when it
+/// can be replaced.
+class _ProfileEditRouteResolvingScreen extends StatelessWidget {
+  const _ProfileEditRouteResolvingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final tr = (String ar, String en) =>
+        context.watch<LanguageProvider>().isArabic ? ar : en;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(tr(Ar.profileEditCloudTitle, En.profileEditCloudTitle)),
+        elevation: 0,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox.square(
+                dimension: 32,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                tr(Ar.profileCloudLoading, En.profileCloudLoading),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
-  return const NotFoundScreen();
+}
+
+/// V1-R08 correction (finding 1/3) — fail-closed state for `/profile/edit`
+/// while a second-account ownership conflict is active. Offers only the
+/// accepted recovery actions (retry resolution / return to sign-in).
+/// Presentational only: [_ProfileEditDispatch] is authoritative and replaces
+/// this screen the moment the conflict settles (Retry → clean guest must never
+/// leave an empty blocked shell behind).
+class _ProfileEditRouteBlockedScreen extends StatelessWidget {
+  const _ProfileEditRouteBlockedScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final tr = (String ar, String en) =>
+        context.watch<LanguageProvider>().isArabic ? ar : en;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(tr(Ar.profileEditCloudTitle, En.profileEditCloudTitle)),
+        elevation: 0,
+      ),
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: OwnershipConflictView(
+              onCleared: () => context.go(AppRoutes.auth),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// W6.2 — canonical Directory Landing builder (W6.3 shell branch root).
@@ -136,6 +291,27 @@ final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
   debugLogDiagnostics: true,
   errorBuilder: (context, state) => const NotFoundScreen(),
+  // V1-R08 (finding 11) — re-evaluate redirects immediately whenever the
+  // session/identity transitions (live session loss, replacement, sign-in).
+  refreshListenable: AuthRefreshListenable.instance,
+  // V1-R08 — protected-route gate. Signed-out/mid-restore navigations to a
+  // protected family are redirected to the session screen with the intended
+  // destination preserved as `?return=`, so sign-in can resume it — but only
+  // when that destination passes the [AuthReturnDestination] allowlist
+  // (finding 12/21). The auth route itself and all public families pass
+  // through untouched.
+  redirect: (context, state) {
+    final path = state.uri.path;
+    if (path == AppRoutes.auth || !_requiresAuth(path)) return null;
+    final auth = context.read<AuthProvider>();
+    if (auth.isLoggedIn) return null;
+    final rawReturn = state.uri.toString();
+    final allowed = AuthReturnDestination.resolve(rawReturn);
+    final returnQuery = allowed == null
+        ? ''
+        : '?return=${Uri.encodeQueryComponent(allowed)}';
+    return '${AppRoutes.auth}$returnQuery';
+  },
   routes: [
     GoRoute(
       path: AppRoutes.splash,

@@ -87,7 +87,7 @@ class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
     cloudProfile = profile;
   }
 
-  @override
+@override
   Future<void> updateRegionPreferenceId({
     required String userId,
     required String regionPreferenceId,
@@ -100,6 +100,24 @@ class _FakeRemoteGateway implements PersonalProfileRemoteGateway {
       roleCode: cloudProfile?.roleCode,
       preferredRegionId: cloudProfile?.preferredRegionId,
       regionPreferenceId: regionPreferenceId,
+      phone: cloudProfile?.phone,
+    );
+  }
+
+  @override
+  Future<void> saveEditableFields({
+    required String userId,
+    required String roleCode,
+    String? regionPreferenceId,
+  }) async {
+    cloudProfile = CloudProfile(
+      userId: userId,
+      displayName: cloudProfile?.displayName,
+      photoUrl: cloudProfile?.photoUrl,
+      roleCode: roleCode,
+      preferredRegionId: cloudProfile?.preferredRegionId,
+      regionPreferenceId:
+          regionPreferenceId ?? cloudProfile?.regionPreferenceId,
       phone: cloudProfile?.phone,
     );
   }
@@ -125,6 +143,15 @@ class _FakePreferenceGateway implements RegionPreferenceGateway {
     resolveCalls++;
     if (resolveError != null) throw resolveError!;
     return codes[code];
+  }
+
+  @override
+  Future<String?> resolveCodeById(String id) async {
+    if (resolveError != null) throw resolveError!;
+    for (final entry in codes.entries) {
+      if (entry.value == id) return entry.key;
+    }
+    return null;
   }
 }
 
@@ -533,8 +560,13 @@ void main() {
 
       final auth = AuthProvider(
         gateway: FakeAuthGateway(signInResult: _sessionA),
-        onAuthenticated: (session) async {
-          await coordinator.bootstrap(userId: session.userId);
+        onPostAuth: (session) async {
+          final outcome = await coordinator.bootstrap(
+            userId: session.userId,
+          );
+          return outcome == ProfileBootstrapOutcome.failure
+              ? PostAuthOutcome.retryableFailure
+              : PostAuthOutcome.success;
         },
       );
       await auth.signInWithGoogle();
@@ -564,8 +596,13 @@ void main() {
 
       final auth = AuthProvider(
         gateway: FakeAuthGateway(signInResult: _sessionA),
-        onAuthenticated: (session) async {
-          await coordinator.bootstrap(userId: session.userId);
+        onPostAuth: (session) async {
+          final outcome = await coordinator.bootstrap(
+            userId: session.userId,
+          );
+          return outcome == ProfileBootstrapOutcome.failure
+              ? PostAuthOutcome.retryableFailure
+              : PostAuthOutcome.success;
         },
       );
 
@@ -626,16 +663,26 @@ void main() {
       expect(repo.saveCalls, 0);
     });
 
-    test('no local profile → no cloud profile is fabricated', () async {
+    test('no local profile → canonical row is provisioned from authenticated '
+        'metadata only (finding 5)', () async {
       final repo = _MemoryProfileRepository();
       final gateway = _FakeRemoteGateway();
       final coordinator = _coordinator(repo, gateway);
 
-      final outcome = await coordinator.bootstrap(userId: _userA);
+      final outcome = await coordinator.bootstrap(
+        userId: _userA,
+        authDisplayName: 'م. أحمد',
+      );
 
-      expect(outcome, ProfileBootstrapOutcome.noLocalProfile);
-      expect(gateway.fetchCalls, 0);
-      expect(gateway.createCalls, 0);
+      expect(outcome, ProfileBootstrapOutcome.associated);
+      expect(gateway.fetchCalls, 1);
+      expect(gateway.createCalls, 1);
+      expect(gateway.created.single.userId, _userA);
+      expect(gateway.created.single.displayName, 'م. أحمد');
+      expect(gateway.created.single.roleCode, isNull,
+          reason: 'no fabricated role, region, or contact values');
+      expect(gateway.created.single.regionPreferenceId, isNull);
+      expect(repo.profile, isNull);
     });
   });
 

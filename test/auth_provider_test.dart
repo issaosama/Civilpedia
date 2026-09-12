@@ -153,18 +153,28 @@ void main() {
       expect(gateway.signOutCalls, 1);
     });
 
-    test('signOut failure never deletes the local guest state', () async {
+    test(
+        'signOut failure re-resolves the session, never fakes a guest '
+        '(fail-closed)', () async {
       final gateway = FakeAuthGateway(
         restoredSession: fakeSession,
         signOutError: Exception('offline'),
       );
       final provider = AuthProvider(gateway: gateway);
       await provider.restoreSession();
+      expect(provider.isLoggedIn, isTrue);
 
       await provider.signOut();
 
-      expect(provider.isLoggedIn, isFalse);
-      expect(provider.status, AuthStatus.guest);
+      expect(
+        provider.isLoggedIn,
+        isTrue,
+        reason: 'a failed remote sign-out must never fake a guest session',
+      );
+      expect(provider.status, AuthStatus.authenticated);
+      expect(provider.error, AuthError.signOutFailed);
+      expect(provider.session, fakeSession);
+      expect(gateway.signOutCalls, 1);
     });
 
     test('signOut as guest does not call the gateway', () async {

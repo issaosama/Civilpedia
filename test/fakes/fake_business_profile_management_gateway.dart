@@ -34,6 +34,12 @@ class FakeBusinessProfileManagementGateway
   int categoriesCalls = 0;
   int regionsCalls = 0;
 
+  /// Scriptable in-flight hooks. When set, the gateway suspends until the
+  /// hook's future completes, letting tests race a reset against an in-flight
+  /// read/save (V1-R08 final pass, finding 1).
+  Future<ManagedProfileReadResult> Function(String entityId)? onReadManagedProfile;
+  Future<ManagedProfileUpdateResult> Function()? onUpdateManagedProfile;
+
   String? lastReadEntityId;
   String? lastUpdateEntityId;
   DateTime? lastExpectedUpdatedAt;
@@ -51,6 +57,8 @@ class FakeBusinessProfileManagementGateway
   Future<ManagedProfileReadResult> readManagedProfile(String entityId) async {
     readCalls++;
     lastReadEntityId = entityId;
+    final hook = onReadManagedProfile;
+    if (hook != null) return hook(entityId);
     return _readResult;
   }
 
@@ -64,6 +72,8 @@ class FakeBusinessProfileManagementGateway
     lastUpdateEntityId = entityId;
     lastExpectedUpdatedAt = expectedUpdatedAt;
     lastUpdateDraft = draft;
+    final hook = onUpdateManagedProfile;
+    if (hook != null) return hook();
     return _updateResult;
   }
 

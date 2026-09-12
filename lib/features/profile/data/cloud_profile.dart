@@ -98,3 +98,129 @@ CivilUserType roleCodeToCivilUserType(String code) {
       return CivilUserType.generalUser;
   }
 }
+
+/// Thrown when a raw `public.profiles` row cannot be parsed as a valid,
+/// session-owned cloud profile (V1-R08 strict parsing, finding 4).
+class CloudProfileParseException implements Exception {
+  const CloudProfileParseException(this.reason);
+  final String reason;
+
+  @override
+  String toString() => 'CloudProfileParseException($reason)';
+}
+
+/// The exact set of `profiles.role_code` values the DB CHECK constraint
+/// allows. These are the only values the save foundation may write.
+const Set<String> canonicalRoleCodes = {
+  'site_engineer',
+  'consultant_engineer',
+  'structural_engineer',
+  'contractor',
+  'engineering_student',
+  'technician_supervisor',
+  'supplier_shop_owner',
+  'engineering_office',
+  'construction_company',
+  'building_office',
+  'general_user',
+};
+
+/// True when [code] is one of the canonical `profiles.role_code` values.
+bool isCanonicalRoleCode(String code) => canonicalRoleCodes.contains(code);
+
+/// True when [value] is a valid UUID v4-ish string (8-4-4-4-12 hex with
+/// dashes). Case-insensitive for hex digits.
+bool isValidUuid(String value) {
+  final trimmed = value.trim();
+  if (trimmed.length != 36) return false;
+  if (trimmed[8] != '-' ||
+      trimmed[13] != '-' ||
+      trimmed[18] != '-' ||
+      trimmed[23] != '-') {
+    return false;
+  }
+  final body = trimmed.replaceAll('-', '');
+  if (body.length != 32) return false;
+  for (final rune in body.codeUnits) {
+    final isDigit = rune >= 0x30 && rune <= 0x39;
+    final isLowerHex = rune >= 0x61 && rune <= 0x66;
+    final isUpperHex = rune >= 0x41 && rune <= 0x46;
+    if (!(isDigit || isLowerHex || isUpperHex)) return false;
+  }
+  return true;
+}
+
+/// Strict parser for a raw `public.profiles` row returned by PostgREST.
+///
+/// Enforces (V1-R08 finding 4):
+/// * `user_id` is present, non-empty, matches [expectedUserId], and is a
+///   valid UUID.
+/// * `role_code` when present is one of the canonical values.
+/// * UUID-typed columns when present are valid UUIDs.
+/// * Other text columns are accepted as-is (presentation-only).
+///
+/// Throws [CloudProfileParseException] on any violation so the caller can
+/// surface a typed `malformedResponse` cause without fabricating data.
+CloudProfile parseCloudProfileRow(
+  Map<String, dynamic> row, {
+  required String expectedUserId,
+}) {
+  final rawUserId = row['user_id'];
+  if (rawUserId is! String || rawUserId.trim().isEmpty) {
+    throw const CloudProfileParseException(
+      'profile row has no canonical user_id',
+    );
+  }
+  final userId = rawUserId.trim();
+  if (userId != expectedUserId) {
+    throw CloudProfileParseException(
+      'profile row user_id ($userId) does not match '
+      'authenticated user ($expectedUserId)',
+    );
+  }
+  if (!isValidUuid(userId)) {
+    throw const CloudProfileParseException(
+      'profile row user_id is not a valid UUID',
+    );
+  }
+
+  final roleCode = _nullableText(row, 'role_code');
+  if (roleCode != null && !isCanonicalRoleCode(roleCode)) {
+    throw CloudProfileParseException(
+      'non-canonical role_code "$roleCode"',
+    );
+  }
+
+  _optionalUuid(row, 'region_preference_id');
+  _optionalUuid(row, 'preferred_region_id');
+
+  return CloudProfile(
+    userId: userId,
+    displayName: _nullableText(row, 'display_name'),
+    photoUrl: _nullableText(row, 'photo_url'),
+    roleCode: roleCode,
+    preferredRegionId: _nullableText(row, 'preferred_region_id'),
+    regionPreferenceId: _nullableText(row, 'region_preference_id'),
+    phone: _nullableText(row, 'phone'),
+  );
+}
+
+String? _nullableText(Map<String, dynamic> row, String column) {
+  final raw = row[column];
+  if (raw == null) return null;
+  if (raw is! String) {
+    throw CloudProfileParseException('$column is not a text value');
+  }
+  return raw;
+}
+
+void _optionalUuid(Map<String, dynamic> row, String column) {
+  final raw = row[column];
+  if (raw == null) return;
+  if (raw is! String) {
+    throw CloudProfileParseException('$column is not a string');
+  }
+  if (!isValidUuid(raw.trim())) {
+    throw CloudProfileParseException('$column is not a valid UUID');
+  }
+}

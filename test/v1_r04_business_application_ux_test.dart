@@ -62,6 +62,12 @@ class _FakeAppGateway implements BusinessApplicationGateway {
   List<BusinessApplication> listOwnResult = const [];
   BusinessApplication? getOwnResult;
 
+  /// Scriptable in-flight hooks. When set, the gateway suspends until the
+  /// hook's future completes, letting tests race a reset against an in-flight
+  /// read/mutation (V1-R08 final pass, finding 1).
+  Future<List<BusinessApplication>> Function()? onListOwnApplications;
+  Future<BusinessApplication?> Function()? onGetOwnApplication;
+
   Future<BusinessApplicationCreateResult> Function()? onCreateNewDraft;
   Future<BusinessApplicationCreateResult> Function(String targetId)?
       onCreateClaimDraft;
@@ -73,6 +79,8 @@ class _FakeAppGateway implements BusinessApplicationGateway {
   @override
   Future<List<BusinessApplication>> listOwnApplications(String userId) async {
     listOwnCalls.add(userId);
+    final onList = onListOwnApplications;
+    if (onList != null) return onList();
     final error = listOwnError;
     if (error != null) throw error;
     return listOwnResult;
@@ -84,6 +92,8 @@ class _FakeAppGateway implements BusinessApplicationGateway {
     String applicationId,
   ) async {
     getOwnCalls.add(applicationId);
+    final onGet = onGetOwnApplication;
+    if (onGet != null) return onGet();
     return getOwnResult;
   }
 
@@ -178,9 +188,14 @@ class _FakeClaimTargetGateway implements BusinessClaimTargetGateway {
   List<BusinessClaimTarget> targetsResult;
   int listCalls = 0;
 
+  /// Scriptable in-flight hook (V1-R08 final pass, finding 1).
+  Future<List<BusinessClaimTarget>> Function()? onListUnclaimedTargets;
+
   @override
   Future<List<BusinessClaimTarget>> listUnclaimedTargets() async {
     listCalls++;
+    final onList = onListUnclaimedTargets;
+    if (onList != null) return onList();
     return targetsResult;
   }
 }
@@ -1324,6 +1339,248 @@ void main() {
       expect(result, isEmpty,
           reason: 'no authenticated session → typed safely-empty result, '
               'never an anonymous directory_entities SELECT');
+    });
+  });
+
+  group('V1-R08 final pass — account-bound async invalidation (finding 1)', () {
+    test('A. a stale list completion after reset is dropped', () async {
+      final completer = Completer<List<BusinessApplication>>();
+      final gateway = _FakeAppGateway()
+        ..onListOwnApplications = () => completer.future;
+      final provider = await _makeProvider(gateway);
+
+      final staleLoad = provider.loadApplications();
+      expect(provider.state, BusinessApplicationState.loading);
+
+      provider.resetForIdentityChange();
+
+      completer.complete([_app(id: 'stale-A')]);
+      await staleLoad;
+
+      expect(provider.applications, isEmpty,
+          reason: 'stale list must never install into the reset session');
+      expect(provider.state, BusinessApplicationState.loading,
+          reason: 'a stale result must never publish data/empty/error');
+    });
+
+    test('A. a stale list FAILURE after reset is also dropped', () async {
+      final completer = Completer<List<BusinessApplication>>();
+      final gateway = _FakeAppGateway()
+        ..onListOwnApplications = () => completer.future;
+      final provider = await _makeProvider(gateway);
+
+      final staleLoad = provider.loadApplications();
+      provider.resetForIdentityChange();
+
+      completer.completeError(Exception('late network failure'));
+      await staleLoad;
+
+      expect(provider.applications, isEmpty);
+      expect(provider.error, isNull,
+          reason: 'a stale failure must not publish error state');
+      expect(provider.state, BusinessApplicationState.loading);
+    });
+
+    test('A. a stale DETAIL completion after reset is dropped', () async {
+      final completer = Completer<BusinessApplication?>();
+      final gateway = _FakeAppGateway()
+        ..onGetOwnApplication = () => completer.future;
+      final provider = await _makeProvider(gateway);
+
+      final staleDetail = provider.loadApplication('app-9');
+      provider.resetForIdentityChange();
+
+      completer.complete(_app(id: 'stale-detail'));
+      await staleDetail;
+
+      expect(provider.current, isNull);
+      expect(provider.state, BusinessApplicationState.loading);
+    });
+
+    test('B. a stale createNewDraft completion after reset is dropped',
+        () async {
+      final completer = Completer<BusinessApplicationCreateResult>();
+      final gateway = _FakeAppGateway()
+        ..onCreateNewDraft = () => completer.future;
+      final provider = await _makeProvider(gateway);
+
+      final staleCreate = provider.createNewDraft(metadata: const {'k': 'v'});
+      provider.resetForIdentityChange();
+
+      completer.complete(BusinessApplicationCreated(_app(id: 'stale-draft')));
+      expect(await staleCreate, isNull,
+          reason: 'epoch-mismatched mutation result is dropped');
+      expect(provider.applications, isEmpty);
+      expect(provider.current, isNull);
+    });
+
+    test('C. a stale submit completion after reset is dropped', () async {
+      final completer = Completer<BusinessApplicationSubmitResult>();
+      final gateway = _FakeAppGateway()
+        ..onSubmitApplication = (_) => completer.future;
+      final provider = await _makeProvider(gateway);
+
+      final staleSubmit = provider.submit(
+        _app(id: 'draft-1', status: BusinessApplicationStatus.draft),
+      );
+      provider.resetForIdentityChange();
+
+      completer.complete(
+        BusinessApplicationSubmitted(
+          _app(id: 'draft-1', status: BusinessApplicationStatus.submitted),
+        ),
+      );
+      expect(await staleSubmit, isNull);
+      expect(gateway.submitCalls, 1);
+      expect(provider.applications, isEmpty);
+      expect(provider.current, isNull);
+    });
+
+    test('D. a re-load after reset publishes only the new-session result',
+        () async {
+      final completers = <Completer<List<BusinessApplication>>>[];
+      final gateway = _FakeAppGateway()
+        ..onListOwnApplications = () {
+          final completer = Completer<List<BusinessApplication>>();
+          completers.add(completer);
+          return completer.future;
+        };
+      final provider = await _makeProvider(gateway);
+
+      final staleLoad = provider.loadApplications();
+      provider.resetForIdentityChange();
+      final freshLoad = provider.loadApplications();
+      expect(completers, hasLength(2));
+
+      completers[1].complete([_app(id: 'fresh-B')]);
+      await freshLoad;
+      expect(provider.applications.map((a) => a.id), ['fresh-B']);
+
+      // A's stale result finally lands — it must never replace B's data.
+      completers[0].complete([_app(id: 'stale-A')]);
+      await staleLoad;
+      expect(provider.applications.map((a) => a.id), ['fresh-B']);
+      expect(provider.state, BusinessApplicationState.data);
+    });
+
+    test('E. a stale old-session mutation never releases the newer busy owner',
+        () async {
+      final gateA = Completer<BusinessApplicationCreateResult>();
+      final gateB = Completer<BusinessApplicationCreateResult>();
+      var mutationCall = 0;
+      final gateway = _FakeAppGateway()
+        ..onCreateNewDraft = () {
+          mutationCall++;
+          return mutationCall == 1 ? gateA.future : gateB.future;
+        };
+      final provider = await _makeProvider(gateway);
+
+      // 1. User A's mutation starts and owns the busy state.
+      final staleA = provider.createNewDraft(metadata: const {'k': 'v'});
+      expect(provider.isBusy, isTrue, reason: 'A owns the busy state');
+
+      // 2. Session/reset happens.
+      provider.resetForIdentityChange();
+      expect(provider.isBusy, isFalse,
+          reason: 'reset releases the stale busy state');
+
+      // 3. User B's operation starts and owns the busy state.
+      final freshB = provider.createNewDraft(metadata: const {'k': 'v2'});
+      expect(provider.isBusy, isTrue,
+          reason: 'the new-session operation owns the busy state');
+
+      // 4. Old A mutation completes late.
+      gateA.complete(BusinessApplicationCreated(_app(id: 'stale-A')));
+      expect(await staleA, isNull,
+          reason: 'epoch-mismatched old result is dropped');
+
+      // 5. Busy must remain true for B.
+      expect(provider.isBusy, isTrue,
+          reason: 'stale old-session completion must not clear busy state '
+              'belonging to the newer operation');
+      expect(provider.applications, isEmpty,
+          reason: 'old completion must not publish data into the new session');
+
+      // 6. B completes and releases its own busy state.
+      gateB.complete(BusinessApplicationCreated(_app(id: 'fresh-B')));
+      final bResult = await freshB;
+      expect(bResult, isA<BusinessApplicationCreated>());
+
+      // 7. Busy becomes false again.
+      expect(provider.isBusy, isFalse,
+          reason: 'the owning operation clears busy on completion');
+      expect(provider.applications.map((a) => a.id), ['fresh-B']);
+    });
+
+    test('E2. a stale old-session SUBMIT never releases a newer busy owner',
+        () async {
+      final gateA = Completer<BusinessApplicationSubmitResult>();
+      final gateB = Completer<BusinessApplicationSubmitResult>();
+      var submitCall = 0;
+      final gateway = _FakeAppGateway()
+        ..onSubmitApplication = (_) {
+          submitCall++;
+          return submitCall == 1 ? gateA.future : gateB.future;
+        };
+      final provider = await _makeProvider(gateway);
+
+      final staleA = provider.submit(
+        _app(id: 'draft-1', status: BusinessApplicationStatus.draft),
+      );
+      expect(provider.isBusy, isTrue);
+
+      provider.resetForIdentityChange();
+      expect(provider.isBusy, isFalse);
+
+      final freshB = provider.submit(
+        _app(id: 'draft-2', status: BusinessApplicationStatus.draft),
+      );
+      expect(provider.isBusy, isTrue);
+
+      gateA.complete(
+        BusinessApplicationSubmitted(
+          _app(id: 'draft-1', status: BusinessApplicationStatus.submitted),
+        ),
+      );
+      expect(await staleA, isNull);
+
+      // Stale A must not release B's busy state.
+      expect(provider.isBusy, isTrue);
+      expect(provider.applications, isEmpty);
+      expect(provider.current, isNull);
+
+      gateB.complete(
+        BusinessApplicationSubmitted(
+          _app(id: 'draft-2', status: BusinessApplicationStatus.submitted),
+        ),
+      );
+      final bResult = await freshB;
+      expect(bResult, isA<BusinessApplicationSubmitted>());
+      expect(provider.isBusy, isFalse);
+    });
+
+    test('stale claim-target reload after reset is dropped', () async {
+      final completer = Completer<List<BusinessClaimTarget>>();
+      final gateway = _FakeClaimTargetGateway()
+        ..onListUnclaimedTargets = () => completer.future;
+      final provider = BusinessClaimTargetProvider(gateway: gateway);
+
+      final staleReload = provider.reload();
+      provider.resetForIdentityChange();
+
+      completer.complete([
+        const BusinessClaimTarget(
+          id: 'target-1',
+          name: 'Candidate',
+          entityType: 'company',
+          claimStatus: 'unclaimed',
+        ),
+      ]);
+      await staleReload;
+
+      expect(provider.targets, isEmpty,
+          reason: 'old-session candidates must never publish');
+      expect(provider.state, BusinessClaimTargetState.loading);
     });
   });
 }

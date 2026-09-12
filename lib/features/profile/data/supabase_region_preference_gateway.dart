@@ -45,4 +45,13 @@ class SupabaseRegionPreferenceGateway implements RegionPreferenceGateway {
     final resolved = await _loadOnce();
     return resolved[code];
   }
+
+  @override
+  Future<String?> resolveCodeById(String id) async {
+    final resolved = await _loadOnce();
+    for (final entry in resolved.entries) {
+      if (entry.value == id) return entry.key;
+    }
+    return null;
+  }
 }

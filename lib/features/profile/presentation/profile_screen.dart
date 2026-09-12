@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/di/app_dependencies.dart';
 import '../../../core/navigation/shell_content_insets.dart';
+import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
@@ -13,7 +14,10 @@ import '../../../core/services/theme_provider.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
+import '../../../features/auth/domain/entities/auth_error.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../../features/auth/presentation/widgets/ownership_conflict_view.dart';
+import '../../profile/data/cloud_profile.dart';
 import '../../profile/data/region_preference.dart';
 import '../../profile/domain/user_profile.dart';
 import '../../profile/presentation/providers/user_profile_provider.dart';
@@ -62,40 +66,55 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
-  void _showEditDialog(BuildContext context, AuthProvider auth) {
-    final nameCtrl = TextEditingController(text: auth.currentName ?? '');
-    showDialog(
+  Future<void> _confirmAndSignOut(
+    BuildContext context,
+    String Function(String, String) tr,
+  ) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(Ar.editProfile),
-        content: TextField(
-          controller: nameCtrl,
-          decoration: const InputDecoration(
-            labelText: Ar.fullName,
-            border: OutlineInputBorder(),
-          ),
-        ),
+        title: Text(tr(Ar.signOutConfirmTitle, En.signOutConfirmTitle)),
+        content: Text(tr(Ar.signOutConfirmMessage, En.signOutConfirmMessage)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text(Ar.cancel),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(tr(Ar.cancel, En.cancel)),
           ),
           ElevatedButton(
-            onPressed: () {
-              HapticFeedback.lightImpact();
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('${Ar.editProfile}: ${nameCtrl.text}'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-            child: const Text(Ar.save),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(tr(Ar.logout, En.logout)),
           ),
         ],
       ),
     );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+    await _performSignOut(context, tr);
+  }
+
+  Future<void> _performSignOut(
+    BuildContext context,
+    String Function(String, String) tr,
+  ) async {
+    final auth = context.read<AuthProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    await auth.signOut();
+    if (!context.mounted) return;
+    if (auth.error == AuthError.signOutFailed) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(tr(Ar.signOutFailed, En.signOutFailed)),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.error,
+            action: SnackBarAction(
+              label: tr(Ar.retry, En.retry),
+              onPressed: () => _performSignOut(context, tr),
+            ),
+          ),
+        );
+    }
   }
 
   @override
@@ -103,165 +122,39 @@ class ProfileScreen extends StatelessWidget {
     final themeProvider = context.watch<ThemeProvider>();
     final auth = context.watch<AuthProvider>();
     final profileProvider = context.watch<UserProfileProvider>();
-    String tr(String ar, String en) => ar;
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          Ar.profile,
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        elevation: 0,
+    final body = ListView(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        24,
+        16,
+        shellSafeBottomPadding(context),
       ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          24,
-          16,
-          shellSafeBottomPadding(context),
-        ),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: isDark ? theme.colorScheme.surface : Colors.white,
-              borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.05)
-                    : Colors.black.withValues(alpha: 0.05),
-                width: 1,
-              ),
-              boxShadow: DesignTokens.softShadow(theme.shadowColor),
-            ),
-            child: Column(
-              children: [
-                Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    CircleAvatar(
-                      radius: 46,
-                      backgroundColor: theme.primaryColor,
-                      child: Text(
-                        // ✅ FIX هنا
-                        auth.isLoggedIn &&
-                                (auth.currentName?.isNotEmpty ?? false)
-                            ? auth.currentName![0].toUpperCase()
-                            : 'U',
-                        style: const TextStyle(
-                          fontSize: 36,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    if (auth.isLoggedIn)
-                      GestureDetector(
-                        onTap: () => _showEditDialog(context, auth),
-                        child: Container(
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.primaryColor,
-                            border: Border.all(color: Colors.white, width: 2),
-                          ),
-                          child: const Icon(
-                            Icons.edit,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                Text(
-                  auth.isLoggedIn && (auth.currentName?.isNotEmpty ?? false)
-                      ? auth.currentName!
-                      : tr(Ar.visitor, En.visitor),
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                const SizedBox(height: 4),
-
-                Text(
-                  auth.isLoggedIn && (auth.currentEmail?.isNotEmpty ?? false)
-                      ? auth.currentEmail!
-                      : tr(Ar.notRegistered, En.notRegistered),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: isDark ? Colors.white70 : Colors.black54,
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                if (!auth.isLoggedIn)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 46,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        context.go('/auth');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: const Icon(Icons.login),
-                      label: const Text(Ar.login),
-                    ),
-                  ),
-
-                if (auth.isLoggedIn)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 46,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        HapticFeedback.lightImpact();
-                        auth.signOut();
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: theme.primaryColor.withValues(alpha: 0.5),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: const Icon(Icons.logout),
-                      label: const Text(Ar.logout),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
+      children: [
+        // V1-R08 correction (finding 1/3): the profile area fails closed on
+        // ANY conflict-bound state while no session is present — stuck
+        // (blocked resolution), restore-in-flight (blocking error retained) and
+        // neutralized (guest + conflict error). Only the accepted recovery
+        // actions are offered.
+        if (auth.error == AuthError.ownershipConflict && !auth.isLoggedIn)
+          _buildOwnershipBlocked(context, tr)
+        else ...[
+          _buildIdentityHeader(context, auth, isDark, theme, tr),
           const SizedBox(height: 24),
-
-          _buildProfileCard(context, profileProvider, true, isDark, theme),
-
+          _buildProfileCard(context, profileProvider, auth, isArabic, isDark, theme),
           const SizedBox(height: 24),
-
-          _buildBackupCard(context, true, isDark, theme),
-
+          _buildBackupCard(context, isArabic, isDark, theme),
           const SizedBox(height: 24),
-
           _buildSettingsGroup(
             context,
             title: tr(Ar.generalSettings, En.generalSettings),
             children: [
               SwitchListTile(
-                title: const Text(Ar.darkMode),
+                title: Text(tr(Ar.darkMode, En.darkMode)),
                 subtitle: Text(
                   themeProvider.isDarkMode
                       ? tr(Ar.enabled, En.enabled)
@@ -283,56 +176,186 @@ class ProfileScreen extends StatelessWidget {
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
           _buildSettingsGroup(
             context,
             title: tr(Ar.supportSharing, En.supportSharing),
             children: [
               ListTile(
                 leading: Icon(Icons.share, color: theme.primaryColor),
-                title: const Text(Ar.shareApp),
+                title: Text(tr(Ar.shareApp, En.shareApp)),
                 trailing: const Icon(Icons.chevron_left, size: 20),
                 onTap: () => _shareApp(context),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.star, color: theme.primaryColor),
-                title: const Text(Ar.rateApp),
+                title: Text(tr(Ar.rateApp, En.rateApp)),
                 trailing: const Icon(Icons.chevron_left, size: 20),
                 onTap: _rateApp,
               ),
               const Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.headset_mic, color: theme.primaryColor),
-                title: const Text(Ar.support),
+                title: Text(tr(Ar.support, En.support)),
                 trailing: const Icon(Icons.chevron_left, size: 20),
                 onTap: _contactSupport,
               ),
               const Divider(height: 1),
               ListTile(
                 leading: Icon(Icons.privacy_tip, color: theme.primaryColor),
-                title: const Text(Ar.privacyPolicy),
+                title: Text(tr(Ar.privacyPolicy, En.privacyPolicy)),
                 trailing: const Icon(Icons.chevron_left, size: 20),
                 onTap: _openPrivacy,
               ),
             ],
           ),
-
           const SizedBox(height: 16),
-
           _buildSettingsGroup(
             context,
             title: tr(Ar.aboutApp, En.aboutApp),
             children: [
               ListTile(
                 leading: Icon(Icons.info_outline, color: theme.primaryColor),
-                title: const Text(Ar.about),
+                title: Text(tr(Ar.about, En.about)),
                 subtitle: const Text('Civilpedia v1.0.0'),
               ),
             ],
           ),
+        ],
+      ],
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          tr(Ar.profile, En.profile),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+      ),
+      body: SafeArea(child: body),
+    );
+  }
+
+  /// V1-R08 correction (finding 3) — the whole profile area fails closed on a
+  /// second-account ownership conflict and offers ONLY the accepted recovery
+  /// actions (retry resolution / return to sign-in). No sign-out, no profile
+  /// affordances, no A/B data.
+  Widget _buildOwnershipBlocked(
+    BuildContext context,
+    String Function(String, String) tr,
+  ) {
+    return OwnershipConflictView(
+      onCleared: () => context.go(AppRoutes.auth),
+    );
+  }
+
+  Widget _buildIdentityHeader(
+    BuildContext context,
+    AuthProvider auth,
+    bool isDark,
+    ThemeData theme,
+    String Function(String, String) tr,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: isDark ? theme.colorScheme.surface : Colors.white,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : Colors.black.withValues(alpha: 0.05),
+          width: 1,
+        ),
+        boxShadow: DesignTokens.softShadow(theme.shadowColor),
+      ),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 46,
+            backgroundColor: theme.primaryColor,
+            child: Text(
+              auth.session != null &&
+                      (auth.currentName?.isNotEmpty ?? false)
+                  ? auth.currentName![0].toUpperCase()
+                  : 'U',
+              style: const TextStyle(
+                fontSize: 36,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            auth.session != null && (auth.currentName?.isNotEmpty ?? false)
+                ? auth.currentName!
+                : tr(Ar.visitor, En.visitor),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            auth.session != null && (auth.currentEmail?.isNotEmpty ?? false)
+                ? auth.currentEmail!
+                : tr(Ar.notRegistered, En.notRegistered),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: isDark ? Colors.white70 : Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (auth.session == null)
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  HapticFeedback.lightImpact();
+                  context.go('/auth');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.primaryColor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.login),
+                label: Text(tr(Ar.login, En.login)),
+              ),
+            ),
+          if (auth.session != null)
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: OutlinedButton.icon(
+                onPressed: auth.isSigningOut
+                    ? null
+                    : () => _confirmAndSignOut(context, tr),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(
+                    color: theme.primaryColor.withValues(alpha: 0.5),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: auth.isSigningOut
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.logout),
+                label: Text(
+                  auth.isSigningOut
+                      ? tr(Ar.signOutPendingLabel, En.signOutPendingLabel)
+                      : tr(Ar.logout, En.logout),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -361,9 +384,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         Container(
           decoration: BoxDecoration(
-            color: isDark
-                ? Theme.of(context).colorScheme.surface
-                : Colors.white,
+            color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
             borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
             border: Border.all(
               color: isDark
@@ -371,7 +392,8 @@ class ProfileScreen extends StatelessWidget {
                   : Colors.black.withValues(alpha: 0.05),
               width: 1,
             ),
-            boxShadow: DesignTokens.softShadow(Theme.of(context).shadowColor),
+            boxShadow:
+                DesignTokens.softShadow(Theme.of(context).shadowColor),
           ),
           child: Column(children: children),
         ),
@@ -429,11 +451,96 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildProfileCard(
     BuildContext context,
     UserProfileProvider profileProvider,
+    AuthProvider auth,
     bool isArabic,
     bool isDark,
     ThemeData theme,
   ) {
     String tr(String ar, String en) => isArabic ? ar : en;
+
+    if (auth.isLoggedIn) {
+      // V1-R08 (Part 2) — AUTHORITY split for the signed-in session:
+      // 1. Cloud bound  → cloud card read-only (role/region) + separate Edit
+      //    affordance pushing `profileEditRoute` (no extra — the authenticated
+      //    editor reads the cloud SSOT itself; the role ListTile must NOT
+      //    navigate, F2).
+      // 2. Cloud load failed → typed error + retry (never a local fallback).
+      // 3. Loading in flight → explicit loading row (never "not set").
+      // 4. Settled without a cloud row → not-set row (fail closed).
+      // 5. W3.4 auth-agnostic test world (`provider` not auth-wired) → the
+      //    local profile card remains authoritative there; it is the ONLY
+      //    reason a signed-in user ever sees a local-prop file.
+      final cloud = profileProvider.authenticatedProfile;
+      if (cloud != null) {
+        final roleCode = cloud.roleCode;
+        final role = (roleCode == null || roleCode.isEmpty)
+            ? tr(Ar.profileNotSet, En.profileNotSet)
+            : _userTypeName(isArabic, roleCodeToCivilUserType(roleCode));
+        final regionName = _regionPreferenceName(
+          profileProvider.authenticatedRegionPreferenceCode,
+          isArabic: isArabic,
+        );
+        return _buildSettingsGroup(
+          context,
+          title:
+              tr(Ar.profileMyCivilpediaProfile, En.profileMyCivilpediaProfile),
+          children: [
+            ListTile(
+              leading: Icon(Icons.badge_outlined, color: theme.primaryColor),
+              title: Text(tr(Ar.profileRole, En.profileRole)),
+              subtitle: Text(role),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: Icon(Icons.public_outlined, color: theme.primaryColor),
+              title: Text(
+                tr(Ar.profileRegionPreference, En.profileRegionPreference),
+              ),
+              subtitle: Text(regionName),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+              child: _CloudProfileEditButton(
+                profileEditRoute: profileEditRoute,
+              ),
+            ),
+          ],
+        );
+      }
+      if (profileProvider.cloudLoadFailed) {
+        return _buildSettingsGroup(
+          context,
+          title:
+              tr(Ar.profileMyCivilpediaProfile, En.profileMyCivilpediaProfile),
+          children: [
+            ListTile(
+              leading: Icon(
+                Icons.cloud_off,
+                color: theme.colorScheme.error,
+              ),
+              title: Text(
+                tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
+              ),
+              trailing: TextButton(
+                onPressed: () => profileProvider.ensureCloudProfileLoaded(),
+                child: Text(tr(Ar.retry, En.retry)),
+              ),
+            ),
+          ],
+        );
+      }
+      if (profileProvider.isCloudProfileLoading) {
+        return _buildSettingsGroup(
+          context,
+          title:
+              tr(Ar.profileMyCivilpediaProfile, En.profileMyCivilpediaProfile),
+          children: const [
+            _CloudProfileLoadingRow(),
+          ],
+        );
+      }
+    }
+
     final profile = profileProvider.profile;
     if (profile == null) {
       return Container(
@@ -472,9 +579,8 @@ class ProfileScreen extends StatelessWidget {
     }
 
     final role = _userTypeName(isArabic, profile.userType);
-    final area = isArabic
-        ? profile.baghdadArea.arName
-        : profile.baghdadArea.enName;
+    final area =
+        isArabic ? profile.baghdadArea.arName : profile.baghdadArea.enName;
 
     return _buildSettingsGroup(
       context,
@@ -512,7 +618,9 @@ class ProfileScreen extends StatelessWidget {
         const Divider(height: 1),
         ListTile(
           leading: Icon(Icons.public_outlined, color: theme.primaryColor),
-          title: Text(tr(Ar.profileRegionPreference, En.profileRegionPreference)),
+          title: Text(
+            tr(Ar.profileRegionPreference, En.profileRegionPreference),
+          ),
           subtitle: Text(
             _regionPreferenceName(profile.regionPreferenceCode,
                 isArabic: isArabic),
@@ -619,5 +727,65 @@ class ProfileScreen extends StatelessWidget {
         ),
       );
     }
+  }
+}
+
+/// V1-R08 (F2) — separate read-only cloud-card "Edit profile" affordance.
+/// It pushes `profileEditRoute` WITHOUT an `extra`: the authenticated editor
+/// reads the cloud single-source-of-truth itself. Kept as a dedicated widget
+/// so the role/region ListTiles stay strictly non-navigating.
+class _CloudProfileEditButton extends StatelessWidget {
+  const _CloudProfileEditButton({required this.profileEditRoute});
+
+  final String profileEditRoute;
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
+    return SizedBox(
+      width: double.infinity,
+      height: 44,
+      child: OutlinedButton.icon(
+        onPressed: () => context.push(profileEditRoute),
+        style: OutlinedButton.styleFrom(
+          side: BorderSide(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        icon: const Icon(Icons.edit_outlined),
+        label: Text(tr(Ar.editProfile, En.editProfile)),
+      ),
+    );
+  }
+}
+
+/// V1-R08 — explicit cloud-loading row for an authenticated session whose
+/// authoritative profile read is in flight.
+class _CloudProfileLoadingRow extends StatelessWidget {
+  const _CloudProfileLoadingRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    String tr(String ar, String en) => isArabic ? ar : en;
+    return Padding(
+      padding: AppSpacing.padLg,
+      child: Row(
+        children: [
+          const SizedBox.square(
+            dimension: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          AppSpacing.gapMd,
+          Expanded(
+            child: Text(tr(Ar.profileCloudLoading, En.profileCloudLoading)),
+          ),
+        ],
+      ),
+    );
   }
 }

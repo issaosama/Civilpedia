@@ -11,6 +11,7 @@ import 'package:civilpedia/core/navigation/app_shell.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/services/theme_provider.dart';
 import 'package:civilpedia/data/local/hive_helper.dart';
+import 'package:civilpedia/features/auth/domain/entities/auth_session.dart';
 import 'package:civilpedia/features/auth/presentation/auth_screen.dart';
 import 'package:civilpedia/features/auth/presentation/providers/auth_provider.dart';
 import 'package:civilpedia/features/business/domain/business_application.dart';
@@ -33,10 +34,15 @@ import 'package:civilpedia/features/encyclopedia/domain/entities/topic_section.d
 import 'package:civilpedia/features/encyclopedia/domain/repositories/encyclopedia_repository.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/providers/encyclopedia_favorites_provider.dart';
 import 'package:civilpedia/features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
+import 'package:civilpedia/features/profile/data/cloud_profile.dart';
+import 'package:civilpedia/features/profile/data/personal_profile_remote_gateway.dart';
+import 'package:civilpedia/features/profile/data/region_preference.dart';
+import 'package:civilpedia/features/profile/data/region_preference_gateway.dart';
 import 'package:civilpedia/features/profile/domain/user_profile.dart';
 import 'package:civilpedia/features/profile/domain/user_profile_repository.dart';
 import 'package:civilpedia/features/profile/presentation/profile_screen.dart';
 import 'package:civilpedia/features/profile/presentation/providers/user_profile_provider.dart';
+import 'package:civilpedia/features/profile/presentation/screens/authenticated_profile_edit_screen.dart';
 import 'package:civilpedia/features/profile/presentation/screens/profile_edit_screen.dart';
 import 'package:civilpedia/features/profile/presentation/screens/profile_setup_screen.dart';
 import 'package:civilpedia/features/saved/presentation/saved_screen.dart';
@@ -45,6 +51,8 @@ import 'package:civilpedia/localization/ar.dart';
 import 'package:civilpedia/routes/app_router.dart';
 import 'package:civilpedia/routes/app_routes.dart';
 import 'package:civilpedia/routes/not_found_screen.dart';
+
+import 'fakes/fake_auth_gateway.dart';
 
 const _boxName = 'w3_4_user_area_test_box';
 
@@ -252,16 +260,36 @@ class _FakeStaffAccessGateway implements BusinessApplicationStaffGateway {
           BusinessApplicationStaffCause.staffPermissionDenied);
 }
 
+/// V1-R08 — the User-area and business-application families are now
+/// auth-required. Helpers that exercise those routes must supply an
+/// authenticated [AuthProvider] so the router does not redirect to the
+/// session screen.
+AuthProvider _authenticatedAuth() => AuthProvider(
+      gateway: FakeAuthGateway(
+        restoredSession: const AuthSession(
+          userId: 'w3-4-authenticated-user',
+          email: 'w3.4@civilpedia.test',
+          displayName: 'W3.4 Tester',
+        ),
+      ),
+    );
+
+/// A guest session for the legacy public-route contract: `/profile/edit`
+/// remains reachable and keeps its W3.3 semantics for guests.
+AuthProvider _guestAuth() => AuthProvider(gateway: FakeAuthGateway());
+
 Widget _app(
   UserProfileProvider profileProvider, {
   EncyclopediaFavoritesProvider? favorites,
   BusinessApplicationProvider? businessApplications,
+  AuthProvider? auth,
 }) {
+  final effectiveAuth = auth ?? _authenticatedAuth();
   return MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => LanguageProvider()),
-      ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ChangeNotifierProvider.value(value: effectiveAuth),
       ChangeNotifierProvider(
         create: (context) => StaffAccessProvider(
           gateway: _FakeStaffAccessGateway(),
@@ -288,7 +316,7 @@ Widget _app(
         ChangeNotifierProvider(
           create: (_) => BusinessApplicationProvider(
             gateway: _FakeBusinessAppGateway(),
-            auth: AuthProvider(),
+            auth: effectiveAuth,
           ),
         ),
     ],
@@ -303,6 +331,65 @@ UserProfileProvider _profileProvider({LocalUserProfile? stored}) {
   return provider;
 }
 
+/// V1-R08 (F2) — canned [PersonalProfileRemoteGateway] fake for the cloud card
+/// render test. Handed-back rows are already-valid [CloudProfile]s.
+class _FakeCloudProfileGateway implements PersonalProfileRemoteGateway {
+  _FakeCloudProfileGateway(this.cloud);
+
+  CloudProfile? cloud;
+
+  @override
+  Future<CloudProfile?> fetchByUserId(String userId) async => cloud;
+
+  @override
+  Future<void> createProfile(CloudProfile profile) async {
+    cloud = profile;
+  }
+
+  @override
+  Future<void> updateRegionPreferenceId({
+    required String userId,
+    required String regionPreferenceId,
+  }) async {}
+
+  @override
+  Future<void> saveEditableFields({
+    required String userId,
+    required String roleCode,
+    String? regionPreferenceId,
+  }) async {}
+}
+
+/// V1-R08 (F2) — canned reverse-lookup [RegionPreferenceGateway] fake.
+class _FakeRegionGateway implements RegionPreferenceGateway {
+  _FakeRegionGateway({this.karkhId});
+
+  final String? karkhId;
+
+  @override
+  Future<String?> resolvePreferenceIdByCode(String code) async => null;
+
+  @override
+  Future<String?> resolveCodeById(String id) async =>
+      id == karkhId ? RegionPreferenceCode.baghdadKarkh : null;
+}
+
+/// V1-R08 (F2) — authenticated provider with a cloud gateway + reverse-lookup
+/// region gateway so the ProfileScreen renders the read-only cloud card.
+UserProfileProvider _cloudProfileProvider({
+  required AuthProvider auth,
+  required CloudProfile cloud,
+  String? karkhId,
+}) {
+  final provider = UserProfileProvider(
+    repository: _FakeUserProfileRepository(null),
+    cloudProfileGateway: _FakeCloudProfileGateway(cloud),
+    regionPreferenceGateway: _FakeRegionGateway(karkhId: karkhId),
+    auth: auth,
+  );
+  return provider;
+}
+
 /// Navigates the canonical [appRouter] to [path] before attaching it so the
 /// test never renders the app's splash/onboarding origin.
 Future<void> _open(
@@ -310,9 +397,12 @@ Future<void> _open(
   UserProfileProvider profileProvider,
   String path, {
   Object? extra,
+  AuthProvider? auth,
 }) async {
+  final effectiveAuth = auth ?? _authenticatedAuth();
+  await effectiveAuth.restoreSession();
   appRouter.go(path, extra: extra);
-  await tester.pumpWidget(_app(profileProvider));
+  await tester.pumpWidget(_app(profileProvider, auth: effectiveAuth));
   await tester.pumpAndSettle();
 }
 
@@ -495,7 +585,9 @@ void main() {
             'My Managed Businesses (V1-R06), My Applications (V1-R04 §13), '
             'Profile, Saved, Downloads are the shipped destinations; '
             'activity/preferences/theme/language/backup/account are inventory '
-            'and must NOT be surfaced, and there is no avatar/header wiring',
+            'and must NOT be surfaced; the V1-R08 identity/cloud header '
+            'renders NO ListTiles, so the navigation-card inventory stays '
+            'exactly five',
       );
       expect(tester.takeException(), isNull);
     });
@@ -522,6 +614,20 @@ void main() {
 
       expect(find.byType(ProfileScreen), findsOneWidget);
       expect(_topMatchedLocation(), AppRoutes.userProfile);
+    });
+
+    testWidgets('identity header Edit profile pushes /user/profile/edit', (
+      tester,
+    ) async {
+      final profileProvider = _profileProvider(stored: _profile());
+      await _open(tester, profileProvider, AppRoutes.user);
+
+      await tester.tap(find.text(Ar.editProfile));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
+      expect(_topMatchedLocation(), AppRoutes.userProfileEdit);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('hub Saved entry opens /user/saved live on the existing '
@@ -573,7 +679,10 @@ void main() {
       await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ProfileEditScreen), findsOneWidget);
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget,
+          reason: 'V1-R08 edits an authenticated session through the cloud '
+              'editor, never the local ProfileEditScreen');
+      expect(find.byType(ProfileEditScreen), findsNothing);
       expect(_topMatchedLocation(), AppRoutes.userProfileEdit);
       expect(tester.takeException(), isNull);
     });
@@ -587,14 +696,14 @@ void main() {
       await tester.tap(find.widgetWithText(ListTile, Ar.profileMainWorkArea));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ProfileEditScreen), findsOneWidget);
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
+      expect(find.byType(ProfileEditScreen), findsNothing);
       expect(_topMatchedLocation(), AppRoutes.userProfileEdit);
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('profile data reaches ProfileEditScreen via state.extra', (
-      tester,
-    ) async {
+    testWidgets('an authenticated edit renders the cloud editor, NOT the '
+        'local ProfileEditScreen (extra is ignored)', (tester) async {
       _useTallViewport(tester);
       final profileProvider = _profileProvider(stored: _profile());
       await profileProvider.loadProfile();
@@ -603,8 +712,13 @@ void main() {
       await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
       await tester.pumpAndSettle();
 
-      expect(find.text(Ar.siteEngineer), findsOneWidget);
-      expect(find.text(BaghdadArea.karkh.arName), findsOneWidget);
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
+      expect(find.byType(ProfileEditScreen), findsNothing);
+      // V1-R08 — the authenticated editor reads the cloud SSOT only; the
+      // local role/work-area extra must never surface in it.
+      expect(find.text(Ar.siteEngineer), findsNothing);
+      expect(find.text(BaghdadArea.karkh.arName), findsNothing);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('Back from /user/profile/edit returns to /user/profile', (
@@ -617,80 +731,296 @@ void main() {
 
       await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
       await tester.pumpAndSettle();
-      expect(find.byType(ProfileEditScreen), findsOneWidget);
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
 
       await tester.pageBack();
       await tester.pumpAndSettle();
 
-      expect(find.byType(ProfileEditScreen), findsNothing);
+      expect(find.byType(AuthenticatedProfileEditScreen), findsNothing);
       expect(find.text(Ar.backupAndRestore), findsOneWidget);
       expect(_topMatchedLocation(), AppRoutes.userProfile);
     });
   });
 
-  group(
-    'W3.4 /user/profile/edit fallback contract (reuses W3.3 semantics)',
-    () {
-      testWidgets('wrong-type extra is handled safely via the router error '
-          'contract', (tester) async {
-        final profileProvider = _profileProvider(stored: null);
-        await _open(
-          tester,
-          profileProvider,
-          AppRoutes.userProfileEdit,
-          extra: 'not-a-profile',
-        );
+  group('V1-R08 /user/profile cloud card (F2)', () {
+    const authUserId = 'w3-4-authenticated-user';
+    const karkhId = '10000000-0000-4000-8000-000000000101';
 
-        expect(find.byType(NotFoundScreen), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      });
+    /// Renders [ProfileScreen] directly (provider + auth, no router timing):
+    /// authenticated, so the card MUST come from the canonical cloud row.
+    Future<void> _pumpProfileScreen(
+      WidgetTester tester, {
+      required AuthProvider auth,
+      required UserProfileProvider profileProvider,
+    }) async {
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => ThemeProvider()),
+            ChangeNotifierProvider(create: (_) => LanguageProvider()),
+            ChangeNotifierProvider.value(value: auth),
+            ChangeNotifierProvider.value(value: profileProvider),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(body: ProfileScreen()),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
 
-      testWidgets('missing extra with no profile shows NotFound instead of '
-          'crashing', (tester) async {
-        final profileProvider = _profileProvider(stored: null);
-        await _open(tester, profileProvider, AppRoutes.userProfileEdit);
+    testWidgets('an authenticated cloud profile renders the read-only '
+        'cloud role + region', (tester) async {
+      _useTallViewport(tester);
+      final auth = _authenticatedAuth();
+      // Production order: auth first, provider listened to it, restore fires
+      // the listener → cloud load.
+      final profileProvider = _cloudProfileProvider(
+        auth: auth,
+        karkhId: karkhId,
+        cloud: const CloudProfile(
+          userId: authUserId,
+          roleCode: 'site_engineer',
+          regionPreferenceId: karkhId,
+        ),
+      );
+      await auth.restoreSession();
+      await profileProvider.ensureCloudProfileLoaded();
 
-        expect(find.byType(NotFoundScreen), findsOneWidget);
-        expect(tester.takeException(), isNull);
-      });
+      await _pumpProfileScreen(tester, auth: auth, profileProvider: profileProvider);
 
-      testWidgets(
-        'missing extra falls back to the authoritative profile provider '
-        'when a profile exists',
-        (tester) async {
-          final profileProvider = _profileProvider(stored: _profile());
-          await profileProvider.loadProfile();
-          await _open(tester, profileProvider, AppRoutes.userProfileEdit);
+      // Cloud role + region are rendered from the canonical row.
+      expect(profileProvider.isCloudBound, isTrue);
+      expect(
+        find.text(Ar.profileMyCivilpediaProfile.toUpperCase()),
+        findsOneWidget,
+        reason: 'group titles render uppercased',
+      );
+      expect(find.text(Ar.siteEngineer), findsOneWidget);
+      expect(find.text(Ar.regionBaghdadKarkh), findsOneWidget);
 
-          expect(find.byType(ProfileEditScreen), findsOneWidget);
-          expect(find.text(Ar.siteEngineer), findsOneWidget);
-        },
+      // The card is read-only: the role row must NOT push /user/profile/edit
+      // (no local-profile surrogate editing into an authenticated session).
+      await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfileEditScreen), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('an unresolved cloud region renders "not set" (never a '
+        'UUID or fabricated label)', (tester) async {
+      _useTallViewport(tester);
+      final auth = _authenticatedAuth();
+      final profileProvider = _cloudProfileProvider(
+        auth: auth,
+        // No karkhId mapping, so reverse lookup yields null.
+        cloud: const CloudProfile(
+          userId: authUserId,
+          roleCode: 'structural_engineer',
+          regionPreferenceId: '10000000-0000-4000-8000-000000009999',
+        ),
+      );
+      await auth.restoreSession();
+      await profileProvider.ensureCloudProfileLoaded();
+
+      await _pumpProfileScreen(tester, auth: auth, profileProvider: profileProvider);
+
+      expect(profileProvider.isCloudBound, isTrue);
+      expect(find.text(Ar.structuralEngineer), findsOneWidget);
+      expect(find.text(Ar.profileNotSet), findsOneWidget);
+      expect(find.text(karkhId), findsNothing,
+          reason: 'a UUID literal must never be rendered');
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a conflicting LOCAL profile can never override the '
+        'authenticated cloud role + region', (tester) async {
+      _useTallViewport(tester);
+      const authUserId = 'w3-4-authenticated-user';
+      const karkhId = '10000000-0000-4000-8000-000000000101';
+
+      // Local repo intentionally holds a DIFFERENT, valid role + region (B):
+      // structural_engineer + Rusafa. It must never surface while the cloud
+      // row (A) is authoritative.
+      final conflictingLocal = LocalUserProfile(
+        anonymousInstallId: 'w3.4-local',
+        userType: CivilUserType.structuralEngineer,
+        baghdadArea: BaghdadArea.rusafa,
+        regionPreferenceCode: RegionPreferenceCode.baghdadRusafa,
       );
 
-      testWidgets('valid extra is honored', (tester) async {
-        final profileProvider = _profileProvider(
-          stored: LocalUserProfile(
-            anonymousInstallId: 'w3.4-extra',
-            userType: CivilUserType.contractor,
-            baghdadArea: BaghdadArea.rusafa,
+      final auth = _authenticatedAuth();
+      final profileProvider = UserProfileProvider(
+        repository: _FakeUserProfileRepository(conflictingLocal),
+        cloudProfileGateway: _FakeCloudProfileGateway(
+          const CloudProfile(
+            userId: authUserId,
+            roleCode: 'site_engineer',
+            regionPreferenceId: karkhId,
           ),
-        );
-        await _open(
-          tester,
-          profileProvider,
-          AppRoutes.userProfileEdit,
-          extra: LocalUserProfile(
-            anonymousInstallId: 'w3.4-direct',
-            userType: CivilUserType.engineeringOffice,
-            baghdadArea: BaghdadArea.karkh,
-          ),
-        );
+        ),
+        regionPreferenceGateway: _FakeRegionGateway(karkhId: karkhId),
+        auth: auth,
+      );
 
-        expect(find.byType(ProfileEditScreen), findsOneWidget);
-        expect(find.text(Ar.engineeringOffice), findsOneWidget);
-      });
-    },
-  );
+      await auth.restoreSession();
+      // Load the conflicting LOCAL data too — the strongest override attempt:
+      // both sources are populated simultaneously.
+      await profileProvider.loadProfile();
+      await profileProvider.ensureCloudProfileLoaded();
+
+      expect(profileProvider.profile, isNull,
+          reason: 'the local profile is never surfaced while authenticated');
+
+      await _pumpProfileScreen(tester, auth: auth, profileProvider: profileProvider);
+
+      // Cloud (A) authority: displayed role + region come from the cloud row.
+      expect(profileProvider.isCloudBound, isTrue);
+      expect(find.text(Ar.siteEngineer), findsOneWidget);
+      expect(find.text(Ar.regionBaghdadKarkh), findsOneWidget);
+
+      // Conflicting local (B) role + region must NOT be displayed anywhere.
+      expect(find.text(Ar.structuralEngineer), findsNothing,
+          reason: 'conflicting local role must never override the cloud role');
+      expect(find.text(Ar.regionBaghdadRusafa), findsNothing,
+          reason: 'conflicting local region must never override the cloud region');
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('V1-R08 /user/profile/edit dispatch (authenticated)', () {
+    testWidgets('authenticated + wrong-type extra reaches the cloud editor '
+        '(extra ignored, never NotFound)', (tester) async {
+      final profileProvider = _profileProvider(stored: null);
+      await _open(
+        tester,
+        profileProvider,
+        AppRoutes.userProfileEdit,
+        extra: 'not-a-profile',
+      );
+
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
+      expect(find.byType(NotFoundScreen), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('authenticated + missing extra + no cloud fails closed in '
+        'the cloud editor, never NotFound', (tester) async {
+      final profileProvider = _profileProvider(stored: null);
+      await _open(tester, profileProvider, AppRoutes.userProfileEdit);
+
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
+      expect(find.byType(NotFoundScreen), findsNothing);
+      expect(find.text(Ar.profileNotAvailable), findsOneWidget,
+          reason: 'the authenticated editor fails closed without a cloud row');
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('authenticated + missing extra + local profile → the cloud '
+        'editor ignores the local fallback', (tester) async {
+      final profileProvider = _profileProvider(stored: _profile());
+      await profileProvider.loadProfile();
+      await _open(tester, profileProvider, AppRoutes.userProfileEdit);
+
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
+      expect(find.byType(ProfileEditScreen), findsNothing);
+      expect(find.text(Ar.siteEngineer), findsNothing,
+          reason: 'a signed-in session must never edit a local surrogate');
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('authenticated + valid local extra → still the cloud editor '
+        '(extra ignored by the authenticated gate)', (tester) async {
+      final profileProvider = _profileProvider(
+        stored: LocalUserProfile(
+          anonymousInstallId: 'w3.4-extra',
+          userType: CivilUserType.contractor,
+          baghdadArea: BaghdadArea.rusafa,
+        ),
+      );
+      await _open(
+        tester,
+        profileProvider,
+        AppRoutes.userProfileEdit,
+        extra: LocalUserProfile(
+          anonymousInstallId: 'w3.4-direct',
+          userType: CivilUserType.engineeringOffice,
+          baghdadArea: BaghdadArea.karkh,
+        ),
+      );
+
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
+      expect(find.byType(ProfileEditScreen), findsNothing);
+      expect(find.text(Ar.engineeringOffice), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
+  group('W3.4 /profile/edit guest legacy contract', () {
+    testWidgets('guest + wrong-type extra is handled safely via NotFound', (
+      tester,
+    ) async {
+      final profileProvider = _profileProvider(stored: null);
+      await _open(
+        tester,
+        profileProvider,
+        AppRoutes.profileEdit,
+        extra: 'not-a-profile',
+        auth: _guestAuth(),
+      );
+
+      expect(find.byType(NotFoundScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('guest + missing extra + no profile shows NotFound', (
+      tester,
+    ) async {
+      final profileProvider = _profileProvider(stored: null);
+      await _open(
+        tester,
+        profileProvider,
+        AppRoutes.profileEdit,
+        auth: _guestAuth(),
+      );
+
+      expect(find.byType(NotFoundScreen), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('guest + missing extra falls back to the authoritative local '
+        'profile provider when one exists', (tester) async {
+      final profileProvider = _profileProvider(stored: _profile());
+      await profileProvider.loadProfile();
+      await _open(
+        tester,
+        profileProvider,
+        AppRoutes.profileEdit,
+        auth: _guestAuth(),
+      );
+
+      expect(find.byType(ProfileEditScreen), findsOneWidget);
+      expect(find.text(Ar.siteEngineer), findsOneWidget);
+    });
+
+    testWidgets('guest + valid extra is honored', (tester) async {
+      final profileProvider = _profileProvider(stored: null);
+      await _open(
+        tester,
+        profileProvider,
+        AppRoutes.profileEdit,
+        extra: LocalUserProfile(
+          anonymousInstallId: 'w3.4-direct',
+          userType: CivilUserType.engineeringOffice,
+          baghdadArea: BaghdadArea.karkh,
+        ),
+        auth: _guestAuth(),
+      );
+
+      expect(find.byType(ProfileEditScreen), findsOneWidget);
+      expect(find.text(Ar.engineeringOffice), findsOneWidget);
+    });
+  });
 
   group('W3.4 /user/saved and /user/downloads', () {
     testWidgets('/user/saved opens the existing SavedScreen on Favorites', (
@@ -755,7 +1085,10 @@ void main() {
       _useTallViewport(tester);
       final profileProvider = _profileProvider(stored: _profile());
       await profileProvider.loadProfile();
-      await _open(tester, profileProvider, AppRoutes.profile);
+      // A GUEST owns the on-device profile: the legacy `/profile` →
+      // `/profile/edit` local-edit flow is a signed-out contract (an
+      // authenticated session edits the cloud SSOT instead).
+      await _open(tester, profileProvider, AppRoutes.profile, auth: _guestAuth());
 
       await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
       await tester.pumpAndSettle();
@@ -805,10 +1138,14 @@ void main() {
       final favorites = EncyclopediaFavoritesProvider(
         store: _ListBackedEncyclopediaFavoritesStore(const []),
       );
+      final auth = _authenticatedAuth();
       await tester.runAsync(() async {
+        await auth.restoreSession();
         await favorites.load();
         appRouter.go(AppRoutes.user);
-        await tester.pumpWidget(_app(profileProvider, favorites: favorites));
+        await tester.pumpWidget(
+          _app(profileProvider, favorites: favorites, auth: auth),
+        );
         await tester.pump(const Duration(milliseconds: 100));
       });
       for (var i = 0; i < 12; i++) {
@@ -824,7 +1161,10 @@ void main() {
 
       appRouter.go(AppRoutes.userProfileEdit, extra: _profile());
       await tester.pumpAndSettle();
-      expect(find.byType(ProfileEditScreen), findsOneWidget);
+      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget,
+          reason: 'an authenticated session must reach the cloud editor, '
+              'never the local ProfileEditScreen');
+      expect(find.byType(ProfileEditScreen), findsNothing);
       expect(_topMatchedLocation(), AppRoutes.userProfileEdit);
 
       await _goAndSettleSaved(tester, AppRoutes.userSaved);

@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'package:civilpedia/core/di/staff_operations_scope.dart';
+import 'package:civilpedia/core/services/language_provider.dart';
+import 'package:civilpedia/features/auth/domain/entities/auth_event.dart';
 import 'package:civilpedia/features/auth/domain/entities/auth_session.dart';
 import 'package:civilpedia/features/auth/domain/repositories/auth_gateway.dart';
 import 'package:civilpedia/features/auth/presentation/providers/auth_provider.dart';
@@ -24,6 +26,9 @@ import 'package:civilpedia/features/business/presentation/providers/staff_applic
 import 'package:civilpedia/features/business/presentation/screens/staff_application_queue_screen.dart';
 import 'package:civilpedia/features/business/presentation/screens/staff_application_review_screen.dart';
 import 'package:civilpedia/features/user_area/presentation/user_area_screen.dart';
+import 'package:civilpedia/features/profile/domain/user_profile.dart';
+import 'package:civilpedia/features/profile/domain/user_profile_repository.dart';
+import 'package:civilpedia/features/profile/presentation/providers/user_profile_provider.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:civilpedia/localization/en.dart';
 import 'package:civilpedia/routes/app_routes.dart';
@@ -1670,6 +1675,17 @@ void main() {
 // Test helpers
 // ---------------------------------------------------------------------------
 
+class _FakeProfileRepo implements UserProfileRepository {
+  @override
+  Future<LocalUserProfile?> loadProfile() async => null;
+
+  @override
+  Future<void> saveProfile(LocalUserProfile value) async {}
+
+  @override
+  Future<void> clearProfile() async {}
+}
+
 Widget _testApp({
   required _FakeStaffGateway staffGateway,
   required Widget child,
@@ -1680,6 +1696,14 @@ Widget _testApp({
     create: (_) => auth,
     child: MultiProvider(
       providers: [
+        ChangeNotifierProvider(
+          create: (_) => LanguageProvider(
+            isArabic: locale.languageCode != 'en',
+          ),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => UserProfileProvider(repository: _FakeProfileRepo()),
+        ),
         ChangeNotifierProvider(
           create: (_) => StaffAccessProvider(gateway: staffGateway, auth: auth),
         ),
@@ -1789,6 +1813,10 @@ _RouterHarness _routerHarness({
   );
   final app = MultiProvider(
     providers: [
+      ChangeNotifierProvider(create: (_) => LanguageProvider()),
+      ChangeNotifierProvider(
+        create: (_) => UserProfileProvider(repository: _FakeProfileRepo()),
+      ),
       ChangeNotifierProvider<AuthProvider>.value(value: auth),
       ChangeNotifierProvider<StaffAccessProvider>.value(value: scope.access),
       ChangeNotifierProvider<StaffApplicationQueueProvider>.value(
@@ -1833,6 +1861,10 @@ class _FakeAuthGateway implements AuthGateway {
   bool get isAvailable => true;
 
   @override
+  Stream<AuthEvent> get authEvents =>
+      const Stream.empty();
+
+  @override
   Future<AuthSession?> restoreSession() async => session;
 
   @override
@@ -1840,6 +1872,9 @@ class _FakeAuthGateway implements AuthGateway {
 
   @override
   Future<void> signOut() async {}
+
+  @override
+  void dispose() {}
 }
 
 class _FakeAuthProvider extends AuthProvider {
