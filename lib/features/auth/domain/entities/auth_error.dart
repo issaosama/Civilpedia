@@ -8,4 +8,5 @@ enum AuthError {
   ownershipConflict,
   retryableNetwork,
   unexpected,
+  recoveryBlocked,
 }

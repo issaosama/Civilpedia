@@ -84,6 +84,14 @@ abstract final class AppStorageKeys {
   /// Hive: downloaded article ids.
   static const String downloads = 'downloads';
 
+  /// Hive: auth recovery journal box (V1-R09 C1).
+  ///
+  /// NEW additive box. Contains only non-secret recovery metadata; no tokens.
+  static const String authRecoveryJournalBox = 'auth_recovery_journal';
+
+  /// Hive key for the active auth recovery journal entry.
+  static const String authRecoveryJournalEntry = 'auth_recovery_journal_entry';
+
   /// SharedPreferences: per-project checklist JSON key:
   /// `checklist_project_<projectId>`.
   static String projectChecklist(String projectId) =>

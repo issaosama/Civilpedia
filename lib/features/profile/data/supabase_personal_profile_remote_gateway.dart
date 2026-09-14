@@ -24,9 +24,9 @@ import 'personal_profile_remote_gateway.dart';
 /// fails the schema contract throws [CloudProfileParseException] and is never
 /// surfaced to callers, so malformed backend data always fails closed.
 class SupabasePersonalProfileRemoteGateway
-    implements PersonalProfileRemoteGateway {
+    implements PersonalProfileRemoteGateway, ConditionalProfileRetryGateway {
   SupabasePersonalProfileRemoteGateway({SupabaseClient? client})
-      : _injectedClient = client;
+    : _injectedClient = client;
 
   // Injected for tests; production resolves lazily so merely constructing the
   // gateway never touches the global Supabase singleton (e.g. in unconfigured
@@ -39,13 +39,19 @@ class SupabasePersonalProfileRemoteGateway
 
   @override
   Future<CloudProfile?> fetchByUserId(String userId) async {
-    final rows = await _client
-        .from(_table)
-        .select()
-        .eq('user_id', userId)
-        .maybeSingle();
-    if (rows == null) return null;
-    return parseCloudProfileRow(rows, expectedUserId: userId);
+    try {
+      final rows = await _client
+          .from(_table)
+          .select()
+          .eq('user_id', userId)
+          .maybeSingle();
+      if (rows == null) return null;
+      return parseCloudProfileRow(rows, expectedUserId: userId);
+    } on TypeError {
+      throw const CloudProfileParseException('Invalid profile response shape');
+    } catch (error) {
+      throwProfileFailure(error);
+    }
   }
 
   @override
@@ -73,7 +79,7 @@ class SupabasePersonalProfileRemoteGateway
         // re-read and evaluate as an existing-cloud case.
         throw const CloudProfileAlreadyExistsException();
       }
-      if (_isPermissionDenied(e)) {
+      if (isPermissionDenied(e)) {
         // RLS denial is NEVER a provisioning failure (F7).
         throw const CloudProfilePermissionDeniedException();
       }
@@ -83,7 +89,7 @@ class SupabasePersonalProfileRemoteGateway
         // is never surfaced.
         throw const CloudProfileProvisioningException();
       }
-      rethrow;
+      throwProfileFailure(e);
     }
   }
 
@@ -93,11 +99,26 @@ class SupabasePersonalProfileRemoteGateway
     required String regionPreferenceId,
   }) async {
     // Only the six-zone preference column is touched. RLS guarantees the
-    // authenticated user can UPDATE only their own row.
-    await _client
-        .from(_table)
-        .update({'region_preference_id': regionPreferenceId})
-        .eq('user_id', userId);
+    // authenticated user can UPDATE only their own row. The additional
+    // null-only predicate guarantees we never overwrite an existing cloud
+    // preference (C4 M2).
+    try {
+      await _client
+          .from(_table)
+          .update({'region_preference_id': regionPreferenceId})
+          .eq('user_id', userId)
+          .isFilter('region_preference_id', null);
+    } on PostgrestException catch (e) {
+      if (isPermissionDenied(e)) {
+        throw const CloudProfilePermissionDeniedException();
+      }
+      if (isUpdateInvalidDataRejection(e)) {
+        // C4 M2: UPDATE-time 23505 and similar constraint/data violations are
+        // domain failures, never silent provisioning success.
+        throw const CloudProfileInvalidDataException();
+      }
+      throwProfileFailure(e);
+    }
   }
 
   @override
@@ -105,6 +126,30 @@ class SupabasePersonalProfileRemoteGateway
     required String userId,
     required String roleCode,
     String? regionPreferenceId,
+  }) => _saveEditableFields(
+    userId: userId,
+    roleCode: roleCode,
+    regionPreferenceId: regionPreferenceId,
+    onlyIfAbsent: false,
+  );
+
+  @override
+  Future<void> saveEditableFieldsIfRegionAbsent({
+    required String userId,
+    required String roleCode,
+    String? regionPreferenceId,
+  }) => _saveEditableFields(
+    userId: userId,
+    roleCode: roleCode,
+    regionPreferenceId: regionPreferenceId,
+    onlyIfAbsent: true,
+  );
+
+  Future<void> _saveEditableFields({
+    required String userId,
+    required String roleCode,
+    String? regionPreferenceId,
+    required bool onlyIfAbsent,
   }) async {
     // V1-R08 — the ONLY cloud mutation the authenticated optimize foundation
     // may author. RLS guarantees the user can UPDATE only their own row; a
@@ -115,21 +160,27 @@ class SupabasePersonalProfileRemoteGateway
         'region_preference_id': regionPreferenceId,
     };
     try {
-      await _client
+      final mutation = _client
           .from(_table)
           .update(payload)
           .eq('user_id', userId);
+      await (onlyIfAbsent
+          ? mutation.isFilter('region_preference_id', null)
+          : mutation);
     } on PostgrestException catch (e) {
-      if (_isPermissionDenied(e)) {
+      if (isPermissionDenied(e)) {
         throw const CloudProfilePermissionDeniedException();
       }
-      rethrow;
+      if (isUpdateInvalidDataRejection(e)) {
+        throw const CloudProfileInvalidDataException();
+      }
+      throwProfileFailure(e);
     }
   }
 
   /// PostgREST surfaces RLS denials as SQLSTATE `42501` (insufficient_privilege)
   /// or as a PGRST-level parse message mentioning permission.
-  static bool _isPermissionDenied(PostgrestException e) {
+  static bool isPermissionDenied(PostgrestException e) {
     return e.code == '42501' ||
         (e.message?.toLowerCase().contains('permission denied') ?? false);
   }
@@ -144,6 +195,20 @@ class SupabasePersonalProfileRemoteGateway
         e.code == '23503' ||
         e.code == '23514' ||
         e.code == '23P01' ||
-        (e.code?.startsWith('22') ?? false);
+        RegExp(r'^22[A-Z0-9]{3}$').hasMatch(e.code ?? '');
+  }
+
+  /// C4 M2 — UPDATE-time domain/invalid-data rejections. Includes the CREATE
+  /// provisioning-rejection codes PLUS the unique-violation 23505, because an
+  /// UPDATE duplicate must NOT be reinterpreted as successful provisioning.
+  static bool isUpdateInvalidDataRejection(PostgrestException e) {
+    return e.code == '23505' || _isProvisioningRejection(e);
+  }
+
+  /// C4 M2 — True when [e] represents a backend failure that is neither an
+  /// RLS denial nor a known domain/invalid-data rejection. These are surfaced
+  /// as typed unexpected backend failures rather than retryable network errors.
+  static bool isUnexpectedBackendFailure(PostgrestException e) {
+    return classifyProfileFailure(e) == ProfileFailureKind.unexpected;
   }
 }

@@ -151,6 +151,8 @@ class _ProfileEditDispatch extends StatelessWidget {
       return const _ProfileEditRouteBlockedScreen();
     }
 
+    if (auth.isCleanupBlocked) return const AuthScreen();
+
     // Any non-guest, non-blocked unsettled state (resolving / authenticating /
     // signOutPending / error) renders the safe resolution surface, never the
     // legacy local editor.

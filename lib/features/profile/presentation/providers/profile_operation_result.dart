@@ -13,6 +13,10 @@ enum ProfileOperationCause {
   /// result was intentionally NOT published (generation-gated stale result).
   sessionLost,
 
+  authorityBlocked,
+  authFailure,
+  profileConflict,
+
   /// The backend denied the mutation/read (RLS). Fail closed — no local change,
   /// no fabrication.
   permissionDenied,
@@ -57,20 +61,11 @@ class ProfileOperationResult {
   const ProfileOperationResult.ok({
     profile_data.CloudProfile? profile,
     bool wasNoOp = false,
-  }) : this._(
-          succeeded: true,
-          cause: null,
-          profile: profile,
-          wasNoOp: wasNoOp,
-        );
+  }) : this._(succeeded: true, cause: null, profile: profile, wasNoOp: wasNoOp);
 
   /// A failed operation. Failures never mutate cloud state and never navigate.
   const ProfileOperationResult.failed(ProfileOperationCause cause)
-      : this._(
-          succeeded: false,
-          cause: cause,
-          profile: null,
-        );
+    : this._(succeeded: false, cause: cause, profile: null);
 
   final bool succeeded;
   final ProfileOperationCause? cause;

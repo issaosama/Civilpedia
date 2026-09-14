@@ -84,7 +84,9 @@ Future<void> _pumpAuth(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LanguageProvider(isArabic: isArabic)),
+        ChangeNotifierProvider(
+          create: (_) => LanguageProvider(isArabic: isArabic),
+        ),
         ChangeNotifierProvider.value(value: auth),
         ChangeNotifierProvider.value(
           value: UserProfileProvider(repository: _FakeRepo()),
@@ -97,6 +99,54 @@ Future<void> _pumpAuth(
 }
 
 void main() {
+  for (final arabic in [true, false]) {
+    final cases = [
+      (
+        PostAuthOutcome.permissionDenied,
+        Ar.profileCausePermissionDenied,
+        En.profileCausePermissionDenied,
+      ),
+      (
+        PostAuthOutcome.invalidData,
+        Ar.profileCauseInvalidData,
+        En.profileCauseInvalidData,
+      ),
+      (
+        PostAuthOutcome.malformedResponse,
+        Ar.profileCauseMalformed,
+        En.profileCauseMalformed,
+      ),
+      (
+        PostAuthOutcome.authFailure,
+        Ar.profileCauseAuthFailure,
+        En.profileCauseAuthFailure,
+      ),
+      (
+        PostAuthOutcome.unexpected,
+        Ar.profileCauseUnexpected,
+        En.profileCauseUnexpected,
+      ),
+    ];
+    for (final entry in cases) {
+      testWidgets(
+        'C4 ${entry.$1} Arabic=$arabic has typed copy and no network retry',
+        (tester) async {
+          final gateway = FakeAuthGateway(restoredSession: fakeSession);
+          final auth = AuthProvider(
+            gateway: gateway,
+            onPostAuth: (_) async => entry.$1,
+          );
+          await _pumpAuth(tester, auth, isArabic: arabic);
+          expect(find.text(arabic ? entry.$2 : entry.$3), findsOneWidget);
+          expect(find.text(arabic ? Ar.retry : En.retry), findsNothing);
+          expect(auth.isLoggedIn, isTrue);
+          expect(gateway.signOutCalls, 0);
+          expect(tester.takeException(), isNull);
+          auth.dispose();
+        },
+      );
+    }
+  }
   group('V1-R08 AuthScreen', () {
     testWidgets('a quiet guest sees the Continue-with-Google affordance and '
         'no error row', (tester) async {
@@ -130,9 +180,7 @@ void main() {
 
     testWidgets('a cancelled sign-in returns to the quiet guest state without '
         'navigating', (tester) async {
-      final auth = AuthProvider(
-        gateway: FakeAuthGateway(signInResult: null),
-      );
+      final auth = AuthProvider(gateway: FakeAuthGateway(signInResult: null));
       await _pumpAuth(tester, auth);
 
       await tester.tap(find.text(Ar.continueWithGoogle));
@@ -140,8 +188,11 @@ void main() {
 
       expect(auth.isLoggedIn, isFalse);
       expect(find.text(Ar.continueWithGoogle), findsOneWidget);
-      expect(find.text(Ar.googleSignInFailed), findsNothing,
-          reason: 'cancellation is not an error');
+      expect(
+        find.text(Ar.googleSignInFailed),
+        findsNothing,
+        reason: 'cancellation is not an error',
+      );
       expect(_topMatchedLocation(), AppRoutes.auth);
       expect(tester.takeException(), isNull);
       auth.dispose();
@@ -188,8 +239,11 @@ void main() {
       expect(auth.isLoggedIn, isTrue);
       expect(auth.postAuthState, PostAuthLifecycleState.retryableFailure);
       expect(find.text(Ar.authPostSetupRetryable), findsOneWidget);
-      expect(_topMatchedLocation(), AppRoutes.auth,
-          reason: 'never dump into the app before the pipeline settles');
+      expect(
+        _topMatchedLocation(),
+        AppRoutes.auth,
+        reason: 'never dump into the app before the pipeline settles',
+      );
 
       await tester.tap(find.text(Ar.retry));
       await tester.pumpAndSettle();
@@ -220,20 +274,31 @@ void main() {
       final retry = auth.retryPostAuth();
       // Explicit pumps: an indeterminate spinner never settles.
       await tester.pump();
-      expect(find.text(Ar.authPostSetupRunning), findsOneWidget,
-          reason: 'the claim/bootstrap progress seam is observable while a '
-              'retry is in flight');
+      expect(
+        find.text(Ar.authPostSetupRunning),
+        findsOneWidget,
+        reason:
+            'the claim/bootstrap progress seam is observable while a '
+            'retry is in flight',
+      );
 
       gate.complete(PostAuthOutcome.success);
       await retry;
       await tester.pumpAndSettle();
 
       expect(auth.postAuthState, PostAuthLifecycleState.success);
-      expect(find.textContaining(Ar.signedInAs), findsOneWidget,
-          reason: 'the signed-in card appears once the pipeline has settled');
-      expect(_topMatchedLocation(), AppRoutes.auth,
-          reason: 'a direct pipeline retry does not navigate; only the '
-              'screen-level Retry action does');
+      expect(
+        find.textContaining(Ar.signedInAs),
+        findsOneWidget,
+        reason: 'the signed-in card appears once the pipeline has settled',
+      );
+      expect(
+        _topMatchedLocation(),
+        AppRoutes.auth,
+        reason:
+            'a direct pipeline retry does not navigate; only the '
+            'screen-level Retry action does',
+      );
       expect(tester.takeException(), isNull);
       auth.dispose();
     });
@@ -266,9 +331,13 @@ void main() {
       expect(auth.isOwnershipBlocked, isTrue);
       expect(find.text(Ar.authAccountConflictTitle), findsOneWidget);
       expect(find.text(Ar.authAccountConflictMessage), findsOneWidget);
-      expect(find.text(Ar.continueWithGoogle), findsNothing,
-          reason: 'no new Google session while blockingly bound to another '
-              'account');
+      expect(
+        find.text(Ar.continueWithGoogle),
+        findsNothing,
+        reason:
+            'no new Google session while blockingly bound to another '
+            'account',
+      );
       expect(tester.takeException(), isNull);
       auth.dispose();
     });
@@ -298,8 +367,11 @@ void main() {
       await tester.pump();
 
       expect(auth.isSigningIn, isTrue);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget,
-          reason: 'the in-flight progress is observable');
+      expect(
+        find.byType(CircularProgressIndicator),
+        findsOneWidget,
+        reason: 'the in-flight progress is observable',
+      );
 
       // Duplicate tap on the same affordance must NOT re-enter the gateway.
       await tester.tap(
@@ -307,8 +379,11 @@ void main() {
         warnIfMissed: false,
       );
       await tester.pump();
-      expect(gateway.signInCalls, 1,
-          reason: 'single-flight: no duplicate sign-in may start');
+      expect(
+        gateway.signInCalls,
+        1,
+        reason: 'single-flight: no duplicate sign-in may start',
+      );
 
       gate.complete();
       await tester.pumpAndSettle();
@@ -321,8 +396,9 @@ void main() {
     });
 
     testWidgets('ownership-conflict Retry re-runs resolution; a resolved '
-        'conflict returns to the quiet guest sign-in (no dead-end)',
-        (tester) async {
+        'conflict returns to the quiet guest sign-in (no dead-end)', (
+      tester,
+    ) async {
       final gateway = _RecoveredRestoreGateway();
       final auth = AuthProvider(
         gateway: gateway,
@@ -341,8 +417,11 @@ void main() {
       // Retry resolved the account signature to a clean guest.
       expect(auth.isOwnershipBlocked, isFalse);
       expect(auth.error, isNull);
-      expect(find.text(Ar.continueWithGoogle), findsOneWidget,
-          reason: 'a resolved conflict returns to a quiet guest');
+      expect(
+        find.text(Ar.continueWithGoogle),
+        findsOneWidget,
+        reason: 'a resolved conflict returns to a quiet guest',
+      );
       expect(find.text(Ar.retry), findsNothing);
       expect(_topMatchedLocation(), AppRoutes.auth);
       expect(tester.takeException(), isNull);
@@ -368,26 +447,43 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(auth.error, AuthError.ownershipConflict);
-      expect(auth.isOwnershipBlocked, isTrue,
-          reason: 'the neutralized conflict stays blocked until cleared');
-      expect(find.text(Ar.ownershipConflictReturnToSignIn), findsOneWidget,
-          reason: 'the neutralized conflict exposes the forward recovery '
-              'action instead of a bare retry');
+      expect(
+        auth.isOwnershipBlocked,
+        isTrue,
+        reason: 'the neutralized conflict stays blocked until cleared',
+      );
+      expect(
+        find.text(Ar.ownershipConflictReturnToSignIn),
+        findsOneWidget,
+        reason:
+            'the neutralized conflict exposes the forward recovery '
+            'action instead of a bare retry',
+      );
       expect(find.text(Ar.authAccountConflictTitle), findsOneWidget);
       expect(find.text(Ar.retry), findsNothing);
-      expect(find.text(Ar.continueWithGoogle), findsNothing,
-          reason: 'a Google sign-in is never available while the device is '
-              'still conflict-bound');
+      expect(
+        find.text(Ar.continueWithGoogle),
+        findsNothing,
+        reason:
+            'a Google sign-in is never available while the device is '
+            'still conflict-bound',
+      );
 
       await tester.ensureVisible(find.text(Ar.ownershipConflictReturnToSignIn));
       await tester.tap(find.text(Ar.ownershipConflictReturnToSignIn));
       await tester.pumpAndSettle();
 
       expect(auth.error, isNull);
-      expect(find.text(Ar.continueWithGoogle), findsOneWidget,
-          reason: 'clearing the conflict error unblocks the quiet guest');
-      expect(_topMatchedLocation(), AppRoutes.auth,
-          reason: 'on the auth surface the recovery stays put (no navigation)');
+      expect(
+        find.text(Ar.continueWithGoogle),
+        findsOneWidget,
+        reason: 'clearing the conflict error unblocks the quiet guest',
+      );
+      expect(
+        _topMatchedLocation(),
+        AppRoutes.auth,
+        reason: 'on the auth surface the recovery stays put (no navigation)',
+      );
       expect(tester.takeException(), isNull);
       auth.dispose();
     });
@@ -397,8 +493,11 @@ void main() {
       final auth = AuthProvider(gateway: FakeAuthGateway());
       await _pumpAuth(tester, auth, isArabic: false);
 
-      expect(find.text(En.login), findsOneWidget,
-          reason: 'the AppBar title follows the active locale');
+      expect(
+        find.text(En.login),
+        findsOneWidget,
+        reason: 'the AppBar title follows the active locale',
+      );
       expect(find.text(En.continueWithGoogle), findsOneWidget);
       expect(find.text(Ar.login), findsNothing);
       expect(find.text(Ar.continueWithGoogle), findsNothing);

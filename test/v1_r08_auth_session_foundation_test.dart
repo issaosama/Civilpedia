@@ -55,6 +55,18 @@ class _BlockingGateway implements AuthGateway {
   bool get isAvailable => true;
 
   @override
+  bool get canAccountAuthorityBeGranted => true;
+
+  @override
+  bool get isAuthObservationAvailable => true;
+
+  @override
+  bool get isLogoutCleanupBlocked => false;
+
+  @override
+  Future<bool> retryAuthCleanup() async => false;
+
+  @override
   Stream<AuthEvent> get authEvents => const Stream.empty();
 
   @override

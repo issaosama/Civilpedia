@@ -99,7 +99,8 @@ bool _directorySourceHasNoDirectPrefsAccess() {
 
 /// V1-R05 W5.1 correction — explicit APPROVED static-key baseline: every
 /// pre-existing app key PLUS exactly the single V1-R05 Directory addition
-/// `directory_cloud_cache`.
+/// `directory_cloud_cache` PLUS the V1-R09 C1 authorized auth-recovery journal
+/// keys (`auth_recovery_journal`, `auth_recovery_journal_entry`).
 ///
 /// This is an explicit allow-list, NOT a naming-pattern heuristic. Any new or
 /// renamed static string literal fails the check regardless of its prefix,
@@ -122,6 +123,8 @@ const Set<String> _approvedStaticKeys = {
   'encyclopediaFavorites',
   'savedReferences',
   'downloads',
+  'auth_recovery_journal',
+  'auth_recovery_journal_entry',
 };
 
 /// Extracts every simple `static const String ... = 'literal';` key literal

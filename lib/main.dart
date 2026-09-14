@@ -66,12 +66,24 @@ void _runApp() {
     staffOperationsScope.resetForAuthChange();
   }
 
-  final auth = AuthProvider(
+  late final AuthProvider auth;
+  auth = AuthProvider(
     gateway: AppDependencies.authGateway,
-    onPostAuth: AppDependencies.runPostAuthPipeline,
+    onPostAuth: (session) {
+      final generation = auth.generation;
+      return AppDependencies.runPostAuthPipeline(
+        session,
+        canContinue: () =>
+            !auth.isAuthorityBlocked &&
+            AppDependencies.authGateway.canAccountAuthorityBeGranted &&
+            auth.session?.userId == session.userId &&
+            auth.generation == generation,
+      );
+    },
     onAccountBoundReset: resetAccountBoundState,
     onSessionRefresh: AuthRefreshListenable.instance.refresh,
-  )..restoreSession();
+  );
+  auth.restoreSession();
 
   userProfileProvider = UserProfileProvider(
     repository: AppDependencies.userProfileRepo,

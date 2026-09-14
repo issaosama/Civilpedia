@@ -10,6 +10,7 @@ import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
 import '../../auth/domain/entities/auth_error.dart';
+import '../../auth/domain/repositories/auth_gateway.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
 import '../../auth/presentation/widgets/ownership_conflict_view.dart';
 import '../../business/presentation/providers/staff_access_provider.dart';
@@ -166,12 +167,17 @@ class _UserAreaHeaderState extends State<_UserAreaHeader> {
     final messenger = ScaffoldMessenger.of(context);
     await auth.signOut();
     if (!mounted) return;
-    if (auth.error == AuthError.signOutFailed) {
+    if (auth.error == AuthError.signOutFailed ||
+        auth.error == AuthError.retryableNetwork) {
       messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(
           SnackBar(
-            content: Text(tr(Ar.signOutFailed, En.signOutFailed)),
+            content: Text(
+              auth.error == AuthError.retryableNetwork
+                  ? tr(Ar.authErrorRetryable, En.authErrorRetryable)
+                  : tr(Ar.signOutFailed, En.signOutFailed),
+            ),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.error,
             action: SnackBarAction(
@@ -185,7 +191,8 @@ class _UserAreaHeaderState extends State<_UserAreaHeader> {
 
   String _roleLabel(String? code, {required bool isArabic}) {
     String tr(String ar, String en) => isArabic ? ar : en;
-    if (code == null || code.isEmpty) return tr(Ar.profileNotSet, En.profileNotSet);
+    if (code == null || code.isEmpty)
+      return tr(Ar.profileNotSet, En.profileNotSet);
     switch (roleCodeToCivilUserType(code)) {
       case CivilUserType.siteEngineer:
         return tr(Ar.siteEngineer, En.siteEngineer);
@@ -239,7 +246,9 @@ class _UserAreaHeaderState extends State<_UserAreaHeader> {
     final theme = Theme.of(context);
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final muted = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
 
     final cloud = provider.authenticatedProfile;
     if (cloud != null) {
@@ -261,7 +270,9 @@ class _UserAreaHeaderState extends State<_UserAreaHeader> {
           Expanded(
             child: Text(
               tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
-              style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.error),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.error,
+              ),
             ),
           ),
           TextButton(
@@ -327,140 +338,239 @@ class _UserAreaHeaderState extends State<_UserAreaHeader> {
               onCleared: () => context.go(AppRoutes.auth),
             )
           : Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 26,
-                backgroundColor: theme.primaryColor,
-                child: Text(
-                  auth.session != null && (auth.currentName?.isNotEmpty ?? false)
-                      ? auth.currentName![0].toUpperCase()
-                      : 'U',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              AppSpacing.gapMd,
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      auth.session != null &&
-                              (auth.currentName?.isNotEmpty ?? false)
-                          ? auth.currentName!
-                          : tr(Ar.visitor, En.visitor),
-                      style: theme.textTheme.titleMedium
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                    CircleAvatar(
+                      radius: 26,
+                      backgroundColor: theme.primaryColor,
+                      child: Text(
+                        auth.session != null &&
+                                (auth.currentName?.isNotEmpty ?? false)
+                            ? auth.currentName![0].toUpperCase()
+                            : 'U',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      auth.session != null &&
-                              (auth.currentEmail?.isNotEmpty ?? false)
-                          ? auth.currentEmail!
-                          : tr(Ar.notRegistered, En.notRegistered),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
+                    AppSpacing.gapMd,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            auth.session != null &&
+                                    (auth.currentName?.isNotEmpty ?? false)
+                                ? auth.currentName!
+                                : tr(Ar.visitor, En.visitor),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            auth.session != null &&
+                                    (auth.currentEmail?.isNotEmpty ?? false)
+                                ? auth.currentEmail!
+                                : tr(Ar.notRegistered, En.notRegistered),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          if (auth.session != null) ...[
-            _buildCloudLine(context, provider, tr),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 44,
-                    child: OutlinedButton.icon(
-                      onPressed: () => context.push(AppRoutes.userProfileEdit),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: theme.primaryColor.withValues(alpha: 0.5),
+                const SizedBox(height: 16),
+                if (auth.session != null) ...[
+                  _buildCloudLine(context, provider, tr),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton.icon(
+                            onPressed: () =>
+                                context.push(AppRoutes.userProfileEdit),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: theme.primaryColor.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: const Icon(Icons.edit_outlined),
+                            label: Text(tr(Ar.editProfile, En.editProfile)),
+                          ),
                         ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton.icon(
+                            onPressed: auth.isSigningOut
+                                ? null
+                                : () => _confirmAndSignOut(context, tr),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: theme.colorScheme.error.withValues(
+                                  alpha: 0.5,
+                                ),
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            icon: auth.isSigningOut
+                                ? const SizedBox.square(
+                                    dimension: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.logout),
+                            label: Text(
+                              auth.isSigningOut
+                                  ? tr(
+                                      Ar.signOutPendingLabel,
+                                      En.signOutPendingLabel,
+                                    )
+                                  : tr(Ar.logout, En.logout),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else if (auth.isCleanupBlocked) ...[
+                  // V1-R09 H1 — remote sign-out succeeded but owned local cleanup is
+                  // pending/blocked/stalled. No sign-in surface; only the bounded
+                  // cleanup retry is offered.
+                  Text(
+                    switch (auth.recoveryStatus) {
+                      AuthRecoveryStatus.remotePending => tr(
+                        Ar.authRemotePendingMessage,
+                        En.authRemotePendingMessage,
+                      ),
+                      AuthRecoveryStatus.restartRequired => tr(
+                        Ar.authRecoveryRestartMessage,
+                        En.authRecoveryRestartMessage,
+                      ),
+                      AuthRecoveryStatus.blockedCleanupFailure ||
+                      AuthRecoveryStatus.storageFailure => tr(
+                        Ar.authRecoveryBlockedMessage,
+                        En.authRecoveryBlockedMessage,
+                      ),
+                      AuthRecoveryStatus.exchangeBlockedUnattributed => tr(
+                        Ar.authUnattributedResetMessage,
+                        En.authUnattributedResetMessage,
+                      ),
+                      AuthRecoveryStatus.localResetRestartRequired => tr(
+                        Ar.authLocalResetRestartMessage,
+                        En.authLocalResetRestartMessage,
+                      ),
+                      AuthRecoveryStatus.exchangeTimedOutPending => tr(
+                        Ar.authExchangeTimedOutPendingMessage,
+                        En.authExchangeTimedOutPendingMessage,
+                      ),
+                      AuthRecoveryStatus.exchangeNeutralizing => tr(
+                        Ar.authExchangeNeutralizingMessage,
+                        En.authExchangeNeutralizingMessage,
+                      ),
+                      AuthRecoveryStatus.exchangeBlockedCleanupFailure => tr(
+                        Ar.authExchangeBlockedMessage,
+                        En.authExchangeBlockedMessage,
+                      ),
+                      _ => tr(
+                        Ar.authLogoutCleanupMessage,
+                        En.authLogoutCleanupMessage,
+                      ),
+                    },
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  if (auth.recoveryStatus !=
+                          AuthRecoveryStatus.restartRequired &&
+                      auth.recoveryStatus !=
+                          AuthRecoveryStatus.localResetRestartRequired)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 44,
+                      child: FilledButton.icon(
+                        onPressed: auth.isRecoveryRetryBusy
+                            ? null
+                            : auth.recoveryStatus ==
+                                  AuthRecoveryStatus.exchangeBlockedUnattributed
+                            ? auth.resetQuarantinedDeviceSignIn
+                            : auth.retryAuthCleanup,
+                        style: FilledButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        icon: const Icon(Icons.refresh),
+                        label: Text(
+                          auth.recoveryStatus ==
+                                  AuthRecoveryStatus.exchangeBlockedUnattributed
+                              ? tr(Ar.resetDeviceSignIn, En.resetDeviceSignIn)
+                              : tr(Ar.retryAuthRecovery, En.retryAuthRecovery),
+                        ),
+                      ),
+                    ),
+                ] else if (auth.isAuthObservationUnavailable) ...[
+                  // V1-R09 H2 — canonical auth observation stopped; a restart is
+                  // required before fresh authority may resume.
+                  Text(
+                    tr(Ar.authRestartRequired, En.authRestartRequired),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ] else ...[
+                  Text(
+                    tr(Ar.userAreaSignInPrompt, En.userAreaSignInPrompt),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: FilledButton.icon(
+                      onPressed: () => context.go(AppRoutes.auth),
+                      style: FilledButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      icon: const Icon(Icons.edit_outlined),
-                      label: Text(tr(Ar.editProfile, En.editProfile)),
+                      icon: const Icon(Icons.login),
+                      label: Text(tr(Ar.login, En.login)),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: SizedBox(
-                    height: 44,
-                    child: OutlinedButton.icon(
-                      onPressed: auth.isSigningOut
-                          ? null
-                          : () => _confirmAndSignOut(context, tr),
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(
-                          color: theme.colorScheme.error.withValues(alpha: 0.5),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: auth.isSigningOut
-                          ? const SizedBox.square(
-                              dimension: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.logout),
-                      label: Text(
-                        auth.isSigningOut
-                            ? tr(
-                                Ar.signOutPendingLabel,
-                                En.signOutPendingLabel,
-                              )
-                            : tr(Ar.logout, En.logout),
-                      ),
-                    ),
-                  ),
-                ),
+                ],
               ],
             ),
-          ] else ...[
-            Text(
-              tr(Ar.userAreaSignInPrompt, En.userAreaSignInPrompt),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: FilledButton.icon(
-                onPressed: () => context.go(AppRoutes.auth),
-                style: FilledButton.styleFrom(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                icon: const Icon(Icons.login),
-                label: Text(tr(Ar.login, En.login)),
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 }

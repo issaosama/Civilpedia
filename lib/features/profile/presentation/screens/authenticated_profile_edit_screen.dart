@@ -80,10 +80,9 @@ class _AuthenticatedProfileEditScreenState
   }
 
   void _syncFromCloud(CloudProfile cloud, String? regionCode) {
-    final roleCode =
-        (cloud.roleCode == null || cloud.roleCode!.isEmpty)
-            ? CivilUserType.generalUser.roleCodeValue
-            : cloud.roleCode;
+    final roleCode = (cloud.roleCode == null || cloud.roleCode!.isEmpty)
+        ? CivilUserType.generalUser.roleCodeValue
+        : cloud.roleCode;
     setState(() {
       _selectedRoleCode = roleCode;
       _initialRoleCode = roleCode;
@@ -115,8 +114,9 @@ class _AuthenticatedProfileEditScreenState
                   child: Text(
                     _roleName(code, isArabic: isArabic),
                     style: TextStyle(
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                       color: isSelected ? AppColors.primary : null,
                     ),
                   ),
@@ -140,7 +140,10 @@ class _AuthenticatedProfileEditScreenState
       context: context,
       builder: (ctx) => SimpleDialog(
         title: Text(
-          tr(Ar.profileChangeRegionPreference, En.profileChangeRegionPreference),
+          tr(
+            Ar.profileChangeRegionPreference,
+            En.profileChangeRegionPreference,
+          ),
         ),
         children: RegionPreferenceCode.all.map((code) {
           final isSelected = _selectedRegionCode == code;
@@ -155,8 +158,9 @@ class _AuthenticatedProfileEditScreenState
                   child: Text(
                     _regionName(code, isArabic: isArabic),
                     style: TextStyle(
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                       color: isSelected ? AppColors.primary : null,
                     ),
                   ),
@@ -239,8 +243,7 @@ class _AuthenticatedProfileEditScreenState
     if (result.succeeded) {
       // Successful authoritative re-read installed new cloud state. Re-baseline
       // so the form stays put, clean, and consistent with the SSOT.
-      final freshRole =
-          result.profile?.roleCode ?? _selectedRoleCode;
+      final freshRole = result.profile?.roleCode ?? _selectedRoleCode;
       setState(() {
         _initialRoleCode = freshRole;
         _selectedRoleCode = freshRole;
@@ -279,15 +282,28 @@ class _AuthenticatedProfileEditScreenState
   String _causeMessage(ProfileOperationCause? cause) {
     switch (cause) {
       case ProfileOperationCause.unauthenticated:
-        return tr(Ar.profileCauseUnauthenticated, En.profileCauseUnauthenticated);
+        return tr(
+          Ar.profileCauseUnauthenticated,
+          En.profileCauseUnauthenticated,
+        );
       case ProfileOperationCause.sessionLost:
         return tr(Ar.authSessionLost, En.authSessionLost);
+      case ProfileOperationCause.authorityBlocked:
+        return tr(
+          Ar.profileCauseAuthorityBlocked,
+          En.profileCauseAuthorityBlocked,
+        );
+      case ProfileOperationCause.authFailure:
+        return tr(Ar.profileCauseAuthFailure, En.profileCauseAuthFailure);
+      case ProfileOperationCause.profileConflict:
+        return tr(Ar.profileCauseRegionConflict, En.profileCauseRegionConflict);
       case ProfileOperationCause.permissionDenied:
         return tr(
-            Ar.profileCausePermissionDenied, En.profileCausePermissionDenied);
+          Ar.profileCausePermissionDenied,
+          En.profileCausePermissionDenied,
+        );
       case ProfileOperationCause.provisioningFailure:
-        return tr(
-            Ar.profileCauseProvisioning, En.profileCauseProvisioning);
+        return tr(Ar.profileCauseProvisioning, En.profileCauseProvisioning);
       case ProfileOperationCause.invalidData:
         return tr(Ar.profileCauseInvalidData, En.profileCauseInvalidData);
       case ProfileOperationCause.malformedResponse:
@@ -296,7 +312,9 @@ class _AuthenticatedProfileEditScreenState
         return tr(Ar.profileCauseRetryable, En.profileCauseRetryable);
       case ProfileOperationCause.ownershipConflict:
         return tr(
-            Ar.profileCauseOwnershipConflict, En.profileCauseOwnershipConflict);
+          Ar.profileCauseOwnershipConflict,
+          En.profileCauseOwnershipConflict,
+        );
       case ProfileOperationCause.unexpected:
       case null:
         return tr(Ar.profileCauseUnexpected, En.profileCauseUnexpected);
@@ -340,7 +358,10 @@ class _AuthenticatedProfileEditScreenState
         context,
         icon: Icons.lock_clock_outlined,
         title: tr(Ar.authSessionLost, En.authSessionLost),
-        message: tr(Ar.profileCauseUnauthenticated, En.profileCauseUnauthenticated),
+        message: tr(
+          Ar.profileCauseUnauthenticated,
+          En.profileCauseUnauthenticated,
+        ),
         action: FilledButton(
           onPressed: () => context.go(AppRoutes.userProfile),
           child: Text(tr(Ar.login, En.login)),
@@ -386,10 +407,12 @@ class _AuthenticatedProfileEditScreenState
     }
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDarkMode ? AppColors.darkTextPrimary : AppColors.textPrimary;
-    final subtitleColor =
-        isDarkMode ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final textColor = isDarkMode
+        ? AppColors.darkTextPrimary
+        : AppColors.textPrimary;
+    final subtitleColor = isDarkMode
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
 
     return PopScope(
       canPop: !_pending && !_dirty,
@@ -398,12 +421,11 @@ class _AuthenticatedProfileEditScreenState
         _showDiscardDialog();
       },
       child: Scaffold(
-        backgroundColor:
-            isDark ? AppColors.darkBackground : AppColors.background,
+        backgroundColor: isDark
+            ? AppColors.darkBackground
+            : AppColors.background,
         appBar: AppBar(
-          title: Text(
-            tr(Ar.profileEditCloudTitle, En.profileEditCloudTitle),
-          ),
+          title: Text(tr(Ar.profileEditCloudTitle, En.profileEditCloudTitle)),
           elevation: 0,
         ),
         body: ListView(
@@ -419,8 +441,7 @@ class _AuthenticatedProfileEditScreenState
               icon: Icons.badge_outlined,
               label: tr(Ar.profileRole, En.profileRole),
               value: _roleName(
-                _selectedRoleCode ??
-                    CivilUserType.generalUser.roleCodeValue,
+                _selectedRoleCode ?? CivilUserType.generalUser.roleCodeValue,
                 isArabic: isArabic,
               ),
               subtitleColor: subtitleColor,
@@ -505,16 +526,19 @@ class _AuthenticatedProfileEditScreenState
                   child: CircularProgressIndicator(strokeWidth: 3),
                 )
               else if (icon != null)
-                Icon(icon, size: 48, color: Theme.of(context).colorScheme.error),
+                Icon(
+                  icon,
+                  size: 48,
+                  color: Theme.of(context).colorScheme.error,
+                ),
               if (title != null) ...[
                 AppSpacing.gapLg,
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
               if (message != null) ...[
@@ -523,10 +547,10 @@ class _AuthenticatedProfileEditScreenState
                   message,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.textSecondary,
-                      ),
+                    color: isDark
+                        ? AppColors.darkTextSecondary
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ],
               if (action != null) ...[

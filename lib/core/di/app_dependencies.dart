@@ -19,6 +19,7 @@ import '../../features/profile/data/region_preference_gateway.dart';
 import '../../features/profile/data/service_business_data_source.dart';
 import '../../features/profile/data/supabase_personal_profile_remote_gateway.dart';
 import '../../features/profile/data/supabase_region_preference_gateway.dart';
+import '../../features/profile/data/timed_profile_gateways.dart';
 import '../../features/profile/domain/user_profile_repository.dart';
 import '../../features/profile/domain/service_business_repository.dart';
 import '../../features/saved/data/hive_saved_reference_store.dart';
@@ -90,15 +91,15 @@ class AppDependencies {
 
   static late final PersonalProfileRemoteGateway _personalProfileRemoteGateway;
   static late final PersonalProfileBootstrapCoordinator
-      _personalProfileBootstrapCoordinator;
+  _personalProfileBootstrapCoordinator;
   static late final RegionPreferenceGateway _regionPreferenceGateway;
 
-static late final BusinessMembershipGateway _businessMembershipGateway;
+  static late final BusinessMembershipGateway _businessMembershipGateway;
   static late final BusinessProfileManagementGateway
-      _businessProfileManagementGateway;
+  _businessProfileManagementGateway;
   static late final BusinessApplicationGateway _businessApplicationGateway;
   static late final BusinessApplicationStaffGateway
-      _businessApplicationStaffGateway;
+  _businessApplicationStaffGateway;
   static late final BusinessClaimTargetGateway _businessClaimTargetGateway;
 
   static Future<void> init() async {
@@ -138,10 +139,10 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
       fileService: _backupFileService,
     );
 
-    // A5.1 — backend initialization boundary. Reads the compile-time
-    // environment configuration and initializes Supabase only when it is
-    // fully configured. Absent configuration keeps the service unavailable
-    // without affecting current guest/local behavior.
+    // A5.1/V1-R09 — the existing backend boundary owns one bounded
+    // initialization operation. AppDependencies waits at most the frozen
+    // startup deadline, after which the local shell can run with this same
+    // service unavailable; a late success updates its dynamic readiness.
     _supabaseService = SupabaseService();
     await _supabaseService.init();
 
@@ -179,9 +180,12 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
     // physical regions taxonomy; the preference gateway resolves zone codes →
     // ids for A5.8 persistence (create + safe fill), and legacy BaghdadArea is
     // Directory geography, never mapped to a preference.
-    _regionPreferenceGateway = SupabaseRegionPreferenceGateway();
-    _personalProfileRemoteGateway =
-        SupabasePersonalProfileRemoteGateway();
+    _regionPreferenceGateway = TimedRegionPreferenceGateway(
+      delegate: SupabaseRegionPreferenceGateway(),
+    );
+    _personalProfileRemoteGateway = TimedPersonalProfileRemoteGateway(
+      delegate: SupabasePersonalProfileRemoteGateway(),
+    );
     _personalProfileBootstrapCoordinator = PersonalProfileBootstrapCoordinator(
       localRepository: _userProfileRepo,
       remoteGateway: _personalProfileRemoteGateway,
@@ -201,9 +205,7 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
     // (get_managed_business_profile / update_managed_business_profile) from
     // migration 00020. No direct table write; taxonomy lookups are read-only.
     _businessProfileManagementGateway =
-        SupabaseBusinessProfileManagementGateway(
-      service: _supabaseService,
-    );
+        SupabaseBusinessProfileManagementGateway(service: _supabaseService);
 
     // A6.3.1 — business application boundary. Reads remain own-row only;
     // creation and lifecycle mutations use narrow server-authorized RPCs
@@ -233,6 +235,7 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
   /// for unavailable/unconfigured builds.
   static void dispose() {
     _authGateway.dispose();
+    _supabaseService.dispose();
   }
 
   static EncyclopediaRepository get encyclopediaRepo => _encyclopediaRepo;
@@ -280,9 +283,9 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
 
   /// A5.6/A5.7 — production personal-profile bootstrap coordinator, invoked
   /// through the same `onPostAuth` seam after the A5.5 claim.
-  static PersonalProfileBootstrapCoordinator get
-      personalProfileBootstrapCoordinator =>
-          _personalProfileBootstrapCoordinator;
+  static PersonalProfileBootstrapCoordinator
+  get personalProfileBootstrapCoordinator =>
+      _personalProfileBootstrapCoordinator;
 
   /// A5.7/A5.8 — production Region Preference gateway (stable zone code →
   /// `region_preferences.id`). The six frozen zones are a SEPARATE concept
@@ -324,6 +327,16 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
         return PostAuthOutcome.retryableFailure;
       case ProfileBootstrapOutcome.provisioningFailure:
         return PostAuthOutcome.provisioningFailure;
+      case ProfileBootstrapOutcome.permissionDenied:
+        return PostAuthOutcome.permissionDenied;
+      case ProfileBootstrapOutcome.invalidData:
+        return PostAuthOutcome.invalidData;
+      case ProfileBootstrapOutcome.malformedResponse:
+        return PostAuthOutcome.malformedResponse;
+      case ProfileBootstrapOutcome.authFailure:
+        return PostAuthOutcome.authFailure;
+      case ProfileBootstrapOutcome.unexpected:
+        return PostAuthOutcome.unexpected;
       default:
         return PostAuthOutcome.success;
     }
@@ -338,14 +351,20 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
   /// maps to a retryable outcome while authentication stays successful (the
   /// next authenticated session retries safely). Exceptions are swallowed by
   /// the provider's pipeline runner and degrade to a retryable outcome.
-  static Future<PostAuthOutcome> runPostAuthPipeline(AuthSession session) async {
+  static Future<PostAuthOutcome> runPostAuthPipeline(
+    AuthSession session, {
+    bool Function()? canContinue,
+  }) async {
+    if (!(canContinue?.call() ?? true)) return PostAuthOutcome.authFailure;
     final claim = await _ownershipClaimCoordinator.claimFor(session.userId);
     final claimOutcome = mapClaimOutcome(claim);
     if (claimOutcome != PostAuthOutcome.success) return claimOutcome;
+    if (!(canContinue?.call() ?? true)) return PostAuthOutcome.authFailure;
     final bootstrap = await _personalProfileBootstrapCoordinator.bootstrap(
       userId: session.userId,
       authDisplayName: session.displayName,
       authPhotoUrl: session.photoUrl,
+      canContinue: canContinue,
     );
     return mapBootstrapOutcome(bootstrap);
   }
@@ -359,8 +378,8 @@ static late final BusinessMembershipGateway _businessMembershipGateway;
   /// V1-R06 — production [BusinessProfileManagementGateway]. OWNER/ADMIN
   /// public profile read/update via the frozen migration 00020 RPCs.
   /// Taxonomy lookups are read-only; no direct Directory table mutation.
-  static BusinessProfileManagementGateway get businessProfileManagementGateway =>
-      _businessProfileManagementGateway;
+  static BusinessProfileManagementGateway
+  get businessProfileManagementGateway => _businessProfileManagementGateway;
 
   /// A6.3.1 — production [BusinessApplicationGateway]. Read-own plus narrow
   /// server-authorized creation/lifecycle RPCs; never a generic table mutation

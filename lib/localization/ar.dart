@@ -1,4 +1,10 @@
 class Ar {
+  static const profileCauseAuthFailure =
+      'تعذر اعتماد تسجيل الدخول لهذا الطلب. لم يتم مسح جلستك.';
+  static const profileCauseAuthorityBlocked =
+      'تغييرات الملف غير متاحة أثناء الحاجة إلى استعادة تسجيل الدخول.';
+  static const profileCauseRegionConflict =
+      'يختلف الملف المحفوظ عن طلبك. راجع الملف السحابي الحالي قبل إجراء تغييرات أخرى.';
   static const String appName = 'Civilpedia';
   static const String home = 'الرئيسية';
   static const String tools = 'الأدوات';
@@ -701,8 +707,7 @@ class Ar {
       'يجب تسجيل الدخول لإدارة طلباتك التجارية';
   static const String businessSignInButton = 'تسجيل الدخول';
   static const String businessNoApplications = 'لا توجد طلبات تجارية بعد';
-  static const String businessApplicationsError =
-      'تعذر تحميل الطلبات التجارية';
+  static const String businessApplicationsError = 'تعذر تحميل الطلبات التجارية';
   static const String businessRefresh = 'تحديث';
 
   // Screens
@@ -786,8 +791,7 @@ class Ar {
       'لم يتم العثور على المنشأة المطلوبة';
   static const String businessCauseTargetNotClaimable =
       'هذه المنشأة غير متاحة للمطالبة حالياً';
-  static const String businessCauseAlreadyOwner =
-      'أنت مالك هذه المنشأة بالفعل';
+  static const String businessCauseAlreadyOwner = 'أنت مالك هذه المنشأة بالفعل';
   static const String businessCauseDuplicateClaim =
       'لديك طلب مطالبة ساري لهذه المنشأة بالفعل';
   static const String businessCauseApplicantMismatch =
@@ -803,7 +807,8 @@ class Ar {
       'يجب إضافة رقم هاتف إلى ملفك الشخصي قبل الإرسال';
   static const String businessCauseRequiredDataMissing =
       'البيانات المطلوبة غير مكتملة';
-  static const String businessCauseUnexpected = 'حدث خطأ غير متوقع، حاول مجدداً';
+  static const String businessCauseUnexpected =
+      'حدث خطأ غير متوقع، حاول مجدداً';
   static const String businessCorrectionInfo =
       'لا يمكن تعديل بيانات الطلب في هذه المرحلة. أعد الإرسال بعد معالجة سبب الإعادة إذا أمكن.';
 
@@ -837,8 +842,7 @@ class Ar {
   static const String businessProfileEditTitle = 'تعديل الملف العام';
   static const String businessProfileNameLabel = 'اسم النشاط';
   static const String businessProfileDescriptionLabel = 'الوصف';
-  static const String businessProfileDescriptionHint =
-      'وصف مختصر (اختياري)';
+  static const String businessProfileDescriptionHint = 'وصف مختصر (اختياري)';
   static const String businessProfileContactsLabel = 'وسائل التواصل';
   static const String businessProfileAddContact = 'إضافة وسيلة تواصل';
   static const String businessProfileCategoriesLabel = 'التصنيفات';
@@ -875,12 +879,10 @@ class Ar {
   static const String businessProfileNoCategories = 'لا توجد تصنيفات متاحة';
 
   static const String businessProfileValidationRequired = 'هذا الحقل مطلوب';
-  static const String businessProfileValidationTooLong =
-      'النص أطول من المسموح';
+  static const String businessProfileValidationTooLong = 'النص أطول من المسموح';
   static const String businessProfileValidationTooMany =
       'العدد أعلى من المسموح';
-  static const String businessProfileValidationInvalidFormat =
-      'تنسيق غير صالح';
+  static const String businessProfileValidationInvalidFormat = 'تنسيق غير صالح';
   static const String businessProfileValidationDuplicate = 'قيمة مكررة';
   static const String businessProfileValidationDuplicatePrimary =
       'رئيسي واحد فقط لكل نوع';
@@ -897,24 +899,23 @@ class Ar {
       'يجب تسجيل الدخول أولاً';
   static const String businessProfileCausePermissionDenied =
       'ليس لديك صلاحية إدارة هذا النشاط';
-  static const String businessProfileCauseNotFound =
-      'لم يتم العثور على النشاط';
+  static const String businessProfileCauseNotFound = 'لم يتم العثور على النشاط';
   static const String businessProfileCauseInvalidData = 'البيانات غير صالحة';
   static const String businessProfileCauseConflict =
       'تم تعديل الملف من جهة أخرى';
-  static const String businessProfileCauseNetwork =
-      'تعذر الاتصال، حاول مجدداً';
-  static const String businessProfileCauseUnexpected =
-      'حدث خطأ غير متوقع';
+  static const String businessProfileCauseNetwork = 'تعذر الاتصال، حاول مجدداً';
+  static const String businessProfileCauseUnexpected = 'حدث خطأ غير متوقع';
   static const String businessProfileCauseUnavailable =
       'الخدمة غير متاحة حالياً';
 
   // V1-R07 — Staff / Admin Operations Foundation
   static const String staffOperations = 'عمليات المراجعة';
   static const String staffApplicationsTitle = 'طلبات المراجعة';
-  static const String staffSignInRequired = 'يجب تسجيل الدخول للوصول إلى أدوات المراجعة';
+  static const String staffSignInRequired =
+      'يجب تسجيل الدخول للوصول إلى أدوات المراجعة';
   static const String staffAccessDenied = 'لا توجد صلاحية وصول لأدوات المراجعة';
-  static const String staffPermissionLost = 'تم إلغاء صلاحية الوصول. يرجى تحديث الصفحة.';
+  static const String staffPermissionLost =
+      'تم إلغاء صلاحية الوصول. يرجى تحديث الصفحة.';
   static const String staffLoadingAccess = 'جاري التحقق من الصلاحيات...';
   static const String staffLoadingQueue = 'جاري تحميل الطلبات...';
   static const String staffLoadingDetail = 'جاري تحميل تفاصيل الطلب...';
@@ -1003,32 +1004,85 @@ class Ar {
   static const String staffRefreshDetail = 'تحديث التفاصيل';
 
   static const String staffCauseUnauthenticated = 'يجب تسجيل الدخول أولاً';
-  static const String staffCausePermissionDenied = 'لا توجد صلاحية لهذا الإجراء';
+  static const String staffCausePermissionDenied =
+      'لا توجد صلاحية لهذا الإجراء';
   static const String staffCauseNotFound = 'الطلب غير موجود';
-  static const String staffCauseInvalidTransition = 'لا يمكن تنفيذ هذا الإجراء في الحالة الحالية';
-  static const String staffCauseCorrectionReasonRequired = 'سبب الإعادة للتصحيح مطلوب';
+  static const String staffCauseInvalidTransition =
+      'لا يمكن تنفيذ هذا الإجراء في الحالة الحالية';
+  static const String staffCauseCorrectionReasonRequired =
+      'سبب الإعادة للتصحيح مطلوب';
   static const String staffCauseRejectionReasonRequired = 'سبب الرفض مطلوب';
-  static const String staffCauseRequiredDataMissing = 'البيانات المطلوبة غير مكتملة';
+  static const String staffCauseRequiredDataMissing =
+      'البيانات المطلوبة غير مكتملة';
   static const String staffCauseUnexpected = 'حدث خطأ غير متوقع، حاول مجدداً';
 
   // V1-R08 — Auth & Profile Production Completion (Part 2)
-  static const String authErrorRetryable = 'تعذر الاتصال. يرجى المحاولة مرة أخرى';
-  static const String authErrorUnexpected = 'حدث خطأ غير متوقع أثناء تسجيل الدخول';
+  static const String authErrorRetryable =
+      'تعذر الاتصال. يرجى المحاولة مرة أخرى';
+  static const String authErrorUnexpected =
+      'حدث خطأ غير متوقع أثناء تسجيل الدخول';
   static const String authPostSetupRunning = 'جارٍ إعداد حسابك...';
   static const String authPostSetupRetryable =
       'تعذر إكمال إعداد الحساب. يمكنك إعادة المحاولة';
   static const String authPostSetupProvisioning =
       'توجد مشكلة مؤقتة في إعداد حسابك. يمكنك الانتقال إلى ملفك الشخصي';
-  static const String authAccountConflictTitle = 'يوجد حساب مرتبط بالفعل بهذا الجهاز';
+  static const String authAccountConflictTitle =
+      'يوجد حساب مرتبط بالفعل بهذا الجهاز';
   static const String authAccountConflictMessage =
       'البيانات المحفوظة على هذا الجهاز مرتبطة بحساب آخر. اضغط الزر أدناه للتحقق مجددًا أو للعودة إلى تسجيل الدخول بأمان.';
-  static const String ownershipConflictReturnToSignIn = 'العودة إلى تسجيل الدخول';
-  static const String authSessionLost = 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى';
+  static const String ownershipConflictReturnToSignIn =
+      'العودة إلى تسجيل الدخول';
+  static const String authSessionLost =
+      'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى';
   static const String signOutConfirmTitle = 'تسجيل الخروج';
   static const String signOutConfirmMessage =
       'هل تريد تسجيل الخروج من حسابك الحالي؟ سيظل ملفك الشخصي وبياناتك محفوظة في السحابة';
   static const String signOutPendingLabel = 'جارٍ تسجيل الخروج...';
-  static const String signOutFailed = 'تعذر تسجيل الخروج. يرجى المحاولة مرة أخرى';
+  static const String signOutFailed =
+      'تعذر تسجيل الخروج. يرجى المحاولة مرة أخرى';
+
+  // V1-R09 C2 — authoritative sign-out recovery + observation loss
+  static const String authLogoutCleanupTitle =
+      'لا يزال تسجيل الخروج قيد الإكمال';
+  static const String authLogoutCleanupMessage =
+      'تم تسجيل الخروج من حسابك، لكن عملية التنظيف الآمنة ما تزال قيد التنفيذ '
+      'على هذا الجهاز. يمكنك إعادة محاولة التنظيف الآن أو إعادة تشغيل التطبيق لاحقاً.';
+  static const String retryCleanup = 'إعادة محاولة التنظيف';
+  static const String resetDeviceSignIn =
+      'إعادة ضبط تسجيل الدخول على هذا الجهاز';
+  static const String authUnattributedResetMessage =
+      'تعذر التحقق من جلسة تسجيل دخول سابقة على هذا الجهاز. '
+      'يمكنك إعادة ضبط تسجيل الدخول المحلي ثم إغلاق التطبيق وإعادة فتحه. '
+      'سيُزال تسجيل الدخول المحفوظ محليًا على هذا الجهاز وستحتاج إلى تسجيل الدخول مجددًا. '
+      'لن يؤدي ذلك إلى حذف حسابك أو بياناتك السحابية أو تسجيل الخروج من الأجهزة الأخرى.';
+  static const String authLocalResetRestartMessage =
+      'تمت إعادة ضبط تسجيل الدخول المحلي. أغلق التطبيق وأعد فتحه للتحقق من إعادة الضبط '
+      'قبل تسجيل الدخول مجددًا. يبقى الوصول إلى الحساب محظورًا حتى ذلك الحين. '
+      'لم يُحذف حسابك أو بياناتك السحابية.';
+  static const String authRecoveryTitle = 'يلزم استرداد حالة الحساب';
+  static const String retryAuthRecovery = 'إعادة محاولة استرداد الحساب';
+  static const String authRemotePendingMessage =
+      'لم تُحسم نتيجة تسجيل الخروج بعد. أعد محاولة الاسترداد. إذا استمر '
+      'الانتظار فأغلق التطبيق وافتحه مجدداً. الميزات المحلية متاحة.';
+  static const String authRecoveryBlockedMessage =
+      'تم إيقاف استرداد الحساب لحماية بيانات تسجيل الدخول المحفوظة. أعد '
+      'المحاولة أو أغلق التطبيق وافتحه مجدداً. إذا استمر الإيقاف فاطلب المساعدة.';
+  static const String authRecoveryRestartMessage =
+      'تعذر إكمال تسجيل الخروج وتم الاحتفاظ ببيانات تسجيل الدخول. أغلق '
+      'التطبيق وافتحه مجدداً لاستعادة الجلسة بالطريقة المعتادة.';
+  static const String authExchangeTimedOutPendingMessage =
+      'استغرق تسجيل الدخول وقتاً أطول من المتوقع. لا يزال التبادل الآمن قيد '
+      'التسوية في الخلفية. يمكنك إعادة المحاولة بعد اكتماله أو إعادة تشغيل '
+      'التطبيق.';
+  static const String authExchangeNeutralizingMessage =
+      'جارٍ إزالة جلسة تسجيل دخول قديمة لحماية حسابك. يرجى الانتظار؛ يمكنك '
+      'إعادة محاولة التنظيف إذا استمر الحظر.';
+  static const String authExchangeBlockedMessage =
+      'تم إيقاف تنظيف جلسة تسجيل الدخول القديمة لحماية بيانات تسجيل الدخول '
+      'المحفوظة. أعد المحاولة أو أغلق التطبيق وافتحه مجدداً. إذا استمر '
+      'الإيقاف فاطلب المساعدة.';
+  static const String authRestartRequired =
+      'توقف مراقبة أمان الحساب. أعد تشغيل التطبيق قبل استخدام حسابك مرة أخرى.';
   static const String profileCloudLoading = 'جارٍ تحميل ملفك الشخصي...';
   static const String profileCloudLoadFailed =
       'تعذر تحميل الملف الشخصي من السحابة';

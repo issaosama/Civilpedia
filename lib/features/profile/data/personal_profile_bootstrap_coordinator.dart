@@ -1,3 +1,4 @@
+import '../../../core/network/remote_operation_policy.dart';
 import '../domain/user_profile.dart';
 import '../domain/user_profile_repository.dart';
 import 'cloud_profile.dart';
@@ -87,6 +88,7 @@ class PersonalProfileBootstrapCoordinator {
     required String userId,
     String? authDisplayName,
     String? authPhotoUrl,
+    bool Function()? canContinue,
   }) {
     if (userId.trim().isEmpty) {
       return Future.value(ProfileBootstrapOutcome.skippedGuest);
@@ -97,6 +99,7 @@ class PersonalProfileBootstrapCoordinator {
       userId: userId,
       authDisplayName: authDisplayName,
       authPhotoUrl: authPhotoUrl,
+      canContinue: canContinue,
     ).whenComplete(() => _inFlight = null);
     _inFlight = run;
     return run;
@@ -106,14 +109,17 @@ class PersonalProfileBootstrapCoordinator {
     required String userId,
     String? authDisplayName,
     String? authPhotoUrl,
+    bool Function()? canContinue,
   }) async {
+    if (!(canContinue?.call() ?? true))
+      return ProfileBootstrapOutcome.authFailure;
     // 1. Read local profile safely.
     final LocalUserProfile? local;
     try {
       local = await _localRepository.loadProfile();
-    } catch (_) {
+    } catch (error) {
       // Cannot read local state → cannot prove safety → treat as retryable.
-      return ProfileBootstrapOutcome.failure;
+      return _failureOutcome(error);
     }
     if (local == null) {
       // V1-R08 (finding 5) — provisioning MUST work even when the device has
@@ -124,12 +130,15 @@ class PersonalProfileBootstrapCoordinator {
         userId: userId,
         authDisplayName: authDisplayName,
         authPhotoUrl: authPhotoUrl,
+        canContinue: canContinue,
       );
     }
 
     // 2. Validate local account binding (fail closed).
     final boundUserId = local.futureCloudUserId;
-    if (boundUserId != null && boundUserId.isNotEmpty && boundUserId != userId) {
+    if (boundUserId != null &&
+        boundUserId.isNotEmpty &&
+        boundUserId != userId) {
       // Never silently change User A's binding to User B, never mutate remote.
       return ProfileBootstrapOutcome.differentUserBlocked;
     }
@@ -138,9 +147,9 @@ class PersonalProfileBootstrapCoordinator {
     CloudProfile? cloud;
     try {
       cloud = await _remoteGateway.fetchByUserId(userId);
-    } catch (_) {
+    } catch (error) {
       // Offline/read failure → local untouched, binding not falsely persisted.
-      return ProfileBootstrapOutcome.failure;
+      return _failureOutcome(error);
     }
 
     if (cloud == null) {
@@ -158,9 +167,11 @@ class PersonalProfileBootstrapCoordinator {
         try {
           regionPreferenceId = await _regionPreferenceGateway
               .resolvePreferenceIdByCode(local.regionPreferenceCode!);
-        } catch (_) {
-          return ProfileBootstrapOutcome.failure;
+        } catch (error) {
+          return _failureOutcome(error);
         }
+        if (regionPreferenceId == null)
+          return ProfileBootstrapOutcome.invalidData;
       }
       final toCreate = _buildCloudProfile(
         local: local,
@@ -170,37 +181,55 @@ class PersonalProfileBootstrapCoordinator {
         regionPreferenceId: regionPreferenceId,
       );
       try {
+        if (!(canContinue?.call() ?? true))
+          return ProfileBootstrapOutcome.authFailure;
+        if (_mutationPending(userId)) return ProfileBootstrapOutcome.failure;
         await _remoteGateway.createProfile(toCreate);
       } on CloudProfileAlreadyExistsException {
         // Insert-race: another client created the row. Re-read and evaluate
         // as CASE B instead of failing or double-inserting.
         try {
           cloud = await _remoteGateway.fetchByUserId(userId);
-        } catch (_) {
-          return ProfileBootstrapOutcome.failure;
+        } catch (error) {
+          return _failureOutcome(error);
         }
         if (cloud == null) {
-          return ProfileBootstrapOutcome.failure;
+          return ProfileBootstrapOutcome.provisioningFailure;
         }
-        return _associateOrConflict(local: local, cloud: cloud, userId: userId);
+        return _associateOrConflict(
+          local: local,
+          cloud: cloud,
+          userId: userId,
+          canContinue: canContinue,
+        );
       } on CloudProfileProvisioningException {
         // F7 — the canonical row could not be provisioned for a
         // provisioning-specific reason. Typed outcome; the raw backend message
         // is never surfaced.
         return ProfileBootstrapOutcome.provisioningFailure;
-      } catch (_) {
+      } catch (error) {
         // Remote insert failure → local untouched, binding not persisted.
-        return ProfileBootstrapOutcome.failure;
+        return _failureOutcome(error);
       }
 
       // Remote creation confirmed → now (and only now) persist local binding.
-      final bound = await _persistLocalBinding(local, userId);
-      return bound ? ProfileBootstrapOutcome.associated
-                   : ProfileBootstrapOutcome.failure;
+      if (!(canContinue?.call() ?? true))
+        return ProfileBootstrapOutcome.authFailure;
+      final bound = await _persistLocalBinding(local, userId, canContinue);
+      return bound
+          ? ProfileBootstrapOutcome.associated
+          : ProfileBootstrapOutcome.unexpected;
     }
 
+    if (!(canContinue?.call() ?? true))
+      return ProfileBootstrapOutcome.authFailure;
     // CASE B — existing cloud profile.
-    return _associateOrConflict(local: local, cloud: cloud, userId: userId);
+    return _associateOrConflict(
+      local: local,
+      cloud: cloud,
+      userId: userId,
+      canContinue: canContinue,
+    );
   }
 
   /// V1-R08 (finding 5) — provisions the canonical cloud row when there is no
@@ -211,13 +240,16 @@ class PersonalProfileBootstrapCoordinator {
     required String userId,
     String? authDisplayName,
     String? authPhotoUrl,
+    bool Function()? canContinue,
   }) async {
     CloudProfile? cloud;
     try {
       cloud = await _remoteGateway.fetchByUserId(userId);
-    } catch (_) {
-      return ProfileBootstrapOutcome.failure;
+    } catch (error) {
+      return _failureOutcome(error);
     }
+    if (!(canContinue?.call() ?? true))
+      return ProfileBootstrapOutcome.authFailure;
     if (cloud != null) {
       // Canonical row already exists → nothing to create or bind (there is no
       // local profile to associate on this device).
@@ -230,30 +262,38 @@ class PersonalProfileBootstrapCoordinator {
       photoUrl: _meaningful(authPhotoUrl),
     );
     try {
+      if (!(canContinue?.call() ?? true))
+        return ProfileBootstrapOutcome.authFailure;
+      if (_mutationPending(userId)) return ProfileBootstrapOutcome.failure;
       await _remoteGateway.createProfile(toCreate);
     } on CloudProfileAlreadyExistsException {
       try {
         cloud = await _remoteGateway.fetchByUserId(userId);
-      } catch (_) {
-        return ProfileBootstrapOutcome.failure;
+      } catch (error) {
+        return _failureOutcome(error);
       }
+      if (!(canContinue?.call() ?? true))
+        return ProfileBootstrapOutcome.authFailure;
       return cloud == null
-          ? ProfileBootstrapOutcome.failure
+          ? ProfileBootstrapOutcome.provisioningFailure
           : ProfileBootstrapOutcome.associated;
     } on CloudProfileProvisioningException {
       // F7 — the canonical row could not be provisioned for a
       // provisioning-specific reason.
       return ProfileBootstrapOutcome.provisioningFailure;
-    } catch (_) {
-      return ProfileBootstrapOutcome.failure;
+    } catch (error) {
+      return _failureOutcome(error);
     }
-    return ProfileBootstrapOutcome.associated;
+    return (canContinue?.call() ?? true)
+        ? ProfileBootstrapOutcome.associated
+        : ProfileBootstrapOutcome.authFailure;
   }
 
   Future<ProfileBootstrapOutcome> _associateOrConflict({
     required LocalUserProfile local,
     required CloudProfile cloud,
     required String userId,
+    bool Function()? canContinue,
   }) async {
     // A5.8 FAIL-CLOSED Region Preference association: when the local
     // preference is meaningful, its canonical id MUST be resolved before any
@@ -266,23 +306,54 @@ class PersonalProfileBootstrapCoordinator {
       try {
         localPreferenceId = await _regionPreferenceGateway
             .resolvePreferenceIdByCode(local.regionPreferenceCode!);
-      } catch (_) {
-        return ProfileBootstrapOutcome.failure;
+      } catch (error) {
+        return _failureOutcome(error);
       }
+      if (localPreferenceId == null) return ProfileBootstrapOutcome.invalidData;
     }
     if (localPreferenceId != null) {
       final cloudPreferenceId = cloud.regionPreferenceId;
       if (cloudPreferenceId == null) {
         // cloud NULL + local preference → conditional single-column safe fill.
-        // A failure here never fails the association: the fill is retried on
-        // a later session without any local or other cloud mutation.
+        // V1-R09 C4 M2: any failure here is fail-closed — no binding, no
+        // silent success. Only a successful update followed by an authoritative
+        // reread proving the expected region may proceed to association.
         try {
+          if (!(canContinue?.call() ?? true))
+            return ProfileBootstrapOutcome.authFailure;
+          if (_mutationPending(userId)) return ProfileBootstrapOutcome.failure;
           await _remoteGateway.updateRegionPreferenceId(
             userId: userId,
             regionPreferenceId: localPreferenceId,
           );
-        } catch (_) {
-          // non-fatal; see above.
+        } catch (error) {
+          return _failureOutcome(error);
+        }
+
+        // Authoritative reread — do NOT trust the submitted value. The reread
+        // uses the existing strict parser and ownership check (SSOT).
+        CloudProfile? fresh;
+        try {
+          fresh = await _remoteGateway.fetchByUserId(userId);
+        } catch (error) {
+          return _failureOutcome(error);
+        }
+        if (fresh == null) {
+          return ProfileBootstrapOutcome.provisioningFailure;
+        }
+        if (fresh.userId != userId) {
+          return ProfileBootstrapOutcome.malformedResponse;
+        }
+        final freshPreferenceId = fresh.regionPreferenceId;
+        if (freshPreferenceId == null) {
+          // The null-only predicate did not match (e.g. a concurrent write
+          // populated the column). Fail closed and retry later.
+          return ProfileBootstrapOutcome.profileConflict;
+        }
+        if (freshPreferenceId != localPreferenceId) {
+          // A different value is now authoritative in the cloud. Preserve both
+          // sides and do not overwrite or bind speculatively.
+          return ProfileBootstrapOutcome.profileConflict;
         }
       } else if (cloudPreferenceId != localPreferenceId) {
         // Different cloud/local preference → preserve BOTH sides and never
@@ -298,10 +369,13 @@ class PersonalProfileBootstrapCoordinator {
       return ProfileBootstrapOutcome.profileConflict;
     }
 
+    if (!(canContinue?.call() ?? true))
+      return ProfileBootstrapOutcome.authFailure;
     // Compatible/equal → associate local profile with the canonical user id.
-    final bound = await _persistLocalBinding(local, userId);
-    return bound ? ProfileBootstrapOutcome.associated
-                 : ProfileBootstrapOutcome.failure;
+    final bound = await _persistLocalBinding(local, userId, canContinue);
+    return bound
+        ? ProfileBootstrapOutcome.associated
+        : ProfileBootstrapOutcome.unexpected;
   }
 
   /// Field-by-field comparison of the values A5.6 can map meaningfully.
@@ -366,7 +440,9 @@ class PersonalProfileBootstrapCoordinator {
   Future<bool> _persistLocalBinding(
     LocalUserProfile local,
     String userId,
+    bool Function()? canContinue,
   ) async {
+    if (!(canContinue?.call() ?? true)) return false;
     if (local.futureCloudUserId == userId) return true; // Already bound.
     final updated = local.copyWith(
       futureCloudUserId: userId,
@@ -380,6 +456,23 @@ class PersonalProfileBootstrapCoordinator {
       return false;
     }
   }
+
+  bool _mutationPending(String userId) {
+    final gateway = _remoteGateway;
+    return gateway is ProfileMutationSettlement &&
+        (gateway as ProfileMutationSettlement).isProfileMutationPending(userId);
+  }
+
+  static ProfileBootstrapOutcome _failureOutcome(
+    Object error,
+  ) => switch (classifyProfileFailure(error)) {
+    ProfileFailureKind.infrastructure => ProfileBootstrapOutcome.failure,
+    ProfileFailureKind.permission => ProfileBootstrapOutcome.permissionDenied,
+    ProfileFailureKind.invalidData => ProfileBootstrapOutcome.invalidData,
+    ProfileFailureKind.malformed => ProfileBootstrapOutcome.malformedResponse,
+    ProfileFailureKind.auth => ProfileBootstrapOutcome.authFailure,
+    ProfileFailureKind.unexpected => ProfileBootstrapOutcome.unexpected,
+  };
 
   static String? _meaningful(String? value) {
     if (value == null) return null;

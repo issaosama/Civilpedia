@@ -1,4 +1,117 @@
+import 'package:http/http.dart' show ClientException;
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../core/network/remote_operation_policy.dart';
 import 'cloud_profile.dart';
+
+/// Profile request rejection, not proof that the SDK session was lost.
+class CloudProfileAuthException implements Exception {
+  const CloudProfileAuthException();
+}
+
+enum ProfileFailureKind {
+  infrastructure,
+  auth,
+  permission,
+  invalidData,
+  malformed,
+  unexpected,
+}
+
+/// The deadline wrapper knows whether a timed-out raw write is still running.
+/// A manual retry must not issue a competing mutation during that interval.
+abstract interface class ProfileMutationSettlement {
+  bool isProfileMutationPending(String userId);
+}
+
+/// An uncertain-write retry may fill an absent region, but cannot overwrite a
+/// region installed after its preflight reread by another device/request.
+abstract interface class ConditionalProfileRetryGateway {
+  Future<void> saveEditableFieldsIfRegionAbsent({
+    required String userId,
+    required String roleCode,
+    String? regionPreferenceId,
+  });
+}
+
+/// Shared C4 classification for lookup, read, mutation and bootstrap. Raw
+/// messages are never used to infer authentication or transport failure.
+ProfileFailureKind classifyProfileFailure(Object error) {
+  if (error is CloudProfileAuthException) return ProfileFailureKind.auth;
+  if (error is CloudProfilePermissionDeniedException)
+    return ProfileFailureKind.permission;
+  if (error is CloudProfileInvalidDataException ||
+      error is CloudProfileAlreadyExistsException) {
+    return ProfileFailureKind.invalidData;
+  }
+  if (error is CloudProfileParseException || error is FormatException)
+    return ProfileFailureKind.malformed;
+  if (error is CloudProfileUnexpectedException)
+    return ProfileFailureKind.unexpected;
+  if (error is PostgrestException) {
+    // Public PostgREST JWT contract: errors.html#group-3-jwt. PGRST300 is
+    // server configuration, not evidence of a rejected user session.
+    if (const {'PGRST301', 'PGRST302', 'PGRST303', '401'}.contains(error.code))
+      return ProfileFailureKind.auth;
+    if (error.code == '42501') return ProfileFailureKind.permission;
+    if (const {
+          '23502',
+          '23503',
+          '23514',
+          '23P01',
+          '23505',
+        }.contains(error.code) ||
+        RegExp(r'^22[A-Z0-9]{3}$').hasMatch(error.code ?? ''))
+      return ProfileFailureKind.invalidData;
+    // postgrest 2.8.0 uses the HTTP status when no backend code is present.
+    if (error.code == '503') return ProfileFailureKind.infrastructure;
+    if (error.code == '200' || error.code == '406' || error.code == 'PGRST116')
+      return ProfileFailureKind.malformed;
+    return ProfileFailureKind.unexpected;
+  }
+  // Canonical GoTrue exceptions can escape token acquisition in the shared
+  // SDK HTTP client. Retryable fetch failures are not auth rejection.
+  if (error is AuthRetryableFetchException || error is ClientException)
+    return ProfileFailureKind.infrastructure;
+  if (error is AuthSessionMissingException || error is AuthInvalidJwtException)
+    return ProfileFailureKind.auth;
+  if (error is AuthException) {
+    return error.statusCode == '401'
+        ? ProfileFailureKind.auth
+        : ProfileFailureKind.unexpected;
+  }
+  return switch (classifyInfrastructureFailure(error).kind) {
+    InfrastructureFailureKind.offline ||
+    InfrastructureFailureKind.network ||
+    InfrastructureFailureKind.timeout ||
+    InfrastructureFailureKind.serviceUnavailable =>
+      ProfileFailureKind.infrastructure,
+    InfrastructureFailureKind.malformedResponse => ProfileFailureKind.malformed,
+    InfrastructureFailureKind.unknown => ProfileFailureKind.unexpected,
+  };
+}
+
+Never throwProfileFailure(Object error) {
+  switch (classifyProfileFailure(error)) {
+    case ProfileFailureKind.auth:
+      throw const CloudProfileAuthException();
+    case ProfileFailureKind.permission:
+      throw const CloudProfilePermissionDeniedException();
+    case ProfileFailureKind.invalidData:
+      throw const CloudProfileInvalidDataException();
+    case ProfileFailureKind.malformed:
+      throw const CloudProfileParseException('Invalid profile response');
+    case ProfileFailureKind.unexpected:
+      throw const CloudProfileUnexpectedException();
+    case ProfileFailureKind.infrastructure:
+      if (error is PostgrestException) {
+        throw const InfrastructureFailureException(
+          InfrastructureFailure(InfrastructureFailureKind.serviceUnavailable),
+        );
+      }
+      throw error;
+  }
+}
 
 /// Thrown by [PersonalProfileRemoteGateway.createProfile] when an INSERT
 /// fails because a row for the same `user_id` already exists (a concurrent
@@ -24,6 +137,22 @@ class CloudProfilePermissionDeniedException implements Exception {
 /// `provisioningFailure` and never surface the raw backend message.
 class CloudProfileProvisioningException implements Exception {
   const CloudProfileProvisioningException();
+}
+
+/// Thrown by [PersonalProfileRemoteGateway.updateRegionPreferenceId] and
+/// [PersonalProfileRemoteGateway.saveEditableFields] when the backend rejects
+/// the mutation for a domain/data reason (constraint violation, invalid value,
+/// duplicate on update). This is the UPDATE-time equivalent of an invalid-data
+/// failure; it must NEVER be interpreted as a successful create/provision.
+class CloudProfileInvalidDataException implements Exception {
+  const CloudProfileInvalidDataException();
+}
+
+/// Thrown when the backend returns an unexpected SQLSTATE or otherwise
+/// unclassifiable failure on a profile mutation/read. Callers map this to a
+/// typed `unexpected` cause; the raw backend message is never surfaced.
+class CloudProfileUnexpectedException implements Exception {
+  const CloudProfileUnexpectedException();
 }
 
 /// A5.6 — Boundary to the Supabase `public.profiles` table.
@@ -56,8 +185,15 @@ abstract class PersonalProfileRemoteGateway {
 
   /// Single-column safe update of `profiles.region_preference_id` for
   /// [userId]. Used ONLY for the A5.8 conditional fill path (cloud
-  /// `region_preference_id` NULL + a locally-selected preference). Never used
-  /// to overwrite an existing cloud preference. A network failure MUST throw.
+  /// `region_preference_id` NULL + a locally-selected preference). The backend
+  /// predicate guarantees the column is currently NULL; an existing value is
+  /// never overwritten.
+  ///
+  /// Throws [CloudProfilePermissionDeniedException] on RLS denial,
+  /// [CloudProfileInvalidDataException] on a domain/constraint/data rejection
+  /// (including UPDATE-time unique violation 23505), and
+  /// [CloudProfileUnexpectedException] for an unclassifiable backend failure.
+  /// Network/infrastructure failures are left for the caller's classifier.
   Future<void> updateRegionPreferenceId({
     required String userId,
     required String regionPreferenceId,
@@ -71,9 +207,11 @@ abstract class PersonalProfileRemoteGateway {
   /// `preferred_region_id`, and never clears `region_preference_id` (a null
   /// [regionPreferenceId] leaves the column untouched).
   ///
-  /// Throws [CloudProfilePermissionDeniedException] on RLS denial; any other
-  /// failure is a retryable/permission condition the caller maps to a typed
-  /// result.
+  /// Throws [CloudProfilePermissionDeniedException] on RLS denial,
+  /// [CloudProfileInvalidDataException] on a domain/constraint/data rejection,
+  /// and [CloudProfileUnexpectedException] for an unclassifiable backend
+  /// failure. Network/infrastructure failures are left for the caller's
+  /// classifier.
   Future<void> saveEditableFields({
     required String userId,
     required String roleCode,

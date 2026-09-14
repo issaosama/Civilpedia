@@ -119,8 +119,8 @@ Rules for this table:
 CURRENT_PHASE_ID: V1-R09
 CURRENT_PHASE_TITLE: Offline / Connectivity / Error Hardening
 CURRENT_PHASE_STATUS: CURRENT
-CURRENT_PHASE_CONTRACT: NOT_FROZEN
-IMPLEMENTATION_AUTHORIZED: NO
+CURRENT_PHASE_CONTRACT: V1-R09-CONTRACT-v1
+IMPLEMENTATION_AUTHORIZED: YES
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
@@ -749,6 +749,9 @@ Production audit and completion of:
 
 STATUS: CURRENT
 
+Part 1: CLOSED / ACCEPTED — PASS - V1-R09 PART 1 ACCEPTED - PART 2 MAY BEGIN
+Part 2: AUTHORIZED — current within V1-R09 (overall V1-R09 remains CURRENT)
+
 Primary:
 
 Big Pickle
@@ -1344,4 +1347,28 @@ Push verified: NO (owner stages explicit files)
 Next CURRENT phase: V1-R09 — Offline / Connectivity / Error Hardening
 Next contract: NOT_FROZEN
 Implementation authorized: NO
+Owner approval: PENDING OWNER STAGING
+
+### Phase Contract Freeze Record
+
+Phase: V1-R09 — Offline / Connectivity / Error Hardening
+Status: CURRENT
+Contract: V1-R09-CONTRACT-v1
+Contract status: FROZEN
+Architect decision: APPROVED FOR IMPLEMENTATION
+Implementation authorized: YES
+Baseline: e80fab8883a3631e58d1cc9bb83846c7f981d0fa
+Evidence summary:
+- pre-contract architecture audit: READY FOR ARCHITECT V1-R09 CONTRACT FREEZE
+- one canonical injectable transport authority using existing connectivity_plus
+- local-first startup and finite application-owned timeout policy frozen
+- common infrastructure failure classification and no-raw-error policy frozen
+- conservative read reconnect policy; blind automatic mutation retry forbidden
+- Directory immediate-cache, bounded-refresh, and stale-empty behavior frozen
+- V1-R08 auth/session/ownership protections explicitly preserved
+- OPTION A — NO DATABASE MIGRATION REQUIRED; migration 00022 prohibited
+- production Supabase readiness and DEV server QA remain deferred to V1-R14
+- implementation split into independently reviewed Part 1 then Part 2
+V1-R09 status: CURRENT (not closed)
+Next queued phase: V1-R10 — Core App UX Production Completion
 Owner approval: PENDING OWNER STAGING

@@ -11,6 +11,7 @@ import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
 import '../../auth/domain/auth_return_destination.dart';
 import '../../auth/domain/entities/auth_error.dart';
+import '../../auth/domain/repositories/auth_gateway.dart';
 import 'providers/auth_provider.dart';
 import 'widgets/ownership_conflict_view.dart';
 
@@ -65,21 +66,38 @@ class _AuthScreenState extends State<AuthScreen> {
     return AuthReturnDestination.resolve(raw);
   }
 
-  String? _signInErrorMessage(AuthProvider auth, String Function(String, String) tr) {
+  String? _signInErrorMessage(
+    AuthProvider auth,
+    String Function(String, String) tr,
+  ) {
     final error = auth.error;
     if (error == null) return null;
     return switch (error) {
-      AuthError.unavailable => tr(Ar.googleSignInUnavailable, En.googleSignInUnavailable),
-      AuthError.retryableNetwork => tr(Ar.authErrorRetryable, En.authErrorRetryable),
-      AuthError.signInFailed => tr(Ar.googleSignInFailed, En.googleSignInFailed),
-      AuthError.unexpected => tr(Ar.authErrorUnexpected, En.authErrorUnexpected),
+      AuthError.unavailable => tr(
+        Ar.googleSignInUnavailable,
+        En.googleSignInUnavailable,
+      ),
+      AuthError.retryableNetwork => tr(
+        Ar.authErrorRetryable,
+        En.authErrorRetryable,
+      ),
+      AuthError.signInFailed => tr(
+        Ar.googleSignInFailed,
+        En.googleSignInFailed,
+      ),
+      AuthError.unexpected => tr(
+        Ar.authErrorUnexpected,
+        En.authErrorUnexpected,
+      ),
       AuthError.sessionLost => tr(Ar.authSessionLost, En.authSessionLost),
       // Cancellation returns to the quiet guest state (no error row).
       AuthError.signInCancelled ||
       AuthError.signOutFailed ||
       AuthError.sessionExpired ||
-      AuthError.ownershipConflict =>
-        null,
+      AuthError.ownershipConflict ||
+      // C1 — recovery-blocked authority is surfaced by suppressing auth, not
+      // by presenting a message that could be mistaken for a transient error.
+      AuthError.recoveryBlocked => null,
     };
   }
 
@@ -106,11 +124,7 @@ class _AuthScreenState extends State<AuthScreen> {
             vertical: 32,
           ),
           children: [
-            Icon(
-              Icons.account_circle,
-              size: 88,
-              color: theme.primaryColor,
-            ),
+            Icon(Icons.account_circle, size: 88, color: theme.primaryColor),
             AppSpacing.gapLg,
             Text(
               tr(Ar.googleSignInGuestNotice, En.googleSignInGuestNotice),
@@ -131,13 +145,16 @@ class _AuthScreenState extends State<AuthScreen> {
               const OwnershipConflictView()
             else if (auth.isLoggedIn)
               _buildPostAuthArea(context, auth, tr)
+            else if (auth.isCleanupBlocked)
+              _CleanupRequiredNotice(tr: tr)
+            else if (auth.isAuthObservationUnavailable)
+              const _RestartRequiredNotice()
             else if (!auth.isAvailable)
               _UnavailableNotice(tr: tr)
             else ...[
               _GoogleSignInButton(
                 label: tr(Ar.continueWithGoogle, En.continueWithGoogle),
-                onPressed:
-                    auth.isRestoring ? null : () => _signIn(),
+                onPressed: auth.isRestoring ? null : () => _signIn(),
                 restoring: auth.isRestoring,
               ),
               if (_signInErrorMessage(auth, tr) case final message?)
@@ -168,12 +185,21 @@ class _AuthScreenState extends State<AuthScreen> {
       case PostAuthLifecycleState.running:
         return _PostAuthProgress(tr: tr);
       case PostAuthLifecycleState.retryableFailure:
-        return _PostAuthRetryable(
-          tr: tr,
-          onRetry: _retrySetup,
-        );
+        return _PostAuthRetryable(tr: tr, onRetry: _retrySetup);
       case PostAuthLifecycleState.provisioningFailure:
         return _PostAuthProvisioning(tr: tr);
+      case PostAuthLifecycleState.permissionDenied:
+        return Text(
+          tr(Ar.profileCausePermissionDenied, En.profileCausePermissionDenied),
+        );
+      case PostAuthLifecycleState.invalidData:
+        return Text(tr(Ar.profileCauseInvalidData, En.profileCauseInvalidData));
+      case PostAuthLifecycleState.malformedResponse:
+        return Text(tr(Ar.profileCauseMalformed, En.profileCauseMalformed));
+      case PostAuthLifecycleState.authFailure:
+        return Text(tr(Ar.profileCauseAuthFailure, En.profileCauseAuthFailure));
+      case PostAuthLifecycleState.unexpected:
+        return Text(tr(Ar.profileCauseUnexpected, En.profileCauseUnexpected));
       case PostAuthLifecycleState.ownershipConflict:
       case PostAuthLifecycleState.corruptOwnershipRegistry:
         return const OwnershipConflictView();
@@ -242,10 +268,7 @@ class _PostAuthProgress extends StatelessWidget {
 /// authoritative; the user may safely retry from here or proceed to the
 /// profile area (the profile seam shows the same lifecycle).
 class _PostAuthRetryable extends StatelessWidget {
-  const _PostAuthRetryable({
-    required this.tr,
-    required this.onRetry,
-  });
+  const _PostAuthRetryable({required this.tr, required this.onRetry});
 
   final String Function(String ar, String en) tr;
   final VoidCallback onRetry;
@@ -255,11 +278,7 @@ class _PostAuthRetryable extends StatelessWidget {
     final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(
-          Icons.cloud_off,
-          size: 40,
-          color: theme.colorScheme.error,
-        ),
+        Icon(Icons.cloud_off, size: 40, color: theme.colorScheme.error),
         AppSpacing.gapLg,
         Text(
           tr(Ar.authPostSetupRetryable, En.authPostSetupRetryable),
@@ -301,11 +320,7 @@ class _PostAuthProvisioning extends StatelessWidget {
     final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(
-          Icons.info_outline,
-          size: 40,
-          color: theme.colorScheme.primary,
-        ),
+        Icon(Icons.info_outline, size: 40, color: theme.colorScheme.primary),
         AppSpacing.gapLg,
         Text(
           tr(Ar.authPostSetupProvisioning, En.authPostSetupProvisioning),
@@ -410,9 +425,130 @@ class _UnavailableNotice extends StatelessWidget {
     return Text(
       tr(Ar.googleSignInUnavailable, En.googleSignInUnavailable),
       textAlign: TextAlign.center,
-      style: theme.textTheme.bodyMedium?.copyWith(
-        color: AppColors.error,
+      style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.error),
+    );
+  }
+}
+
+/// V1-R09 H1 — remote sign-out succeeded but owned local cleanup is pending,
+/// blocked, or stalled. The profile/account areas are neutralized and only the
+/// bounded cleanup retry is offered; a fresh sign-in must NOT be presented.
+class _CleanupRequiredNotice extends StatelessWidget {
+  const _CleanupRequiredNotice({required this.tr});
+
+  final String Function(String ar, String en) tr;
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+    final message = switch (auth.recoveryStatus) {
+      AuthRecoveryStatus.remotePending => tr(
+        Ar.authRemotePendingMessage,
+        En.authRemotePendingMessage,
       ),
+      AuthRecoveryStatus.restartRequired => tr(
+        Ar.authRecoveryRestartMessage,
+        En.authRecoveryRestartMessage,
+      ),
+      AuthRecoveryStatus.blockedCleanupFailure ||
+      AuthRecoveryStatus.storageFailure => tr(
+        Ar.authRecoveryBlockedMessage,
+        En.authRecoveryBlockedMessage,
+      ),
+      AuthRecoveryStatus.exchangeBlockedUnattributed => tr(
+        Ar.authUnattributedResetMessage,
+        En.authUnattributedResetMessage,
+      ),
+      AuthRecoveryStatus.localResetRestartRequired => tr(
+        Ar.authLocalResetRestartMessage,
+        En.authLocalResetRestartMessage,
+      ),
+      AuthRecoveryStatus.exchangeTimedOutPending => tr(
+        Ar.authExchangeTimedOutPendingMessage,
+        En.authExchangeTimedOutPendingMessage,
+      ),
+      AuthRecoveryStatus.exchangeNeutralizing => tr(
+        Ar.authExchangeNeutralizingMessage,
+        En.authExchangeNeutralizingMessage,
+      ),
+      AuthRecoveryStatus.exchangeBlockedCleanupFailure => tr(
+        Ar.authExchangeBlockedMessage,
+        En.authExchangeBlockedMessage,
+      ),
+      _ => tr(Ar.authLogoutCleanupMessage, En.authLogoutCleanupMessage),
+    };
+    final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final muted = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
+    return Column(
+      children: [
+        Icon(Icons.shield_outlined, size: 40, color: theme.colorScheme.error),
+        AppSpacing.gapLg,
+        Text(
+          tr(Ar.authRecoveryTitle, En.authRecoveryTitle),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        AppSpacing.gapSm,
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+        ),
+        AppSpacing.gapXl,
+        if (auth.recoveryStatus != AuthRecoveryStatus.restartRequired &&
+            auth.recoveryStatus != AuthRecoveryStatus.localResetRestartRequired)
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: FilledButton(
+              onPressed: auth.isRecoveryRetryBusy
+                  ? null
+                  : auth.recoveryStatus ==
+                        AuthRecoveryStatus.exchangeBlockedUnattributed
+                  ? auth.resetQuarantinedDeviceSignIn
+                  : auth.retryAuthCleanup,
+              child: Text(
+                auth.recoveryStatus ==
+                        AuthRecoveryStatus.exchangeBlockedUnattributed
+                    ? tr(Ar.resetDeviceSignIn, En.resetDeviceSignIn)
+                    : tr(Ar.retryAuthRecovery, En.retryAuthRecovery),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// V1-R09 H2 — the canonical auth-state observation stream terminated
+/// unexpectedly. Fresh authority stays latched off; the app must restart.
+class _RestartRequiredNotice extends StatelessWidget {
+  const _RestartRequiredNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tr = (String ar, String en) =>
+        context.watch<LanguageProvider>().isArabic ? ar : en;
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
+    return Column(
+      children: [
+        Icon(Icons.refresh, size: 40, color: theme.colorScheme.error),
+        AppSpacing.gapLg,
+        Text(
+          tr(Ar.authRestartRequired, En.authRestartRequired),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodyLarge?.copyWith(color: muted),
+        ),
+      ],
     );
   }
 }

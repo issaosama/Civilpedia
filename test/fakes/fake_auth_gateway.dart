@@ -19,6 +19,7 @@ class FakeAuthGateway implements AuthGateway {
     this.restoreError,
     this.signInError,
     this.signOutError,
+    this.blockAccountAuthority = false,
     this.onSignIn,
     this.onSignOut,
     Stream<AuthEvent>? events,
@@ -39,6 +40,7 @@ class FakeAuthGateway implements AuthGateway {
   Object? restoreError;
   Object? signInError;
   Object? signOutError;
+  bool blockAccountAuthority = false;
   int signInCalls = 0;
   int signOutCalls = 0;
   final StreamController<AuthEvent> _controller;
@@ -58,6 +60,18 @@ class FakeAuthGateway implements AuthGateway {
 
   @override
   bool get isAvailable => available;
+
+  @override
+  bool get canAccountAuthorityBeGranted => !blockAccountAuthority;
+
+  @override
+  bool get isAuthObservationAvailable => true;
+
+  @override
+  bool get isLogoutCleanupBlocked => false;
+
+  @override
+  Future<bool> retryAuthCleanup() async => false;
 
   @override
   Stream<AuthEvent> get authEvents => _controller.stream;

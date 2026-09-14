@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/network/remote_operation_policy.dart';
 import '../../../../core/services/logger_service.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../data/cloud_profile.dart';
@@ -39,10 +40,10 @@ class UserProfileProvider extends ChangeNotifier {
     PersonalProfileRemoteGateway? cloudProfileGateway,
     RegionPreferenceGateway? regionPreferenceGateway,
     AuthProvider? auth,
-  })  : _repository = repository,
-        _cloudProfileGateway = cloudProfileGateway,
-        _regionPreferenceGateway = regionPreferenceGateway,
-        _auth = auth {
+  }) : _repository = repository,
+       _cloudProfileGateway = cloudProfileGateway,
+       _regionPreferenceGateway = regionPreferenceGateway,
+       _auth = auth {
     _auth?.addListener(_handleAuthChanged);
   }
 
@@ -70,6 +71,10 @@ class UserProfileProvider extends ChangeNotifier {
   /// writes).
   Future<ProfileOperationResult>? _saveInFlight;
 
+  // Process-local request metadata only; never a profile cache or replay queue.
+  ({String userId, int generation, String role, String? region})?
+  _uncertainSave;
+
   /// The on-device local profile. NULL while an authenticated session is
   /// active (the cloud profile is canonical and the local profile is never a
   /// signed-in fallback — finding 1/17).
@@ -88,7 +93,8 @@ class UserProfileProvider extends ChangeNotifier {
   /// regionPreferenceId] UUID by reverse resolution via the [RegionPreferenceGateway].
   /// Display-only; null when the cloud profile has no region set or when the
   /// reverse resolution fails (never fabricated).
-  String? get authenticatedRegionPreferenceCode => _authenticatedRegionPreferenceCode;
+  String? get authenticatedRegionPreferenceCode =>
+      _authenticatedRegionPreferenceCode;
 
   /// True only while a cloud profile is authoritatively loaded for the active
   /// authenticated session.
@@ -194,7 +200,8 @@ class UserProfileProvider extends ChangeNotifier {
       final loaded = await gateway.fetchByUserId(userId);
       // Stale suppression: the session may have changed while the read was in
       // flight; a result captured under an old identity/generation is dropped.
-      if (!auth.isCurrentSession(userId: userId, generation: generation)) return;
+      if (!auth.isCurrentSession(userId: userId, generation: generation))
+        return;
       if (loaded == null) {
         // No row yet — provisioning belongs to the post-auth bootstrap seam;
         // the provider keeps showing no authenticated profile (fail closed).
@@ -208,7 +215,8 @@ class UserProfileProvider extends ChangeNotifier {
         );
         // Reverse-lookup was async; still publish only under the captured
         // (userId, generation).
-        if (!auth.isCurrentSession(userId: userId, generation: generation)) return;
+        if (!auth.isCurrentSession(userId: userId, generation: generation))
+          return;
         _authenticatedProfile = loaded;
         _authenticatedRegionPreferenceCode = regionCode;
         _cloudLoadFailed = false;
@@ -244,7 +252,9 @@ class UserProfileProvider extends ChangeNotifier {
   /// stable six-zone code for display. Display-only: a missing id, an unknown
   /// id, or a failed lookup yields null (the UI renders "not set"; the code is
   /// never fabricated).
-  Future<String?> _resolveRegionPreferenceCode(String? regionPreferenceId) async {
+  Future<String?> _resolveRegionPreferenceCode(
+    String? regionPreferenceId,
+  ) async {
     final regionGateway = _regionPreferenceGateway;
     if (regionGateway == null ||
         regionPreferenceId == null ||
@@ -299,17 +309,34 @@ class UserProfileProvider extends ChangeNotifier {
     final auth = _auth;
     final gateway = _cloudProfileGateway;
     final regionGateway = _regionPreferenceGateway;
-    if (auth == null || !auth.isLoggedIn || gateway == null || regionGateway == null) {
+    if (auth == null ||
+        !auth.isLoggedIn ||
+        gateway == null ||
+        regionGateway == null) {
       return const ProfileOperationResult.failed(
         ProfileOperationCause.unauthenticated,
       );
     }
+    if (!auth.canAccountAuthorityBeGranted) {
+      return const ProfileOperationResult.failed(
+        ProfileOperationCause.authorityBlocked,
+      );
+    }
     final userId = auth.currentUserId;
+    final generation = auth.generation;
     if (userId == null || userId.isEmpty) {
       return const ProfileOperationResult.failed(
         ProfileOperationCause.unauthenticated,
       );
     }
+    ProfileOperationCause? lostAuthority() {
+      if (!auth.isCurrentSession(userId: userId, generation: generation))
+        return ProfileOperationCause.sessionLost;
+      if (!auth.canAccountAuthorityBeGranted)
+        return ProfileOperationCause.authorityBlocked;
+      return null;
+    }
+
     if (!isCanonicalRoleCode(roleCode)) {
       return const ProfileOperationResult.failed(
         ProfileOperationCause.invalidData,
@@ -324,15 +351,16 @@ class UserProfileProvider extends ChangeNotifier {
         );
       }
       try {
-        regionPreferenceId =
-            await regionGateway.resolvePreferenceIdByCode(trimmedRegion);
-      } catch (_) {
-        // Lookup/network failure: nothing may be written without the canonical
-        // id. Map to a retryable failure; prior cloud state is untouched.
-        return const ProfileOperationResult.failed(
-          ProfileOperationCause.retryableFailure,
+        regionPreferenceId = await regionGateway.resolvePreferenceIdByCode(
+          trimmedRegion,
+        );
+      } catch (error) {
+        return ProfileOperationResult.failed(
+          lostAuthority() ?? _failureCause(error),
         );
       }
+      final lost = lostAuthority();
+      if (lost != null) return ProfileOperationResult.failed(lost);
       if (regionPreferenceId == null) {
         return const ProfileOperationResult.failed(
           ProfileOperationCause.invalidData,
@@ -340,89 +368,228 @@ class UserProfileProvider extends ChangeNotifier {
       }
     }
 
-    final generation = auth.generation;
+    bool matches(CloudProfile profile) =>
+        profile.roleCode == roleCode &&
+        (regionPreferenceId == null ||
+            profile.regionPreferenceId == regionPreferenceId);
 
-    // Duplicate-save guard fires BEFORE any remote mutation.
-    final current = _authenticatedProfile;
-    if (current != null &&
-        current.userId == userId &&
-        current.roleCode == roleCode &&
-        (current.regionPreferenceId ?? '') == (regionPreferenceId ?? '')) {
-      return ProfileOperationResult.ok(profile: current, wasNoOp: true);
+    Future<ProfileOperationResult> publish(
+      CloudProfile fresh, {
+      bool noOp = false,
+    }) async {
+      if (fresh.userId != userId) {
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.ownershipConflict,
+        );
+      }
+      final regionCode = await _resolveRegionPreferenceCode(
+        fresh.regionPreferenceId,
+      );
+      final lost = lostAuthority();
+      if (lost != null) return ProfileOperationResult.failed(lost);
+      _authenticatedProfile = fresh;
+      _authenticatedRegionPreferenceCode = regionCode;
+      _cloudLoadFailed = false;
+      _cloudLoadSettled = true;
+      notifyListeners();
+      return matches(fresh)
+          ? ProfileOperationResult.ok(profile: fresh, wasNoOp: noOp)
+          : const ProfileOperationResult.failed(
+              ProfileOperationCause.profileConflict,
+            );
     }
 
+    final uncertain = _uncertainSave;
+    var conditionalRetry = false;
+    final hasStaleUncertainty = uncertain != null &&
+        (uncertain.userId != userId || uncertain.generation != generation);
+
+    if (uncertain != null &&
+        uncertain.userId == userId &&
+        uncertain.generation == generation) {
+      // A timed-out write may already have committed. Inspect current authority
+      // before another intentional attempt; never overwrite an observed region.
+      CloudProfile? current;
+      try {
+        current = await gateway.fetchByUserId(userId);
+      } catch (error) {
+        return ProfileOperationResult.failed(
+          lostAuthority() ?? _failureCause(error),
+        );
+      }
+      final lost = lostAuthority();
+      if (lost != null) return ProfileOperationResult.failed(lost);
+      if (current == null)
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.provisioningFailure,
+        );
+      if (current.userId != userId)
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.ownershipConflict,
+        );
+      if (_isProfileMutationPending(userId)) {
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.retryableFailure,
+        );
+      }
+      _uncertainSave = null;
+      if (matches(current)) {
+        return publish(current, noOp: true);
+      }
+      if ((regionPreferenceId != null && current.regionPreferenceId != null) ||
+          uncertain.role != roleCode ||
+          uncertain.region != regionPreferenceId) {
+        await publish(current);
+        final lost = lostAuthority();
+        return ProfileOperationResult.failed(
+          lost ?? ProfileOperationCause.profileConflict,
+        );
+      }
+      // Only the same request can be explicitly retried while the authoritative
+      // region is absent and the old raw write has settled.
+      conditionalRetry = regionPreferenceId != null;
+    } else if (hasStaleUncertainty) {
+      // A stale local uncertainty (different user or generation) does NOT prove
+      // the underlying raw mutation has settled. The gateway's pending-mutation
+      // state is authoritative, and an authoritative reread is required before
+      // another mutation whenever the previous outcome was uncertain.
+      if (_isProfileMutationPending(userId)) {
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.retryableFailure,
+        );
+      }
+      CloudProfile? current;
+      try {
+        current = await gateway.fetchByUserId(userId);
+      } catch (error) {
+        return ProfileOperationResult.failed(
+          lostAuthority() ?? _failureCause(error),
+        );
+      }
+      final lost = lostAuthority();
+      if (lost != null) return ProfileOperationResult.failed(lost);
+      if (current == null)
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.provisioningFailure,
+        );
+      if (current.userId != userId)
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.ownershipConflict,
+        );
+      _uncertainSave = null;
+      if (matches(current)) {
+        return publish(current, noOp: true);
+      }
+      if (regionPreferenceId != null && current.regionPreferenceId != null) {
+        await publish(current);
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.profileConflict,
+        );
+      }
+      // The raw mutation has settled and the authoritative region is still
+      // absent; a fresh mutation may proceed under the current generation.
+      conditionalRetry = regionPreferenceId != null;
+    } else {
+      // No prior uncertainty, but the gateway is still authoritative for
+      // whether a raw mutation for this user is in flight.
+      if (_isProfileMutationPending(userId)) {
+        return const ProfileOperationResult.failed(
+          ProfileOperationCause.retryableFailure,
+        );
+      }
+      _uncertainSave = null;
+      final current = _authenticatedProfile;
+      if (current != null && current.userId == userId && matches(current)) {
+        return ProfileOperationResult.ok(profile: current, wasNoOp: true);
+      }
+    }
+
+    final lost = lostAuthority();
+    if (lost != null) return ProfileOperationResult.failed(lost);
+    final request = (
+      userId: userId,
+      generation: generation,
+      role: roleCode,
+      region: regionPreferenceId,
+    );
+    _uncertainSave = request;
     try {
-      await gateway.saveEditableFields(
-        userId: userId,
-        roleCode: roleCode,
-        regionPreferenceId: regionPreferenceId,
-      );
-    } on CloudProfilePermissionDeniedException {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.permissionDenied,
-      );
-    } catch (_) {
-      // A failed write preserves the current cloud state; never fabricate
-      // success, never navigate.
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.retryableFailure,
+      if (conditionalRetry) {
+        if (gateway is! ConditionalProfileRetryGateway)
+          throw const CloudProfileUnexpectedException();
+        await (gateway as ConditionalProfileRetryGateway)
+            .saveEditableFieldsIfRegionAbsent(
+              userId: userId,
+              roleCode: roleCode,
+              regionPreferenceId: regionPreferenceId,
+            );
+      } else {
+        await gateway.saveEditableFields(
+          userId: userId,
+          roleCode: roleCode,
+          regionPreferenceId: regionPreferenceId,
+        );
+      }
+    } catch (error) {
+      final kind = classifyProfileFailure(error);
+      // A definite rejection did not commit this request. Allow corrected
+      // input, but do not erase uncertainty from an earlier timed-out request.
+      if (uncertain == null &&
+          _uncertainSave == request &&
+          (kind == ProfileFailureKind.permission ||
+              kind == ProfileFailureKind.invalidData ||
+              kind == ProfileFailureKind.auth)) {
+        _uncertainSave = null;
+      }
+      return ProfileOperationResult.failed(
+        lostAuthority() ?? _failureCause(error),
       );
     }
-
-    // Authoritative re-read — ONLY a successful strict parse under the SAME
-    // (userId, generation) may install new state (finding 8 stale suppression).
-    if (!auth.isCurrentSession(userId: userId, generation: generation)) {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.sessionLost,
-      );
-    }
+    final afterWrite = lostAuthority();
+    if (afterWrite != null) return ProfileOperationResult.failed(afterWrite);
     CloudProfile? fresh;
     try {
       fresh = await gateway.fetchByUserId(userId);
-    } on CloudProfilePermissionDeniedException {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.permissionDenied,
-      );
-    } on CloudProfileParseException {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.malformedResponse,
-      );
-    } catch (_) {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.retryableFailure,
+    } catch (error) {
+      return ProfileOperationResult.failed(
+        lostAuthority() ?? _failureCause(error),
       );
     }
-    if (!auth.isCurrentSession(userId: userId, generation: generation)) {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.sessionLost,
-      );
-    }
+    final afterRead = lostAuthority();
+    if (afterRead != null) return ProfileOperationResult.failed(afterRead);
     if (fresh == null) {
-      // F7 — the authoritative re-read finds NO canonical row for a session
-      // that was supposed to have one: provisioning (create at sign-in) never
-      // succeeded. Fail closed with the typed provisioning cause; never
-      // fabricate success.
       return const ProfileOperationResult.failed(
         ProfileOperationCause.provisioningFailure,
       );
     }
-    if (fresh.userId != userId) {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.ownershipConflict,
-      );
+    final result = await publish(fresh);
+    if (lostAuthority() == null &&
+        _uncertainSave == request &&
+        uncertain == null) {
+      _uncertainSave = null;
     }
-    final regionCode = await _resolveRegionPreferenceCode(fresh.regionPreferenceId);
-    if (!auth.isCurrentSession(userId: userId, generation: generation)) {
-      return const ProfileOperationResult.failed(
-        ProfileOperationCause.sessionLost,
-      );
-    }
-    _authenticatedProfile = fresh;
-    _authenticatedRegionPreferenceCode = regionCode;
-    _cloudLoadFailed = false;
-    _cloudLoadSettled = true;
-    notifyListeners();
-    return ProfileOperationResult.ok(profile: fresh);
+    return result;
+  }
+
+  static ProfileOperationCause _failureCause(Object error) =>
+      switch (classifyProfileFailure(error)) {
+        ProfileFailureKind.infrastructure =>
+          ProfileOperationCause.retryableFailure,
+        ProfileFailureKind.auth => ProfileOperationCause.authFailure,
+        ProfileFailureKind.permission => ProfileOperationCause.permissionDenied,
+        ProfileFailureKind.invalidData => ProfileOperationCause.invalidData,
+        ProfileFailureKind.malformed => ProfileOperationCause.malformedResponse,
+        ProfileFailureKind.unexpected => ProfileOperationCause.unexpected,
+      };
+
+  /// The gateway is authoritative for whether a raw mutation for [userId] is
+  /// still in flight. A generation mismatch or stale local uncertainty does NOT
+  /// prove the raw write has settled.
+  bool _isProfileMutationPending(String userId) {
+    final gateway = _cloudProfileGateway;
+    if (gateway is! ProfileMutationSettlement) return false;
+    return (gateway as ProfileMutationSettlement)
+        .isProfileMutationPending(userId);
   }
 
   /// Clears authenticated cloud state on a canonical identity change. Called

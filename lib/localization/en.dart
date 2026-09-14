@@ -1,4 +1,10 @@
 class En {
+  static const profileCauseAuthFailure =
+      'Your sign-in could not authorize this profile request. Your session has not been cleared.';
+  static const profileCauseAuthorityBlocked =
+      'Profile changes are unavailable while sign-in recovery is required.';
+  static const profileCauseRegionConflict =
+      'The saved profile differs from your request. Review the current cloud profile before making further changes.';
   static const String appName = 'Civilpedia';
   static const String home = 'Home';
   static const String tools = 'Tools';
@@ -107,8 +113,7 @@ class En {
       'You are using Civilpedia as a guest. Sign in to sync your data across your devices.';
   static const String googleSignInUnavailable =
       'Sign-in is not available right now. Please try again later.';
-  static const String googleSignInFailed =
-      'Sign-in failed. Please try again.';
+  static const String googleSignInFailed = 'Sign-in failed. Please try again.';
   static const String signedInAs = 'Signed in as';
   static const String goToProfile = 'Go to your profile';
   static const String noAccount = "Don't have an account?";
@@ -718,8 +723,7 @@ class En {
   static const String businessSignInRequired =
       'Sign in to manage your business applications';
   static const String businessSignInButton = 'Sign in';
-  static const String businessNoApplications =
-      'No business applications yet';
+  static const String businessNoApplications = 'No business applications yet';
   static const String businessApplicationsError =
       'Unable to load business applications';
   static const String businessRefresh = 'Refresh';
@@ -837,7 +841,8 @@ class En {
   static const String businessRejectionReason = 'Rejection reason';
   static const String businessApprovedNote =
       'Application approved. Activation is in progress.';
-  static const String businessActivatedNote = 'Business activated successfully.';
+  static const String businessActivatedNote =
+      'Business activated successfully.';
 
   // V1-R06 — Business Profile Management
   static const String businessContactTypePhone = 'Phone';
@@ -896,7 +901,8 @@ class En {
   static const String businessProfilePreview = 'View public page';
   static const String businessProfileNoCategories = 'No categories available';
 
-  static const String businessProfileValidationRequired = 'This field is required';
+  static const String businessProfileValidationRequired =
+      'This field is required';
   static const String businessProfileValidationTooLong = 'Text is too long';
   static const String businessProfileValidationTooMany = 'Too many items';
   static const String businessProfileValidationInvalidFormat = 'Invalid format';
@@ -931,12 +937,15 @@ class En {
   static const String staffOperations = 'Review Operations';
   static const String staffApplicationsTitle = 'Review Applications';
   static const String staffSignInRequired = 'Sign in to access review tools';
-  static const String staffAccessDenied = 'You do not have access to review tools';
-  static const String staffPermissionLost = 'Access was revoked. Please refresh.';
+  static const String staffAccessDenied =
+      'You do not have access to review tools';
+  static const String staffPermissionLost =
+      'Access was revoked. Please refresh.';
   static const String staffLoadingAccess = 'Checking permissions...';
   static const String staffLoadingQueue = 'Loading applications...';
   static const String staffLoadingDetail = 'Loading application details...';
-  static const String staffEmptyQueue = 'No applications match the current filter';
+  static const String staffEmptyQueue =
+      'No applications match the current filter';
   static const String staffQueueError = 'Unable to load applications';
   static const String staffDetailError = 'Unable to load application details';
   static const String staffRetry = 'Retry';
@@ -960,15 +969,18 @@ class En {
   static const String staffActionReject = 'Reject';
   static const String staffActionActivate = 'Activate';
 
-  static const String staffConfirmBeginReview = 'Begin reviewing this application?';
+  static const String staffConfirmBeginReview =
+      'Begin reviewing this application?';
   static const String staffConfirmApprove = 'Approve this application?';
   static const String staffConfirmActivate = 'Activate this application now?';
   static const String staffConfirmAction = 'Confirm action';
 
   static const String staffCorrectionReasonLabel = 'Correction reason';
-  static const String staffCorrectionReasonHint = 'Explain clearly why it is returned';
+  static const String staffCorrectionReasonHint =
+      'Explain clearly why it is returned';
   static const String staffRejectionReasonLabel = 'Rejection reason';
-  static const String staffRejectionReasonHint = 'Explain clearly why it is rejected';
+  static const String staffRejectionReasonHint =
+      'Explain clearly why it is rejected';
   static const String staffContactTypeLabel = 'Contact method';
   static const String staffContactResultLabel = 'Contact result (optional)';
   static const String staffContactNotesLabel = 'Notes (optional)';
@@ -1021,13 +1033,19 @@ class En {
   static const String staffRefreshDetail = 'Refresh details';
 
   static const String staffCauseUnauthenticated = 'Please sign in first';
-  static const String staffCausePermissionDenied = 'No permission for this action';
+  static const String staffCausePermissionDenied =
+      'No permission for this action';
   static const String staffCauseNotFound = 'Application not found';
-  static const String staffCauseInvalidTransition = 'This action cannot be performed in the current state';
-  static const String staffCauseCorrectionReasonRequired = 'Correction reason is required';
-  static const String staffCauseRejectionReasonRequired = 'Rejection reason is required';
-  static const String staffCauseRequiredDataMissing = 'Required details are incomplete';
-  static const String staffCauseUnexpected = 'An unexpected error occurred, please try again';
+  static const String staffCauseInvalidTransition =
+      'This action cannot be performed in the current state';
+  static const String staffCauseCorrectionReasonRequired =
+      'Correction reason is required';
+  static const String staffCauseRejectionReasonRequired =
+      'Rejection reason is required';
+  static const String staffCauseRequiredDataMissing =
+      'Required details are incomplete';
+  static const String staffCauseUnexpected =
+      'An unexpected error occurred, please try again';
 
   // V1-R08 — Auth & Profile Production Completion (Part 2)
   static const String authErrorRetryable =
@@ -1044,15 +1062,61 @@ class En {
   static const String authAccountConflictMessage =
       'The data saved on this device is linked to another account. Use the button below to verify again or to return to sign-in safely.';
   static const String ownershipConflictReturnToSignIn = 'Return to sign in';
-  static const String authSessionLost = 'Your session ended. Please sign in again';
+  static const String authSessionLost =
+      'Your session ended. Please sign in again';
   static const String signOutConfirmTitle = 'Sign out';
   static const String signOutConfirmMessage =
       'Sign out of the current account? Your profile and data stay saved in the cloud';
   static const String signOutPendingLabel = 'Signing out...';
   static const String signOutFailed = 'Sign-out failed. Please try again';
+
+  // V1-R09 C2 — authoritative sign-out recovery + observation loss
+  static const String authLogoutCleanupTitle = 'Sign-out is still completing';
+  static const String authLogoutCleanupMessage =
+      'Your account is signed out, but secure logout cleanup is still '
+      'in progress on this device. You can retry the cleanup now or restart '
+      'the app later.';
+  static const String retryCleanup = 'Retry cleanup';
+  static const String resetDeviceSignIn = 'Reset sign-in on this device';
+  static const String authUnattributedResetMessage =
+      'A previous sign-in on this device could not be verified. You can reset '
+      'the locally stored sign-in, then close and reopen the app. This removes '
+      'only the sign-in saved on this device; you will need to sign in again. '
+      'It does not delete your account or cloud data, or sign out other devices.';
+  static const String authLocalResetRestartMessage =
+      'Local sign-in was reset. Close and reopen the app to verify the reset '
+      'before signing in again. Account access stays blocked until then. '
+      'Your account and cloud data have not been deleted.';
+  static const String authRecoveryTitle = 'Account recovery required';
+  static const String retryAuthRecovery = 'Retry account recovery';
+  static const String authRemotePendingMessage =
+      'The outcome of your sign-out is still unknown. Retry recovery. If it '
+      'remains pending, close and reopen the app. Local features are available.';
+  static const String authRecoveryBlockedMessage =
+      'Account recovery is blocked to protect saved sign-in data. Try again '
+      'or close and reopen the app. If the block remains, ask for assistance.';
+  static const String authRecoveryRestartMessage =
+      'Sign-out could not be completed. Your saved sign-in data was kept. '
+      'Close and reopen the app to resume normal session restoration.';
+  static const String authExchangeTimedOutPendingMessage =
+      'Sign-in took too long to complete. The secure exchange is still being '
+      'settled in the background. You can retry once it finishes or close and '
+      'reopen the app.';
+  static const String authExchangeNeutralizingMessage =
+      'A stale sign-in session is being removed to protect your account. '
+      'Please wait; you can retry the cleanup if it remains blocked.';
+  static const String authExchangeBlockedMessage =
+      'Stale sign-in cleanup is blocked to protect your saved sign-in data. '
+      'Try again or close and reopen the app. If the block remains, ask for '
+      'assistance.';
+  static const String authRestartRequired =
+      'Account security monitoring stopped. Restart the app before using your '
+      'account again.';
   static const String profileCloudLoading = 'Loading your profile...';
-  static const String profileCloudLoadFailed = 'Could not load your profile from the cloud';
-  static const String profileNotAvailable = 'Profile is not available right now';
+  static const String profileCloudLoadFailed =
+      'Could not load your profile from the cloud';
+  static const String profileNotAvailable =
+      'Profile is not available right now';
   static const String profileEditCloudTitle = 'Edit My Civilpedia Profile';
   static const String profileUnsavedTitle = 'Unsaved changes';
   static const String profileUnsavedMessage =
@@ -1067,7 +1131,8 @@ class En {
   static const String profileCauseInvalidData = 'The entered data is invalid';
   static const String profileCauseMalformed =
       'Invalid response from the server. Try again';
-  static const String profileCauseRetryable = 'Could not reach the server. Try again';
+  static const String profileCauseRetryable =
+      'Could not reach the server. Try again';
   static const String profileCauseProvisioning =
       'Could not set up the profile. Try again';
   static const String profileCauseOwnershipConflict =

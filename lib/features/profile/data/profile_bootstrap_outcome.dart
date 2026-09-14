@@ -28,6 +28,12 @@ enum ProfileBootstrapOutcome {
   /// falsely marked complete, and a later authenticated session retries safely.
   failure,
 
+  permissionDenied,
+  invalidData,
+  malformedResponse,
+  authFailure,
+  unexpected,
+
   /// F7 — a canonical `public.profiles` row for the authenticated session
   /// could NOT be provisioned for a provisioning-specific reason (constraint /
   /// data rejection on INSERT). Sign-in remains successful; the typed state is
