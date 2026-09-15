@@ -1,7 +1,13 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/supabase_service.dart';
+import '../../../core/network/remote_operation_policy.dart';
 import '../domain/canonical_directory_entity.dart';
+import '../domain/cloud_directory_repository.dart';
 
 /// V1-R05 — PostgREST SELECT projection executed by the production cloud read
 /// channel (see [SupabaseDirectoryReadQueryChannel]).
@@ -77,12 +83,15 @@ class SupabaseDirectoryReadQueryChannel implements DirectoryReadQueryChannel {
 /// * NO new table, NO RPC, NO migration, NO mutation surface.
 ///
 /// Follows the established gateway pattern (injected client, lazy resolution,
-/// fail-closed parsing, `isAvailable` gating).
+/// fail-closed parsing, `isAvailable` gating). All remote reads are bounded by
+/// [RemoteOperationPolicy.read] (15 seconds) and return typed outcomes; raw
+/// exceptions are never surfaced past this boundary.
 class SupabaseDirectoryReadGateway {
   SupabaseDirectoryReadGateway({
     required this.service,
     SupabaseClient? client,
     DirectoryReadQueryChannel? queryChannel,
+    this.readTimeout = RemoteOperationPolicy.read,
   })  : _injectedClient = client,
         _queryChannel = queryChannel;
 
@@ -93,6 +102,10 @@ class SupabaseDirectoryReadGateway {
   /// semantics unchanged); when null the production
   /// [SupabaseDirectoryReadQueryChannel] runs the exact same statements.
   final DirectoryReadQueryChannel? _queryChannel;
+
+  /// Application-owned read deadline. Production uses
+  /// [RemoteOperationPolicy.read]; tests may inject a shorter duration.
+  final Duration readTimeout;
 
   SupabaseClient get _client => _injectedClient ?? Supabase.instance.client;
 
@@ -107,42 +120,87 @@ class SupabaseDirectoryReadGateway {
   /// Loads all active directory entities with their canonical child
   /// relationships.
   ///
-  /// On network/query failure this THROWS so callers can distinguish a
-  /// failure from an authoritative EMPTY result (empty cloud directory is a
-  /// valid snapshot and must be able to replace stale cache; failures must
-  /// preserve the last valid cache).
-  Future<List<CanonicalDirectoryEntity>> loadAll() async {
+  /// The complete snapshot is validated strictly: a single malformed entity
+  /// row, relationship row, or required nested child structure causes the
+  /// whole result to fail as [DirectoryReadFailureKind.malformedResponse].
+  /// Authoritative empty is returned as [DirectoryListEmpty].
+  Future<DirectoryListOutcome> loadAll() async {
     if (!isAvailable) {
-      throw StateError('Directory read gateway is not available');
+      return const DirectoryListFailure(
+        DirectoryReadFailureKind.serviceUnavailable,
+      );
     }
 
-    final rows = await _queries.queryAllActive();
+    try {
+      final rows = await runWithRemoteDeadline(
+        _queries.queryAllActive(),
+        timeout: readTimeout,
+      );
 
-    final entities = <CanonicalDirectoryEntity>[];
-    for (final row in rows) {
-      final parsed = _parseRow(row);
-      if (parsed != null) entities.add(parsed);
+      final entities = <CanonicalDirectoryEntity>[];
+      for (final row in rows) {
+        final parsed = _parseRow(row);
+        if (parsed == null) {
+          return const DirectoryListFailure(
+            DirectoryReadFailureKind.malformedResponse,
+          );
+        }
+        entities.add(parsed);
+      }
+
+      final refreshedAt = DateTime.now().toUtc();
+      if (entities.isEmpty) {
+        return DirectoryListEmpty(refreshedAt);
+      }
+      return DirectoryListSuccess(entities, refreshedAt);
+    } catch (e) {
+      return DirectoryListFailure(_classifyError(e));
     }
-    return entities;
   }
 
   /// Loads a single active entity by canonical UUID.
-  /// Returns null when not found, not visible under RLS, or malformed.
-  Future<CanonicalDirectoryEntity?> loadById(String id) async {
-    if (!isAvailable) return null;
-    if (id.isEmpty || !CanonicalDirectoryEntity.isValidUuid(id)) return null;
+  ///
+  /// Returns [DirectoryEntityInvalidId] without a backend call when [id] is
+  /// not a valid canonical UUID. Malformed responses are distinct from
+  /// authoritative absence.
+  Future<DirectoryEntityOutcome> loadById(String id) async {
+    // Canonical ID validation is local and MUST run before any availability
+    // or network logic so an invalid ID never depends on backend state.
+    if (id.isEmpty || !CanonicalDirectoryEntity.isValidUuid(id)) {
+      return const DirectoryEntityInvalidId();
+    }
+
+    if (!isAvailable) {
+      return const DirectoryEntityFailure(
+        DirectoryReadFailureKind.serviceUnavailable,
+      );
+    }
 
     try {
-      final rows = await _queries.queryActiveById(id);
+      final rows = await runWithRemoteDeadline(
+        _queries.queryActiveById(id),
+        timeout: readTimeout,
+      );
 
-      if (rows.isEmpty) return null;
-      return _parseRow(rows.first);
-    } catch (_) {
-      return null;
+      if (rows.isEmpty) return const DirectoryEntityNotFound();
+
+      final parsed = _parseRow(rows.first);
+      if (parsed == null) {
+        return const DirectoryEntityFailure(
+          DirectoryReadFailureKind.malformedResponse,
+        );
+      }
+      return DirectoryEntitySuccess(parsed);
+    } catch (e) {
+      return DirectoryEntityFailure(_classifyError(e));
     }
   }
 
   /// Fail-closed row parser with child relationship extraction.
+  ///
+  /// Returns null when the entity or any required nested child is malformed.
+  /// A null return is converted to [DirectoryReadFailureKind.malformedResponse]
+  /// by the public load methods so the failure is never silently dropped.
   static CanonicalDirectoryEntity? _parseRow(Map<String, dynamic> row) {
     final categories = _parseCategories(row);
     final locations = _parseLocations(row);
@@ -162,16 +220,24 @@ class SupabaseDirectoryReadGateway {
     Map<String, dynamic> row,
   ) {
     final raw = row['directory_entity_categories'];
-    if (raw is! List) return const [];
+    if (raw == null) {
+      throw const FormatException('directory_entity_categories missing');
+    }
+    if (raw is! List) throw const FormatException('categories not a list');
     final result = <CanonicalDirectoryCategory>[];
     for (final item in raw) {
-      if (item is! Map) continue;
+      if (item is! Map) throw const FormatException('category item not a map');
       final cat = item['directory_categories'];
-      if (cat is! Map) continue;
+      if (cat is! Map) {
+        throw const FormatException('directory_categories missing');
+      }
       final parsed = CanonicalDirectoryCategory.tryFromRow(
         Map<String, dynamic>.from(cat),
       );
-      if (parsed != null) result.add(parsed);
+      if (parsed == null) {
+        throw const FormatException('directory_categories malformed');
+      }
+      result.add(parsed);
     }
     return result;
   }
@@ -180,29 +246,54 @@ class SupabaseDirectoryReadGateway {
     Map<String, dynamic> row,
   ) {
     final raw = row['entity_locations'];
-    if (raw is! List) return const [];
+    if (raw == null) throw const FormatException('entity_locations missing');
+    if (raw is! List) throw const FormatException('locations not a list');
     final result = <CanonicalDirectoryLocation>[];
     for (final item in raw) {
-      if (item is! Map) continue;
+      if (item is! Map) throw const FormatException('location item not a map');
       final region = item['regions'];
-      final regionCode = region is Map ? region['code'] as String? : null;
-      final regionNameAr = region is Map ? region['name_ar'] as String? : null;
-      final regionNameEn = region is Map ? region['name_en'] as String? : null;
-      final address = item['address'] as String?;
-      final isPrimary = item['is_primary'] == true;
-      if ((regionCode != null && regionCode.isNotEmpty) ||
-          (address != null && address.isNotEmpty)) {
-        result.add(
-          CanonicalDirectoryLocation(
-            regionCode: regionCode ?? '',
-            regionName: _displayName(regionNameEn, regionNameAr),
-            regionNameAr: regionNameAr,
-            regionNameEn: regionNameEn,
-            address: address,
-            isPrimary: isPrimary,
-          ),
-        );
+      if (region != null && region is! Map) {
+        throw const FormatException('regions malformed');
       }
+      final regionCodeRaw = region is Map ? region['code'] : null;
+      if (regionCodeRaw != null && regionCodeRaw is! String) {
+        throw const FormatException('region code malformed');
+      }
+      final regionNameArRaw = region is Map ? region['name_ar'] : null;
+      if (regionNameArRaw != null && regionNameArRaw is! String) {
+        throw const FormatException('region name_ar malformed');
+      }
+      final regionNameEnRaw = region is Map ? region['name_en'] : null;
+      if (regionNameEnRaw != null && regionNameEnRaw is! String) {
+        throw const FormatException('region name_en malformed');
+      }
+      final addressRaw = item['address'];
+      if (addressRaw != null && addressRaw is! String) {
+        throw const FormatException('location address malformed');
+      }
+      final isPrimaryRaw = item['is_primary'];
+      if (isPrimaryRaw is! bool) {
+        throw const FormatException('is_primary malformed');
+      }
+      final regionCode = regionCodeRaw as String?;
+      final regionNameAr = regionNameArRaw as String?;
+      final regionNameEn = regionNameEnRaw as String?;
+      final address = addressRaw as String?;
+      final isPrimary = isPrimaryRaw;
+      if ((regionCode == null || regionCode.isEmpty) &&
+          (address == null || address.isEmpty)) {
+        throw const FormatException('location missing region and address');
+      }
+      result.add(
+        CanonicalDirectoryLocation(
+          regionCode: regionCode ?? '',
+          regionName: _displayName(regionNameEn, regionNameAr),
+          regionNameAr: regionNameAr,
+          regionNameEn: regionNameEn,
+          address: address,
+          isPrimary: isPrimary,
+        ),
+      );
     }
     // V1-R06 compatibility: public presentation consumes the first location,
     // so put the database-authoritative primary row first deterministically.
@@ -222,14 +313,16 @@ class SupabaseDirectoryReadGateway {
     Map<String, dynamic> row,
   ) {
     final raw = row['entity_contacts'];
-    if (raw is! List) return const [];
+    if (raw == null) throw const FormatException('entity_contacts missing');
+    if (raw is! List) throw const FormatException('contacts not a list');
     final result = <CanonicalDirectoryContact>[];
     for (final item in raw) {
-      if (item is! Map) continue;
+      if (item is! Map) throw const FormatException('contact item not a map');
       final parsed = CanonicalDirectoryContact.tryFromRow(
         Map<String, dynamic>.from(item),
       );
-      if (parsed != null) result.add(parsed);
+      if (parsed == null) throw const FormatException('contact malformed');
+      result.add(parsed);
     }
     return result;
   }
@@ -238,17 +331,87 @@ class SupabaseDirectoryReadGateway {
     Map<String, dynamic> row,
   ) {
     final raw = row['entity_media'];
-    if (raw is! List) return const [];
+    if (raw == null) throw const FormatException('entity_media missing');
+    if (raw is! List) throw const FormatException('media not a list');
     final result = <CanonicalDirectoryMedia>[];
     for (final item in raw) {
-      if (item is! Map) continue;
+      if (item is! Map) throw const FormatException('media item not a map');
       final url = item['url'];
-      if (url is! String || url.isEmpty) continue;
+      if (url is! String || url.isEmpty) {
+        throw const FormatException('media url missing');
+      }
+      final mediaTypeRaw = item['media_type'];
+      if (mediaTypeRaw != null && mediaTypeRaw is! String) {
+        throw const FormatException('media type malformed');
+      }
       result.add(CanonicalDirectoryMedia(
         url: url,
-        mediaType: item['media_type'] as String?,
+        mediaType: mediaTypeRaw as String?,
       ));
     }
     return result;
+  }
+
+  static DirectoryReadFailureKind _classifyError(Object error) {
+    if (error is InfrastructureFailureException) {
+      // The data layer never asserts device transport state; an offline kind
+      // from the infrastructure helper can only mean a transport request
+      // failure, so it is mapped to network.
+      final kind = error.failure.kind;
+      return switch (kind) {
+        InfrastructureFailureKind.offline => DirectoryReadFailureKind.network,
+        InfrastructureFailureKind.network => DirectoryReadFailureKind.network,
+        InfrastructureFailureKind.timeout => DirectoryReadFailureKind.timeout,
+        InfrastructureFailureKind.serviceUnavailable =>
+          DirectoryReadFailureKind.serviceUnavailable,
+        InfrastructureFailureKind.malformedResponse =>
+          DirectoryReadFailureKind.malformedResponse,
+        InfrastructureFailureKind.unknown => DirectoryReadFailureKind.unexpected,
+      };
+    }
+    if (error is TimeoutException) {
+      return DirectoryReadFailureKind.timeout;
+    }
+    if (error is FormatException) {
+      return DirectoryReadFailureKind.malformedResponse;
+    }
+    if (error is SocketException ||
+        error is HandshakeException ||
+        error is HttpException ||
+        error is http.ClientException) {
+      return DirectoryReadFailureKind.network;
+    }
+    if (error is PostgrestException) {
+      // serviceUnavailable is reserved for clearly recognized temporary
+      // backend/service availability failures. PostgrestException.code is the
+      // Postgres/PostgREST error code, NOT the HTTP status code, so HTTP 503
+      // must not be used as the classifier.
+      //
+      // Recognized temporary conditions:
+      //   * PostgreSQL connection exception class ('08xxx')
+      //   * PostgreSQL insufficient-resources class ('53xxx')
+      //   * PostgREST database-connection/service availability family
+      //     (PGRST000..PGRST003)
+      //
+      // Permission, auth, schema, semantic, query, and unknown PostgREST
+      // failures remain unexpected. No backend error text is surfaced.
+      final code = error.code ?? '';
+      if (_isPostgrestTemporaryServiceFailure(code)) {
+        return DirectoryReadFailureKind.serviceUnavailable;
+      }
+      return DirectoryReadFailureKind.unexpected;
+    }
+    return DirectoryReadFailureKind.unexpected;
+  }
+
+  static bool _isPostgrestTemporaryServiceFailure(String code) {
+    if (code.startsWith('08') || code.startsWith('53')) return true;
+    const postgrestAvailabilityCodes = {
+      'PGRST000',
+      'PGRST001',
+      'PGRST002',
+      'PGRST003',
+    };
+    return postgrestAvailabilityCodes.contains(code);
   }
 }

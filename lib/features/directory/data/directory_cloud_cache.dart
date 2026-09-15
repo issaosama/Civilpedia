@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/storage/app_storage_keys.dart';
@@ -19,15 +20,30 @@ import '../domain/canonical_directory_entity.dart';
 /// * failed/partial refresh never destroys the last valid cache (callers only
 ///   call [writeSnapshot] after a successful complete refresh);
 /// * an authoritative EMPTY cloud refresh replaces the old snapshot (empty is
-///   a valid snapshot).
+///   a valid snapshot);
+/// * [SharedPreferences.setString] returning `false` or throwing is a
+///   persistence failure and is reported to callers.
 abstract final class DirectoryCloudCache {
   /// Bumped when the persisted snapshot shape changes.
   static const int cacheVersion = 1;
 
+  static final DirectoryCloudCacheStore _defaultStore =
+      _SharedPreferencesCacheStore();
+
+  /// Narrow test seam for deterministic cache-store behavior. Production code
+  /// never sets this; [_defaultStore] is used normally.
+  static DirectoryCloudCacheStore? _testStore;
+
+  @visibleForTesting
+  static void setTestStore(DirectoryCloudCacheStore? store) {
+    _testStore = store;
+  }
+
+  static DirectoryCloudCacheStore get _store => _testStore ?? _defaultStore;
+
   static Future<DirectoryCloudCacheSnapshot?> read() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(AppStorageKeys.directoryCloudCache);
+      final raw = await _store.readString(AppStorageKeys.directoryCloudCache);
       if (raw == null || raw.isEmpty) return null;
       return DirectoryCloudCacheSnapshot.tryDecode(raw);
     } catch (_) {
@@ -38,13 +54,41 @@ abstract final class DirectoryCloudCache {
 
   /// Atomically replaces the whole snapshot. [snapshot] must be a complete,
   /// successfully-refreshed snapshot — callers never persist partial data.
-  static Future<void> writeSnapshot(DirectoryCloudCacheSnapshot snapshot) {
-    return SharedPreferences.getInstance().then((prefs) {
-      return prefs.setString(
+  ///
+  /// Returns `true` when [SharedPreferences.setString] reports success,
+  /// `false` when it reports failure or throws.
+  static Future<bool> writeSnapshot(DirectoryCloudCacheSnapshot snapshot) async {
+    try {
+      return await _store.writeString(
         AppStorageKeys.directoryCloudCache,
         snapshot.encode(),
       );
-    });
+    } catch (_) {
+      return false;
+    }
+  }
+}
+
+/// Internal cache-store seam. Production uses [SharedPreferences]; tests may
+/// inject deterministic implementations without creating a second cache.
+///
+/// Public so external tests can inject narrow fakes; it is not a second cache.
+abstract interface class DirectoryCloudCacheStore {
+  Future<String?> readString(String key);
+  Future<bool> writeString(String key, String value);
+}
+
+class _SharedPreferencesCacheStore implements DirectoryCloudCacheStore {
+  @override
+  Future<String?> readString(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
+
+  @override
+  Future<bool> writeString(String key, String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.setString(key, value);
   }
 }
 

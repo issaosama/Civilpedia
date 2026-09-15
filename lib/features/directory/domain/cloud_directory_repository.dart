@@ -1,5 +1,66 @@
 import 'canonical_directory_entity.dart';
 
+/// Typed infrastructure-level failure kinds for Directory reads.
+///
+/// `offline` is produced only by presentation/controller code that observes
+/// the canonical transport authority; the data/gateway/repository layer never
+/// maps a raw request failure to `offline`.
+enum DirectoryReadFailureKind {
+  offline,
+  network,
+  timeout,
+  serviceUnavailable,
+  malformedResponse,
+  unexpected,
+}
+
+/// Outcome of resolving a single canonical entity by UUID.
+sealed class DirectoryEntityOutcome {
+  const DirectoryEntityOutcome();
+}
+
+class DirectoryEntitySuccess extends DirectoryEntityOutcome {
+  const DirectoryEntitySuccess(this.entity);
+  final CanonicalDirectoryEntity entity;
+}
+
+/// Valid canonical UUID + successful authoritative query + entity absent.
+class DirectoryEntityNotFound extends DirectoryEntityOutcome {
+  const DirectoryEntityNotFound();
+}
+
+/// The supplied ID is not a syntactically valid canonical UUID.
+class DirectoryEntityInvalidId extends DirectoryEntityOutcome {
+  const DirectoryEntityInvalidId();
+}
+
+class DirectoryEntityFailure extends DirectoryEntityOutcome {
+  const DirectoryEntityFailure(this.kind);
+  final DirectoryReadFailureKind kind;
+}
+
+/// Outcome of a complete public Directory refresh.
+sealed class DirectoryListOutcome {
+  const DirectoryListOutcome();
+}
+
+class DirectoryListSuccess extends DirectoryListOutcome {
+  const DirectoryListSuccess(this.entities, this.refreshedAt);
+  final List<CanonicalDirectoryEntity> entities;
+  final DateTime refreshedAt;
+}
+
+/// Authoritative empty cloud directory.
+class DirectoryListEmpty extends DirectoryListOutcome {
+  const DirectoryListEmpty(this.refreshedAt);
+  final DateTime refreshedAt;
+}
+
+class DirectoryListFailure extends DirectoryListOutcome {
+  const DirectoryListFailure(this.kind);
+  final DirectoryReadFailureKind kind;
+}
+
 /// V1-R05 — Canonical production Directory repository boundary.
 ///
 /// READ-ONLY regarding public business entities. Responsibilities:
@@ -59,20 +120,43 @@ class DirectoryRefreshResult {
     required this.status,
     this.entities = const [],
     this.refreshedAt,
+    this.cachePersisted = true,
   });
 
   final DirectoryRefreshStatus status;
 
-  /// Canonical entities — populated only on [DirectoryRefreshStatus.success].
+  /// Canonical entities — populated on [DirectoryRefreshStatus.success] and
+  /// [DirectoryRefreshStatus.authoritativeEmpty].
   final List<CanonicalDirectoryEntity> entities;
 
   /// Capture time of the successful refresh; null on failure.
   final DateTime? refreshedAt;
 
-  bool get succeeded => status == DirectoryRefreshStatus.success;
+  /// Whether the replacement cache write succeeded. `false` means the
+  /// authoritative in-memory result is still fresh and must not be discarded.
+  final bool cachePersisted;
+
+  /// A successful authoritative read, including an authoritative empty result.
+  bool get succeeded =>
+      status == DirectoryRefreshStatus.success ||
+      status == DirectoryRefreshStatus.authoritativeEmpty;
 }
 
-enum DirectoryRefreshStatus { success, failure, unavailable }
+enum DirectoryRefreshStatus {
+  success,
+  authoritativeEmpty,
+  network,
+  timeout,
+  serviceUnavailable,
+  malformedResponse,
+  unexpected,
+  unavailable,
+
+  /// Legacy compatibility value. Production repository paths no longer return
+  /// this status; it is retained only so pre-P2-B2 test fakes continue to
+  /// compile until P2-B2 migrates presentation to [readCache] + [refresh].
+  failure,
+}
 
 /// The presentation-relevant state of a Directory load.
 class DirectoryLoadResult {

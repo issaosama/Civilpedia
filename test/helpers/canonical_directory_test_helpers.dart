@@ -74,7 +74,9 @@ class FakeCloudDirectoryRepository implements CloudDirectoryRepository {
       return const DirectoryRefreshResult(status: DirectoryRefreshStatus.failure);
     }
     return DirectoryRefreshResult(
-      status: DirectoryRefreshStatus.success,
+      status: entities.isEmpty
+          ? DirectoryRefreshStatus.authoritativeEmpty
+          : DirectoryRefreshStatus.success,
       entities: List<CanonicalDirectoryEntity>.from(entities),
       refreshedAt: DateTime.now().toUtc(),
     );

@@ -313,7 +313,7 @@ void main() {
       );
     });
 
-    test('10. tryFromJson handles missing children gracefully', () {
+    test('10. tryFromJson handles empty required children gracefully', () {
       final json = <String, dynamic>{
         'id': _kUuid1,
         'name': 'X',
@@ -321,12 +321,17 @@ void main() {
         'lifecycle_status': 'active',
         'claim_status': 'unclaimed',
         'verification_status': 'unverified',
+        'categories': <Map<String, dynamic>>[],
+        'locations': <Map<String, dynamic>>[],
+        'contacts': <Map<String, dynamic>>[],
+        'media': <Map<String, dynamic>>[],
       };
       final entity = CanonicalDirectoryEntity.tryFromJson(json);
       expect(entity, isNotNull);
       expect(entity!.categories, isEmpty);
       expect(entity.locations, isEmpty);
       expect(entity.contacts, isEmpty);
+      expect(entity.media, isEmpty);
     });
 
     test('10a. bilingual category round-trip preserves name_ar/name_en', () {
@@ -1022,9 +1027,11 @@ void main() {
         queryChannel: channel,
       );
 
-      final entities = await gateway.loadAll();
+      final outcome = await gateway.loadAll();
 
       expect(channel.queryAllCalls, 1);
+      expect(outcome, isA<DirectoryListSuccess>());
+      final entities = (outcome as DirectoryListSuccess).entities;
       expect(entities, hasLength(1));
       final entity = entities.single;
       // Bilingual category mapped from name_ar/name_en (two categories).
@@ -1071,12 +1078,13 @@ void main() {
         queryChannel: channel,
       );
 
-      final entity = await gateway.loadById(_kUuid1);
+      final outcome = await gateway.loadById(_kUuid1);
 
       expect(channel.queryByIdCalls, 1);
       expect(channel.queriedIds, [_kUuid1]);
-      expect(entity, isNotNull);
-      expect(entity!.id, _kUuid1);
+      expect(outcome, isA<DirectoryEntitySuccess>());
+      final entity = (outcome as DirectoryEntitySuccess).entity;
+      expect(entity.id, _kUuid1);
       expect(entity.name, 'Alpha Co');
     });
 
@@ -1087,9 +1095,9 @@ void main() {
         queryChannel: channel,
       );
 
-      final entity = await gateway.loadById('not-a-uuid');
+      final outcome = await gateway.loadById('not-a-uuid');
 
-      expect(entity, isNull);
+      expect(outcome, isA<DirectoryEntityInvalidId>());
       expect(channel.queryByIdCalls, 0);
     });
 
@@ -1112,7 +1120,8 @@ void main() {
       expect(projection.contains('directory_categories.name'), isFalse);
     });
 
-    test('P5. loadAll failure propagates; loadById failure fails safe', () async {
+    test('P5. loadAll failure returns typed outcome; loadById failure fails safe',
+        () async {
       final channel = _FakeDirectoryReadQueryChannel(
         throwOnQuery: Exception('network down'),
       );
@@ -1121,8 +1130,15 @@ void main() {
         queryChannel: channel,
       );
 
-      await expectLater(gateway.loadAll(), throwsA(isA<Exception>()));
-      expect(await gateway.loadById(_kUuid1), isNull);
+      final listOutcome = await gateway.loadAll();
+      expect(listOutcome, isA<DirectoryListFailure>());
+      expect(
+        (listOutcome as DirectoryListFailure).kind,
+        DirectoryReadFailureKind.unexpected,
+      );
+
+      final entityOutcome = await gateway.loadById(_kUuid1);
+      expect(entityOutcome, isA<DirectoryEntityFailure>());
     });
   });
 
@@ -1182,7 +1198,7 @@ void main() {
 
       final refresh = await repository.refresh();
       expect(refresh.succeeded, isFalse);
-      expect(refresh.status, DirectoryRefreshStatus.failure);
+      expect(refresh.status, DirectoryRefreshStatus.unexpected);
       expect(refresh.entities, isEmpty);
 
       // Cache preserved — not destructively overwritten.
@@ -1209,6 +1225,7 @@ void main() {
 
       final result = await repository.refresh();
       expect(result.succeeded, isTrue);
+      expect(result.status, DirectoryRefreshStatus.authoritativeEmpty);
       expect(result.entities, isEmpty);
 
       final load = await repository.load();

@@ -106,15 +106,18 @@ class CanonicalDirectoryEntity {
       return null;
     }
 
-    final description = row['description'] as String?;
+    final descriptionRaw = row['description'];
+    if (descriptionRaw != null && descriptionRaw is! String) return null;
+    final description = descriptionRaw as String?;
 
-    final lifecycleStatus = row['lifecycle_status'] as String?;
-    if (lifecycleStatus == null || !_knownLifecycleStatuses.contains(lifecycleStatus)) {
+    final lifecycleStatus = row['lifecycle_status'];
+    if (lifecycleStatus is! String ||
+        !_knownLifecycleStatuses.contains(lifecycleStatus)) {
       return null;
     }
 
-    final claimStatus = row['claim_status'] as String?;
-    if (claimStatus == null || !_knownClaimStatuses.contains(claimStatus)) {
+    final claimStatus = row['claim_status'];
+    if (claimStatus is! String || !_knownClaimStatuses.contains(claimStatus)) {
       return null;
     }
 
@@ -130,12 +133,18 @@ class CanonicalDirectoryEntity {
     if (verificationStatus == null) return null;
 
     DateTime? createdAt;
-    if (row['created_at'] is String) {
-      createdAt = DateTime.tryParse(row['created_at']);
+    final createdAtRaw = row['created_at'];
+    if (createdAtRaw is String) {
+      createdAt = DateTime.tryParse(createdAtRaw);
+    } else if (createdAtRaw != null) {
+      return null;
     }
     DateTime? updatedAt;
-    if (row['updated_at'] is String) {
-      updatedAt = DateTime.tryParse(row['updated_at']);
+    final updatedAtRaw = row['updated_at'];
+    if (updatedAtRaw is String) {
+      updatedAt = DateTime.tryParse(updatedAtRaw);
+    } else if (updatedAtRaw != null) {
+      return null;
     }
 
     return CanonicalDirectoryEntity(
@@ -173,6 +182,14 @@ class CanonicalDirectoryEntity {
   };
 
   /// Fail-closed deserialization from a cache map.
+  ///
+  /// Whole-snapshot rule: if ANY required nested child structure is malformed,
+  /// the entire entity is rejected. The cache must never present a partially
+  /// repaired authoritative snapshot.
+  ///
+  /// Required relationship fields (`categories`, `locations`, `contacts`,
+  /// `media`) must be present and list-shaped. Missing or null values are
+  /// treated as malformed, not as empty relationships.
   static CanonicalDirectoryEntity? tryFromJson(Map<String, dynamic> json) {
     final id = json['id'];
     final name = json['name'];
@@ -183,13 +200,14 @@ class CanonicalDirectoryEntity {
       return null;
     }
 
-    final lifecycleStatus = json['lifecycle_status'] as String?;
-    if (lifecycleStatus == null || !_knownLifecycleStatuses.contains(lifecycleStatus)) {
+    final lifecycleStatus = json['lifecycle_status'];
+    if (lifecycleStatus is! String ||
+        !_knownLifecycleStatuses.contains(lifecycleStatus)) {
       return null;
     }
 
-    final claimStatus = json['claim_status'] as String?;
-    if (claimStatus == null || !_knownClaimStatuses.contains(claimStatus)) {
+    final claimStatus = json['claim_status'];
+    if (claimStatus is! String || !_knownClaimStatuses.contains(claimStatus)) {
       return null;
     }
 
@@ -204,57 +222,79 @@ class CanonicalDirectoryEntity {
     }
     if (verificationStatus == null) return null;
 
-    final categoriesRaw = json['categories'];
-    final locationsRaw = json['locations'];
-    final contactsRaw = json['contacts'];
-    final mediaRaw = json['media'];
+    final descriptionRaw = json['description'];
+    if (descriptionRaw != null && descriptionRaw is! String) return null;
+    final description = descriptionRaw as String?;
 
-    return CanonicalDirectoryEntity(
-      id: id,
-      name: name,
-      entityType: entityType,
-      description: json['description'] as String?,
-      lifecycleStatus: lifecycleStatus,
-      verificationStatus: verificationStatus,
-      claimStatus: claimStatus,
-      categories: categoriesRaw is List
-          ? categoriesRaw
-              .whereType<Map>()
-              .map((m) => CanonicalDirectoryCategory.fromJson(
-                    Map<String, dynamic>.from(m),
-                  ))
-              .where((c) => c.id.isNotEmpty)
-              .toList()
-          : const [],
-      locations: locationsRaw is List
-          ? locationsRaw
-              .whereType<Map>()
-              .map((m) => CanonicalDirectoryLocation.fromJson(
-                    Map<String, dynamic>.from(m),
-                  ))
-              .where((l) =>
-                  l.regionCode.isNotEmpty || (l.address?.isNotEmpty ?? false))
-              .toList()
-          : const [],
-      contacts: contactsRaw is List
-          ? contactsRaw
-              .whereType<Map>()
-              .map((m) => CanonicalDirectoryContact.fromJson(
-                    Map<String, dynamic>.from(m),
-                  ))
-              .toList()
-          : const [],
-      media: mediaRaw is List
-          ? mediaRaw
-              .whereType<Map>()
-              .map((m) => CanonicalDirectoryMedia.fromJson(
-                    Map<String, dynamic>.from(m),
-                  ))
-              .toList()
-          : const [],
-      createdAt: DateTime.tryParse(json['created_at'] as String? ?? ''),
-      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? ''),
-    );
+    DateTime? createdAt;
+    final createdAtRaw = json['created_at'];
+    if (createdAtRaw is String) {
+      createdAt = DateTime.tryParse(createdAtRaw);
+    } else if (createdAtRaw != null) {
+      return null;
+    }
+    DateTime? updatedAt;
+    final updatedAtRaw = json['updated_at'];
+    if (updatedAtRaw is String) {
+      updatedAt = DateTime.tryParse(updatedAtRaw);
+    } else if (updatedAtRaw != null) {
+      return null;
+    }
+
+    try {
+      final categories = _parseRequiredChildList(
+        json['categories'],
+        CanonicalDirectoryCategory.tryFromJson,
+      );
+      final locations = _parseRequiredChildList(
+        json['locations'],
+        CanonicalDirectoryLocation.tryFromJson,
+      );
+      final contacts = _parseRequiredChildList(
+        json['contacts'],
+        CanonicalDirectoryContact.tryFromJson,
+      );
+      final media = _parseRequiredChildList(
+        json['media'],
+        CanonicalDirectoryMedia.tryFromJson,
+      );
+
+      return CanonicalDirectoryEntity(
+        id: id,
+        name: name,
+        entityType: entityType,
+        description: description,
+        lifecycleStatus: lifecycleStatus,
+        verificationStatus: verificationStatus,
+        claimStatus: claimStatus,
+        categories: categories,
+        locations: locations,
+        contacts: contacts,
+        media: media,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Parses a required relationship list. Missing, null, non-list, or
+  /// malformed child values invalidate the whole entity.
+  static List<T> _parseRequiredChildList<T>(
+    dynamic raw,
+    T? Function(Map<String, dynamic>) parse,
+  ) {
+    if (raw == null) throw const FormatException('required child list missing');
+    if (raw is! List) throw const FormatException('expected list');
+    final result = <T>[];
+    for (final item in raw) {
+      if (item is! Map) throw const FormatException('expected map');
+      final parsed = parse(Map<String, dynamic>.from(item));
+      if (parsed == null) throw const FormatException('invalid child');
+      result.add(parsed);
+    }
+    return result;
   }
 
   @override
@@ -291,17 +331,21 @@ class CanonicalDirectoryCategory {
 
   static CanonicalDirectoryCategory? tryFromRow(Map<String, dynamic> row) {
     final id = row['id'];
-    final nameAr = row['name_ar'] as String?;
-    final nameEn = row['name_en'] as String?;
     if (id is! String || id.isEmpty) return null;
-    final displayName = _firstNonEmpty(nameEn, nameAr);
+    final nameAr = row['name_ar'];
+    if (nameAr != null && nameAr is! String) return null;
+    final nameEn = row['name_en'];
+    if (nameEn != null && nameEn is! String) return null;
+    final displayName = _firstNonEmpty(nameEn as String?, nameAr as String?);
     if (displayName == null || displayName.isEmpty) return null;
+    final code = row['code'];
+    if (code != null && code is! String) return null;
     return CanonicalDirectoryCategory(
       id: id,
       name: displayName,
-      code: row['code'] as String?,
-      nameAr: nameAr,
-      nameEn: nameEn,
+      code: code as String?,
+      nameAr: nameAr as String?,
+      nameEn: nameEn as String?,
     );
   }
 
@@ -326,6 +370,31 @@ class CanonicalDirectoryCategory {
       code: json['code'] as String?,
       nameAr: nameAr,
       nameEn: nameEn,
+    );
+  }
+
+  /// Fail-closed cache deserialization.
+  static CanonicalDirectoryCategory? tryFromJson(Map<String, dynamic> json) {
+    final id = json['id'];
+    if (id is! String || id.isEmpty) return null;
+    final nameAr = json['name_ar'];
+    if (nameAr != null && nameAr is! String) return null;
+    final nameEn = json['name_en'];
+    if (nameEn != null && nameEn is! String) return null;
+    final storedName = json['name'];
+    if (storedName != null && storedName is! String) return null;
+    final displayName = (storedName != null && (storedName as String).isNotEmpty)
+        ? storedName as String
+        : _firstNonEmpty(nameEn as String?, nameAr as String?);
+    if (displayName == null || displayName.isEmpty) return null;
+    final code = json['code'];
+    if (code != null && code is! String) return null;
+    return CanonicalDirectoryCategory(
+      id: id,
+      name: displayName,
+      code: code as String?,
+      nameAr: nameAr as String?,
+      nameEn: nameEn as String?,
     );
   }
 }
@@ -377,6 +446,39 @@ class CanonicalDirectoryLocation {
       isPrimary: json['is_primary'] == true,
     );
   }
+
+  /// Fail-closed cache deserialization.
+  static CanonicalDirectoryLocation? tryFromJson(Map<String, dynamic> json) {
+    final regionCode = json['region_code'];
+    if (regionCode is! String) return null;
+    final nameAr = json['region_name_ar'];
+    if (nameAr != null && nameAr is! String) return null;
+    final nameEn = json['region_name_en'];
+    if (nameEn != null && nameEn is! String) return null;
+    final storedName = json['region_name'];
+    if (storedName != null && storedName is! String) return null;
+    final address = json['address'];
+    if (address != null && address is! String) return null;
+    final isPrimary = json['is_primary'];
+    if (isPrimary is! bool) return null;
+
+    final displayName = (storedName != null && (storedName as String).isNotEmpty)
+        ? storedName as String
+        : _firstNonEmpty(nameEn as String?, nameAr as String?);
+
+    if (regionCode.isEmpty && (address == null || (address as String).isEmpty)) {
+      return null;
+    }
+
+    return CanonicalDirectoryLocation(
+      regionCode: regionCode,
+      regionName: displayName,
+      regionNameAr: nameAr as String?,
+      regionNameEn: nameEn as String?,
+      address: address as String?,
+      isPrimary: isPrimary == true,
+    );
+  }
 }
 
 /// Canonical public contact from `entity_contacts`.
@@ -411,6 +513,19 @@ class CanonicalDirectoryContact {
       value: json['value'] as String? ?? '',
     );
   }
+
+  /// Fail-closed cache deserialization.
+  static CanonicalDirectoryContact? tryFromJson(Map<String, dynamic> json) {
+    final contactType = json['contact_type'];
+    if (contactType is! String) return null;
+    final value = json['value'];
+    if (value is! String) return null;
+    if (contactType.isEmpty || value.isEmpty) return null;
+    return CanonicalDirectoryContact(
+      contactType: contactType,
+      value: value,
+    );
+  }
 }
 
 /// Canonical public media from `entity_media`.
@@ -432,6 +547,18 @@ class CanonicalDirectoryMedia {
     return CanonicalDirectoryMedia(
       url: json['url'] as String? ?? '',
       mediaType: json['media_type'] as String?,
+    );
+  }
+
+  /// Fail-closed cache deserialization.
+  static CanonicalDirectoryMedia? tryFromJson(Map<String, dynamic> json) {
+    final url = json['url'];
+    if (url is! String || url.isEmpty) return null;
+    final mediaType = json['media_type'];
+    if (mediaType != null && mediaType is! String) return null;
+    return CanonicalDirectoryMedia(
+      url: url,
+      mediaType: mediaType as String?,
     );
   }
 }

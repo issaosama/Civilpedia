@@ -753,8 +753,8 @@ Part 1: CLOSED / ACCEPTED — PASS - V1-R09 PART 1 ACCEPTED - PART 2 MAY BEGIN
 Part 2: AUTHORIZED — current within V1-R09 (overall V1-R09 remains CURRENT)
 Part 2 P2-A: ACCEPTED / CLOSED — PASS - P2-A ACCEPTED - P2-B MAY BEGIN
 Part 2 P2-B: CURRENT — CONTRACT V1-R09-P2-B-CONTRACT-v1 FROZEN
-Part 2 P2-B1: IMPLEMENTATION_AUTHORIZED: YES
-Part 2 P2-B2: LOCKED pending P2-B1 acceptance
+Part 2 P2-B1: ACCEPTED / CLOSED
+Part 2 P2-B2: CURRENT — IMPLEMENTATION_AUTHORIZED: YES (NEXT)
 Part 2 P2-C through P2-G: LOCKED
 
 Primary:
@@ -1404,3 +1404,24 @@ V1-R10: QUEUED (not started)
 Backend decision: no migration / RLS / schema / Edge / Realtime / service_role change
 V1-R09 status: CURRENT (not closed)
 Owner approval: PENDING OWNER STAGING
+
+### V1-R09 Part 2 P2-B1 Closure Record
+
+Slice: P2-B1 — Directory Cache-First + Reconnect (correction pass)
+Status: ACCEPTED / CLOSED
+Final micro-review: PASS — P2-B1 ACCEPTED — P2-B2 MAY BE UNLOCKED
+Final focused evidence: 183 PASS / 0 FAIL / 0 SKIPPED
+  - test/v1_r09_p2_b_directory_data_test.dart: 100 PASS
+  - test/v1_r05_directory_cloud_integration_test.dart: 83 PASS
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+Corrected defects:
+  - required relationship structure validation (remote + cache)
+  - parser type safety (remote + cache)
+  - PostgREST temporary-service classification by Postgres/PostgREST code family
+  - http.ClientException mapped to network
+  - invalid canonical UUID validated before availability/network logic
+  - loadByCanonicalId cache-first compatibility preserved
+  - location `is_primary` strict bool validation (remote + cache)
+P2-B2: CURRENT — IMPLEMENTATION_AUTHORIZED: YES (NEXT)
+P2-C through P2-G: LOCKED
+V1-R10: QUEUED (not started)
