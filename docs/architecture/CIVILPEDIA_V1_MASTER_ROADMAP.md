@@ -752,7 +752,10 @@ STATUS: CURRENT
 Part 1: CLOSED / ACCEPTED — PASS - V1-R09 PART 1 ACCEPTED - PART 2 MAY BEGIN
 Part 2: AUTHORIZED — current within V1-R09 (overall V1-R09 remains CURRENT)
 Part 2 P2-A: ACCEPTED / CLOSED — PASS - P2-A ACCEPTED - P2-B MAY BEGIN
-Part 2 P2-B: NEXT / AUTHORIZED FOR CONTRACT FREEZE (no separate frozen P2-B contract exists yet; implementation authorization remains gated on that freeze)
+Part 2 P2-B: CURRENT — CONTRACT V1-R09-P2-B-CONTRACT-v1 FROZEN
+Part 2 P2-B1: IMPLEMENTATION_AUTHORIZED: YES
+Part 2 P2-B2: LOCKED pending P2-B1 acceptance
+Part 2 P2-C through P2-G: LOCKED
 
 Primary:
 
@@ -1383,5 +1386,21 @@ Final micro-review: PASS — P2-A ACCEPTED — P2-B MAY BEGIN
 Final focused evidence: 57 PASS / 0 FAIL / 0 SKIPPED
 Findings: HIGH NONE / MEDIUM NONE / LOW NONE
 P2-A report: Civilpedia_V1-R09_P2-A_Report.txt (with append-only Appendix A)
-P2-B: NEXT / AUTHORIZED FOR CONTRACT FREEZE (implementation authorization gated on a separate frozen P2-B contract)
+P2-B: CURRENT — CONTRACT V1-R09-P2-B-CONTRACT-v1 FROZEN (P2-B1 authorized; P2-B2 locked pending P2-B1 acceptance)
 V1-R10: QUEUED (not started)
+
+### V1-R09 Part 2 P2-B Contract Freeze Record
+
+Phase: V1-R09 Part 2
+Slice: P2-B — Directory Cache-First + Reconnect
+Status: CURRENT
+Contract: V1-R09-P2-B-CONTRACT-v1
+Contract status: FROZEN
+Architect decision: FROZEN
+P2-B1: IMPLEMENTATION_AUTHORIZED: YES (effective after contract persistence)
+P2-B2: LOCKED pending P2-B1 independent acceptance
+P2-C through P2-G: LOCKED
+V1-R10: QUEUED (not started)
+Backend decision: no migration / RLS / schema / Edge / Realtime / service_role change
+V1-R09 status: CURRENT (not closed)
+Owner approval: PENDING OWNER STAGING
