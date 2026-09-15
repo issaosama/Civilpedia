@@ -1141,4 +1141,25 @@ class En {
       'An unexpected error occurred while saving';
   static const String userAreaSignInPrompt =
       'Sign in to sync and manage your profile';
+
+  // ── P2-A: Transport & Remote-Data Notice ──
+  static const String transportUnavailableTitle = 'Connection unavailable';
+  static const String transportUnavailableMessage =
+      'The network is unreachable. Check your connection and try again.';
+  static const String transportUnavailableAccessibility =
+      'Network connection is currently unavailable';
+
+  static const String noticeOffline = 'No network connection';
+  static const String noticeOfflineCompact = 'Offline';
+  static const String noticeTimeout = 'Connection timed out';
+  static const String noticeServiceUnavailable =
+      'Service temporarily unavailable';
+  static const String noticeMalformed = 'Data is invalid or unavailable';
+  static const String noticePermissionDenied = 'You do not have access';
+  static const String noticeAuthRestricted =
+      'Sign in required to access this data';
+  static const String noticeInvalidState = 'Invalid state for this request';
+  static const String noticeConflict = 'Data conflict on update';
+  static const String noticeUnexpected = 'An unexpected error occurred';
+  static const String noticeRetryAccessibility = 'Tap to retry';
 }

@@ -87,4 +87,18 @@ void main() {
       expect(materialApp.theme?.scaffoldBackgroundColor, AppTheme.darkTheme.scaffoldBackgroundColor);
     });
   });
+
+  group('P2-A HomeHeader connectivity-dot removal', () {
+    testWidgets(
+        'real HomeMainScreen renders without the removed home connectivity dot',
+        (tester) async {
+      await tester.pumpWidget(_pumpHome(theme: AppTheme.lightTheme));
+      await tester.pump(const Duration(milliseconds: 200));
+
+      expect(find.byIcon(Icons.wifi), findsNothing,
+          reason: 'old HomeHeader connectivity dot used Icons.wifi when online');
+      expect(find.byIcon(Icons.wifi_off), findsNothing,
+          reason: 'old HomeHeader connectivity dot used Icons.wifi_off when offline');
+    });
+  });
 }

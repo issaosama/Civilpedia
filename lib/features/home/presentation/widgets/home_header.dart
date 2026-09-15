@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import '../../../../core/services/connectivity_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../localization/ar.dart';
@@ -14,14 +13,14 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 /// * Civilpedia identity/logo at the top-right (RTL trailing side).
 /// * Compact user avatar/profile affordance on the opposite side.
 /// * Greeting line directly underneath the logo row.
-/// * Existing auth/connectivity behavior preserved; no new business logic.
+/// * Transport status is owned by the canonical shell banner; no local
+///   connectivity UI is rendered here.
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final connectivity = context.watch<ConnectivityProvider>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     String tr(String ar, String en) => isArabic ? ar : en;
@@ -61,13 +60,11 @@ class HomeHeader extends StatelessWidget {
                 ],
               ),
               const Spacer(),
-              // Existing user/profile and connectivity affordances.
+              // Existing user/profile affordance.
               _AvatarChip(
                 auth: auth,
                 onTap: () => context.push(AppRoutes.user),
               ),
-              const SizedBox(width: 8),
-              _ConnectivityDot(connectivity: connectivity),
             ],
           ),
           const SizedBox(height: 6),
@@ -115,21 +112,6 @@ class _AvatarChip extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ConnectivityDot extends StatelessWidget {
-  final ConnectivityProvider connectivity;
-
-  const _ConnectivityDot({required this.connectivity});
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      connectivity.isOnline ? Icons.wifi : Icons.wifi_off,
-      size: 16,
-      color: connectivity.isOnline ? Colors.green.shade600 : Colors.orange.shade400,
     );
   }
 }

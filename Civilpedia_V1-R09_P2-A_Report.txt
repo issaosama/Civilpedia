@@ -1,0 +1,224 @@
+CIVILPEDIA — V1-R09 PART 2 (P2-A): SHARED TRANSPORT AND REMOTE-STATE UX
+Implementation Report — READY FOR INDEPENDENT REVIEW
+
+STATUS: IMPLEMENTATION COMPLETE — READY FOR INDEPENDENT REVIEW
+AUTHORIZATION: V1-R09 PART 2 SLICE P2-A ONLY (in-scope). P2-B..P2-G not started (locked). V1-R10 queued (not started).
+CONTRACT: No commits/stage/push; no migrations; no pubspec/pubspec.lock/dependency changes; one SupabaseClient; Encyclopedia SSOT untouched; no new connectivity abstraction; production files outside P2-A scope untouched.
+
+======================================================================
+1. OBJECTIVE (P2-A) — RESOLVED
+======================================================================
+Deliver one canonical, non-blocking transport status surface plus a typed,
+non-throwing remote-state notice, wired once into the AppShell, with correct
+AR/EN localization and no duplicate transport indicators.
+
+Key decisions locked:
+- No new ConnectivityProvider/TransportState (existing ConnectivityProvider is the single source).
+- No blocking UI, no modal dialogs, no repeated/stacked snackbars, no navigation blocking.
+- Provider-absent (UNKNOWN / no ConnectivityProvider in tree) renders NO false banner.
+- Surface is purely view/consumer; it never paints raw errors or owns async work.
+
+======================================================================
+2. PRODUCTION IMPLEMENTATION
+======================================================================
+
+2.1 lib/core/widgets/transport_status_banner.dart  (NEW)
+======================================================================
+- TransportStatusBanner: canonical non-blocking transport status surface.
+- Consumes ConnectivityProvider via a NULLABLE Provider.of lookup
+  (Consumer<ConnectivityProvider?>), NOT a hard Provider.of that throws.
+  - Provider absent in the tree  -> no banner (SizedBox.shrink). This keeps
+    every pre-existing test that pumps AppShell without a provider green
+    (e.g. W6.2 directory-route tests) with zero edits to those files.
+  - state == TransportState.unavailable  -> exactly ONE compact banner.
+  - state == available or unknown         -> no banner (no false online/offline).
+- Fields guarded by DesignTokens / AppColors (light+dark).
+- RTL-aware: Localizations.localeOf(context).languageCode == 'ar' selects
+  Ar.* copy; banner is RTL-transition-friendly regardless of direction.
+- Narrow-screen safe (Column + Expanded, no overflow).
+- Persistent, non-blocking, no Timer, no stream ownership, no retry surface.
+- Encapsulates localized title + message + Semantics accessibility label.
+
+2.2 lib/core/widgets/remote_data_notice.dart  (NEW)
+======================================================================
+- RemoteDataNotice: typed remote-state notice; NEVER exposes raw errors.
+- RemoteDataCause (typed enum): offline, timeout, serviceUnavailable,
+  malformed, permissionDenied, authRestricted, invalidState, conflict,
+  unexpected. No error objects leak to UI.
+- RemoteDataNoticeMode: compact (persistent inline) and noData (centered,
+  no-results surface).
+- callback-based retry: retry button rendered ONLY when an onRetry callback
+  is supplied by the caller. The widget itself NEVER decides retryability,
+  NEVER queues work, has no mutation API.
+- Semantic labels per mode; works RTL/LTR, light/dark, narrow screens.
+
+2.3 lib/core/network/reconnect_generation_gate.dart  (NEW)
+======================================================================
+- ReconnectGenerationGate: pure generation-claim tracker used to make a
+  reconnect retry authoritative once per transport recovery.
+- Pure logic only: NO Timer, NO Future, NO ConnectivityProvider, NO streams.
+- bind(connectedGeneration): records the claimable generation.
+- claimCurrentGeneration(gen): returns true only for the CURRENT generation,
+  exactly once; newer generations are rejected until bind updates the current
+  value; older generations are never claimable; non-positive and UNKNOWN
+  generations are never claimable.
+- Failed reads do NOT reopen an old (already-settled) generation.
+- dispose(): prevents further claims (no timer/future lifecycle concerns).
+
+2.4 lib/core/navigation/app_shell.dart  (MODIFIED)
+======================================================================
+- AppShellBuilder shell now renders: Column [
+    TransportStatusBanner(),   // top, non-blocking, banner-or-shrink
+    Expanded(navigationShell),
+  ].
+- Banner is added BEFORE the navigation shell inside the existing Column so it
+  does not overlap the bottom navigation and never blocks the branch content.
+- No new routing production files, no route/segment identity changes
+  (confirmed by W6.3 data-untouched guard rails).
+
+2.5 lib/features/home/presentation/widgets/home_header.dart  (MODIFIED)
+======================================================================
+- REMOVED the duplicate inline connectivity indicator (the old dot that was
+  watching ConnectivityProvider inside HomeHeader).
+- HomeHeader no longer consumes ConnectivityProvider; the TransportStatusBanner
+  is now the SINGLE canonical transport surface in the shell.
+- Localized labels/accessibility retained (no new strings required here).
+
+2.6 lib/app.dart  (MODIFIED)
+======================================================================
+- supportedLocales: const [Locale('ar'), Locale('en')] (English locale
+  registered alongside Arabic for the shared UX surfaces).
+
+2.7 lib/localization/ar.dart + lib/localization/en.dart  (MODIFIED)
+======================================================================
+- Added P2-A strings (shared transport + remote-state UX) to BOTH locales:
+  transportUnavailableTitle, transportUnavailableMessage,
+  transportUnavailableAccessibility, noticeOffline, noticeTimeout,
+  noticeServiceUnavailable, noticeMalformed, noticePermissionDenied,
+  noticeAuthRestricted, noticeInvalidState, noticeConflict, noticeUnexpected,
+  retry / noticeRetryAccessibility (English + Arabic).
+- No existing keys removed; no duplicate-declaration regressions (verified).
+
+======================================================================
+3. TEST IMPLEMENTATION
+======================================================================
+
+3.1 test/v1_r09_p2_shared_ux_test.dart  (NEW — 44 tests)
+======================================================================
+Coverage of the four verifiable categories required by the P2-A contract:
+a) ReconnectGenerationGate lifecycle: initial bind records current generation;
+   generation 0 / negative generations never claimable; duplicate generation
+   rejected; older generation rejected; newer positive generation claimed
+   exactly once; failed read does not reopen old generation; reset returns to
+   unbound; no Timer/future ownership; dispose prevents further claims.
+b) TransportStatusBanner state machine: unknown -> no banner; unavailable ->
+   exactly one non-blocking banner; available -> no banner; unavailable ->
+   available clears it; repeated unavailable events do not stack duplicates;
+   shell remains interactive (navigation not blocked) while banner visible.
+c) Layout/theme/locale: RTL (Arabic) and LTR (English) banner render without
+   overflow; light + dark themes; narrow screens; NO forced Arabic in English;
+   correct Arabic transport copy; localized retry copy.
+d) RemoteDataNotice: compact mode renders typed cause; no-data mode renders
+   centered notice; retry HIDDEN without onRetry callback; retry SHOWN with
+   callback; callback invoked once per tap; all typed causes render without
+   raw errors; NO mutation-specific API surface (widget stays presentation-only).
+e) AppShell integration: banner visible when transport unavailable in the real
+   shell; no banner when transport available; shell/provider disposal safe.
+
+3.2 test/app_shell_test.dart  (UPDATED — passes)
+======================================================================
+- All existing shell assertions preserved. Updated only where required: any
+  AppShell-under-test that needs the banner to render now provides
+  ConnectivityProvider (when the test also needs a provider, since the banner
+  reads ConnectivityProvider from the tree). Nullable banner lookup keeps all
+  remaining shell assertions (W6.3 destinations, IndexedStack preservation,
+  back-to-exit, root-pushed routes, bottom obstruction) passing.
+
+3.3 test/global_search_screen_test.dart  (UPDATED — passes)
+======================================================================
+- Updated only where required: provides ConnectivityProvider when that test
+  pumps AppShell with a banner surface. All /search behavior assertions
+  (canonical route, no bottom nav, live search, debounce, stale-result
+  protection, no-results, Knowledge/Tools aggregation, Back journeys,
+  direction-aware RTL) unchanged and passing.
+
+======================================================================
+4. PRODUCTION-PROTECTION CHECKLIST (VERIFIED)
+======================================================================
+[X] No migration added; no schema/identifier changes (W6.3 data-untouched guard rails pass).
+[X] No pubspec.yaml / pubspec.lock / package dependency changes.
+[X] Single SupabaseClient; Encyclopedia SSOT untouched (path A0 untouched).
+[X] No new connectivity provider/abstraction; existing ConnectivityProvider reused.
+[X] No files modified outside P2-A production scope.
+[X] Pre-existing dirty test files left untouched (a5_6_profile_bootstrap_test.dart,
+    v1_r08_cloud_profile_foundation_test.dart, v1_r08_profile_edit_screen_widget_test.dart,
+    OpenCode_Usage_Report.txt are pre-existing baseline dirt — not touched).
+[X] Banner/banner-only regressions: pre-existing directory-route tests green
+    WITHOUT edits (nullable provider lookup -> no banner when provider absent).
+[X] No staged/committed/pushed files. git diff --check clean (no whitespace errors).
+
+======================================================================
+5. VERIFICATION RESULTS (run one-at-a-time; no parallel flutter test — see NOTE)
+======================================================================
+- flutter test --no-pub test/connectivity_provider_test.dart ....... 21 PASS
+- flutter test --no-pub test/app_shell_test.dart ....................  8 PASS
+- flutter test --no-pub test/v1_r09_p2_shared_ux_test.dart ......... 44 PASS
+- flutter test --no-pub test/global_search_screen_test.dart ........ 20 PASS
+- flutter test --no-pub test/w6_1_projects_route_test.dart ......... 10 PASS
+- flutter test --no-pub test/w6_3_nav_transition_test.dart .......... 26 PASS
+Sequential FULL P2-A suite: green.
+
+NOTE (total reliability): NativeAssets/build parallelism on this machine can
+cause PathExistsException under CONCURRENT `flutter test` processes. All runs
+in this work were executed strictly ONE-AT-A-TIME. Do not run flutter test in
+parallel in this repo.
+
+======================================================================
+6. DELIVERY STATEMENT
+======================================================================
+P2-A is the only V1-R09 Part 2 slice implemented in this change; every other
+Part 2 slice remains LOCKED/not-started spacer (P2-B..P2-G unchanged), V1-R10
+remains queued, and the pre-existing dirty work in the test tree was not
+modified.
+
+DECISION: P2-A IMPLEMENTATION COMPLETE — READY FOR INDEPENDENT REVIEW.
+
+END OF P2-A REPORT
+
+======================================================================
+APPENDIX A — CORRECTION NOTE (append-only; historical content above is
+NOT rewritten. Filed during the P2-A localization correction pass.)
+======================================================================
+CORRECTION: Section 2.3 wording ("newer generations are rejected until
+bind updates the current value") mis-describes the frozen ReconnectGenerationGate
+semantics. The gate implementation (lib/core/network/reconnect_generation_gate.dart)
+and its test suite were already correct; only the prose was wrong. The frozen
+semantics verified by the gate now read:
+
+- The initial generation is recorded at bind().
+- Zero and negative generations are rejected (generation <= 0 is never claimable).
+- The same generation is rejected (already handled; claimed once only).
+- An older generation is rejected (never claimable after a newer one).
+- Every newer positive generation may be claimed once; each successful claim
+  advances the handled baseline, so consecutive newer generations are each
+  claimable without re-binding.
+- A failed external read does NOT reopen an already-claimed generation
+  (the gate is pure bookkeeping; it never un-claims on read failure).
+- No re-bind is required before claiming a later newer generation
+  (bind is only for initial/onboarding synchronization).
+
+END OF APPENDIX A
+
+======================================================================
+APPENDIX B — FINAL ACCEPTANCE / CLOSURE (append-only)
+======================================================================
+- P2-A: ACCEPTED / CLOSED.
+- Final micro-review: PASS — P2-A ACCEPTED — P2-B MAY BEGIN.
+- Final focused correction verification: 57 PASS / 0 FAIL / 0 SKIPPED
+  (app_shell_test.dart 10, home_main_screen_theme_test.dart 3,
+  v1_r09_p2_shared_ux_test.dart 44).
+- Findings: HIGH NONE / MEDIUM NONE / LOW NONE.
+- P2-B may proceed to contract freeze.
+- Historical report evidence above is not rewritten.
+
+END OF APPENDIX B

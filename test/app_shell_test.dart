@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import 'package:civilpedia/core/navigation/app_shell.dart';
 import 'package:civilpedia/core/navigation/shell_content_insets.dart';
+import 'package:civilpedia/core/services/connectivity_provider.dart';
+import 'package:civilpedia/core/services/transport_source.dart';
 import 'package:civilpedia/localization/ar.dart';
+import 'package:civilpedia/localization/en.dart';
 
 /// Minimal stand-in for a branch content screen. Carries per-branch stateful
 /// widgets so IndexedStack state preservation can be asserted.
@@ -32,6 +38,14 @@ class _BranchProbe extends StatelessWidget {
       ),
     );
   }
+}
+
+class _FakeTransportSource implements TransportSource {
+  _FakeTransportSource();
+  @override
+  Future<bool> checkAvailability() async => true;
+  @override
+  Stream<bool> get availabilityChanges => const Stream.empty();
 }
 
 final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>();
@@ -70,17 +84,23 @@ GoRouter _buildTestRouter() {
   );
 }
 
-Future<void> _pumpShell(WidgetTester tester) async {
+Future<void> _pumpShell(WidgetTester tester,
+    {Locale locale = const Locale('ar')}) async {
+  final connectivity = ConnectivityProvider(source: _FakeTransportSource());
+  await connectivity.initialization;
   await tester.pumpWidget(
-    MaterialApp.router(
-      locale: const Locale('ar'),
-      supportedLocales: const [Locale('ar')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      routerConfig: _buildTestRouter(),
+    ChangeNotifierProvider<ConnectivityProvider>.value(
+      value: connectivity,
+      child: MaterialApp.router(
+        locale: locale,
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        routerConfig: _buildTestRouter(),
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -124,6 +144,38 @@ void main() {
     expect(kShellDestinations[2].route, '/tools');
     expect(kShellDestinations[3].route, '/projects');
     expect(kShellDestinations[4].route, '/directory');
+  });
+
+  testWidgets('English shell: all five nav labels use canonical En values',
+      (tester) async {
+    await _pumpShell(tester, locale: const Locale('en'));
+
+    expect(find.byType(AppShell), findsOneWidget);
+    expect(find.text(En.home), findsOneWidget);
+    expect(find.text(En.encyclopedia), findsOneWidget);
+    expect(find.text(En.tools), findsOneWidget);
+    expect(find.text(En.checklistMyProjects), findsOneWidget);
+    expect(find.text(En.directory), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.text(En.home))),
+      TextDirection.ltr,
+    );
+  });
+
+  testWidgets('English first-back at branch root confirms exit with En copy',
+      (tester) async {
+    final popLog = <bool>[];
+    _mockSystemNavigatorPop(tester, popLog);
+    await _pumpShell(tester, locale: const Locale('en'));
+
+    await _rootNavigatorOf(tester).maybePop();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text(En.exitConfirm), findsOneWidget);
+    expect(popLog, isEmpty);
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('every destination reaches its branch', (tester) async {

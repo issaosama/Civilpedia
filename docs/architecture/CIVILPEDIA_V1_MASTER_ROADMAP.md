@@ -751,6 +751,8 @@ STATUS: CURRENT
 
 Part 1: CLOSED / ACCEPTED — PASS - V1-R09 PART 1 ACCEPTED - PART 2 MAY BEGIN
 Part 2: AUTHORIZED — current within V1-R09 (overall V1-R09 remains CURRENT)
+Part 2 P2-A: ACCEPTED / CLOSED — PASS - P2-A ACCEPTED - P2-B MAY BEGIN
+Part 2 P2-B: NEXT / AUTHORIZED FOR CONTRACT FREEZE (no separate frozen P2-B contract exists yet; implementation authorization remains gated on that freeze)
 
 Primary:
 
@@ -1372,3 +1374,14 @@ Evidence summary:
 V1-R09 status: CURRENT (not closed)
 Next queued phase: V1-R10 — Core App UX Production Completion
 Owner approval: PENDING OWNER STAGING
+
+### V1-R09 Part 2 P2-A Closure Record
+
+Slice: P2-A — Shared Transport and Remote-State UX
+Status: ACCEPTED / CLOSED
+Final micro-review: PASS — P2-A ACCEPTED — P2-B MAY BEGIN
+Final focused evidence: 57 PASS / 0 FAIL / 0 SKIPPED
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+P2-A report: Civilpedia_V1-R09_P2-A_Report.txt (with append-only Appendix A)
+P2-B: NEXT / AUTHORIZED FOR CONTRACT FREEZE (implementation authorization gated on a separate frozen P2-B contract)
+V1-R10: QUEUED (not started)

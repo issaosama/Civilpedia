@@ -4,8 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import 'package:civilpedia/core/navigation/app_shell.dart';
+import 'package:civilpedia/core/services/connectivity_provider.dart';
+import 'package:civilpedia/core/services/transport_source.dart';
 import 'package:civilpedia/core/widgets/civil_surface_card.dart';
 import 'package:civilpedia/features/search/domain/search_aggregator.dart';
 import 'package:civilpedia/features/search/domain/search_result.dart';
@@ -14,6 +17,14 @@ import 'package:civilpedia/localization/ar.dart';
 import 'package:civilpedia/routes/app_routes.dart';
 
 final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>();
+
+class _FakeTransportSource implements TransportSource {
+  _FakeTransportSource();
+  @override
+  Future<bool> checkAvailability() async => true;
+  @override
+  Stream<bool> get availabilityChanges => const Stream.empty();
+}
 
 /// Probe shell branch so the routing contract can be asserted without pulling
 /// heavyweight feature providers.
@@ -124,16 +135,21 @@ SearchAggregator _gatedAggregator(
 }
 
 Future<void> _pumpRouter(WidgetTester tester, GoRouter router) async {
+  final connectivity = ConnectivityProvider(source: _FakeTransportSource());
+  await connectivity.initialization;
   await tester.pumpWidget(
-    MaterialApp.router(
-      locale: const Locale('ar'),
-      supportedLocales: const [Locale('ar')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      routerConfig: router,
+    ChangeNotifierProvider<ConnectivityProvider>.value(
+      value: connectivity,
+      child: MaterialApp.router(
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        routerConfig: router,
+      ),
     ),
   );
   await tester.pumpAndSettle();

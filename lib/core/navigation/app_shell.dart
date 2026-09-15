@@ -5,9 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../localization/ar.dart';
+import '../../localization/en.dart';
 import '../../routes/app_routes.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
+import '../widgets/transport_status_banner.dart';
 import 'shell_content_insets.dart';
 
 /// Metadata for one bottom-navigation destination of the application shell.
@@ -26,13 +28,20 @@ class ShellDestination {
   /// Icon shown when the branch is selected.
   final IconData activeIcon;
 
+  /// Canonical Arabic label (SSOT). Displayed when the active locale is
+  /// Arabic; this is what the existing W-series tests and the dir W6.2
+  /// double-back tests assert against.
   final String label;
+
+  /// Canonical English label. Displayed when the active locale is English.
+  final String enLabel;
 
   const ShellDestination({
     required this.route,
     required this.icon,
     required this.activeIcon,
     required this.label,
+    required this.enLabel,
   });
 }
 
@@ -50,30 +59,35 @@ const List<ShellDestination> kShellDestinations = [
     icon: Icons.home_outlined,
     activeIcon: Icons.home,
     label: Ar.home,
+    enLabel: En.home,
   ),
   ShellDestination(
     route: AppRoutes.encyclopedia,
     icon: Icons.menu_book_outlined,
     activeIcon: Icons.menu_book,
     label: Ar.encyclopedia,
+    enLabel: En.encyclopedia,
   ),
   ShellDestination(
     route: AppRoutes.tools,
     icon: Icons.build_outlined,
     activeIcon: Icons.build,
     label: Ar.tools,
+    enLabel: En.tools,
   ),
   ShellDestination(
     route: AppRoutes.projects,
     icon: Icons.folder_outlined,
     activeIcon: Icons.folder,
     label: Ar.checklistMyProjects,
+    enLabel: En.checklistMyProjects,
   ),
   ShellDestination(
     route: AppRoutes.directory,
     icon: Icons.business_center_outlined,
     activeIcon: Icons.business_center,
     label: Ar.directory,
+    enLabel: En.directory,
   ),
 ];
 
@@ -129,7 +143,7 @@ class _AppShellState extends State<AppShell> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(Ar.exitConfirm),
+            content: Text(_exitConfirmText(context)),
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
           ),
@@ -138,6 +152,29 @@ class _AppShellState extends State<AppShell> {
       return false;
     }
     return true;
+  }
+
+  /// Canonical locale-resolved exit-confirmation text.
+  ///
+  /// Mirrors the banner's SSOT-by-active-locale pattern exactly: resolve via
+  /// `Localizations.localeOf(context)`, never through a second localization
+  /// system and never hard-coded to one locale. This is what the W-series
+  /// double-back tests assert against (Arabic) and the correction will
+  /// additionally assert the canonical English text.
+  String _exitConfirmText(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    return isArabic ? Ar.exitConfirm : En.exitConfirm;
+  }
+
+  /// Canonical locale-resolved label for a bottom-navigation destination.
+  ///
+  /// The canonical Arabic label (SSOT) stays `destination.label` so the
+  /// W6.3 branch-index/`label == Ar.*` assertions keep passing; the canonical
+  /// English label is resolved from the same const SSOT via
+  /// `destination.enLabel` exactly when the active locale is English.
+  String _navLabel(ShellDestination destination) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    return isArabic ? destination.label : destination.enLabel;
   }
 
   @override
@@ -163,6 +200,7 @@ class _AppShellState extends State<AppShell> {
             bottomObstruction: AppShell.shellBottomObstruction,
             child: Column(
               children: [
+                const TransportStatusBanner(),
                 Expanded(child: widget.navigationShell),
               ],
             ),
@@ -262,7 +300,7 @@ class _AppShellState extends State<AppShell> {
               ),
               const SizedBox(height: 4),
               Text(
-                destination.label,
+                _navLabel(destination),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,

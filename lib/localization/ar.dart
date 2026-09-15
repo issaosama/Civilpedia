@@ -1110,4 +1110,26 @@ class Ar {
   static const String profileCauseUnexpected = 'حدث خطأ غير متوقع عند الحفظ';
   static const String userAreaSignInPrompt =
       'سجّل الدخول لمزامنة ملفك الشخصي وإدارته';
+
+  // ── P2-A: Transport & Remote-Data Notice ──
+  static const String transportUnavailableTitle = 'الاتصال غير متاح';
+  static const String transportUnavailableMessage =
+      'لا يمكن الوصول إلى الشبكة. تحقق من اتصالك وأعد المحاولة.';
+  static const String transportUnavailableAccessibility =
+      'الاتصال بالشبكة غير متاح حالياً';
+
+  static const String noticeOffline = 'لا يوجد اتصال بالشبكة';
+  static const String noticeOfflineCompact = 'غير متصل';
+  static const String noticeTimeout = 'انتهت مهلة الاتصال';
+  static const String noticeServiceUnavailable =
+      'الخدمة غير متاحة مؤقتاً';
+  static const String noticeMalformed = 'البيانات غير صالحة أو غير متوفرة';
+  static const String noticePermissionDenied = 'ليس لديك صلاحية للوصول';
+  static const String noticeAuthRestricted =
+      'يجب تسجيل الدخول للوصول إلى هذه البيانات';
+  static const String noticeInvalidState =
+      'الحالة غير صالحة لإجراء هذا الطلب';
+  static const String noticeConflict = 'تعارض في البيانات المحدثة';
+  static const String noticeUnexpected = 'حدث خطأ غير متوقع';
+  static const String noticeRetryAccessibility = 'اضغط لإعادة المحاولة';
 }
