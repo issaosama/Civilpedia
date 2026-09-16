@@ -13,6 +13,22 @@ import '../../domain/user_profile.dart';
 import '../../domain/user_profile_repository.dart';
 import 'profile_operation_result.dart';
 
+/// P2-C1 transient state for the active authenticated-profile read surface.
+enum AuthenticatedProfileReadPhase {
+  idle,
+  loading,
+  refreshing,
+  loaded,
+  authoritativeNotFound,
+  failed,
+}
+
+typedef _ProfileReadKey = ({
+  String userId,
+  int authGeneration,
+  int profileRevision,
+});
+
 /// V1-R08 — Session-aware owner of the personal profile, with a strict
 /// gated-bounded authority split (finding 1 / 17):
 ///
@@ -57,12 +73,16 @@ class UserProfileProvider extends ChangeNotifier {
   bool _profileLoadFailed = false;
 
   CloudProfile? _authenticatedProfile;
-  bool _cloudLoadFailed = false;
-  bool _cloudLoadSettled = false;
+  AuthenticatedProfileReadPhase _cloudReadPhase =
+      AuthenticatedProfileReadPhase.idle;
+  ProfileReadFailureKind? _cloudReadFailure;
   String? _authenticatedRegionPreferenceCode;
   String? _lastWatchedUser;
   int _lastWatchedGeneration = 0;
-  Future<void>? _cloudLoadInFlight;
+  final Map<_ProfileReadKey, Future<void>> _cloudReadsInFlight = {};
+  int _cloudReadRequestEpoch = 0;
+  int _profileRevision = 0;
+  bool _disposed = false;
 
   /// F3 — coalesces concurrent [saveRoleAndRegionPreference] invocations so the
   /// backend `saveEditableFields` is invoked at most once per burst. A caller
@@ -107,9 +127,20 @@ class UserProfileProvider extends ChangeNotifier {
         _authenticatedProfile!.userId == auth.currentUserId;
   }
 
-  /// True when the last authoritative authenticated cloud re-read failed
-  /// (offline/backend). The guest/local profile is never used as a fallback.
-  bool get cloudLoadFailed => _cloudLoadFailed;
+  /// Typed lifecycle state consumed by the P2-C2 presentation layer.
+  AuthenticatedProfileReadPhase get cloudReadPhase => _cloudReadPhase;
+
+  /// Exact sanitized cause of the latest failed authenticated read.
+  ProfileReadFailureKind? get cloudReadFailure => _cloudReadFailure;
+
+  /// Backward-compatible view used by the existing V1-R08 screens until
+  /// P2-C2 migrates them to [cloudReadPhase]/[cloudReadFailure].
+  bool get cloudLoadFailed =>
+      _cloudReadPhase == AuthenticatedProfileReadPhase.failed;
+
+  /// True while a known-good same-user profile stays visible during a read.
+  bool get isCloudProfileRefreshing =>
+      _cloudReadPhase == AuthenticatedProfileReadPhase.refreshing;
 
   /// V1-R08 (Part 2) — True while an authenticated cloud profile read is still
   /// in flight and has NOT settled to a row, "no row", or failure. Lets the UI
@@ -121,8 +152,7 @@ class UserProfileProvider extends ChangeNotifier {
     final auth = _auth;
     if (auth == null || !auth.isLoggedIn) return false;
     return _authenticatedProfile == null &&
-        !_cloudLoadFailed &&
-        !_cloudLoadSettled;
+        _cloudReadPhase == AuthenticatedProfileReadPhase.loading;
   }
 
   Future<void> loadProfile() async {
@@ -135,7 +165,7 @@ class UserProfileProvider extends ChangeNotifier {
       _profile = null;
     }
     _isLoaded = true;
-    notifyListeners();
+    _notifyIfAlive();
   }
 
   Future<void> saveProfile(LocalUserProfile value) async {
@@ -143,109 +173,180 @@ class UserProfileProvider extends ChangeNotifier {
     // could silently shadow cloud state, so it is rejected outright.
     if (_auth?.isLoggedIn ?? false) return;
     await _repository.saveProfile(value);
+    if (_disposed) return;
     _profile = value;
-    notifyListeners();
+    _notifyIfAlive();
   }
 
   Future<void> clearProfile() async {
     await _repository.clearProfile();
+    if (_disposed) return;
     _profile = null;
     _authenticatedProfile = null;
     _authenticatedRegionPreferenceCode = null;
-    _cloudLoadFailed = false;
-    _cloudLoadSettled = false;
-    notifyListeners();
+    _cloudReadFailure = null;
+    _cloudReadPhase = AuthenticatedProfileReadPhase.idle;
+    _profileRevision++;
+    _cloudReadRequestEpoch++;
+    _notifyIfAlive();
   }
 
   /// Loads the authoritative cloud profile for the ACTIVE authenticated
-  /// session (idempotent; coalesces concurrent calls). No-op when signed out.
-  /// Results are published only while the captured (userId, generation) still
-  /// matches the active session.
+  /// session. Concurrent calls coalesce only when their exact logical key
+  /// `(userId, authGeneration, profileRevision)` matches.
   Future<void> ensureCloudProfileLoaded() async {
+    if (_disposed) return;
     final auth = _auth;
     if (auth == null || !auth.isLoggedIn) return;
     final userId = auth.currentUserId;
     if (userId == null) return;
     final generation = auth.generation;
 
-    final pending = _cloudLoadInFlight;
+    // Fail closed if an impossible foreign in-memory profile survived an
+    // external harness/state transition. It must never be retained for the
+    // current identity or treated as refreshable content.
+    if (_authenticatedProfile != null &&
+        _authenticatedProfile!.userId != userId) {
+      _authenticatedProfile = null;
+      _authenticatedRegionPreferenceCode = null;
+      _profileRevision++;
+    }
+
+    // A provider constructed after an already-restored session may receive
+    // its first read before any auth-listener transition. Record that same
+    // canonical identity so a later same-generation token refresh does not
+    // look like an account replacement.
+    _lastWatchedUser = userId;
+    _lastWatchedGeneration = generation;
+
+    final key = (
+      userId: userId,
+      authGeneration: generation,
+      profileRevision: _profileRevision,
+    );
+    final pending = _cloudReadsInFlight[key];
     if (pending != null) {
       await pending;
       return;
     }
-    final run = _loadCloudProfile(userId: userId, generation: generation);
-    _cloudLoadInFlight = run;
-    try {
-      await run;
-    } finally {
-      if (identical(_cloudLoadInFlight, run)) _cloudLoadInFlight = null;
-    }
+
+    final requestEpoch = ++_cloudReadRequestEpoch;
+    _cloudReadFailure = null;
+    _cloudReadPhase = _authenticatedProfile?.userId == userId
+        ? AuthenticatedProfileReadPhase.refreshing
+        : AuthenticatedProfileReadPhase.loading;
+
+    late final Future<void> run;
+    run =
+        Future<void>.microtask(
+          () => _loadCloudProfile(key: key, requestEpoch: requestEpoch),
+        ).whenComplete(() {
+          if (identical(_cloudReadsInFlight[key], run)) {
+            _cloudReadsInFlight.remove(key);
+          }
+        });
+    _cloudReadsInFlight[key] = run;
+    _notifyIfAlive();
+    await run;
   }
 
   Future<void> _loadCloudProfile({
-    required String userId,
-    required int generation,
+    required _ProfileReadKey key,
+    required int requestEpoch,
   }) async {
     final auth = _auth;
     final gateway = _cloudProfileGateway;
     if (auth == null || gateway == null) {
-      _authenticatedProfile = null;
-      _authenticatedRegionPreferenceCode = null;
-      _cloudLoadFailed = false;
-      _cloudLoadSettled = true;
-      notifyListeners();
+      _publishReadFailure(
+        key: key,
+        requestEpoch: requestEpoch,
+        failure: ProfileReadFailureKind.unexpected,
+      );
       return;
     }
     try {
-      final loaded = await gateway.fetchByUserId(userId);
-      // Stale suppression: the session may have changed while the read was in
-      // flight; a result captured under an old identity/generation is dropped.
-      if (!auth.isCurrentSession(userId: userId, generation: generation))
-        return;
+      final loaded = await gateway.fetchByUserId(key.userId);
+      if (!_canPublishRead(key: key, requestEpoch: requestEpoch)) return;
       if (loaded == null) {
-        // No row yet — provisioning belongs to the post-auth bootstrap seam;
-        // the provider keeps showing no authenticated profile (fail closed).
+        // Successful absence is authoritative, but provisioning remains
+        // exclusively owned by PersonalProfileBootstrapCoordinator.
+        final changed =
+            _authenticatedProfile != null ||
+            _authenticatedRegionPreferenceCode != null;
         _authenticatedProfile = null;
         _authenticatedRegionPreferenceCode = null;
-        _cloudLoadFailed = false;
-        _cloudLoadSettled = true;
+        _cloudReadFailure = null;
+        _cloudReadPhase = AuthenticatedProfileReadPhase.authoritativeNotFound;
+        if (changed) _profileRevision++;
+        _notifyIfAlive();
       } else {
+        if (loaded.userId != key.userId) {
+          _publishReadFailure(
+            key: key,
+            requestEpoch: requestEpoch,
+            failure: ProfileReadFailureKind.malformedResponse,
+          );
+          return;
+        }
         final regionCode = await _resolveRegionPreferenceCode(
           loaded.regionPreferenceId,
         );
-        // Reverse-lookup was async; still publish only under the captured
-        // (userId, generation).
-        if (!auth.isCurrentSession(userId: userId, generation: generation))
-          return;
+        if (!_canPublishRead(key: key, requestEpoch: requestEpoch)) return;
+        // Advance before publication so any older read captured at the prior
+        // revision is immediately stale.
+        _profileRevision++;
         _authenticatedProfile = loaded;
         _authenticatedRegionPreferenceCode = regionCode;
-        _cloudLoadFailed = false;
-        _cloudLoadSettled = true;
+        _cloudReadFailure = null;
+        _cloudReadPhase = AuthenticatedProfileReadPhase.loaded;
+        _notifyIfAlive();
       }
-    } on CloudProfilePermissionDeniedException {
-      if (auth.isCurrentSession(userId: userId, generation: generation)) {
-        _authenticatedProfile = null;
-        _authenticatedRegionPreferenceCode = null;
-        _cloudLoadFailed = true;
-        _cloudLoadSettled = true;
-      }
-    } on CloudProfileParseException {
-      // Strict parser rejected the row — never surface malformed data.
-      if (auth.isCurrentSession(userId: userId, generation: generation)) {
-        _authenticatedProfile = null;
-        _authenticatedRegionPreferenceCode = null;
-        _cloudLoadFailed = true;
-        _cloudLoadSettled = true;
-      }
-    } catch (_) {
-      if (auth.isCurrentSession(userId: userId, generation: generation)) {
-        _authenticatedProfile = null;
-        _authenticatedRegionPreferenceCode = null;
-        _cloudLoadFailed = true;
-        _cloudLoadSettled = true;
-      }
+    } catch (error) {
+      _publishReadFailure(
+        key: key,
+        requestEpoch: requestEpoch,
+        failure: classifyProfileReadFailure(error),
+      );
     }
-    notifyListeners();
+  }
+
+  bool _canPublishRead({
+    required _ProfileReadKey key,
+    required int requestEpoch,
+  }) {
+    final auth = _auth;
+    return !_disposed &&
+        requestEpoch == _cloudReadRequestEpoch &&
+        key.profileRevision == _profileRevision &&
+        auth != null &&
+        auth.isCurrentSession(
+          userId: key.userId,
+          generation: key.authGeneration,
+        );
+  }
+
+  void _publishReadFailure({
+    required _ProfileReadKey key,
+    required int requestEpoch,
+    required ProfileReadFailureKind failure,
+  }) {
+    if (!_canPublishRead(key: key, requestEpoch: requestEpoch)) return;
+    // Preserve a known-good same-user profile. Fail closed if a foreign value
+    // somehow reached this state; guest/local data is never substituted.
+    if (_authenticatedProfile != null &&
+        _authenticatedProfile!.userId != key.userId) {
+      _authenticatedProfile = null;
+      _authenticatedRegionPreferenceCode = null;
+      _profileRevision++;
+      _cloudReadRequestEpoch++;
+      _cloudReadFailure = null;
+      _cloudReadPhase = AuthenticatedProfileReadPhase.idle;
+      _notifyIfAlive();
+      return;
+    }
+    _cloudReadFailure = failure;
+    _cloudReadPhase = AuthenticatedProfileReadPhase.failed;
+    _notifyIfAlive();
   }
 
   /// Reverse-lookup of a cloud profile's `region_preferences.id` UUID → the
@@ -330,6 +431,7 @@ class UserProfileProvider extends ChangeNotifier {
       );
     }
     ProfileOperationCause? lostAuthority() {
+      if (_disposed) return ProfileOperationCause.sessionLost;
       if (!auth.isCurrentSession(userId: userId, generation: generation))
         return ProfileOperationCause.sessionLost;
       if (!auth.canAccountAuthorityBeGranted)
@@ -387,11 +489,14 @@ class UserProfileProvider extends ChangeNotifier {
       );
       final lost = lostAuthority();
       if (lost != null) return ProfileOperationResult.failed(lost);
+      // P2-C1: an accepted authoritative mutation publication advances the
+      // canonical in-memory revision before any older read can publish.
+      _profileRevision++;
       _authenticatedProfile = fresh;
       _authenticatedRegionPreferenceCode = regionCode;
-      _cloudLoadFailed = false;
-      _cloudLoadSettled = true;
-      notifyListeners();
+      _cloudReadFailure = null;
+      _cloudReadPhase = AuthenticatedProfileReadPhase.loaded;
+      _notifyIfAlive();
       return matches(fresh)
           ? ProfileOperationResult.ok(profile: fresh, wasNoOp: noOp)
           : const ProfileOperationResult.failed(
@@ -401,7 +506,8 @@ class UserProfileProvider extends ChangeNotifier {
 
     final uncertain = _uncertainSave;
     var conditionalRetry = false;
-    final hasStaleUncertainty = uncertain != null &&
+    final hasStaleUncertainty =
+        uncertain != null &&
         (uncertain.userId != userId || uncertain.generation != generation);
 
     if (uncertain != null &&
@@ -588,21 +694,25 @@ class UserProfileProvider extends ChangeNotifier {
   bool _isProfileMutationPending(String userId) {
     final gateway = _cloudProfileGateway;
     if (gateway is! ProfileMutationSettlement) return false;
-    return (gateway as ProfileMutationSettlement)
-        .isProfileMutationPending(userId);
+    return (gateway as ProfileMutationSettlement).isProfileMutationPending(
+      userId,
+    );
   }
 
   /// Clears authenticated cloud state on a canonical identity change. Called
   /// synchronously via the account-bound reset wiring; the auth listener then
   /// reloads for the new identity.
   void resetForIdentityChange() {
+    if (_disposed) return;
+    _cloudReadRequestEpoch++;
+    _profileRevision++;
     _authenticatedProfile = null;
     _authenticatedRegionPreferenceCode = null;
-    _cloudLoadFailed = false;
-    _cloudLoadSettled = false;
+    _cloudReadFailure = null;
+    _cloudReadPhase = AuthenticatedProfileReadPhase.idle;
     _lastWatchedUser = null;
     _lastWatchedGeneration = 0;
-    notifyListeners();
+    _notifyIfAlive();
   }
 
   /// Fires for every [AuthProvider] change. On a canonical user/generation
@@ -610,6 +720,7 @@ class UserProfileProvider extends ChangeNotifier {
   /// identity; sign-out drops it entirely (the local profile remains, guest
   /// authority only).
   void _handleAuthChanged() {
+    if (_disposed) return;
     final auth = _auth;
     if (auth == null) return;
     final authenticated = auth.isLoggedIn;
@@ -617,15 +728,15 @@ class UserProfileProvider extends ChangeNotifier {
     final generation = auth.generation;
 
     if (!authenticated) {
-      if (_authenticatedProfile != null || _cloudLoadFailed) {
-        _authenticatedProfile = null;
-        _authenticatedRegionPreferenceCode = null;
-        _cloudLoadFailed = false;
-        notifyListeners();
-      }
-      _cloudLoadSettled = false;
+      _cloudReadRequestEpoch++;
+      _profileRevision++;
+      _authenticatedProfile = null;
+      _authenticatedRegionPreferenceCode = null;
+      _cloudReadFailure = null;
+      _cloudReadPhase = AuthenticatedProfileReadPhase.idle;
       _lastWatchedUser = null;
       _lastWatchedGeneration = 0;
+      _notifyIfAlive();
       return;
     }
 
@@ -633,18 +744,29 @@ class UserProfileProvider extends ChangeNotifier {
     if (_lastWatchedUser == userId && _lastWatchedGeneration == generation) {
       return;
     }
+    _cloudReadRequestEpoch++;
+    _profileRevision++;
     _authenticatedProfile = null;
     _authenticatedRegionPreferenceCode = null;
-    _cloudLoadFailed = false;
-    _cloudLoadSettled = false;
+    _cloudReadFailure = null;
+    _cloudReadPhase = AuthenticatedProfileReadPhase.idle;
     _lastWatchedUser = userId;
     _lastWatchedGeneration = generation;
-    notifyListeners();
+    _notifyIfAlive();
     unawaited(ensureCloudProfileLoaded());
+  }
+
+  void _notifyIfAlive() {
+    if (!_disposed) notifyListeners();
   }
 
   @override
   void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _cloudReadRequestEpoch++;
+    _profileRevision++;
+    _cloudReadsInFlight.clear();
     _auth?.removeListener(_handleAuthChanged);
     super.dispose();
   }

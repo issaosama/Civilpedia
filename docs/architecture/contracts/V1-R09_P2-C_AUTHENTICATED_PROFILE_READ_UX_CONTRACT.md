@@ -263,3 +263,12 @@ unresolved contract contradiction to remain.
 
 This freeze authorizes P2-C1 implementation only (after contract persistence).
 It does not mark V1-R09 closed.
+
+## Appendix — P2-C1 Closure
+
+P2-C1: ACCEPTED / CLOSED
+Independent review: PASS
+Test evidence: 205 PASS / 0 FAIL / 0 SKIPPED
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+P2-C2: may now be unlocked
+P2-C overall: remains CURRENT

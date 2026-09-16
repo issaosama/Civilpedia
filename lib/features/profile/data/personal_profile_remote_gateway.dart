@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:http/http.dart' show ClientException;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -16,6 +19,123 @@ enum ProfileFailureKind {
   invalidData,
   malformed,
   unexpected,
+}
+
+/// P2-C1 — narrow failure taxonomy for authenticated profile READS.
+///
+/// This deliberately has no `offline` value: only the presentation layer may
+/// promote a request-level [network] failure to confirmed offline after
+/// consulting the canonical ConnectivityProvider.
+enum ProfileReadFailureKind {
+  network,
+  timeout,
+  serviceUnavailable,
+  malformedResponse,
+  permissionDenied,
+  authRestricted,
+  unexpected,
+}
+
+/// Classifies authenticated-profile reads without relying on raw error text.
+///
+/// PostgREST `code` is a PostgreSQL/PostgREST code, not an HTTP status. In
+/// particular the literal value `503` is intentionally *not* considered proof
+/// of temporary service unavailability.
+ProfileReadFailureKind classifyProfileReadFailure(Object error) {
+  if (error is CloudProfileAuthException ||
+      error is AuthSessionMissingException ||
+      error is AuthInvalidJwtException) {
+    return ProfileReadFailureKind.authRestricted;
+  }
+  if (error is CloudProfilePermissionDeniedException) {
+    return ProfileReadFailureKind.permissionDenied;
+  }
+  if (error is CloudProfileParseException ||
+      error is FormatException ||
+      error is TypeError) {
+    return ProfileReadFailureKind.malformedResponse;
+  }
+  if (error is CloudProfileUnexpectedException) {
+    return ProfileReadFailureKind.unexpected;
+  }
+  if (error is InfrastructureFailureException) {
+    return switch (error.failure.kind) {
+      InfrastructureFailureKind.offline ||
+      InfrastructureFailureKind.network => ProfileReadFailureKind.network,
+      InfrastructureFailureKind.timeout => ProfileReadFailureKind.timeout,
+      InfrastructureFailureKind.serviceUnavailable =>
+        ProfileReadFailureKind.serviceUnavailable,
+      InfrastructureFailureKind.malformedResponse =>
+        ProfileReadFailureKind.malformedResponse,
+      InfrastructureFailureKind.unknown => ProfileReadFailureKind.unexpected,
+    };
+  }
+  if (error is TimeoutException) return ProfileReadFailureKind.timeout;
+  if (error is SocketException ||
+      error is HandshakeException ||
+      error is HttpException ||
+      error is ClientException ||
+      error is AuthRetryableFetchException) {
+    return ProfileReadFailureKind.network;
+  }
+  if (error is AuthException) {
+    return error.statusCode == '401'
+        ? ProfileReadFailureKind.authRestricted
+        : ProfileReadFailureKind.unexpected;
+  }
+  if (error is PostgrestException) {
+    final code = error.code ?? '';
+    if (const {'PGRST301', 'PGRST302', 'PGRST303', '401'}.contains(code)) {
+      return ProfileReadFailureKind.authRestricted;
+    }
+    if (code == '42501') return ProfileReadFailureKind.permissionDenied;
+    if (code.startsWith('08') ||
+        code.startsWith('53') ||
+        const {'PGRST000', 'PGRST001', 'PGRST002', 'PGRST003'}.contains(code)) {
+      return ProfileReadFailureKind.serviceUnavailable;
+    }
+    if (code == '200' || code == '406' || code == 'PGRST116') {
+      return ProfileReadFailureKind.malformedResponse;
+    }
+    return ProfileReadFailureKind.unexpected;
+  }
+  return switch (classifyInfrastructureFailure(error).kind) {
+    InfrastructureFailureKind.offline ||
+    InfrastructureFailureKind.network => ProfileReadFailureKind.network,
+    InfrastructureFailureKind.timeout => ProfileReadFailureKind.timeout,
+    InfrastructureFailureKind.serviceUnavailable =>
+      ProfileReadFailureKind.serviceUnavailable,
+    InfrastructureFailureKind.malformedResponse =>
+      ProfileReadFailureKind.malformedResponse,
+    InfrastructureFailureKind.unknown => ProfileReadFailureKind.unexpected,
+  };
+}
+
+/// Converts any raw READ failure to a sanitized typed boundary exception.
+/// Mutation/bootstrap classification remains owned by [throwProfileFailure].
+Never throwProfileReadFailure(Object error) {
+  switch (classifyProfileReadFailure(error)) {
+    case ProfileReadFailureKind.network:
+      throw const InfrastructureFailureException(
+        InfrastructureFailure(InfrastructureFailureKind.network),
+      );
+    case ProfileReadFailureKind.timeout:
+      throw const InfrastructureFailureException(
+        InfrastructureFailure(InfrastructureFailureKind.timeout),
+      );
+    case ProfileReadFailureKind.serviceUnavailable:
+      throw const InfrastructureFailureException(
+        InfrastructureFailure(InfrastructureFailureKind.serviceUnavailable),
+      );
+    case ProfileReadFailureKind.malformedResponse:
+      throw const CloudProfileParseException('Invalid profile response');
+    case ProfileReadFailureKind.permissionDenied:
+      throw const CloudProfilePermissionDeniedException();
+    case ProfileReadFailureKind.authRestricted:
+      throw const CloudProfileAuthException();
+    case ProfileReadFailureKind.unexpected:
+      throw const CloudProfileUnexpectedException();
+  }
 }
 
 /// The deadline wrapper knows whether a timed-out raw write is still running.

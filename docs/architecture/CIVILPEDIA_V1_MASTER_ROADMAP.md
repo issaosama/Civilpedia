@@ -756,8 +756,8 @@ Part 2 P2-B: ACCEPTED / CLOSED
 Part 2 P2-B1: ACCEPTED / CLOSED
 Part 2 P2-B2: ACCEPTED / CLOSED
 Part 2 P2-C: CURRENT — CONTRACT V1-R09-P2-C-CONTRACT-v1 FROZEN
-Part 2 P2-C1: IMPLEMENTATION_AUTHORIZED: YES
-Part 2 P2-C2: LOCKED pending P2-C1 independent acceptance
+Part 2 P2-C1: ACCEPTED / CLOSED
+Part 2 P2-C2: NEXT — IMPLEMENTATION AUTHORIZED
 Part 2 P2-D through P2-G: LOCKED
 V1-R10: QUEUED (not started)
 
@@ -1503,14 +1503,29 @@ Status: CURRENT
 Contract: V1-R09-P2-C-CONTRACT-v1
 Contract status: FROZEN
 Architect decision: FROZEN
-P2-C1: IMPLEMENTATION_AUTHORIZED: YES (effective after contract persistence)
+P2-C1: ACCEPTED / CLOSED
 P2-C1 implementer: Codex
 P2-C1 reviewer: GPT-5.6 Sol High
-P2-C2: LOCKED pending P2-C1 independent acceptance
-P2-C2 implementer: Big Pickle (locked)
-P2-C2 reviewer: GitHub Copilot Civilpedia Reviewer (locked)
+P2-C2: NEXT — IMPLEMENTATION AUTHORIZED
+P2-C2 implementer: Big Pickle
+P2-C2 reviewer: GitHub Copilot Civilpedia Reviewer
 P2-D through P2-G: LOCKED
 V1-R10: QUEUED (not started)
 Backend decision: no migration / RLS / schema / Edge / Realtime / service_role change
 V1-R09 status: CURRENT (not closed)
 Owner approval: PENDING OWNER STAGING
+
+### V1-R09 Part 2 P2-C1 Closure Record
+
+Slice: P2-C1 — Typed Read & Lifecycle Foundation
+Status: ACCEPTED / CLOSED
+Independent review: PASS
+Test evidence: 205 PASS / 0 FAIL / 0 SKIPPED
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+P2-C: CURRENT (not closed)
+P2-C2: may now be unlocked
+Implementation boundary:
+  lib/features/profile/data/personal_profile_remote_gateway.dart
+  lib/features/profile/data/supabase_personal_profile_remote_gateway.dart
+  lib/features/profile/presentation/providers/user_profile_provider.dart
+  test/v1_r09_p2_c_authenticated_profile_read_foundation_test.dart

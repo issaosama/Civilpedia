@@ -47,10 +47,11 @@ class SupabasePersonalProfileRemoteGateway
           .maybeSingle();
       if (rows == null) return null;
       return parseCloudProfileRow(rows, expectedUserId: userId);
-    } on TypeError {
-      throw const CloudProfileParseException('Invalid profile response shape');
     } catch (error) {
-      throwProfileFailure(error);
+      // P2-C1: preserve the narrow READ taxonomy before the broader shared
+      // mutation/bootstrap classifier can erase the exact infrastructure
+      // cause. The thrown values are sanitized and contain no backend text.
+      throwProfileReadFailure(error);
     }
   }
 
