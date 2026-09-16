@@ -758,7 +758,9 @@ Part 2 P2-B2: ACCEPTED / CLOSED
 Part 2 P2-C: ACCEPTED / CLOSED
 Part 2 P2-C1: ACCEPTED / CLOSED
 Part 2 P2-C2: ACCEPTED / CLOSED
-Part 2 P2-D: NEXT — CONTRACT FREEZE ONLY (implementation NOT authorized)
+Part 2 P2-D: CURRENT — CONTRACT V1-R09-P2-D-CONTRACT-v1 FROZEN
+Part 2 P2-D1: IMPLEMENTATION_AUTHORIZED (NEXT)
+Part 2 P2-D2: LOCKED pending P2-D1 acceptance
 Part 2 P2-E through P2-G: LOCKED
 V1-R10: QUEUED (not started)
 
@@ -1554,3 +1556,24 @@ Contract: V1-R09-P2-C-CONTRACT-v1 frozen semantics preserved unchanged; only
   the append-only final closure section added.
 V1-R09 Part 2: CURRENT (V1-R09 overall not closed)
 V1-R10: QUEUED (not started)
+
+### V1-R09 Part 2 P2-D Contract Freeze Record
+
+Phase: V1-R09 Part 2
+Slice: P2-D — Business Remote Read UX
+Status: CURRENT
+Contract: V1-R09-P2-D-CONTRACT-v1
+Contract status: FROZEN
+Architect decision: FROZEN
+P2-D1: IMPLEMENTATION_AUTHORIZED: YES (effective after contract persistence)
+P2-D1 implementer: Codex / GPT-5.6 Sol High
+P2-D1 reviewer: GPT-5.6 Sol High (separate read-only session)
+P2-D2: LOCKED pending P2-D1 independent acceptance
+P2-D2 implementer: Big Pickle
+P2-D2 reviewer: GitHub Copilot Civilpedia Reviewer
+P2-E through P2-G: LOCKED
+V1-R10: QUEUED (not started)
+Backend decision: no migration / RLS / schema / Edge / Realtime / service_role
+  change; migration 00022 remains absent
+V1-R09 status: CURRENT (not closed)
+Owner approval: PENDING OWNER STAGING
