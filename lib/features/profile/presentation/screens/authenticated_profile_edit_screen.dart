@@ -3,10 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../core/navigation/shell_content_insets.dart';
+import '../../../../core/services/connectivity_provider.dart';
 import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/remote_data_notice.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
 import '../../../../routes/app_routes.dart';
@@ -16,6 +18,7 @@ import '../../data/region_preference.dart';
 import '../../domain/user_profile.dart';
 import '../providers/profile_operation_result.dart';
 import '../providers/user_profile_provider.dart';
+import '../widgets/authenticated_profile_read_notice.dart';
 
 /// V1-R08 (Part 2) — the AUTHENTICATED profile editor. Edits the canonical
 /// cloud profile (role + region preference only) through the single
@@ -368,30 +371,53 @@ class _AuthenticatedProfileEditScreenState
         ),
       );
     }
-    if (provider.cloudLoadFailed) {
-      return _buildStaticScaffold(
-        context,
-        icon: Icons.cloud_off,
-        title: tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
-        message: tr(Ar.profileNotAvailable, En.profileNotAvailable),
-        action: FilledButton(
-          onPressed: () => provider.ensureCloudProfileLoaded(),
-          child: Text(tr(Ar.retry, En.retry)),
-        ),
-      );
-    }
     final cloud = provider.authenticatedProfile;
-    if (provider.isCloudProfileLoading) {
-      return _buildStaticScaffold(
-        context,
-        icon: null,
-        title: tr(Ar.profileCloudLoading, En.profileCloudLoading),
-        message: null,
-        action: null,
-        showSpinner: true,
-      );
-    }
+    final phase = provider.cloudReadPhase;
+    final failure = provider.cloudReadFailure;
+    final connectivityIsUnavailable =
+        context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
+
     if (cloud == null) {
+      switch (phase) {
+        case AuthenticatedProfileReadPhase.loading:
+          return _buildStaticScaffold(
+            context,
+            icon: null,
+            title: tr(Ar.profileCloudLoading, En.profileCloudLoading),
+            message: null,
+            action: null,
+            showSpinner: true,
+          );
+        case AuthenticatedProfileReadPhase.failed:
+          if (failure != null) {
+            // P2-C2 — typed controlled no-data state. The canonical
+            // profileCloudLoadFailed label stays (existing V1-R08 contract) and
+            // the shared RemoteDataNotice adds the exact typed cause. The retry
+            // control keeps the LanguageProvider-driven label that the V1-R08
+            // widget tests tap (find.text(Ar.retry)).
+            return _buildStaticScaffold(
+              context,
+              icon: null,
+              title: tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
+              message: null,
+              action: FilledButton(
+                onPressed: () => provider.ensureCloudProfileLoaded(),
+                child: Text(tr(Ar.retry, En.retry)),
+              ),
+              notice: AuthenticatedProfileReadNotice(
+                failure: failure,
+                connectivityIsUnavailable: connectivityIsUnavailable,
+                mode: RemoteDataNoticeMode.noData,
+              ),
+            );
+          }
+          break;
+        case AuthenticatedProfileReadPhase.idle:
+        case AuthenticatedProfileReadPhase.loaded:
+        case AuthenticatedProfileReadPhase.refreshing:
+        case AuthenticatedProfileReadPhase.authoritativeNotFound:
+          break;
+      }
       // Settled with no cloud row — fail closed: never show a form for a
       // profile that does not exist on the SSOT.
       return _buildStaticScaffold(
@@ -405,6 +431,22 @@ class _AuthenticatedProfileEditScreenState
         ),
       );
     }
+
+    // P2-C2 — a KNOWN-GOOD cloud row keeps the form on screen even while a
+    // re-read is refreshing, and an existing-profile read failure adds ONE
+    // compact typed notice (never a static failure screen over valid content).
+    final existingReadNotice =
+        phase == AuthenticatedProfileReadPhase.failed && failure != null
+        ? Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: AuthenticatedProfileReadNotice(
+              failure: failure!,
+              connectivityIsUnavailable: connectivityIsUnavailable,
+              mode: RemoteDataNoticeMode.compact,
+              onRetry: () => provider.ensureCloudProfileLoaded(),
+            ),
+          )
+        : null;
 
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDarkMode
@@ -436,6 +478,7 @@ class _AuthenticatedProfileEditScreenState
             bottom: shellSafeBottomPadding(context),
           ),
           children: [
+            if (existingReadNotice != null) existingReadNotice,
             _buildSection(
               context: context,
               icon: Icons.badge_outlined,
@@ -504,6 +547,7 @@ class _AuthenticatedProfileEditScreenState
     required String? message,
     required Widget? action,
     bool showSpinner = false,
+    Widget? notice,
   }) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
@@ -552,6 +596,10 @@ class _AuthenticatedProfileEditScreenState
                         : AppColors.textSecondary,
                   ),
                 ),
+              ],
+              if (notice != null) ...[
+                AppSpacing.gapXl,
+                notice,
               ],
               if (action != null) ...[
                 AppSpacing.gapXl,

@@ -755,10 +755,11 @@ Part 2 P2-A: ACCEPTED / CLOSED — PASS - P2-A ACCEPTED - P2-B MAY BEGIN
 Part 2 P2-B: ACCEPTED / CLOSED
 Part 2 P2-B1: ACCEPTED / CLOSED
 Part 2 P2-B2: ACCEPTED / CLOSED
-Part 2 P2-C: CURRENT — CONTRACT V1-R09-P2-C-CONTRACT-v1 FROZEN
+Part 2 P2-C: ACCEPTED / CLOSED
 Part 2 P2-C1: ACCEPTED / CLOSED
-Part 2 P2-C2: NEXT — IMPLEMENTATION AUTHORIZED
-Part 2 P2-D through P2-G: LOCKED
+Part 2 P2-C2: ACCEPTED / CLOSED
+Part 2 P2-D: NEXT — CONTRACT FREEZE ONLY (implementation NOT authorized)
+Part 2 P2-E through P2-G: LOCKED
 V1-R10: QUEUED (not started)
 
 Primary:
@@ -1529,3 +1530,27 @@ Implementation boundary:
   lib/features/profile/data/supabase_personal_profile_remote_gateway.dart
   lib/features/profile/presentation/providers/user_profile_provider.dart
   test/v1_r09_p2_c_authenticated_profile_read_foundation_test.dart
+
+### V1-R09 Part 2 P2-C2 / P2-C Closure Record
+
+Slice: P2-C2 — Authenticated Profile Read Presentation (read facing)
+Status: ACCEPTED / CLOSED
+Final P2-C2 independent decision: PASS — P2-C2 ACCEPTED — P2-C MAY CLOSE
+Final focused evidence: 172 PASS / 0 FAIL / 0 SKIPPED
+  - test/v1_r09_p2_c_authenticated_profile_read_ux_test.dart: 23 PASS
+  - test/v1_r08_profile_screen_widget_test.dart: 13 PASS
+  - test/v1_r08_profile_edit_screen_widget_test.dart: 16 PASS
+  - test/v1_r08_user_area_widget_test.dart: 14 PASS
+  - test/v1_r09_p2_shared_ux_test.dart: 48 PASS
+  - test/v1_r09_p2_c_authenticated_profile_read_foundation_test.dart: 21 PASS
+  - test/user_area_route_test.dart: 37 PASS
+Independent reviewer shell execution: UNAVAILABLE — no independent test
+  execution claimed; the 172/0/0 evidence is implementer evidence only.
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+P2-C: ACCEPTED / CLOSED
+P2-D: NEXT — CONTRACT FREEZE ONLY (implementation NOT authorized)
+P2-E through P2-G: LOCKED
+Contract: V1-R09-P2-C-CONTRACT-v1 frozen semantics preserved unchanged; only
+  the append-only final closure section added.
+V1-R09 Part 2: CURRENT (V1-R09 overall not closed)
+V1-R10: QUEUED (not started)

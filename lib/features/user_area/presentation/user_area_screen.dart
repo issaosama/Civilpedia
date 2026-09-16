@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/services/connectivity_provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
+import '../../../core/widgets/remote_data_notice.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
@@ -19,6 +21,7 @@ import '../../profile/data/cloud_profile.dart';
 import '../../profile/data/region_preference.dart';
 import '../../profile/domain/user_profile.dart';
 import '../../profile/presentation/providers/user_profile_provider.dart';
+import '../../profile/presentation/widgets/authenticated_profile_read_notice.dart';
 
 /// W3.4 — full-screen User Area hub at `/user`.
 ///
@@ -249,53 +252,108 @@ class _UserAreaHeaderState extends State<_UserAreaHeader> {
     final muted = isDark
         ? AppColors.darkTextSecondary
         : AppColors.textSecondary;
+    // P2-C2 — the canonical ConnectivityProvider is resolved once here and
+    // passed into the typed notice (the adapter never reads transport itself).
+    final connectivityIsUnavailable =
+        context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
 
     final cloud = provider.authenticatedProfile;
+    final phase = provider.cloudReadPhase;
+    final failure = provider.cloudReadFailure;
+
     if (cloud != null) {
+      // P2-C2 — a known-good cloud summary stays visible through a refresh or
+      // an existing-profile read failure. A failure adds ONE compact typed
+      // notice below the summary (never a guest/local fallback).
       final role = _roleLabel(cloud.roleCode, isArabic: isArabic);
       final region = _regionLabel(
         provider.authenticatedRegionPreferenceCode,
         isArabic: isArabic,
       );
-      return Text(
-        '$role · $region',
-        style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-      );
-    }
-    if (provider.cloudLoadFailed) {
-      return Row(
-        children: [
-          const Icon(Icons.cloud_off, size: 18, color: AppColors.error),
-          AppSpacing.gapSm,
-          Expanded(
-            child: Text(
-              tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.error,
-              ),
+      final children = <Widget>[
+        Text(
+          '$role · $region',
+          style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+        ),
+      ];
+      if (phase == AuthenticatedProfileReadPhase.failed && failure != null) {
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.sm),
+            child: AuthenticatedProfileReadNotice(
+              failure: failure,
+              connectivityIsUnavailable: connectivityIsUnavailable,
+              mode: RemoteDataNoticeMode.compact,
+              onRetry: () => provider.ensureCloudProfileLoaded(),
             ),
           ),
-          TextButton(
-            onPressed: () => provider.ensureCloudProfileLoaded(),
-            child: Text(tr(Ar.retry, En.retry)),
-          ),
-        ],
+        );
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
       );
     }
-    if (provider.isCloudProfileLoading) {
-      return Row(
-        children: [
-          const SizedBox.square(
-            dimension: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          AppSpacing.gapSm,
-          Text(
-            tr(Ar.profileCloudLoading, En.profileCloudLoading),
-            style: theme.textTheme.bodyMedium?.copyWith(color: muted),
-          ),
-        ],
-      );
+
+    switch (phase) {
+      case AuthenticatedProfileReadPhase.loading:
+        return Row(
+          children: [
+            const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            AppSpacing.gapSm,
+            Text(
+              tr(Ar.profileCloudLoading, En.profileCloudLoading),
+              style: theme.textTheme.bodyMedium?.copyWith(color: muted),
+            ),
+          ],
+        );
+      case AuthenticatedProfileReadPhase.failed:
+        if (failure != null) {
+          // P2-C2 — typed controlled no-data state: the canonical
+          // profileCloudLoadFailed line + Retry stay (V1-R08 contract; the
+          // widget tests tap find.text(Ar.retry)) and a compact typed notice
+          // adds the exact cause.
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.cloud_off, size: 18, color: AppColors.error),
+                  AppSpacing.gapSm,
+                  Expanded(
+                    child: Text(
+                      tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => provider.ensureCloudProfileLoaded(),
+                    child: Text(tr(Ar.retry, En.retry)),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: AppSpacing.sm),
+                child: AuthenticatedProfileReadNotice(
+                  failure: failure,
+                  connectivityIsUnavailable: connectivityIsUnavailable,
+                  mode: RemoteDataNoticeMode.compact,
+                ),
+              ),
+            ],
+          );
+        }
+        break;
+      case AuthenticatedProfileReadPhase.idle:
+      case AuthenticatedProfileReadPhase.loaded:
+      case AuthenticatedProfileReadPhase.refreshing:
+      case AuthenticatedProfileReadPhase.authoritativeNotFound:
+        break;
     }
     return Text(
       tr(Ar.profileNotAvailable, En.profileNotAvailable),

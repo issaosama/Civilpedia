@@ -6,11 +6,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/di/app_dependencies.dart';
 import '../../../core/navigation/shell_content_insets.dart';
+import '../../../core/services/connectivity_provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/services/theme_provider.dart';
+import '../../../core/widgets/remote_data_notice.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
@@ -21,6 +23,7 @@ import '../../profile/data/cloud_profile.dart';
 import '../../profile/data/region_preference.dart';
 import '../../profile/domain/user_profile.dart';
 import '../../profile/presentation/providers/user_profile_provider.dart';
+import 'widgets/authenticated_profile_read_notice.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
@@ -460,7 +463,7 @@ class ProfileScreen extends StatelessWidget {
 
     if (auth.isLoggedIn) {
       // V1-R08 (Part 2) — AUTHORITY split for the signed-in session:
-      // 1. Cloud bound  → cloud card read-only (role/region) + separate Edit
+      // 1. Cloud bound → cloud card read-only (role/region) + separate Edit
       //    affordance pushing `profileEditRoute` (no extra — the authenticated
       //    editor reads the cloud SSOT itself; the role ListTile must NOT
       //    navigate, F2).
@@ -470,8 +473,22 @@ class ProfileScreen extends StatelessWidget {
       // 5. W3.4 auth-agnostic test world (`provider` not auth-wired) → the
       //    local profile card remains authoritative there; it is the ONLY
       //    reason a signed-in user ever sees a local-prop file.
+      //
+      // P2-C2 — the authenticated branch below now binds the exact
+      // authenticated-profile READ lifecycle from the frozen P2-C1 state to the
+      // shared typed RemoteDataNotice, with the canonical ConnectivityProvider
+      // resolved once here (never inside the notice adapter).
       final cloud = profileProvider.authenticatedProfile;
+      final phase = profileProvider.cloudReadPhase;
+      final failure = profileProvider.cloudReadFailure;
+      final connectivityIsUnavailable =
+          context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
+
       if (cloud != null) {
+        // P2-C2 — known-good cloud row stays authoritative through refresh
+        // (with a lightweight indicator) and through an existing-profile read
+        // failure (with ONE compact typed notice + manual retry; drafting the
+        // card or navigating away is never required).
         final roleCode = cloud.roleCode;
         final role = (roleCode == null || roleCode.isEmpty)
             ? tr(Ar.profileNotSet, En.profileNotSet)
@@ -480,64 +497,155 @@ class ProfileScreen extends StatelessWidget {
           profileProvider.authenticatedRegionPreferenceCode,
           isArabic: isArabic,
         );
-        return _buildSettingsGroup(
-          context,
-          title:
-              tr(Ar.profileMyCivilpediaProfile, En.profileMyCivilpediaProfile),
-          children: [
-            ListTile(
-              leading: Icon(Icons.badge_outlined, color: theme.primaryColor),
-              title: Text(tr(Ar.profileRole, En.profileRole)),
-              subtitle: Text(role),
+        final children = <Widget>[
+          ListTile(
+            leading: Icon(Icons.badge_outlined, color: theme.primaryColor),
+            title: Text(tr(Ar.profileRole, En.profileRole)),
+            subtitle: Text(role),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: Icon(Icons.public_outlined, color: theme.primaryColor),
+            title: Text(
+              tr(Ar.profileRegionPreference, En.profileRegionPreference),
             ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(Icons.public_outlined, color: theme.primaryColor),
-              title: Text(
-                tr(Ar.profileRegionPreference, En.profileRegionPreference),
-              ),
-              subtitle: Text(regionName),
+            subtitle: Text(regionName),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
+            child: _CloudProfileEditButton(
+              profileEditRoute: profileEditRoute,
             ),
+          ),
+        ];
+        if (phase == AuthenticatedProfileReadPhase.refreshing) {
+          children.add(const _CloudProfileRefreshingRow());
+        }
+        if (phase == AuthenticatedProfileReadPhase.failed &&
+            failure != null) {
+          children.add(
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-              child: _CloudProfileEditButton(
-                profileEditRoute: profileEditRoute,
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: AuthenticatedProfileReadNotice(
+                failure: failure,
+                connectivityIsUnavailable: connectivityIsUnavailable,
+                mode: RemoteDataNoticeMode.compact,
+                onRetry: () => profileProvider.ensureCloudProfileLoaded(),
               ),
             ),
-          ],
-        );
-      }
-      if (profileProvider.cloudLoadFailed) {
+          );
+        }
         return _buildSettingsGroup(
           context,
           title:
               tr(Ar.profileMyCivilpediaProfile, En.profileMyCivilpediaProfile),
-          children: [
-            ListTile(
-              leading: Icon(
-                Icons.cloud_off,
-                color: theme.colorScheme.error,
-              ),
-              title: Text(
-                tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
-              ),
-              trailing: TextButton(
-                onPressed: () => profileProvider.ensureCloudProfileLoaded(),
-                child: Text(tr(Ar.retry, En.retry)),
-              ),
-            ),
-          ],
+          children: children,
         );
       }
-      if (profileProvider.isCloudProfileLoading) {
-        return _buildSettingsGroup(
-          context,
-          title:
-              tr(Ar.profileMyCivilpediaProfile, En.profileMyCivilpediaProfile),
-          children: const [
-            _CloudProfileLoadingRow(),
-          ],
-        );
+
+      switch (phase) {
+        case AuthenticatedProfileReadPhase.loading:
+          return _buildSettingsGroup(
+            context,
+            title: tr(
+              Ar.profileMyCivilpediaProfile,
+              En.profileMyCivilpediaProfile,
+            ),
+            children: const [
+              _CloudProfileLoadingRow(),
+            ],
+          );
+        case AuthenticatedProfileReadPhase.failed:
+          if (failure != null) {
+            // P2-C2 — typed controlled no-data state: the canonical
+            // profileCloudLoadFailed label stays (existing V1-R08 contract)
+            // with the existing LanguageProvider-driven Retry control (baseline
+            // taps find.text(Ar.retry)), and the shared RemoteDataNotice adds
+            // the exact typed cause. No local fallback is ever shown.
+            return _buildSettingsGroup(
+              context,
+              title: tr(
+                Ar.profileMyCivilpediaProfile,
+                En.profileMyCivilpediaProfile,
+              ),
+              children: [
+                ListTile(
+                  leading: Icon(
+                    Icons.cloud_off,
+                    color: theme.colorScheme.error,
+                  ),
+                  title: Text(
+                    tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
+                  ),
+                  trailing: TextButton(
+                    onPressed: () => profileProvider.ensureCloudProfileLoaded(),
+                    child: Text(tr(Ar.retry, En.retry)),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  child: AuthenticatedProfileReadNotice(
+                    failure: failure,
+                    connectivityIsUnavailable: connectivityIsUnavailable,
+                    mode: RemoteDataNoticeMode.noData,
+                  ),
+                ),
+              ],
+            );
+          }
+          return _buildSettingsGroup(
+            context,
+            title: tr(
+              Ar.profileMyCivilpediaProfile,
+              En.profileMyCivilpediaProfile,
+            ),
+            children: [
+              ListTile(
+                leading: Icon(
+                  Icons.cloud_off,
+                  color: theme.colorScheme.error,
+                ),
+                title: Text(
+                  tr(Ar.profileCloudLoadFailed, En.profileCloudLoadFailed),
+                ),
+                trailing: TextButton(
+                  onPressed: () => profileProvider.ensureCloudProfileLoaded(),
+                  child: Text(tr(Ar.retry, En.retry)),
+                ),
+              ),
+            ],
+          );
+        case AuthenticatedProfileReadPhase.authoritativeNotFound:
+          // P2-C2 — settled "no cloud row": authenticated not-set state
+          // (fail closed), with a manual read retry (never a local fallback).
+          // The frozen V1-R08 contract keeps the canonical `profileNotSet`
+          // label for this state.
+          return _buildSettingsGroup(
+            context,
+            title: tr(
+              Ar.profileMyCivilpediaProfile,
+              En.profileMyCivilpediaProfile,
+            ),
+            children: [
+              ListTile(
+                leading: Icon(
+                  Icons.person_off_outlined,
+                  color: theme.colorScheme.error,
+                ),
+                title: Text(
+                  tr(Ar.profileNotSet, En.profileNotSet),
+                ),
+                trailing: TextButton(
+                  onPressed: () => profileProvider.ensureCloudProfileLoaded(),
+                  child: Text(tr(Ar.retry, En.retry)),
+                ),
+              ),
+            ],
+          );
+        case AuthenticatedProfileReadPhase.idle:
+        case AuthenticatedProfileReadPhase.loaded:
+        case AuthenticatedProfileReadPhase.refreshing:
+          break;
       }
     }
 
@@ -783,6 +891,43 @@ class _CloudProfileLoadingRow extends StatelessWidget {
           AppSpacing.gapMd,
           Expanded(
             child: Text(tr(Ar.profileCloudLoading, En.profileCloudLoading)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// P2-C2 — lightweight refresh indication shown inside the read-only cloud
+/// card while a known-good cloud row stays visible during an in-flight
+/// re-read ([AuthenticatedProfileReadPhase.refreshing]). Reuses the canonical
+/// cloud-loading string; never hides the already-authoritative role/region.
+class _CloudProfileRefreshingRow extends StatelessWidget {
+  const _CloudProfileRefreshingRow();
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    String tr(String ar, String en) => isArabic ? ar : en;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+      child: Row(
+        children: [
+          const SizedBox.square(
+            dimension: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          AppSpacing.gapSm,
+          Expanded(
+            child: Text(
+              tr(Ar.profileCloudLoading, En.profileCloudLoading),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
+              ),
+            ),
           ),
         ],
       ),
