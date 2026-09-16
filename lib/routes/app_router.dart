@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'app_routes.dart';
 import '../core/di/app_dependencies.dart';
+import '../core/services/connectivity_provider.dart';
 import '../core/services/language_provider.dart';
 import '../core/widgets/civil_app_bar.dart';
 import '../localization/ar.dart';
@@ -266,6 +267,7 @@ Widget _buildDirectorySearch(BuildContext context, GoRouterState state) {
   final extra = state.extra;
   return DirectorySearchScreen(
     initialEntityType: extra is String ? extra : null,
+    connectivityProvider: context.read<ConnectivityProvider>(),
   );
 }
 
@@ -284,6 +286,7 @@ Widget _buildDirectoryEntityDetail(BuildContext context, GoRouterState state) {
   return DirectoryProviderDetailResolver(
     entityId: id,
     repository: AppDependencies.directoryRepo,
+    connectivityProvider: context.read<ConnectivityProvider>(),
     seedEntity: (seed != null && seed.id == id) ? seed : null,
   );
 }

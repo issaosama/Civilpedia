@@ -6,16 +6,19 @@ import 'package:provider/provider.dart';
 
 import '../../../core/di/app_dependencies.dart';
 import '../../../core/navigation/shell_content_insets.dart';
+import '../../../core/services/connectivity_provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/civil_app_bar.dart';
+import '../../../core/widgets/remote_data_notice.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/state_widgets.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
+import '../application/directory_refresh_controller.dart';
 import '../domain/canonical_directory_entity.dart';
 import '../domain/canonical_directory_query_engine.dart';
 import '../domain/cloud_directory_repository.dart';
@@ -42,6 +45,10 @@ class DirectorySearchScreen extends StatefulWidget {
   /// [AppDependencies.directoryRepo].
   final CloudDirectoryRepository? repository;
 
+  /// Canonical transport observer. Production passes [ConnectivityProvider];
+  /// tests may leave null to keep reconnect observation out of scope.
+  final ConnectivityProvider? connectivityProvider;
+
   /// Bottom scroll clearance for the result list.
   final double bottomContentPadding;
 
@@ -49,6 +56,7 @@ class DirectorySearchScreen extends StatefulWidget {
     super.key,
     this.initialEntityType,
     this.repository,
+    this.connectivityProvider,
     this.bottomContentPadding = AppSpacing.huge,
   });
 
@@ -59,15 +67,10 @@ class DirectorySearchScreen extends StatefulWidget {
 class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   static const Duration _debounceDuration = Duration(milliseconds: 280);
 
-  late final CloudDirectoryRepository _repository;
   final TextEditingController _searchController = TextEditingController();
 
   Timer? _debounce;
-
-  List<CanonicalDirectoryEntity> _entities = const [];
-  DirectoryLoadState _loadState = DirectoryLoadState.error;
-  bool _loading = true;
-  DateTime? _refreshedAt;
+  DirectoryRefreshController? _controller;
 
   String _text = '';
   String? _entityType;
@@ -77,45 +80,30 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   @override
   void initState() {
     super.initState();
-    _repository = widget.repository ?? AppDependencies.directoryRepo;
     _entityType = widget.initialEntityType;
-    _load();
+    _initController();
+  }
+
+  void _initController() {
+    final repository = widget.repository ?? AppDependencies.directoryRepo;
+    final controller = DirectoryRefreshController(
+      repository: repository,
+      connectivity: widget.connectivityProvider,
+    );
+    _controller = controller;
+    controller.initialize();
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
     _searchController.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = true;
-    });
-    final result = await _repository.load();
-    if (!mounted) return;
-    setState(() {
-      _entities = result.entities;
-      _loadState = result.state;
-      _refreshedAt = result.refreshedAt;
-      _loading = false;
-    });
-  }
-
   Future<void> _refresh() async {
-    final result = await _repository.refresh();
-    if (!mounted) return;
-    if (result.succeeded) {
-      setState(() {
-        _entities = result.entities;
-        _loadState = result.entities.isEmpty
-            ? DirectoryLoadState.empty
-            : DirectoryLoadState.fresh;
-        _refreshedAt = result.refreshedAt;
-      });
-    }
-    // On failure, keep existing state (stale cache).
+    await _controller?.refresh(userInitiated: true);
   }
 
   void _onTextChanged(String raw) {
@@ -143,10 +131,13 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
     setState(() => _categoryId = value);
   }
 
+  DirectoryRefreshController get _controllerState => _controller!;
+
   List<CanonicalDirectoryEntity> get _results {
-    if (_entities.isEmpty) return const [];
+    final entities = _controllerState.entities;
+    if (entities.isEmpty) return const [];
     return CanonicalDirectoryQueryEngine.apply(
-      _entities,
+      entities,
       CanonicalDirectoryQuery(
         text: _text,
         entityType: _entityType,
@@ -160,7 +151,7 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   /// region filter dropdown.
   List<String> get _availableRegionCodes {
     final codes = <String>{};
-    for (final entity in _entities) {
+    for (final entity in _controllerState.entities) {
       for (final loc in entity.locations) {
         if (loc.regionCode.isNotEmpty) codes.add(loc.regionCode);
       }
@@ -171,7 +162,7 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   /// Collect all distinct category ids from the loaded entities.
   List<CanonicalDirectoryCategory> get _availableCategories {
     final cats = <String, CanonicalDirectoryCategory>{};
-    for (final entity in _entities) {
+    for (final entity in _controllerState.entities) {
       for (final cat in entity.categories) {
         cats[cat.id] = cat;
       }
@@ -184,27 +175,34 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final title = isArabic ? Ar.directorySearchTitle : En.directorySearchTitle;
 
+    final controller = _controller;
+
     return Scaffold(
       appBar: CivilAppBar(title: Text(title)),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.lg,
-              AppSpacing.xs,
-            ),
-            child: SearchBarWidget(
-              controller: _searchController,
-              onChanged: _onTextChanged,
-              hintText: isArabic ? Ar.directorySearchHint : En.directorySearchHint,
-              lightSurface: true,
-            ),
-          ),
-          _buildFilters(context, isArabic),
-          Expanded(child: _buildBody(context, isArabic)),
-        ],
+      body: ListenableBuilder(
+        listenable: controller ?? const _EmptyListenable(),
+        builder: (context, _) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.lg,
+                  AppSpacing.md,
+                  AppSpacing.lg,
+                  AppSpacing.xs,
+                ),
+                child: SearchBarWidget(
+                  controller: _searchController,
+                  onChanged: _onTextChanged,
+                  hintText: isArabic ? Ar.directorySearchHint : En.directorySearchHint,
+                  lightSurface: true,
+                ),
+              ),
+              _buildFilters(context, isArabic),
+              Expanded(child: _buildBody(context, isArabic)),
+            ],
+          );
+        },
       ),
     );
   }
@@ -264,50 +262,58 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   }
 
   Widget _buildBody(BuildContext context, bool isArabic) {
-    if (_loading) {
+    final controller = _controller;
+    if (controller == null || (controller.isLoading && !controller.hasSnapshot)) {
       return const Center(child: CircularProgressIndicator());
     }
 
     final results = _results;
+    final cause = controller.cause;
+    final loadState = controller.loadState;
+    final entities = controller.entities;
 
-    // Stale/offline banner.
-    if (_loadState == DirectoryLoadState.stale) {
+    // Stale with cached data: show typed notice and the cached list.
+    // A valid cached-empty snapshot renders the directory empty state.
+    if (loadState == DirectoryLoadState.stale) {
       return Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            color: AppColors.warning.withValues(alpha: 0.1),
-            child: Row(
-              children: [
-                Icon(Icons.cloud_off, size: 16, color: AppColors.warning),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  child: Text(
-                    isArabic
-                        ? 'عرض بيانات مخزنة — قد لا تكون محدّثة'
-                        : 'Showing cached data — may not be up to date',
-                    style: TextStyle(fontSize: 12, color: AppColors.warning),
-                  ),
-                ),
-              ],
+          if (cause != null)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.lg,
+                AppSpacing.xs,
+                AppSpacing.lg,
+                0,
+              ),
+              child: RemoteDataNotice(
+                cause: cause,
+                mode: RemoteDataNoticeMode.compact,
+                onRetry: controller.refresh,
+              ),
             ),
+          Expanded(
+            child: controller.entities.isEmpty
+                ? EmptyStateWidget(
+                    icon: Icons.business_center_outlined,
+                    message: isArabic
+                        ? Ar.directoryEmptyDirectory
+                        : En.directoryEmptyDirectory,
+                  )
+                : _buildResultsList(context, results),
           ),
-          if (results.isEmpty && _entities.isEmpty)
-            const Expanded(child: Center(child: CircularProgressIndicator()))
-          else
-            Expanded(child: _buildResultsList(context, results)),
         ],
       );
     }
 
-    if (_loadState == DirectoryLoadState.error) {
-      return ErrorStateWidget(
-        message: isArabic ? Ar.errorOccurred : En.errorOccurred,
-        onRetry: _load,
+    if (loadState == DirectoryLoadState.error) {
+      return RemoteDataNotice(
+        cause: cause ?? RemoteDataCause.unexpected,
+        mode: RemoteDataNoticeMode.noData,
+        onRetry: controller.refresh,
       );
     }
 
-    if (_loadState == DirectoryLoadState.empty || (_entities.isEmpty && results.isEmpty)) {
+    if (loadState == DirectoryLoadState.empty || (entities.isEmpty && results.isEmpty)) {
       return EmptyStateWidget(
         icon: Icons.business_center_outlined,
         message: isArabic ? Ar.directoryEmptyDirectory : En.directoryEmptyDirectory,
@@ -365,6 +371,16 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
       extra: entity,
     );
   }
+}
+
+class _EmptyListenable implements Listenable {
+  const _EmptyListenable();
+
+  @override
+  void addListener(VoidCallback listener) {}
+
+  @override
+  void removeListener(VoidCallback listener) {}
 }
 
 class _FilterDropdown<T> extends StatelessWidget {

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,7 @@ import 'helpers/canonical_directory_test_helpers.dart';
 
 class _FakeCloudDirectoryRepository implements CloudDirectoryRepository {
   int loadCalls = 0;
+  int refreshCalls = 0;
   final List<CanonicalDirectoryEntity> entities;
   final Object? throwOnLoad;
   final Future<void>? pendingFirstLoad;
@@ -41,8 +43,22 @@ class _FakeCloudDirectoryRepository implements CloudDirectoryRepository {
   Future<DirectoryCachedData?> readCache() async => null;
 
   @override
-  Future<DirectoryRefreshResult> refresh() async =>
-      const DirectoryRefreshResult(status: DirectoryRefreshStatus.failure);
+  Future<DirectoryRefreshResult> refresh() async {
+    refreshCalls++;
+    if (pendingFirstLoad != null && refreshCalls == 1) {
+      await pendingFirstLoad!;
+    }
+    if (throwOnLoad != null) {
+      return const DirectoryRefreshResult(status: DirectoryRefreshStatus.network);
+    }
+    return DirectoryRefreshResult(
+      status: entities.isEmpty
+          ? DirectoryRefreshStatus.authoritativeEmpty
+          : DirectoryRefreshStatus.success,
+      entities: List<CanonicalDirectoryEntity>.from(entities),
+      refreshedAt: DateTime.now().toUtc(),
+    );
+  }
 
   @override
   Future<CanonicalDirectoryEntity?> loadByCanonicalId(String id) async {
@@ -76,6 +92,8 @@ class _FakeCloudDirectoryRepository implements CloudDirectoryRepository {
   }
 }
 
+String _uuid(int n) => '00000000-0000-0000-0000-${n.toString().padLeft(12, '0')}';
+
 CanonicalDirectoryEntity _p({
   required String id,
   String name = '',
@@ -101,6 +119,13 @@ Widget _app(_FakeCloudDirectoryRepository repo, {String? initialEntityType}) {
     create: (_) => LanguageProvider(),
     child: MaterialApp.router(
       theme: AppTheme.lightTheme,
+      locale: const Locale('ar'),
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       routerConfig: canonicalDirectoryDetailRouter(
         home: DirectorySearchScreen(
           repository: repo,
@@ -128,14 +153,14 @@ void main() {
   group('W5.3 SCREEN — load & states', () {
     testWidgets('28. screen loads through CloudDirectoryRepository', (tester) async {
       final repo = await _pump(tester);
-      expect(repo.loadCalls, 1);
+      expect(repo.refreshCalls, 1);
       expect(find.byType(DirectorySearchScreen), findsOneWidget);
     });
 
-    testWidgets('29. repository load called once', (tester) async {
+    testWidgets('29. repository refresh called once', (tester) async {
       final repo = await _pump(tester);
       await tester.pump(const Duration(milliseconds: 400));
-      expect(repo.loadCalls, 1);
+      expect(repo.refreshCalls, 1);
     });
 
     testWidgets('30. initial loading state works', (tester) async {
@@ -145,14 +170,18 @@ void main() {
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       completer.complete();
-      await tester.pumpAndSettle();
+      // Allow the delayed refresh future to resolve across microtasks.
+      for (var i = 0; i < 10; i++) {
+        await tester.pump(const Duration(milliseconds: 10));
+        if (find.byType(CircularProgressIndicator).evaluate().isEmpty) break;
+      }
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('31. browse mode renders loaded entities', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Company A', entityType: 'supplier'),
-        _p(id: 'b', name: 'Company B', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'Company A', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Company B', entityType: 'contractor'),
       ];
       await _pump(tester, entities: entities);
       expect(find.text('Company A'), findsOneWidget);
@@ -161,8 +190,8 @@ void main() {
 
     testWidgets('32. initialEntityType preselects correct entity type', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Supplier Co', entityType: 'supplier', locations: [fakeLocation('karrada', regionName: 'كرادة')]),
-        _p(id: 'b', name: 'Contractor Co', entityType: 'contractor', locations: [fakeLocation('karrada', regionName: 'كرادة')]),
+        _p(id: _uuid(1), name: 'Supplier Co', entityType: 'supplier', locations: [fakeLocation('karrada', regionName: 'كرادة')]),
+        _p(id: _uuid(2), name: 'Contractor Co', entityType: 'contractor', locations: [fakeLocation('karrada', regionName: 'كرادة')]),
       ];
       await _pump(tester, entities: entities, initialEntityType: 'supplier');
       expect(find.text('Supplier Co'), findsOneWidget);
@@ -175,24 +204,24 @@ void main() {
     });
 
     testWidgets('40. non-empty repo + zero matches shows no-results state', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha Co')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha Co')];
       await _pump(tester, entities: entities);
       await tester.enterText(find.byType(TextField), 'zzz-none');
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.text(Ar.directoryNoResults), findsOneWidget);
     });
 
-    testWidgets('50. error state on repository load failure', (tester) async {
+    testWidgets('50. error state on repository refresh failure', (tester) async {
       await _pump(tester, throwOnLoad: Exception('boom'));
-      expect(find.text(Ar.errorOccurred), findsOneWidget);
+      expect(find.text(Ar.noticeNetwork), findsOneWidget);
     });
   });
 
   group('W5.3 SCREEN — search field & debounce', () {
     testWidgets('33. search field filters results', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Alpha Steel', entityType: 'supplier'),
-        _p(id: 'b', name: 'Beta Materials', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'Alpha Steel', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Beta Materials', entityType: 'contractor'),
       ];
       await _pump(tester, entities: entities);
       await tester.enterText(find.byType(TextField), 'steel');
@@ -202,7 +231,7 @@ void main() {
     });
 
     testWidgets('34. debounce behavior works (single re-filter after pause)', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha Steel')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha Steel')];
       await _pump(tester, entities: entities);
       await tester.enterText(find.byType(TextField), 'zzz');
       await tester.pump(const Duration(milliseconds: 100));
@@ -215,8 +244,8 @@ void main() {
   group('W5.3 SCREEN — filters', () {
     testWidgets('35. category selection filters immediately', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Supplier Co', entityType: 'supplier'),
-        _p(id: 'b', name: 'Contractor Co', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'Supplier Co', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Contractor Co', entityType: 'contractor'),
       ];
       await _pump(tester, entities: entities);
       await tester.tap(
@@ -231,8 +260,8 @@ void main() {
 
     testWidgets('36. location selection filters immediately', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Co A', locations: [fakeLocation('adhamiya', regionName: 'الأعظمية')]),
-        _p(id: 'b', name: 'Co B', locations: [fakeLocation('mansour', regionName: 'المنصور')]),
+        _p(id: _uuid(1), name: 'Co A', locations: [fakeLocation('adhamiya', regionName: 'الأعظمية')]),
+        _p(id: _uuid(2), name: 'Co B', locations: [fakeLocation('mansour', regionName: 'المنصور')]),
       ];
       await _pump(tester, entities: entities);
       await tester.tap(find.byType(DropdownButtonFormField<String?>).at(1));
@@ -245,8 +274,8 @@ void main() {
 
     testWidgets('37. clearing category returns all', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Supplier Co', entityType: 'supplier'),
-        _p(id: 'b', name: 'Contractor Co', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'Supplier Co', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Contractor Co', entityType: 'contractor'),
       ];
       await _pump(tester, entities: entities, initialEntityType: 'supplier');
       expect(find.text('Contractor Co'), findsNothing);
@@ -260,8 +289,8 @@ void main() {
 
     testWidgets('38. clearing location returns all', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Co A', locations: [fakeLocation('adhamiya', regionName: 'الأعظمية')]),
-        _p(id: 'b', name: 'Co B', locations: [fakeLocation('mansour', regionName: 'المنصور')]),
+        _p(id: _uuid(1), name: 'Co A', locations: [fakeLocation('adhamiya', regionName: 'الأعظمية')]),
+        _p(id: _uuid(2), name: 'Co B', locations: [fakeLocation('mansour', regionName: 'المنصور')]),
       ];
       await _pump(tester, entities: entities);
       await tester.tap(find.byType(DropdownButtonFormField<String?>).at(1));
@@ -282,8 +311,8 @@ void main() {
   group('W5.3 SCREEN — result presentation', () {
     testWidgets('41. no result count displayed', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Alpha Co', entityType: 'supplier'),
-        _p(id: 'b', name: 'Beta Co', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'Alpha Co', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Beta Co', entityType: 'contractor'),
       ];
       await _pump(tester, entities: entities);
       expect(find.textContaining('results'), findsNothing);
@@ -291,20 +320,20 @@ void main() {
     });
 
     testWidgets('42. result row shows name', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha Steel')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha Steel')];
       await _pump(tester, entities: entities);
       expect(find.text('Alpha Steel'), findsOneWidget);
     });
 
     testWidgets('43. result row shows localized entity type', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha', entityType: 'supplier')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha', entityType: 'supplier')];
       await _pump(tester, entities: entities);
       expect(find.text(Ar.directoryTypeSupplier), findsOneWidget);
     });
 
     testWidgets('44. result row does not show contact', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Alpha', contacts: [fakePhone('07701234567'), fakeWhatsApp('07801234567')]),
+        _p(id: _uuid(1), name: 'Alpha', contacts: [fakePhone('07701234567'), fakeWhatsApp('07801234567')]),
       ];
       await _pump(tester, entities: entities);
       expect(find.text('07701234567'), findsNothing);
@@ -314,7 +343,7 @@ void main() {
 
     testWidgets('45. result row shows verification badge but filter is absent (W5.5)', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified),
+        _p(id: _uuid(1), name: 'Alpha', verificationStatus: VerificationStatus.verified),
       ];
       await _pump(tester, entities: entities);
       expect(find.text('موثّق'), findsOneWidget);
@@ -324,14 +353,14 @@ void main() {
     });
 
     testWidgets('46. result row does not show Saved', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha')];
       await _pump(tester, entities: entities);
       expect(find.byIcon(Icons.bookmark), findsNothing);
       expect(find.byIcon(Icons.bookmark_border), findsNothing);
     });
 
     testWidgets('47. result navigates to provider detail (W5.4)', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha Co')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha Co')];
       await _pump(tester, entities: entities);
       await tester.tap(find.text('Alpha Co'));
       await tester.pumpAndSettle();

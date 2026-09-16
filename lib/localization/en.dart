@@ -701,6 +701,10 @@ class En {
   static const String directoryNoContactInformation = 'No contact information';
   static const String directoryUnableToOpenApp = 'Unable to open app';
 
+  // V1-R09 P2-B2 — Detail resolver states
+  static const String directoryEntityNotFound = 'Provider not found';
+  static const String directoryInvalidEntityId = 'Invalid provider ID';
+
   // W5.5 — Verification display (5-state)
   static const String verificationUnverified = 'Unverified';
   static const String verificationPending = 'Pending review';
@@ -1151,6 +1155,7 @@ class En {
 
   static const String noticeOffline = 'No network connection';
   static const String noticeOfflineCompact = 'Offline';
+  static const String noticeNetwork = 'Couldn’t connect to the service. Try again.';
   static const String noticeTimeout = 'Connection timed out';
   static const String noticeServiceUnavailable =
       'Service temporarily unavailable';

@@ -684,6 +684,10 @@ class Ar {
   static const String directoryNoContactInformation = 'لا توجد معلومات اتصال';
   static const String directoryUnableToOpenApp = 'تعذر فتح التطبيق';
 
+  // V1-R09 P2-B2 — Detail resolver states
+  static const String directoryEntityNotFound = 'المزود غير موجود';
+  static const String directoryInvalidEntityId = 'معرّف غير صالح';
+
   // W5.5 — Verification display (5-state)
   static const String verificationUnverified = 'غير موثّق';
   static const String verificationPending = 'قيد المراجعة';
@@ -1120,6 +1124,7 @@ class Ar {
 
   static const String noticeOffline = 'لا يوجد اتصال بالشبكة';
   static const String noticeOfflineCompact = 'غير متصل';
+  static const String noticeNetwork = 'تعذّر الاتصال بالخدمة. حاول مرة أخرى.';
   static const String noticeTimeout = 'انتهت مهلة الاتصال';
   static const String noticeServiceUnavailable =
       'الخدمة غير متاحة مؤقتاً';

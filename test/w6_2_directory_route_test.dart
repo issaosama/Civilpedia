@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:civilpedia/core/di/app_dependencies.dart';
 import 'package:civilpedia/core/navigation/app_shell.dart';
+import 'package:civilpedia/core/services/connectivity_provider.dart';
 import 'package:civilpedia/core/services/language_provider.dart';
 import 'package:civilpedia/core/services/theme_provider.dart';
 import 'package:civilpedia/core/widgets/civil_surface_card.dart';
@@ -34,6 +35,7 @@ Widget _app() {
     providers: [
       ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ChangeNotifierProvider(create: (_) => LanguageProvider()),
+      ChangeNotifierProvider(create: (_) => ConnectivityProvider()),
       ChangeNotifierProvider(create: (_) => AuthProvider()),
     ],
     child: MaterialApp.router(routerConfig: appRouter),

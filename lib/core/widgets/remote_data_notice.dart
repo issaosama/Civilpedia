@@ -12,6 +12,7 @@ import '../theme/design_tokens.dart';
 /// before passing them to this widget.
 enum RemoteDataCause {
   offline,
+  network,
   timeout,
   serviceUnavailable,
   malformed,
@@ -63,6 +64,8 @@ class RemoteDataNotice extends StatelessWidget {
     switch (cause) {
       case RemoteDataCause.offline:
         return isArabic ? Ar.noticeOffline : En.noticeOffline;
+      case RemoteDataCause.network:
+        return isArabic ? Ar.noticeNetwork : En.noticeNetwork;
       case RemoteDataCause.timeout:
         return isArabic ? Ar.noticeTimeout : En.noticeTimeout;
       case RemoteDataCause.serviceUnavailable:
@@ -96,6 +99,8 @@ class RemoteDataNotice extends StatelessWidget {
     switch (cause) {
       case RemoteDataCause.offline:
         return Icons.wifi_off_rounded;
+      case RemoteDataCause.network:
+        return Icons.signal_wifi_bad_rounded;
       case RemoteDataCause.timeout:
         return Icons.timer_off_rounded;
       case RemoteDataCause.serviceUnavailable:

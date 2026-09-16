@@ -17,6 +17,7 @@ import 'helpers/canonical_directory_test_helpers.dart';
 
 class _FakeCloudDirectoryRepository implements CloudDirectoryRepository {
   int loadCalls = 0;
+  int refreshCalls = 0;
   final List<CanonicalDirectoryEntity> entities;
 
   _FakeCloudDirectoryRepository(this.entities);
@@ -28,8 +29,21 @@ class _FakeCloudDirectoryRepository implements CloudDirectoryRepository {
   Future<DirectoryCachedData?> readCache() async => null;
 
   @override
-  Future<DirectoryRefreshResult> refresh() async =>
-      const DirectoryRefreshResult(status: DirectoryRefreshStatus.failure);
+  Future<DirectoryRefreshResult> refresh() async {
+    refreshCalls++;
+    if (entities.isEmpty) {
+      return DirectoryRefreshResult(
+        status: DirectoryRefreshStatus.authoritativeEmpty,
+        entities: const [],
+        refreshedAt: DateTime.now().toUtc(),
+      );
+    }
+    return DirectoryRefreshResult(
+      status: DirectoryRefreshStatus.success,
+      entities: List<CanonicalDirectoryEntity>.from(entities),
+      refreshedAt: DateTime.now().toUtc(),
+    );
+  }
 
   @override
   Future<CanonicalDirectoryEntity?> loadByCanonicalId(String id) async {
@@ -56,6 +70,8 @@ class _FakeCloudDirectoryRepository implements CloudDirectoryRepository {
     );
   }
 }
+
+String _uuid(int n) => '00000000-0000-0000-0000-${n.toString().padLeft(12, '0')}';
 
 CanonicalDirectoryEntity _p({
   required String id,
@@ -91,7 +107,7 @@ Widget _app(_FakeCloudDirectoryRepository repo) {
 void main() {
   group('W5.4 — W5.3 INTEGRATION', () {
     testWidgets('44. search results render DirectoryProviderCard', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha Co', entityType: 'supplier')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha Co', entityType: 'supplier')];
       await tester.pumpWidget(_app(_FakeCloudDirectoryRepository(entities)));
       await tester.pumpAndSettle();
       expect(find.byType(DirectoryProviderCard), findsOneWidget);
@@ -99,7 +115,7 @@ void main() {
 
     testWidgets('45. tapping result opens DirectoryProviderDetailScreen', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Alpha', phones: _defaultPhones(), entityType: 'supplier'),
+        _p(id: _uuid(1), name: 'Alpha', phones: _defaultPhones(), entityType: 'supplier'),
       ];
       await tester.pumpWidget(_app(_FakeCloudDirectoryRepository(entities)));
       await tester.pumpAndSettle();
@@ -110,8 +126,8 @@ void main() {
 
     testWidgets('46. query engine unchanged (filtering still applies)', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Alpha Steel', entityType: 'supplier'),
-        _p(id: 'b', name: 'Beta Co', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'Alpha Steel', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Beta Co', entityType: 'contractor'),
       ];
       await tester.pumpWidget(_app(_FakeCloudDirectoryRepository(entities)));
       await tester.pumpAndSettle();
@@ -124,8 +140,8 @@ void main() {
 
     testWidgets('47. text search works through card', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Omega', categories: [fakeCategory('Reinforcement')]),
-        _p(id: 'b', name: 'Gamma', categories: [fakeCategory('Formwork')]),
+        _p(id: _uuid(1), name: 'Omega', categories: [fakeCategory('Reinforcement')]),
+        _p(id: _uuid(2), name: 'Gamma', categories: [fakeCategory('Formwork')]),
       ];
       await tester.pumpWidget(_app(_FakeCloudDirectoryRepository(entities)));
       await tester.pumpAndSettle();
@@ -138,8 +154,8 @@ void main() {
 
     testWidgets('48. category filter unchanged', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'Supplier Co', entityType: 'supplier'),
-        _p(id: 'b', name: 'Contractor Co', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'Supplier Co', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Contractor Co', entityType: 'contractor'),
       ];
       await tester.pumpWidget(_app(_FakeCloudDirectoryRepository(entities)));
       await tester.pumpAndSettle();
@@ -156,12 +172,12 @@ void main() {
     testWidgets('49. location filter unchanged', (tester) async {
       final entities = [
         _p(
-          id: 'a',
+          id: _uuid(1),
           name: 'Co A',
           locations: [fakeLocation('adhamiya', regionName: 'الأعظمية')],
         ),
         _p(
-          id: 'b',
+          id: _uuid(2),
           name: 'Co B',
           locations: [fakeLocation('mansour', regionName: 'المنصور')],
         ),
@@ -177,7 +193,7 @@ void main() {
     });
 
     testWidgets('50. debounce remains 280ms', (tester) async {
-      final entities = [_p(id: 'a', name: 'Alpha Steel')];
+      final entities = [_p(id: _uuid(1), name: 'Alpha Steel')];
       await tester.pumpWidget(_app(_FakeCloudDirectoryRepository(entities)));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField), 'zzz');
@@ -189,8 +205,8 @@ void main() {
 
     testWidgets('51. source ordering unchanged (stable)', (tester) async {
       final entities = [
-        _p(id: 'a', name: 'First', entityType: 'supplier'),
-        _p(id: 'b', name: 'Second', entityType: 'contractor'),
+        _p(id: _uuid(1), name: 'First', entityType: 'supplier'),
+        _p(id: _uuid(2), name: 'Second', entityType: 'contractor'),
       ];
       await tester.pumpWidget(_app(_FakeCloudDirectoryRepository(entities)));
       await tester.pumpAndSettle();
@@ -201,12 +217,12 @@ void main() {
       expect(names, ['First', 'Second']);
     });
 
-    testWidgets('52. loadAll still called once', (tester) async {
-      final repo = _FakeCloudDirectoryRepository([_p(id: 'a', name: 'Alpha')]);
+    testWidgets('52. refresh still called once', (tester) async {
+      final repo = _FakeCloudDirectoryRepository([_p(id: _uuid(1), name: 'Alpha')]);
       await tester.pumpWidget(_app(repo));
       await tester.pumpAndSettle();
       await tester.pump(const Duration(milliseconds: 400));
-      expect(repo.loadCalls, 1);
+      expect(repo.refreshCalls, 1);
     });
 
     test('53. no permanent Directory route added', () {

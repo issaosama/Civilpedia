@@ -1,0 +1,160 @@
+================================================================================
+CIVILPEDIA V1-R09 — PART 2 (P2-B) IMPLEMENTATION REPORT
+Directory Cache-First + Reconnect (Search / Detail / Saved / Reconnect UX)
+================================================================================
+
+SLICE        : P2-B2 — Directory Search, Detail, Saved reconnect UX
+ROADMAP      : CURRENT — IMPLEMENTATION_AUTHORIZED: YES
+OWNER        : PENDING OWNER STAGING (nothing staged/committed/pushed)
+HEAD         : afd7b8676c3efd34bed0a82ecea5131a4361608b
+DATE         : 2026-09-16
+
+--------------------------------------------------------------------------------
+1. FOCUSED EVIDENCE (sequential single-process flutter test runs)
+--------------------------------------------------------------------------------
+  test/v1_r09_p2_b_directory_ux_test.dart (new) | 22 PASS
+  test/w5_4_directory_search_integration_test.dart (updated to refresh seam) | 11 PASS
+  test/w5_4_directory_provider_detail_screen_test.dart              | 31 PASS
+  test/w5_6_directory_provider_detail_save_test.dart                | 13 PASS
+  test/w5_6_saved_screen_directory_test.dart                        | 28 PASS
+  test/saved_reference_resolver_test.dart                           | 16 PASS
+  test/w6_2_directory_route_test.dart                               | 10 PASS
+  test/w5_3_directory_search_screen_test.dart                       | 24 PASS
+  test/v1_r09_p2_shared_ux_test.dart                                | 48 PASS
+
+FINDINGS: HIGH NONE / MEDIUM NONE / LOW NONE
+
+--------------------------------------------------------------------------------
+2. WORK COMPLETED THIS SLICE
+--------------------------------------------------------------------------------
+  [2.1] Directory Detail controller (new)
+        lib/features/directory/application/directory_detail_controller.dart
+        - Per-screen detail controller with DirectoryDetailState:
+          unresolved / loading / ready / stale / notFound / invalidId / failure.
+        - Request epoch guard for refresh single-flight per session.
+        - Reconnect generation gating; transport cause mapping.
+      Fixed during pass: initialize() left the token-loading lock set, so the
+      authoritative refresh (_refresh) early-returned and valid-ID detail
+      resolution never refreshed. _isLoading = false is now set before the
+      refresh (mirrors DirectoryRefreshController).
+
+  [2.2] Directory Refresh controller (new)
+        lib/features/directory/application/directory_refresh_controller.dart
+        - Cache-first search/detail refresh controller, per-screen (NOT singleton).
+        - ReconnectGenerationGate ownership, presentation-owned connectivity.
+
+  [2.3] Directory Search screen
+        lib/features/directory/presentation/directory_search_screen.dart
+        - Cache-first publish before refresh; reconnect-eligible refresh once.
+
+  [2.4] Directory Provider Detail screen
+        lib/features/directory/presentation/directory_provider_detail_screen.dart
+        - Migrated to DirectoryProviderDetailResolver backed by the detail
+          controller; optional stale notice (noticeCause / onRetryCause).
+
+  [2.5] Saved flow (local-first, batch)
+        lib/features/saved/presentation/saved_screen.dart
+        - Local-first publish before Directory resolution.
+        - Single refresh batch for all refs; no per-ref reconnect.
+        - No ConnectivityProvider / ReconnectGenerationGate / TransportSource
+          imports (structural test enforces this).
+
+  [2.6] Router / shell
+        lib/routes/app_router.dart (lines ~270/289): inject the EXISTING
+        ConnectivityProvider for Directory routes only.
+        lib/main.dart (line ~129): production ConnectivityProvider provided.
+
+  [2.7] Shared UX widgets
+        lib/core/widgets/remote_data_notice.dart
+        - RemoteDataCause.network added (Addendum-A); offline remains the only
+          confirmed-unavailable cause; notFound/invalidId remain feature-owned.
+
+  [2.8] Localization
+        lib/localization/ar.dart , lib/localization/en.dart
+        - directoryEntityNotFound, directoryInvalidEntityId, noticeNetwork.
+
+  [2.9] Legacy directly-affected integration test updated
+        test/w5_4_directory_search_integration_test.dart
+        - refresh-based fake (refreshCalls counter, success/authoritativeEmpty),
+          valid canonical UUID ids (_uuid(n)), test 52 -> "refresh still called once".
+
+  [2.10] New minimum-coverage suite
+        test/v1_r09_p2_b_directory_ux_test.dart
+        - Seed paint, cache-over-seed, stale + network/timeout/serviceUnavailable,
+          malformed (stale; manual retry allowed; no reconnect), notFound
+          (success-no-match + authoritativeEmpty), invalidId with zero
+          cache/refresh requests, cachePersisted-false stays fresh, in-flight
+          coalescing (epoch guard), reconnect eligibility, one-claim /
+          same-generation-ignored, dispose stops observing transport,
+          Saved local-first publication, single refresh batch, no-delete-on-
+          failure, and Saved owning no connectivity/reconnect listener.
+
+--------------------------------------------------------------------------------
+3. OWNERSHIP COMPLIANCE (verified)
+--------------------------------------------------------------------------------
+  - DirectoryRefreshController / DirectoryDetailController: per-screen, NOT
+    singletons. Production calls initialize() explicitly
+    (directory_search_screen.dart:94).
+  - Repository (SupabaseCloudDirectoryRepository) remains the ONLY owner of
+    refresh single-flight / Future.
+  - Connectivity observation is presentation-owned: Search and Detail each own
+    a ConnectivityProvider listener + ReconnectGenerationGate; Saved owns NONE.
+  - Router change limited to injecting the existing ConnectivityProvider.
+  - No contract rewrite; Addendum-A append-only.
+
+--------------------------------------------------------------------------------
+4. SAFETY
+--------------------------------------------------------------------------------
+  - Nothing staged / committed / pushed (owner-only).
+  - Pre-existing dirty baseline files untouched:
+      test/a5_6_profile_bootstrap_test.dart
+      test/v1_r08_cloud_profile_foundation_test.dart
+      test/v1_r08_profile_edit_screen_widget_test.dart
+      OpenCode_Usage_Report.txt
+  - No full repository suite run; no flutter pub get; no flutter analyze.
+  - No backend / migration / RLS / schema change.
+
+--------------------------------------------------------------------------------
+5. WORKING TREE (at report time)
+--------------------------------------------------------------------------------
+  Modified (in-scope):
+    docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md
+    docs/architecture/contracts/V1-R09_P2-B_DIRECTORY_CACHE_FIRST_RECONNECT_CONTRACT.md
+    lib/core/widgets/remote_data_notice.dart
+    lib/features/directory/presentation/directory_provider_detail_screen.dart
+    lib/features/directory/presentation/directory_search_screen.dart
+    lib/features/saved/presentation/saved_screen.dart
+    lib/localization/ar.dart
+    lib/localization/en.dart
+    lib/routes/app_router.dart
+    test/v1_r09_p2_shared_ux_test.dart
+    test/w5_3_directory_search_screen_test.dart
+    test/w5_4_directory_search_integration_test.dart
+    test/w5_6_saved_screen_directory_test.dart
+    test/w6_2_directory_route_test.dart
+  Untracked (new, in-scope):
+    lib/features/directory/application/directory_detail_controller.dart
+    lib/features/directory/application/directory_refresh_controller.dart
+    test/v1_r09_p2_b_directory_ux_test.dart
+  Untracked (baseline, untouched): OpenCode_Usage_Report.txt
+  Modified (baseline, untouched): a5_6 / v1_r08_cloud_profile / v1_r08_profile_edit
+
+================================================================================
+
+P2-B2 IMPLEMENTATION COMPLETE — READY FOR INDEPENDENT REVIEW
+
+================================================================================
+
+FINAL ACCEPTANCE — APPEND-ONLY (2026-09-16)
+================================================================================
+
+- Addendum-A: ACCEPTED / CLOSED
+- P2-B1: ACCEPTED / CLOSED
+- P2-B2: ACCEPTED / CLOSED
+- Final P2-B2 micro-review: PASS — P2-B2 ACCEPTED — P2-B MAY CLOSE
+- P2-B final focused correction evidence: 205 PASS / 0 FAIL / 0 SKIPPED (9 suites)
+- Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+- P2-B: FORMALLY CLOSED
+- P2-C: MAY PROCEED TO CONTRACT FREEZE ONLY (implementation NOT authorized)
+
+Historical implementation evidence above is preserved unchanged.

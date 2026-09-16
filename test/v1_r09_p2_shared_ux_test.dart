@@ -707,6 +707,107 @@ void main() {
 
       expect(find.text(En.noticeAuthRestricted), findsOneWidget);
     });
+
+    testWidgets('network renders neutral Arabic copy', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: const Scaffold(
+          body: RemoteDataNotice(
+            cause: RemoteDataCause.network,
+            mode: RemoteDataNoticeMode.compact,
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text(Ar.noticeNetwork), findsOneWidget);
+      expect(find.text(Ar.noticeOffline), findsNothing);
+    });
+
+    testWidgets('network renders neutral English copy', (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        locale: const Locale('en'),
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: const Scaffold(
+          body: RemoteDataNotice(
+            cause: RemoteDataCause.network,
+            mode: RemoteDataNoticeMode.compact,
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text(En.noticeNetwork), findsOneWidget);
+      expect(find.text(En.noticeOffline), findsNothing);
+    });
+
+    testWidgets('network is distinct from offline icon and wording',
+        (tester) async {
+      await tester.pumpWidget(MaterialApp(
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: const Scaffold(
+          body: RemoteDataNotice(cause: RemoteDataCause.network),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text(Ar.noticeNetwork), findsOneWidget);
+      expect(find.text(Ar.noticeOffline), findsNothing);
+      expect(find.byIcon(Icons.signal_wifi_bad_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.wifi_off_rounded), findsNothing);
+
+      await tester.pumpWidget(MaterialApp(
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: const Scaffold(
+          body: RemoteDataNotice(cause: RemoteDataCause.offline),
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text(Ar.noticeOffline), findsOneWidget);
+      expect(find.text(Ar.noticeNetwork), findsNothing);
+      expect(find.byIcon(Icons.wifi_off_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.signal_wifi_bad_rounded), findsNothing);
+    });
+
+    testWidgets('network retry callback works unchanged', (tester) async {
+      int tapCount = 0;
+
+      await tester.pumpWidget(_wrapNotice(
+        RemoteDataNotice(
+          cause: RemoteDataCause.network,
+          onRetry: () => tapCount++,
+        ),
+      ));
+      await tester.pumpAndSettle();
+
+      expect(find.text(Ar.retry), findsOneWidget);
+      await tester.tap(find.text(Ar.retry));
+      expect(tapCount, 1);
+    });
   });
 
   // ══════════════════════════════════════════════════════════════════════

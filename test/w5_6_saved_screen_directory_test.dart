@@ -102,6 +102,8 @@ CanonicalDirectoryEntity _provider(
   );
 }
 
+String _uuid(int n) => '00000000-0000-0000-0000-${n.toString().padLeft(12, '0')}';
+
 SavedItemReference _dirRef(String id) => SavedItemReference(
   ownerDomain: SavedReferenceOwners.directory,
   entityType: SavedReferenceEntityTypes.provider,
@@ -181,7 +183,7 @@ void main() {
     testWidgets('38. no Directory section when no Directory refs', (tester) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
         store: _FakeSavedStore(const []),
       );
       expect(find.text(Ar.savedEngineeringDirectory), findsNothing);
@@ -191,8 +193,8 @@ void main() {
     testWidgets('39. Directory section appears with provider refs', (tester) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
-        store: _FakeSavedStore([_dirRef('p1')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       expect(find.text(Ar.savedEngineeringDirectory), findsOneWidget);
     });
@@ -200,8 +202,8 @@ void main() {
     testWidgets('40. resolved provider row shows name', (tester) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha Steel')]),
-        store: _FakeSavedStore([_dirRef('p1')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha Steel')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       expect(find.text('Alpha Steel'), findsOneWidget);
     });
@@ -210,9 +212,9 @@ void main() {
       await _pump(
         tester,
         directoryRepo: FakeCloudDirectoryRepository([
-          _provider('p1', name: 'Alpha', entityType: 'supplier'),
+          _provider(_uuid(1), name: 'Alpha', entityType: 'supplier'),
         ]),
-        store: _FakeSavedStore([_dirRef('p1')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       expect(
         find.textContaining(
@@ -226,9 +228,9 @@ void main() {
       await _pump(
         tester,
         directoryRepo: FakeCloudDirectoryRepository([
-          _provider('p1', name: 'Alpha'),
+          _provider(_uuid(1), name: 'Alpha'),
         ]),
-        store: _FakeSavedStore([_dirRef('p1')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       expect(find.textContaining('كرادة'), findsOneWidget);
     });
@@ -237,11 +239,11 @@ void main() {
       await _pump(
         tester,
         directoryRepo: FakeCloudDirectoryRepository([
-          _provider('p1', name: 'Provider One'),
-          _provider('p2', name: 'Provider Two'),
-          _provider('p3', name: 'Provider Three'),
+          _provider(_uuid(1), name: 'Provider One'),
+          _provider(_uuid(2), name: 'Provider Two'),
+          _provider(_uuid(3), name: 'Provider Three'),
         ]),
-        store: _FakeSavedStore([_dirRef('p1'), _dirRef('p2'), _dirRef('p3')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1)), _dirRef(_uuid(2)), _dirRef(_uuid(3))]),
       );
       expect(tester.getTopLeft(find.text('Provider One')).dy <
           tester.getTopLeft(find.text('Provider Two')).dy, isTrue);
@@ -252,8 +254,8 @@ void main() {
     testWidgets('44. row tap opens DirectoryProviderDetailScreen', (tester) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
-        store: _FakeSavedStore([_dirRef('p1')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       await tester.tap(find.text('Alpha'));
       await tester.pumpAndSettle();
@@ -263,8 +265,8 @@ void main() {
     testWidgets('45. back returns to SavedScreen', (tester) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
-        store: _FakeSavedStore([_dirRef('p1')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       await tester.tap(find.text('Alpha'));
       await tester.pumpAndSettle();
@@ -311,8 +313,8 @@ void main() {
       // A Knowledge topic still renders alongside a Directory section.
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider('p1', name: 'Alpha')]),
-        store: _FakeSavedStore([_dirRef('p1')]),
+        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        store: _FakeSavedStore([_dirRef(_uuid(1))]),
         topicIds: const ['t1'],
         topics: [_topic('t1', 'الموضوع الأول')],
       );

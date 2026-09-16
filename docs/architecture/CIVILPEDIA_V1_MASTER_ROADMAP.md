@@ -750,12 +750,14 @@ Production audit and completion of:
 STATUS: CURRENT
 
 Part 1: CLOSED / ACCEPTED — PASS - V1-R09 PART 1 ACCEPTED - PART 2 MAY BEGIN
-Part 2: AUTHORIZED — current within V1-R09 (overall V1-R09 remains CURRENT)
+Part 2: CURRENT — current within V1-R09 (overall V1-R09 remains CURRENT)
 Part 2 P2-A: ACCEPTED / CLOSED — PASS - P2-A ACCEPTED - P2-B MAY BEGIN
-Part 2 P2-B: CURRENT — CONTRACT V1-R09-P2-B-CONTRACT-v1 FROZEN
+Part 2 P2-B: ACCEPTED / CLOSED
 Part 2 P2-B1: ACCEPTED / CLOSED
-Part 2 P2-B2: CURRENT — IMPLEMENTATION_AUTHORIZED: YES (NEXT)
-Part 2 P2-C through P2-G: LOCKED
+Part 2 P2-B2: ACCEPTED / CLOSED
+Part 2 P2-C: NEXT — AUTHORIZED FOR CONTRACT FREEZE ONLY
+Part 2 P2-D through P2-G: LOCKED
+V1-R10: QUEUED (not started)
 
 Primary:
 
@@ -1424,4 +1426,69 @@ Corrected defects:
   - location `is_primary` strict bool validation (remote + cache)
 P2-B2: CURRENT — IMPLEMENTATION_AUTHORIZED: YES (NEXT)
 P2-C through P2-G: LOCKED
+V1-R10: QUEUED (not started)
+
+### V1-R09 Part 2 P2-B Addendum-A Closure Record
+
+Slice: P2-B — Directory Cache-First + Reconnect (Addendum-A: Shared Network Cause)
+Status: ACCEPTED / CLOSED
+Final micro-review: PASS — ADDENDUM-A ACCEPTED — P2-B2 MAY RESUME
+Final focused evidence: 48 PASS / 0 FAIL / 0 SKIPPED
+  - test/v1_r09_p2_shared_ux_test.dart: 48 PASS
+Final regression evidence: 202 PASS / 0 FAIL / 0 SKIPPED
+  - test/v1_r09_p2_b_directory_data_test.dart: 100 PASS
+  - test/v1_r05_directory_cloud_integration_test.dart: 83 PASS
+  - test/remote_operation_policy_test.dart: 9 PASS
+  - test/app_shell_test.dart: 10 PASS
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+Additive change:
+  - RemoteDataCause.network added to lib/core/widgets/remote_data_notice.dart
+  - Neutral Arabic/English localization added to lib/localization/ar.dart and lib/localization/en.dart
+  - Frozen contract amended via append-only APPENDIX-A
+P2-B2: CURRENT — IMPLEMENTATION_AUTHORIZED: YES (NEXT)
+P2-C through P2-G: LOCKED
+V1-R10: QUEUED (not started)
+
+### V1-R09 Part 2 P2-B2 Closure Record
+
+Slice: P2-B2 — Directory Search / Detail / Saved / Reconnect UX (correction pass)
+Status: ACCEPTED / CLOSED
+Final micro-review: PASS — P2-B2 ACCEPTED — P2-B MAY CLOSE
+Final focused correction evidence: 205 PASS / 0 FAIL / 0 SKIPPED
+  - test/v1_r09_p2_b_directory_ux_test.dart: 40 PASS
+  - test/w5_3_directory_search_screen_test.dart: 24 PASS
+  - test/w5_4_directory_search_integration_test.dart: 11 PASS
+  - test/w5_4_directory_provider_detail_screen_test.dart: 31 PASS
+  - test/w5_6_directory_provider_detail_save_test.dart: 13 PASS
+  - test/w5_6_saved_screen_directory_test.dart: 12 PASS
+  - test/saved_reference_resolver_test.dart: 16 PASS
+  - test/w6_2_directory_route_test.dart: 10 PASS
+  - test/v1_r09_p2_shared_ux_test.dart: 48 PASS
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+Corrected defects:
+  - post-dispose async publication in DirectoryRefreshController
+    (disposed flag + operation epoch guards)
+  - post-dispose async publication in DirectoryDetailController
+    (disposed flag + request epoch invalidation on dispose)
+  - valid cached-empty snapshot drowned by loading gate in
+    DirectorySearchScreen (explicit hasSnapshot flag)
+  - 18 deterministic tests added (T1-T18)
+P2-B: ACCEPTED / CLOSED
+P2-C: NEXT — AUTHORIZED FOR CONTRACT FREEZE ONLY (implementation NOT authorized)
+V1-R10: QUEUED (not started)
+
+### V1-R09 Part 2 P2-B Closure Record
+
+Slice: P2-B — Directory Cache-First + Reconnect
+Status: ACCEPTED / CLOSED
+P2-B1: ACCEPTED / CLOSED
+P2-B2: ACCEPTED / CLOSED
+Addendum-A: ACCEPTED / CLOSED
+Final micro-review: PASS — P2-B2 ACCEPTED — P2-B MAY CLOSE
+Final focused correction evidence: 205 PASS / 0 FAIL / 0 SKIPPED
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+Contract: V1-R09-P2-B-CONTRACT-v1 (+ ADDENDUM-A) preserved unchanged
+P2-C: NEXT — AUTHORIZED FOR CONTRACT FREEZE ONLY
+P2-D through P2-G: LOCKED
+V1-R09 Part 2: CURRENT (V1-R09 overall not closed)
 V1-R10: QUEUED (not started)

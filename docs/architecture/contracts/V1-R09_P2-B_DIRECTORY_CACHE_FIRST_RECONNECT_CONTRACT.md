@@ -202,3 +202,103 @@ unresolved contract contradiction to remain.
 
 This freeze authorizes P2-B1 implementation only after this contract is
 persisted. It does not mark V1-R09 closed.
+
+---
+
+# ADDENDUM-A — Shared Network Cause
+
+CONTRACT: V1-R09-P2-B-CONTRACT-v1 + ADDENDUM-A
+STATUS: FROZEN
+ARCHITECT DECISION: APPROVED ADDITIVE AMENDMENT
+
+## A.1 Authority
+
+This addendum amends the frozen V1-R09-P2-B-CONTRACT-v1 without rewriting its
+historical text. It resolves the shared UX contract mismatch that blocked P2-B2.
+
+## A.2 Additive Change
+
+The shared `RemoteDataCause` model gains exactly one new case:
+
+- `RemoteDataCause.network`
+
+All existing `RemoteDataCause` cases and their behavior remain unchanged.
+
+## A.3 Semantics
+
+`RemoteDataCause.network` represents a request-level connection failure where
+transport is NOT confirmed unavailable by the canonical `ConnectivityProvider`.
+
+User-facing copy must be neutral connection wording such as:
+
+- English: "Couldn’t connect to the service. Try again."
+- Arabic: "تعذّر الاتصال بالخدمة. حاول مرة أخرى."
+
+It must NOT say or imply:
+
+- device is offline
+- internet is disconnected
+- transport is unavailable
+
+That meaning remains owned exclusively by `RemoteDataCause.offline`.
+
+## A.4 Ownership Remains Feature-Level
+
+The following remain Directory feature states and are NOT added to the shared
+`RemoteDataCause` model:
+
+- `authoritativeNotFound`
+- `invalidCanonicalId`
+- `cachePersistenceFailed` (not a remote failure notice)
+
+## A.5 Reconnect Eligibility Unchanged
+
+Automatic reconnect refresh remains eligible only for:
+
+- `offline`
+- `network`
+- `timeout`
+- `serviceUnavailable`
+
+The following remain ineligible for automatic reconnect refresh:
+
+- `malformedResponse`
+- `unexpected`
+- `authoritativeNotFound`
+- `invalidCanonicalId`
+
+## A.6 Scope Protection
+
+This addendum modifies only the shared UX primitive and its localization. It
+does not authorize changes to:
+
+- Directory production implementation
+- P2-B1 data foundation
+- ConnectivityProvider
+- ReconnectGenerationGate
+- TransportStatusBanner
+- backend / migrations / RLS / schema / Edge Functions / Realtime / service_role
+
+## A.7 Acceptance
+
+STATUS: ACCEPTED / CLOSED
+
+Addendum-A passed independent focused review. P2-B2 implementation is now authorized to resume.
+
+---
+
+# P2-B CLOSURE MARKER
+
+CONTRACT: V1-R09-P2-B-CONTRACT-v1 (+ ADDENDUM-A)
+STATUS: CLOSED
+
+P2-B1: ACCEPTED / CLOSED
+P2-B2: ACCEPTED / CLOSED
+P2-B overall: ACCEPTED / CLOSED
+Final micro-review: PASS
+Final focused correction evidence: 205 PASS / 0 FAIL / 0 SKIPPED
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+
+Append-only closure marker. The frozen contract and Addendum-A history above
+are preserved unchanged. No semantics changed. P2-B2 implementation is closed;
+P2-C may proceed to contract freeze only.

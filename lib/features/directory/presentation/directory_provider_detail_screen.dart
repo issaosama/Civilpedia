@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/di/app_dependencies.dart';
+import '../../../core/services/connectivity_provider.dart';
 import '../../../core/services/language_provider.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/remote_data_notice.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/civil_app_bar.dart';
@@ -12,6 +14,7 @@ import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
 import '../../saved/domain/saved_item_reference.dart';
 import '../../saved/domain/saved_reference_store.dart';
+import '../application/directory_detail_controller.dart';
 import '../domain/canonical_directory_entity.dart';
 import '../domain/cloud_directory_repository.dart';
 import 'canonical_entity_type_presentation.dart';
@@ -40,11 +43,20 @@ class DirectoryProviderDetailScreen extends StatefulWidget {
   /// [AppDependencies.savedReferenceStore]; tests inject a fake in-memory store.
   final SavedReferenceStore? savedReferenceStore;
 
+  /// Optional typed remote-data notice shown above the detail body when the
+  /// entity is being presented from stale seed/cache after a refresh failure.
+  final RemoteDataCause? noticeCause;
+
+  /// Retry callback paired with [noticeCause].
+  final VoidCallback? onRetryCause;
+
   const DirectoryProviderDetailScreen({
     super.key,
     required this.entity,
     this.contactLauncher,
     this.savedReferenceStore,
+    this.noticeCause,
+    this.onRetryCause,
   });
 
   @override
@@ -191,51 +203,74 @@ class _DirectoryProviderDetailScreenState
     final (phones, whatsappDigits) = _contactProjection(entity);
     final hasActionableContact = phones.isNotEmpty || whatsappDigits.isNotEmpty;
 
+    final notice = widget.noticeCause;
+
     return Scaffold(
       appBar: CivilAppBar(
         title: Text(entity.name),
         actions: [_buildSaveAction(isArabic)],
       ),
-      body: ListView(
-        padding: AppSpacing.padLg,
+      body: Column(
         children: [
-          _buildIdentity(entity, isArabic, theme),
-          if (description != null && description.isNotEmpty) ...[
-            AppSpacing.gapLg,
-            _sectionLabel(isArabic ? Ar.directoryDescription : En.directoryDescription),
-            AppSpacing.gapSm,
-            Text(
-              description,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
-                height: 1.5,
+          if (notice != null) ...[
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.lg,
+                AppSpacing.sm,
+                AppSpacing.lg,
+                0,
+              ),
+              child: RemoteDataNotice(
+                cause: notice,
+                mode: RemoteDataNoticeMode.compact,
+                onRetry: widget.onRetryCause,
               ),
             ),
           ],
-          if (address != null && address.isNotEmpty) ...[
-            AppSpacing.gapLg,
-            _sectionLabel(isArabic ? Ar.directoryAddress : En.directoryAddress),
-            AppSpacing.gapSm,
-            Text(
-              address,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
-              ),
+          Expanded(
+            child: ListView(
+              padding: AppSpacing.padLg,
+              children: [
+                _buildIdentity(entity, isArabic, theme),
+                if (description != null && description.isNotEmpty) ...[
+                  AppSpacing.gapLg,
+                  _sectionLabel(isArabic ? Ar.directoryDescription : En.directoryDescription),
+                  AppSpacing.gapSm,
+                  Text(
+                    description,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+                if (address != null && address.isNotEmpty) ...[
+                  AppSpacing.gapLg,
+                  _sectionLabel(isArabic ? Ar.directoryAddress : En.directoryAddress),
+                  AppSpacing.gapSm,
+                  Text(
+                    address,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+                if (services.isNotEmpty) ...[
+                  AppSpacing.gapLg,
+                  _sectionLabel(isArabic ? Ar.directoryServices : En.directoryServices),
+                  AppSpacing.gapSm,
+                  _ServicesWrap(values: services),
+                ],
+                AppSpacing.gapLg,
+                _sectionLabel(isArabic ? Ar.directoryContact : En.directoryContact),
+                AppSpacing.gapSm,
+                if (hasActionableContact)
+                  _buildContactActions(entity, phones, whatsappDigits, isArabic, theme)
+                else
+                  _buildNoContact(theme),
+              ],
             ),
-          ],
-          if (services.isNotEmpty) ...[
-            AppSpacing.gapLg,
-            _sectionLabel(isArabic ? Ar.directoryServices : En.directoryServices),
-            AppSpacing.gapSm,
-            _ServicesWrap(values: services),
-          ],
-          AppSpacing.gapLg,
-          _sectionLabel(isArabic ? Ar.directoryContact : En.directoryContact),
-          AppSpacing.gapSm,
-          if (hasActionableContact)
-            _buildContactActions(entity, phones, whatsappDigits, isArabic, theme)
-          else
-            _buildNoContact(theme),
+          ),
         ],
       ),
     );
@@ -482,7 +517,7 @@ String _whatsappDigits(String? whatsapp) {
   return extractWhatsAppDigits(whatsapp);
 }
 
-/// V1-R05 — canonical detail destination resolver for the
+/// V1-R05 / V1-R09 P2-B2 — canonical detail destination resolver for the
 /// `/directory/entity/:id` route.
 ///
 /// The canonical `directory_entities.id` is the ONLY authoritative detail
@@ -490,13 +525,14 @@ String _whatsappDigits(String? whatsapp) {
 /// detail surface is shown. A whole-entity [seedEntity] is used ONLY as a
 /// non-authoritative first-frame presentation optimization (fast paint while
 /// the authoritative resolution is in flight) and is always replaced by the
-/// resolved entity. Unknown/unresolvable ids render the unavailable state
-/// instead of inventing an entity.
+/// resolved entity. Unknown/unresolvable ids render the appropriate
+/// feature-owned state instead of inventing an entity.
 class DirectoryProviderDetailResolver extends StatefulWidget {
   const DirectoryProviderDetailResolver({
     super.key,
     required this.entityId,
     required this.repository,
+    this.connectivityProvider,
     this.seedEntity,
     this.savedReferenceStore,
   });
@@ -506,6 +542,10 @@ class DirectoryProviderDetailResolver extends StatefulWidget {
 
   /// Production repository/cache used for the authoritative resolution.
   final CloudDirectoryRepository repository;
+
+  /// Canonical transport observer. Production passes [ConnectivityProvider];
+  /// tests may leave null.
+  final ConnectivityProvider? connectivityProvider;
 
   /// Non-authoritative first-frame hint; never the authoritative detail state.
   final CanonicalDirectoryEntity? seedEntity;
@@ -520,50 +560,98 @@ class DirectoryProviderDetailResolver extends StatefulWidget {
 
 class _DirectoryProviderDetailResolverState
     extends State<DirectoryProviderDetailResolver> {
-  CanonicalDirectoryEntity? _entity;
-  bool _resolved = false;
+  DirectoryDetailController? _controller;
 
   @override
   void initState() {
     super.initState();
-    final seed = widget.seedEntity;
-    _entity = (seed != null && seed.id == widget.entityId) ? seed : null;
-    _resolve();
+    _controller = DirectoryDetailController(
+      repository: widget.repository,
+      entityId: widget.entityId,
+      connectivity: widget.connectivityProvider,
+      seedEntity: widget.seedEntity,
+    );
   }
 
-  Future<void> _resolve() async {
-    CanonicalDirectoryEntity? resolved;
-    try {
-      resolved = await widget.repository.loadByCanonicalId(widget.entityId);
-    } catch (_) {
-      resolved = null;
-    }
-    if (!mounted) return;
-    setState(() {
-      // Authoritative replacement — even a null (unknown) result replaces
-      // the seed frame so a stale hint can never remain authoritative.
-      _entity = resolved;
-      _resolved = true;
-    });
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final entity = _entity;
-    if (entity == null) {
-      if (_resolved) {
-        return Scaffold(
-          appBar: CivilAppBar(title: const Text('')),
-          body: const Center(child: Text('Entity not found')),
-        );
-      }
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    final controller = _controller;
+
+    if (controller == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    return DirectoryProviderDetailScreen(
-      entity: entity,
-      savedReferenceStore: widget.savedReferenceStore,
+
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        final entity = controller.entity;
+        final state = controller.state;
+
+        if (entity != null) {
+          return DirectoryProviderDetailScreen(
+            entity: entity,
+            savedReferenceStore: widget.savedReferenceStore,
+            noticeCause:
+                state == DirectoryDetailState.stale ? controller.cause : null,
+            onRetryCause: controller.retry,
+          );
+        }
+
+        if (state == DirectoryDetailState.invalidId) {
+          return _buildMessageState(
+            isArabic ? Ar.directoryInvalidEntityId : En.directoryInvalidEntityId,
+          );
+        }
+
+        if (state == DirectoryDetailState.notFound) {
+          return _buildMessageState(
+            isArabic ? Ar.directoryEntityNotFound : En.directoryEntityNotFound,
+          );
+        }
+
+        if (state == DirectoryDetailState.unresolved && !controller.isLoading) {
+          final cause = controller.cause ?? RemoteDataCause.unexpected;
+          return Scaffold(
+            appBar: CivilAppBar(title: const Text('')),
+            body: Center(
+              child: RemoteDataNotice(
+                cause: cause,
+                mode: RemoteDataNoticeMode.noData,
+                onRetry: controller.retry,
+              ),
+            ),
+          );
+        }
+
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      },
+    );
+  }
+
+  Widget _buildMessageState(String message) {
+    return Scaffold(
+      appBar: CivilAppBar(title: const Text('')),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+      ),
     );
   }
 }

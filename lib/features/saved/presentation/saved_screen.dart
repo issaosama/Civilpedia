@@ -133,13 +133,17 @@ class _SavedScreenState extends State<SavedScreen>
         .resolve()
         .then((refs) async {
           if (!mounted || generation != _loadGeneration) return;
-          final providers = await _resolveDirectoryProviders(refs);
-          if (!mounted || generation != _loadGeneration) return;
+          // Publish local Saved refs immediately; do not block the whole screen
+          // on Directory cloud resolution. Directory refs are represented as
+          // unavailable rows until cache/cloud resolution supplies entities.
+          final directoryRefs = _directoryRefs(refs);
           setState(() {
             _favorites = refs;
-            _directoryProviders = providers;
+            _directoryProviders =
+                List<CanonicalDirectoryEntity?>.filled(directoryRefs.length, null);
             _favoritesLoaded = true;
           });
+          await _resolveDirectoryProviders(directoryRefs, generation);
         })
         .catchError((Object _) {
           if (!mounted || generation != _loadGeneration) return;
@@ -151,34 +155,76 @@ class _SavedScreenState extends State<SavedScreen>
         });
   }
 
-  /// V1-R05 — resolves directory/provider Saved refs through the canonical
-  /// [CloudDirectoryRepository.loadByCanonicalId] using the canonical entity
-  /// UUID. Preserves reference/source order and marks unresolvable entries as
-  /// null (shown "unavailable"). Never deletes the Saved ref and ranks nothing.
-  /// Unmatched legacy references (non-UUID local ids) are not heuristically
-  /// rebound.
-  Future<List<CanonicalDirectoryEntity?>> _resolveDirectoryProviders(
-    List<SavedItemReference> refs,
-  ) async {
-    final result = <CanonicalDirectoryEntity?>[];
+  List<SavedItemReference> _directoryRefs(List<SavedItemReference> refs) {
+    final directoryRefs = <SavedItemReference>[];
     for (final ref in refs) {
       if (ref.ownerDomain != SavedReferenceOwners.directory) continue;
       if (ref.entityType != SavedReferenceEntityTypes.provider) continue;
-      final entityId = ref.entityId;
-      if (entityId.isEmpty) {
-        result.add(null);
+      directoryRefs.add(ref);
+    }
+    return directoryRefs;
+  }
+
+  /// V1-R09 P2-B2 — resolves saved Directory provider refs locally first,
+  /// then joins exactly ONE complete repository refresh for any IDs not found
+  /// in cache. Never deletes Saved refs, never makes sequential remote calls,
+  /// and never installs a reconnect listener.
+  Future<void> _resolveDirectoryProviders(
+    List<SavedItemReference> directoryRefs,
+    int generation,
+  ) async {
+    if (directoryRefs.isEmpty) return;
+
+    final repo = widget.directoryRepository ?? AppDependencies.directoryRepo;
+    final providers =
+        List<CanonicalDirectoryEntity?>.filled(directoryRefs.length, null);
+    final unresolvedIndices = <int>[];
+
+    // Read cache once and publish cached matches immediately.
+    final cached = await repo.readCache();
+    for (var i = 0; i < directoryRefs.length; i++) {
+      final entityId = directoryRefs[i].entityId;
+      if (entityId.isEmpty ||
+          !CanonicalDirectoryEntity.isValidUuid(entityId)) {
         continue;
       }
-      final repo = widget.directoryRepository ?? AppDependencies.directoryRepo;
-      CanonicalDirectoryEntity? provider;
-      try {
-        provider = await repo.loadByCanonicalId(entityId);
-      } catch (_) {
-        provider = null;
+      final entity = cached?.byId(entityId);
+      if (entity != null) {
+        providers[i] = entity;
+      } else {
+        unresolvedIndices.add(i);
       }
-      result.add(provider);
     }
-    return result;
+
+    if (!mounted || generation != _loadGeneration) return;
+    setState(() => _directoryProviders = providers);
+
+    if (unresolvedIndices.isEmpty) return;
+
+    // One complete refresh for all unresolved IDs.
+    final refreshResult = await repo.refresh();
+    if (!mounted || generation != _loadGeneration) return;
+
+    if (refreshResult.succeeded) {
+      for (final idx in unresolvedIndices) {
+        final entityId = directoryRefs[idx].entityId;
+        providers[idx] = _findById(refreshResult.entities, entityId);
+      }
+    }
+    // On failure, unresolved entries remain null (unavailable) without deleting
+    // the Saved reference.
+
+    setState(() => _directoryProviders = providers);
+  }
+
+  static CanonicalDirectoryEntity? _findById(
+    List<CanonicalDirectoryEntity> entities,
+    String id,
+  ) {
+    for (final entity in entities) {
+      if (entity.id == id) return entity;
+    }
+    return null;
   }
 
   @override
