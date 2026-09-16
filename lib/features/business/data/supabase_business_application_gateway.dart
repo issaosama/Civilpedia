@@ -1,10 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/supabase_service.dart';
+import '../../../core/network/remote_operation_policy.dart';
 import '../domain/business_application.dart';
 import '../domain/business_application_gateway.dart';
 import '../domain/business_application_policy.dart';
 import '../domain/business_membership_gateway.dart';
+import '../domain/business_remote_read.dart';
+import 'business_remote_read_classifier.dart';
 
 /// A6.3.1 — Production [BusinessApplicationGateway] backed by the shared
 /// Supabase client.
@@ -38,6 +41,7 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
     required this.service,
     this.membershipGateway,
     SupabaseClient? client,
+    this.readTimeout = RemoteOperationPolicy.read,
   }) : _injectedClient = client;
 
   /// The backend boundary used to decide availability.
@@ -46,6 +50,7 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
   /// Read-only membership boundary used for claim-ownership checks. Optional
   /// so a build without a configured backend stays safely inert.
   final BusinessMembershipGateway? membershipGateway;
+  final Duration readTimeout;
 
   // Injected for tests; production resolves lazily so merely constructing the
   // gateway never touches the global Supabase singleton.
@@ -60,23 +65,36 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
 
   @override
   Future<List<BusinessApplication>> listOwnApplications(String userId) async {
-    final rows = await _client
-        .from(_table)
-        .select()
-        .eq('applicant_user_id', userId);
-    final applications = <BusinessApplication>[];
-    for (final row in rows) {
-      final parsed = BusinessApplication.tryFromRow(row);
-      // Defensive own-read reinforcement; RLS is the authoritative backstop.
-      if (parsed != null && parsed.belongsTo(userId)) {
+    if (!isAvailable) {
+      throw const BusinessRemoteReadException(
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
+    }
+    try {
+      final rows = await runWithRemoteDeadline(
+        _client.from(_table).select().eq('applicant_user_id', userId),
+        timeout: readTimeout,
+      );
+      final applications = <BusinessApplication>[];
+      for (final row in rows) {
+        final parsed = _tryParseAuthoritativeReadRow(row);
+        // A row outside the requested actor or a malformed required row is a
+        // complete-response failure, never a silently reduced list.
+        if (parsed == null || !parsed.belongsTo(userId)) {
+          throw const BusinessRemoteReadException(
+            BusinessRemoteReadFailureKind.malformedResponse,
+          );
+        }
         applications.add(parsed);
       }
+      applications.sort((a, b) {
+        final byTime = b.createdAt.compareTo(a.createdAt);
+        return byTime != 0 ? byTime : a.id.compareTo(b.id);
+      });
+      return List.unmodifiable(applications);
+    } catch (error) {
+      throwBusinessRemoteReadFailure(error);
     }
-    applications.sort((a, b) {
-      final byTime = b.createdAt.compareTo(a.createdAt);
-      return byTime != 0 ? byTime : a.id.compareTo(b.id);
-    });
-    return applications;
   }
 
   @override
@@ -84,16 +102,52 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
     String userId,
     String applicationId,
   ) async {
-    final row = await _client
-        .from(_table)
-        .select()
-        .eq('applicant_user_id', userId)
-        .eq('id', applicationId)
-        .maybeSingle();
-    if (row == null) return null;
-    final parsed = BusinessApplication.tryFromRow(row);
-    if (parsed == null || !parsed.belongsTo(userId)) return null;
-    return parsed;
+    if (!isAvailable) {
+      throw const BusinessRemoteReadException(
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
+    }
+    try {
+      final row = await runWithRemoteDeadline(
+        _client
+            .from(_table)
+            .select()
+            .eq('applicant_user_id', userId)
+            .eq('id', applicationId)
+            .maybeSingle(),
+        timeout: readTimeout,
+      );
+      if (row == null) return null;
+      final parsed = _tryParseAuthoritativeReadRow(row);
+      if (parsed == null ||
+          parsed.id != applicationId ||
+          !parsed.belongsTo(userId)) {
+        throw const BusinessRemoteReadException(
+          BusinessRemoteReadFailureKind.malformedResponse,
+        );
+      }
+      return parsed;
+    } catch (error) {
+      throwBusinessRemoteReadFailure(error);
+    }
+  }
+
+  /// P2-D authoritative application reads require both server timestamps.
+  ///
+  /// The shared domain parser remains permissive for historical synthetic and
+  /// mutation paths; this read boundary must not fabricate remote timestamps.
+  static BusinessApplication? _tryParseAuthoritativeReadRow(
+    Map<String, dynamic> row,
+  ) {
+    final createdAt = row['created_at'];
+    final updatedAt = row['updated_at'];
+    if (createdAt is! String ||
+        updatedAt is! String ||
+        DateTime.tryParse(createdAt) == null ||
+        DateTime.tryParse(updatedAt) == null) {
+      return null;
+    }
+    return BusinessApplication.tryFromRow(row);
   }
 
   @override
@@ -244,8 +298,10 @@ class SupabaseBusinessApplicationGateway implements BusinessApplicationGateway {
     required BusinessApplication application,
   }) async {
     try {
-      final response = await _client
-          .rpc(rpcName, params: {'p_application_id': application.id});
+      final response = await _client.rpc(
+        rpcName,
+        params: {'p_application_id': application.id},
+      );
       if (response is! Map<String, dynamic>) {
         return const BusinessApplicationSubmitDenied(
           BusinessApplicationSubmitCause.unexpected,

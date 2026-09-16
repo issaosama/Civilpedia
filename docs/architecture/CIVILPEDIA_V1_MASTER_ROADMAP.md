@@ -759,8 +759,8 @@ Part 2 P2-C: ACCEPTED / CLOSED
 Part 2 P2-C1: ACCEPTED / CLOSED
 Part 2 P2-C2: ACCEPTED / CLOSED
 Part 2 P2-D: CURRENT — CONTRACT V1-R09-P2-D-CONTRACT-v1 FROZEN
-Part 2 P2-D1: IMPLEMENTATION_AUTHORIZED (NEXT)
-Part 2 P2-D2: LOCKED pending P2-D1 acceptance
+Part 2 P2-D1: ACCEPTED / CLOSED
+Part 2 P2-D2: NEXT — IMPLEMENTATION AUTHORIZED
 Part 2 P2-E through P2-G: LOCKED
 V1-R10: QUEUED (not started)
 
@@ -1577,3 +1577,21 @@ Backend decision: no migration / RLS / schema / Edge / Realtime / service_role
   change; migration 00022 remains absent
 V1-R09 status: CURRENT (not closed)
 Owner approval: PENDING OWNER STAGING
+
+### V1-R09 Part 2 P2-D1 Closure Record
+
+Slice: P2-D1 — Typed Business Read / State / Lifecycle Foundation
+Status: ACCEPTED / CLOSED
+Independent review: PASS
+Independent focused evidence: 359 PASS / 0 FAIL / 0 SKIPPED
+Findings: HIGH NONE / MEDIUM NONE
+LOW finding: implementer-reported total 364 overcounted five legacy-suite
+  terminal counters by one each; independent actual total is 359.
+  Reporting-only, non-blocking.
+P2-D: CURRENT (not closed)
+P2-D2: NEXT — IMPLEMENTATION AUTHORIZED (unlocked after this closure/checkpoint)
+P2-E through P2-G: LOCKED
+Contract: V1-R09-P2-D-CONTRACT-v1 frozen semantics preserved unchanged; only
+  the append-only P2-D1 closure marker added.
+V1-R09 Part 2: CURRENT (V1-R09 overall not closed)
+V1-R10: QUEUED (not started)

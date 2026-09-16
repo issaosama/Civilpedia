@@ -19,6 +19,7 @@ import 'package:civilpedia/features/business/domain/business_membership_gateway.
 import 'package:civilpedia/features/business/domain/business_profile_management_gateway.dart';
 import 'package:civilpedia/features/business/domain/business_profile_validator.dart';
 import 'package:civilpedia/features/business/domain/business_role.dart';
+import 'package:civilpedia/features/business/domain/business_remote_read.dart';
 import 'package:civilpedia/features/business/domain/managed_business_profile.dart';
 import 'package:civilpedia/features/business/domain/managed_business_profile_draft.dart';
 import 'package:civilpedia/features/business/domain/managed_business_summary.dart';
@@ -159,13 +160,13 @@ http.Response _jsonResponse(Object? body, {int statusCode = 200}) {
 
 class _FakeInitializedService extends SupabaseService {
   _FakeInitializedService()
-      : super(
-          config: const BackendConfig(
-            appEnvRaw: 'development',
-            supabaseUrl: 'http://localhost:54321',
-            supabaseAnonKey: 'anon',
-          ),
-        );
+    : super(
+        config: const BackendConfig(
+          appEnvRaw: 'development',
+          supabaseUrl: 'http://localhost:54321',
+          supabaseAnonKey: 'anon',
+        ),
+      );
 
   @override
   bool get isInitialized => true;
@@ -190,7 +191,8 @@ class _RecordingHttpClient extends http.BaseClient {
   }
 }
 
-class _ToggleFailureCloudDirectoryRepository implements CloudDirectoryRepository {
+class _ToggleFailureCloudDirectoryRepository
+    implements CloudDirectoryRepository {
   _ToggleFailureCloudDirectoryRepository();
 
   bool failNext = false;
@@ -207,26 +209,21 @@ class _ToggleFailureCloudDirectoryRepository implements CloudDirectoryRepository
       failNext = false;
       throw Exception('refresh failed');
     }
-    return const DirectoryRefreshResult(
-      status: DirectoryRefreshStatus.success,
-    );
+    return const DirectoryRefreshResult(status: DirectoryRefreshStatus.success);
   }
 
   @override
   Future<CanonicalDirectoryEntity?> loadByCanonicalId(String id) async => null;
 
   @override
-  Future<DirectoryLoadResult> load() async => const DirectoryLoadResult(
-        state: DirectoryLoadState.empty,
-      );
+  Future<DirectoryLoadResult> load() async =>
+      const DirectoryLoadResult(state: DirectoryLoadState.empty);
 }
 
 Widget _wrapEditor(BusinessProfileEditorProvider provider) {
   return ChangeNotifierProvider.value(
     value: provider,
-    child: MaterialApp(
-      home: BusinessProfileEditScreen(entityId: _entityId),
-    ),
+    child: MaterialApp(home: BusinessProfileEditScreen(entityId: _entityId)),
   );
 }
 
@@ -279,8 +276,7 @@ void main() {
 
     test('fail-closed on invalid verification_status', () {
       final json = _sampleProfileJson();
-      (json['entity'] as Map<String, dynamic>)['verification_status'] =
-          'celeb';
+      (json['entity'] as Map<String, dynamic>)['verification_status'] = 'celeb';
       expect(ManagedBusinessProfile.tryFromJson(json), isNull);
     });
 
@@ -366,7 +362,6 @@ void main() {
       expect(profile, isNotNull);
       expect(profile!.primaryLocation, isNull);
     });
-
   });
 
   group('V1-R06 draft and validator', () {
@@ -376,7 +371,10 @@ void main() {
       expect(draft.name, profile.name);
       expect(draft.description, profile.description);
       expect(draft.contacts.length, profile.contacts.length);
-      expect(draft.primaryLocation?.regionId, profile.primaryLocation?.regionId);
+      expect(
+        draft.primaryLocation?.regionId,
+        profile.primaryLocation?.regionId,
+      );
       expect(draft.categories.length, profile.categories.length);
     });
 
@@ -421,8 +419,9 @@ void main() {
     });
 
     test('rejects empty name', () {
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(name: '   ');
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(name: '   ');
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
       expect(
@@ -437,14 +436,17 @@ void main() {
     });
 
     test('rejects name too long', () {
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(name: 'A' * 161);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(name: 'A' * 161);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.name &&
-            i.code == BusinessProfileValidationIssueCode.tooLong),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.name &&
+              i.code == BusinessProfileValidationIssueCode.tooLong,
+        ),
         isTrue,
       );
     });
@@ -459,8 +461,9 @@ void main() {
           isPrimary: false,
         ),
       );
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(contacts: contacts);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(contacts: contacts);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
     });
@@ -480,14 +483,17 @@ void main() {
           isPrimary: false,
         ),
       ];
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(contacts: contacts);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(contacts: contacts);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.contacts &&
-            i.code == BusinessProfileValidationIssueCode.duplicate),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.contacts &&
+              i.code == BusinessProfileValidationIssueCode.duplicate,
+        ),
         isTrue,
       );
     });
@@ -501,8 +507,9 @@ void main() {
           isPrimary: false,
         ),
       ];
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(contacts: contacts);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(contacts: contacts);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
     });
@@ -522,14 +529,17 @@ void main() {
           isPrimary: true,
         ),
       ];
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(contacts: contacts);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(contacts: contacts);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.contacts &&
-            i.code == BusinessProfileValidationIssueCode.duplicatePrimary),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.contacts &&
+              i.code == BusinessProfileValidationIssueCode.duplicatePrimary,
+        ),
         isTrue,
       );
     });
@@ -538,13 +548,15 @@ void main() {
       final categories = List<ManagedBusinessCategory>.generate(
         11,
         (i) => ManagedBusinessCategory(
-          categoryId: '00000000-0000-0000-0000-${i.toString().padLeft(12, '0')}',
+          categoryId:
+              '00000000-0000-0000-0000-${i.toString().padLeft(12, '0')}',
           code: 'c$i',
           isPrimary: false,
         ),
       );
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(categories: categories);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(categories: categories);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
     });
@@ -562,14 +574,17 @@ void main() {
           isPrimary: false,
         ),
       ];
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(categories: categories);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(categories: categories);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.categories &&
-            i.code == BusinessProfileValidationIssueCode.duplicate),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.categories &&
+              i.code == BusinessProfileValidationIssueCode.duplicate,
+        ),
         isTrue,
       );
     });
@@ -588,14 +603,17 @@ void main() {
         ),
       ];
       final result = BusinessProfileValidator.validate(
-        draft: ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-            .copyWith(categories: categories),
+        draft: ManagedBusinessProfileDraft.fromProfile(
+          _sampleProfile(),
+        ).copyWith(categories: categories),
       );
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.categories &&
-            i.code == BusinessProfileValidationIssueCode.multiplePrimary),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.categories &&
+              i.code == BusinessProfileValidationIssueCode.multiplePrimary,
+        ),
         isTrue,
       );
     });
@@ -613,17 +631,20 @@ void main() {
           nameAr: 'معروف',
         ),
       ];
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(categories: [category]);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(categories: [category]);
       final result = BusinessProfileValidator.validate(
         draft: draft,
         selectableCategories: selectable,
       );
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.categories &&
-            i.code == BusinessProfileValidationIssueCode.invalidFormat),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.categories &&
+              i.code == BusinessProfileValidationIssueCode.invalidFormat,
+        ),
         isTrue,
       );
     });
@@ -634,14 +655,17 @@ void main() {
         latitude: 33.0,
         longitude: null,
       );
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(primaryLocation: () => location);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(primaryLocation: () => location);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.coordinates &&
-            i.code == BusinessProfileValidationIssueCode.incompletePair),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.coordinates &&
+              i.code == BusinessProfileValidationIssueCode.incompletePair,
+        ),
         isTrue,
       );
     });
@@ -652,14 +676,17 @@ void main() {
         latitude: 99.0,
         longitude: 190.0,
       );
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(primaryLocation: () => location);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(primaryLocation: () => location);
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.coordinates &&
-            i.code == BusinessProfileValidationIssueCode.outOfRange),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.coordinates &&
+              i.code == BusinessProfileValidationIssueCode.outOfRange,
+        ),
         isTrue,
       );
     });
@@ -676,17 +703,20 @@ void main() {
           nameAr: 'بغداد',
         ),
       ];
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(primaryLocation: () => location);
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(primaryLocation: () => location);
       final result = BusinessProfileValidator.validate(
         draft: draft,
         selectableRegions: selectable,
       );
       expect(result.isValid, isFalse);
       expect(
-        result.issues.any((i) =>
-            i.field == BusinessProfileValidationField.address &&
-            i.code == BusinessProfileValidationIssueCode.invalidFormat),
+        result.issues.any(
+          (i) =>
+              i.field == BusinessProfileValidationField.address &&
+              i.code == BusinessProfileValidationIssueCode.invalidFormat,
+        ),
         isTrue,
       );
     });
@@ -695,15 +725,15 @@ void main() {
       for (final url in ['https://', 'http://']) {
         final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
             .copyWith(
-          contacts: [
-            ManagedBusinessContact(
-              id: '',
-              type: BusinessContactType.website,
-              value: url,
-              isPrimary: false,
-            ),
-          ],
-        );
+              contacts: [
+                ManagedBusinessContact(
+                  id: '',
+                  type: BusinessContactType.website,
+                  value: url,
+                  isPrimary: false,
+                ),
+              ],
+            );
         final result = BusinessProfileValidator.validate(draft: draft);
         expect(result.isValid, isFalse, reason: url);
       }
@@ -712,15 +742,15 @@ void main() {
     test('rejects website containing whitespace', () {
       final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
           .copyWith(
-        contacts: [
-          ManagedBusinessContact(
-            id: '',
-            type: BusinessContactType.website,
-            value: 'https://example .com',
-            isPrimary: false,
-          ),
-        ],
-      );
+            contacts: [
+              ManagedBusinessContact(
+                id: '',
+                type: BusinessContactType.website,
+                value: 'https://example .com',
+                isPrimary: false,
+              ),
+            ],
+          );
       final result = BusinessProfileValidator.validate(draft: draft);
       expect(result.isValid, isFalse);
     });
@@ -733,15 +763,15 @@ void main() {
       ]) {
         final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
             .copyWith(
-          contacts: [
-            ManagedBusinessContact(
-              id: '',
-              type: BusinessContactType.website,
-              value: url,
-              isPrimary: false,
-            ),
-          ],
-        );
+              contacts: [
+                ManagedBusinessContact(
+                  id: '',
+                  type: BusinessContactType.website,
+                  value: url,
+                  isPrimary: false,
+                ),
+              ],
+            );
         final result = BusinessProfileValidator.validate(draft: draft);
         expect(result.isValid, isTrue, reason: url);
       }
@@ -790,8 +820,7 @@ void main() {
 
     test('unavailable backend surfaces unavailable state', () async {
       final provider = ManagedBusinessesProvider(
-        membershipGateway:
-            FakeBusinessMembershipGateway(available: false),
+        membershipGateway: FakeBusinessMembershipGateway(available: false),
         auth: await _authenticatedAuth(),
       );
       await provider.load();
@@ -848,7 +877,7 @@ void main() {
     test('server denial propagates typed cause', () async {
       final gateway = FakeBusinessMembershipGateway(
         listResult: const ManagedBusinessListDenied(
-          BusinessManagementReadCause.permissionDenied,
+          BusinessRemoteReadFailureKind.permissionDenied,
         ),
       );
       final provider = ManagedBusinessesProvider(
@@ -928,37 +957,41 @@ void main() {
       expect(provider.lastValidation?.isValid, isTrue);
     });
 
-    test('verification warning appears only for verified + sensitive change',
-        () async {
-      final gateway = FakeBusinessProfileManagementGateway(
-        readResult: ManagedProfileReadSuccess(_sampleProfile()),
-      );
-      final provider = BusinessProfileEditorProvider(
-        gateway: gateway,
-        directoryRepository: FakeCloudDirectoryRepository([]),
-        auth: await _authenticatedAuth(),
-      );
-      await provider.load(_entityId);
-      expect(provider.verificationResetWarningVisible, isFalse);
+    test(
+      'verification warning appears only for verified + sensitive change',
+      () async {
+        final gateway = FakeBusinessProfileManagementGateway(
+          readResult: ManagedProfileReadSuccess(_sampleProfile()),
+        );
+        final provider = BusinessProfileEditorProvider(
+          gateway: gateway,
+          directoryRepository: FakeCloudDirectoryRepository([]),
+          auth: await _authenticatedAuth(),
+        );
+        await provider.load(_entityId);
+        expect(provider.verificationResetWarningVisible, isFalse);
 
-      provider.setName('Changed Name');
-      expect(provider.verificationResetWarningVisible, isTrue);
-    });
+        provider.setName('Changed Name');
+        expect(provider.verificationResetWarningVisible, isTrue);
+      },
+    );
 
-    test('description-only change does not trigger verification warning',
-        () async {
-      final gateway = FakeBusinessProfileManagementGateway(
-        readResult: ManagedProfileReadSuccess(_sampleProfile()),
-      );
-      final provider = BusinessProfileEditorProvider(
-        gateway: gateway,
-        directoryRepository: FakeCloudDirectoryRepository([]),
-        auth: await _authenticatedAuth(),
-      );
-      await provider.load(_entityId);
-      provider.setDescription('Updated description');
-      expect(provider.verificationResetWarningVisible, isFalse);
-    });
+    test(
+      'description-only change does not trigger verification warning',
+      () async {
+        final gateway = FakeBusinessProfileManagementGateway(
+          readResult: ManagedProfileReadSuccess(_sampleProfile()),
+        );
+        final provider = BusinessProfileEditorProvider(
+          gateway: gateway,
+          directoryRepository: FakeCloudDirectoryRepository([]),
+          auth: await _authenticatedAuth(),
+        );
+        await provider.load(_entityId);
+        provider.setDescription('Updated description');
+        expect(provider.verificationResetWarningVisible, isFalse);
+      },
+    );
 
     test('save sends expected updated_at and payload shape', () async {
       final gateway = FakeBusinessProfileManagementGateway(
@@ -985,22 +1018,24 @@ void main() {
       expect(provider.state, BusinessProfileEditorState.saveSuccess);
     });
 
-    test('save with invalid payload is blocked client-side and does not call gateway',
-        () async {
-      final gateway = FakeBusinessProfileManagementGateway(
-        readResult: ManagedProfileReadSuccess(_sampleProfile()),
-      );
-      final provider = BusinessProfileEditorProvider(
-        gateway: gateway,
-        directoryRepository: FakeCloudDirectoryRepository([]),
-        auth: await _authenticatedAuth(),
-      );
-      await provider.load(_entityId);
-      provider.setName('');
-      final ok = await provider.save();
-      expect(ok, isFalse);
-      expect(gateway.updateCalls, 0);
-    });
+    test(
+      'save with invalid payload is blocked client-side and does not call gateway',
+      () async {
+        final gateway = FakeBusinessProfileManagementGateway(
+          readResult: ManagedProfileReadSuccess(_sampleProfile()),
+        );
+        final provider = BusinessProfileEditorProvider(
+          gateway: gateway,
+          directoryRepository: FakeCloudDirectoryRepository([]),
+          auth: await _authenticatedAuth(),
+        );
+        await provider.load(_entityId);
+        provider.setName('');
+        final ok = await provider.save();
+        expect(ok, isFalse);
+        expect(gateway.updateCalls, 0);
+      },
+    );
 
     test('P0CON conflict preserves draft and exposes reload action', () async {
       final gateway = FakeBusinessProfileManagementGateway(
@@ -1050,9 +1085,7 @@ void main() {
       );
       // Throwing taxonomy reads is simulated by making the future throw.
       // The fake returns normally, so override the methods via a subclass.
-      final throwingGateway = _ThrowingTaxonomyGateway(
-        base: gateway,
-      );
+      final throwingGateway = _ThrowingTaxonomyGateway(base: gateway);
       final provider = BusinessProfileEditorProvider(
         gateway: throwingGateway,
         directoryRepository: FakeCloudDirectoryRepository([]),
@@ -1102,7 +1135,9 @@ void main() {
   group('V1-R06 localization and messages', () {
     test('message resolver maps every management cause to Arabic text', () {
       for (final cause in BusinessProfileManagementCause.values) {
-        final message = BusinessProfileManagementMessages.messageForCause(cause);
+        final message = BusinessProfileManagementMessages.messageForCause(
+          cause,
+        );
         expect(message.isNotEmpty, isTrue);
       }
     });
@@ -1141,8 +1176,9 @@ void main() {
       );
     });
 
-    testWidgets('router resolves /business/manage to ManagedBusinessesScreen',
-        (tester) async {
+    testWidgets('router resolves /business/manage to ManagedBusinessesScreen', (
+      tester,
+    ) async {
       final guestAuth = AuthProvider(
         gateway: FakeAuthGateway(),
         onPostAuth: (_) async => PostAuthOutcome.success,
@@ -1173,44 +1209,46 @@ void main() {
       expect(find.byType(ManagedBusinessesScreen), findsOneWidget);
     });
 
-    testWidgets('router resolves /business/manage/:id to BusinessProfileEditScreen',
-        (tester) async {
-      final guestAuth = AuthProvider(
-        gateway: FakeAuthGateway(),
-        onPostAuth: (_) async => PostAuthOutcome.success,
-      );
-      final router = GoRouter(
-        initialLocation: AppRoutes.businessManageDetailFor(_entityId),
-        routes: [
-          GoRoute(
-            path: AppRoutes.businessManage,
-            builder: (_, __) => const ManagedBusinessesScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.businessManageDetailPattern,
-            builder: (_, state) => BusinessProfileEditScreen(
-              entityId: state.pathParameters['entityId'] ?? '',
+    testWidgets(
+      'router resolves /business/manage/:id to BusinessProfileEditScreen',
+      (tester) async {
+        final guestAuth = AuthProvider(
+          gateway: FakeAuthGateway(),
+          onPostAuth: (_) async => PostAuthOutcome.success,
+        );
+        final router = GoRouter(
+          initialLocation: AppRoutes.businessManageDetailFor(_entityId),
+          routes: [
+            GoRoute(
+              path: AppRoutes.businessManage,
+              builder: (_, __) => const ManagedBusinessesScreen(),
             ),
-          ),
-        ],
-      );
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (_) => BusinessProfileEditorProvider(
-                gateway: FakeBusinessProfileManagementGateway(),
-                directoryRepository: FakeCloudDirectoryRepository([]),
-                auth: guestAuth,
+            GoRoute(
+              path: AppRoutes.businessManageDetailPattern,
+              builder: (_, state) => BusinessProfileEditScreen(
+                entityId: state.pathParameters['entityId'] ?? '',
               ),
             ),
           ],
-          child: MaterialApp.router(routerConfig: router),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(BusinessProfileEditScreen), findsOneWidget);
-    });
+        );
+        await tester.pumpWidget(
+          MultiProvider(
+            providers: [
+              ChangeNotifierProvider(
+                create: (_) => BusinessProfileEditorProvider(
+                  gateway: FakeBusinessProfileManagementGateway(),
+                  directoryRepository: FakeCloudDirectoryRepository([]),
+                  auth: guestAuth,
+                ),
+              ),
+            ],
+            child: MaterialApp.router(routerConfig: router),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(BusinessProfileEditScreen), findsOneWidget);
+      },
+    );
   });
 
   group('V1-R06 production gateway behavioral coverage', () {
@@ -1242,37 +1280,44 @@ void main() {
       expect(result, isA<ManagedProfileReadSuccess>());
       final profile = (result as ManagedProfileReadSuccess).profile;
       expect(profile.id, _entityId);
-      expect(httpClient.requests.any((r) =>
-          r.url.path.endsWith('get_managed_business_profile')), isTrue);
-    });
-
-    test('readManagedProfile denies unexpected on malformed projection', () async {
-      final malformed = _sampleProfileJson()..remove('categories');
-      final httpClient = _RecordingHttpClient(
-        onRequest: (request) async {
-          if (request.url.path.endsWith('get_managed_business_profile')) {
-            return _jsonResponse(malformed);
-          }
-          return _jsonResponse({});
-        },
-      );
-      final supabase = SupabaseClient(
-        'http://localhost:54321',
-        'anon',
-        httpClient: httpClient,
-      );
-      final gateway = SupabaseBusinessProfileManagementGateway(
-        service: _FakeInitializedService(),
-        client: supabase,
-      );
-
-      final result = await gateway.readManagedProfile(_entityId);
-      expect(result, isA<ManagedProfileReadDenied>());
       expect(
-        (result as ManagedProfileReadDenied).cause,
-        BusinessProfileManagementCause.unexpected,
+        httpClient.requests.any(
+          (r) => r.url.path.endsWith('get_managed_business_profile'),
+        ),
+        isTrue,
       );
     });
+
+    test(
+      'readManagedProfile denies unexpected on malformed projection',
+      () async {
+        final malformed = _sampleProfileJson()..remove('categories');
+        final httpClient = _RecordingHttpClient(
+          onRequest: (request) async {
+            if (request.url.path.endsWith('get_managed_business_profile')) {
+              return _jsonResponse(malformed);
+            }
+            return _jsonResponse({});
+          },
+        );
+        final supabase = SupabaseClient(
+          'http://localhost:54321',
+          'anon',
+          httpClient: httpClient,
+        );
+        final gateway = SupabaseBusinessProfileManagementGateway(
+          service: _FakeInitializedService(),
+          client: supabase,
+        );
+
+        final result = await gateway.readManagedProfile(_entityId);
+        expect(result, isA<ManagedProfileReadFailed>());
+        expect(
+          (result as ManagedProfileReadFailed).cause,
+          BusinessRemoteReadFailureKind.malformedResponse,
+        );
+      },
+    );
 
     test('updateManagedProfile sends allowed fields only', () async {
       late Map<String, dynamic> capturedBody;
@@ -1297,8 +1342,9 @@ void main() {
         service: _FakeInitializedService(),
         client: supabase,
       );
-      final draft = ManagedBusinessProfileDraft.fromProfile(_sampleProfile())
-          .copyWith(name: 'Updated Co');
+      final draft = ManagedBusinessProfileDraft.fromProfile(
+        _sampleProfile(),
+      ).copyWith(name: 'Updated Co');
 
       final result = await gateway.updateManagedProfile(
         entityId: _entityId,
@@ -1316,10 +1362,7 @@ void main() {
         'p_categories',
       });
       expect(capturedBody['p_entity_id'], _entityId);
-      expect(
-        capturedBody['p_expected_updated_at'],
-        '2024-01-02T00:00:00.000Z',
-      );
+      expect(capturedBody['p_expected_updated_at'], '2024-01-02T00:00:00.000Z');
       expect(capturedBody['p_name'], 'Updated Co');
       expect(capturedBody['p_description'], 'A sample business');
       expect(capturedBody['p_contacts'], isList);
@@ -1336,50 +1379,56 @@ void main() {
       'P0CON': BusinessProfileManagementCause.conflict,
     };
     for (final entry in realPathErrorCases.entries) {
-      test('real gateway maps server ${entry.key} to ${entry.value.name}',
-          () async {
-        final useReadRpc = entry.key == 'P0AUT' || entry.key == 'P0NOT';
-        final httpClient = _RecordingHttpClient(
-          onRequest: (request) async {
-            final expectedRpc = useReadRpc
-                ? 'get_managed_business_profile'
-                : 'update_managed_business_profile';
-            if (request.url.path.endsWith(expectedRpc)) {
-              return _jsonResponse(
-                {
+      test(
+        'real gateway maps server ${entry.key} to ${entry.value.name}',
+        () async {
+          final useReadRpc = entry.key == 'P0AUT' || entry.key == 'P0NOT';
+          final httpClient = _RecordingHttpClient(
+            onRequest: (request) async {
+              final expectedRpc = useReadRpc
+                  ? 'get_managed_business_profile'
+                  : 'update_managed_business_profile';
+              if (request.url.path.endsWith(expectedRpc)) {
+                return _jsonResponse({
                   'message': 'typed server rejection',
                   'code': entry.key,
-                },
-                statusCode: 400,
+                }, statusCode: 400);
+              }
+              return _jsonResponse({});
+            },
+          );
+          final supabase = SupabaseClient(
+            'http://localhost:54321',
+            'anon',
+            httpClient: httpClient,
+          );
+          final gateway = SupabaseBusinessProfileManagementGateway(
+            service: _FakeInitializedService(),
+            client: supabase,
+          );
+
+          if (useReadRpc) {
+            final result = await gateway.readManagedProfile(_entityId);
+            if (entry.key == 'P0NOT') {
+              expect(result, isA<ManagedProfileReadNotFound>());
+            } else {
+              expect(result, isA<ManagedProfileReadFailed>());
+              expect(
+                (result as ManagedProfileReadFailed).cause,
+                BusinessRemoteReadFailureKind.authRestricted,
               );
             }
-            return _jsonResponse({});
-          },
-        );
-        final supabase = SupabaseClient(
-          'http://localhost:54321',
-          'anon',
-          httpClient: httpClient,
-        );
-        final gateway = SupabaseBusinessProfileManagementGateway(
-          service: _FakeInitializedService(),
-          client: supabase,
-        );
-
-        if (useReadRpc) {
-          final result = await gateway.readManagedProfile(_entityId);
-          expect(result, isA<ManagedProfileReadDenied>());
-          expect((result as ManagedProfileReadDenied).cause, entry.value);
-        } else {
-          final result = await gateway.updateManagedProfile(
-            entityId: _entityId,
-            expectedUpdatedAt: _sampleProfile().updatedAt,
-            draft: ManagedBusinessProfileDraft.fromProfile(_sampleProfile()),
-          );
-          expect(result, isA<ManagedProfileUpdateDenied>());
-          expect((result as ManagedProfileUpdateDenied).cause, entry.value);
-        }
-      });
+          } else {
+            final result = await gateway.updateManagedProfile(
+              entityId: _entityId,
+              expectedUpdatedAt: _sampleProfile().updatedAt,
+              draft: ManagedBusinessProfileDraft.fromProfile(_sampleProfile()),
+            );
+            expect(result, isA<ManagedProfileUpdateDenied>());
+            expect((result as ManagedProfileUpdateDenied).cause, entry.value);
+          }
+        },
+      );
     }
 
     test('returns unavailable when service is not initialized', () async {
@@ -1393,7 +1442,11 @@ void main() {
         ),
       );
       final read = await gateway.readManagedProfile(_entityId);
-      expect(read, isA<ManagedProfileReadUnavailable>());
+      expect(read, isA<ManagedProfileReadFailed>());
+      expect(
+        (read as ManagedProfileReadFailed).cause,
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
       final update = await gateway.updateManagedProfile(
         entityId: _entityId,
         expectedUpdatedAt: DateTime.utc(2024),
@@ -1408,8 +1461,9 @@ void main() {
   });
 
   group('V1-R06 editor widget tests', () {
-    testWidgets('diagnostic: editor loads data and shows fields',
-        (tester) async {
+    testWidgets('diagnostic: editor loads data and shows fields', (
+      tester,
+    ) async {
       final gateway = FakeBusinessProfileManagementGateway(
         readResult: ManagedProfileReadSuccess(_sampleProfile()),
       );
@@ -1438,14 +1492,18 @@ void main() {
       await _pumpEditor(tester, provider);
 
       const address = 'Al Mansour Street, Baghdad';
-      final addressFinder = find.byKey(const Key('businessProfileAddressField'));
+      final addressFinder = find.byKey(
+        const Key('businessProfileAddressField'),
+      );
       await tester.enterText(addressFinder, address);
       await tester.pump();
       final field = tester.widget<TextField>(addressFinder);
       expect(field.controller!.text, address);
     });
 
-    testWidgets('typing negative latitude keeps the minus sign', (tester) async {
+    testWidgets('typing negative latitude keeps the minus sign', (
+      tester,
+    ) async {
       final gateway = FakeBusinessProfileManagementGateway(
         readResult: ManagedProfileReadSuccess(_sampleProfile()),
       );
@@ -1468,8 +1526,9 @@ void main() {
       expect(field.controller!.text, '-33.5');
     });
 
-    testWidgets('unsaved PopScope guard supports stay then discard and leave',
-        (tester) async {
+    testWidgets('unsaved PopScope guard supports stay then discard and leave', (
+      tester,
+    ) async {
       final gateway = FakeBusinessProfileManagementGateway(
         readResult: ManagedProfileReadSuccess(_sampleProfile()),
       );
@@ -1490,9 +1549,8 @@ void main() {
                   key: const Key('openBusinessProfileEditor'),
                   onPressed: () => Navigator.of(context).push(
                     MaterialPageRoute<void>(
-                      builder: (_) => const BusinessProfileEditScreen(
-                        entityId: _entityId,
-                      ),
+                      builder: (_) =>
+                          const BusinessProfileEditScreen(entityId: _entityId),
                     ),
                   ),
                   child: const Text('Open editor'),
@@ -1528,7 +1586,10 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(BusinessProfileEditScreen), findsNothing);
-      expect(find.byKey(const Key('openBusinessProfileEditor')), findsOneWidget);
+      expect(
+        find.byKey(const Key('openBusinessProfileEditor')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('successful save clears dirty state', (tester) async {
@@ -1599,10 +1660,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(
-        provider.lastErrorCause,
-        BusinessProfileManagementCause.conflict,
-      );
+      expect(provider.lastErrorCause, BusinessProfileManagementCause.conflict);
       expect(provider.draft?.name, 'My New Name');
       expect(find.text(Ar.businessProfileConflictMessage), findsOneWidget);
 
@@ -1626,8 +1684,9 @@ void main() {
       expect(find.text(Ar.businessProfileConflictMessage), findsNothing);
     });
 
-    testWidgets('refresh warning banner appears and retry clears it',
-        (tester) async {
+    testWidgets('refresh warning banner appears and retry clears it', (
+      tester,
+    ) async {
       final savedProfile = _sampleProfile(updatedAt: DateTime.utc(2024, 1, 3));
       final gateway = FakeBusinessProfileManagementGateway(
         readResult: ManagedProfileReadSuccess(_sampleProfile()),
@@ -1672,7 +1731,9 @@ void main() {
       expect(gateway.updateCalls, 1);
     });
 
-    testWidgets('primary contact toggle updates provider state', (tester) async {
+    testWidgets('primary contact toggle updates provider state', (
+      tester,
+    ) async {
       final gateway = FakeBusinessProfileManagementGateway(
         readResult: ManagedProfileReadSuccess(
           _sampleProfile().copyWith(
@@ -1713,8 +1774,9 @@ void main() {
       expect(provider.draft?.contacts[1].isPrimary, isTrue);
     });
 
-    testWidgets('preview is enabled only for active public profiles',
-        (tester) async {
+    testWidgets('preview is enabled only for active public profiles', (
+      tester,
+    ) async {
       final publicProfile = _sampleProfile(
         verification: VerificationStatus.verified,
         lifecycleStatus: 'active',
@@ -1832,56 +1894,67 @@ void main() {
       completer.complete(ManagedBusinessListAvailable([summaryForA]));
       await staleLoad;
 
-      expect(provider.items, isEmpty,
-          reason: 'old-session managed businesses must never publish');
-      expect(provider.state, ManagedBusinessesState.loading,
-          reason: 'a stale result must not publish data/empty/error');
+      expect(
+        provider.items,
+        isEmpty,
+        reason: 'old-session managed businesses must never publish',
+      );
+      expect(
+        provider.state,
+        ManagedBusinessesState.loading,
+        reason: 'a stale result must not publish data/empty/error',
+      );
     });
 
-    test('D. a re-load after reset publishes only the new-session result',
-        () async {
-      final completers = <Completer<ManagedBusinessListResult>>[];
-      final gateway = FakeBusinessMembershipGateway()
-        ..onListMyBusinesses = () {
-          final completer = Completer<ManagedBusinessListResult>();
-          completers.add(completer);
-          return completer.future;
-        };
-      final provider = ManagedBusinessesProvider(
-        membershipGateway: gateway,
-        auth: await _authenticatedAuth(),
-      );
+    test(
+      'D. a re-load after reset publishes only the new-session result',
+      () async {
+        final completers = <Completer<ManagedBusinessListResult>>[];
+        final gateway = FakeBusinessMembershipGateway()
+          ..onListMyBusinesses = () {
+            final completer = Completer<ManagedBusinessListResult>();
+            completers.add(completer);
+            return completer.future;
+          };
+        final provider = ManagedBusinessesProvider(
+          membershipGateway: gateway,
+          auth: await _authenticatedAuth(),
+        );
 
-      final staleLoad = provider.load();
-      provider.reset();
-      final freshLoad = provider.load();
-      expect(completers, hasLength(2));
+        final staleLoad = provider.load();
+        provider.reset();
+        final freshLoad = provider.load();
+        expect(completers, hasLength(2));
 
-      final summaryForB = ManagedBusinessSummary(
-        entityId: _entityId,
-        name: 'B-owned Co',
-        entityType: 'company',
-        membershipRole: BusinessRole.owner,
-        claimStatus: 'claimed',
-        verificationStatus: 'verified',
-      );
-      completers[1].complete(ManagedBusinessListAvailable([summaryForB]));
-      await freshLoad;
-      expect(provider.items.single.summary.name, 'B-owned Co');
+        final summaryForB = ManagedBusinessSummary(
+          entityId: _entityId,
+          name: 'B-owned Co',
+          entityType: 'company',
+          membershipRole: BusinessRole.owner,
+          claimStatus: 'claimed',
+          verificationStatus: 'verified',
+        );
+        completers[1].complete(ManagedBusinessListAvailable([summaryForB]));
+        await freshLoad;
+        expect(provider.items.single.summary.name, 'B-owned Co');
 
-      final summaryForA = ManagedBusinessSummary(
-        entityId: _entityId,
-        name: 'A-owned Co',
-        entityType: 'company',
-        membershipRole: BusinessRole.owner,
-        claimStatus: 'claimed',
-        verificationStatus: 'verified',
-      );
-      completers[0].complete(ManagedBusinessListAvailable([summaryForA]));
-      await staleLoad;
-      expect(provider.items.single.summary.name, 'B-owned Co',
-          reason: 'A stale result must never replace B session data');
-    });
+        final summaryForA = ManagedBusinessSummary(
+          entityId: _entityId,
+          name: 'A-owned Co',
+          entityType: 'company',
+          membershipRole: BusinessRole.owner,
+          claimStatus: 'claimed',
+          verificationStatus: 'verified',
+        );
+        completers[0].complete(ManagedBusinessListAvailable([summaryForA]));
+        await staleLoad;
+        expect(
+          provider.items.single.summary.name,
+          'B-owned Co',
+          reason: 'A stale result must never replace B session data',
+        );
+      },
+    );
 
     test('A. a stale editor load after reset is dropped', () async {
       final completer = Completer<ManagedProfileReadResult>();
@@ -1922,11 +1995,17 @@ void main() {
       provider.reset();
 
       completer.complete(ManagedProfileUpdateSuccess(_sampleProfile()));
-      expect(await staleSave, isFalse,
-          reason: 'epoch-mismatched save is dropped');
+      expect(
+        await staleSave,
+        isFalse,
+        reason: 'epoch-mismatched save is dropped',
+      );
       expect(gateway.updateCalls, 1);
-      expect(provider.profile, isNull,
-          reason: 'a stale save must never install the new projection');
+      expect(
+        provider.profile,
+        isNull,
+        reason: 'a stale save must never install the new projection',
+      );
       expect(provider.state, BusinessProfileEditorState.initial);
     });
   });
@@ -1934,8 +2013,7 @@ void main() {
 
 /// Fake gateway whose taxonomy reads throw, used to verify the editor keeps
 /// the editable profile available even when selectors fail.
-class _ThrowingTaxonomyGateway
-    implements BusinessProfileManagementGateway {
+class _ThrowingTaxonomyGateway implements BusinessProfileManagementGateway {
   _ThrowingTaxonomyGateway({required this.base});
 
   final FakeBusinessProfileManagementGateway base;

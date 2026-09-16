@@ -15,6 +15,7 @@ import 'package:civilpedia/features/business/domain/business_application_status.
 import 'package:civilpedia/features/business/domain/business_application_type.dart';
 import 'package:civilpedia/features/business/domain/business_claim_target.dart';
 import 'package:civilpedia/features/business/domain/business_claim_target_gateway.dart';
+import 'package:civilpedia/features/business/domain/business_remote_read.dart';
 import 'package:civilpedia/features/business/domain/directory_entity_types.dart';
 import 'package:civilpedia/features/business/presentation/providers/business_application_provider.dart';
 import 'package:civilpedia/features/business/presentation/providers/business_claim_target_provider.dart';
@@ -70,11 +71,11 @@ class _FakeAppGateway implements BusinessApplicationGateway {
 
   Future<BusinessApplicationCreateResult> Function()? onCreateNewDraft;
   Future<BusinessApplicationCreateResult> Function(String targetId)?
-      onCreateClaimDraft;
+  onCreateClaimDraft;
   Future<BusinessApplicationSubmitResult> Function(BusinessApplication)?
-      onSubmitApplication;
+  onSubmitApplication;
   Future<BusinessApplicationSubmitResult> Function(BusinessApplication)?
-      onResubmitApplication;
+  onResubmitApplication;
 
   @override
   Future<List<BusinessApplication>> listOwnApplications(String userId) async {
@@ -219,26 +220,34 @@ BusinessApplication _app({
   BusinessApplicationStatus status = BusinessApplicationStatus.draft,
   String? targetEntityId,
   Map<String, dynamic>? metadata,
-}) =>
-    BusinessApplication(
-      id: id,
-      applicantUserId: applicantUserId ?? _userId,
-      type: type,
-      status: status,
-      targetEntityId: targetEntityId,
-      metadata: metadata,
-    );
+}) => BusinessApplication(
+  id: id,
+  applicantUserId: applicantUserId ?? _userId,
+  type: type,
+  status: status,
+  targetEntityId: targetEntityId,
+  metadata: metadata,
+);
 
 /// An authenticated [AuthProvider] backed by the deterministic fake gateway.
-AuthProvider _authenticatedAuth() => AuthProvider(
-      gateway: FakeAuthGateway(signInResult: _testSession),
-    );
+AuthProvider _authenticatedAuth() =>
+    AuthProvider(gateway: FakeAuthGateway(signInResult: _testSession));
 
 /// Creates an authenticated [BusinessApplicationProvider].
-Future<BusinessApplicationProvider> _makeProvider(_FakeAppGateway gateway) async {
+Future<BusinessApplicationProvider> _makeProvider(
+  _FakeAppGateway gateway,
+) async {
   final auth = _authenticatedAuth();
   await auth.signInWithGoogle();
   return BusinessApplicationProvider(gateway: gateway, auth: auth);
+}
+
+Future<BusinessClaimTargetProvider> _makeClaimProvider(
+  BusinessClaimTargetGateway gateway,
+) async {
+  final auth = _authenticatedAuth();
+  await auth.signInWithGoogle();
+  return BusinessClaimTargetProvider(gateway: gateway, auth: auth);
 }
 
 Widget _wrapWithProviders(BusinessApplicationProvider business, Widget home) {
@@ -288,16 +297,18 @@ void main() {
   // A. Status presentation + chip (canonical, reusable)
   // =========================================================================
   group('A. Status presentation', () {
-    test('1. label for every one of the nine canonical statuses is non-empty',
-        () {
-      for (final status in BusinessApplicationStatus.values) {
-        final label = BusinessApplicationStatusPresentation.labelFor(
-          status,
-          isArabic: true,
-        );
-        expect(label, isNotEmpty, reason: 'Missing label for ${status.name}');
-      }
-    });
+    test(
+      '1. label for every one of the nine canonical statuses is non-empty',
+      () {
+        for (final status in BusinessApplicationStatus.values) {
+          final label = BusinessApplicationStatusPresentation.labelFor(
+            status,
+            isArabic: true,
+          );
+          expect(label, isNotEmpty, reason: 'Missing label for ${status.name}');
+        }
+      },
+    );
 
     test('2. every canonical status has a semantic icon and accent', () {
       for (final status in BusinessApplicationStatus.values) {
@@ -330,15 +341,22 @@ void main() {
       expect(
         known.map((s) => s.code).toSet(),
         equals({
-          'DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'NEEDS_CORRECTION',
-          'CONTACTED', 'VISIT_SCHEDULED', 'APPROVED', 'REJECTED',
+          'DRAFT',
+          'SUBMITTED',
+          'UNDER_REVIEW',
+          'NEEDS_CORRECTION',
+          'CONTACTED',
+          'VISIT_SCHEDULED',
+          'APPROVED',
+          'REJECTED',
           'ACTIVATED',
         }),
       );
     });
 
-    testWidgets('5. status chip renders icon + Arabic label for DRAFT',
-        (tester) async {
+    testWidgets('5. status chip renders icon + Arabic label for DRAFT', (
+      tester,
+    ) async {
       await tester.pumpWidget(_chipApp());
       await tester.pumpAndSettle();
       expect(find.text(Ar.businessStatusDraft), findsOneWidget);
@@ -356,8 +374,15 @@ void main() {
 
     test('7. values match the migration 00005 CHECK set exactly', () {
       const expected = <String>{
-        'company', 'engineering_office', 'contractor', 'supplier', 'store',
-        'technician', 'laboratory', 'equipment_provider', 'service_provider',
+        'company',
+        'engineering_office',
+        'contractor',
+        'supplier',
+        'store',
+        'technician',
+        'laboratory',
+        'equipment_provider',
+        'service_provider',
       };
       expect(DirectoryEntityType.all.toSet(), equals(expected));
       expect(DirectoryEntityType.all.length, expected.length);
@@ -396,7 +421,9 @@ void main() {
     test('10. claim_status pending/claimed → not unclaimed', () {
       for (final status in ['pending', 'claimed']) {
         final target = BusinessClaimTarget.tryFromRow({
-          'id': 'id', 'name': 'X', 'entity_type': 'company',
+          'id': 'id',
+          'name': 'X',
+          'entity_type': 'company',
           'claim_status': status,
         })!;
         expect(target.isUnclaimed, isFalse, reason: 'Status: $status');
@@ -405,7 +432,9 @@ void main() {
 
     test('11. unknown claim_status → not claimable (fail safe)', () {
       final target = BusinessClaimTarget.tryFromRow({
-        'id': 'id', 'name': 'X', 'entity_type': 'company',
+        'id': 'id',
+        'name': 'X',
+        'entity_type': 'company',
         'claim_status': 'unknown_state',
       })!;
       expect(target.isUnclaimed, isFalse);
@@ -415,13 +444,15 @@ void main() {
       expect(BusinessClaimTarget.tryFromRow({'id': 'x'}), isNull);
       expect(
         BusinessClaimTarget.tryFromRow({
-          'id': 'a', 'name': 'X', 'entity_type': 'company',
+          'id': 'a',
+          'name': 'X',
+          'entity_type': 'company',
         }),
         isNull,
       );
     });
 
-    test('12b. claim target provider keeps only unclaimed targets', () async {
+    test('12b. contradictory claim target fails complete response', () async {
       final gateway = _FakeClaimTargetGateway(
         targetsResult: const [
           BusinessClaimTarget(
@@ -438,20 +469,25 @@ void main() {
           ),
         ],
       );
-      final provider = BusinessClaimTargetProvider(gateway: gateway);
+      final provider = await _makeClaimProvider(gateway);
       await provider.reload();
-      expect(provider.state, BusinessClaimTargetState.data);
-      expect(provider.targets.length, 1);
-      expect(provider.targets.first.id,
-          '30000000-0000-0000-0000-000000000001');
+      expect(provider.state, BusinessClaimTargetState.error);
+      expect(provider.targets, isEmpty);
+      expect(
+        provider.readFailure,
+        BusinessRemoteReadFailureKind.malformedResponse,
+      );
     });
 
-    test('12c. claim target provider maps zero targets to empty state', () async {
-      final gateway = _FakeClaimTargetGateway(targetsResult: const []);
-      final provider = BusinessClaimTargetProvider(gateway: gateway);
-      await provider.reload();
-      expect(provider.state, BusinessClaimTargetState.empty);
-    });
+    test(
+      '12c. claim target provider maps zero targets to empty state',
+      () async {
+        final gateway = _FakeClaimTargetGateway(targetsResult: const []);
+        final provider = await _makeClaimProvider(gateway);
+        await provider.reload();
+        expect(provider.state, BusinessClaimTargetState.empty);
+      },
+    );
   });
 
   // =========================================================================
@@ -471,8 +507,9 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('13. blank name is rejected and no draft is created',
-        (tester) async {
+    testWidgets('13. blank name is rejected and no draft is created', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway();
       final provider = await _makeProvider(gateway);
       await pumpForm(tester, provider);
@@ -496,8 +533,9 @@ void main() {
       expect(gateway.createNewDraftCalls, isEmpty);
     });
 
-    testWidgets('15. dropdown offers every canonical entity type',
-        (tester) async {
+    testWidgets('15. dropdown offers every canonical entity type', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway();
       final provider = await _makeProvider(gateway);
       await pumpForm(tester, provider);
@@ -510,8 +548,9 @@ void main() {
       }
     });
 
-    testWidgets('16. valid input produces the exact canonical metadata keys',
-        (tester) async {
+    testWidgets('16. valid input produces the exact canonical metadata keys', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway();
       final provider = await _makeProvider(gateway);
       await pumpForm(tester, provider);
@@ -528,7 +567,10 @@ void main() {
       expect(gateway.createNewDraftCalls.length, 1);
       final metadata = gateway.createNewDraftCalls.single!;
       expect(metadata.containsKey(BusinessApplicationMetadata.name), isTrue);
-      expect(metadata.containsKey(BusinessApplicationMetadata.entityType), isTrue);
+      expect(
+        metadata.containsKey(BusinessApplicationMetadata.entityType),
+        isTrue,
+      );
       expect(metadata[BusinessApplicationMetadata.name], 'Test Office');
       expect(
         metadata[BusinessApplicationMetadata.entityType],
@@ -540,14 +582,18 @@ void main() {
       final gateway = _FakeAppGateway();
       final provider = await _makeProvider(gateway);
 
-      final result = await provider.createNewDraft(metadata: {
-        BusinessApplicationMetadata.name: 'Test',
-        BusinessApplicationMetadata.entityType: 'company',
-      });
+      final result = await provider.createNewDraft(
+        metadata: {
+          BusinessApplicationMetadata.name: 'Test',
+          BusinessApplicationMetadata.entityType: 'company',
+        },
+      );
 
       expect(result, isA<BusinessApplicationCreated>());
-      expect((result as BusinessApplicationCreated).application.status,
-          BusinessApplicationStatus.draft);
+      expect(
+        (result as BusinessApplicationCreated).application.status,
+        BusinessApplicationStatus.draft,
+      );
       expect(gateway.submitCalls, 0);
       expect(gateway.resubmitCalls, 0);
     });
@@ -557,19 +603,25 @@ void main() {
   // E. CLAIM form boundary
   // =========================================================================
   group('E. CLAIM form state', () {
-    test('18. createClaimDraft receives the canonical directory target id',
-        () async {
-      final gateway = _FakeAppGateway();
-      final provider = await _makeProvider(gateway);
+    test(
+      '18. createClaimDraft receives the canonical directory target id',
+      () async {
+        final gateway = _FakeAppGateway();
+        final provider = await _makeProvider(gateway);
 
-      const targetId = '30000000-0000-0000-0000-000000000001';
-      final result = await provider.createClaimDraft(targetEntityId: targetId);
+        const targetId = '30000000-0000-0000-0000-000000000001';
+        final result = await provider.createClaimDraft(
+          targetEntityId: targetId,
+        );
 
-      expect(result, isA<BusinessApplicationCreated>());
-      expect(gateway.createClaimDraftCalls, [targetId]);
-      expect((result as BusinessApplicationCreated).application.targetEntityId,
-          targetId);
-    });
+        expect(result, isA<BusinessApplicationCreated>());
+        expect(gateway.createClaimDraftCalls, [targetId]);
+        expect(
+          (result as BusinessApplicationCreated).application.targetEntityId,
+          targetId,
+        );
+      },
+    );
 
     testWidgets('19. real CLAIM screen forwards exactly the selected canonical'
         ' target id through the widget interaction', (tester) async {
@@ -588,10 +640,8 @@ void main() {
 
       final gateway = _FakeAppGateway();
       final provider = await _makeProvider(gateway);
-      final claimProvider = BusinessClaimTargetProvider(
-        gateway: _FakeClaimTargetGateway(
-          targetsResult: const [targetA, targetB],
-        ),
+      final claimProvider = await _makeClaimProvider(
+        _FakeClaimTargetGateway(targetsResult: const [targetA, targetB]),
       );
 
       await tester.pumpWidget(
@@ -667,19 +717,21 @@ void main() {
   // F. Provider list/detail semantics
   // =========================================================================
   group('F. BusinessApplicationProvider list/detail', () {
-    test('21. list maps to signInRequired when no authenticated session',
-        () async {
-      final gateway = _FakeAppGateway();
-      final auth = AuthProvider(); // guest
-      final provider = BusinessApplicationProvider(
-        gateway: gateway,
-        auth: auth,
-      );
+    test(
+      '21. list maps to signInRequired when no authenticated session',
+      () async {
+        final gateway = _FakeAppGateway();
+        final auth = AuthProvider(); // guest
+        final provider = BusinessApplicationProvider(
+          gateway: gateway,
+          auth: auth,
+        );
 
-      await provider.loadApplications();
-      expect(provider.state, BusinessApplicationState.signInRequired);
-      expect(provider.applications, isEmpty);
-    });
+        await provider.loadApplications();
+        expect(provider.state, BusinessApplicationState.signInRequired);
+        expect(provider.applications, isEmpty);
+      },
+    );
 
     test('22. empty own list maps to empty state', () async {
       final gateway = _FakeAppGateway();
@@ -727,8 +779,7 @@ void main() {
       gateway.listOwnResult = [_app(id: 'a1'), _app(id: 'a2')];
       await provider.loadApplications();
       expect(provider.applications.length, 2);
-      expect(provider.applications.map((a) => a.id),
-          containsAll(['a1', 'a2']));
+      expect(provider.applications.map((a) => a.id), containsAll(['a1', 'a2']));
     });
   });
 
@@ -751,8 +802,7 @@ void main() {
       expect(gateway.submitCalls, 1); // no second call
     });
 
-    test('27. resubmit calls the gateway only from NEEDS_CORRECTION',
-        () async {
+    test('27. resubmit calls the gateway only from NEEDS_CORRECTION', () async {
       final gateway = _FakeAppGateway();
       final provider = await _makeProvider(gateway);
 
@@ -803,7 +853,10 @@ void main() {
       final provider = await _makeProvider(gateway);
 
       await provider.loadApplications();
-      expect(provider.applications.first.status, BusinessApplicationStatus.draft);
+      expect(
+        provider.applications.first.status,
+        BusinessApplicationStatus.draft,
+      );
 
       await provider.submit(original);
       expect(
@@ -812,32 +865,34 @@ void main() {
       );
     });
 
-    test('30. typed submit denials map to Arabic messages without raw errors',
-        () {
-      const cases = <BusinessApplicationSubmitCause, String>{
-        BusinessApplicationSubmitCause.unauthenticated:
-            Ar.businessCauseUnauthenticated,
-        BusinessApplicationSubmitCause.notApplicant:
-            Ar.businessCauseNotApplicant,
-        BusinessApplicationSubmitCause.applicationNotFound:
-            Ar.businessCauseApplicationNotFound,
-        BusinessApplicationSubmitCause.invalidTransition:
-            Ar.businessCauseInvalidTransition,
-        BusinessApplicationSubmitCause.phoneRequired:
-            Ar.businessCausePhoneRequired,
-        BusinessApplicationSubmitCause.requiredDataMissing:
-            Ar.businessCauseRequiredDataMissing,
-        BusinessApplicationSubmitCause.targetNotClaimable:
-            Ar.businessCauseTargetNotClaimable,
-        BusinessApplicationSubmitCause.unexpected: Ar.businessCauseUnexpected,
-      };
-      cases.forEach((cause, expected) {
-        final msg = BusinessApplicationCauseMessages.messageForSubmit(cause);
-        expect(msg, equals(expected), reason: cause.name);
-        expect(msg.contains('SQLSTATE'), isFalse);
-        expect(msg.contains('42'), isFalse);
-      });
-    });
+    test(
+      '30. typed submit denials map to Arabic messages without raw errors',
+      () {
+        const cases = <BusinessApplicationSubmitCause, String>{
+          BusinessApplicationSubmitCause.unauthenticated:
+              Ar.businessCauseUnauthenticated,
+          BusinessApplicationSubmitCause.notApplicant:
+              Ar.businessCauseNotApplicant,
+          BusinessApplicationSubmitCause.applicationNotFound:
+              Ar.businessCauseApplicationNotFound,
+          BusinessApplicationSubmitCause.invalidTransition:
+              Ar.businessCauseInvalidTransition,
+          BusinessApplicationSubmitCause.phoneRequired:
+              Ar.businessCausePhoneRequired,
+          BusinessApplicationSubmitCause.requiredDataMissing:
+              Ar.businessCauseRequiredDataMissing,
+          BusinessApplicationSubmitCause.targetNotClaimable:
+              Ar.businessCauseTargetNotClaimable,
+          BusinessApplicationSubmitCause.unexpected: Ar.businessCauseUnexpected,
+        };
+        cases.forEach((cause, expected) {
+          final msg = BusinessApplicationCauseMessages.messageForSubmit(cause);
+          expect(msg, equals(expected), reason: cause.name);
+          expect(msg.contains('SQLSTATE'), isFalse);
+          expect(msg.contains('42'), isFalse);
+        });
+      },
+    );
   });
 
   // =========================================================================
@@ -879,8 +934,9 @@ void main() {
       expect(find.text(Ar.businessTypeClaim), findsOneWidget);
     });
 
-    testWidgets('31c. data list renders application card with status chip',
-        (tester) async {
+    testWidgets('31c. data list renders application card with status chip', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway(
         listOwnResult: [
           _app(
@@ -905,22 +961,24 @@ void main() {
       expect(find.byType(BusinessApplicationStatusChip), findsOneWidget);
     });
 
-    test('32. load failure surfaces an error state and retry recovers',
-        () async {
-      final gateway = _FakeAppGateway()..listOwnError = Exception('offline');
-      final provider = await _makeProvider(gateway);
+    test(
+      '32. load failure surfaces an error state and retry recovers',
+      () async {
+        final gateway = _FakeAppGateway()..listOwnError = Exception('offline');
+        final provider = await _makeProvider(gateway);
 
-      await provider.loadApplications();
-      expect(provider.state, BusinessApplicationState.error);
-      expect(provider.applications, isEmpty);
+        await provider.loadApplications();
+        expect(provider.state, BusinessApplicationState.error);
+        expect(provider.applications, isEmpty);
 
-      // Retry with the backend back: clears the failure.
-      gateway.listOwnError = null;
-      gateway.listOwnResult = [_app(id: 'a1')];
-      await provider.loadApplications();
-      expect(provider.state, BusinessApplicationState.data);
-      expect(provider.applications.length, 1);
-    });
+        // Retry with the backend back: clears the failure.
+        gateway.listOwnError = null;
+        gateway.listOwnResult = [_app(id: 'a1')];
+        await provider.loadApplications();
+        expect(provider.state, BusinessApplicationState.data);
+        expect(provider.applications.length, 1);
+      },
+    );
   });
 
   // =========================================================================
@@ -969,8 +1027,9 @@ void main() {
   // I. Guest route guards + claim selector UX (production paths)
   // =========================================================================
   group('I. Guest guards + claim selector', () {
-    testWidgets('33. NEW route as guest shows sign-in-required, never a form',
-        (tester) async {
+    testWidgets('33. NEW route as guest shows sign-in-required, never a form', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway();
       final auth = AuthProvider();
       final provider = BusinessApplicationProvider(
@@ -997,8 +1056,10 @@ void main() {
         auth: auth,
       );
       final targetGateway = _FakeClaimTargetGateway();
-      final claimProvider =
-          BusinessClaimTargetProvider(gateway: targetGateway);
+      final claimProvider = BusinessClaimTargetProvider(
+        gateway: targetGateway,
+        auth: auth,
+      );
 
       await tester.pumpWidget(
         _wrapClaimForm(
@@ -1011,8 +1072,11 @@ void main() {
 
       expect(find.text(Ar.businessSignInRequired), findsOneWidget);
       expect(find.text(Ar.businessClaimTargetsEmpty), findsNothing);
-      expect(targetGateway.listCalls, 0,
-          reason: 'guest must never trigger the unclaimed-target read');
+      expect(
+        targetGateway.listCalls,
+        0,
+        reason: 'guest must never trigger the unclaimed-target read',
+      );
     });
 
     testWidgets('35. claim selector renders localized entity type and '
@@ -1031,8 +1095,7 @@ void main() {
           ),
         ],
       );
-      final claimProvider =
-          BusinessClaimTargetProvider(gateway: targetGateway);
+      final claimProvider = await _makeClaimProvider(targetGateway);
 
       await tester.pumpWidget(
         _wrapClaimForm(
@@ -1046,12 +1109,21 @@ void main() {
       expect(find.text('Alpha'), findsOneWidget);
       expect(find.text(Ar.businessEntityTypeCompany), findsOneWidget);
       expect(find.textContaining(Ar.verificationVerified), findsOneWidget);
-      expect(find.text('company'), findsNothing,
-          reason: 'raw storage entity_type must never leak to the UI');
-      expect(find.text('verified'), findsNothing,
-          reason: 'raw storage verification_status must never leak');
-      expect(find.text(targetId), findsNothing,
-          reason: 'canonical UUID must never be rendered for applicants');
+      expect(
+        find.text('company'),
+        findsNothing,
+        reason: 'raw storage entity_type must never leak to the UI',
+      );
+      expect(
+        find.text('verified'),
+        findsNothing,
+        reason: 'raw storage verification_status must never leak',
+      );
+      expect(
+        find.text(targetId),
+        findsNothing,
+        reason: 'canonical UUID must never be rendered for applicants',
+      );
     });
 
     testWidgets('36. claim empty state offers refresh and recovers via a '
@@ -1060,8 +1132,7 @@ void main() {
       final appGateway = _FakeAppGateway();
       final appProvider = await _makeProvider(appGateway);
       final targetGateway = _FakeClaimTargetGateway();
-      final claimProvider =
-          BusinessClaimTargetProvider(gateway: targetGateway);
+      final claimProvider = await _makeClaimProvider(targetGateway);
 
       await tester.pumpWidget(
         _wrapClaimForm(
@@ -1091,8 +1162,9 @@ void main() {
       expect(targetGateway.listCalls, greaterThanOrEqualTo(2));
     });
 
-    testWidgets('37. malformed metadata never crashes the list card',
-        (tester) async {
+    testWidgets('37. malformed metadata never crashes the list card', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway(
         listOwnResult: [
           _app(
@@ -1136,8 +1208,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('38. detail renders authoritative timestamps',
-        (tester) async {
+    testWidgets('38. detail renders authoritative timestamps', (tester) async {
       final gateway = _FakeAppGateway(
         getOwnResult: BusinessApplication(
           id: 'a1',
@@ -1170,52 +1241,57 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('39. REJECTED detail shows the authoritative rejection reason',
-        (tester) async {
-      final gateway = _FakeAppGateway(
-        getOwnResult: BusinessApplication(
-          id: 'a1',
-          applicantUserId: _userId,
-          type: BusinessApplicationType.newApplication,
-          status: BusinessApplicationStatus.rejected,
-          rejectionReason: 'مستندات غير مكتملة',
-          createdAt: DateTime(2026, 1, 1),
-        ),
-      );
-      final provider = await _makeProvider(gateway);
+    testWidgets(
+      '39. REJECTED detail shows the authoritative rejection reason',
+      (tester) async {
+        final gateway = _FakeAppGateway(
+          getOwnResult: BusinessApplication(
+            id: 'a1',
+            applicantUserId: _userId,
+            type: BusinessApplicationType.newApplication,
+            status: BusinessApplicationStatus.rejected,
+            rejectionReason: 'مستندات غير مكتملة',
+            createdAt: DateTime(2026, 1, 1),
+          ),
+        );
+        final provider = await _makeProvider(gateway);
 
-      await pumpDetail(tester, provider, 'a1');
+        await pumpDetail(tester, provider, 'a1');
 
-      expect(find.text(Ar.businessRejectionReason), findsOneWidget);
-      expect(find.text('مستندات غير مكتملة'), findsOneWidget);
-      expect(find.text(Ar.businessStatusRejected), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+        expect(find.text(Ar.businessRejectionReason), findsOneWidget);
+        expect(find.text('مستندات غير مكتملة'), findsOneWidget);
+        expect(find.text(Ar.businessStatusRejected), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
-    testWidgets('40. NEEDS_CORRECTION detail shows return reason and resubmit',
-        (tester) async {
-      final gateway = _FakeAppGateway(
-        getOwnResult: BusinessApplication(
-          id: 'a1',
-          applicantUserId: _userId,
-          type: BusinessApplicationType.newApplication,
-          status: BusinessApplicationStatus.needsCorrection,
-          returnReason: 'نقص في رقم الهاتف',
-          createdAt: DateTime(2026, 1, 1),
-        ),
-      );
-      final provider = await _makeProvider(gateway);
+    testWidgets(
+      '40. NEEDS_CORRECTION detail shows return reason and resubmit',
+      (tester) async {
+        final gateway = _FakeAppGateway(
+          getOwnResult: BusinessApplication(
+            id: 'a1',
+            applicantUserId: _userId,
+            type: BusinessApplicationType.newApplication,
+            status: BusinessApplicationStatus.needsCorrection,
+            returnReason: 'نقص في رقم الهاتف',
+            createdAt: DateTime(2026, 1, 1),
+          ),
+        );
+        final provider = await _makeProvider(gateway);
 
-      await pumpDetail(tester, provider, 'a1');
+        await pumpDetail(tester, provider, 'a1');
 
-      expect(find.text(Ar.businessReturnReasonTitle), findsOneWidget);
-      expect(find.text('نقص في رقم الهاتف'), findsOneWidget);
-      expect(find.text(Ar.businessResubmit), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+        expect(find.text(Ar.businessReturnReasonTitle), findsOneWidget);
+        expect(find.text('نقص في رقم الهاتف'), findsOneWidget);
+        expect(find.text(Ar.businessResubmit), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
-    testWidgets('41. ACTIVATED detail shows activation semantics',
-        (tester) async {
+    testWidgets('41. ACTIVATED detail shows activation semantics', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway(
         getOwnResult: BusinessApplication(
           id: 'a1',
@@ -1237,8 +1313,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('42. CLAIM detail never exposes the raw target UUID',
-        (tester) async {
+    testWidgets('42. CLAIM detail never exposes the raw target UUID', (
+      tester,
+    ) async {
       const targetId = '30000000-0000-0000-0000-000000000009';
       final gateway = _FakeAppGateway(
         getOwnResult: BusinessApplication(
@@ -1259,8 +1336,9 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('43. malformed metadata never crashes the detail screen',
-        (tester) async {
+    testWidgets('43. malformed metadata never crashes the detail screen', (
+      tester,
+    ) async {
       final gateway = _FakeAppGateway(
         getOwnResult: BusinessApplication(
           id: 'a1',
@@ -1325,20 +1403,22 @@ void main() {
       await service.init(
         initialize: ({required url, required publishableKey}) async {},
       );
-      final client = SupabaseClient(
-        'https://project.supabase.co',
-        'anon-key',
-      );
+      final client = SupabaseClient('https://project.supabase.co', 'anon-key');
       final gateway = SupabaseBusinessClaimTargetGateway(
         service: service,
         client: client,
       );
 
-      final result = await gateway.listUnclaimedTargets();
-
-      expect(result, isEmpty,
-          reason: 'no authenticated session → typed safely-empty result, '
-              'never an anonymous directory_entities SELECT');
+      await expectLater(
+        gateway.listUnclaimedTargets(),
+        throwsA(
+          isA<BusinessRemoteReadException>().having(
+            (error) => error.kind,
+            'kind',
+            BusinessRemoteReadFailureKind.authRestricted,
+          ),
+        ),
+      );
     });
   });
 
@@ -1357,10 +1437,16 @@ void main() {
       completer.complete([_app(id: 'stale-A')]);
       await staleLoad;
 
-      expect(provider.applications, isEmpty,
-          reason: 'stale list must never install into the reset session');
-      expect(provider.state, BusinessApplicationState.loading,
-          reason: 'a stale result must never publish data/empty/error');
+      expect(
+        provider.applications,
+        isEmpty,
+        reason: 'stale list must never install into the reset session',
+      );
+      expect(
+        provider.state,
+        BusinessApplicationState.loading,
+        reason: 'a stale result must never publish data/empty/error',
+      );
     });
 
     test('A. a stale list FAILURE after reset is also dropped', () async {
@@ -1376,8 +1462,11 @@ void main() {
       await staleLoad;
 
       expect(provider.applications, isEmpty);
-      expect(provider.error, isNull,
-          reason: 'a stale failure must not publish error state');
+      expect(
+        provider.error,
+        isNull,
+        reason: 'a stale failure must not publish error state',
+      );
       expect(provider.state, BusinessApplicationState.loading);
     });
 
@@ -1397,22 +1486,27 @@ void main() {
       expect(provider.state, BusinessApplicationState.loading);
     });
 
-    test('B. a stale createNewDraft completion after reset is dropped',
-        () async {
-      final completer = Completer<BusinessApplicationCreateResult>();
-      final gateway = _FakeAppGateway()
-        ..onCreateNewDraft = () => completer.future;
-      final provider = await _makeProvider(gateway);
+    test(
+      'B. a stale createNewDraft completion after reset is dropped',
+      () async {
+        final completer = Completer<BusinessApplicationCreateResult>();
+        final gateway = _FakeAppGateway()
+          ..onCreateNewDraft = () => completer.future;
+        final provider = await _makeProvider(gateway);
 
-      final staleCreate = provider.createNewDraft(metadata: const {'k': 'v'});
-      provider.resetForIdentityChange();
+        final staleCreate = provider.createNewDraft(metadata: const {'k': 'v'});
+        provider.resetForIdentityChange();
 
-      completer.complete(BusinessApplicationCreated(_app(id: 'stale-draft')));
-      expect(await staleCreate, isNull,
-          reason: 'epoch-mismatched mutation result is dropped');
-      expect(provider.applications, isEmpty);
-      expect(provider.current, isNull);
-    });
+        completer.complete(BusinessApplicationCreated(_app(id: 'stale-draft')));
+        expect(
+          await staleCreate,
+          isNull,
+          reason: 'epoch-mismatched mutation result is dropped',
+        );
+        expect(provider.applications, isEmpty);
+        expect(provider.current, isNull);
+      },
+    );
 
     test('C. a stale submit completion after reset is dropped', () async {
       final completer = Completer<BusinessApplicationSubmitResult>();
@@ -1436,134 +1530,159 @@ void main() {
       expect(provider.current, isNull);
     });
 
-    test('D. a re-load after reset publishes only the new-session result',
-        () async {
-      final completers = <Completer<List<BusinessApplication>>>[];
-      final gateway = _FakeAppGateway()
-        ..onListOwnApplications = () {
-          final completer = Completer<List<BusinessApplication>>();
-          completers.add(completer);
-          return completer.future;
-        };
-      final provider = await _makeProvider(gateway);
+    test(
+      'D. a re-load after reset publishes only the new-session result',
+      () async {
+        final completers = <Completer<List<BusinessApplication>>>[];
+        final gateway = _FakeAppGateway()
+          ..onListOwnApplications = () {
+            final completer = Completer<List<BusinessApplication>>();
+            completers.add(completer);
+            return completer.future;
+          };
+        final provider = await _makeProvider(gateway);
 
-      final staleLoad = provider.loadApplications();
-      provider.resetForIdentityChange();
-      final freshLoad = provider.loadApplications();
-      expect(completers, hasLength(2));
+        final staleLoad = provider.loadApplications();
+        provider.resetForIdentityChange();
+        final freshLoad = provider.loadApplications();
+        expect(completers, hasLength(2));
 
-      completers[1].complete([_app(id: 'fresh-B')]);
-      await freshLoad;
-      expect(provider.applications.map((a) => a.id), ['fresh-B']);
+        completers[1].complete([_app(id: 'fresh-B')]);
+        await freshLoad;
+        expect(provider.applications.map((a) => a.id), ['fresh-B']);
 
-      // A's stale result finally lands — it must never replace B's data.
-      completers[0].complete([_app(id: 'stale-A')]);
-      await staleLoad;
-      expect(provider.applications.map((a) => a.id), ['fresh-B']);
-      expect(provider.state, BusinessApplicationState.data);
-    });
+        // A's stale result finally lands — it must never replace B's data.
+        completers[0].complete([_app(id: 'stale-A')]);
+        await staleLoad;
+        expect(provider.applications.map((a) => a.id), ['fresh-B']);
+        expect(provider.state, BusinessApplicationState.data);
+      },
+    );
 
-    test('E. a stale old-session mutation never releases the newer busy owner',
-        () async {
-      final gateA = Completer<BusinessApplicationCreateResult>();
-      final gateB = Completer<BusinessApplicationCreateResult>();
-      var mutationCall = 0;
-      final gateway = _FakeAppGateway()
-        ..onCreateNewDraft = () {
-          mutationCall++;
-          return mutationCall == 1 ? gateA.future : gateB.future;
-        };
-      final provider = await _makeProvider(gateway);
+    test(
+      'E. a stale old-session mutation never releases the newer busy owner',
+      () async {
+        final gateA = Completer<BusinessApplicationCreateResult>();
+        final gateB = Completer<BusinessApplicationCreateResult>();
+        var mutationCall = 0;
+        final gateway = _FakeAppGateway()
+          ..onCreateNewDraft = () {
+            mutationCall++;
+            return mutationCall == 1 ? gateA.future : gateB.future;
+          };
+        final provider = await _makeProvider(gateway);
 
-      // 1. User A's mutation starts and owns the busy state.
-      final staleA = provider.createNewDraft(metadata: const {'k': 'v'});
-      expect(provider.isBusy, isTrue, reason: 'A owns the busy state');
+        // 1. User A's mutation starts and owns the busy state.
+        final staleA = provider.createNewDraft(metadata: const {'k': 'v'});
+        expect(provider.isBusy, isTrue, reason: 'A owns the busy state');
 
-      // 2. Session/reset happens.
-      provider.resetForIdentityChange();
-      expect(provider.isBusy, isFalse,
-          reason: 'reset releases the stale busy state');
+        // 2. Session/reset happens.
+        provider.resetForIdentityChange();
+        expect(
+          provider.isBusy,
+          isFalse,
+          reason: 'reset releases the stale busy state',
+        );
 
-      // 3. User B's operation starts and owns the busy state.
-      final freshB = provider.createNewDraft(metadata: const {'k': 'v2'});
-      expect(provider.isBusy, isTrue,
-          reason: 'the new-session operation owns the busy state');
+        // 3. User B's operation starts and owns the busy state.
+        final freshB = provider.createNewDraft(metadata: const {'k': 'v2'});
+        expect(
+          provider.isBusy,
+          isTrue,
+          reason: 'the new-session operation owns the busy state',
+        );
 
-      // 4. Old A mutation completes late.
-      gateA.complete(BusinessApplicationCreated(_app(id: 'stale-A')));
-      expect(await staleA, isNull,
-          reason: 'epoch-mismatched old result is dropped');
+        // 4. Old A mutation completes late.
+        gateA.complete(BusinessApplicationCreated(_app(id: 'stale-A')));
+        expect(
+          await staleA,
+          isNull,
+          reason: 'epoch-mismatched old result is dropped',
+        );
 
-      // 5. Busy must remain true for B.
-      expect(provider.isBusy, isTrue,
-          reason: 'stale old-session completion must not clear busy state '
-              'belonging to the newer operation');
-      expect(provider.applications, isEmpty,
-          reason: 'old completion must not publish data into the new session');
+        // 5. Busy must remain true for B.
+        expect(
+          provider.isBusy,
+          isTrue,
+          reason:
+              'stale old-session completion must not clear busy state '
+              'belonging to the newer operation',
+        );
+        expect(
+          provider.applications,
+          isEmpty,
+          reason: 'old completion must not publish data into the new session',
+        );
 
-      // 6. B completes and releases its own busy state.
-      gateB.complete(BusinessApplicationCreated(_app(id: 'fresh-B')));
-      final bResult = await freshB;
-      expect(bResult, isA<BusinessApplicationCreated>());
+        // 6. B completes and releases its own busy state.
+        gateB.complete(BusinessApplicationCreated(_app(id: 'fresh-B')));
+        final bResult = await freshB;
+        expect(bResult, isA<BusinessApplicationCreated>());
 
-      // 7. Busy becomes false again.
-      expect(provider.isBusy, isFalse,
-          reason: 'the owning operation clears busy on completion');
-      expect(provider.applications.map((a) => a.id), ['fresh-B']);
-    });
+        // 7. Busy becomes false again.
+        expect(
+          provider.isBusy,
+          isFalse,
+          reason: 'the owning operation clears busy on completion',
+        );
+        expect(provider.applications.map((a) => a.id), ['fresh-B']);
+      },
+    );
 
-    test('E2. a stale old-session SUBMIT never releases a newer busy owner',
-        () async {
-      final gateA = Completer<BusinessApplicationSubmitResult>();
-      final gateB = Completer<BusinessApplicationSubmitResult>();
-      var submitCall = 0;
-      final gateway = _FakeAppGateway()
-        ..onSubmitApplication = (_) {
-          submitCall++;
-          return submitCall == 1 ? gateA.future : gateB.future;
-        };
-      final provider = await _makeProvider(gateway);
+    test(
+      'E2. a stale old-session SUBMIT never releases a newer busy owner',
+      () async {
+        final gateA = Completer<BusinessApplicationSubmitResult>();
+        final gateB = Completer<BusinessApplicationSubmitResult>();
+        var submitCall = 0;
+        final gateway = _FakeAppGateway()
+          ..onSubmitApplication = (_) {
+            submitCall++;
+            return submitCall == 1 ? gateA.future : gateB.future;
+          };
+        final provider = await _makeProvider(gateway);
 
-      final staleA = provider.submit(
-        _app(id: 'draft-1', status: BusinessApplicationStatus.draft),
-      );
-      expect(provider.isBusy, isTrue);
+        final staleA = provider.submit(
+          _app(id: 'draft-1', status: BusinessApplicationStatus.draft),
+        );
+        expect(provider.isBusy, isTrue);
 
-      provider.resetForIdentityChange();
-      expect(provider.isBusy, isFalse);
+        provider.resetForIdentityChange();
+        expect(provider.isBusy, isFalse);
 
-      final freshB = provider.submit(
-        _app(id: 'draft-2', status: BusinessApplicationStatus.draft),
-      );
-      expect(provider.isBusy, isTrue);
+        final freshB = provider.submit(
+          _app(id: 'draft-2', status: BusinessApplicationStatus.draft),
+        );
+        expect(provider.isBusy, isTrue);
 
-      gateA.complete(
-        BusinessApplicationSubmitted(
-          _app(id: 'draft-1', status: BusinessApplicationStatus.submitted),
-        ),
-      );
-      expect(await staleA, isNull);
+        gateA.complete(
+          BusinessApplicationSubmitted(
+            _app(id: 'draft-1', status: BusinessApplicationStatus.submitted),
+          ),
+        );
+        expect(await staleA, isNull);
 
-      // Stale A must not release B's busy state.
-      expect(provider.isBusy, isTrue);
-      expect(provider.applications, isEmpty);
-      expect(provider.current, isNull);
+        // Stale A must not release B's busy state.
+        expect(provider.isBusy, isTrue);
+        expect(provider.applications, isEmpty);
+        expect(provider.current, isNull);
 
-      gateB.complete(
-        BusinessApplicationSubmitted(
-          _app(id: 'draft-2', status: BusinessApplicationStatus.submitted),
-        ),
-      );
-      final bResult = await freshB;
-      expect(bResult, isA<BusinessApplicationSubmitted>());
-      expect(provider.isBusy, isFalse);
-    });
+        gateB.complete(
+          BusinessApplicationSubmitted(
+            _app(id: 'draft-2', status: BusinessApplicationStatus.submitted),
+          ),
+        );
+        final bResult = await freshB;
+        expect(bResult, isA<BusinessApplicationSubmitted>());
+        expect(provider.isBusy, isFalse);
+      },
+    );
 
     test('stale claim-target reload after reset is dropped', () async {
       final completer = Completer<List<BusinessClaimTarget>>();
       final gateway = _FakeClaimTargetGateway()
         ..onListUnclaimedTargets = () => completer.future;
-      final provider = BusinessClaimTargetProvider(gateway: gateway);
+      final provider = await _makeClaimProvider(gateway);
 
       final staleReload = provider.reload();
       provider.resetForIdentityChange();
@@ -1578,8 +1697,11 @@ void main() {
       ]);
       await staleReload;
 
-      expect(provider.targets, isEmpty,
-          reason: 'old-session candidates must never publish');
+      expect(
+        provider.targets,
+        isEmpty,
+        reason: 'old-session candidates must never publish',
+      );
       expect(provider.state, BusinessClaimTargetState.loading);
     });
   });

@@ -99,6 +99,7 @@ void _runApp() {
 
   businessClaimTargetProvider = BusinessClaimTargetProvider(
     gateway: AppDependencies.businessClaimTargetGateway,
+    auth: auth,
   );
 
   managedBusinessesProvider = ManagedBusinessesProvider(

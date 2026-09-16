@@ -1,6 +1,7 @@
 import 'managed_business_profile.dart';
 import 'managed_business_profile_draft.dart';
 import 'managed_selectable_options.dart';
+import 'business_remote_read.dart';
 
 /// V1-R06 — Typed management failures for the frozen server RPC contract
 /// (migration 00020).
@@ -58,6 +59,19 @@ class ManagedProfileReadDenied extends ManagedProfileReadResult {
   const ManagedProfileReadDenied(this.cause);
 
   final BusinessProfileManagementCause cause;
+}
+
+/// The read failed without exposing backend details to presentation.
+class ManagedProfileReadFailed extends ManagedProfileReadResult {
+  const ManagedProfileReadFailed(this.cause);
+
+  final BusinessRemoteReadFailureKind cause;
+}
+
+/// `get_managed_business_profile` proved P0NOT for the current authorized
+/// read. This is a successful controlled absence, not infrastructure failure.
+class ManagedProfileReadNotFound extends ManagedProfileReadResult {
+  const ManagedProfileReadNotFound();
 }
 
 /// The backend is unavailable, so no management authority can be inferred.

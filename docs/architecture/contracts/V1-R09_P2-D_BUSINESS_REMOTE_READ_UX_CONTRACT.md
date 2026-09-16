@@ -483,3 +483,16 @@ unresolved contract contradiction to remain.
 
 This freeze authorizes P2-D1 implementation only (after contract persistence).
 It does not mark V1-R09 closed.
+
+## Appendix — P2-D1 Closure
+
+P2-D1: ACCEPTED / CLOSED
+Independent review: PASS
+Authoritative focused evidence: 359 PASS / 0 FAIL / 0 SKIPPED
+HIGH findings: NONE
+MEDIUM findings: NONE
+LOW finding: implementer count over-reported by 5 (364 → authoritative 359);
+  reporting-only.
+P2-D2: may be unlocked after this closure/checkpoint
+P2-D overall: remains CURRENT
+All frozen contract semantics in sections 1–20 above remain unchanged.

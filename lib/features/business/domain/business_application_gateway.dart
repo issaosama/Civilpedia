@@ -1,6 +1,7 @@
 import 'business_application.dart';
 import 'business_application_metadata.dart';
 import 'business_application_policy.dart';
+import 'business_remote_read.dart';
 
 /// A6.2 — Outcome of a business-application creation attempt.
 sealed class BusinessApplicationCreateResult {
@@ -129,12 +130,14 @@ abstract class BusinessApplicationGateway {
 
   /// Returns every application belonging to [userId] (the canonical
   /// authenticated user id). A read/network failure THROWS so the caller can
-  /// fail safe without inventing a status. Unauthenticated/offline degrades to
-  /// an empty list.
+  /// fail safe without inventing a status. Failures throw only a sanitized
+  /// [BusinessRemoteReadException].
   Future<List<BusinessApplication>> listOwnApplications(String userId);
 
   /// Fetches [applicationId] if and only if it belongs to [userId]. Returns
-  /// null when absent/unowned. Read/network failures THROW.
+  /// null when absent/unowned within the current actor's authorized read
+  /// scope. Read failures throw only a sanitized
+  /// [BusinessRemoteReadException].
   Future<BusinessApplication?> getOwnApplication(
     String userId,
     String applicationId,

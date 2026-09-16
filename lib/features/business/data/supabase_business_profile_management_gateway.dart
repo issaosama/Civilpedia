@@ -1,10 +1,13 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/supabase_service.dart';
+import '../../../core/network/remote_operation_policy.dart';
 import '../domain/business_profile_management_gateway.dart';
+import '../domain/business_remote_read.dart';
 import '../domain/managed_business_profile.dart';
 import '../domain/managed_business_profile_draft.dart';
 import '../domain/managed_selectable_options.dart';
+import 'business_remote_read_classifier.dart';
 
 /// V1-R06 — Production [BusinessProfileManagementGateway] backed by the shared
 /// Supabase client.
@@ -23,10 +26,12 @@ class SupabaseBusinessProfileManagementGateway
   SupabaseBusinessProfileManagementGateway({
     required this.service,
     SupabaseClient? client,
+    this.readTimeout = RemoteOperationPolicy.read,
   }) : _injectedClient = client;
 
   final SupabaseService service;
   final SupabaseClient? _injectedClient;
+  final Duration readTimeout;
 
   SupabaseClient get _client => _injectedClient ?? Supabase.instance.client;
 
@@ -38,38 +43,50 @@ class SupabaseBusinessProfileManagementGateway
 
   @override
   Future<ManagedProfileReadResult> readManagedProfile(String entityId) async {
-    if (!isAvailable) return const ManagedProfileReadUnavailable();
+    if (!isAvailable) {
+      return const ManagedProfileReadFailed(
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
+    }
     if (!ManagedBusinessProfile.isValidUuid(entityId)) {
-      return const ManagedProfileReadDenied(
-        BusinessProfileManagementCause.unexpected,
+      return const ManagedProfileReadFailed(
+        BusinessRemoteReadFailureKind.unexpected,
       );
     }
     try {
-      final response = await _client.rpc(
-        _readRpc,
-        params: <String, dynamic>{'p_entity_id': entityId},
+      final response = await runWithRemoteDeadline(
+        _client.rpc(
+          _readRpc,
+          params: <String, dynamic>{'p_entity_id': entityId},
+        ),
+        timeout: readTimeout,
       );
       final projection = _decodeSingleProjection(response);
       if (projection == null) {
-        return const ManagedProfileReadDenied(
-          BusinessProfileManagementCause.unexpected,
+        return const ManagedProfileReadFailed(
+          BusinessRemoteReadFailureKind.malformedResponse,
         );
       }
       final profile = ManagedBusinessProfile.tryFromJson(projection);
-      if (profile == null) {
-        return const ManagedProfileReadDenied(
-          BusinessProfileManagementCause.unexpected,
+      if (profile == null || profile.id != entityId) {
+        return const ManagedProfileReadFailed(
+          BusinessRemoteReadFailureKind.malformedResponse,
         );
       }
       return ManagedProfileReadSuccess(profile);
     } on PostgrestException catch (error) {
-      return ManagedProfileReadDenied(
-        BusinessProfileManagementCause.fromServerCode(error.code),
+      if (error.code?.toUpperCase() == 'P0NOT') {
+        return const ManagedProfileReadNotFound();
+      }
+      return ManagedProfileReadFailed(
+        classifyBusinessRemoteReadFailure(
+          error,
+          p0AutIsAuthRestricted: true,
+          p0PerIsPermissionDenied: true,
+        ),
       );
-    } catch (_) {
-      return const ManagedProfileReadDenied(
-        BusinessProfileManagementCause.network,
-      );
+    } catch (error) {
+      return ManagedProfileReadFailed(classifyBusinessRemoteReadFailure(error));
     }
   }
 
@@ -96,11 +113,11 @@ class SupabaseBusinessProfileManagementGateway
         _updateRpc,
         params: <String, dynamic>{
           'p_entity_id': entityId,
-          'p_expected_updated_at':
-              expectedUpdatedAt.toUtc().toIso8601String(),
+          'p_expected_updated_at': expectedUpdatedAt.toUtc().toIso8601String(),
           'p_name': draft.name.trim(),
-          'p_description':
-              (description == null || description.isEmpty) ? null : description,
+          'p_description': (description == null || description.isEmpty)
+              ? null
+              : description,
           'p_contacts': [
             for (final contact in draft.contacts)
               <String, dynamic>{
@@ -113,10 +130,9 @@ class SupabaseBusinessProfileManagementGateway
               ? null
               : <String, dynamic>{
                   'region_id': location.regionId,
-                  'address':
-                      (location.address?.trim().isEmpty ?? true)
-                          ? null
-                          : location.address!.trim(),
+                  'address': (location.address?.trim().isEmpty ?? true)
+                      ? null
+                      : location.address!.trim(),
                   'latitude': location.latitude,
                   'longitude': location.longitude,
                 },
@@ -156,37 +172,65 @@ class SupabaseBusinessProfileManagementGateway
   @override
   Future<List<ManagedSelectableCategory>> loadActiveCategories() async {
     if (!isAvailable) {
-      throw StateError('Business profile management gateway is not available');
+      throw const BusinessRemoteReadException(
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
     }
-    final rows = await _client
-        .from('directory_categories')
-        .select('id, parent_category_id, code, name_ar, name_en, is_active')
-        .eq('is_active', true);
-    final result = <ManagedSelectableCategory>[];
-    for (final row in rows) {
-      final parsed = ManagedSelectableCategory.tryFromRow(row);
-      if (parsed != null) result.add(parsed);
+    try {
+      final rows = await runWithRemoteDeadline(
+        _client
+            .from('directory_categories')
+            .select('id, parent_category_id, code, name_ar, name_en, is_active')
+            .eq('is_active', true),
+        timeout: readTimeout,
+      );
+      final result = <ManagedSelectableCategory>[];
+      for (final row in rows) {
+        final parsed = ManagedSelectableCategory.tryFromRow(row);
+        if (parsed == null) {
+          throw const BusinessRemoteReadException(
+            BusinessRemoteReadFailureKind.malformedResponse,
+          );
+        }
+        result.add(parsed);
+      }
+      return List.unmodifiable(result);
+    } catch (error) {
+      throwBusinessRemoteReadFailure(error);
     }
-    return result;
   }
 
   @override
   Future<List<ManagedSelectableRegion>> loadActiveRegions() async {
     if (!isAvailable) {
-      throw StateError('Business profile management gateway is not available');
+      throw const BusinessRemoteReadException(
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
     }
-    final rows = await _client
-        .from('regions')
-        .select(
-          'id, parent_id, code, region_type, name_ar, name_en, is_active',
-        )
-        .eq('is_active', true);
-    final result = <ManagedSelectableRegion>[];
-    for (final row in rows) {
-      final parsed = ManagedSelectableRegion.tryFromRow(row);
-      if (parsed != null) result.add(parsed);
+    try {
+      final rows = await runWithRemoteDeadline(
+        _client
+            .from('regions')
+            .select(
+              'id, parent_id, code, region_type, name_ar, name_en, is_active',
+            )
+            .eq('is_active', true),
+        timeout: readTimeout,
+      );
+      final result = <ManagedSelectableRegion>[];
+      for (final row in rows) {
+        final parsed = ManagedSelectableRegion.tryFromRow(row);
+        if (parsed == null) {
+          throw const BusinessRemoteReadException(
+            BusinessRemoteReadFailureKind.malformedResponse,
+          );
+        }
+        result.add(parsed);
+      }
+      return List.unmodifiable(result);
+    } catch (error) {
+      throwBusinessRemoteReadFailure(error);
     }
-    return result;
   }
 
   /// Decodes the frozen READ/UPDATE RPC jsonb projection.

@@ -1,4 +1,5 @@
 import 'business_claim_target.dart';
+import 'business_remote_read.dart';
 
 /// V1-R04 — Read boundary for CLAIM targets on `public.directory_entities`.
 ///
@@ -16,8 +17,9 @@ abstract class BusinessClaimTargetGateway {
   /// `claim_status = 'unclaimed'` — visible under the existing RLS
   /// (`directory_entities_select_active`, migration 00010).
   ///
-  /// Read/network failures THROW so the caller can present a retryable error
-  /// rather than an invented empty list. The server trigger (migration 00014)
-  /// remains the authoritative claimability backstop.
+  /// Read failures throw only a sanitized [BusinessRemoteReadException] so the
+  /// caller can present a retryable error rather than an invented empty list.
+  /// The server trigger (migration 00014) remains the authoritative
+  /// claimability backstop.
   Future<List<BusinessClaimTarget>> listUnclaimedTargets();
 }

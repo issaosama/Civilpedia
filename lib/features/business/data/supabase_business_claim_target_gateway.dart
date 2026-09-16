@@ -1,8 +1,11 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/supabase_service.dart';
+import '../../../core/network/remote_operation_policy.dart';
 import '../domain/business_claim_target.dart';
 import '../domain/business_claim_target_gateway.dart';
+import '../domain/business_remote_read.dart';
+import 'business_remote_read_classifier.dart';
 
 /// V1-R04 — Production [BusinessClaimTargetGateway] backed by the shared
 /// Supabase client's PostgREST boundary.
@@ -24,10 +27,12 @@ class SupabaseBusinessClaimTargetGateway implements BusinessClaimTargetGateway {
   SupabaseBusinessClaimTargetGateway({
     required this.service,
     SupabaseClient? client,
+    this.readTimeout = RemoteOperationPolicy.read,
   }) : _injectedClient = client;
 
   /// The backend boundary used to decide availability.
   final SupabaseService service;
+  final Duration readTimeout;
 
   // Injected for tests; production resolves lazily so merely constructing the
   // gateway never touches the global Supabase singleton.
@@ -56,25 +61,42 @@ class SupabaseBusinessClaimTargetGateway implements BusinessClaimTargetGateway {
 
   @override
   Future<List<BusinessClaimTarget>> listUnclaimedTargets() async {
-    // Auth guard before the query: unauthenticated/unanonymous is the existing
-    // typed "safely empty" result — no anon SELECT on directory_entities.
-    if (!_hasAuthenticatedSession) {
-      return const [];
+    if (!isAvailable) {
+      throw const BusinessRemoteReadException(
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
     }
-    final rows = await _client
-        .from(_table)
-        .select(_projection.join(','))
-        .eq('claim_status', 'unclaimed')
-        .order('name');
-    final targets = <BusinessClaimTarget>[];
-    for (final row in rows) {
-      final parsed = BusinessClaimTarget.tryFromRow(row);
-      // Defensive read-time reinforcement: only rows that still parse and are
-      // canonically unclaimed are surfaced. RLS/trigger remain authoritative.
-      if (parsed != null && parsed.isUnclaimed) {
+    // No anon query and no invented authoritative empty result.
+    if (!_hasAuthenticatedSession) {
+      throw const BusinessRemoteReadException(
+        BusinessRemoteReadFailureKind.authRestricted,
+      );
+    }
+    try {
+      final rows = await runWithRemoteDeadline(
+        _client
+            .from(_table)
+            .select(_projection.join(','))
+            .eq('claim_status', 'unclaimed')
+            .order('name'),
+        timeout: readTimeout,
+      );
+      final targets = <BusinessClaimTarget>[];
+      for (final row in rows) {
+        final parsed = BusinessClaimTarget.tryFromRow(row);
+        // The query promises unclaimed rows. Any malformed or contradictory
+        // row invalidates the complete response rather than fabricating a
+        // partial candidate set.
+        if (parsed == null || !parsed.isUnclaimed) {
+          throw const BusinessRemoteReadException(
+            BusinessRemoteReadFailureKind.malformedResponse,
+          );
+        }
         targets.add(parsed);
       }
+      return List.unmodifiable(targets);
+    } catch (error) {
+      throwBusinessRemoteReadFailure(error);
     }
-    return targets;
   }
 }

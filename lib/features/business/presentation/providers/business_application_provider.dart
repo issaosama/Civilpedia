@@ -6,275 +6,523 @@ import '../../domain/business_application.dart';
 import '../../domain/business_application_gateway.dart';
 import '../../domain/business_application_policy.dart';
 import '../../domain/business_application_status.dart';
+import '../../domain/business_remote_read.dart';
 
-/// V1-R04 — UI data state for a [BusinessApplication] collection/read.
-enum BusinessApplicationState {
-  /// No authenticated session; UI must render sign-in-required.
-  signInRequired,
+typedef _ApplicationListReadKey = ({
+  String userId,
+  int authGeneration,
+  int applicationRevision,
+});
+typedef _ApplicationDetailReadKey = ({
+  String userId,
+  int authGeneration,
+  String applicationId,
+  int applicationRevision,
+});
 
-  /// Authoritative read in flight.
-  loading,
+enum BusinessApplicationState { signInRequired, loading, data, error, empty }
 
-  /// Authoritative list/detail is available.
-  data,
+enum _ApplicationReadLane { list, detail }
 
-  /// The authoritative read failed; a retry is available.
-  error,
-
-  /// The user has zero applications (official empty state).
-  empty,
-}
-
-/// V1-R04 — rather than inventing state machine again, the provider drives a
-/// small mutable view-state; read outcomes are authoritative and failures are
-/// retryable. Mutations are server-authorized and exposed as typed results.
+/// Applicant-owned application state with independent list/detail read lanes.
 class BusinessApplicationProvider extends ChangeNotifier {
   BusinessApplicationProvider({
     required BusinessApplicationGateway gateway,
     required AuthProvider auth,
-  })  : _gateway = gateway,
-        _auth = auth;
+  }) : _gateway = gateway,
+       _auth = auth;
 
   final BusinessApplicationGateway _gateway;
   final AuthProvider _auth;
 
-  BusinessApplicationState _state = BusinessApplicationState.loading;
   List<BusinessApplication> _applications = const [];
   BusinessApplication? _current;
+  String? _detailApplicationId;
   String? _error;
 
-  /// The current user's authoritative applications (list state).
-  List<BusinessApplication> get applications => _applications;
+  BusinessApplicationState _listState = BusinessApplicationState.loading;
+  BusinessApplicationState _detailState = BusinessApplicationState.loading;
+  BusinessRemoteReadPhase _listReadPhase = BusinessRemoteReadPhase.idle;
+  BusinessRemoteReadPhase _detailReadPhase = BusinessRemoteReadPhase.idle;
+  BusinessRemoteReadFailureKind? _listReadFailure;
+  BusinessRemoteReadFailureKind? _detailReadFailure;
+  _ApplicationReadLane _activeLane = _ApplicationReadLane.list;
 
-  /// The currently selected application (detail state).
-  BusinessApplication? get current => _current;
+  _ApplicationListReadKey? _listDataKey;
+  _ApplicationDetailReadKey? _detailDataKey;
+  bool _hasListResult = false;
+  bool _hasDetailResult = false;
 
-  BusinessApplicationState get state => _state;
-  String? get error => _error;
-
-  bool get isBusy => _busy;
-
-  /// In-flight mutation guard (submit/resubmit/create).
-  bool _busy = false;
-
-  /// Canonical session epoch (V1-R08 final pass, finding 1). Advances on every
-  /// account-bound reset; async work captures the epoch before any `await` and
-  /// must LOSE the captured epoch before publishing data/errors/loading or
-  /// privileged follow-ups. A result that lands after a reset is silently
-  /// dropped — it never installs into a different (or guest) session.
   int _sessionEpoch = 0;
+  int _applicationRevision = 0;
+  int _listReadEpoch = 0;
+  int _detailReadEpoch = 0;
+  final Map<_ApplicationListReadKey, Future<void>> _activeListReads = {};
+  final Map<_ApplicationDetailReadKey, Future<void>> _activeDetailReads = {};
+
+  bool _busy = false;
+  bool _disposed = false;
+
+  List<BusinessApplication> get applications => _applications;
+  BusinessApplication? get current => _current;
+  String? get currentApplicationId => _detailApplicationId;
+
+  /// Compatibility lens for the currently active route. The underlying list
+  /// and detail states remain independent.
+  BusinessApplicationState get state =>
+      _activeLane == _ApplicationReadLane.list ? _listState : _detailState;
+  BusinessApplicationState get listState => _listState;
+  BusinessApplicationState get detailState => _detailState;
+  BusinessRemoteReadPhase get listReadPhase => _listReadPhase;
+  BusinessRemoteReadPhase get detailReadPhase => _detailReadPhase;
+  BusinessRemoteReadFailureKind? get listReadFailure => _listReadFailure;
+  BusinessRemoteReadFailureKind? get detailReadFailure => _detailReadFailure;
+  String? get error => _error;
+  bool get isBusy => _busy;
+  int get applicationRevision => _applicationRevision;
+  int get activeListReadCount => _activeListReads.length;
+  int get activeDetailReadCount => _activeDetailReads.length;
 
   String? get _currentUserId => _auth.session?.userId;
-
   bool get isAuthenticated =>
       _auth.isLoggedIn && (_currentUserId?.isNotEmpty ?? false);
 
-  /// Loads the authoritative list of the current user's applications.
-  Future<void> loadApplications() async {
-    final epoch = _sessionEpoch;
+  Future<void> loadApplications() {
+    _activeLane = _ApplicationReadLane.list;
     final userId = _currentUserId;
     if (!isAuthenticated || userId == null || userId.isEmpty) {
-      _state = BusinessApplicationState.signInRequired;
-      _applications = const [];
-      _error = null;
-      notifyListeners();
-      return;
+      _clearAccountData();
+      _listState = BusinessApplicationState.signInRequired;
+      _detailState = BusinessApplicationState.signInRequired;
+      _notifyIfAlive();
+      return Future.value();
     }
-    _state = BusinessApplicationState.loading;
+
+    final key = (
+      userId: userId,
+      authGeneration: _auth.generation,
+      applicationRevision: _applicationRevision,
+    );
+    final active = _activeListReads[key];
+    if (active != null) return active;
+
+    final hasMatchingKnownGood = _hasListResult && _listDataKey == key;
+    if (!hasMatchingKnownGood) {
+      _applications = const [];
+      _listDataKey = null;
+      _hasListResult = false;
+    }
     _error = null;
-    notifyListeners();
-    try {
-      final loaded = await _gateway.listOwnApplications(userId);
-      // Drop the result BEFORE touching any account-bound field: a bounded
-      // reset during the in-flight read must never install stale data into a
-      // different (or guest) session.
-      if (epoch != _sessionEpoch) return;
-      _applications = loaded;
-      _state = loaded.isEmpty
-          ? BusinessApplicationState.empty
-          : BusinessApplicationState.data;
-    } catch (_) {
-      if (epoch != _sessionEpoch) return;
-      _applications = const [];
-      _state = BusinessApplicationState.error;
-    }
-    notifyListeners();
+    _listReadFailure = null;
+    _listReadPhase = hasMatchingKnownGood
+        ? BusinessRemoteReadPhase.refreshing
+        : BusinessRemoteReadPhase.loading;
+    _listState = hasMatchingKnownGood
+        ? (_applications.isEmpty
+              ? BusinessApplicationState.empty
+              : BusinessApplicationState.data)
+        : BusinessApplicationState.loading;
+    _notifyIfAlive();
+
+    final requestEpoch = ++_listReadEpoch;
+    late final Future<void> operation;
+    operation = _performListRead(key, requestEpoch).whenComplete(() {
+      if (identical(_activeListReads[key], operation)) {
+        _activeListReads.remove(key);
+      }
+    });
+    _activeListReads[key] = operation;
+    return operation;
   }
 
-  /// Loads one authoritative application by id (only if owned by the user).
-  Future<void> loadApplication(String applicationId) async {
-    final epoch = _sessionEpoch;
+  Future<void> _performListRead(
+    _ApplicationListReadKey key,
+    int requestEpoch,
+  ) async {
+    try {
+      final loaded = await _gateway.listOwnApplications(key.userId);
+      if (!_canPublishList(key, requestEpoch)) return;
+      _applications = List.unmodifiable(loaded);
+      _listDataKey = key;
+      _hasListResult = true;
+      _listReadFailure = null;
+      _listReadPhase = loaded.isEmpty
+          ? BusinessRemoteReadPhase.authoritativeEmpty
+          : BusinessRemoteReadPhase.loaded;
+      _listState = loaded.isEmpty
+          ? BusinessApplicationState.empty
+          : BusinessApplicationState.data;
+    } catch (error) {
+      if (!_canPublishList(key, requestEpoch)) return;
+      _publishListFailure(
+        key,
+        error is BusinessRemoteReadException
+            ? error.kind
+            : BusinessRemoteReadFailureKind.unexpected,
+      );
+    }
+    _notifyIfAlive();
+  }
+
+  Future<void> loadApplication(String applicationId) {
+    _activeLane = _ApplicationReadLane.detail;
     final userId = _currentUserId;
     if (!isAuthenticated || userId == null || userId.isEmpty) {
-      _state = BusinessApplicationState.signInRequired;
-      _current = null;
-      notifyListeners();
-      return;
+      _clearAccountData();
+      _listState = BusinessApplicationState.signInRequired;
+      _detailState = BusinessApplicationState.signInRequired;
+      _notifyIfAlive();
+      return Future.value();
     }
-    _state = BusinessApplicationState.loading;
-    _current = null;
+
+    final key = (
+      userId: userId,
+      authGeneration: _auth.generation,
+      applicationId: applicationId,
+      applicationRevision: _applicationRevision,
+    );
+    final active = _activeDetailReads[key];
+    if (active != null) return active;
+
+    final hasMatchingKnownGood = _hasDetailResult && _detailDataKey == key;
+    _detailApplicationId = applicationId;
+    if (!hasMatchingKnownGood) {
+      _current = null;
+      _detailDataKey = null;
+      _hasDetailResult = false;
+    }
     _error = null;
-    notifyListeners();
+    _detailReadFailure = null;
+    _detailReadPhase = hasMatchingKnownGood
+        ? BusinessRemoteReadPhase.refreshing
+        : BusinessRemoteReadPhase.loading;
+    _detailState = hasMatchingKnownGood
+        ? (_current == null
+              ? BusinessApplicationState.empty
+              : BusinessApplicationState.data)
+        : BusinessApplicationState.loading;
+    _notifyIfAlive();
+
+    final requestEpoch = ++_detailReadEpoch;
+    late final Future<void> operation;
+    operation = _performDetailRead(key, requestEpoch).whenComplete(() {
+      if (identical(_activeDetailReads[key], operation)) {
+        _activeDetailReads.remove(key);
+      }
+    });
+    _activeDetailReads[key] = operation;
+    return operation;
+  }
+
+  Future<void> _performDetailRead(
+    _ApplicationDetailReadKey key,
+    int requestEpoch,
+  ) async {
     try {
-      final loaded = await _gateway.getOwnApplication(userId, applicationId);
-      // Stale results must be dropped before any field is overwritten (same
-      // bounded reset rule as the list load above).
-      if (epoch != _sessionEpoch) return;
+      final loaded = await _gateway.getOwnApplication(
+        key.userId,
+        key.applicationId,
+      );
+      if (!_canPublishDetail(key, requestEpoch)) return;
+      if (loaded != null &&
+          (loaded.id != key.applicationId || !loaded.belongsTo(key.userId))) {
+        _publishDetailFailure(
+          key,
+          BusinessRemoteReadFailureKind.malformedResponse,
+        );
+        _notifyIfAlive();
+        return;
+      }
       _current = loaded;
-      _state = loaded == null
+      _detailApplicationId = key.applicationId;
+      _detailDataKey = key;
+      _hasDetailResult = true;
+      _detailReadFailure = null;
+      _detailReadPhase = loaded == null
+          ? BusinessRemoteReadPhase.authoritativeNotFound
+          : BusinessRemoteReadPhase.loaded;
+      _detailState = loaded == null
           ? BusinessApplicationState.empty
           : BusinessApplicationState.data;
-    } catch (_) {
-      if (epoch != _sessionEpoch) return;
-      _current = null;
-      _state = BusinessApplicationState.error;
+    } catch (error) {
+      if (!_canPublishDetail(key, requestEpoch)) return;
+      _publishDetailFailure(
+        key,
+        error is BusinessRemoteReadException
+            ? error.kind
+            : BusinessRemoteReadFailureKind.unexpected,
+      );
     }
-    notifyListeners();
+    _notifyIfAlive();
   }
 
-  /// Files a NEW DRAFT (server-authorized). Never auto-submits.
+  void _publishListFailure(
+    _ApplicationListReadKey key,
+    BusinessRemoteReadFailureKind cause,
+  ) {
+    _listReadFailure = cause;
+    _listReadPhase = BusinessRemoteReadPhase.failed;
+    if (_hasListResult && _listDataKey == key) {
+      _listState = _applications.isEmpty
+          ? BusinessApplicationState.empty
+          : BusinessApplicationState.data;
+    } else {
+      _applications = const [];
+      _listState = BusinessApplicationState.error;
+    }
+  }
+
+  void _publishDetailFailure(
+    _ApplicationDetailReadKey key,
+    BusinessRemoteReadFailureKind cause,
+  ) {
+    _detailReadFailure = cause;
+    _detailReadPhase = BusinessRemoteReadPhase.failed;
+    if (_hasDetailResult && _detailDataKey == key) {
+      _detailState = _current == null
+          ? BusinessApplicationState.empty
+          : BusinessApplicationState.data;
+    } else {
+      _current = null;
+      _detailState = BusinessApplicationState.error;
+    }
+  }
+
+  bool _canPublishList(_ApplicationListReadKey key, int requestEpoch) {
+    return !_disposed &&
+        requestEpoch == _listReadEpoch &&
+        key.applicationRevision == _applicationRevision &&
+        _isCurrentAuth(key.userId, key.authGeneration);
+  }
+
+  bool _canPublishDetail(_ApplicationDetailReadKey key, int requestEpoch) {
+    return !_disposed &&
+        requestEpoch == _detailReadEpoch &&
+        key.applicationId == _detailApplicationId &&
+        key.applicationRevision == _applicationRevision &&
+        _isCurrentAuth(key.userId, key.authGeneration);
+  }
+
+  bool _isCurrentAuth(String userId, int generation) {
+    return _currentUserId == userId &&
+        _auth.generation == generation &&
+        _auth.isCurrentSession(userId: userId, generation: generation);
+  }
+
   Future<BusinessApplicationCreateResult?> createNewDraft({
     required Map<String, dynamic> metadata,
   }) async {
-    if (_busy) return null;
+    if (_busy || _disposed) return null;
     _busy = true;
     final epoch = _sessionEpoch;
-    notifyListeners();
+    _notifyIfAlive();
     try {
       final result = await _gateway.createNewDraft(
         currentUserId: _currentUserId ?? '',
         metadata: metadata,
       );
-      if (epoch != _sessionEpoch) return null; // reset during in-flight write
+      if (!_canPublishMutation(epoch)) return null;
       if (result is BusinessApplicationCreated) {
-        _applications = [result.application, ..._applications];
-        _current = result.application;
-        _state = BusinessApplicationState.data;
+        _acceptCreated(result.application);
       }
       return result;
     } finally {
-      if (epoch == _sessionEpoch) {
+      if (_canPublishMutation(epoch)) {
         _busy = false;
-        notifyListeners();
+        _notifyIfAlive();
       }
     }
   }
 
-  /// Files a CLAIM DRAFT for the canonical directory target id.
   Future<BusinessApplicationCreateResult?> createClaimDraft({
     required String targetEntityId,
   }) async {
-    if (_busy) return null;
+    if (_busy || _disposed) return null;
     _busy = true;
     final epoch = _sessionEpoch;
-    notifyListeners();
+    _notifyIfAlive();
     try {
       final result = await _gateway.createClaimDraft(
         currentUserId: _currentUserId ?? '',
         targetEntityId: targetEntityId,
       );
-      if (epoch != _sessionEpoch) return null; // reset during in-flight write
+      if (!_canPublishMutation(epoch)) return null;
       if (result is BusinessApplicationCreated) {
-        _applications = [result.application, ..._applications];
-        _current = result.application;
-        _state = BusinessApplicationState.data;
+        _acceptCreated(result.application);
       }
       return result;
     } finally {
-      // Stale old-session completion must not release the newer session's
-      // busy state.
-      if (epoch == _sessionEpoch) {
+      if (_canPublishMutation(epoch)) {
         _busy = false;
-        notifyListeners();
+        _notifyIfAlive();
       }
     }
   }
 
-  /// Submits the application (server-authorized). Replaces the held application
-  /// with the authoritative returned row on success. No-op on any DRAFT/NULL
-  /// mismatch (submit is valid only from DRAFT).
-  Future<BusinessApplicationSubmitResult?> submit(BusinessApplication? app) async {
-    if (_busy || app == null || app.status != BusinessApplicationStatus.draft) {
+  Future<BusinessApplicationSubmitResult?> submit(
+    BusinessApplication? app,
+  ) async {
+    if (_busy ||
+        _disposed ||
+        app == null ||
+        app.status != BusinessApplicationStatus.draft) {
       return null;
     }
     _busy = true;
     final epoch = _sessionEpoch;
-    notifyListeners();
+    _notifyIfAlive();
     try {
       final result = await _gateway.submitApplication(app);
-      if (epoch != _sessionEpoch) return null; // reset during in-flight write
+      if (!_canPublishMutation(epoch)) return null;
       if (result is BusinessApplicationSubmitted) {
-        _replace(result.application);
+        _acceptReplacement(result.application);
       }
       return result;
     } finally {
-      if (epoch == _sessionEpoch) {
+      if (_canPublishMutation(epoch)) {
         _busy = false;
-        notifyListeners();
+        _notifyIfAlive();
       }
     }
   }
 
-  /// Resubmits a NEEDS_CORRECTION application. Replaces with the authoritative
-  /// returned row on success. No-op otherwise (valid only from
-  /// NEEDS_CORRECTION).
   Future<BusinessApplicationSubmitResult?> resubmit(
     BusinessApplication? app,
   ) async {
     if (_busy ||
+        _disposed ||
         app == null ||
         app.status != BusinessApplicationStatus.needsCorrection) {
       return null;
     }
     _busy = true;
     final epoch = _sessionEpoch;
-    notifyListeners();
+    _notifyIfAlive();
     try {
       final result = await _gateway.resubmitApplication(app);
-      if (epoch != _sessionEpoch) return null; // reset during in-flight write
+      if (!_canPublishMutation(epoch)) return null;
       if (result is BusinessApplicationSubmitted) {
-        _replace(result.application);
+        _acceptReplacement(result.application);
       }
       return result;
     } finally {
-      if (epoch == _sessionEpoch) {
+      if (_canPublishMutation(epoch)) {
         _busy = false;
-        notifyListeners();
+        _notifyIfAlive();
       }
     }
   }
 
-  void _replace(BusinessApplication authoritative) {
-    final index = _applications.indexWhere((a) => a.id == authoritative.id);
+  void _acceptCreated(BusinessApplication authoritative) {
+    _applicationRevision++;
+    _applications = [
+      authoritative,
+      for (final app in _applications)
+        if (app.id != authoritative.id) app,
+    ];
+    _current = authoritative;
+    _detailApplicationId = authoritative.id;
+    _stampMutationData(authoritative.id, listChanged: true);
+  }
+
+  void _acceptReplacement(BusinessApplication authoritative) {
+    _applicationRevision++;
+    final index = _applications.indexWhere((app) => app.id == authoritative.id);
+    final listChanged = index >= 0;
     if (index >= 0) {
       _applications = [..._applications]..[index] = authoritative;
     }
     if (_current?.id == authoritative.id) {
       _current = authoritative;
+      _detailApplicationId = authoritative.id;
+    }
+    _stampMutationData(authoritative.id, listChanged: listChanged);
+  }
+
+  void _stampMutationData(String applicationId, {required bool listChanged}) {
+    final userId = _currentUserId;
+    if (userId == null) return;
+    final generation = _auth.generation;
+    if (listChanged) {
+      _listDataKey = (
+        userId: userId,
+        authGeneration: generation,
+        applicationRevision: _applicationRevision,
+      );
+      _hasListResult = true;
+      _listState = _applications.isEmpty
+          ? BusinessApplicationState.empty
+          : BusinessApplicationState.data;
+      _listReadPhase = _applications.isEmpty
+          ? BusinessRemoteReadPhase.authoritativeEmpty
+          : BusinessRemoteReadPhase.loaded;
+      _listReadFailure = null;
+    }
+
+    if (_current?.id == applicationId) {
+      _detailDataKey = (
+        userId: userId,
+        authGeneration: generation,
+        applicationId: applicationId,
+        applicationRevision: _applicationRevision,
+      );
+      _hasDetailResult = true;
+      _detailState = BusinessApplicationState.data;
+      _detailReadPhase = BusinessRemoteReadPhase.loaded;
+      _detailReadFailure = null;
     }
   }
 
-  /// V1-R08 (finding 8/9/10 + final pass 1) — clears all account-bound
-  /// application state on a canonical identity change AND advances the session
-  /// epoch so any still-in-flight read/write captured under the old epoch is
-  /// dropped on arrival (it can never publish into the new session). Wired
-  /// through the account-bound reset seam; the next read re-resolves for the
-  /// new session. Cross-account data never survives.
-  void resetForIdentityChange() {
-    _sessionEpoch++;
-    _state = BusinessApplicationState.loading;
+  bool _canPublishMutation(int epoch) => !_disposed && epoch == _sessionEpoch;
+
+  void _clearAccountData() {
+    _listReadEpoch++;
+    _detailReadEpoch++;
+    _activeListReads.clear();
+    _activeDetailReads.clear();
     _applications = const [];
     _current = null;
+    _detailApplicationId = null;
     _error = null;
+    _listReadFailure = null;
+    _detailReadFailure = null;
+    _listDataKey = null;
+    _detailDataKey = null;
+    _hasListResult = false;
+    _hasDetailResult = false;
+    _listReadPhase = BusinessRemoteReadPhase.idle;
+    _detailReadPhase = BusinessRemoteReadPhase.idle;
+  }
+
+  void resetForIdentityChange() {
+    if (_disposed) return;
+    _sessionEpoch++;
+    _applicationRevision = 0;
+    _clearAccountData();
+    _listState = BusinessApplicationState.loading;
+    _detailState = BusinessApplicationState.loading;
+    _activeLane = _ApplicationReadLane.list;
     _busy = false;
     notifyListeners();
   }
+
+  void _notifyIfAlive() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _sessionEpoch++;
+    _listReadEpoch++;
+    _detailReadEpoch++;
+    _activeListReads.clear();
+    _activeDetailReads.clear();
+    super.dispose();
+  }
 }
 
-/// V1-R04 — localized presentation resolution for a denial cause. Kept here
-/// (presentation layer) rather than in a widget so tests can assert mapping
-/// without building widgets. Arabic is the canonical UI language (the only
-/// active locale today), so Arabic strings are resolved directly.
 abstract final class BusinessApplicationCauseMessages {
   static String messageFor(BusinessApplicationRejectionCause cause) {
     switch (cause) {

@@ -1,9 +1,12 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/supabase_service.dart';
+import '../../../core/network/remote_operation_policy.dart';
 import '../domain/business_membership.dart';
 import '../domain/business_membership_gateway.dart';
+import '../domain/business_remote_read.dart';
 import '../domain/managed_business_summary.dart';
+import 'business_remote_read_classifier.dart';
 
 /// A6.1 — Production [BusinessMembershipGateway] backed by the shared Supabase
 /// client's PostgREST boundary.
@@ -21,6 +24,7 @@ class SupabaseBusinessMembershipGateway implements BusinessMembershipGateway {
   SupabaseBusinessMembershipGateway({
     SupabaseClient? client,
     required this.service,
+    this.readTimeout = RemoteOperationPolicy.read,
   }) : _injectedClient = client;
 
   // Injected for tests; production resolves lazily so merely constructing the
@@ -29,6 +33,7 @@ class SupabaseBusinessMembershipGateway implements BusinessMembershipGateway {
 
   /// The backend boundary used to decide availability.
   final SupabaseService service;
+  final Duration readTimeout;
 
   SupabaseClient get _client => _injectedClient ?? Supabase.instance.client;
 
@@ -56,13 +61,20 @@ class SupabaseBusinessMembershipGateway implements BusinessMembershipGateway {
 
   @override
   Future<ManagedBusinessListResult> listMyBusinesses() async {
-    if (!isAvailable) return const ManagedBusinessListUnavailable();
+    if (!isAvailable) {
+      return const ManagedBusinessListDenied(
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      );
+    }
     try {
-      final response = await _client.rpc('list_my_businesses');
+      final response = await runWithRemoteDeadline(
+        _client.rpc('list_my_businesses'),
+        timeout: readTimeout,
+      );
       final rows = _rpcRows(response);
       if (rows == null) {
         return const ManagedBusinessListDenied(
-          BusinessManagementReadCause.unexpected,
+          BusinessRemoteReadFailureKind.malformedResponse,
         );
       }
       final businesses = <ManagedBusinessSummary>[];
@@ -70,7 +82,7 @@ class SupabaseBusinessMembershipGateway implements BusinessMembershipGateway {
         final parsed = ManagedBusinessSummary.tryFromRow(row);
         if (parsed == null) {
           return const ManagedBusinessListDenied(
-            BusinessManagementReadCause.unexpected,
+            BusinessRemoteReadFailureKind.malformedResponse,
           );
         }
         businesses.add(parsed);
@@ -78,11 +90,11 @@ class SupabaseBusinessMembershipGateway implements BusinessMembershipGateway {
       return ManagedBusinessListAvailable(List.unmodifiable(businesses));
     } on PostgrestException catch (error) {
       return ManagedBusinessListDenied(
-        BusinessManagementReadCause.fromServerCode(error.code),
+        classifyBusinessRemoteReadFailure(error, p0AutIsAuthRestricted: true),
       );
-    } catch (_) {
-      return const ManagedBusinessListDenied(
-        BusinessManagementReadCause.unexpected,
+    } catch (error) {
+      return ManagedBusinessListDenied(
+        classifyBusinessRemoteReadFailure(error),
       );
     }
   }

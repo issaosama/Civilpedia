@@ -1,4 +1,5 @@
 import 'business_membership.dart';
+import 'business_remote_read.dart';
 import 'managed_business_summary.dart';
 
 /// A6.1 — Read-only boundary to the canonical business ownership model
@@ -69,7 +70,7 @@ class ManagedBusinessListAvailable extends ManagedBusinessListResult {
 class ManagedBusinessListDenied extends ManagedBusinessListResult {
   const ManagedBusinessListDenied(this.cause);
 
-  final BusinessManagementReadCause cause;
+  final BusinessRemoteReadFailureKind cause;
 }
 
 class ManagedBusinessListUnavailable extends ManagedBusinessListResult {

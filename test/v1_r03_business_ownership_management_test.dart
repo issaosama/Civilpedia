@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:civilpedia/features/business/domain/business_membership.dart';
 import 'package:civilpedia/features/business/domain/business_membership_capabilities.dart';
 import 'package:civilpedia/features/business/domain/business_membership_gateway.dart';
+import 'package:civilpedia/features/business/domain/business_remote_read.dart';
 import 'package:civilpedia/features/business/domain/business_role.dart';
 import 'package:civilpedia/features/business/domain/managed_business_summary.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,7 +42,7 @@ class _ManagementHarness {
     final userId = actor;
     if (userId == null) {
       return const ManagedBusinessListDenied(
-        BusinessManagementReadCause.unauthenticated,
+        BusinessRemoteReadFailureKind.authRestricted,
       );
     }
     final results = <ManagedBusinessSummary>[];
@@ -121,7 +122,7 @@ void main() {
         entities: entities,
       );
       final result = harness.listMyBusinesses() as ManagedBusinessListDenied;
-      expect(result.cause, BusinessManagementReadCause.unauthenticated);
+      expect(result.cause, BusinessRemoteReadFailureKind.authRestricted);
     });
 
     test('2. authenticated actor with zero memberships gets empty success', () {

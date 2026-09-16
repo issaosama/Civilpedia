@@ -107,8 +107,8 @@ class _CloudOnlyA implements PersonalProfileRemoteGateway {
   @override
   Future<CloudProfile?> fetchByUserId(String userId) async =>
       userId == 'uuid-0000-0000'
-          ? CloudProfile(userId: userId, roleCode: 'site_engineer')
-          : null;
+      ? CloudProfile(userId: userId, roleCode: 'site_engineer')
+      : null;
 
   @override
   Future<void> createProfile(CloudProfile profile) async {}
@@ -134,7 +134,8 @@ class _BusinessApps implements BusinessApplicationGateway {
   bool get isAvailable => true;
 
   @override
-  Future<List<BusinessApplication>> listOwnApplications(String userId) async => [
+  Future<List<BusinessApplication>> listOwnApplications(String userId) async =>
+      [
         BusinessApplication(
           id: 'app-A1',
           applicantUserId: userId,
@@ -147,42 +148,37 @@ class _BusinessApps implements BusinessApplicationGateway {
   Future<BusinessApplication?> getOwnApplication(
     String userId,
     String applicationId,
-  ) async =>
-      null;
+  ) async => null;
 
   @override
   Future<BusinessApplicationCreateResult> createNewDraft({
     required String currentUserId,
     Map<String, dynamic>? metadata,
-  }) async =>
-      const BusinessApplicationCreateDenied(
-        BusinessApplicationRejectionCause.guestUser,
-      );
+  }) async => const BusinessApplicationCreateDenied(
+    BusinessApplicationRejectionCause.guestUser,
+  );
 
   @override
   Future<BusinessApplicationCreateResult> createClaimDraft({
     required String currentUserId,
     required String targetEntityId,
-  }) async =>
-      const BusinessApplicationCreateDenied(
-        BusinessApplicationRejectionCause.guestUser,
-      );
+  }) async => const BusinessApplicationCreateDenied(
+    BusinessApplicationRejectionCause.guestUser,
+  );
 
   @override
   Future<BusinessApplicationSubmitResult> submitApplication(
     BusinessApplication application,
-  ) async =>
-      const BusinessApplicationSubmitDenied(
-        BusinessApplicationSubmitCause.unauthenticated,
-      );
+  ) async => const BusinessApplicationSubmitDenied(
+    BusinessApplicationSubmitCause.unauthenticated,
+  );
 
   @override
   Future<BusinessApplicationSubmitResult> resubmitApplication(
     BusinessApplication application,
-  ) async =>
-      const BusinessApplicationSubmitDenied(
-        BusinessApplicationSubmitCause.unauthenticated,
-      );
+  ) async => const BusinessApplicationSubmitDenied(
+    BusinessApplicationSubmitCause.unauthenticated,
+  );
 }
 
 /// Claim-target gateway returning identifiable A-branded candidates.
@@ -192,13 +188,13 @@ class _ClaimTargets implements BusinessClaimTargetGateway {
 
   @override
   Future<List<BusinessClaimTarget>> listUnclaimedTargets() async => const [
-        BusinessClaimTarget(
-          id: 'target-A1',
-          name: 'A Target',
-          entityType: 'company',
-          claimStatus: 'unclaimed',
-        ),
-      ];
+    BusinessClaimTarget(
+      id: 'target-A1',
+      name: 'A Target',
+      entityType: 'company',
+      claimStatus: 'unclaimed',
+    ),
+  ];
 }
 
 /// Production-faithful account-bound providers sharing ONE [AuthProvider],
@@ -226,7 +222,7 @@ class _SecondAccountHarness {
       gateway: _BusinessApps(),
       auth: auth,
     );
-    claims = BusinessClaimTargetProvider(gateway: _ClaimTargets());
+    claims = BusinessClaimTargetProvider(gateway: _ClaimTargets(), auth: auth);
   }
 
   late final FakeAuthGateway gateway;
@@ -326,55 +322,61 @@ void main() {
   // §5 Canonical session generation
   // ------------------------------------------------------------------
   group('session generation', () {
-    test('initial restore from guest does advance generation (guest→auth is a real identity change)', () async {
-      final provider = AuthProvider(
-        gateway: FakeAuthGateway(restoredSession: _sessionA),
-      );
-      expect(provider.generation, 0);
-      await provider.restoreSession();
-      expect(provider.generation, greaterThan(0));
-      provider.dispose();
-    });
+    test(
+      'initial restore from guest does advance generation (guest→auth is a real identity change)',
+      () async {
+        final provider = AuthProvider(
+          gateway: FakeAuthGateway(restoredSession: _sessionA),
+        );
+        expect(provider.generation, 0);
+        await provider.restoreSession();
+        expect(provider.generation, greaterThan(0));
+        provider.dispose();
+      },
+    );
 
-    test('sign-out + re-restore invalidates prior-generation captures', () async {
-      final provider = AuthProvider(
-        gateway: FakeAuthGateway(restoredSession: _sessionA),
-      );
-      await provider.restoreSession();
-      final genDuringAuth = provider.generation;
-      expect(
-        provider.isCurrentSession(
-          userId: _sessionA.userId,
-          generation: genDuringAuth,
-        ),
-        isTrue,
-      );
+    test(
+      'sign-out + re-restore invalidates prior-generation captures',
+      () async {
+        final provider = AuthProvider(
+          gateway: FakeAuthGateway(restoredSession: _sessionA),
+        );
+        await provider.restoreSession();
+        final genDuringAuth = provider.generation;
+        expect(
+          provider.isCurrentSession(
+            userId: _sessionA.userId,
+            generation: genDuringAuth,
+          ),
+          isTrue,
+        );
 
-      await provider.signOut();
-      final genAfterSignOut = provider.generation;
-      expect(genAfterSignOut, greaterThan(genDuringAuth));
-      expect(
-        provider.isCurrentSession(
-          userId: _sessionA.userId,
-          generation: genDuringAuth,
-        ),
-        isFalse,
-      );
+        await provider.signOut();
+        final genAfterSignOut = provider.generation;
+        expect(genAfterSignOut, greaterThan(genDuringAuth));
+        expect(
+          provider.isCurrentSession(
+            userId: _sessionA.userId,
+            generation: genDuringAuth,
+          ),
+          isFalse,
+        );
 
-      // Re-authenticating the SAME identity from guest is itself a new
-      // identity transition (guest → authenticated), so the epoch advances
-      // again (finding 6/19).
-      await provider.restoreSession();
-      expect(provider.generation, greaterThan(genAfterSignOut));
-      expect(
-        provider.isCurrentSession(
-          userId: _sessionA.userId,
-          generation: genDuringAuth,
-        ),
-        isFalse,
-      );
-      provider.dispose();
-    });
+        // Re-authenticating the SAME identity from guest is itself a new
+        // identity transition (guest → authenticated), so the epoch advances
+        // again (finding 6/19).
+        await provider.restoreSession();
+        expect(provider.generation, greaterThan(genAfterSignOut));
+        expect(
+          provider.isCurrentSession(
+            userId: _sessionA.userId,
+            generation: genDuringAuth,
+          ),
+          isFalse,
+        );
+        provider.dispose();
+      },
+    );
 
     test('advances on explicit sign-out', () async {
       final provider = AuthProvider(
@@ -406,27 +408,31 @@ void main() {
       await provider.restoreSession();
       final gen = provider.generation;
 
-      gateway.emit(AuthEvent(
-        type: AuthEventType.sessionRestored,
-        session: _sessionA,
-      ));
+      gateway.emit(
+        AuthEvent(type: AuthEventType.sessionRestored, session: _sessionA),
+      );
       await _settle();
       expect(provider.generation, gen);
       provider.dispose();
     });
 
-    test('different-user sign-in advances generation and replaces session', () async {
-      final gateway = FakeAuthGateway(restoredSession: _sessionA);
-      final provider = AuthProvider(gateway: gateway);
-      await provider.restoreSession();
-      final genA = provider.generation;
+    test(
+      'different-user sign-in advances generation and replaces session',
+      () async {
+        final gateway = FakeAuthGateway(restoredSession: _sessionA);
+        final provider = AuthProvider(gateway: gateway);
+        await provider.restoreSession();
+        final genA = provider.generation;
 
-      gateway.emit(AuthEvent(type: AuthEventType.signedIn, session: _sessionB));
-      await _settle();
-      expect(provider.generation, greaterThan(genA));
-      expect(provider.session, _sessionB);
-      provider.dispose();
-    });
+        gateway.emit(
+          AuthEvent(type: AuthEventType.signedIn, session: _sessionB),
+        );
+        await _settle();
+        expect(provider.generation, greaterThan(genA));
+        expect(provider.session, _sessionB);
+        provider.dispose();
+      },
+    );
   });
 
   // ------------------------------------------------------------------
@@ -489,22 +495,25 @@ void main() {
   // §6 Sign-in concurrency guard
   // ------------------------------------------------------------------
   group('sign-in concurrency', () {
-    test('concurrent signInWithGoogle calls reuse the pending future', () async {
-      final completer = Completer<AuthSession?>();
-      final gateway = _BlockingGateway(completer);
-      final provider = AuthProvider(gateway: gateway);
+    test(
+      'concurrent signInWithGoogle calls reuse the pending future',
+      () async {
+        final completer = Completer<AuthSession?>();
+        final gateway = _BlockingGateway(completer);
+        final provider = AuthProvider(gateway: gateway);
 
-      final future1 = provider.signInWithGoogle();
-      final future2 = provider.signInWithGoogle();
+        final future1 = provider.signInWithGoogle();
+        final future2 = provider.signInWithGoogle();
 
-      expect(gateway.signInCalls, 1); // only one underlying sign-in started
+        expect(gateway.signInCalls, 1); // only one underlying sign-in started
 
-      completer.complete(_sessionA);
-      await Future.wait([future1, future2]);
-      expect(provider.status, AuthStatus.authenticated);
-      expect(gateway.signInCalls, 1);
-      provider.dispose();
-    });
+        completer.complete(_sessionA);
+        await Future.wait([future1, future2]);
+        expect(provider.status, AuthStatus.authenticated);
+        expect(gateway.signInCalls, 1);
+        provider.dispose();
+      },
+    );
 
     test('sign-in while resolving reuses the pending operation', () async {
       final completer = Completer<AuthSession?>();
@@ -582,40 +591,48 @@ void main() {
       provider.dispose();
     });
 
-    test('tokenRefreshed event updates session without advancing generation', () async {
-      final gateway = FakeAuthGateway(restoredSession: _sessionA);
-      final provider = AuthProvider(gateway: gateway);
-      await provider.restoreSession();
-      final gen = provider.generation;
+    test(
+      'tokenRefreshed event updates session without advancing generation',
+      () async {
+        final gateway = FakeAuthGateway(restoredSession: _sessionA);
+        final provider = AuthProvider(gateway: gateway);
+        await provider.restoreSession();
+        final gen = provider.generation;
 
-      const refreshedSession = AuthSession(
-        userId: 'uuid-0000-0000',
-        email: 'a@civilpedia.com',
-        displayName: 'Engineer A',
-        photoUrl: 'https://new-photo.url',
-      );
-      gateway.emit(AuthEvent(
-        type: AuthEventType.tokenRefreshed,
-        session: refreshedSession,
-      ));
-      await _settle();
-      expect(provider.generation, gen);
-      expect(provider.session?.photoUrl, 'https://new-photo.url');
-      provider.dispose();
-    });
+        const refreshedSession = AuthSession(
+          userId: 'uuid-0000-0000',
+          email: 'a@civilpedia.com',
+          displayName: 'Engineer A',
+          photoUrl: 'https://new-photo.url',
+        );
+        gateway.emit(
+          AuthEvent(
+            type: AuthEventType.tokenRefreshed,
+            session: refreshedSession,
+          ),
+        );
+        await _settle();
+        expect(provider.generation, gen);
+        expect(provider.session?.photoUrl, 'https://new-photo.url');
+        provider.dispose();
+      },
+    );
 
-    test('sessionLost event transitions to guest and advances generation', () async {
-      final gateway = FakeAuthGateway(restoredSession: _sessionA);
-      final provider = AuthProvider(gateway: gateway);
-      await provider.restoreSession();
-      final gen = provider.generation;
+    test(
+      'sessionLost event transitions to guest and advances generation',
+      () async {
+        final gateway = FakeAuthGateway(restoredSession: _sessionA);
+        final provider = AuthProvider(gateway: gateway);
+        await provider.restoreSession();
+        final gen = provider.generation;
 
-      gateway.emit(const AuthEvent(type: AuthEventType.sessionLost));
-      await _settle();
-      expect(provider.status, AuthStatus.guest);
-      expect(provider.generation, greaterThan(gen));
-      provider.dispose();
-    });
+        gateway.emit(const AuthEvent(type: AuthEventType.sessionLost));
+        await _settle();
+        expect(provider.status, AuthStatus.guest);
+        expect(provider.generation, greaterThan(gen));
+        provider.dispose();
+      },
+    );
 
     test('sessionReplaced event notifies the account-bound reset', () async {
       var resetCount = 0;
@@ -626,10 +643,9 @@ void main() {
       );
       await provider.restoreSession();
 
-      gateway.emit(AuthEvent(
-        type: AuthEventType.sessionReplaced,
-        session: _sessionB,
-      ));
+      gateway.emit(
+        AuthEvent(type: AuthEventType.sessionReplaced, session: _sessionB),
+      );
       await _settle();
       expect(resetCount, greaterThanOrEqualTo(1));
       expect(provider.session, _sessionB);
@@ -710,9 +726,7 @@ void main() {
     // ----------------------------------------------------------------
     test('second-account conflict neutralizes the temporary session via '
         'gateway sign-out (F6)', () async {
-      final gateway = FakeAuthGateway(
-        restoredSession: fakeSessionOther,
-      );
+      final gateway = FakeAuthGateway(restoredSession: fakeSessionOther);
       final provider = AuthProvider(
         gateway: gateway,
         onPostAuth: (_) async => PostAuthOutcome.ownershipConflict,
@@ -754,30 +768,36 @@ void main() {
       provider.dispose();
     });
 
-    test('callback exception maps to retryableFailure, auth survives', () async {
-      final provider = AuthProvider(
-        gateway: FakeAuthGateway(restoredSession: _sessionA),
-        onPostAuth: (_) async => throw Exception('boom'),
-      );
+    test(
+      'callback exception maps to retryableFailure, auth survives',
+      () async {
+        final provider = AuthProvider(
+          gateway: FakeAuthGateway(restoredSession: _sessionA),
+          onPostAuth: (_) async => throw Exception('boom'),
+        );
 
-      await provider.restoreSession();
-      await _settle();
+        await provider.restoreSession();
+        await _settle();
 
-      expect(provider.status, AuthStatus.authenticated);
-      expect(provider.postAuthState, PostAuthLifecycleState.retryableFailure);
-      provider.dispose();
-    });
+        expect(provider.status, AuthStatus.authenticated);
+        expect(provider.postAuthState, PostAuthLifecycleState.retryableFailure);
+        provider.dispose();
+      },
+    );
 
-    test('no onPostAuth registered → pipeline reports success (no work)', () async {
-      final provider = AuthProvider(
-        gateway: FakeAuthGateway(restoredSession: _sessionA),
-      );
+    test(
+      'no onPostAuth registered → pipeline reports success (no work)',
+      () async {
+        final provider = AuthProvider(
+          gateway: FakeAuthGateway(restoredSession: _sessionA),
+        );
 
-      await provider.restoreSession();
-      await _settle();
-      expect(provider.postAuthState, PostAuthLifecycleState.success);
-      provider.dispose();
-    });
+        await provider.restoreSession();
+        await _settle();
+        expect(provider.postAuthState, PostAuthLifecycleState.success);
+        provider.dispose();
+      },
+    );
   });
 
   // ------------------------------------------------------------------
@@ -807,127 +827,127 @@ void main() {
       provider.dispose();
     });
 
-    test('a divergent account gets its OWN run; a stale A result is dropped',
-        () async {
-      final seen = <String>[];
-      final releaseA = Completer<void>();
-      final releaseB = Completer<void>();
-      final gateway = FakeAuthGateway();
-      final provider = AuthProvider(
-        gateway: gateway,
-        onPostAuth: (session) async {
-          seen.add(session.userId);
-          if (session.userId == _sessionA.userId) {
-            await releaseA.future;
+    test(
+      'a divergent account gets its OWN run; a stale A result is dropped',
+      () async {
+        final seen = <String>[];
+        final releaseA = Completer<void>();
+        final releaseB = Completer<void>();
+        final gateway = FakeAuthGateway();
+        final provider = AuthProvider(
+          gateway: gateway,
+          onPostAuth: (session) async {
+            seen.add(session.userId);
+            if (session.userId == _sessionA.userId) {
+              await releaseA.future;
+              return PostAuthOutcome.success;
+            }
+            await releaseB.future;
             return PostAuthOutcome.success;
-          }
-          await releaseB.future;
-          return PostAuthOutcome.success;
-        },
-      );
+          },
+        );
 
-      gateway.emit(
-        AuthEvent(type: AuthEventType.signedIn, session: _sessionA),
-      );
-      await _settle();
-      final genA = provider.generation;
-      expect(seen, contains(_sessionA.userId));
+        gateway.emit(
+          AuthEvent(type: AuthEventType.signedIn, session: _sessionA),
+        );
+        await _settle();
+        final genA = provider.generation;
+        expect(seen, contains(_sessionA.userId));
 
-      // A divergent account signs in while A's pipeline is still in flight:
-      // it must NOT reuse A's pending future (finding 7).
-      gateway.emit(
-        AuthEvent(type: AuthEventType.signedIn, session: _sessionB),
-      );
-      await _settle();
-      final genB = provider.generation;
-      expect(genB, greaterThan(genA));
-      expect(seen, contains(_sessionB.userId));
+        // A divergent account signs in while A's pipeline is still in flight:
+        // it must NOT reuse A's pending future (finding 7).
+        gateway.emit(
+          AuthEvent(type: AuthEventType.signedIn, session: _sessionB),
+        );
+        await _settle();
+        final genB = provider.generation;
+        expect(genB, greaterThan(genA));
+        expect(seen, contains(_sessionB.userId));
 
-      releaseB.complete();
-      await _settle();
-      expect(provider.status, AuthStatus.authenticated);
-      expect(provider.session, _sessionB);
-      expect(provider.postAuthState, PostAuthLifecycleState.success);
+        releaseB.complete();
+        await _settle();
+        expect(provider.status, AuthStatus.authenticated);
+        expect(provider.session, _sessionB);
+        expect(provider.postAuthState, PostAuthLifecycleState.success);
 
-      // A's abandoned run completes late at a stale generation: it must never
-      // overwrite B's session or lifecycle state.
-      releaseA.complete();
-      await _settle();
-      expect(provider.session, _sessionB);
-      expect(provider.postAuthState, PostAuthLifecycleState.success);
-      expect(
-        provider.isCurrentSession(
-          userId: _sessionA.userId,
-          generation: genA,
-        ),
-        isFalse,
-      );
-      expect(
-        provider.isCurrentSession(
-          userId: _sessionB.userId,
-          generation: genB,
-        ),
-        isTrue,
-      );
-      provider.dispose();
-    });
+        // A's abandoned run completes late at a stale generation: it must never
+        // overwrite B's session or lifecycle state.
+        releaseA.complete();
+        await _settle();
+        expect(provider.session, _sessionB);
+        expect(provider.postAuthState, PostAuthLifecycleState.success);
+        expect(
+          provider.isCurrentSession(userId: _sessionA.userId, generation: genA),
+          isFalse,
+        );
+        expect(
+          provider.isCurrentSession(userId: _sessionB.userId, generation: genB),
+          isTrue,
+        );
+        provider.dispose();
+      },
+    );
 
-    test('re-authenticating the SAME user from guest re-runs the pipeline',
-        () async {
-      var pipelineCalls = 0;
-      final gateway = FakeAuthGateway(restoredSession: _sessionA);
-      final provider = AuthProvider(
-        gateway: gateway,
-        onPostAuth: (_) async {
-          pipelineCalls++;
-          return PostAuthOutcome.success;
-        },
-      );
+    test(
+      're-authenticating the SAME user from guest re-runs the pipeline',
+      () async {
+        var pipelineCalls = 0;
+        final gateway = FakeAuthGateway(restoredSession: _sessionA);
+        final provider = AuthProvider(
+          gateway: gateway,
+          onPostAuth: (_) async {
+            pipelineCalls++;
+            return PostAuthOutcome.success;
+          },
+        );
 
-      await provider.restoreSession();
-      await _settle();
-      expect(pipelineCalls, 1);
+        await provider.restoreSession();
+        await _settle();
+        expect(pipelineCalls, 1);
 
-      await provider.signOut();
-      await _settle();
-      expect(provider.status, AuthStatus.guest);
+        await provider.signOut();
+        await _settle();
+        expect(provider.status, AuthStatus.guest);
 
-      // Guest → authenticated is a NEW epoch, so the pipeline re-runs for the
-      // same identity instead of reusing the settled (user, generation) pair.
-      await provider.restoreSession();
-      await _settle();
-      expect(pipelineCalls, 2);
-      expect(provider.status, AuthStatus.authenticated);
-      provider.dispose();
-    });
+        // Guest → authenticated is a NEW epoch, so the pipeline re-runs for the
+        // same identity instead of reusing the settled (user, generation) pair.
+        await provider.restoreSession();
+        await _settle();
+        expect(pipelineCalls, 2);
+        expect(provider.status, AuthStatus.authenticated);
+        provider.dispose();
+      },
+    );
   });
 
   // ------------------------------------------------------------------
   // §10 Post-auth retry (finding 9)
   // ------------------------------------------------------------------
   group('post-auth retry', () {
-    test('retries only a current authenticated session with retryableFailure',
-        () async {
-      var runCount = 0;
-      final provider = AuthProvider(
-        gateway: FakeAuthGateway(restoredSession: _sessionA),
-        onPostAuth: (_) async {
-          runCount++;
-          return PostAuthOutcome.retryableFailure;
-        },
-      );
+    test(
+      'retries only a current authenticated session with retryableFailure',
+      () async {
+        var runCount = 0;
+        final provider = AuthProvider(
+          gateway: FakeAuthGateway(restoredSession: _sessionA),
+          onPostAuth: (_) async {
+            runCount++;
+            return PostAuthOutcome.retryableFailure;
+          },
+        );
 
-      await provider.restoreSession();
-      await _settle();
-      expect(runCount, 1);
-      expect(provider.postAuthState, PostAuthLifecycleState.retryableFailure);
+        await provider.restoreSession();
+        await _settle();
+        expect(runCount, 1);
+        expect(provider.postAuthState, PostAuthLifecycleState.retryableFailure);
 
-      await provider.retryPostAuth();
-      await _settle();
-      expect(runCount, 2);
-      expect(provider.postAuthState, PostAuthLifecycleState.retryableFailure);
-      provider.dispose();
-    });
+        await provider.retryPostAuth();
+        await _settle();
+        expect(runCount, 2);
+        expect(provider.postAuthState, PostAuthLifecycleState.retryableFailure);
+        provider.dispose();
+      },
+    );
 
     test('retry is a no-op when the pipeline already succeeded', () async {
       var runCount = 0;
@@ -1010,10 +1030,9 @@ void main() {
       );
 
       await provider.restoreSession();
-      gateway.emit(const AuthEvent(
-        type: AuthEventType.tokenRefreshed,
-        session: _sessionA,
-      ));
+      gateway.emit(
+        const AuthEvent(type: AuthEventType.tokenRefreshed, session: _sessionA),
+      );
       await _settle();
       expect(resetCount, 0);
       provider.dispose();
@@ -1025,68 +1044,76 @@ void main() {
   // clearance (behavioral, production-free).
   // ------------------------------------------------------------------
   group('second-account conflict (F6)', () {
-    test('B: bootstrap suppressed, A data cleared, cleanup signOut succeeds',
-        () async {
-      final h = _SecondAccountHarness();
+    test(
+      'B: bootstrap suppressed, A data cleared, cleanup signOut succeeds',
+      () async {
+        final h = _SecondAccountHarness();
 
-      // Stage A: authenticate and install identifiable A data.
-      await h.auth.restoreSession();
-      await _settle();
-      await h.profile.ensureCloudProfileLoaded();
-      await h.business.loadApplications();
-      await h.claims.reload();
+        // Stage A: authenticate and install identifiable A data.
+        await h.auth.restoreSession();
+        await _settle();
+        await h.profile.ensureCloudProfileLoaded();
+        await h.business.loadApplications();
+        await h.claims.reload();
 
-      expect(h.auth.status, AuthStatus.authenticated);
-      expect(h.auth.isLoggedIn, isTrue);
-      expect(h.profile.authenticatedProfile?.userId, _sessionA.userId);
-      expect(h.profile.isCloudBound, isTrue);
-      expect(h.business.applications, isNotEmpty);
-      expect(h.claims.targets, isNotEmpty);
+        expect(h.auth.status, AuthStatus.authenticated);
+        expect(h.auth.isLoggedIn, isTrue);
+        expect(h.profile.authenticatedProfile?.userId, _sessionA.userId);
+        expect(h.profile.isCloudBound, isTrue);
+        expect(h.business.applications, isNotEmpty);
+        expect(h.claims.targets, isNotEmpty);
 
-      // Stage B: a SECOND account signs in on the same device.
-      h.gateway.emit(const AuthEvent(
-        type: AuthEventType.signedIn,
-        session: _sessionB,
-      ));
-      await _settle(ticks: 8);
+        // Stage B: a SECOND account signs in on the same device.
+        h.gateway.emit(
+          const AuthEvent(type: AuthEventType.signedIn, session: _sessionB),
+        );
+        await _settle(ticks: 8);
 
-      // B bootstrap was suppressed BEFORE it could run.
-      expect(h.bootstrapUsers.where((id) => id == _sessionB.userId), isEmpty,
-          reason: 'the rejected second account must NEVER run bootstrap');
+        // B bootstrap was suppressed BEFORE it could run.
+        expect(
+          h.bootstrapUsers.where((id) => id == _sessionB.userId),
+          isEmpty,
+          reason: 'the rejected second account must NEVER run bootstrap',
+        );
 
-      // The temporary B session cleanup sign-out was invoked.
-      expect(h.gateway.signOutCalls, greaterThanOrEqualTo(1));
+        // The temporary B session cleanup sign-out was invoked.
+        expect(h.gateway.signOutCalls, greaterThanOrEqualTo(1));
 
-      // The account-bound reset seam fired and cleared A's real data.
-      expect(h.resetCount, greaterThanOrEqualTo(1));
-      expect(h.profile.authenticatedProfile, isNull);
-      expect(h.profile.isCloudBound, isFalse);
-      expect(h.business.applications, isEmpty,
-          reason: "A's business-application state must not survive");
-      expect(h.claims.targets, isEmpty,
-          reason: "A's claim-candidate state must not survive");
+        // The account-bound reset seam fired and cleared A's real data.
+        expect(h.resetCount, greaterThanOrEqualTo(1));
+        expect(h.profile.authenticatedProfile, isNull);
+        expect(h.profile.isCloudBound, isFalse);
+        expect(
+          h.business.applications,
+          isEmpty,
+          reason: "A's business-application state must not survive",
+        );
+        expect(
+          h.claims.targets,
+          isEmpty,
+          reason: "A's claim-candidate state must not survive",
+        );
 
-      // The device is held in the blocking ownership-conflict state, NOT a
-      // usable authenticated B state, so no B-differentiated UI can render.
-      expect(h.auth.status, AuthStatus.ownershipConflict);
-      expect(h.auth.isOwnershipBlocked, isTrue);
-      expect(h.auth.isLoggedIn, isFalse);
-      expect(h.auth.postAuthState, PostAuthLifecycleState.ownershipConflict);
+        // The device is held in the blocking ownership-conflict state, NOT a
+        // usable authenticated B state, so no B-differentiated UI can render.
+        expect(h.auth.status, AuthStatus.ownershipConflict);
+        expect(h.auth.isOwnershipBlocked, isTrue);
+        expect(h.auth.isLoggedIn, isFalse);
+        expect(h.auth.postAuthState, PostAuthLifecycleState.ownershipConflict);
 
-      // No B private state was installed anywhere.
-      expect(h.business.applications, isEmpty);
-      expect(h.business.current, isNull);
-      expect(h.claims.targets, isEmpty);
-      expect(h.profile.authenticatedProfile, isNull);
+        // No B private state was installed anywhere.
+        expect(h.business.applications, isEmpty);
+        expect(h.business.current, isNull);
+        expect(h.claims.targets, isEmpty);
+        expect(h.profile.authenticatedProfile, isNull);
 
-      h.dispose();
-    });
+        h.dispose();
+      },
+    );
 
     test('B: cleanup signOut FAILURE still clears A and stays open-ended '
         'blocked without any auto bootstrap', () async {
-      final h = _SecondAccountHarness(
-        signOutError: Exception('network down'),
-      );
+      final h = _SecondAccountHarness(signOutError: Exception('network down'));
 
       // Stage A: authenticate and install identifiable A data.
       await h.auth.restoreSession();
@@ -1098,15 +1125,17 @@ void main() {
       expect(h.auth.status, AuthStatus.authenticated);
 
       // Stage B: second account arrival while the cleanup cannot complete.
-      h.gateway.emit(const AuthEvent(
-        type: AuthEventType.signedIn,
-        session: _sessionB,
-      ));
+      h.gateway.emit(
+        const AuthEvent(type: AuthEventType.signedIn, session: _sessionB),
+      );
       await _settle(ticks: 8);
 
       // Even with the sign-out failing, B's bootstrap never ran.
-      expect(h.bootstrapUsers.where((id) => id == _sessionB.userId), isEmpty,
-          reason: 'a failed temp-session cleanup must NOT re-enable bootstrap');
+      expect(
+        h.bootstrapUsers.where((id) => id == _sessionB.userId),
+        isEmpty,
+        reason: 'a failed temp-session cleanup must NOT re-enable bootstrap',
+      );
 
       // The account-bound reset still wiped A's real data (fail-closed).
       expect(h.resetCount, greaterThanOrEqualTo(1));

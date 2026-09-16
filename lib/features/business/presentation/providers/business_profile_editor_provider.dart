@@ -8,9 +8,22 @@ import '../../../profile/domain/service_business_profile.dart';
 import '../../domain/business_contact_type.dart';
 import '../../domain/business_profile_management_gateway.dart';
 import '../../domain/business_profile_validator.dart';
+import '../../domain/business_remote_read.dart';
 import '../../domain/managed_business_profile.dart';
 import '../../domain/managed_business_profile_draft.dart';
 import '../../domain/managed_selectable_options.dart';
+
+typedef _ManagedProfileReadKey = ({
+  String userId,
+  int authGeneration,
+  String entityId,
+  int profileRevision,
+});
+typedef _EditorAuxiliaryReadKey = ({
+  String userId,
+  int authGeneration,
+  String entityId,
+});
 
 /// V1-R06 — UI lifecycle for the public business-profile editor.
 enum BusinessProfileEditorState {
@@ -50,9 +63,9 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     required BusinessProfileManagementGateway gateway,
     required CloudDirectoryRepository directoryRepository,
     required AuthProvider auth,
-  })  : _gateway = gateway,
-        _directoryRepository = directoryRepository,
-        _auth = auth;
+  }) : _gateway = gateway,
+       _directoryRepository = directoryRepository,
+       _auth = auth;
 
   final BusinessProfileManagementGateway _gateway;
   final CloudDirectoryRepository _directoryRepository;
@@ -75,6 +88,22 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
 
   bool _directoryRefreshFailed = false;
 
+  BusinessRemoteReadPhase _profileReadPhase = BusinessRemoteReadPhase.idle;
+  BusinessRemoteReadFailureKind? _profileReadFailure;
+  BusinessRemoteReadPhase _auxiliaryReadPhase = BusinessRemoteReadPhase.idle;
+  BusinessRemoteReadFailureKind? _auxiliaryReadFailure;
+  _ManagedProfileReadKey? _profileDataKey;
+  _EditorAuxiliaryReadKey? _auxiliaryDataKey;
+  bool _hasProfileResult = false;
+  bool _hasAuxiliaryResult = false;
+
+  int _profileRevision = 0;
+  int _profileReadEpoch = 0;
+  int _auxiliaryReadEpoch = 0;
+  final Map<_ManagedProfileReadKey, Future<void>> _activeProfileReads = {};
+  final Map<_EditorAuxiliaryReadKey, Future<void>> _activeAuxiliaryReads = {};
+  bool _disposed = false;
+
   /// Canonical session epoch (V1-R08 final pass, finding 1). Advanced on every
   /// account-bound reset so a load/save/directory refresh captured under the
   /// old session is dropped on arrival and can never publish into the new
@@ -84,6 +113,14 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
   String? get entityId => _entityId;
   BusinessProfileEditorState get state => _state;
   BusinessProfileManagementCause? get lastErrorCause => _lastErrorCause;
+  BusinessRemoteReadPhase get profileReadPhase => _profileReadPhase;
+  BusinessRemoteReadFailureKind? get profileReadFailure => _profileReadFailure;
+  BusinessRemoteReadPhase get auxiliaryReadPhase => _auxiliaryReadPhase;
+  BusinessRemoteReadFailureKind? get auxiliaryReadFailure =>
+      _auxiliaryReadFailure;
+  int get profileRevision => _profileRevision;
+  int get activeProfileReadCount => _activeProfileReads.length;
+  int get activeAuxiliaryReadCount => _activeAuxiliaryReads.length;
 
   ManagedBusinessProfile? get profile => _profile;
   ManagedBusinessProfileDraft? get draft => _draft;
@@ -152,80 +189,268 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     return false;
   }
 
-  /// Loads the authoritative profile + taxonomy for [entityId].
+  /// Loads the profile and auxiliary taxonomies through independent lanes.
   Future<void> load(String entityId) async {
-    final epoch = _sessionEpoch;
+    final identityChanged = _entityId != entityId;
     _entityId = entityId;
 
     if (!_isAuthenticated) {
+      _invalidateReadLanes();
       _state = BusinessProfileEditorState.signInRequired;
       _clearData();
-      notifyListeners();
+      _notifyIfAlive();
       return;
     }
 
-    if (!_gateway.isAvailable) {
-      _state = BusinessProfileEditorState.unavailable;
+    if (identityChanged) {
+      _invalidateReadLanes();
       _clearData();
-      notifyListeners();
-      return;
     }
 
-    _state = BusinessProfileEditorState.loading;
+    final userId = _currentUserId!;
+    final generation = _auth.generation;
+    final profileKey = (
+      userId: userId,
+      authGeneration: generation,
+      entityId: entityId,
+      profileRevision: _profileRevision,
+    );
+    final auxiliaryKey = (
+      userId: userId,
+      authGeneration: generation,
+      entityId: entityId,
+    );
+
+    await Future.wait<void>([
+      _startProfileRead(profileKey),
+      _startAuxiliaryRead(auxiliaryKey),
+    ]);
+  }
+
+  Future<void> _startProfileRead(_ManagedProfileReadKey key) {
+    final active = _activeProfileReads[key];
+    if (active != null) return active;
+
+    final hasMatchingKnownGood = _hasProfileResult && _profileDataKey == key;
+    _profileReadFailure = null;
     _lastErrorCause = null;
-    _clearData();
-    notifyListeners();
+    _profileReadPhase = hasMatchingKnownGood
+        ? BusinessRemoteReadPhase.refreshing
+        : BusinessRemoteReadPhase.loading;
+    _state = hasMatchingKnownGood
+        ? BusinessProfileEditorState.data
+        : BusinessProfileEditorState.loading;
+    _notifyIfAlive();
 
-    // Parallel authoritative profile + taxonomy reads. Selector failures are
-    // non-fatal to keep the editable profile available.
-    ManagedProfileReadResult? profileResult;
-    List<ManagedSelectableCategory>? categories;
-    List<ManagedSelectableRegion>? regions;
+    final requestEpoch = ++_profileReadEpoch;
+    late final Future<void> operation;
+    operation = _performProfileRead(key, requestEpoch).whenComplete(() {
+      if (identical(_activeProfileReads[key], operation)) {
+        _activeProfileReads.remove(key);
+      }
+    });
+    _activeProfileReads[key] = operation;
+    return operation;
+  }
+
+  Future<void> _performProfileRead(
+    _ManagedProfileReadKey key,
+    int requestEpoch,
+  ) async {
+    ManagedProfileReadResult result;
     try {
-      final results = await Future.wait([
-        _gateway.readManagedProfile(entityId),
-        _gateway.loadActiveCategories().then<List<ManagedSelectableCategory>?>(
-          (value) => value,
-        ).catchError((_) => null),
-        _gateway.loadActiveRegions().then<List<ManagedSelectableRegion>?>(
-          (value) => value,
-        ).catchError((_) => null),
-      ]);
-      if (epoch != _sessionEpoch) return; // reset during in-flight load
-      profileResult = results[0] as ManagedProfileReadResult?;
-      categories = results[1] as List<ManagedSelectableCategory>?;
-      regions = results[2] as List<ManagedSelectableRegion>?;
-    } catch (_) {
-      if (epoch != _sessionEpoch) return;
-      _state = BusinessProfileEditorState.error;
-      _lastErrorCause = BusinessProfileManagementCause.network;
-      notifyListeners();
-      return;
+      result = await _gateway.readManagedProfile(key.entityId);
+    } catch (error) {
+      result = ManagedProfileReadFailed(
+        error is BusinessRemoteReadException
+            ? error.kind
+            : BusinessRemoteReadFailureKind.unexpected,
+      );
     }
+    if (!_canPublishProfile(key, requestEpoch)) return;
 
-    _selectableCategories = categories ?? const [];
-    _categoriesCatalogError = categories == null;
-    _selectableRegions = regions ?? const [];
-    _regionsCatalogError = regions == null;
-
-    switch (profileResult) {
-      case null:
-        _state = BusinessProfileEditorState.error;
-        _lastErrorCause = BusinessProfileManagementCause.unexpected;
+    switch (result) {
       case ManagedProfileReadSuccess(:final profile):
-        _profile = profile;
-        _draft = ManagedBusinessProfileDraft.fromProfile(profile);
-        _originalDraft = _draft;
-        _state = BusinessProfileEditorState.data;
-        _lastErrorCause = null;
-        _validate();
-      case ManagedProfileReadDenied(:final cause):
+        if (profile.id != key.entityId) {
+          _publishProfileFailure(
+            key,
+            BusinessRemoteReadFailureKind.malformedResponse,
+          );
+        } else {
+          _profile = profile;
+          _draft = ManagedBusinessProfileDraft.fromProfile(profile);
+          _originalDraft = _draft;
+          _profileDataKey = key;
+          _hasProfileResult = true;
+          _profileReadFailure = null;
+          _profileReadPhase = BusinessRemoteReadPhase.loaded;
+          _state = BusinessProfileEditorState.data;
+          _lastErrorCause = null;
+          _validate();
+        }
+      case ManagedProfileReadNotFound():
+        _clearProfileOnly();
+        _profileReadPhase = BusinessRemoteReadPhase.authoritativeNotFound;
+        _lastErrorCause = BusinessProfileManagementCause.notFound;
         _state = BusinessProfileEditorState.error;
-        _lastErrorCause = cause;
+      case ManagedProfileReadFailed(:final cause):
+        _publishProfileFailure(key, cause);
+      case ManagedProfileReadDenied(:final cause):
+        if (cause == BusinessProfileManagementCause.notFound) {
+          _clearProfileOnly();
+          _profileReadPhase = BusinessRemoteReadPhase.authoritativeNotFound;
+          _lastErrorCause = BusinessProfileManagementCause.notFound;
+          _state = BusinessProfileEditorState.error;
+        } else {
+          _publishProfileFailure(key, _readFailureForLegacyCause(cause));
+        }
       case ManagedProfileReadUnavailable():
-        _state = BusinessProfileEditorState.unavailable;
+        _publishProfileFailure(
+          key,
+          BusinessRemoteReadFailureKind.serviceUnavailable,
+        );
     }
-    notifyListeners();
+    _notifyIfAlive();
+  }
+
+  Future<void> _startAuxiliaryRead(_EditorAuxiliaryReadKey key) {
+    final active = _activeAuxiliaryReads[key];
+    if (active != null) return active;
+
+    final hasMatchingKnownGood =
+        _hasAuxiliaryResult && _auxiliaryDataKey == key;
+    _auxiliaryReadFailure = null;
+    _auxiliaryReadPhase = hasMatchingKnownGood
+        ? BusinessRemoteReadPhase.refreshing
+        : BusinessRemoteReadPhase.loading;
+    final requestEpoch = ++_auxiliaryReadEpoch;
+    late final Future<void> operation;
+    operation = _performAuxiliaryRead(key, requestEpoch).whenComplete(() {
+      if (identical(_activeAuxiliaryReads[key], operation)) {
+        _activeAuxiliaryReads.remove(key);
+      }
+    });
+    _activeAuxiliaryReads[key] = operation;
+    return operation;
+  }
+
+  Future<void> _performAuxiliaryRead(
+    _EditorAuxiliaryReadKey key,
+    int requestEpoch,
+  ) async {
+    try {
+      final results = await Future.wait<Object>([
+        _gateway.loadActiveCategories(),
+        _gateway.loadActiveRegions(),
+      ]);
+      if (!_canPublishAuxiliary(key, requestEpoch)) return;
+      _selectableCategories = List.unmodifiable(
+        results[0] as List<ManagedSelectableCategory>,
+      );
+      _selectableRegions = List.unmodifiable(
+        results[1] as List<ManagedSelectableRegion>,
+      );
+      _categoriesCatalogError = false;
+      _regionsCatalogError = false;
+      _auxiliaryDataKey = key;
+      _hasAuxiliaryResult = true;
+      _auxiliaryReadFailure = null;
+      _auxiliaryReadPhase = BusinessRemoteReadPhase.loaded;
+      if (_draft != null) _validate();
+    } catch (error) {
+      if (!_canPublishAuxiliary(key, requestEpoch)) return;
+      _categoriesCatalogError = true;
+      _regionsCatalogError = true;
+      _auxiliaryReadFailure = error is BusinessRemoteReadException
+          ? error.kind
+          : BusinessRemoteReadFailureKind.unexpected;
+      _auxiliaryReadPhase = BusinessRemoteReadPhase.failed;
+      if (!(_hasAuxiliaryResult && _auxiliaryDataKey == key)) {
+        _selectableCategories = const [];
+        _selectableRegions = const [];
+      }
+    }
+    _notifyIfAlive();
+  }
+
+  void _publishProfileFailure(
+    _ManagedProfileReadKey key,
+    BusinessRemoteReadFailureKind cause,
+  ) {
+    _profileReadFailure = cause;
+    _profileReadPhase = BusinessRemoteReadPhase.failed;
+    _lastErrorCause = _legacyCauseForReadFailure(cause);
+    if (_hasProfileResult && _profileDataKey == key) {
+      _state = BusinessProfileEditorState.data;
+    } else {
+      _clearProfileOnly();
+      _state = cause == BusinessRemoteReadFailureKind.serviceUnavailable
+          ? BusinessProfileEditorState.unavailable
+          : BusinessProfileEditorState.error;
+    }
+  }
+
+  bool _canPublishProfile(_ManagedProfileReadKey key, int requestEpoch) {
+    return !_disposed &&
+        requestEpoch == _profileReadEpoch &&
+        _entityId == key.entityId &&
+        _profileRevision == key.profileRevision &&
+        _isCurrentAuth(key.userId, key.authGeneration);
+  }
+
+  bool _canPublishAuxiliary(_EditorAuxiliaryReadKey key, int requestEpoch) {
+    return !_disposed &&
+        requestEpoch == _auxiliaryReadEpoch &&
+        _entityId == key.entityId &&
+        _isCurrentAuth(key.userId, key.authGeneration);
+  }
+
+  bool _isCurrentAuth(String userId, int generation) {
+    return _currentUserId == userId &&
+        _auth.generation == generation &&
+        _auth.isCurrentSession(userId: userId, generation: generation);
+  }
+
+  static BusinessRemoteReadFailureKind _readFailureForLegacyCause(
+    BusinessProfileManagementCause cause,
+  ) {
+    return switch (cause) {
+      BusinessProfileManagementCause.unauthenticated =>
+        BusinessRemoteReadFailureKind.authRestricted,
+      BusinessProfileManagementCause.permissionDenied =>
+        BusinessRemoteReadFailureKind.permissionDenied,
+      BusinessProfileManagementCause.network =>
+        BusinessRemoteReadFailureKind.network,
+      BusinessProfileManagementCause.unavailable =>
+        BusinessRemoteReadFailureKind.serviceUnavailable,
+      _ => BusinessRemoteReadFailureKind.unexpected,
+    };
+  }
+
+  static BusinessProfileManagementCause _legacyCauseForReadFailure(
+    BusinessRemoteReadFailureKind cause,
+  ) {
+    return switch (cause) {
+      BusinessRemoteReadFailureKind.authRestricted =>
+        BusinessProfileManagementCause.unauthenticated,
+      BusinessRemoteReadFailureKind.permissionDenied =>
+        BusinessProfileManagementCause.permissionDenied,
+      BusinessRemoteReadFailureKind.network ||
+      BusinessRemoteReadFailureKind.timeout =>
+        BusinessProfileManagementCause.network,
+      BusinessRemoteReadFailureKind.serviceUnavailable =>
+        BusinessProfileManagementCause.unavailable,
+      _ => BusinessProfileManagementCause.unexpected,
+    };
+  }
+
+  void _clearProfileOnly() {
+    _profile = null;
+    _draft = null;
+    _originalDraft = null;
+    _lastValidation = null;
+    _profileDataKey = null;
+    _hasProfileResult = false;
   }
 
   void _clearData() {
@@ -238,6 +463,12 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     _categoriesCatalogError = false;
     _regionsCatalogError = false;
     _directoryRefreshFailed = false;
+    _profileReadFailure = null;
+    _auxiliaryReadFailure = null;
+    _profileDataKey = null;
+    _auxiliaryDataKey = null;
+    _hasProfileResult = false;
+    _hasAuxiliaryResult = false;
   }
 
   BusinessProfileValidationResult _validate() {
@@ -333,8 +564,8 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
           isPrimary: i == index
               ? isPrimary
               : (draft.contacts[i].type == target.type
-                  ? false
-                  : draft.contacts[i].isPrimary),
+                    ? false
+                    : draft.contacts[i].isPrimary),
         ),
     ];
     _draft = draft.copyWith(contacts: updated);
@@ -348,9 +579,7 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     final draft = _draft;
     if (draft == null || isSaving) return;
     final cleared = location == null || location.isEmpty;
-    _draft = draft.copyWith(
-      primaryLocation: () => cleared ? null : location,
-    );
+    _draft = draft.copyWith(primaryLocation: () => cleared ? null : location);
     _validate();
     notifyListeners();
   }
@@ -362,8 +591,8 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     // Preserve raw typed text (including interior/trailing spaces) while still
     // treating an all-whitespace value as "no address".
     final trimmedForEmptyCheck = value?.trim();
-    final address = (trimmedForEmptyCheck == null ||
-            trimmedForEmptyCheck.isEmpty)
+    final address =
+        (trimmedForEmptyCheck == null || trimmedForEmptyCheck.isEmpty)
         ? null
         : value;
     final next = ManagedBusinessLocation(
@@ -376,9 +605,7 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
       latitude: location?.latitude,
       longitude: location?.longitude,
     );
-    _draft = draft.copyWith(
-      primaryLocation: () => next.isEmpty ? null : next,
-    );
+    _draft = draft.copyWith(primaryLocation: () => next.isEmpty ? null : next);
     _validate();
     notifyListeners();
   }
@@ -390,9 +617,9 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     final region = regionId == null || regionId.isEmpty
         ? null
         : _selectableRegions.cast<ManagedSelectableRegion?>().firstWhere(
-              (r) => r?.id == regionId,
-              orElse: () => null,
-            );
+            (r) => r?.id == regionId,
+            orElse: () => null,
+          );
     final next = ManagedBusinessLocation(
       id: location?.id ?? '',
       regionId: region?.id,
@@ -403,9 +630,7 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
       latitude: location?.latitude,
       longitude: location?.longitude,
     );
-    _draft = draft.copyWith(
-      primaryLocation: () => next.isEmpty ? null : next,
-    );
+    _draft = draft.copyWith(primaryLocation: () => next.isEmpty ? null : next);
     _validate();
     notifyListeners();
   }
@@ -424,14 +649,15 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
       latitude: latitude,
       longitude: longitude,
     );
-    _draft = draft.copyWith(
-      primaryLocation: () => next.isEmpty ? null : next,
-    );
+    _draft = draft.copyWith(primaryLocation: () => next.isEmpty ? null : next);
     _validate();
     notifyListeners();
   }
 
-  void addCategory(ManagedSelectableCategory category, {bool isPrimary = false}) {
+  void addCategory(
+    ManagedSelectableCategory category, {
+    bool isPrimary = false,
+  }) {
     final draft = _draft;
     if (draft == null || isSaving) return;
     if (draft.categories.any((c) => c.categoryId == category.id)) return;
@@ -442,9 +668,7 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
       nameEn: category.nameEn,
       isPrimary: isPrimary,
     );
-    _draft = draft.copyWith(
-      categories: [...draft.categories, assignment],
-    );
+    _draft = draft.copyWith(categories: [...draft.categories, assignment]);
     _validate();
     notifyListeners();
   }
@@ -453,7 +677,9 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     final draft = _draft;
     if (draft == null || isSaving) return;
     _draft = draft.copyWith(
-      categories: draft.categories.where((c) => c.categoryId != categoryId).toList(),
+      categories: draft.categories
+          .where((c) => c.categoryId != categoryId)
+          .toList(),
     );
     _validate();
     notifyListeners();
@@ -497,7 +723,14 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     final draft = _draft;
     final profile = _profile;
     final entityId = _entityId;
-    if (draft == null || profile == null || entityId == null || isBusy) {
+    final userId = _currentUserId;
+    final generation = _auth.generation;
+    if (draft == null ||
+        profile == null ||
+        entityId == null ||
+        userId == null ||
+        isBusy ||
+        _disposed) {
       return false;
     }
 
@@ -518,33 +751,58 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
       draft: draft,
     );
 
-    if (epoch != _sessionEpoch) return false; // reset during in-flight save
+    if (!_canPublishMutation(epoch, userId, generation, entityId)) return false;
 
     switch (result) {
       case ManagedProfileUpdateSuccess(:final profile):
+        // Advance before publishing the accepted projection so every older
+        // read is stale even while the best-effort Directory refresh awaits.
+        _profileRevision++;
         _profile = profile;
         _draft = ManagedBusinessProfileDraft.fromProfile(profile);
         _originalDraft = _draft;
+        _profileDataKey = (
+          userId: userId,
+          authGeneration: generation,
+          entityId: entityId,
+          profileRevision: _profileRevision,
+        );
+        _hasProfileResult = true;
+        _profileReadPhase = BusinessRemoteReadPhase.loaded;
+        _profileReadFailure = null;
         _lastValidation = null;
         _lastErrorCause = null;
         _directoryRefreshFailed = false;
         _state = BusinessProfileEditorState.saveSuccess;
+        var refreshFailed = false;
         try {
           await _directoryRepository.refresh();
         } catch (_) {
-          // Public Directory refresh is best-effort coherency. The management
-          // save already succeeded and the authoritative projection is
-          // installed; surface a non-blocking warning so the user can retry.
-          _directoryRefreshFailed = true;
+          refreshFailed = true;
         }
-        notifyListeners();
+        if (_canPublishMutation(epoch, userId, generation, entityId)) {
+          _directoryRefreshFailed = refreshFailed;
+          _notifyIfAlive();
+        }
         return true;
       case ManagedProfileUpdateDenied(:final cause):
         _lastErrorCause = cause;
         _state = BusinessProfileEditorState.data;
-        notifyListeners();
+        _notifyIfAlive();
         return false;
     }
+  }
+
+  bool _canPublishMutation(
+    int epoch,
+    String userId,
+    int generation,
+    String entityId,
+  ) {
+    return !_disposed &&
+        epoch == _sessionEpoch &&
+        _entityId == entityId &&
+        _isCurrentAuth(userId, generation);
   }
 
   /// Retries the public Directory cache refresh. This does NOT resubmit the
@@ -555,13 +813,13 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
     if (entityId == null) return;
     try {
       await _directoryRepository.refresh();
-      if (epoch != _sessionEpoch) return; // reset during in-flight refresh
+      if (_disposed || epoch != _sessionEpoch || entityId != _entityId) return;
       _directoryRefreshFailed = false;
-      notifyListeners();
+      _notifyIfAlive();
     } catch (_) {
-      if (epoch != _sessionEpoch) return;
+      if (_disposed || epoch != _sessionEpoch || entityId != _entityId) return;
       _directoryRefreshFailed = true;
-      notifyListeners();
+      _notifyIfAlive();
     }
   }
 
@@ -585,10 +843,38 @@ class BusinessProfileEditorProvider extends ChangeNotifier {
   /// session epoch so in-flight loads/saves never publish after the reset
   /// (V1-R08 final pass, finding 1).
   void reset() {
+    if (_disposed) return;
     _sessionEpoch++;
+    _profileRevision = 0;
+    _invalidateReadLanes();
     _entityId = null;
     _state = BusinessProfileEditorState.initial;
     _clearData();
     notifyListeners();
+  }
+
+  void _invalidateReadLanes() {
+    _profileReadEpoch++;
+    _auxiliaryReadEpoch++;
+    _activeProfileReads.clear();
+    _activeAuxiliaryReads.clear();
+    _profileReadPhase = BusinessRemoteReadPhase.idle;
+    _auxiliaryReadPhase = BusinessRemoteReadPhase.idle;
+  }
+
+  void _notifyIfAlive() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _sessionEpoch++;
+    _profileReadEpoch++;
+    _auxiliaryReadEpoch++;
+    _activeProfileReads.clear();
+    _activeAuxiliaryReads.clear();
+    super.dispose();
   }
 }
