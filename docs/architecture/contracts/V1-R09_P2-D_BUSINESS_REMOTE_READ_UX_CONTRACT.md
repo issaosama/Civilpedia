@@ -496,3 +496,31 @@ LOW finding: implementer count over-reported by 5 (364 → authoritative 359);
 P2-D2: may be unlocked after this closure/checkpoint
 P2-D overall: remains CURRENT
 All frozen contract semantics in sections 1–20 above remain unchanged.
+
+## Appendix — P2-D2 / P2-D Final Closure
+
+P2-D1: ACCEPTED / CLOSED
+P2-D2: ACCEPTED / CLOSED
+P2-D: CLOSED
+
+P2-D2 independent decision: PASS — P2-D2 ACCEPTED — P2-D MAY CLOSE
+
+Final P2-D2 focused evidence: 285 PASS / 0 FAIL / 0 SKIPPED
+
+Final findings:
+HIGH: NONE
+MEDIUM: NONE
+LOW: NONE
+
+Accepted correction history:
+- first independent review found two active-locale defects
+- application-list empty-state localization corrected
+- claim verification labels corrected
+- first localization micro-review found deterministic assertion quality defect
+- J.58/J.59 hardened to exact full rendered-line cross-language assertions
+- final micro-review PASS
+
+P2-E: NEXT — CONTRACT FREEZE ONLY (implementation NOT authorized)
+P2-F through P2-G: LOCKED
+V1-R10: QUEUED (not started)
+All frozen contract semantics in sections 1–20 above remain unchanged.

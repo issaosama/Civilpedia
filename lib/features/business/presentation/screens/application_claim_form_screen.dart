@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/services/connectivity_provider.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/civil_app_bar.dart';
 import '../../../../core/widgets/civil_surface_card.dart';
+import '../../../../core/widgets/remote_data_notice.dart';
 import '../../../../core/widgets/state_widgets.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../../domain/business_application_gateway.dart';
 import '../../domain/business_claim_target.dart';
+import '../../domain/business_remote_read.dart';
 import '../providers/business_application_provider.dart';
 import '../providers/business_claim_target_provider.dart';
 import '../widgets/business_claim_verification_labels.dart';
+import '../widgets/business_remote_read_notice.dart';
 import '../widgets/business_sign_in_required_view.dart';
 import '../widgets/directory_entity_type_labels.dart';
 
@@ -21,6 +27,9 @@ import '../widgets/directory_entity_type_labels.dart';
 /// 'unclaimed') from the authoritative PostgREST read seam. Selecting a target
 /// files a CLAIM draft using the canonical `directory_entities.id` via
 /// `createClaimDraft` — NEVER a local `ServiceBusinessProfile.id`.
+///
+/// V1-R09 P2-D — typed claim read lanes: no-data failure is a typed read
+/// notice, known-good targets are preserved with a compact notice.
 class ApplicationClaimFormScreen extends StatefulWidget {
   const ApplicationClaimFormScreen({super.key});
 
@@ -44,17 +53,25 @@ class _ApplicationClaimFormScreenState extends State<ApplicationClaimFormScreen>
   Widget build(BuildContext context) {
     final provider = context.watch<BusinessClaimTargetProvider>();
     final appProvider = context.watch<BusinessApplicationProvider>();
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    final connectivityIsUnavailable =
+        context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
+    String l(String ar, String en) => isArabic ? ar : en;
 
     return Scaffold(
       appBar: CivilAppBar(
-        title: const Text(Ar.businessClaimApplicationTitle),
+        title: Text(l(Ar.businessClaimApplicationTitle, En.businessClaimApplicationTitle)),
         showBackButton: true,
       ),
       body: appProvider.isAuthenticated
           ? _ClaimBody(
               state: provider.state,
               targets: provider.targets,
-              error: provider.error,
+              readFailure: provider.readFailure,
+              isRefreshing: provider.isRefreshing,
+              connectivityIsUnavailable: connectivityIsUnavailable,
+              isArabic: isArabic,
+              l: l,
               onRetry: () =>
                   context.read<BusinessClaimTargetProvider>().reload(),
               appProvider: appProvider,
@@ -67,16 +84,24 @@ class _ApplicationClaimFormScreenState extends State<ApplicationClaimFormScreen>
 class _ClaimBody extends StatelessWidget {
   final BusinessClaimTargetState state;
   final List<BusinessClaimTarget> targets;
-  final String? error;
+  final BusinessRemoteReadFailureKind? readFailure;
+  final bool isRefreshing;
+  final bool connectivityIsUnavailable;
+  final bool isArabic;
+  final String Function(String ar, String en) l;
   final VoidCallback onRetry;
   final BusinessApplicationProvider appProvider;
 
   const _ClaimBody({
     required this.state,
     required this.targets,
-    required this.appProvider,
+    required this.readFailure,
+    required this.isRefreshing,
+    required this.connectivityIsUnavailable,
+    required this.isArabic,
+    required this.l,
     required this.onRetry,
-    this.error,
+    required this.appProvider,
   });
 
   @override
@@ -85,22 +110,77 @@ class _ClaimBody extends StatelessWidget {
       case BusinessClaimTargetState.loading:
         return const Center(child: CircularProgressIndicator());
       case BusinessClaimTargetState.error:
-        return ErrorStateWidget(
-          message: error ?? Ar.businessClaimTargetsError,
+        return BusinessRemoteReadNotice(
+          failure: readFailure ?? BusinessRemoteReadFailureKind.unexpected,
+          connectivityIsUnavailable: connectivityIsUnavailable,
+          mode: RemoteDataNoticeMode.noData,
           onRetry: onRetry,
         );
       case BusinessClaimTargetState.empty:
-        return _EmptyClaimState(onRefresh: onRetry);
+        final failed = readFailure != null;
+        return Column(
+          children: [
+            if (failed)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: BusinessRemoteReadNotice(
+                  failure: readFailure!,
+                  connectivityIsUnavailable: connectivityIsUnavailable,
+                  mode: RemoteDataNoticeMode.compact,
+                  onRetry: onRetry,
+                ),
+              ),
+            Expanded(
+              child: _EmptyClaimState(
+                onRefresh: onRetry,
+                isArabic: isArabic,
+                l: l,
+              ),
+            ),
+          ],
+        );
       case BusinessClaimTargetState.data:
-        return _TargetList(targets: targets, appProvider: appProvider);
+        return Column(
+          children: [
+            if (isRefreshing)
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: LinearProgressIndicator(minHeight: 2),
+              ),
+            if (readFailure != null)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: BusinessRemoteReadNotice(
+                  failure: readFailure!,
+                  connectivityIsUnavailable: connectivityIsUnavailable,
+                  mode: RemoteDataNoticeMode.compact,
+                  onRetry: onRetry,
+                ),
+              ),
+            Expanded(
+              child: _TargetList(
+                targets: targets,
+                appProvider: appProvider,
+                isArabic: isArabic,
+                l: l,
+              ),
+            ),
+          ],
+        );
     }
   }
 }
 
 class _EmptyClaimState extends StatelessWidget {
   final VoidCallback onRefresh;
+  final bool isArabic;
+  final String Function(String ar, String en) l;
 
-  const _EmptyClaimState({required this.onRefresh});
+  const _EmptyClaimState({
+    required this.onRefresh,
+    required this.isArabic,
+    required this.l,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -109,16 +189,16 @@ class _EmptyClaimState extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         children: [
-          const EmptyStateWidget(
+          EmptyStateWidget(
             icon: Icons.business_center_outlined,
-            message: Ar.businessClaimTargetsEmpty,
+            message: l(Ar.businessClaimTargetsEmpty, En.businessClaimTargetsEmpty),
           ),
           const SizedBox(height: AppSpacing.sm),
           Center(
             child: OutlinedButton.icon(
               onPressed: onRefresh,
               icon: const Icon(Icons.refresh),
-              label: const Text(Ar.businessRefresh),
+              label: Text(l(Ar.businessRefresh, En.businessRefresh)),
             ),
           ),
         ],
@@ -130,8 +210,15 @@ class _EmptyClaimState extends StatelessWidget {
 class _TargetList extends StatefulWidget {
   final List<BusinessClaimTarget> targets;
   final BusinessApplicationProvider appProvider;
+  final bool isArabic;
+  final String Function(String ar, String en) l;
 
-  const _TargetList({required this.targets, required this.appProvider});
+  const _TargetList({
+    required this.targets,
+    required this.appProvider,
+    required this.isArabic,
+    required this.l,
+  });
 
   @override
   State<_TargetList> createState() => _TargetListState();
@@ -151,10 +238,12 @@ class _TargetListState extends State<_TargetList> {
 
   Future<void> _onClaim(BusinessClaimTarget target) async {
     if (widget.appProvider.isBusy) return;
+    final isArabic = widget.isArabic;
+    String l(String ar, String en) => isArabic ? ar : en;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text(Ar.businessClaimTarget),
+        title: Text(l(Ar.businessClaimTarget, En.businessClaimTarget)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -164,7 +253,7 @@ class _TargetListState extends State<_TargetList> {
             Text(
               DirectoryEntityTypeLabels.labelFor(
                 target.entityType,
-                isArabic: true,
+                isArabic: isArabic,
               ),
             ),
           ],
@@ -172,11 +261,11 @@ class _TargetListState extends State<_TargetList> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text(Ar.businessCancel),
+            child: Text(l(Ar.businessCancel, En.businessCancel)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text(Ar.businessClaimTarget),
+            child: Text(l(Ar.businessClaimTarget, En.businessClaimTarget)),
           ),
         ],
       ),
@@ -209,7 +298,8 @@ class _TargetListState extends State<_TargetList> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final isArabic = true;
+    final isArabic = widget.isArabic;
+    String l(String ar, String en) => isArabic ? ar : en;
     final filtered = _filtered;
 
     return Column(
@@ -218,7 +308,7 @@ class _TargetListState extends State<_TargetList> {
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: TextField(
             decoration: InputDecoration(
-              hintText: Ar.directorySearchHint,
+              hintText: l(Ar.directorySearchHint, En.directorySearchHint),
               prefixIcon: const Icon(Icons.search),
               border: const OutlineInputBorder(),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12),
@@ -271,8 +361,8 @@ class _TargetListState extends State<_TargetList> {
                         if (target.verificationStatus != null) ...[
                           const SizedBox(height: AppSpacing.xs),
                           Text(
-                            '${Ar.businessVerificationStatus}: '
-                            '${BusinessClaimVerificationLabels.labelFor(target.verificationStatus)}',
+                            '${l(Ar.businessVerificationStatus, En.businessVerificationStatus)}: '
+                            '${BusinessClaimVerificationLabels.labelFor(target.verificationStatus, isArabic: isArabic)}',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: isDark
                                   ? AppColors.darkTextMuted

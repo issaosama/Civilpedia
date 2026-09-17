@@ -758,10 +758,12 @@ Part 2 P2-B2: ACCEPTED / CLOSED
 Part 2 P2-C: ACCEPTED / CLOSED
 Part 2 P2-C1: ACCEPTED / CLOSED
 Part 2 P2-C2: ACCEPTED / CLOSED
-Part 2 P2-D: CURRENT — CONTRACT V1-R09-P2-D-CONTRACT-v1 FROZEN
+Part 2 P2-D: ACCEPTED / CLOSED — P2-D FORMALLY CLOSED
 Part 2 P2-D1: ACCEPTED / CLOSED
-Part 2 P2-D2: NEXT — IMPLEMENTATION AUTHORIZED
-Part 2 P2-E through P2-G: LOCKED
+Part 2 P2-D2: ACCEPTED / CLOSED
+Part 2 P2-E: NEXT — CONTRACT FREEZE ONLY (implementation NOT authorized)
+Part 2 P2-E implementation: LOCKED pending frozen contract
+Part 2 P2-F through P2-G: LOCKED
 V1-R10: QUEUED (not started)
 
 Primary:
@@ -1593,5 +1595,35 @@ P2-D2: NEXT — IMPLEMENTATION AUTHORIZED (unlocked after this closure/checkpoin
 P2-E through P2-G: LOCKED
 Contract: V1-R09-P2-D-CONTRACT-v1 frozen semantics preserved unchanged; only
   the append-only P2-D1 closure marker added.
+V1-R09 Part 2: CURRENT (V1-R09 overall not closed)
+V1-R10: QUEUED (not started)
+
+### V1-R09 Part 2 P2-D2 / P2-D Closure Record
+
+Slice: P2-D2 — Business Remote-Read Presentation UX
+Status: ACCEPTED / CLOSED
+Final independent decision: PASS — P2-D2 ACCEPTED — P2-D MAY CLOSE
+Final focused evidence: 285 PASS / 0 FAIL / 0 SKIPPED
+  - test/v1_r09_p2_d_business_remote_read_ux_test.dart: 62 PASS
+  - test/v1_r04_business_application_ux_test.dart: 61 PASS
+  - test/v1_r06_business_profile_management_test.dart: 85 PASS
+  - test/user_area_route_test.dart: 37 PASS
+  - test/v1_r09_p2_d_business_remote_read_foundation_test.dart: 40 PASS
+Findings: HIGH NONE / MEDIUM NONE / LOW NONE
+Accepted correction history:
+  - first independent review found two active-locale defects
+  - application-list empty-state localization corrected
+  - claim verification labels corrected
+  - first localization micro-review found deterministic assertion quality defect
+  - J.58/J.59 hardened to exact full rendered-line cross-language assertions
+  - final micro-review PASS
+P2-D1: ACCEPTED / CLOSED
+P2-D2: ACCEPTED / CLOSED
+P2-D: ACCEPTED / CLOSED — P2-D FORMALLY CLOSED
+P2-E: NEXT — CONTRACT FREEZE ONLY (implementation NOT authorized)
+P2-E implementation: LOCKED pending frozen contract
+P2-F through P2-G: LOCKED
+Contract: V1-R09-P2-D-CONTRACT-v1 frozen semantics preserved unchanged; only
+  the append-only P2-D2 / P2-D closure marker added.
 V1-R09 Part 2: CURRENT (V1-R09 overall not closed)
 V1-R10: QUEUED (not started)

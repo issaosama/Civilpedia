@@ -1,79 +1,137 @@
 import '../../../localization/ar.dart';
+import '../../../localization/en.dart';
 import '../domain/business_contact_type.dart';
 import '../domain/business_profile_management_gateway.dart';
 import '../domain/business_profile_validator.dart';
 
 /// V1-R06 — Presentation labels for the business-profile management flow.
 ///
-/// Arabic is the canonical UI language; this resolver is intentionally thin
-/// and delegates to [Ar] so widgets and tests share the same keys.
+/// Arabic is the canonical default UI language. P2-D2 makes the resolver
+/// ACTIVE-LOCALE aware: callers pass [isArabic]; the default stays `true`
+/// (Arabic) so existing Arabic-first call sites and test suites keep working.
+/// The cause→text mapping is unchanged — only the selected language differs.
 abstract final class BusinessProfileManagementMessages {
-  static String titleForList() => Ar.businessManageTitle;
+  static String titleForList({bool isArabic = true}) =>
+      isArabic ? Ar.businessManageTitle : En.businessManageTitle;
 
-  static String titleForEditor() => Ar.businessProfileEditTitle;
+  static String titleForEditor({bool isArabic = true}) =>
+      isArabic ? Ar.businessProfileEditTitle : En.businessProfileEditTitle;
 
-  static String labelForContactType(BusinessContactType type) {
+  static String labelForContactType(
+    BusinessContactType type, {
+    bool isArabic = true,
+  }) {
     switch (type) {
       case BusinessContactType.phone:
-        return Ar.businessContactTypePhone;
+        return isArabic
+            ? Ar.businessContactTypePhone
+            : En.businessContactTypePhone;
       case BusinessContactType.whatsapp:
-        return Ar.businessContactTypeWhatsApp;
+        return isArabic
+            ? Ar.businessContactTypeWhatsApp
+            : En.businessContactTypeWhatsApp;
       case BusinessContactType.email:
-        return Ar.businessContactTypeEmail;
+        return isArabic
+            ? Ar.businessContactTypeEmail
+            : En.businessContactTypeEmail;
       case BusinessContactType.website:
-        return Ar.businessContactTypeWebsite;
+        return isArabic
+            ? Ar.businessContactTypeWebsite
+            : En.businessContactTypeWebsite;
       case BusinessContactType.other:
-        return Ar.businessContactTypeOther;
+        return isArabic
+            ? Ar.businessContactTypeOther
+            : En.businessContactTypeOther;
       case BusinessContactType.unknown:
-        return Ar.businessStatusUnknown;
+        return isArabic ? Ar.businessStatusUnknown : En.businessStatusUnknown;
     }
   }
 
-  static String messageForCause(BusinessProfileManagementCause cause) {
+  static String messageForCause(
+    BusinessProfileManagementCause cause, {
+    bool isArabic = true,
+  }) {
     switch (cause) {
       case BusinessProfileManagementCause.unauthenticated:
-        return Ar.businessProfileCauseUnauthenticated;
+        return isArabic
+            ? Ar.businessProfileCauseUnauthenticated
+            : En.businessProfileCauseUnauthenticated;
       case BusinessProfileManagementCause.permissionDenied:
-        return Ar.businessProfileCausePermissionDenied;
+        return isArabic
+            ? Ar.businessProfileCausePermissionDenied
+            : En.businessProfileCausePermissionDenied;
       case BusinessProfileManagementCause.notFound:
-        return Ar.businessProfileCauseNotFound;
+        return isArabic
+            ? Ar.businessProfileCauseNotFound
+            : En.businessProfileCauseNotFound;
       case BusinessProfileManagementCause.invalidData:
-        return Ar.businessProfileCauseInvalidData;
+        return isArabic
+            ? Ar.businessProfileCauseInvalidData
+            : En.businessProfileCauseInvalidData;
       case BusinessProfileManagementCause.conflict:
-        return Ar.businessProfileCauseConflict;
+        return isArabic
+            ? Ar.businessProfileCauseConflict
+            : En.businessProfileCauseConflict;
       case BusinessProfileManagementCause.network:
-        return Ar.businessProfileCauseNetwork;
+        return isArabic
+            ? Ar.businessProfileCauseNetwork
+            : En.businessProfileCauseNetwork;
       case BusinessProfileManagementCause.unavailable:
-        return Ar.businessProfileCauseUnavailable;
+        return isArabic
+            ? Ar.businessProfileCauseUnavailable
+            : En.businessProfileCauseUnavailable;
       case BusinessProfileManagementCause.unexpected:
-        return Ar.businessProfileCauseUnexpected;
+        return isArabic
+            ? Ar.businessProfileCauseUnexpected
+            : En.businessProfileCauseUnexpected;
     }
   }
 
   static String messageForValidationIssue(
-    BusinessProfileValidationIssue issue,
-  ) {
+    BusinessProfileValidationIssue issue, {
+    bool isArabic = true,
+  }) {
     switch (issue.code) {
       case BusinessProfileValidationIssueCode.required:
-        return Ar.businessProfileValidationRequired;
+        return isArabic
+            ? Ar.businessProfileValidationRequired
+            : En.businessProfileValidationRequired;
       case BusinessProfileValidationIssueCode.tooLong:
-        return Ar.businessProfileValidationTooLong;
+        return isArabic
+            ? Ar.businessProfileValidationTooLong
+            : En.businessProfileValidationTooLong;
       case BusinessProfileValidationIssueCode.tooMany:
-        return Ar.businessProfileValidationTooMany;
+        return isArabic
+            ? Ar.businessProfileValidationTooMany
+            : En.businessProfileValidationTooMany;
       case BusinessProfileValidationIssueCode.invalidFormat:
-        return Ar.businessProfileValidationInvalidFormat;
+        return isArabic
+            ? Ar.businessProfileValidationInvalidFormat
+            : En.businessProfileValidationInvalidFormat;
       case BusinessProfileValidationIssueCode.duplicate:
-        return Ar.businessProfileValidationDuplicate;
+        return isArabic
+            ? Ar.businessProfileValidationDuplicate
+            : En.businessProfileValidationDuplicate;
       case BusinessProfileValidationIssueCode.duplicatePrimary:
-        return Ar.businessProfileValidationDuplicatePrimary;
+        return isArabic
+            ? Ar.businessProfileValidationDuplicatePrimary
+            : En.businessProfileValidationDuplicatePrimary;
       case BusinessProfileValidationIssueCode.multiplePrimary:
-        return Ar.businessProfileValidationMultiplePrimary;
+        return isArabic
+            ? Ar.businessProfileValidationMultiplePrimary
+            : En.businessProfileValidationMultiplePrimary;
       case BusinessProfileValidationIssueCode.incompleteLocation:
-        return Ar.businessProfileValidationIncompleteLocation;
+        return isArabic
+            ? Ar.businessProfileValidationIncompleteLocation
+            : En.businessProfileValidationIncompleteLocation;
       case BusinessProfileValidationIssueCode.incompletePair:
-        return Ar.businessProfileValidationIncompletePair;
+        return isArabic
+            ? Ar.businessProfileValidationIncompletePair
+            : En.businessProfileValidationIncompletePair;
       case BusinessProfileValidationIssueCode.outOfRange:
-        return Ar.businessProfileValidationOutOfRange;
+        return isArabic
+            ? Ar.businessProfileValidationOutOfRange
+            : En.businessProfileValidationOutOfRange;
     }
   }
 }

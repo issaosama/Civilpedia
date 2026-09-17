@@ -1,0 +1,226 @@
+================================================================================
+CIVILPEDIA V1-R09 - PART 2 (P2-D) IMPLEMENTATION REPORT
+P2-D2 - Business Remote-Read Presentation UX
+================================================================================
+
+SLICE        : P2-D2 - Business Remote-Read Presentation UX (read-facing)
+ROADMAP      : CURRENT - IMPLEMENTATION_AUTHORIZED: YES
+OWNER        : PENDING OWNER STAGING (nothing staged/committed/pushed)
+HEAD         : dce92895797a0360cc0de2b52e68ce01ecb65d52
+DATE         : 2026-09-17
+
+--------------------------------------------------------------------------------
+1. FOCUSED EVIDENCE (sequential single-process flutter test runs)
+--------------------------------------------------------------------------------
+  test/v1_r09_p2_d_business_remote_read_ux_test.dart (new) | 62 PASS
+  test/v1_r04_business_application_ux_test.dart           | 61 PASS
+  test/v1_r06_business_profile_management_test.dart       | 85 PASS
+  test/user_area_route_test.dart                          | 37 PASS
+  test/v1_r09_p2_d_business_remote_read_foundation_test.dart | 40 PASS
+
+Focused total: 285 PASS / 0 FAIL / 0 SKIPPED
+FINDINGS: HIGH NONE / MEDIUM NONE / LOW NONE
+
+--------------------------------------------------------------------------------
+2. WORK COMPLETED THIS SLICE
+--------------------------------------------------------------------------------
+  [2.1] New shared feature adapter: BusinessRemoteReadNotice
+        (lib/features/business/presentation/widgets/business_remote_read_notice.dart)
+        - Pure presentation mapping of typed Business READ failures
+          (BusinessRemoteReadFailureKind, P2-D1) into the shared
+          RemoteDataCause / RemoteDataNotice rendering.
+        - "offline" is the ONLY presentation-only promotion, performed ONLY
+          when the canonical ConnectivityProvider state has CONFIRMED transport
+          is unavailable; otherwise a transport failure stays "network".
+        - Owns NO read state, retry state, timers or connectivity subscription;
+          onRetry is a plain READ retry (never a mutation, never a save).
+  [2.2] Managed-business list screen reworked (managed_businesses_screen.dart)
+        - Switch over the provider state: loading / signInRequired / empty /
+          error / unavailable / data, each surface typed notices or preserves
+          known-good cards with a compact notice on failed refresh.
+        - Read-only members render "not editable" instead of a navigation
+          chevron; cards preserved across refresh.
+  [2.3] Managed profile editor screen reworked (business_profile_edit_screen.dart)
+        - First-load network failure -> no-data notice; authoritative absence ->
+          neutral retry-free controlled state; failed refresh preserves the
+          editable profile with a compact notice; read retry never triggers a
+          save mutation.
+        - Auxiliary taxonomy failure preserves the editable profile with exactly
+          one auxiliary notice; retry clears only the auxiliary notice; selectable
+          category/region catalogs are preserved through an auxiliary failure.
+        - Root-cause fix: _firstIssueMessage is now ACTIVE-LOCALE aware (takes
+          BuildContext, reads the nullable LanguageProvider `?.isArabic ?? true`)
+          for name/description/address/coordinates validation rows.
+  [2.4] My-applications list screen reworked (my_applications_screen.dart)
+        - Header/card/empty/notice inventory driven by provider.state; failed
+          refresh preserves cards with a compact notice; cards show the status
+          chip.
+        - Empty state is ACTIVE-LOCALE aware (l(Ar.businessNoApplications,
+          En.businessNoApplications)); see correction in section 3A.
+  [2.5] Application detail screen reworked (application_detail_screen.dart)
+        - States: loading / signInRequired / empty (neutral, retry-free) / error
+          (typed notice) / data (status chip, approved/activated/return/rejection
+          notes, metadata name, ActionSection for draft / needs-correction).
+        - Root-cause fix: _ApplicationContent previously returned a nested
+          ListView inside the outer ListView (unbounded-height layout failure on
+          device in the data branch). Flattened to a Column; the outer list
+          scrolls.
+  [2.6] Claim selector screen reworked (application_claim_form_screen.dart)
+        - Empty-target product empty state + refresh; canonical labels, never raw
+          tokens; first-load failure notice; preserved targets with compact
+          notice on failed reload; claim confirm files exactly one draft.
+  [2.7] Messages resolver locale-aware (business_profile_management_messages.dart)
+        - Label/contact-type/cause-text resolvers now accept isArabic (default
+          stays true for the existing Arabic-first call sites); cause-to-text
+          mapping unchanged.
+  [2.8] New focused UX suite (test/v1_r09_p2_d_business_remote_read_ux_test.dart)
+        - 62 obligations (61 widget tests + 1 pure mapping test) covering:
+            A.1-A.14 managed-business list lanes
+            B.15-B.20 managed profile editor lanes
+            C.21-C.25 auxiliary taxonomy lanes
+            D.26-D.31 my-applications list lanes
+            E.32-E.37 application detail lanes
+            F.38-F.43 claim selector lanes
+            G.44-G.47 connectivity-derived offline promotion
+            H.48-H.49 notice ownership (exactly one typed notice per lane)
+            I.50      raw backend text never reaches the UI
+            J.51-J.59 AR/EN localization (J.56-J.59 added by the correction)
+            K.56-K.58 mutation compatibility (read retry never mutates)
+        - Claim verification labels resolve from the ACTIVE APP locale
+          (BusinessClaimVerificationLabels.labelFor(status, isArabic:)); see
+          correction in section 3A.
+        - Harness units: _setTallViewport (2400dp viewport for full-suite
+          scrollable mounting), _baseProviders (List<SingleChildWidget> via
+          package:nested), five pump helpers, typed fakes for the four Business
+          gateways, completer-gated spills and explicit pump() usage while
+          indeterminate progress rows are mounted.
+
+--------------------------------------------------------------------------------
+3. DEFECTS CORRECTED DURING SUITE BRING-UP (root-cause, in-scope)
+--------------------------------------------------------------------------------
+  3.1 application_detail_screen.dart: nested ListView inside ListView in the
+      data branch (unbounded vertical viewport). Flattened to a Column.
+  3.2 business_profile_edit_screen.dart: _firstIssueMessage read an
+      out-of-context isArabic flag in two copies (_Body and _LocationEditor);
+      both now take BuildContext and watch the nullable LanguageProvider.
+  3.3 Test-only: E.32/E.35/E.37 fixtures built _app() with the default id
+      'app-1' while the screen requests 'a1'; the provider correctly mapped
+      id != requested to malformedResponse -> error state. Fixtures now pass
+      id: 'a1'. This exercises the intended malformed-response guard in E.36.
+
+--------------------------------------------------------------------------------
+3A. INDEPENDENT REVIEW CORRECTION PASS (localization) - CORRECTION WAS REQUIRED
+--------------------------------------------------------------------------------
+  Independent review decision: FAIL - P2-D2 CORRECTION REQUIRED.
+  HIGH: NONE. MEDIUM: two English-locale Arabic-leakage defects, plus their
+  missing focused coverage. Everything else was accepted.
+
+  [3A.1] Defect 1 - application-list empty state leaked Arabic in English.
+         my_applications_screen.dart rendered EmptyStateWidget(message:
+         Ar.businessNoApplications) unconditionally. Now resolves the existing
+         active-app-locale helper already used across the screen:
+         l(Ar.businessNoApplications, En.businessNoApplications). No new key,
+         no hard-coded English, no second localization mechanism.
+  [3A.2] Defect 2 - claim-target verification labels leaked Arabic in English.
+         business_claim_verification_labels.dart returned Ar.* unconditionally.
+         labelFor() now takes the Arabic-first isArabic flag (default true,
+         matching DirectoryEntityTypeLabels) and selects Ar./En. for all five
+         canonical statuses plus the neutral fallback. The single P2-D2 call
+         site (application_claim_form_screen.dart) passes isArabic from the
+         active LanguageProvider. No provider/domain/P2-D1 change.
+  [3A.3] Localization resources: ar.dart and en.dart UNCHANGED. Every required
+         EN pair already existed (En.businessNoApplications,
+         En.verificationUnverified/Pending/Verified/Rejected/Suspended,
+         En.directoryNotSpecified). AR/EN parity verified.
+  [3A.4] Deterministic coverage added: J.56 (EN app-list empty + LTR + product
+         actions + no notice), J.57 (AR app-list empty + RTL), J.58 (EN claim
+         verification labels across all five statuses + neutral fallback on the
+         ACTUAL rendered screen path + no Arabic leak + LTR), J.59 (AR claim
+         verification labels + RTL + no English leak).
+
+--------------------------------------------------------------------------------
+3B. CLAIM-LABEL EVIDENCE CORRECTION PASS 2 - CORRECTION WAS REQUIRED
+--------------------------------------------------------------------------------
+  Micro-review decision: FAIL - P2-D2 CORRECTION REQUIRED.
+  The production localization correction was ACCEPTED (both empty-state and
+  claim-label active-locale behavior, AR/EN parity, detail layout,
+  connectivity/retry/mutation behavior, P2-D1 protection). The ONLY blocking
+  finding was insufficient deterministic claim-label TEST EVIDENCE. No
+  production-code correction was authorized or made in this pass.
+
+  [3B.1] Finding - J.58 used substring absence checks such as
+         find.textContaining(Ar.verificationVerified), which is unsafe because
+         Ar.verificationVerified (موثّق) is a substring of
+         Ar.verificationUnverified (غير موثّق); it also did not prove absence of
+         every Arabic equivalent, and J.59 did not prove absence of every
+         English equivalent.
+  [3B.2] Correction (test-only): J.58 and J.59 now assert the EXACT full
+         rendered line for every own-language status and the neutral fallback,
+         and assert absence of the EXACT full rendered line of every
+         counterpart language (all six: unverified / pending / verified /
+         rejected / suspended / not-specified). No substring matching is used
+         for cross-language absence. Both tests still exercise the ACTUAL
+         rendered ApplicationClaimFormScreen path and still assert LTR (EN) /
+         RTL (AR).
+  [3B.3] No production file was modified in this pass.
+
+--------------------------------------------------------------------------------
+4. TEST TECHNIQUE NOTES (kept for the independent review)
+--------------------------------------------------------------------------------
+  - find.byType matches the exact runtimeType; ElevatedButton.icon /
+    OutlinedButton.icon factories build private subclasses, so the A.9 and
+    F.38 retry taps use text finders / type-predicate finders.
+  - K.58 dialog confirm is a TextButton sharing the SaveBar label; located via
+    find.widgetWithText(TextButton, ...) after the SaveBar ElevatedButton tap.
+  - pumpAndSettle is never used while an indeterminate progress row is mounted
+    (completer-gated fake + explicit tester.pump(duration)); C.23 uses
+    recurringAuxiliaryFailure to prove catalog preservation.
+  - BusinessApplicationStatusChip uses the non-nullable LanguageProvider; the
+    harness always provides one.
+  - Cross-language absence is asserted with exact find.text(<full rendered
+    line>); substring finders are never used for absence because
+    "موثّق" is a substring of "غير موثّق".
+
+--------------------------------------------------------------------------------
+5. CONSTRAINTS HONORED
+--------------------------------------------------------------------------------
+  - Contract V1-R09-P2-D-CONTRACT-v1: NOT modified (frozen). Roadmap: NOT
+    modified this pass.
+  - Four regression suites run sequentially, one at a time, with
+    `flutter test --no-pub`; NO full repository suite run (focused-only policy).
+  - No parallel flutter test processes.
+  - No git add / git commit / git push; nothing staged or pushed.
+  - Out-of-scope dirty files left untouched: test/a5_6_profile_bootstrap_test.dart,
+    test/v1_r08_cloud_profile_foundation_test.dart,
+    test/v1_r08_profile_edit_screen_widget_test.dart.
+  - Object file OpenCode_Usage_Report.txt: untouched.
+  - pubspec.yaml / pubspec.lock: untouched.
+  - `git diff --check`: clean (pre-existing CRLF warnings only).
+  - No database / schema / RLS / migration / service_role change.
+
+--------------------------------------------------------------------------------
+6. NOT DONE THIS PASS (standing environment constraints)
+--------------------------------------------------------------------------------
+  - Full repository suite (deferred to the authorized integrated V1-R09 gate).
+  - Live DEV Supabase smoke (server/dev-availability deferred).
+  - Contract / roadmap /phase-status edits: architect + owner layer only.
+
+--------------------------------------------------------------------------------
+7. FINAL DECISION (post evidence correction)
+--------------------------------------------------------------------------------
+P2-D2 is implemented on the accepted P2-D1 typed-read foundation. A first
+independent review required correction (FAIL, HIGH NONE): two English-locale
+Arabic-leakage defects plus missing focused coverage. Both production defects
+were corrected within P2-D2 presentation scope with no P2-D1, provider,
+gateway, backend or localization-resource change. A follow-up micro-review
+accepted that production correction but found insufficient deterministic
+claim-label test evidence (J.58/J.59). J.58/J.59 were then hardened, test-only,
+to exact full-rendered-line assertions for every own-language status and
+neutral fallback plus exact full-rendered-line absence of every counterpart
+language (all six statuses each). The 62-obligation UX suite and the four
+affected regression suites were rerun and pass (285/0/0 focused actual). No
+production file was changed in the evidence pass. No contract conflict, no
+database contradiction and no R08 security change was required. V1-R09 remains
+CURRENT and is NOT closed.
+
+P2-D2 CLAIM LABEL EVIDENCE CORRECTED — READY FOR FINAL MICRO-REVIEW

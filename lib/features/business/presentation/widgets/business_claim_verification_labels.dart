@@ -1,4 +1,5 @@
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 /// V1-R04 — localized applicant-facing label for a claim target's canonical
 /// `verification_status` storage value (migration 00005 CHECK set).
@@ -8,20 +9,20 @@ import '../../../../localization/ar.dart';
 abstract final class BusinessClaimVerificationLabels {
   const BusinessClaimVerificationLabels._();
 
-  static String labelFor(String? status) {
+  static String labelFor(String? status, {bool isArabic = true}) {
     switch (status) {
       case 'unverified':
-        return Ar.verificationUnverified;
+        return isArabic ? Ar.verificationUnverified : En.verificationUnverified;
       case 'pending':
-        return Ar.verificationPending;
+        return isArabic ? Ar.verificationPending : En.verificationPending;
       case 'verified':
-        return Ar.verificationVerified;
+        return isArabic ? Ar.verificationVerified : En.verificationVerified;
       case 'rejected':
-        return Ar.verificationRejected;
+        return isArabic ? Ar.verificationRejected : En.verificationRejected;
       case 'suspended':
-        return Ar.verificationSuspended;
+        return isArabic ? Ar.verificationSuspended : En.verificationSuspended;
       default:
-        return Ar.directoryNotSpecified;
+        return isArabic ? Ar.directoryNotSpecified : En.directoryNotSpecified;
     }
   }
 }

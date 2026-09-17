@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/services/connectivity_provider.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/remote_data_notice.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../../../../routes/app_routes.dart';
-import '../../domain/business_membership_gateway.dart';
-import '../../domain/business_profile_management_gateway.dart';
+import '../../domain/business_remote_read.dart';
 import '../business_profile_management_messages.dart';
 import '../providers/managed_businesses_provider.dart';
+import '../widgets/business_remote_read_notice.dart';
 
 /// V1-R06 — "My Managed Businesses" list screen.
 ///
@@ -39,11 +43,15 @@ class _ManagedBusinessesScreenState extends State<ManagedBusinessesScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final provider = context.watch<ManagedBusinessesProvider>();
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    final connectivityIsUnavailable =
+        context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
+    String l(String ar, String en) => isArabic ? ar : en;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          BusinessProfileManagementMessages.titleForList(),
+          BusinessProfileManagementMessages.titleForList(isArabic: isArabic),
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         elevation: 0,
@@ -51,6 +59,9 @@ class _ManagedBusinessesScreenState extends State<ManagedBusinessesScreen> {
       body: _Body(
         isDark: isDark,
         provider: provider,
+        isArabic: isArabic,
+        l: l,
+        connectivityIsUnavailable: connectivityIsUnavailable,
       ),
     );
   }
@@ -60,10 +71,16 @@ class _Body extends StatelessWidget {
   const _Body({
     required this.isDark,
     required this.provider,
+    required this.isArabic,
+    required this.l,
+    required this.connectivityIsUnavailable,
   });
 
   final bool isDark;
   final ManagedBusinessesProvider provider;
+  final bool isArabic;
+  final String Function(String ar, String en) l;
+  final bool connectivityIsUnavailable;
 
   @override
   Widget build(BuildContext context) {
@@ -73,44 +90,85 @@ class _Body extends StatelessWidget {
       case ManagedBusinessesState.signInRequired:
         return _MessageState(
           icon: Icons.lock_outline,
-          message: Ar.businessManageSignInRequired,
-          actionLabel: Ar.businessSignInButton,
+          message: l(Ar.businessManageSignInRequired, En.businessManageSignInRequired),
+          actionLabel: l(Ar.businessSignInButton, En.businessSignInButton),
           onAction: () => context.push(AppRoutes.auth),
         );
       case ManagedBusinessesState.empty:
-        return _MessageState(
-          icon: Icons.business_outlined,
-          message: Ar.businessManageEmpty,
+        final failed = provider.readPhase == BusinessRemoteReadPhase.failed &&
+            provider.readFailure != null;
+        return Column(
+          children: [
+            if (failed) ...[
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: BusinessRemoteReadNotice(
+                  failure: provider.readFailure!,
+                  connectivityIsUnavailable: connectivityIsUnavailable,
+                  mode: RemoteDataNoticeMode.compact,
+                  onRetry: () => provider.load(),
+                ),
+              ),
+            ],
+            Expanded(
+              child: _MessageState(
+                icon: Icons.business_outlined,
+                message: l(Ar.businessManageEmpty, En.businessManageEmpty),
+              ),
+            ),
+          ],
         );
       case ManagedBusinessesState.error:
-        return _MessageState(
-          icon: Icons.error_outline,
-          message: Ar.businessManageError,
-          detail: provider.errorCause == null
-              ? null
-              : BusinessProfileManagementMessages.messageForCause(
-                  _mapReadCause(provider.errorCause!),
-                ),
-          actionLabel: Ar.businessRefresh,
-          onAction: () => provider.load(),
+        return BusinessRemoteReadNotice(
+          failure: provider.readFailure ?? BusinessRemoteReadFailureKind.unexpected,
+          connectivityIsUnavailable: connectivityIsUnavailable,
+          mode: RemoteDataNoticeMode.noData,
+          onRetry: () => provider.load(),
         );
       case ManagedBusinessesState.unavailable:
-        return _MessageState(
-          icon: Icons.cloud_off_outlined,
-          message: Ar.businessManageError,
-          detail: Ar.businessProfileCauseUnavailable,
-          actionLabel: Ar.businessRefresh,
-          onAction: () => provider.load(),
+        return BusinessRemoteReadNotice(
+          failure: BusinessRemoteReadFailureKind.serviceUnavailable,
+          connectivityIsUnavailable: connectivityIsUnavailable,
+          mode: RemoteDataNoticeMode.noData,
+          onRetry: () => provider.load(),
         );
       case ManagedBusinessesState.data:
         return ListView.separated(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
-          itemCount: provider.items.length,
+          itemCount:
+              (provider.isRefreshing || provider.isBusy ? 1 : 0) +
+              (provider.readPhase == BusinessRemoteReadPhase.failed &&
+                      provider.readFailure != null
+                  ? 1
+                  : 0) +
+              provider.items.length,
           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
           itemBuilder: (context, index) {
-            final item = provider.items[index];
+            var offset = 0;
+            if (provider.isRefreshing || provider.isBusy) {
+              if (index == offset) {
+                return const _RefreshingRow();
+              }
+              offset++;
+            }
+            if (provider.readPhase == BusinessRemoteReadPhase.failed &&
+                provider.readFailure != null) {
+              if (index == offset) {
+                return BusinessRemoteReadNotice(
+                  failure: provider.readFailure!,
+                  connectivityIsUnavailable: connectivityIsUnavailable,
+                  mode: RemoteDataNoticeMode.compact,
+                  onRetry: () => provider.load(),
+                );
+              }
+              offset++;
+            }
+            final item = provider.items[index - offset];
             return _BusinessCard(
+              isArabic: isArabic,
               item: item,
+              l: l,
               onTap: () {
                 if (item.canManagePublicProfile) {
                   context.push(
@@ -123,28 +181,31 @@ class _Body extends StatelessWidget {
         );
     }
   }
+}
 
-  static BusinessProfileManagementCause _mapReadCause(
-    BusinessManagementReadCause cause,
-  ) {
-    switch (cause) {
-      case BusinessManagementReadCause.unauthenticated:
-        return BusinessProfileManagementCause.unauthenticated;
-      case BusinessManagementReadCause.permissionDenied:
-        return BusinessProfileManagementCause.permissionDenied;
-      case BusinessManagementReadCause.unexpected:
-        return BusinessProfileManagementCause.unexpected;
-    }
+class _RefreshingRow extends StatelessWidget {
+  const _RefreshingRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: LinearProgressIndicator(minHeight: 2),
+    );
   }
 }
 
 class _BusinessCard extends StatelessWidget {
   const _BusinessCard({
+    required this.isArabic,
     required this.item,
+    required this.l,
     required this.onTap,
   });
 
+  final bool isArabic;
   final ManagedBusinessListItem item;
+  final String Function(String ar, String en) l;
   final VoidCallback onTap;
 
   @override
@@ -195,14 +256,17 @@ class _BusinessCard extends StatelessWidget {
                       )
                     else
                       _Chip(
-                        label: Ar.businessManageNotEditable,
+                        label: l(
+                          Ar.businessManageNotEditable,
+                          En.businessManageNotEditable,
+                        ),
                         color: AppColors.warning,
                       ),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  '${Ar.businessEntityTypeLabel}: ${item.summary.entityType}',
+                  '${l(Ar.businessEntityTypeLabel, En.businessEntityTypeLabel)}: ${item.summary.entityType}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: isDark
                         ? AppColors.darkTextSecondary
@@ -213,12 +277,12 @@ class _BusinessCard extends StatelessWidget {
                 Row(
                   children: [
                     _Chip(
-                      label: '${Ar.businessClaimStatus}: '
+                      label: '${l(Ar.businessClaimStatus, En.businessClaimStatus)}: '
                           '${item.summary.claimStatus}',
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     _Chip(
-                      label: '${Ar.businessVerificationStatus}: '
+                      label: '${l(Ar.businessVerificationStatus, En.businessVerificationStatus)}: '
                           '${item.summary.verificationStatus}',
                     ),
                   ],

@@ -2,17 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/services/connectivity_provider.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/remote_data_notice.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../../../../routes/app_routes.dart';
 import '../../domain/business_contact_type.dart';
 import '../../domain/business_profile_management_gateway.dart';
 import '../../domain/business_profile_validator.dart';
+import '../../domain/business_remote_read.dart';
 import '../../domain/managed_selectable_options.dart';
 import '../business_profile_management_messages.dart';
 import '../providers/business_profile_editor_provider.dart';
+import '../widgets/business_remote_read_notice.dart';
 
 /// V1-R06 — OWNER/ADMIN public business-profile editor.
 ///
@@ -55,6 +61,10 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
   String _syncedAddress = '';
   String _syncedLat = '';
   String _syncedLon = '';
+
+  bool get _isArabic =>
+      context.read<LanguageProvider?>()?.isArabic ?? true;
+  String l(String ar, String en) => _isArabic ? ar : en;
 
   @override
   void initState() {
@@ -172,23 +182,24 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
     );
     _commitCoordinates();
 
+    final saveLabel = l(Ar.businessProfileSave, En.businessProfileSave);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(Ar.businessProfileSave),
+        title: Text(saveLabel),
         content: Text(
           provider.verificationResetWarningVisible
-              ? '${Ar.businessProfileVerificationWarning}\n\n${Ar.businessProfileSave}'
-              : Ar.businessProfileSave,
+              ? '${l(Ar.businessProfileVerificationWarning, En.businessProfileVerificationWarning)}\n\n$saveLabel'
+              : saveLabel,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(Ar.businessCancel),
+            child: Text(l(Ar.businessCancel, En.businessCancel)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(Ar.businessProfileSave),
+            child: Text(saveLabel),
           ),
         ],
       ),
@@ -199,7 +210,7 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
     if (mounted && ok) {
       provider.acknowledgeSuccess();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(Ar.businessProfileSaved)),
+        SnackBar(content: Text(l(Ar.businessProfileSaved, En.businessProfileSaved))),
       );
     }
   }
@@ -225,16 +236,16 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
     final discard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(Ar.businessProfileUnsavedTitle),
-        content: Text(Ar.businessProfileUnsavedMessage),
+        title: Text(l(Ar.businessProfileUnsavedTitle, En.businessProfileUnsavedTitle)),
+        content: Text(l(Ar.businessProfileUnsavedMessage, En.businessProfileUnsavedMessage)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(Ar.businessCancel),
+            child: Text(l(Ar.businessCancel, En.businessCancel)),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(Ar.businessProfileDiscard),
+            child: Text(l(Ar.businessProfileDiscard, En.businessProfileDiscard)),
           ),
         ],
       ),
@@ -251,6 +262,9 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final provider = context.watch<BusinessProfileEditorProvider>();
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    final connectivityIsUnavailable =
+        context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
 
     final isDirty = provider.isDirty || _controllersDirty;
 
@@ -267,7 +281,7 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            BusinessProfileManagementMessages.titleForEditor(),
+            BusinessProfileManagementMessages.titleForEditor(isArabic: isArabic),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           elevation: 0,
@@ -275,7 +289,7 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
             if (provider.isPubliclyVisible)
               IconButton(
                 icon: const Icon(Icons.open_in_browser_outlined),
-                tooltip: Ar.businessProfilePreview,
+                tooltip: l(Ar.businessProfilePreview, En.businessProfilePreview),
                 onPressed: () => context.push(
                   AppRoutes.directoryEntityDetailFor(provider.entityId!),
                 ),
@@ -284,6 +298,8 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
         ),
         body: _Body(
           provider: provider,
+          isArabic: isArabic,
+          connectivityIsUnavailable: connectivityIsUnavailable,
           nameController: _nameController,
           descriptionController: _descriptionController,
           addressController: _addressController,
@@ -294,6 +310,7 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
         ),
         bottomNavigationBar: provider.state == BusinessProfileEditorState.data
             ? _SaveBar(
+                isArabic: isArabic,
                 enabled: isDirty && !(provider.lastValidation?.isValid == false),
                 busy: provider.isSaving,
                 onSave: _save,
@@ -307,6 +324,8 @@ class _BusinessProfileEditScreenState extends State<BusinessProfileEditScreen> {
 class _Body extends StatelessWidget {
   const _Body({
     required this.provider,
+    required this.isArabic,
+    required this.connectivityIsUnavailable,
     required this.nameController,
     required this.descriptionController,
     required this.addressController,
@@ -317,6 +336,8 @@ class _Body extends StatelessWidget {
   });
 
   final BusinessProfileEditorProvider provider;
+  final bool isArabic;
+  final bool connectivityIsUnavailable;
   final TextEditingController nameController;
   final TextEditingController descriptionController;
   final TextEditingController addressController;
@@ -325,9 +346,17 @@ class _Body extends StatelessWidget {
   final VoidCallback onSave;
   final VoidCallback onReload;
 
+  String l(String ar, String en) => isArabic ? ar : en;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final profileReadFailed = provider.profileReadPhase ==
+            BusinessRemoteReadPhase.failed &&
+        provider.profileReadFailure != null;
+    final auxiliaryReadFailed = provider.auxiliaryReadPhase ==
+            BusinessRemoteReadPhase.failed &&
+        provider.auxiliaryReadFailure != null;
 
     switch (provider.state) {
       case BusinessProfileEditorState.initial:
@@ -337,21 +366,35 @@ class _Body extends StatelessWidget {
       case BusinessProfileEditorState.signInRequired:
         return _MessageState(
           icon: Icons.lock_outline,
-          message: Ar.businessManageSignInRequired,
+          message: l(Ar.businessManageSignInRequired, En.businessManageSignInRequired),
         );
       case BusinessProfileEditorState.unavailable:
-        return _MessageState(
-          icon: Icons.cloud_off_outlined,
-          message: Ar.businessProfileCauseUnavailable,
+        return BusinessRemoteReadNotice(
+          failure: BusinessRemoteReadFailureKind.serviceUnavailable,
+          connectivityIsUnavailable: connectivityIsUnavailable,
+          mode: RemoteDataNoticeMode.noData,
+          onRetry: () => provider.load(provider.entityId!),
         );
       case BusinessProfileEditorState.error:
-        return _MessageState(
-          icon: Icons.error_outline,
-          message: BusinessProfileManagementMessages.messageForCause(
-            provider.lastErrorCause ?? BusinessProfileManagementCause.unexpected,
-          ),
-          actionLabel: Ar.businessRefresh,
-          onAction: () => provider.load(provider.entityId!),
+        if (provider.profileReadPhase ==
+            BusinessRemoteReadPhase.authoritativeNotFound) {
+          // Authoritative absence (contract-proven P0NOT): a neutral controlled
+          // unavailable-profile state. Not a failure; no retry/creation/redirect.
+          return _MessageState(
+            icon: Icons.business_outlined,
+            message: l(
+              Ar.businessProfileCauseNotFound,
+              En.businessProfileCauseNotFound,
+            ),
+          );
+        }
+        return BusinessRemoteReadNotice(
+          failure:
+              provider.profileReadFailure ??
+              BusinessRemoteReadFailureKind.unexpected,
+          connectivityIsUnavailable: connectivityIsUnavailable,
+          mode: RemoteDataNoticeMode.noData,
+          onRetry: () => provider.load(provider.entityId!),
         );
       case BusinessProfileEditorState.data:
       case BusinessProfileEditorState.saveSuccess:
@@ -359,62 +402,106 @@ class _Body extends StatelessWidget {
         if (draft == null) {
           return _MessageState(
             icon: Icons.error_outline,
-            message: Ar.businessProfileCauseUnexpected,
+            message: l(Ar.businessProfileCauseUnexpected, En.businessProfileCauseUnexpected),
           );
         }
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
           children: [
+            if (provider.profileReadPhase == BusinessRemoteReadPhase.refreshing)
+              const _ThinProgressRow(),
+            if (profileReadFailed)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: BusinessRemoteReadNotice(
+                  failure: provider.profileReadFailure!,
+                  connectivityIsUnavailable: connectivityIsUnavailable,
+                  mode: RemoteDataNoticeMode.compact,
+                  onRetry: () => provider.load(provider.entityId!),
+                ),
+              ),
+            if (auxiliaryReadFailed)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: BusinessRemoteReadNotice(
+                  failure: provider.auxiliaryReadFailure!,
+                  connectivityIsUnavailable: connectivityIsUnavailable,
+                  mode: RemoteDataNoticeMode.compact,
+                  onRetry: () => provider.load(provider.entityId!),
+                ),
+              ),
             if (!provider.isPubliclyVisible)
               _NoticeCard(
                 icon: Icons.visibility_off_outlined,
-                message: Ar.businessProfileNotPublicNotice,
+                message: l(
+                  Ar.businessProfileNotPublicNotice,
+                  En.businessProfileNotPublicNotice,
+                ),
               ),
             if (provider.verificationResetWarningVisible)
               _NoticeCard(
                 icon: Icons.warning_amber_rounded,
-                message: Ar.businessProfileVerificationWarning,
+                message: l(
+                  Ar.businessProfileVerificationWarning,
+                  En.businessProfileVerificationWarning,
+                ),
                 color: AppColors.warning,
               ),
             if (provider.lastErrorCause ==
                 BusinessProfileManagementCause.conflict)
               _ConflictBanner(
+                isArabic: isArabic,
                 onReload: onReload,
               ),
             if (provider.lastErrorCause != null &&
                 provider.lastErrorCause !=
-                    BusinessProfileManagementCause.conflict)
+                    BusinessProfileManagementCause.conflict &&
+                !profileReadFailed)
               _NoticeCard(
                 icon: Icons.error_outline,
                 message: BusinessProfileManagementMessages.messageForCause(
                   provider.lastErrorCause!,
+                  isArabic: isArabic,
                 ),
                 color: AppColors.error,
               ),
             if (provider.directoryRefreshFailed)
               _RefreshWarningBanner(
+                isArabic: isArabic,
                 onRetry: () => provider.retryDirectoryRefresh(),
               ),
-            _SectionTitle(title: Ar.businessProfileNameLabel),
+            _SectionTitle(
+              title: l(Ar.businessProfileNameLabel, En.businessProfileNameLabel),
+            ),
             TextField(
               key: const Key('businessProfileNameField'),
               controller: nameController,
               decoration: InputDecoration(
-                hintText: Ar.businessNameHint,
+                hintText: l(Ar.businessNameHint, En.businessNameHint),
                 errorText: _firstIssueMessage(
+                  context,
                   provider,
                   BusinessProfileValidationField.name,
                 ),
               ),
               maxLength: BusinessProfileBounds.nameMax,
             ),
-            _SectionTitle(title: Ar.businessProfileDescriptionLabel),
+            _SectionTitle(
+              title: l(
+                Ar.businessProfileDescriptionLabel,
+                En.businessProfileDescriptionLabel,
+              ),
+            ),
             TextField(
               key: const Key('businessProfileDescriptionField'),
               controller: descriptionController,
               decoration: InputDecoration(
-                hintText: Ar.businessProfileDescriptionHint,
+                hintText: l(
+                  Ar.businessProfileDescriptionHint,
+                  En.businessProfileDescriptionHint,
+                ),
                 errorText: _firstIssueMessage(
+                  context,
                   provider,
                   BusinessProfileValidationField.description,
                 ),
@@ -422,11 +509,26 @@ class _Body extends StatelessWidget {
               maxLines: 3,
               maxLength: BusinessProfileBounds.descriptionMax,
             ),
-            _SectionTitle(title: Ar.businessProfileContactsLabel),
+            _SectionTitle(
+              title: l(
+                Ar.businessProfileContactsLabel,
+                En.businessProfileContactsLabel,
+              ),
+            ),
             _ContactsEditor(provider: provider),
-            _SectionTitle(title: Ar.businessProfileCategoriesLabel),
+            _SectionTitle(
+              title: l(
+                Ar.businessProfileCategoriesLabel,
+                En.businessProfileCategoriesLabel,
+              ),
+            ),
             _CategoriesEditor(provider: provider),
-            _SectionTitle(title: Ar.businessProfileLocationLabel),
+            _SectionTitle(
+              title: l(
+                Ar.businessProfileLocationLabel,
+                En.businessProfileLocationLabel,
+              ),
+            ),
             _LocationEditor(
               provider: provider,
               addressController: addressController,
@@ -448,12 +550,29 @@ class _Body extends StatelessWidget {
   }
 
   String? _firstIssueMessage(
+    BuildContext context,
     BusinessProfileEditorProvider provider,
     BusinessProfileValidationField field,
   ) {
-    final issue = provider.lastValidation?.forField(field).firstOrNull;
-    if (issue == null) return null;
-    return BusinessProfileManagementMessages.messageForValidationIssue(issue);
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    final issues = provider.lastValidation?.forField(field);
+    if (issues == null || issues.isEmpty) return null;
+    return BusinessProfileManagementMessages.messageForValidationIssue(
+      issues.first,
+      isArabic: isArabic,
+    );
+  }
+}
+
+class _ThinProgressRow extends StatelessWidget {
+  const _ThinProgressRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: LinearProgressIndicator(minHeight: 2),
+    );
   }
 }
 
@@ -465,6 +584,8 @@ class _ContactsEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    String l(String ar, String en) => isArabic ? ar : en;
     final contacts = provider.draft?.contacts ?? const [];
 
     return Column(
@@ -481,7 +602,10 @@ class _ContactsEditor extends StatelessWidget {
             ),
             title: Text(contact.value),
             subtitle: Text(
-              BusinessProfileManagementMessages.labelForContactType(contact.type),
+              BusinessProfileManagementMessages.labelForContactType(
+                contact.type,
+                isArabic: isArabic,
+              ),
             ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
@@ -498,8 +622,8 @@ class _ContactsEditor extends StatelessWidget {
                   ),
                   child: Text(
                     contact.isPrimary
-                        ? '★ ${Ar.businessProfilePrimary}'
-                        : Ar.businessProfilePrimary,
+                        ? '★ ${l(Ar.businessProfilePrimary, En.businessProfilePrimary)}'
+                        : l(Ar.businessProfilePrimary, En.businessProfilePrimary),
                   ),
                 ),
                 IconButton(
@@ -513,7 +637,10 @@ class _ContactsEditor extends StatelessWidget {
         TextButton.icon(
           onPressed: () => _showAddContactSheet(context, provider),
           icon: const Icon(Icons.add),
-          label: Text(Ar.businessProfileAddContact),
+          label: Text(l(
+            Ar.businessProfileAddContact,
+            En.businessProfileAddContact,
+          )),
         ),
         if (provider.lastValidation
                 ?.forField(BusinessProfileValidationField.contacts)
@@ -524,6 +651,7 @@ class _ContactsEditor extends StatelessWidget {
               provider.lastValidation!
                   .forField(BusinessProfileValidationField.contacts)
                   .first,
+              isArabic: isArabic,
             ),
             style: TextStyle(color: AppColors.error),
           ),
@@ -559,6 +687,18 @@ class _ContactsEditor extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       builder: (context) {
+        final sheetArabic =
+            context.read<LanguageProvider?>()?.isArabic ?? true;
+        String sheetL(String ar, String en) => sheetArabic ? ar : en;
+        final addContactLabel = sheetL(
+          Ar.businessProfileAddContact,
+          En.businessProfileAddContact,
+        );
+        final contactsLabel = sheetL(
+          Ar.businessProfileContactsLabel,
+          En.businessProfileContactsLabel,
+        );
+        final cancelLabel = sheetL(Ar.businessCancel, En.businessCancel);
         return StatefulBuilder(
           builder: (context, setState) {
             return Padding(
@@ -572,7 +712,7 @@ class _ContactsEditor extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    Ar.businessProfileAddContact,
+                    addContactLabel,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(height: 16),
@@ -586,6 +726,7 @@ class _ContactsEditor extends StatelessWidget {
                             child: Text(
                               BusinessProfileManagementMessages.labelForContactType(
                                 type,
+                                isArabic: sheetArabic,
                               ),
                             ),
                           ),
@@ -600,7 +741,7 @@ class _ContactsEditor extends StatelessWidget {
                   TextField(
                     controller: valueController,
                     decoration: InputDecoration(
-                      hintText: Ar.businessProfileContactsLabel,
+                      hintText: contactsLabel,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -609,14 +750,14 @@ class _ContactsEditor extends StatelessWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.of(context).pop(false),
-                          child: Text(Ar.businessCancel),
+                          child: Text(cancelLabel),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () => Navigator.of(context).pop(true),
-                          child: Text(Ar.businessProfileAddContact),
+                          child: Text(addContactLabel),
                         ),
                       ),
                     ],
@@ -647,6 +788,8 @@ class _CategoriesEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    String l(String ar, String en) => isArabic ? ar : en;
     final draft = provider.draft;
     final categories = draft?.categories ?? const [];
     final selectable = provider.selectableCategories;
@@ -656,7 +799,7 @@ class _CategoriesEditor extends StatelessWidget {
       children: [
         if (categories.isEmpty)
           Text(
-            Ar.businessProfileNoCategories,
+            l(Ar.businessProfileNoCategories, En.businessProfileNoCategories),
             style: theme.textTheme.bodyMedium?.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -683,7 +826,10 @@ class _CategoriesEditor extends StatelessWidget {
         if (selectable.isNotEmpty)
           DropdownButtonFormField<String?>(
             value: null,
-            hint: Text(Ar.businessProfileAddCategory),
+            hint: Text(l(
+              Ar.businessProfileAddCategory,
+              En.businessProfileAddCategory,
+            )),
             items: [
               for (final option in selectable)
                 if (!categories.any((c) => c.categoryId == option.id))
@@ -700,9 +846,20 @@ class _CategoriesEditor extends StatelessWidget {
           )
         else
           Text(
-            provider.categoriesCatalogError
-                ? Ar.businessProfileCauseNetwork
-                : Ar.businessProfileNoCategories,
+            provider.auxiliaryReadPhase == BusinessRemoteReadPhase.failed
+                ? l(
+                    Ar.businessProfileNoCategories,
+                    En.businessProfileNoCategories,
+                  )
+                : provider.categoriesCatalogError
+                    ? l(
+                        Ar.businessProfileCauseNetwork,
+                        En.businessProfileCauseNetwork,
+                      )
+                    : l(
+                        Ar.businessProfileNoCategories,
+                        En.businessProfileNoCategories,
+                      ),
             style: TextStyle(color: AppColors.textSecondary),
           ),
         if (provider.lastValidation
@@ -714,6 +871,7 @@ class _CategoriesEditor extends StatelessWidget {
               provider.lastValidation!
                   .forField(BusinessProfileValidationField.categories)
                   .first,
+              isArabic: isArabic,
             ),
             style: TextStyle(color: AppColors.error),
           ),
@@ -739,6 +897,8 @@ class _LocationEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    String l(String ar, String en) => isArabic ? ar : en;
     final draft = provider.draft;
     final regions = provider.selectableRegions;
     final selectedRegionId = draft?.primaryLocation?.regionId;
@@ -750,9 +910,10 @@ class _LocationEditor extends StatelessWidget {
           key: const Key('businessProfileAddressField'),
           controller: addressController,
           decoration: InputDecoration(
-            labelText: Ar.businessProfileAddressLabel,
-            hintText: Ar.businessProfileAddressHint,
+            labelText: l(Ar.businessProfileAddressLabel, En.businessProfileAddressLabel),
+            hintText: l(Ar.businessProfileAddressHint, En.businessProfileAddressHint),
             errorText: _firstIssueMessage(
+              context,
               provider,
               BusinessProfileValidationField.address,
             ),
@@ -767,7 +928,7 @@ class _LocationEditor extends StatelessWidget {
         if (regions.isNotEmpty)
           DropdownButtonFormField<String?>(
             value: selectedRegionId,
-            hint: Text(Ar.businessProfileRegionHint),
+            hint: Text(l(Ar.businessProfileRegionHint, En.businessProfileRegionHint)),
             items: [
               const DropdownMenuItem(value: null, child: Text('-')),
               for (final region in regions)
@@ -780,9 +941,20 @@ class _LocationEditor extends StatelessWidget {
           )
         else
           Text(
-            provider.regionsCatalogError
-                ? Ar.businessProfileCauseNetwork
-                : Ar.businessProfileNoCategories,
+            provider.auxiliaryReadPhase == BusinessRemoteReadPhase.failed
+                ? l(
+                    Ar.businessProfileNoCategories,
+                    En.businessProfileNoCategories,
+                  )
+                : provider.regionsCatalogError
+                    ? l(
+                        Ar.businessProfileCauseNetwork,
+                        En.businessProfileCauseNetwork,
+                      )
+                    : l(
+                        Ar.businessProfileNoCategories,
+                        En.businessProfileNoCategories,
+                      ),
             style: TextStyle(color: AppColors.textSecondary),
           ),
         const SizedBox(height: 12),
@@ -793,8 +965,9 @@ class _LocationEditor extends StatelessWidget {
                 key: const Key('businessProfileLatitudeField'),
                 controller: latController,
                 decoration: InputDecoration(
-                  labelText: Ar.businessProfileLatitude,
+                  labelText: l(Ar.businessProfileLatitude, En.businessProfileLatitude),
                   errorText: _firstIssueMessage(
+                    context,
                     provider,
                     BusinessProfileValidationField.coordinates,
                   ),
@@ -810,7 +983,7 @@ class _LocationEditor extends StatelessWidget {
                 key: const Key('businessProfileLongitudeField'),
                 controller: lonController,
                 decoration: InputDecoration(
-                  labelText: Ar.businessProfileLongitude,
+                  labelText: l(Ar.businessProfileLongitude, En.businessProfileLongitude),
                 ),
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
@@ -828,19 +1001,24 @@ class _LocationEditor extends StatelessWidget {
             provider.setPrimaryLocation(null);
           },
           icon: const Icon(Icons.clear),
-          label: Text(Ar.businessProfileDiscard),
+          label: Text(l(Ar.businessProfileDiscard, En.businessProfileDiscard)),
         ),
       ],
     );
   }
 
   String? _firstIssueMessage(
+    BuildContext context,
     BusinessProfileEditorProvider provider,
     BusinessProfileValidationField field,
   ) {
-    final issue = provider.lastValidation?.forField(field).firstOrNull;
-    if (issue == null) return null;
-    return BusinessProfileManagementMessages.messageForValidationIssue(issue);
+    final isArabic = context.watch<LanguageProvider?>()?.isArabic ?? true;
+    final issues = provider.lastValidation?.forField(field);
+    if (issues == null || issues.isEmpty) return null;
+    return BusinessProfileManagementMessages.messageForValidationIssue(
+      issues.first,
+      isArabic: isArabic,
+    );
   }
 }
 
@@ -905,13 +1083,15 @@ class _NoticeCard extends StatelessWidget {
 }
 
 class _ConflictBanner extends StatelessWidget {
-  const _ConflictBanner({required this.onReload});
+  const _ConflictBanner({required this.isArabic, required this.onReload});
 
+  final bool isArabic;
   final VoidCallback onReload;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    String l(String ar, String en) => isArabic ? ar : en;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -926,7 +1106,7 @@ class _ConflictBanner extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
-              Ar.businessProfileConflictMessage,
+              l(Ar.businessProfileConflictMessage, En.businessProfileConflictMessage),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: AppColors.warning,
               ),
@@ -935,7 +1115,12 @@ class _ConflictBanner extends StatelessWidget {
           Flexible(
             child: TextButton(
               onPressed: onReload,
-              child: Text(Ar.businessProfileConflictReload),
+              child: Text(
+                l(
+                  Ar.businessProfileConflictReload,
+                  En.businessProfileConflictReload,
+                ),
+              ),
             ),
           ),
         ],
@@ -945,13 +1130,15 @@ class _ConflictBanner extends StatelessWidget {
 }
 
 class _RefreshWarningBanner extends StatelessWidget {
-  const _RefreshWarningBanner({required this.onRetry});
+  const _RefreshWarningBanner({required this.isArabic, required this.onRetry});
 
+  final bool isArabic;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    String l(String ar, String en) => isArabic ? ar : en;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -966,7 +1153,10 @@ class _RefreshWarningBanner extends StatelessWidget {
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(
-              Ar.businessProfileRefreshWarning,
+              l(
+                Ar.businessProfileRefreshWarning,
+                En.businessProfileRefreshWarning,
+              ),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: AppColors.warning,
               ),
@@ -975,7 +1165,12 @@ class _RefreshWarningBanner extends StatelessWidget {
           Flexible(
             child: TextButton(
               onPressed: onRetry,
-              child: Text(Ar.businessProfileRetryRefresh),
+              child: Text(
+                l(
+                  Ar.businessProfileRetryRefresh,
+                  En.businessProfileRetryRefresh,
+                ),
+              ),
             ),
           ),
         ],
@@ -986,11 +1181,13 @@ class _RefreshWarningBanner extends StatelessWidget {
 
 class _SaveBar extends StatelessWidget {
   const _SaveBar({
+    required this.isArabic,
     required this.enabled,
     required this.busy,
     required this.onSave,
   });
 
+  final bool isArabic;
   final bool enabled;
   final bool busy;
   final VoidCallback onSave;
@@ -999,6 +1196,7 @@ class _SaveBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    String l(String ar, String en) => isArabic ? ar : en;
 
     return SafeArea(
       child: Container(
@@ -1021,7 +1219,11 @@ class _SaveBar extends StatelessWidget {
             Expanded(
               child: ElevatedButton(
                 onPressed: enabled && !busy ? onSave : null,
-                child: Text(busy ? Ar.businessProfileSaving : Ar.businessProfileSave),
+                child: Text(
+                  busy
+                      ? l(Ar.businessProfileSaving, En.businessProfileSaving)
+                      : l(Ar.businessProfileSave, En.businessProfileSave),
+                ),
               ),
             ),
           ],
