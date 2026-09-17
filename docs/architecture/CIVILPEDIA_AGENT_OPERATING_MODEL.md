@@ -238,3 +238,29 @@ When a provider materially changes its lineup:
 3. do not rewrite project architecture or role principles unnecessarily.
 
 Last model-lineup verification: **2026-09-15**.
+
+## 12. Risk-based agent ceremony
+
+Match ceremony to risk. Do not lower quality — reduce only unnecessary process
+overhead where the risk is low.
+
+High-risk work gets strong contract/review ceremony:
+
+- examples: Auth; Supabase authority; RLS/security; ownership; concurrency;
+  lifecycle; migrations; high-blast-radius architecture;
+- preferred workflow:
+  Contract → strong implementation agent/model → independent focused review →
+  formal closure.
+
+Routine lower-risk work uses proportionate ceremony:
+
+- examples: visual polish; ordinary Flutter presentation; localized UI fixes;
+  encyclopedia cards; routine component work;
+- preferred workflow:
+  efficient implementer → focused deterministic tests → routine independent
+  review.
+
+The roadmap's cross-cutting governance (continuous security, continuous
+integration/E2E smoke gates, CI evidence baseline, Supabase shift-left,
+observability, V1 non-goals) applies to every phase from the Post-R09 Quality
+Gate onward.

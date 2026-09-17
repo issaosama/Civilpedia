@@ -95,7 +95,8 @@ ROADMAP_STATUS: ACTIVE
 | V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R08 | Auth + Profile Production Completion | CLOSED | Codex | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R09 | Offline / Connectivity / Error Hardening | CURRENT | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
-| V1-R10 | Core App UX Production Completion | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
+| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | QUEUED | TBD BY ARCHITECT | TBD BY ARCHITECT | MEDIUM | — |
+| V1-R10 | UI/UX & Core App Experience | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R12 | Tools / Calculators Final Engineering QA | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R13 | Encyclopedia / Content Studio Finalization | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -765,7 +766,9 @@ Part 2 P2-E: CURRENT — CONTRACT FROZEN
 Part 2 P2-E1: IMPLEMENTATION_AUTHORIZED — P2-E1 MAY BEGIN
 Part 2 P2-E2: LOCKED pending P2-E1 independent acceptance
 Part 2 P2-F through P2-G: LOCKED
-V1-R10: QUEUED (not started)
+Post-R09 Quality Gate (V1-R09Q): QUEUED after R09 (not started)
+V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
+  (not started)
 
 Primary:
 
@@ -798,43 +801,177 @@ No fake success.
 
 ---
 
-## V1-R10 — Core App UX Production Completion
+## V1-R09Q — Post-R09 Cross-Cutting Quality Gate
 
-STATUS: QUEUED
+STATUS: QUEUED (after V1-R09 closes; BEFORE V1-R10 begins)
+
+Primary:
+
+TBD BY ARCHITECT
+
+This is NOT a feature phase.
+
+Purpose:
+
+- establish/verify the CI baseline;
+- run critical integration smoke tests;
+- verify key auth/session/offline recovery paths together;
+- verify current Supabase/RLS negative + positive security coverage where
+  relevant;
+- verify migration/reproducibility baseline;
+- verify no known cross-feature trust-breaking regression before the V1 UI/UX
+  redesign.
+
+The gate must remain SMALLER than V1-R17 (Final End-to-End QA).
+
+Do NOT turn this gate into a second full End-to-End phase.
+
+V1-R10 does not begin until the Post-R09 Quality Gate completes.
+
+---
+
+## V1-R10 — UI/UX & Core App Experience
+
+STATUS: QUEUED (after the Post-R09 Quality Gate)
 
 Primary:
 
 Big Pickle
 
+Role:
+
+V1-R10 is the PRIMARY V1 UI/UX / design-system phase. It defines the final V1
+visual direction and core app experience BEFORE later major features
+(V1-R11/V1-R12/V1-R13) are built.
+
+Architect-defined sub-phases:
+
+R10.1 — Visual Direction Freeze
+
+Define Civilpedia's final V1 visual direction before later major features are
+built. Include:
+
+- visual identity;
+- primary/supporting colors;
+- typography hierarchy;
+- spacing system;
+- radii;
+- shadows/elevation;
+- iconography;
+- motion principles;
+- information density;
+- engineering/professional visual tone.
+
+Visual direction target:
+
+- professional engineering product;
+- + premium modern feel;
+- + practical usability for engineers/site users.
+
+Do NOT prescribe a copied third-party visual design.
+
+R10.2 — Design System
+
+Define/reconcile reusable primitives such as:
+
+- buttons;
+- cards;
+- inputs;
+- search;
+- chips;
+- list items;
+- section headers;
+- dialogs;
+- bottom sheets;
+- app bars;
+- navigation primitives;
+- loading states;
+- skeletons where appropriate;
+- empty states;
+- error/remote-data states;
+- status badges;
+- common spacing/layout primitives.
+
 Goal:
 
-Production polish of the whole shell and primary journeys:
+later V1-R11/V1-R12/V1-R13 features must consume the design system rather than
+invent their own visual patterns.
+
+R10.3 — Core Screen Redesign / Harmonization
+
+Review and polish the major existing core application surfaces using the actual
+repository architecture (no imaginary screens):
 
 - Home;
-- Knowledge/Encyclopedia;
-- Tools;
-- Projects;
-- Directory;
-- Saved;
-- User/Profile;
-- navigation;
-- typography;
-- RTL;
+- navigation/shell;
+- profile/user area;
+- saved;
+- search;
+- authentication entry screens;
+- common/shared screens.
+
+R10.4 — Responsive / Locale / Theme Hardening
+
+Include:
+
+- Arabic RTL;
+- English LTR;
 - dark mode;
-- responsive layouts;
-- shared cards/tokens;
-- accessibility/touch targets;
-- visual consistency.
+- supported phone sizes;
+- tablet/large-layout behavior where V1 supports it;
+- text scaling / overflow resilience where relevant.
 
-Important:
+R10.5 — Visual QA / UX Regression
 
-Do not redesign already-good areas without evidence.
+Before R10 closes verify:
 
-This is a production completion pass, not a speculative redesign.
+- visual consistency;
+- spacing consistency;
+- no legacy component duplication where a design-system primitive exists;
+- AR/EN;
+- RTL/LTR;
+- dark;
+- responsive behavior;
+- loading/error/empty states;
+- navigation continuity;
+- accessibility basics where applicable.
 
-Arabic-only may remain the intentional V1 product language unless the Owner explicitly promotes English into V1.
+UI FREEZE PRINCIPLE (post-R10):
 
-If Arabic-only remains the decision, it is a production scope decision, not a beta limitation.
+R10 is the main V1 visual redesign window.
+
+After R10:
+
+Allowed:
+- polish;
+- spacing refinements;
+- icon improvements;
+- micro-interactions;
+- animation refinement;
+- small visual consistency fixes;
+- feature-specific extensions of frozen design primitives.
+
+Not preferred without Architect decision:
+- wholesale navigation redesign;
+- global typography redesign;
+- global card/layout philosophy replacement;
+- major design-language reset.
+
+Reason:
+
+V1-R11/V1-R12/V1-R13 must be built on the final V1 design system rather than
+requiring large UI rework near release.
+
+This is NOT an absolute prohibition on later UX correction. Trust-breaking or
+usability defects may always be corrected.
+
+Language note (preserved):
+
+Arabic-only may remain the intentional V1 product language unless the Owner
+explicitly promotes English into V1.
+
+If Arabic-only remains the decision, it is a production scope decision, not a
+beta limitation.
 
 ---
 
@@ -1137,6 +1274,113 @@ Only after stable V1 launch should normal V1.1 feature development begin.
 
 ---
 
+# CROSS-CUTTING QUALITY, SECURITY & PLATFORM GOVERNANCE (V1-R09Q AND EVERY LATER PHASE)
+
+These rules apply to the Post-R09 Quality Gate and every later phase. They do
+not change current V1-R09 execution or any frozen contract.
+
+## Continuous Security Rule
+
+V1-R15 remains Security & Abuse FINAL AUDIT. Security must NOT begin only in
+V1-R15.
+
+Any phase that changes:
+
+- authentication;
+- authorization;
+- Supabase;
+- RLS;
+- grants;
+- RPC authority;
+- ownership;
+- role/staff access;
+- sensitive mutation guards;
+
+must include relevant positive AND negative security/authority tests inside
+that same phase.
+
+V1-R15 is the comprehensive final security gate, not the first security pass.
+
+## Continuous E2E / Integration Rule
+
+V1-R17 remains the FINAL comprehensive End-to-End phase. V1-R17 must NOT be the
+first meaningful integration/E2E execution.
+
+Require targeted critical-journey integration/smoke verification at least:
+
+A. Post-R09 Quality Gate (V1-R09Q);
+
+B. after a major backend-heavy milestone such as V1-R11 closure;
+
+C. after V1-R14 Supabase Production Readiness;
+
+D. comprehensive final E2E in V1-R17.
+
+Intermediate gates remain targeted. Do NOT run huge full-system suites after
+every tiny slice.
+
+## CI Rule
+
+Goal: CI becomes the stable automated evidence source.
+
+The workflow should progressively support:
+
+- focused unit/widget tests;
+- critical integration tests;
+- database/RLS tests where applicable;
+- reproducibility/migration checks where applicable.
+
+Agent-reported test counts remain useful evidence, but automated CI should
+become the long-term deterministic baseline where practical.
+
+CI implementation is not performed in any docs-only task; it is scheduled only
+when authorized.
+
+## Supabase Shift-Left Rule
+
+V1-R14 remains Supabase Production Readiness FINALIZATION / GATE.
+Production-readiness groundwork must begin earlier where relevant.
+
+Any earlier phase introducing Supabase backend behavior must preserve:
+
+- migration version control;
+- deterministic/reproducible environment assumptions;
+- RLS/security tests;
+- no `service_role` client exposure;
+- source-controlled backend contracts.
+
+V1-R14 then performs the final production verification including applicable:
+
+- RLS review;
+- grants review;
+- indexes/performance;
+- environment separation/readiness;
+- database tests;
+- production configuration;
+- security/performance advisor review where used;
+- load/readiness checks where justified.
+
+Backend changes are NOT implemented in this docs-only task.
+
+## Observability Rule
+
+Observability is a V1 production requirement.
+
+Before release readiness / final E2E closes, Civilpedia must have an approved
+strategy for applicable:
+
+- crash reporting;
+- production error visibility;
+- analytics for critical product journeys;
+- basic release diagnostics.
+
+Existing planned technologies such as Crashlytics/Analytics may be used if
+still architecturally appropriate at implementation time.
+
+No telemetry implementation is introduced now.
+
+---
+
 # POST-V1 BY DEFAULT
 
 The following are NOT blockers for V1 unless the Owner explicitly promotes them:
@@ -1159,6 +1403,24 @@ The following are NOT blockers for V1 unless the Owner explicitly promotes them:
 Existing dormant/contract groundwork may remain if safe and honest.
 
 Do not expose half-built monetization functionality to users.
+
+---
+
+# V1 NON-GOALS — NO OVERENGINEERING
+
+Preserve these non-goals unless separately authorized:
+
+- microservices for V1;
+- generic offline mutation queue;
+- conflict-resolution engine;
+- background sync architecture for every feature;
+- durable authoritative cache for every remote domain;
+- oversized admin platform;
+- AI features merely for novelty;
+- excessive animation;
+- speculative abstractions without current use.
+
+The roadmap remains production-grade but intentionally scoped.
 
 ---
 
@@ -1240,7 +1502,11 @@ V1-R09 — Offline / Connectivity / Error Hardening
 
 NEXT AFTER SUCCESSFUL CLOSE:
 
-V1-R10 — Core App UX Production Completion
+V1-R09Q — Post-R09 Cross-Cutting Quality Gate
+
+THEN (QUEUED after the Post-R09 Quality Gate):
+
+V1-R10 — UI/UX & Core App Experience
 
 No other phase may be selected by inference.
 
@@ -1649,3 +1915,31 @@ Backend decision: no migration / RLS / schema / Edge / Realtime / service_role
   change; migration 00022 remains absent
 V1-R09 status: CURRENT (not closed)
 Owner approval: PENDING OWNER STAGING
+
+### Strategic Roadmap Amendment Record (Architect/Owner)
+
+Date: 2026-09-17
+Type: STRATEGIC ROADMAP PERSISTENCE (DOCS ONLY)
+
+Decisions ratified:
+- existing V1 roadmap direction and R11-R19 ordering RATIFIED (unchanged)
+- Post-R09 quality gate inserted between V1-R09 and V1-R10: V1-R09Q
+- V1-R10 redefined as the PRIMARY V1 UI/UX / design-system phase with
+  Architect-defined sub-phases R10.1-R10.5 + post-R10 UI freeze principle
+- continuous quality rules frozen: security shift-left; progressive
+  E2E/integration smoke gates; CI as stable automated evidence source;
+  Supabase shift-left; observability requirement; risk-based agent ceremony;
+  V1 non-goals / no overengineering
+
+Scope discipline:
+- V1-R09 and frozen contract semantics NOT changed (including P2-E)
+- V1-R09 NOT marked closed
+- V1-R09Q NOT started; V1-R10 NOT started; V1-R11+ NOT authorized
+- production code/tests/frozen contracts NOT modified
+
+Status unchanged:
+- V1-R09: CURRENT (not closed)
+- Post-R09 Quality Gate (V1-R09Q): QUEUED after R09
+- V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
+- V1-R11 through V1-R19: QUEUED (ordering unchanged)
+- V1-R14 / V1-R15 / V1-R17 / V1-R19: final-gate roles unchanged
