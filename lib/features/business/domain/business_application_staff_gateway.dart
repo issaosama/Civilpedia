@@ -165,12 +165,15 @@ abstract class BusinessApplicationStaffGateway {
     required String reason,
   });
 
-  /// V1-R07 — Returns the current session's granular business-application
-  /// permissions. UX-only; every subsequent RPC authorizes independently.
+  /// V1-R07/P2-E1 — Returns the current session's granular
+  /// business-application permissions. UX-only; every subsequent RPC
+  /// authorizes independently. Production implementations own the canonical
+  /// [RemoteOperationPolicy.read] deadline at the data boundary.
   Future<StaffReadResult<StaffApplicationCapabilities>> getCapabilities();
 
-  /// V1-R07 — Bounded staff queue. [statusFilter] null means the server's
-  /// default actionable statuses; [typeFilter] null means no type restriction.
+  /// V1-R07/P2-E1 — Bounded staff queue. [statusFilter] null means the
+  /// server's default actionable statuses; [typeFilter] null means no type
+  /// restriction. One malformed required row fails the complete read.
   Future<StaffReadResult<StaffApplicationPage>> listApplications({
     BusinessApplicationStatus? statusFilter,
     BusinessApplicationType? typeFilter,
@@ -178,7 +181,8 @@ abstract class BusinessApplicationStaffGateway {
     StaffApplicationCursor? cursor,
   });
 
-  /// V1-R07 — Bounded staff application detail for [applicationId].
+  /// V1-R07/P2-E1 — Bounded staff application detail for [applicationId].
+  /// A successful response must carry that same canonical application id.
   Future<StaffReadResult<StaffApplicationDetail>> getApplicationDetail(
     String applicationId,
   );

@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/backend/supabase_service.dart';
+import '../../../core/network/remote_operation_policy.dart';
 import '../domain/business_application.dart';
 import '../domain/business_application_staff_gateway.dart';
 import '../domain/business_application_status.dart';
@@ -9,6 +10,8 @@ import '../domain/staff_application_capabilities.dart';
 import '../domain/staff_application_detail.dart';
 import '../domain/staff_application_summary.dart';
 import '../domain/staff_read_result.dart';
+import '../domain/staff_remote_read.dart';
+import 'staff_remote_read_classifier.dart';
 
 /// A6.3/A6.4 — Production [BusinessApplicationStaffGateway] calling the
 /// SECURITY DEFINER staff RPCs of migrations 00016 and 00018.
@@ -28,7 +31,9 @@ class SupabaseBusinessApplicationStaffGateway
   SupabaseBusinessApplicationStaffGateway({
     required this.service,
     SupabaseClient? client,
-  }) : _injectedClient = client;
+    Duration readTimeout = RemoteOperationPolicy.read,
+  }) : _injectedClient = client,
+       _readTimeout = readTimeout;
 
   /// The backend boundary used to decide availability.
   final SupabaseService service;
@@ -36,6 +41,7 @@ class SupabaseBusinessApplicationStaffGateway
   // Injected for tests; production resolves lazily so merely constructing the
   // gateway never touches the global Supabase singleton.
   final SupabaseClient? _injectedClient;
+  final Duration _readTimeout;
 
   SupabaseClient get _client => _injectedClient ?? Supabase.instance.client;
 
@@ -115,37 +121,35 @@ class SupabaseBusinessApplicationStaffGateway
     });
   }
 
-  static const String _capabilitiesRpc =
-      'get_staff_application_capabilities';
+  static const String _capabilitiesRpc = 'get_staff_application_capabilities';
   static const String _listRpc = 'list_staff_business_applications';
   static const String _detailRpc = 'get_staff_business_application_detail';
 
   @override
-  Future<StaffReadResult<StaffApplicationCapabilities>> getCapabilities() async {
+  Future<StaffReadResult<StaffApplicationCapabilities>>
+  getCapabilities() async {
     if (!isAvailable) {
       return const StaffReadUnavailable<StaffApplicationCapabilities>();
     }
     try {
-      final response = await _client.rpc(_capabilitiesRpc);
+      final response = await _readRpc(_capabilitiesRpc);
       if (response is! Map<String, dynamic>) {
-        return const StaffReadDenied<StaffApplicationCapabilities>(
-          BusinessApplicationStaffCause.unexpected,
+        return const StaffRemoteReadFailure<StaffApplicationCapabilities>(
+          StaffRemoteReadFailureKind.malformedResponse,
         );
       }
       final parsed = StaffApplicationCapabilities.tryFromJson(response);
       if (parsed == null) {
-        return const StaffReadDenied<StaffApplicationCapabilities>(
-          BusinessApplicationStaffCause.unexpected,
+        return const StaffRemoteReadFailure<StaffApplicationCapabilities>(
+          StaffRemoteReadFailureKind.malformedResponse,
         );
       }
       return StaffReadSuccess<StaffApplicationCapabilities>(parsed);
     } on PostgrestException catch (e) {
-      return StaffReadDenied<StaffApplicationCapabilities>(
-        BusinessApplicationStaffCause.fromServerCode(e.code),
-      );
-    } catch (_) {
-      return const StaffReadDenied<StaffApplicationCapabilities>(
-        BusinessApplicationStaffCause.unexpected,
+      return _mapCapabilitiesPostgrest(e);
+    } catch (error) {
+      return StaffRemoteReadFailure<StaffApplicationCapabilities>(
+        classifyStaffRemoteReadFailure(error),
       );
     }
   }
@@ -170,26 +174,24 @@ class SupabaseBusinessApplicationStaffGateway
       },
     };
     try {
-      final response = await _client.rpc(_listRpc, params: params);
+      final response = await _readRpc(_listRpc, params: params);
       if (response is! Map<String, dynamic>) {
-        return const StaffReadDenied<StaffApplicationPage>(
-          BusinessApplicationStaffCause.unexpected,
+        return const StaffRemoteReadFailure<StaffApplicationPage>(
+          StaffRemoteReadFailureKind.malformedResponse,
         );
       }
       final parsed = StaffApplicationPage.tryFromJson(response);
       if (parsed == null) {
-        return const StaffReadDenied<StaffApplicationPage>(
-          BusinessApplicationStaffCause.unexpected,
+        return const StaffRemoteReadFailure<StaffApplicationPage>(
+          StaffRemoteReadFailureKind.malformedResponse,
         );
       }
       return StaffReadSuccess<StaffApplicationPage>(parsed);
     } on PostgrestException catch (e) {
-      return StaffReadDenied<StaffApplicationPage>(
-        BusinessApplicationStaffCause.fromServerCode(e.code),
-      );
-    } catch (_) {
-      return const StaffReadDenied<StaffApplicationPage>(
-        BusinessApplicationStaffCause.unexpected,
+      return _mapQueuePostgrest(e);
+    } catch (error) {
+      return StaffRemoteReadFailure<StaffApplicationPage>(
+        classifyStaffRemoteReadFailure(error),
       );
     }
   }
@@ -202,31 +204,88 @@ class SupabaseBusinessApplicationStaffGateway
       return const StaffReadUnavailable<StaffApplicationDetail>();
     }
     try {
-      final response = await _client.rpc(
+      final response = await _readRpc(
         _detailRpc,
         params: {'p_application_id': applicationId},
       );
       if (response is! Map<String, dynamic>) {
-        return const StaffReadDenied<StaffApplicationDetail>(
-          BusinessApplicationStaffCause.unexpected,
+        return const StaffRemoteReadFailure<StaffApplicationDetail>(
+          StaffRemoteReadFailureKind.malformedResponse,
         );
       }
       final parsed = StaffApplicationDetail.tryFromJson(response);
-      if (parsed == null) {
-        return const StaffReadDenied<StaffApplicationDetail>(
-          BusinessApplicationStaffCause.unexpected,
+      if (parsed == null || parsed.id != applicationId) {
+        return const StaffRemoteReadFailure<StaffApplicationDetail>(
+          StaffRemoteReadFailureKind.malformedResponse,
         );
       }
       return StaffReadSuccess<StaffApplicationDetail>(parsed);
     } on PostgrestException catch (e) {
-      return StaffReadDenied<StaffApplicationDetail>(
-        BusinessApplicationStaffCause.fromServerCode(e.code),
-      );
-    } catch (_) {
-      return const StaffReadDenied<StaffApplicationDetail>(
-        BusinessApplicationStaffCause.unexpected,
+      return _mapDetailPostgrest(e);
+    } catch (error) {
+      return StaffRemoteReadFailure<StaffApplicationDetail>(
+        classifyStaffRemoteReadFailure(error),
       );
     }
+  }
+
+  Future<dynamic> _readRpc(String rpcName, {Map<String, dynamic>? params}) {
+    return runWithRemoteDeadline<dynamic>(
+      _client.rpc(rpcName, params: params),
+      timeout: _readTimeout,
+    );
+  }
+
+  StaffReadResult<StaffApplicationCapabilities> _mapCapabilitiesPostgrest(
+    PostgrestException error,
+  ) {
+    if (error.code?.toUpperCase() == 'P0AUT') {
+      return const StaffReadDenied<StaffApplicationCapabilities>(
+        BusinessApplicationStaffCause.unauthenticated,
+      );
+    }
+    return StaffRemoteReadFailure<StaffApplicationCapabilities>(
+      classifyStaffRemoteReadFailure(
+        error,
+        postgrestResponseShapeCodesAreMalformed: true,
+      ),
+    );
+  }
+
+  StaffReadResult<StaffApplicationPage> _mapQueuePostgrest(
+    PostgrestException error,
+  ) {
+    final cause = switch (error.code?.toUpperCase()) {
+      'P0AUT' => BusinessApplicationStaffCause.unauthenticated,
+      'P0PER' => BusinessApplicationStaffCause.staffPermissionDenied,
+      'P0DAT' => BusinessApplicationStaffCause.requiredDataMissing,
+      _ => null,
+    };
+    if (cause != null) return StaffReadDenied<StaffApplicationPage>(cause);
+    return StaffRemoteReadFailure<StaffApplicationPage>(
+      classifyStaffRemoteReadFailure(
+        error,
+        postgrestResponseShapeCodesAreMalformed: true,
+      ),
+    );
+  }
+
+  StaffReadResult<StaffApplicationDetail> _mapDetailPostgrest(
+    PostgrestException error,
+  ) {
+    final cause = switch (error.code?.toUpperCase()) {
+      'P0AUT' => BusinessApplicationStaffCause.unauthenticated,
+      'P0PER' => BusinessApplicationStaffCause.staffPermissionDenied,
+      'P0NOT' => BusinessApplicationStaffCause.applicationNotFound,
+      _ => null,
+    };
+    if (cause != null) return StaffReadDenied<StaffApplicationDetail>(cause);
+    return StaffRemoteReadFailure<StaffApplicationDetail>(
+      classifyStaffRemoteReadFailure(
+        error,
+        postgrestResponseShapeCodesAreMalformed: true,
+      ),
+    );
   }
 
   Future<BusinessApplicationStaffResult> _callRpc(

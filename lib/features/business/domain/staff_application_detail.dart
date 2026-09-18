@@ -75,21 +75,22 @@ class StaffApplicationDetail {
 
     StaffNewBusinessContext? newBusiness;
     final rawNew = json['new_business'];
-    if (rawNew is Map<String, dynamic>) {
+    if (type == BusinessApplicationType.newApplication) {
+      if (rawNew is! Map<String, dynamic>) return null;
       newBusiness = StaffNewBusinessContext.tryFromJson(rawNew);
-      if (newBusiness == null &&
-          type == BusinessApplicationType.newApplication) {
-        return null;
-      }
+      if (newBusiness == null) return null;
+    } else if (rawNew != null) {
+      return null;
     }
 
     StaffClaimTargetContext? claimTarget;
     final rawClaim = json['claim_target'];
-    if (rawClaim is Map<String, dynamic>) {
+    if (type == BusinessApplicationType.claim) {
+      if (rawClaim is! Map<String, dynamic>) return null;
       claimTarget = StaffClaimTargetContext.tryFromJson(rawClaim);
-      if (claimTarget == null && type == BusinessApplicationType.claim) {
-        return null;
-      }
+      if (claimTarget == null) return null;
+    } else if (rawClaim != null) {
+      return null;
     }
 
     final contacts = _parseContacts(json['contacts']);
@@ -124,11 +125,9 @@ class StaffApplicationDetail {
     );
   }
 
-  /// Strict fail-closed parsing (finding 5): a present-but-malformed contacts
-  /// projection fails the whole detail — every entry must parse and the
-  /// collection must be a JSON array. Null/absent is a relaxed default empty.
+  /// P2-E1 strict complete-response parsing: contacts is a required array and
+  /// every row must parse; one malformed row fails the whole detail.
   static List<StaffApplicationContact>? _parseContacts(dynamic raw) {
-    if (raw == null) return const [];
     if (raw is! List<dynamic>) return null;
     final result = <StaffApplicationContact>[];
     for (final item in raw) {
@@ -140,11 +139,9 @@ class StaffApplicationDetail {
     return result;
   }
 
-  /// Strict fail-closed parsing (finding 5): a present-but-malformed visits
-  /// projection fails the whole detail — every entry must parse and the
-  /// collection must be a JSON array. Null/absent is a relaxed default empty.
+  /// P2-E1 strict complete-response parsing: visits is a required array and
+  /// every row must parse; one malformed row fails the whole detail.
   static List<StaffApplicationVisit>? _parseVisits(dynamic raw) {
-    if (raw == null) return const [];
     if (raw is! List<dynamic>) return null;
     final result = <StaffApplicationVisit>[];
     for (final item in raw) {

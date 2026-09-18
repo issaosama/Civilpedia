@@ -22,12 +22,14 @@ class StaffOperationsScope extends ChangeNotifier {
   }) {
     queue = StaffApplicationQueueProvider(
       gateway: gateway,
+      auth: auth,
       onPermissionLost: _onPrivilegedPermissionLost,
     );
     detail = StaffApplicationDetailProvider(
       gateway: gateway,
+      auth: auth,
       onPermissionLost: _onPrivilegedPermissionLost,
-      onMutationCommitted: () => queue.refresh(),
+      onMutationCommitted: queue.onMutationCommitted,
     );
     access = StaffAccessProvider(
       gateway: gateway,

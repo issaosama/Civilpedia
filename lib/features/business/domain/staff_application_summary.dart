@@ -41,20 +41,22 @@ class StaffApplicationSummary {
 
     StaffNewBusinessSummary? newBusiness;
     final rawNew = json['new_business'];
-    if (rawNew is Map<String, dynamic>) {
+    if (type == BusinessApplicationType.newApplication) {
+      if (rawNew is! Map<String, dynamic>) return null;
       newBusiness = StaffNewBusinessSummary.tryFromJson(rawNew);
-      if (newBusiness == null && type == BusinessApplicationType.newApplication) {
-        return null;
-      }
+      if (newBusiness == null) return null;
+    } else if (rawNew != null) {
+      return null;
     }
 
     StaffClaimTargetSummary? claimTarget;
     final rawClaim = json['claim_target'];
-    if (rawClaim is Map<String, dynamic>) {
+    if (type == BusinessApplicationType.claim) {
+      if (rawClaim is! Map<String, dynamic>) return null;
       claimTarget = StaffClaimTargetSummary.tryFromJson(rawClaim);
-      if (claimTarget == null && type == BusinessApplicationType.claim) {
-        return null;
-      }
+      if (claimTarget == null) return null;
+    } else if (rawClaim != null) {
+      return null;
     }
 
     return StaffApplicationSummary(
@@ -72,10 +74,7 @@ class StaffApplicationSummary {
 
 /// V1-R07 — Minimal NEW business summary in a staff queue item.
 class StaffNewBusinessSummary {
-  const StaffNewBusinessSummary({
-    required this.name,
-    this.entityType,
-  });
+  const StaffNewBusinessSummary({required this.name, this.entityType});
 
   final String name;
   final String? entityType;
@@ -118,10 +117,7 @@ class StaffClaimTargetSummary {
 /// `(created_at ASC, id ASC)`, so the cursor is the pair of the last item's
 /// created_at and id.
 class StaffApplicationCursor {
-  const StaffApplicationCursor({
-    required this.createdAt,
-    required this.id,
-  });
+  const StaffApplicationCursor({required this.createdAt, required this.id});
 
   final DateTime createdAt;
   final String id;
@@ -136,10 +132,7 @@ class StaffApplicationCursor {
 
 /// V1-R07 — One page of staff queue results.
 class StaffApplicationPage {
-  const StaffApplicationPage({
-    required this.items,
-    this.nextCursor,
-  });
+  const StaffApplicationPage({required this.items, this.nextCursor});
 
   final List<StaffApplicationSummary> items;
   final StaffApplicationCursor? nextCursor;

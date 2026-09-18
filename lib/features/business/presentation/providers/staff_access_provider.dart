@@ -6,40 +6,21 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/business_application_staff_gateway.dart';
 import '../../domain/staff_application_capabilities.dart';
 import '../../domain/staff_read_result.dart';
+import '../../domain/staff_remote_read.dart';
 
-/// V1-R07 — Lifecycle states for current-session staff capability resolution.
+typedef _StaffCapabilitiesReadKey = ({String userId, int authGeneration});
+
 enum StaffAccessState {
-  /// Not yet asked to resolve.
   initial,
-
-  /// Capability RPC in flight.
   resolving,
-
-  /// Session has `business_applications.read`.
   authorized,
-
-  /// Authenticated but no staff read permission.
   noReadPermission,
-
-  /// No authenticated session.
   signInRequired,
-
-  /// Backend unavailable or unclassified error.
   error,
 }
 
-/// V1-R07 — Resolves the current session's granular staff application
-/// permissions. This is UX-only; every staff RPC revalidates authority.
-///
-/// Privileged queue/detail providers must not render data while this provider
-/// is in [StaffAccessState.resolving] or [StaffAccessState.noReadPermission].
-///
-/// Fail-closed guarantees (findings 1, 10):
-/// - session changes (sign-out, session replacement) reset capability state and
-///   restart resolution for the new session;
-/// - a server `P0PER`/`P0AUT` denial never leaves stale authorized capability
-///   data behind — it clears and signals [onPermissionLost] so privileged
-///   queue/detail data owned elsewhere is cleared too.
+/// Current-session Staff capability resolution with exact-key coalescing and
+/// canonical AuthProvider generation guards.
 class StaffAccessProvider extends ChangeNotifier {
   StaffAccessProvider({
     required BusinessApplicationStaffGateway gateway,
@@ -58,65 +39,101 @@ class StaffAccessProvider extends ChangeNotifier {
   StaffAccessState _state = StaffAccessState.initial;
   StaffApplicationCapabilities? _capabilities;
   BusinessApplicationStaffCause? _lastErrorCause;
+  StaffRemoteReadFailureKind? _lastRemoteFailure;
+  bool _readUnavailable = false;
+  StaffRemoteReadPhase _readPhase = StaffRemoteReadPhase.idle;
+  _StaffCapabilitiesReadKey? _currentKey;
 
-  /// The auth user id for which the current capability state was resolved, or
-  /// null while signed out / unresolved. Used to detect session replacement.
-  String? _resolvedUser;
-
-  int _requestSeq = 0;
+  int _requestEpoch = 0;
+  final Map<_StaffCapabilitiesReadKey, Future<void>> _activeReads = {};
+  bool _disposed = false;
 
   StaffAccessState get state => _state;
   StaffApplicationCapabilities? get capabilities => _capabilities;
   BusinessApplicationStaffCause? get lastErrorCause => _lastErrorCause;
+  StaffRemoteReadFailureKind? get lastRemoteFailure => _lastRemoteFailure;
+  bool get readUnavailable => _readUnavailable;
+  StaffRemoteReadPhase get readPhase => _readPhase;
+  int get activeReadCount => _activeReads.length;
 
   bool get isAuthorized => _state == StaffAccessState.authorized;
   bool get isResolving => _state == StaffAccessState.resolving;
   bool get hasReadPermission => _capabilities?.canRead ?? false;
 
-  @override
-  void dispose() {
-    _auth.removeListener(_handleAuthChanged);
-    super.dispose();
-  }
+  String? get _currentUserId => _auth.session?.userId;
 
-  /// Resolves capabilities for the current session. Safe to call repeatedly.
-  Future<void> load() async {
-    if (!_auth.isLoggedIn) {
-      _resolvedUser = null;
+  /// Resolves capabilities for the current `(userId, authGeneration)` key.
+  /// Repeated calls for that exact active key join one underlying RPC.
+  Future<void> load() {
+    if (_disposed) return Future.value();
+    final userId = _currentUserId;
+    if (!_auth.isLoggedIn || userId == null || userId.isEmpty) {
+      _invalidateReads();
       _state = StaffAccessState.signInRequired;
-      _capabilities = null;
-      _lastErrorCause = null;
-      notifyListeners();
-      return;
+      _readPhase = StaffRemoteReadPhase.idle;
+      _notifyIfAlive();
+      return Future.value();
     }
 
-    if (!_gateway.isAvailable) {
-      _state = StaffAccessState.error;
-      _capabilities = null;
-      _lastErrorCause = BusinessApplicationStaffCause.unexpected;
-      notifyListeners();
-      return;
-    }
+    final key = (userId: userId, authGeneration: _auth.generation);
+    final active = _activeReads[key];
+    if (active != null) return active;
 
-    final request = ++_requestSeq;
-    _resolvedUser = _auth.session?.userId;
+    _currentKey = key;
     _state = StaffAccessState.resolving;
     _capabilities = null;
     _lastErrorCause = null;
-    notifyListeners();
+    _lastRemoteFailure = null;
+    _readUnavailable = false;
+    _readPhase = StaffRemoteReadPhase.loading;
+    _notifyIfAlive();
 
-    final result = await _gateway.getCapabilities();
-    if (request != _requestSeq) return;
+    final requestEpoch = ++_requestEpoch;
+    late final Future<void> operation;
+    operation = _performLoad(key, requestEpoch).whenComplete(() {
+      if (identical(_activeReads[key], operation)) {
+        _activeReads.remove(key);
+      }
+    });
+    _activeReads[key] = operation;
+    return operation;
+  }
+
+  Future<void> _performLoad(
+    _StaffCapabilitiesReadKey key,
+    int requestEpoch,
+  ) async {
+    StaffReadResult<StaffApplicationCapabilities> result;
+    try {
+      result = _gateway.isAvailable
+          ? await _gateway.getCapabilities()
+          : const StaffReadUnavailable<StaffApplicationCapabilities>();
+    } catch (_) {
+      result = const StaffRemoteReadFailure<StaffApplicationCapabilities>(
+        StaffRemoteReadFailureKind.unexpected,
+      );
+    }
+    if (!_canPublish(key, requestEpoch)) return;
+
     switch (result) {
       case StaffReadSuccess(:final data):
         _capabilities = data;
+        _lastErrorCause = null;
+        _lastRemoteFailure = null;
+        _readUnavailable = false;
         _state = data.canRead
             ? StaffAccessState.authorized
             : StaffAccessState.noReadPermission;
-        _lastErrorCause = null;
+        _readPhase = data.canRead
+            ? StaffRemoteReadPhase.loaded
+            : StaffRemoteReadPhase.authoritativeEmpty;
+        if (!data.canRead) _signalPermissionLost();
       case StaffReadDenied(:final cause):
         _capabilities = null;
         _lastErrorCause = cause;
+        _lastRemoteFailure = null;
+        _readUnavailable = false;
+        _readPhase = StaffRemoteReadPhase.failed;
         _state = switch (cause) {
           BusinessApplicationStaffCause.unauthenticated =>
             StaffAccessState.signInRequired,
@@ -124,72 +141,110 @@ class StaffAccessProvider extends ChangeNotifier {
             StaffAccessState.noReadPermission,
           _ => StaffAccessState.error,
         };
-        if (cause == BusinessApplicationStaffCause.staffPermissionDenied ||
-            cause == BusinessApplicationStaffCause.unauthenticated) {
-          _signalPermissionLost();
-        }
+        if (_isAuthorityDenial(cause)) _signalPermissionLost();
+      case StaffRemoteReadFailure(:final kind):
+        _capabilities = null;
+        _lastErrorCause = null;
+        _lastRemoteFailure = kind;
+        _readUnavailable = false;
+        _readPhase = StaffRemoteReadPhase.failed;
+        _state = StaffAccessState.error;
       case StaffReadUnavailable():
         _capabilities = null;
-        _state = StaffAccessState.error;
         _lastErrorCause = BusinessApplicationStaffCause.unexpected;
+        _lastRemoteFailure = null;
+        _readUnavailable = true;
+        _readPhase = StaffRemoteReadPhase.failed;
+        _state = StaffAccessState.error;
     }
-    notifyListeners();
+    _notifyIfAlive();
   }
 
-  /// Clears capability state, e.g. on sign-out.
+  bool _canPublish(_StaffCapabilitiesReadKey key, int requestEpoch) {
+    return !_disposed &&
+        requestEpoch == _requestEpoch &&
+        _currentKey == key &&
+        _auth.isCurrentSession(
+          userId: key.userId,
+          generation: key.authGeneration,
+        );
+  }
+
   void reset() {
-    _requestSeq++;
-    _resolvedUser = null;
+    if (_disposed) return;
+    _invalidateReads();
     _state = StaffAccessState.initial;
-    _capabilities = null;
-    _lastErrorCause = null;
+    _readPhase = StaffRemoteReadPhase.idle;
     notifyListeners();
   }
 
-  /// Applies an authoritative denial reported by another privileged staff RPC.
-  /// This invalidates any capability read in flight without recursively
-  /// re-emitting the scope callback that delivered the denial.
   void applyPrivilegedDenial(BusinessApplicationStaffCause cause) {
-    _requestSeq++;
-    _resolvedUser = cause == BusinessApplicationStaffCause.unauthenticated
-        ? null
-        : _auth.session?.userId;
-    _capabilities = null;
+    if (_disposed) return;
+    _invalidateReads();
+    final userId = _currentUserId;
+    if (userId != null && userId.isNotEmpty) {
+      _currentKey = (userId: userId, authGeneration: _auth.generation);
+    }
     _lastErrorCause = cause;
+    _lastRemoteFailure = null;
+    _readUnavailable = false;
+    _readPhase = StaffRemoteReadPhase.failed;
     _state = cause == BusinessApplicationStaffCause.unauthenticated
         ? StaffAccessState.signInRequired
         : StaffAccessState.noReadPermission;
     notifyListeners();
   }
 
-  /// Auth session transition handling (finding 10).
-  ///
-  /// Binds capability resolution to the auth provider: any change in the
-  /// authenticated user (sign-out or replacement) resets staff state and clears
-  /// privileged queue/detail data for the previous session, and restarts
-  /// capability resolution for a newly authenticated session.
   void _handleAuthChanged() {
-    final signedIn = _auth.isLoggedIn;
-    if (signedIn) {
-      final user = _auth.session?.userId;
-      if (_resolvedUser != null && _resolvedUser != user) {
-        _signalPermissionLost();
-      }
-      if (_resolvedUser != user) {
-        _resolvedUser = user;
-        unawaited(load());
-      }
+    if (_disposed) return;
+    final priorKey = _currentKey;
+    final userId = _currentUserId;
+    if (_auth.isLoggedIn && userId != null && userId.isNotEmpty) {
+      final nextKey = (userId: userId, authGeneration: _auth.generation);
+      if (priorKey == nextKey) return;
+      _invalidateReads();
+      if (priorKey != null) _signalPermissionLost();
+      unawaited(load());
       return;
     }
 
-    if (_resolvedUser != null) {
-      _resolvedUser = null;
-      reset();
-      _signalPermissionLost();
+    if (priorKey != null || _state != StaffAccessState.signInRequired) {
+      _invalidateReads();
+      _state = StaffAccessState.signInRequired;
+      _readPhase = StaffRemoteReadPhase.idle;
+      _notifyIfAlive();
+      if (priorKey != null) _signalPermissionLost();
     }
   }
 
-  void _signalPermissionLost() {
-    _onPermissionLost?.call();
+  void _invalidateReads() {
+    _requestEpoch++;
+    _activeReads.clear();
+    _currentKey = null;
+    _capabilities = null;
+    _lastErrorCause = null;
+    _lastRemoteFailure = null;
+    _readUnavailable = false;
+  }
+
+  static bool _isAuthorityDenial(BusinessApplicationStaffCause cause) {
+    return cause == BusinessApplicationStaffCause.staffPermissionDenied ||
+        cause == BusinessApplicationStaffCause.unauthenticated;
+  }
+
+  void _signalPermissionLost() => _onPermissionLost?.call();
+
+  void _notifyIfAlive() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _auth.removeListener(_handleAuthChanged);
+    _requestEpoch++;
+    _activeReads.clear();
+    super.dispose();
   }
 }

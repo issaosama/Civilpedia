@@ -15,6 +15,7 @@ import 'package:civilpedia/features/business/domain/staff_application_capabiliti
 import 'package:civilpedia/features/business/domain/staff_application_detail.dart';
 import 'package:civilpedia/features/business/domain/staff_application_summary.dart';
 import 'package:civilpedia/features/business/domain/staff_read_result.dart';
+import 'package:civilpedia/features/business/domain/staff_remote_read.dart';
 
 const _appId = '00000000-0000-0000-0000-000000000001';
 
@@ -210,25 +211,28 @@ void main() {
       expect(capturedBody.keys.toSet(), {'p_limit'});
     });
 
-    test('malformed page projection maps to unexpected denial', () async {
-      final httpClient = _RecordingHttpClient(
-        onRequest: (request) async {
-          if (request.url.path.endsWith('list_staff_business_applications')) {
-            return _jsonResponse({'items': 'broken'});
-          }
-          return _jsonResponse({});
-        },
-      );
-      final gateway = _gateway(httpClient);
+    test(
+      'malformed page projection maps to typed malformed response',
+      () async {
+        final httpClient = _RecordingHttpClient(
+          onRequest: (request) async {
+            if (request.url.path.endsWith('list_staff_business_applications')) {
+              return _jsonResponse({'items': 'broken'});
+            }
+            return _jsonResponse({});
+          },
+        );
+        final gateway = _gateway(httpClient);
 
-      final result = await gateway.listApplications();
+        final result = await gateway.listApplications();
 
-      expect(result, isA<StaffReadDenied<StaffApplicationPage>>());
-      expect(
-        (result as StaffReadDenied<StaffApplicationPage>).cause,
-        BusinessApplicationStaffCause.unexpected,
-      );
-    });
+        expect(result, isA<StaffRemoteReadFailure<StaffApplicationPage>>());
+        expect(
+          (result as StaffRemoteReadFailure<StaffApplicationPage>).kind,
+          StaffRemoteReadFailureKind.malformedResponse,
+        );
+      },
+    );
 
     test(
       'getApplicationDetail sends the frozen RPC and parses detail',
@@ -309,45 +313,23 @@ void main() {
       expect(capturedBody['p_reason'], 'Not eligible');
     });
 
-    for (final entry in <String, BusinessApplicationStaffCause>{
-      'P0AUT': BusinessApplicationStaffCause.unauthenticated,
-      'P0PER': BusinessApplicationStaffCause.staffPermissionDenied,
-      'P0NOT': BusinessApplicationStaffCause.applicationNotFound,
-      'P0TRA': BusinessApplicationStaffCause.invalidTransition,
-      'P0COR': BusinessApplicationStaffCause.correctionReasonRequired,
-      'P0REJ': BusinessApplicationStaffCause.rejectionReasonRequired,
-      'P0DAT': BusinessApplicationStaffCause.requiredDataMissing,
-      'P0CLM': BusinessApplicationStaffCause.targetNotClaimable,
-      'P0OWN': BusinessApplicationStaffCause.ownershipProvisioningConflict,
-    }.entries) {
-      test(
-        'real gateway maps server ${entry.key} to ${entry.value.name}',
-        () async {
-          final httpClient = _RecordingHttpClient(
-            onRequest: (request) async {
-              if (request.url.path.endsWith(
-                'get_staff_application_capabilities',
-              )) {
-                return _jsonResponse({
-                  'message': 'typed server rejection',
-                  'code': entry.key,
-                }, statusCode: 400);
-              }
-              return _jsonResponse({});
-            },
-          );
-          final gateway = _gateway(httpClient);
-
-          final result = await gateway.getCapabilities();
-
-          expect(result, isA<StaffReadDenied<StaffApplicationCapabilities>>());
-          expect(
-            (result as StaffReadDenied<StaffApplicationCapabilities>).cause,
-            entry.value,
-          );
-        },
+    test('capability RPC maps only its proven P0AUT domain code', () async {
+      final httpClient = _RecordingHttpClient(
+        onRequest: (request) async => _jsonResponse({
+          'message': 'typed server rejection',
+          'code': 'P0AUT',
+        }, statusCode: 400),
       );
-    }
+      final gateway = _gateway(httpClient);
+
+      final result = await gateway.getCapabilities();
+
+      expect(result, isA<StaffReadDenied<StaffApplicationCapabilities>>());
+      expect(
+        (result as StaffReadDenied<StaffApplicationCapabilities>).cause,
+        BusinessApplicationStaffCause.unauthenticated,
+      );
+    });
 
     test('returns unavailable when the service is not initialized', () async {
       final gateway = SupabaseBusinessApplicationStaffGateway(

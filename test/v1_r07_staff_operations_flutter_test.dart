@@ -144,6 +144,7 @@ void main() {
     test('initial state has empty items and no more pages', () {
       final provider = StaffApplicationQueueProvider(
         gateway: _FakeStaffGateway(),
+        auth: _authenticatedAuth(),
       );
       expect(provider.state, StaffQueueState.initial);
       expect(provider.items, isEmpty);
@@ -161,7 +162,10 @@ void main() {
           ),
         ),
       );
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.loadInitial();
 
@@ -174,7 +178,10 @@ void main() {
       final gateway = _FakeStaffGateway(
         page: const StaffApplicationPage(items: []),
       );
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.loadInitial();
 
@@ -187,7 +194,10 @@ void main() {
           BusinessApplicationStaffCause.staffPermissionDenied,
         ),
       );
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.loadInitial();
 
@@ -200,7 +210,10 @@ void main() {
           BusinessApplicationStaffCause.unauthenticated,
         ),
       );
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.loadInitial();
 
@@ -228,7 +241,10 @@ void main() {
           ),
         ],
       );
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.loadInitial();
       await provider.loadMore();
@@ -239,7 +255,10 @@ void main() {
 
     test('setFilter reloads with new filter', () async {
       final gateway = _FakeStaffGateway();
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.setFilter(
         const StaffApplicationQueueFilter(
@@ -259,7 +278,10 @@ void main() {
         BusinessApplicationStatus.submitted,
       );
       final gateway = _FakeStaffGateway(detail: detail);
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.load('app-1');
 
@@ -273,7 +295,10 @@ void main() {
           BusinessApplicationStaffCause.applicationNotFound,
         ),
       );
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.load('missing');
 
@@ -288,7 +313,10 @@ void main() {
           BusinessApplicationStatus.submitted,
         );
         final gateway = _FakeStaffGateway(detail: detail);
-        final provider = StaffApplicationDetailProvider(gateway: gateway);
+        final provider = StaffApplicationDetailProvider(
+          gateway: gateway,
+          auth: _authenticatedAuth(),
+        );
         await provider.load('app-1');
 
         expect(
@@ -332,7 +360,10 @@ void main() {
         ),
         postMutationDetail: reviewed,
       );
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
       await provider.load('app-1');
 
       final ok = await provider.beginReview();
@@ -353,7 +384,10 @@ void main() {
           BusinessApplicationStaffCause.staffPermissionDenied,
         ),
       );
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
       await provider.load('app-1');
 
       final ok = await provider.beginReview();
@@ -378,7 +412,10 @@ void main() {
         ),
         postMutationDetailResult: const StaffReadUnavailable(),
       );
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
       await provider.load('app-1');
 
       final ok = await provider.approve();
@@ -403,7 +440,10 @@ void main() {
           ),
           postMutationDetailResult: const StaffReadUnavailable(),
         );
-        final provider = StaffApplicationDetailProvider(gateway: gateway);
+        final provider = StaffApplicationDetailProvider(
+          gateway: gateway,
+          auth: _authenticatedAuth(),
+        );
         await provider.load('app-1');
         await provider.approve();
         expect(provider.state, StaffDetailState.refreshAfterMutationError);
@@ -429,7 +469,10 @@ void main() {
           BusinessApplicationStaffCause.unexpected,
         ),
       );
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
       await provider.load(_appId);
 
       final ok = await provider.approve();
@@ -704,7 +747,7 @@ void main() {
       expect(detail, isNull);
     });
 
-    test('detail: absent contacts and visits are relaxed defaults', () {
+    test('detail: absent required contacts and visits fail closed', () {
       final now = DateTime(2024, 1, 1);
       final detail = StaffApplicationDetail.tryFromJson({
         'application': {
@@ -717,9 +760,7 @@ void main() {
         'applicant': {'display_name': 'Applicant'},
         'new_business': {'name': 'B'},
       });
-      expect(detail, isNotNull);
-      expect(detail!.contacts, isEmpty);
-      expect(detail.visits, isEmpty);
+      expect(detail, isNull);
     });
 
     for (final value in <Object?>[null, 'not-a-date']) {
@@ -794,7 +835,7 @@ void main() {
 
       auth.setSession(null);
 
-      expect(provider.state, StaffAccessState.initial);
+      expect(provider.state, StaffAccessState.signInRequired);
       expect(provider.capabilities, isNull);
       expect(lost, 1);
     });
@@ -854,7 +895,10 @@ void main() {
           ),
         ],
       );
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       await provider.loadInitial();
       expect(provider.items.length, 1);
@@ -894,6 +938,7 @@ void main() {
       );
       final provider = StaffApplicationQueueProvider(
         gateway: gateway,
+        auth: _authenticatedAuth(),
         onPermissionLost: (_) => lost++,
       );
       await provider.loadInitial();
@@ -912,7 +957,10 @@ void main() {
       final gateway = _FakeStaffGateway(
         pageRead: (_, __, ___) => calls++ == 0 ? first.future : second.future,
       );
-      final provider = StaffApplicationQueueProvider(gateway: gateway);
+      final provider = StaffApplicationQueueProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       final requestA = provider.loadInitial();
       final requestB = provider.setFilter(
@@ -948,6 +996,7 @@ void main() {
       );
       final provider = StaffApplicationDetailProvider(
         gateway: gateway,
+        auth: _authenticatedAuth(),
         onPermissionLost: (_) => lost++,
       );
 
@@ -969,7 +1018,10 @@ void main() {
           _businessAppFromDetail(detail),
         ),
       );
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
       await provider.load('app-1');
 
       final first = provider.beginReview();
@@ -994,27 +1046,30 @@ void main() {
           return reads == 1 ? first.future : second.future;
         },
       );
-      final provider = StaffApplicationDetailProvider(gateway: gateway);
+      final provider = StaffApplicationDetailProvider(
+        gateway: gateway,
+        auth: _authenticatedAuth(),
+      );
 
       final firstLoad = provider.load('app-1');
       await pumpEventQueue();
-      final secondLoad = provider.refresh();
+      final secondLoad = provider.load('app-2');
 
       first.complete(
         StaffReadSuccess(
-          _sampleDetail('stale', BusinessApplicationStatus.submitted),
+          _sampleDetail('app-1', BusinessApplicationStatus.submitted),
         ),
       );
       second.complete(
         StaffReadSuccess(
-          _sampleDetail('fresh', BusinessApplicationStatus.underReview),
+          _sampleDetail('app-2', BusinessApplicationStatus.underReview),
         ),
       );
 
       await firstLoad;
       await secondLoad;
 
-      expect(provider.detail?.id, 'fresh');
+      expect(provider.detail?.id, 'app-2');
       expect(provider.detail?.status, BusinessApplicationStatus.underReview);
     });
 
@@ -1038,10 +1093,12 @@ void main() {
           const StaffApplicationPage(items: []),
         ],
       );
-      final queue = StaffApplicationQueueProvider(gateway: gateway);
+      final auth = _authenticatedAuth();
+      final queue = StaffApplicationQueueProvider(gateway: gateway, auth: auth);
       final detailProvider = StaffApplicationDetailProvider(
         gateway: gateway,
-        onMutationCommitted: () => queue.refresh(),
+        auth: auth,
+        onMutationCommitted: queue.onMutationCommitted,
       );
       await detailProvider.load('app-1');
       await queue.loadInitial();
@@ -1246,7 +1303,7 @@ void main() {
 
         expect(gateway.mutationActions, ['approve']);
         expect(gateway.detailCalls, 2);
-        expect(gateway.cursorsRequested, isEmpty);
+        expect(gateway.cursorsRequested, [isNull]);
         expect(scope.access.state, StaffAccessState.noReadPermission);
         expect(scope.access.capabilities, isNull);
         expect(scope.detail.detail, isNull);
@@ -1697,9 +1754,8 @@ Widget _testApp({
     child: MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => LanguageProvider(
-            isArabic: locale.languageCode != 'en',
-          ),
+          create: (_) =>
+              LanguageProvider(isArabic: locale.languageCode != 'en'),
         ),
         ChangeNotifierProvider(
           create: (_) => UserProfileProvider(repository: _FakeProfileRepo()),
@@ -1708,10 +1764,12 @@ Widget _testApp({
           create: (_) => StaffAccessProvider(gateway: staffGateway, auth: auth),
         ),
         ChangeNotifierProvider(
-          create: (_) => StaffApplicationQueueProvider(gateway: staffGateway),
+          create: (_) =>
+              StaffApplicationQueueProvider(gateway: staffGateway, auth: auth),
         ),
         ChangeNotifierProvider(
-          create: (_) => StaffApplicationDetailProvider(gateway: staffGateway),
+          create: (_) =>
+              StaffApplicationDetailProvider(gateway: staffGateway, auth: auth),
         ),
       ],
       child: MaterialApp(
@@ -1873,8 +1931,7 @@ class _FakeAuthGateway implements AuthGateway {
   Future<bool> retryAuthCleanup() async => false;
 
   @override
-  Stream<AuthEvent> get authEvents =>
-      const Stream.empty();
+  Stream<AuthEvent> get authEvents => const Stream.empty();
 
   @override
   Future<AuthSession?> restoreSession() async => session;
@@ -1905,6 +1962,14 @@ class _FakeAuthProvider extends AuthProvider {
 
   @override
   AuthSession? get session => _session;
+
+  @override
+  int get generation => 1;
+
+  @override
+  bool isCurrentSession({required String userId, required int generation}) {
+    return generation == 1 && _session?.userId == userId;
+  }
 }
 
 class _SwitchableAuthProvider extends AuthProvider {
@@ -1913,6 +1978,7 @@ class _SwitchableAuthProvider extends AuthProvider {
       super(gateway: _FakeAuthGateway(session: session));
 
   AuthSession? _session;
+  int _testGeneration = 1;
 
   @override
   bool get isLoggedIn => _session != null;
@@ -1924,7 +1990,16 @@ class _SwitchableAuthProvider extends AuthProvider {
   @override
   AuthSession? get session => _session;
 
+  @override
+  int get generation => _testGeneration;
+
+  @override
+  bool isCurrentSession({required String userId, required int generation}) {
+    return generation == _testGeneration && _session?.userId == userId;
+  }
+
   void setSession(AuthSession? next) {
+    if (_session?.userId != next?.userId) _testGeneration++;
     _session = next;
     notifyListeners();
   }

@@ -2,13 +2,27 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../../domain/business_application_staff_gateway.dart';
 import '../../domain/business_application_status.dart';
 import '../../domain/staff_application_capabilities.dart';
 import '../../domain/staff_application_detail.dart';
 import '../../domain/staff_read_result.dart';
+import '../../domain/staff_remote_read.dart';
 
-/// V1-R07 — Lifecycle states for staff application detail/review.
+typedef _StaffDetailReadKey = ({
+  String userId,
+  int authGeneration,
+  String applicationId,
+});
+
+class _ActiveStaffDetailRead {
+  _ActiveStaffDetailRead({required this.requestEpoch});
+
+  final int requestEpoch;
+  late final Future<void> future;
+}
+
 enum StaffDetailState {
   initial,
   loading,
@@ -22,32 +36,22 @@ enum StaffDetailState {
   refreshAfterMutationError,
 }
 
-/// V1-R07 — Provider for staff application detail and authoritative staff
-/// actions.
-///
-/// Safety guarantees implemented for the V1-R07 correction pass:
-/// - pending-mutation guard runs BEFORE any gateway RPC (finding 2): the
-///   action methods defer the gateway call into a closure, so starting a second
-///   mutation while one is in flight is a local no-op — exactly one mutation
-///   RPC is ever issued per user action;
-/// - stale read results are ignored via request sequencing (finding 8);
-/// - a successful mutation triggers an authoritative detail reread followed by
-///   a queue refresh through the normal provider path (finding 9);
-/// - "Refresh details" performs a real authoritative reread — never a dismiss
-///   (finding 7);
-/// - permission loss (`P0PER`) — from reads, refreshes or mutations — clears
-///   privileged detail, removes actions, transitions to a denied state, and
-///   fires [onPermissionLost] (finding 1).
+enum _DetailReadMode { normal, postMutation }
+
+/// Staff detail and mutation provider with an independent exact-key read lane.
 class StaffApplicationDetailProvider extends ChangeNotifier {
   StaffApplicationDetailProvider({
     required BusinessApplicationStaffGateway gateway,
+    required AuthProvider auth,
     ValueChanged<BusinessApplicationStaffCause>? onPermissionLost,
     Future<void> Function()? onMutationCommitted,
   }) : _gateway = gateway,
+       _auth = auth,
        _onPermissionLost = onPermissionLost,
        _onMutationCommitted = onMutationCommitted;
 
   final BusinessApplicationStaffGateway _gateway;
+  final AuthProvider _auth;
   final ValueChanged<BusinessApplicationStaffCause>? _onPermissionLost;
   final Future<void> Function()? _onMutationCommitted;
 
@@ -55,130 +59,237 @@ class StaffApplicationDetailProvider extends ChangeNotifier {
   StaffDetailState _state = StaffDetailState.initial;
   StaffApplicationDetail? _detail;
   BusinessApplicationStaffCause? _lastErrorCause;
+  StaffRemoteReadFailureKind? _lastRemoteFailure;
+  bool _readUnavailable = false;
+  StaffRemoteReadPhase _readPhase = StaffRemoteReadPhase.idle;
+  _StaffDetailReadKey? _dataKey;
+  bool _hasAuthoritativeResult = false;
   bool _mutationSucceeded = false;
 
-  int _requestSeq = 0;
-  int _sessionGeneration = 0;
+  int _requestEpoch = 0;
+  int _mutationEpoch = 0;
+  int _reviewRevision = 0;
+  final Map<_StaffDetailReadKey, _ActiveStaffDetailRead> _activeReads = {};
+  bool _disposed = false;
 
   StaffDetailState get state => _state;
   StaffApplicationDetail? get detail => _detail;
   BusinessApplicationStaffCause? get lastErrorCause => _lastErrorCause;
+  StaffRemoteReadFailureKind? get lastRemoteFailure => _lastRemoteFailure;
+  bool get readUnavailable => _readUnavailable;
+  StaffRemoteReadPhase get readPhase => _readPhase;
+  bool get isRefreshing => _readPhase == StaffRemoteReadPhase.refreshing;
   bool get mutationSucceeded => _mutationSucceeded;
-
   String? get applicationId => _applicationId;
+  int get activeReadCount => _activeReads.length;
+  int get reviewRevision => _reviewRevision;
 
-  /// Loads authoritative detail for [applicationId].
-  Future<void> load(String applicationId) async {
+  String? get _currentUserId => _auth.session?.userId;
+
+  Future<void> load(String applicationId) {
+    return _startRead(applicationId, mode: _DetailReadMode.normal);
+  }
+
+  Future<void> refresh() {
+    final id = _applicationId;
+    if (id == null) return Future.value();
+    return _startRead(id, mode: _DetailReadMode.normal);
+  }
+
+  /// Manual reread after a committed mutation whose authoritative reread
+  /// failed. This never resends the mutation.
+  Future<void> refreshDetail() {
+    final id = _applicationId;
+    if (id == null) return Future.value();
+    return _startRead(id, mode: _DetailReadMode.postMutation);
+  }
+
+  Future<void> _startRead(
+    String applicationId, {
+    required _DetailReadMode mode,
+    bool forceNew = false,
+  }) {
+    if (_disposed) return Future.value();
+    final userId = _currentUserId;
+    if (!_auth.isLoggedIn || userId == null || userId.isEmpty) {
+      _invalidateReadLane(clearApplicationId: false);
+      _applicationId = applicationId;
+      _state = StaffDetailState.signInRequired;
+      _notifyIfAlive();
+      return Future.value();
+    }
+
+    final key = (
+      userId: userId,
+      authGeneration: _auth.generation,
+      applicationId: applicationId,
+    );
+    if (!forceNew) {
+      final active = _activeReads[key];
+      if (active != null &&
+          active.requestEpoch == _requestEpoch &&
+          _applicationId == applicationId) {
+        return active.future;
+      }
+    }
+
     _applicationId = applicationId;
-    final request = ++_requestSeq;
-    _mutationSucceeded = false;
-    _state = StaffDetailState.loading;
-    _detail = null;
+    final hasMatchingKnownGood =
+        _hasAuthoritativeResult && _dataKey == key && _detail != null;
+    if (!hasMatchingKnownGood) {
+      _clearKnownGood();
+    }
     _lastErrorCause = null;
-    notifyListeners();
+    _lastRemoteFailure = null;
+    _readUnavailable = false;
+    if (mode == _DetailReadMode.normal) {
+      _mutationSucceeded = false;
+      _readPhase = hasMatchingKnownGood
+          ? StaffRemoteReadPhase.refreshing
+          : StaffRemoteReadPhase.loading;
+      _state = hasMatchingKnownGood
+          ? StaffDetailState.data
+          : StaffDetailState.loading;
+      _notifyIfAlive();
+    }
 
-    final result = await _gateway.getApplicationDetail(applicationId);
-    if (request != _requestSeq) return; // stale: a newer request superseded it
-    _applyDetailResult(result);
+    final requestEpoch = ++_requestEpoch;
+    final capturedRevision = _reviewRevision;
+    final active = _ActiveStaffDetailRead(requestEpoch: requestEpoch);
+    active.future =
+        _performRead(
+          key: key,
+          requestEpoch: requestEpoch,
+          capturedRevision: capturedRevision,
+          mode: mode,
+        ).whenComplete(() {
+          if (identical(_activeReads[key], active)) {
+            _activeReads.remove(key);
+          }
+        });
+    _activeReads[key] = active;
+    return active.future;
   }
 
-  /// Refreshes the current detail.
-  Future<void> refresh() async {
-    final id = _applicationId;
-    if (id == null) return;
-    final request = ++_requestSeq;
-    _state = StaffDetailState.loading;
-    _lastErrorCause = null;
-    notifyListeners();
-
-    final result = await _gateway.getApplicationDetail(id);
-    if (request != _requestSeq) return;
-    _applyDetailResult(result);
+  Future<void> _performRead({
+    required _StaffDetailReadKey key,
+    required int requestEpoch,
+    required int capturedRevision,
+    required _DetailReadMode mode,
+  }) async {
+    StaffReadResult<StaffApplicationDetail> result;
+    try {
+      result = _gateway.isAvailable
+          ? await _gateway.getApplicationDetail(key.applicationId)
+          : const StaffReadUnavailable<StaffApplicationDetail>();
+    } catch (_) {
+      result = const StaffRemoteReadFailure<StaffApplicationDetail>(
+        StaffRemoteReadFailureKind.unexpected,
+      );
+    }
+    if (!_canPublishRead(
+      key,
+      requestEpoch: requestEpoch,
+      capturedRevision: capturedRevision,
+    )) {
+      return;
+    }
+    if (result case StaffReadSuccess(
+      :final data,
+    ) when data.id != key.applicationId) {
+      result = const StaffRemoteReadFailure<StaffApplicationDetail>(
+        StaffRemoteReadFailureKind.malformedResponse,
+      );
+    }
+    _applyReadResult(key, result, mode: mode);
+    _notifyIfAlive();
   }
 
-  /// "Refresh details" — authoritative detail reread requested by the user from
-  /// the recoverable post-mutation warning (finding 7). On success the new
-  /// detail replaces the stale one and the warning clears; on failure the
-  /// recoverable warning state is preserved and the mutation is never resent.
-  Future<void> refreshDetail() async {
-    final id = _applicationId;
-    if (id == null) return;
-    final request = ++_requestSeq;
-    _lastErrorCause = null;
-    notifyListeners();
-
-    final result = await _gateway.getApplicationDetail(id);
-    if (request != _requestSeq) return;
+  void _applyReadResult(
+    _StaffDetailReadKey key,
+    StaffReadResult<StaffApplicationDetail> result, {
+    required _DetailReadMode mode,
+  }) {
     switch (result) {
       case StaffReadSuccess(:final data):
         _detail = data;
-        _mutationSucceeded = false;
+        _dataKey = key;
+        _hasAuthoritativeResult = true;
         _lastErrorCause = null;
-        _state = StaffDetailState.data;
-      case StaffReadDenied(:final cause):
-        _lastErrorCause = cause;
-        if (cause == BusinessApplicationStaffCause.staffPermissionDenied ||
-            cause == BusinessApplicationStaffCause.unauthenticated) {
-          _applyPermissionLoss(cause);
-        } else {
-          _state = StaffDetailState.refreshAfterMutationError;
-        }
-      case StaffReadUnavailable():
-        _lastErrorCause = BusinessApplicationStaffCause.unexpected;
-        _state = StaffDetailState.refreshAfterMutationError;
-    }
-    notifyListeners();
-  }
-
-  void _notifyMutationCommitted() {
-    final callback = _onMutationCommitted;
-    if (callback == null) return;
-    unawaited(callback());
-  }
-
-  /// Clears all privileged review state (sign-out, session change, permission
-  /// loss). The current application id is retained so a re-entered screen can
-  /// reload it, but all privileged data and actions are cleared immediately.
-  void clear() {
-    _requestSeq++;
-    _sessionGeneration++;
-    _detail = null;
-    _mutationSucceeded = false;
-    _lastErrorCause = null;
-    _state = StaffDetailState.initial;
-    notifyListeners();
-  }
-
-  void _applyDetailResult(StaffReadResult<StaffApplicationDetail> result) {
-    switch (result) {
-      case StaffReadSuccess(:final data):
-        _detail = data;
-        _lastErrorCause = null;
+        _lastRemoteFailure = null;
+        _readUnavailable = false;
+        _readPhase = StaffRemoteReadPhase.loaded;
         _state = StaffDetailState.data;
         _mutationSucceeded = false;
       case StaffReadDenied(:final cause):
-        _detail = null;
         _lastErrorCause = cause;
-        if (cause == BusinessApplicationStaffCause.staffPermissionDenied ||
-            cause == BusinessApplicationStaffCause.unauthenticated) {
-          _applyPermissionLoss(cause);
+        _lastRemoteFailure = null;
+        _readUnavailable = false;
+        if (_isAuthorityDenial(cause)) {
+          _clearKnownGood();
+          _readPhase = StaffRemoteReadPhase.failed;
+          _state = cause == BusinessApplicationStaffCause.unauthenticated
+              ? StaffDetailState.signInRequired
+              : StaffDetailState.accessDenied;
+          if (mode == _DetailReadMode.normal) {
+            _mutationSucceeded = false;
+          }
+          _signalPermissionLost(cause);
+        } else if (cause == BusinessApplicationStaffCause.applicationNotFound) {
+          _clearKnownGood();
+          _readPhase = StaffRemoteReadPhase.authoritativeNotFound;
+          _state = StaffDetailState.notFound;
+          if (mode == _DetailReadMode.normal) {
+            _mutationSucceeded = false;
+          }
         } else {
-          _state = switch (cause) {
-            BusinessApplicationStaffCause.applicationNotFound =>
-              StaffDetailState.notFound,
-            _ => StaffDetailState.error,
-          };
+          _publishReadFailure(key, mode: mode);
         }
+      case StaffRemoteReadFailure(:final kind):
+        _lastErrorCause = null;
+        _lastRemoteFailure = kind;
+        _readUnavailable = false;
+        _publishReadFailure(key, mode: mode);
       case StaffReadUnavailable():
-        _detail = null;
         _lastErrorCause = BusinessApplicationStaffCause.unexpected;
-        _state = StaffDetailState.error;
+        _lastRemoteFailure = null;
+        _readUnavailable = true;
+        _publishReadFailure(key, mode: mode);
     }
-    notifyListeners();
   }
 
-  /// Computes whether [action] is available given [capabilities] and the
-  /// authoritative current status.
+  void _publishReadFailure(
+    _StaffDetailReadKey key, {
+    required _DetailReadMode mode,
+  }) {
+    _readPhase = StaffRemoteReadPhase.failed;
+    final hasMatchingKnownGood =
+        _hasAuthoritativeResult && _dataKey == key && _detail != null;
+    if (mode == _DetailReadMode.postMutation) {
+      _state = StaffDetailState.refreshAfterMutationError;
+    } else if (hasMatchingKnownGood) {
+      _state = StaffDetailState.data;
+    } else {
+      _clearKnownGood();
+      _state = StaffDetailState.error;
+    }
+  }
+
+  bool _canPublishRead(
+    _StaffDetailReadKey key, {
+    required int requestEpoch,
+    required int capturedRevision,
+  }) {
+    return !_disposed &&
+        requestEpoch == _requestEpoch &&
+        capturedRevision == _reviewRevision &&
+        key.applicationId == _applicationId &&
+        _auth.isCurrentSession(
+          userId: key.userId,
+          generation: key.authGeneration,
+        );
+  }
+
   bool isActionAvailable(
     StaffAction action,
     StaffApplicationCapabilities capabilities,
@@ -187,32 +298,6 @@ class StaffApplicationDetailProvider extends ChangeNotifier {
     if (status == null) return false;
     return _actionPermitted(action, capabilities) &&
         _actionValidForStatus(action, status);
-  }
-
-  /// Post-mutation authoritative reread. Failure keeps the recoverable
-  /// [StaffDetailState.refreshAfterMutationError]; permission loss clears.
-  void _applyPostMutationDetailResult(
-    StaffReadResult<StaffApplicationDetail> result,
-  ) {
-    switch (result) {
-      case StaffReadSuccess(:final data):
-        _detail = data;
-        _lastErrorCause = null;
-        _state = StaffDetailState.data;
-      case StaffReadDenied(:final cause):
-        _lastErrorCause = cause;
-        if (cause == BusinessApplicationStaffCause.staffPermissionDenied ||
-            cause == BusinessApplicationStaffCause.unauthenticated) {
-          _applyPermissionLoss(cause);
-        } else {
-          _state = StaffDetailState.refreshAfterMutationError;
-        }
-      case StaffReadUnavailable():
-        _lastErrorCause = BusinessApplicationStaffCause.unexpected;
-        _state = StaffDetailState.refreshAfterMutationError;
-    }
-    _mutationSucceeded = false;
-    notifyListeners();
   }
 
   static bool _actionPermitted(
@@ -236,17 +321,11 @@ class StaffApplicationDetailProvider extends ChangeNotifier {
   ) {
     return switch (action) {
       StaffAction.beginReview => status == BusinessApplicationStatus.submitted,
-      StaffAction.returnForCorrection =>
-        status == BusinessApplicationStatus.underReview,
-      StaffAction.markContacted =>
-        status == BusinessApplicationStatus.underReview,
+      StaffAction.returnForCorrection ||
+      StaffAction.markContacted ||
       StaffAction.scheduleVisit =>
         status == BusinessApplicationStatus.underReview,
-      StaffAction.approve =>
-        status == BusinessApplicationStatus.underReview ||
-            status == BusinessApplicationStatus.contacted ||
-            status == BusinessApplicationStatus.visitScheduled,
-      StaffAction.reject =>
+      StaffAction.approve || StaffAction.reject =>
         status == BusinessApplicationStatus.underReview ||
             status == BusinessApplicationStatus.contacted ||
             status == BusinessApplicationStatus.visitScheduled,
@@ -254,67 +333,89 @@ class StaffApplicationDetailProvider extends ChangeNotifier {
     };
   }
 
-  /// Runs one authoritative staff mutation.
-  ///
-  /// The pending guard runs BEFORE the [call] closure is invoked, so a second
-  /// mutation requested while one is in flight never reaches the gateway —
-  /// exactly one mutation RPC per user action (finding 2).
   Future<bool> _runMutation(
     Future<BusinessApplicationStaffResult> Function() call,
   ) async {
     final id = _applicationId;
-    if (id == null || _state == StaffDetailState.mutating) return false;
-    final sessionGeneration = _sessionGeneration;
+    final userId = _currentUserId;
+    if (_disposed ||
+        id == null ||
+        userId == null ||
+        !_auth.isLoggedIn ||
+        _state == StaffDetailState.mutating) {
+      return false;
+    }
+    final authGeneration = _auth.generation;
+    final mutationEpoch = _mutationEpoch;
 
+    // Mutation entry supersedes every pre-mutation detail read before the RPC
+    // can commit, preventing an old completion from publishing while mutating.
+    _reviewRevision++;
+    _requestEpoch++;
+    _activeReads.clear();
+    _mutationSucceeded = false;
     _state = StaffDetailState.mutating;
     _lastErrorCause = null;
-    notifyListeners();
+    _lastRemoteFailure = null;
+    _readUnavailable = false;
+    _notifyIfAlive();
 
     final result = await call();
-    if (sessionGeneration != _sessionGeneration) return false;
+    if (!_canPublishMutation(
+      applicationId: id,
+      userId: userId,
+      authGeneration: authGeneration,
+      mutationEpoch: mutationEpoch,
+    )) {
+      return false;
+    }
+
     switch (result) {
       case BusinessApplicationStaffSucceeded():
         _mutationSucceeded = true;
-        final readRequest = ++_requestSeq;
-        final read = await _gateway.getApplicationDetail(id);
-        if (sessionGeneration == _sessionGeneration &&
-            readRequest == _requestSeq) {
-          final permissionLost =
-              read is StaffReadDenied<StaffApplicationDetail> &&
-              (read.cause ==
-                      BusinessApplicationStaffCause.staffPermissionDenied ||
-                  read.cause == BusinessApplicationStaffCause.unauthenticated);
-          _applyPostMutationDetailResult(read);
-          if (!permissionLost && sessionGeneration == _sessionGeneration) {
-            _notifyMutationCommitted();
-          }
-        }
+        _notifyMutationCommitted();
+        await _startRead(
+          id,
+          mode: _DetailReadMode.postMutation,
+          forceNew: true,
+        );
         return _state == StaffDetailState.data;
       case BusinessApplicationStaffDenied(:final cause):
         _lastErrorCause = cause;
-        if (cause == BusinessApplicationStaffCause.staffPermissionDenied ||
-            cause == BusinessApplicationStaffCause.unauthenticated) {
-          _detail = null;
-          _applyPermissionLoss(cause);
+        _lastRemoteFailure = null;
+        _readUnavailable = false;
+        if (_isAuthorityDenial(cause)) {
+          _clearKnownGood();
+          _state = cause == BusinessApplicationStaffCause.unauthenticated
+              ? StaffDetailState.signInRequired
+              : StaffDetailState.accessDenied;
+          _mutationSucceeded = false;
+          _signalPermissionLost(cause);
         } else {
-          _state = switch (cause) {
-            BusinessApplicationStaffCause.applicationNotFound =>
-              StaffDetailState.notFound,
-            _ => StaffDetailState.mutationError,
-          };
+          _state = cause == BusinessApplicationStaffCause.applicationNotFound
+              ? StaffDetailState.notFound
+              : StaffDetailState.mutationError;
         }
-        notifyListeners();
+        _notifyIfAlive();
         return false;
     }
   }
 
-  void _applyPermissionLoss(BusinessApplicationStaffCause cause) {
-    _detail = null;
-    _mutationSucceeded = false;
-    _state = cause == BusinessApplicationStaffCause.unauthenticated
-        ? StaffDetailState.signInRequired
-        : StaffDetailState.accessDenied;
-    _signalPermissionLost();
+  bool _canPublishMutation({
+    required String applicationId,
+    required String userId,
+    required int authGeneration,
+    required int mutationEpoch,
+  }) {
+    return !_disposed &&
+        mutationEpoch == _mutationEpoch &&
+        applicationId == _applicationId &&
+        _auth.isCurrentSession(userId: userId, generation: authGeneration);
+  }
+
+  void _notifyMutationCommitted() {
+    final callback = _onMutationCommitted;
+    if (callback != null) unawaited(callback());
   }
 
   Future<bool> beginReview() =>
@@ -359,13 +460,56 @@ class StaffApplicationDetailProvider extends ChangeNotifier {
   Future<bool> activate() =>
       _runMutation(() => _gateway.activate(_applicationId!));
 
-  void _signalPermissionLost() {
-    final cause = _lastErrorCause;
-    if (cause != null) _onPermissionLost?.call(cause);
+  void clear() {
+    if (_disposed) return;
+    _mutationEpoch++;
+    _invalidateReadLane(clearApplicationId: false);
+    _state = StaffDetailState.initial;
+    notifyListeners();
+  }
+
+  void _invalidateReadLane({required bool clearApplicationId}) {
+    _requestEpoch++;
+    _activeReads.clear();
+    if (clearApplicationId) _applicationId = null;
+    _clearKnownGood();
+    _mutationSucceeded = false;
+    _lastErrorCause = null;
+    _lastRemoteFailure = null;
+    _readUnavailable = false;
+    _readPhase = StaffRemoteReadPhase.idle;
+  }
+
+  void _clearKnownGood() {
+    _detail = null;
+    _dataKey = null;
+    _hasAuthoritativeResult = false;
+  }
+
+  static bool _isAuthorityDenial(BusinessApplicationStaffCause cause) {
+    return cause == BusinessApplicationStaffCause.staffPermissionDenied ||
+        cause == BusinessApplicationStaffCause.unauthenticated;
+  }
+
+  void _signalPermissionLost(BusinessApplicationStaffCause cause) {
+    _onPermissionLost?.call(cause);
+  }
+
+  void _notifyIfAlive() {
+    if (!_disposed) notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    if (_disposed) return;
+    _disposed = true;
+    _mutationEpoch++;
+    _requestEpoch++;
+    _activeReads.clear();
+    super.dispose();
   }
 }
 
-/// V1-R07 — Existing staff lifecycle actions.
 enum StaffAction {
   beginReview,
   returnForCorrection,
