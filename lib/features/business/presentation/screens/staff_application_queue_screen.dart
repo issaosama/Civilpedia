@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/services/connectivity_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/remote_data_notice.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
 import '../../../../routes/app_routes.dart';
@@ -13,10 +15,12 @@ import '../../domain/business_application_status.dart';
 import '../../domain/business_application_type.dart';
 import '../../domain/staff_application_capabilities.dart';
 import '../../domain/staff_application_summary.dart';
+import '../../domain/staff_remote_read.dart';
 import '../providers/staff_access_provider.dart';
 import '../providers/staff_application_queue_provider.dart';
 import '../staff_application_messages.dart';
 import '../widgets/business_application_status_presentation.dart';
+import '../widgets/staff_remote_read_notice.dart';
 
 /// V1-R07 — Staff application queue screen at `/staff/applications`.
 class StaffApplicationQueueScreen extends StatefulWidget {
@@ -45,6 +49,20 @@ class _StaffApplicationQueueScreenState
 
   bool get _isArabic =>
       Localizations.localeOf(context).languageCode == 'ar';
+
+  bool get _connectivityIsUnavailable =>
+      context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
+
+  /// Re-runs the access read and, on recovery, (re)loads the queue — mirroring
+  /// the initial `initState` cascade. Manual READ retry only.
+  Future<void> _retryAccess() async {
+    final access = context.read<StaffAccessProvider>();
+    await access.load();
+    if (!mounted) return;
+    if (access.isAuthorized) {
+      context.read<StaffApplicationQueueProvider>().loadInitial();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,20 +101,29 @@ class _StaffApplicationQueueScreenState
                 ),
               ),
             StaffAccessState.noReadPermission || StaffAccessState.error =>
-              _buildCenterMessage(
-                icon: Icons.block_outlined,
-                message: access.state == StaffAccessState.noReadPermission
-                    ? StaffApplicationMessages.localized(
-                        context,
-                        Ar.staffAccessDenied,
-                        En.staffAccessDenied,
-                      )
-                    : StaffApplicationMessages.messageForCause(
-                        access.lastErrorCause ??
-                            BusinessApplicationStaffCause.unexpected,
-                        isArabic: _isArabic,
-                      ),
-              ),
+              switch (access.state) {
+                StaffAccessState.noReadPermission => _buildCenterMessage(
+                  icon: Icons.block_outlined,
+                  message: StaffApplicationMessages.localized(
+                    context,
+                    Ar.staffAccessDenied,
+                    En.staffAccessDenied,
+                  ),
+                ),
+                _ when access.lastRemoteFailure != null =>
+                  _buildRemoteReadError(
+                    access.lastRemoteFailure!,
+                    onRetry: _retryAccess,
+                  ),
+                _ => _buildCenterMessage(
+                  icon: Icons.block_outlined,
+                  message: StaffApplicationMessages.messageForCause(
+                    access.lastErrorCause ??
+                        BusinessApplicationStaffCause.unexpected,
+                    isArabic: _isArabic,
+                  ),
+                ),
+              },
             StaffAccessState.authorized => _buildQueueBody(context, theme),
           };
         },
@@ -124,43 +151,145 @@ class _StaffApplicationQueueScreenState
                 StaffQueueState.error ||
                 StaffQueueState.accessDenied ||
                 StaffQueueState.signInRequired =>
-                  _buildError(
-                    queue.state == StaffQueueState.accessDenied
-                        ? StaffApplicationMessages.localized(
-                            context,
-                            Ar.staffAccessDenied,
-                            En.staffAccessDenied,
-                          )
-                        : queue.state == StaffQueueState.signInRequired
-                            ? StaffApplicationMessages.localized(
-                                context,
-                                Ar.staffSignInRequired,
-                                En.staffSignInRequired,
-                              )
-                            : StaffApplicationMessages.messageForCause(
-                                queue.lastErrorCause ??
-                                    BusinessApplicationStaffCause.unexpected,
-                                isArabic: _isArabic,
-                              ),
-                    onRetry: queue.retry,
-                  ),
-                StaffQueueState.empty => _buildCenterMessage(
-                    icon: Icons.inbox_outlined,
-                    message: StaffApplicationMessages.localized(
-                      context,
-                      Ar.staffEmptyQueue,
-                      En.staffEmptyQueue,
-                    ),
-                  ),
+                  queue.lastRemoteFailure != null
+                      ? _buildRemoteReadError(
+                          queue.lastRemoteFailure!,
+                          onRetry: queue.retry,
+                        )
+                      : _buildError(
+                          queue.state == StaffQueueState.accessDenied
+                              ? StaffApplicationMessages.localized(
+                                  context,
+                                  Ar.staffAccessDenied,
+                                  En.staffAccessDenied,
+                                )
+                              : queue.state == StaffQueueState.signInRequired
+                                  ? StaffApplicationMessages.localized(
+                                      context,
+                                      Ar.staffSignInRequired,
+                                      En.staffSignInRequired,
+                                    )
+                                  : StaffApplicationMessages.messageForCause(
+                                      queue.lastErrorCause ??
+                                          BusinessApplicationStaffCause
+                                              .unexpected,
+                                      isArabic: _isArabic,
+                                    ),
+                          onRetry: queue.retry,
+                        ),
+                StaffQueueState.empty => _buildQueueEmpty(context),
                 StaffQueueState.data ||
                 StaffQueueState.loadingMore ||
                 StaffQueueState.loadMoreError =>
-                  _buildList(context, queue),
+                  _buildQueueColumn(context, queue),
               },
             ),
           ],
         );
       },
+    );
+  }
+
+  Widget _buildQueueEmpty(BuildContext context) {
+    return Column(
+      children: [
+        _buildReadStateHeader(context),
+        Expanded(
+          child: _buildCenterMessage(
+            icon: Icons.inbox_outlined,
+            message: StaffApplicationMessages.localized(
+              context,
+              Ar.staffEmptyQueue,
+              En.staffEmptyQueue,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQueueColumn(
+    BuildContext context,
+    StaffApplicationQueueProvider queue,
+  ) {
+    return Column(
+      children: [
+        if (queue.state == StaffQueueState.data)
+          _buildReadStateHeader(context),
+        Expanded(child: _buildList(context, queue)),
+      ],
+    );
+  }
+
+  /// Compact secondary read-state indicator above retained known-good data
+  /// (queue). Refreshing is a slim progress line; a failed refresh becomes a
+  /// compact shared notice (remote) or a compact Staff domain cause. Intended
+  /// empty/loaded states render nothing.
+  Widget _buildReadStateHeader(BuildContext context) {
+    final queue = context.watch<StaffApplicationQueueProvider>();
+    if (queue.readPhase == StaffRemoteReadPhase.refreshing) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.sm,
+        ),
+        child: _RefreshingIndicator(),
+      );
+    }
+    if (queue.readPhase == StaffRemoteReadPhase.failed) {
+      final remote = queue.lastRemoteFailure;
+      if (remote != null) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            0,
+          ),
+          child: StaffRemoteReadNotice(
+            failure: remote,
+            mode: RemoteDataNoticeMode.compact,
+            connectivityIsUnavailable: _connectivityIsUnavailable,
+            onRetry: queue.retry,
+          ),
+        );
+      }
+      final cause = queue.lastErrorCause;
+      if (cause != null) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            0,
+          ),
+          child: _InlineDomainNotice(
+            message: StaffApplicationMessages.messageForCause(
+              cause,
+              isArabic: _isArabic,
+            ),
+            onRetry: queue.retry,
+          ),
+        );
+      }
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildRemoteReadError(
+    StaffRemoteReadFailureKind failure, {
+    required VoidCallback onRetry,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: StaffRemoteReadNotice(
+          failure: failure,
+          mode: RemoteDataNoticeMode.noData,
+          connectivityIsUnavailable: _connectivityIsUnavailable,
+          onRetry: onRetry,
+        ),
+      ),
     );
   }
 
@@ -207,6 +336,15 @@ class _StaffApplicationQueueScreenState
     BuildContext context,
     StaffApplicationQueueProvider queue,
   ) {
+    final remote = queue.lastRemoteFailure;
+    if (remote != null) {
+      return StaffRemoteReadNotice(
+        failure: remote,
+        mode: RemoteDataNoticeMode.compact,
+        connectivityIsUnavailable: _connectivityIsUnavailable,
+        onRetry: queue.retryLoadMore,
+      );
+    }
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -286,6 +424,63 @@ class _StaffApplicationQueueScreenState
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RefreshingIndicator extends StatelessWidget {
+  const _RefreshingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    final semanticsLabel = StaffApplicationMessages.localized(
+      context,
+      Ar.staffLoadingMore,
+      En.staffLoadingMore,
+    );
+    return Semantics(
+      label: semanticsLabel,
+      child: const LinearProgressIndicator(minHeight: 2),
+    );
+  }
+}
+
+class _InlineDomainNotice extends StatelessWidget {
+  const _InlineDomainNotice({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      container: true,
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, size: 18, color: AppColors.error),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: Text(
+              StaffApplicationMessages.localized(
+                context,
+                Ar.staffRetry,
+                En.staffRetry,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

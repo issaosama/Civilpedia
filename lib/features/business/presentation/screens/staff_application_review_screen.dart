@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../core/services/connectivity_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/remote_data_notice.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
 import '../../domain/business_application_staff_gateway.dart';
@@ -14,10 +16,12 @@ import '../../domain/staff_application_capabilities.dart';
 import '../../domain/staff_application_detail.dart';
 import '../../domain/staff_application_id.dart';
 import '../../domain/staff_application_summary.dart';
+import '../../domain/staff_remote_read.dart';
 import '../providers/staff_access_provider.dart';
 import '../providers/staff_application_detail_provider.dart';
 import '../staff_application_messages.dart';
 import '../widgets/business_application_status_presentation.dart';
+import '../widgets/staff_remote_read_notice.dart';
 
 /// V1-R07 — Staff application review/detail screen at
 /// `/staff/applications/:applicationId`.
@@ -43,6 +47,20 @@ class _StaffApplicationReviewScreenState
   bool? _invalidRouteId;
 
   bool get isArabic => Localizations.localeOf(context).languageCode == 'ar';
+
+  bool get _connectivityIsUnavailable =>
+      context.watch<ConnectivityProvider?>()?.isUnavailable ?? false;
+
+  /// Re-runs the access read and, on recovery, (re)loads the current detail —
+  /// mirroring the initial `initState` cascade. Manual READ retry only.
+  Future<void> _retryAccess() async {
+    final access = context.read<StaffAccessProvider>();
+    await access.load();
+    if (!mounted || _invalidRouteId == true) return;
+    if (access.isAuthorized) {
+      context.read<StaffApplicationDetailProvider>().load(widget.applicationId);
+    }
+  }
 
   @override
   void initState() {
@@ -110,20 +128,30 @@ class _StaffApplicationReviewScreenState
                       ),
                     ),
                   StaffAccessState.noReadPermission || StaffAccessState.error =>
-                    _buildCenterMessage(
-                      icon: Icons.block_outlined,
-                      message: access.state == StaffAccessState.noReadPermission
-                          ? StaffApplicationMessages.localized(
-                              context,
-                              Ar.staffAccessDenied,
-                              En.staffAccessDenied,
-                            )
-                          : StaffApplicationMessages.messageForCause(
-                              access.lastErrorCause ??
-                                  BusinessApplicationStaffCause.unexpected,
-                              isArabic: isArabic,
-                            ),
-                    ),
+                    switch (access.state) {
+                      StaffAccessState.noReadPermission =>
+                        _buildCenterMessage(
+                          icon: Icons.block_outlined,
+                          message: StaffApplicationMessages.localized(
+                            context,
+                            Ar.staffAccessDenied,
+                            En.staffAccessDenied,
+                          ),
+                        ),
+                      _ when access.lastRemoteFailure != null =>
+                        _buildRemoteReadError(
+                          access.lastRemoteFailure!,
+                          onRetry: _retryAccess,
+                        ),
+                      _ => _buildCenterMessage(
+                        icon: Icons.block_outlined,
+                        message: StaffApplicationMessages.messageForCause(
+                          access.lastErrorCause ??
+                              BusinessApplicationStaffCause.unexpected,
+                          isArabic: isArabic,
+                        ),
+                      ),
+                    },
                   StaffAccessState.authorized => _buildDetailBody(theme),
                 };
               },
@@ -169,14 +197,20 @@ class _StaffApplicationReviewScreenState
               ),
             ),
           StaffDetailState.error || StaffDetailState.mutationError =>
-            _buildError(
-              StaffApplicationMessages.messageForCause(
-                detail.lastErrorCause ??
-                    BusinessApplicationStaffCause.unexpected,
-                isArabic: isArabic,
+            switch (detail.lastRemoteFailure) {
+              final failure? => _buildRemoteReadError(
+                failure,
+                onRetry: detail.refresh,
               ),
-              onRetry: detail.refresh,
-            ),
+              _ => _buildError(
+                StaffApplicationMessages.messageForCause(
+                  detail.lastErrorCause ??
+                      BusinessApplicationStaffCause.unexpected,
+                  isArabic: isArabic,
+                ),
+                onRetry: detail.refresh,
+              ),
+            },
           StaffDetailState.refreshAfterMutationError => _buildDetailContent(
               theme,
               detail.detail!,
@@ -187,25 +221,31 @@ class _StaffApplicationReviewScreenState
               theme,
               detail.detail!,
               isMutating: detail.state == StaffDetailState.mutating,
+              showReadState: detail.state == StaffDetailState.data,
             ),
         };
       },
     );
   }
 
-  Widget _buildDetailContent(
+Widget _buildDetailContent(
     ThemeData theme,
     StaffApplicationDetail detail, {
     bool isMutating = false,
     bool showRefreshWarning = false,
+    bool showReadState = false,
   }) {
-    final capabilities = context.watch<StaffAccessProvider>().capabilities ??
-        const StaffApplicationCapabilities.empty();
+  final capabilities = context.watch<StaffAccessProvider>().capabilities ??
+      const StaffApplicationCapabilities.empty();
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
-      children: [
-        if (showRefreshWarning)
+  return ListView(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+    children: [
+      if (showReadState) ...[
+        _buildDetailReadStateHeader(),
+        const SizedBox(height: AppSpacing.sm),
+      ],
+      if (showRefreshWarning)
           _WarningBanner(
             message: StaffApplicationMessages.localized(
               context,
@@ -235,6 +275,78 @@ class _StaffApplicationReviewScreenState
           isMutating: isMutating,
         ),
       ],
+    );
+  }
+
+  /// Compact secondary read-state indicator above retained known-good detail.
+  /// Refreshing is a slim progress line; a failed refresh becomes a compact
+  /// shared notice (remote) or a compact Staff domain cause. Intended loaded
+  /// states render nothing.
+  Widget _buildDetailReadStateHeader() {
+    final detail = context.watch<StaffApplicationDetailProvider>();
+    if (detail.readPhase == StaffRemoteReadPhase.refreshing) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.xl,
+          vertical: AppSpacing.sm,
+        ),
+        child: _RefreshingIndicator(),
+      );
+    }
+    if (detail.readPhase == StaffRemoteReadPhase.failed) {
+      final remote = detail.lastRemoteFailure;
+      if (remote != null) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            0,
+          ),
+          child: StaffRemoteReadNotice(
+            failure: remote,
+            mode: RemoteDataNoticeMode.compact,
+            connectivityIsUnavailable: _connectivityIsUnavailable,
+            onRetry: detail.refresh,
+          ),
+        );
+      }
+      final cause = detail.lastErrorCause;
+      if (cause != null) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.sm,
+            AppSpacing.md,
+            0,
+          ),
+          child: _InlineDomainNotice(
+            message: StaffApplicationMessages.messageForCause(
+              cause,
+              isArabic: isArabic,
+            ),
+            onRetry: detail.refresh,
+          ),
+        );
+      }
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildRemoteReadError(
+    StaffRemoteReadFailureKind failure, {
+    required VoidCallback onRetry,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: StaffRemoteReadNotice(
+          failure: failure,
+          mode: RemoteDataNoticeMode.noData,
+          connectivityIsUnavailable: _connectivityIsUnavailable,
+          onRetry: onRetry,
+        ),
+      ),
     );
   }
 
@@ -1194,4 +1306,61 @@ class _VisitInputs {
   final DateTime scheduledAt;
   final String? location;
   final String? notes;
+}
+
+class _RefreshingIndicator extends StatelessWidget {
+  const _RefreshingIndicator();
+
+  @override
+  Widget build(BuildContext context) {
+    final semanticsLabel = StaffApplicationMessages.localized(
+      context,
+      Ar.staffLoadingMore,
+      En.staffLoadingMore,
+    );
+    return Semantics(
+      label: semanticsLabel,
+      child: const LinearProgressIndicator(minHeight: 2),
+    );
+  }
+}
+
+class _InlineDomainNotice extends StatelessWidget {
+  const _InlineDomainNotice({
+    required this.message,
+    required this.onRetry,
+  });
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Semantics(
+      container: true,
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, size: 18, color: AppColors.error),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodySmall,
+            ),
+          ),
+          TextButton(
+            onPressed: onRetry,
+            child: Text(
+              StaffApplicationMessages.localized(
+                context,
+                Ar.staffRetry,
+                En.staffRetry,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
