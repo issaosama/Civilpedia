@@ -765,8 +765,8 @@ Part 2 P2-D2: ACCEPTED / CLOSED
 Part 2 P2-E: ACCEPTED / CLOSED — P2-E FORMALLY CLOSED
 Part 2 P2-E1: ACCEPTED / CLOSED
 Part 2 P2-E2: ACCEPTED / CLOSED
-Part 2 P2-F: CURRENT — CONTRACT FROZEN (implementation NOT started; authorized only after Architect checkpoint)
-Part 2 P2-G: LOCKED
+Part 2 P2-F: ACCEPTED / CLOSED — P2-F FORMALLY CLOSED — PASS — P2-F ACCEPTED — P2-G MAY BE UNLOCKED
+Part 2 P2-G: NEXT / AUTHORIZABLE AFTER THIS CLOSURE CHECKPOINT (implementation NOT started)
 Post-R09 Quality Gate (V1-R09Q): QUEUED after R09 (not started)
 V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
   (not started)
@@ -2070,7 +2070,76 @@ Live state:
   P2-C: CLOSED
   P2-D: CLOSED
   P2-E: CLOSED
-  P2-F: CURRENT — CONTRACT FROZEN
-  P2-G: LOCKED
+  P2-F: CLOSED — P2-F FORMALLY CLOSED (see P2-F Closure Record below)
+  P2-G: NEXT / AUTHORIZABLE AFTER THIS CLOSURE CHECKPOINT (implementation NOT started)
+  V1-R09Q: QUEUED after R09 (not started)
+  V1-R10: QUEUED after V1-R09Q (not started)
+
+### V1-R09 Part 2 P2-F Closure Record
+
+Slice: P2-F — Encyclopedia Local-Content Error Hardening
+Contract: V1-R09-P2-F-CONTRACT-v1 frozen semantics preserved unchanged; only
+  the append-only P2-F closure record added.
+Status: CLOSED / ACCEPTED
+
+Implementation commit:
+  8c7c780674152856f1d7dea8a935dc866a964291
+
+Acceptance:
+  PASS — P2-F ACCEPTED — P2-G MAY BE UNLOCKED
+
+Closure summary (accepted outcomes, without rewriting the contract):
+  - authoritative production Encyclopedia runtime source restricted to
+    assets/encyclopedia/catalog.generated.json
+  - production legacy/mock fallback removed
+  - frozen local-content failure taxonomy:
+    assetUnavailable / malformedContent / unexpected
+  - authoritative empty / searchNoResults / topicNotFound kept separate from
+    failures (never retryable content failures)
+  - strict fail-closed catalog parsing; any CatalogParseSkip prevents
+    authoritative success; zero partial authoritative publication
+  - required generated-catalog _meta validation: format, schemaVersion,
+    topicCount, sectionCount, blockCount
+  - malformed topic/section/block or unsupported block payload fails
+    authoritative content load
+  - typed local-content failures propagated through repository/provider
+  - raw exception/parser/internal diagnostic text suppressed from user UI
+  - identity-safe known-good behavior: same-authority catalog reload failure
+    preserves known-good; same-category reload failure preserves matching
+    category topics; same-topic reload failure may preserve matching topic;
+    cross-category/topic failure never masquerades old content as requested
+    content
+  - controlled local-content notice + manual retry for known-good reload
+    failure; manual retry only, same local authoritative lane
+  - no ConnectivityProvider / ReconnectGenerationGate / RemoteDataNotice /
+    TransportStatusBanner / network-offline taxonomy / auto retry / polling /
+    timers
+  - existing ImageUnavailableFallback preserved for runtime image render
+    failure
+  - symmetric AR/EN P2-F local-content copy
+  - deterministic app_ready/package catalog synchronization gate
+  - generated production JSON remained unmodified
+  - no backend change; no service_role; migration 00022 remains absent
+
+Accepted evidence:
+  - initial P2-F implementation: 132 PASS / 0 FAIL / 0 SKIPPED
+    (focused sequential suites; no full repository suite; no analyzer)
+  - correction on final corrected worktree: 115 PASS / 0 FAIL / 0 SKIPPED
+    (focused sequential suites)
+  - focused P2-F suite actual case count = 38
+  - known-good catalog/category/list UX corrections included
+  - independent review: initial static independent review found no foundation
+    HIGH issues; final acceptance micro-review PASS across full-catalog
+    known-good UX, categories known-good UX, topic-list identity,
+    topicNotFound, notice priority, and regression check
+  - reviewer limitation: independent reviewer shell was unavailable; final
+    acceptance used static inspection plus implementer deterministic shell
+    evidence (no independent test execution is claimed)
+
+Outcome:
+  P2-F: CLOSED / ACCEPTED — P2-F FORMALLY CLOSED
+  P2-G: NEXT / AUTHORIZABLE AFTER THIS CLOSURE CHECKPOINT
+    (implementation NOT authorized; NOT started)
+  V1-R09: CURRENT (not closed)
   V1-R09Q: QUEUED after R09 (not started)
   V1-R10: QUEUED after V1-R09Q (not started)
