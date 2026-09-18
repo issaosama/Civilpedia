@@ -32,27 +32,25 @@ void main() {
   });
 
   group('V1-R06 Part 1 contract and authorization', () {
-    test('contract is frozen and roadmap records V1-R06 as closed', () {
+    test('contract is frozen and the server source remains the committed '
+        '00020 migration', () {
       final contract = File(
         'docs/architecture/contracts/'
         'V1-R06_BUSINESS_PROVIDER_PROFILE_MANAGEMENT_CONTRACT.md',
       ).readAsStringSync();
-      final roadmap = File(
-        'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md',
-      ).readAsStringSync();
       expect(contract, matches(RegExp(r'CONTRACT_ID:\s*V1-R06-CONTRACT-v1')));
+      expect(File(_migrationPath).existsSync(), isTrue);
       expect(
-        roadmap,
-        contains(
-          '| V1-R06 | Business / Provider Profile Management | CLOSED |',
-        ),
+        _migrationPath,
+        endsWith('supabase/migrations/00020_business_profile_management.sql'),
       );
-      expect(roadmap, contains('CURRENT_PHASE_ID: V1-R09'));
-      expect(roadmap, contains('CURRENT_PHASE_CONTRACT: V1-R09-CONTRACT-v1'));
-      expect(roadmap, contains('IMPLEMENTATION_AUTHORIZED: YES'));
       expect(
-        roadmap,
-        contains('| V1-R09 | Offline / Connectivity / Error Hardening | CURRENT |'),
+        migration,
+        contains('CREATE OR REPLACE FUNCTION public.get_managed_business_profile'),
+      );
+      expect(
+        migration,
+        contains('CREATE OR REPLACE FUNCTION public.update_managed_business_profile'),
       );
     });
 
@@ -283,7 +281,8 @@ void main() {
         gateway,
         contains('regions(id, code, name_ar, name_en), is_primary'),
       );
-      expect(gateway, contains("final isPrimary = item['is_primary'] == true"));
+      expect(gateway, contains("final isPrimaryRaw = item['is_primary']"));
+      expect(gateway, contains('if (isPrimaryRaw is! bool)'));
       expect(
         gateway,
         contains('...result.where((location) => location.isPrimary)'),
