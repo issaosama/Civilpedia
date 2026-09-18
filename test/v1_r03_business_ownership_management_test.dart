@@ -282,7 +282,9 @@ void main() {
     setUpAll(() {
       migration = File(
         'supabase/migrations/00019_business_ownership_management_foundation.sql',
-      ).readAsStringSync();
+      )
+          .readAsStringSync()
+          .replaceAll('\r\n', '\n');
       gateway = File(
         'lib/features/business/data/supabase_business_membership_gateway.dart',
       ).readAsStringSync();
