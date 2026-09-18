@@ -765,7 +765,7 @@ Part 2 P2-D2: ACCEPTED / CLOSED
 Part 2 P2-E: ACCEPTED / CLOSED — P2-E FORMALLY CLOSED
 Part 2 P2-E1: ACCEPTED / CLOSED
 Part 2 P2-E2: ACCEPTED / CLOSED
-Part 2 P2-F: NEXT — AUTHORIZABLE AFTER THIS CLOSURE CHECKPOINT (implementation NOT started)
+Part 2 P2-F: CURRENT — CONTRACT FROZEN (implementation NOT started; authorized only after Architect checkpoint)
 Part 2 P2-G: LOCKED
 Post-R09 Quality Gate (V1-R09Q): QUEUED after R09 (not started)
 V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
@@ -2000,5 +2000,77 @@ Outcome:
     (implementation NOT authorized; NOT started)
   P2-G: LOCKED
   V1-R09: CURRENT (not closed)
+  V1-R09Q: QUEUED after R09 (not started)
+  V1-R10: QUEUED after V1-R09Q (not started)
+
+### V1-R09 Part 2 P2-F Contract Freeze Record
+
+Phase: V1-R09 Part 2
+Slice: P2-F — Encyclopedia Local-Content Error Hardening
+Status: CURRENT
+Contract: V1-R09-P2-F-CONTRACT-v1
+Contract status: FROZEN (docs only; no production code/test/content/generated
+  output modified by this freeze)
+Architect decision: FROZEN (per completed P2-F architecture inspection report)
+Implementation: NOT STARTED — authorized only after Architect checkpoint
+Implementation partition: ONE slice (no F1/F2)
+Implementer: Big Pickle
+Independent reviewer: GitHub Copilot Civilpedia Reviewer
+Escalation: GPT-5.6 Sol High only for a genuine architecture/lifecycle conflict
+
+P2-F decisions ratified:
+- production runtime Encyclopedia authority = ONLY
+  assets/encyclopedia/catalog.generated.json; no legacy catalog fallback; no
+  mock fallback; no content substitution masquerading as success
+- typed local-content taxonomy frozen:
+  EncyclopediaContentFailureKind { assetUnavailable, malformedContent,
+  unexpected }; no offline/network/timeout/serviceUnavailable variants
+- meta gate: _meta.format == "civilpedia-catalog-generated",
+  _meta.schemaVersion == 1, declared topicCount/sectionCount/blockCount must
+  match; missing/wrong mandatory metadata => malformedContent
+- any production CatalogParseSkip => malformedContent; zero partial
+  authoritative publication; no silent block/section/topic drop
+- known-good preservation full-catalog and same-topic; requested/current
+  identity enforcement; Topic A -> Topic B failure NEVER renders A as B
+- manual retry only, reattempting the authoritative generated lane; no
+  legacy/mock/network/connectivity/timer/poll/auto-retry
+- no raw e.toString()/parser/asset-loader/stack/filesystem text in normal UI;
+  localized controlled AR/EN (RTL/LTR) copy; RemoteDataNotice and other
+  remote/connectivity primitives NOT used for local-content failures
+- search matcher keyTopics-vs-tags divergence OUT OF SCOPE (unchanged)
+- no exporter/tooling overhaul (deferred to V1-R13 unless separately promoted);
+  P2-F adds deterministic sync-gate + strict-load regression evidence only
+- no section-granular retry; routing, image fallback, and image failure
+  semantics preserved; backend unchanged (migration 00022 remains absent)
+
+File boundary persisted (see contract §24 for exact paths):
+- FOUNDATION MODIFY:
+  lib/features/encyclopedia/data/datasources/encyclopedia_json_datasource.dart
+  lib/features/encyclopedia/data/repositories/encyclopedia_repository_impl.dart
+  lib/features/encyclopedia/presentation/providers/encyclopedia_provider.dart
+- PRESENTATION MODIFY (only as needed): encyclopedia_screen.dart,
+  categories_screen.dart, topic_list_screen.dart, topic_detail_screen.dart
+  (home/saved surfaces conditional only where required)
+- PRESENTATION ADD (at most one thin notice): under
+  lib/features/encyclopedia/presentation/widgets/
+- LOCALIZATION MODIFY: lib/localization/ar.dart, lib/localization/en.dart
+- TEST MODIFY: test/encyclopedia_catalog_parser_test.dart (only for intended
+  legacy/mock runtime fallback removal)
+- TEST ADD: test/v1_r09_p2_f_encyclopedia_local_content_hardening_test.dart
+
+Backend decision: no migration / RLS / schema / Edge / Realtime / service_role
+  change; migration 00022 remains absent
+V1-R09 status: CURRENT (not closed)
+P2-F status: NOT marked implemented by this freeze
+Owner approval: PENDING OWNER STAGING
+
+Live state:
+  P2-A: CLOSED
+  P2-B: CLOSED
+  P2-C: CLOSED
+  P2-D: CLOSED
+  P2-E: CLOSED
+  P2-F: CURRENT — CONTRACT FROZEN
+  P2-G: LOCKED
   V1-R09Q: QUEUED after R09 (not started)
   V1-R10: QUEUED after V1-R09Q (not started)
