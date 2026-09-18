@@ -3,12 +3,14 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 /// P2-F thin controlled copy banner for encyclopedia content state.
 ///
-/// Design-system only: renders a localized `message` and an optional manual
-/// retry. It owns NO localization resolution and NO network/connectivity
-/// semantics (it is intentionally not a [RemoteDataNotice]).
+/// Design-system only: renders a caller-localized `message` and an optional
+/// manual retry. Only the retry action label is resolved from the ambient
+/// locale. It owns NO network/connectivity semantics (it is intentionally not
+/// a [RemoteDataNotice]).
 class EncyclopediaContentNotice extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
@@ -22,6 +24,7 @@ class EncyclopediaContentNotice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Container(
       width: double.infinity,
@@ -64,7 +67,7 @@ class EncyclopediaContentNotice extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             TextButton(
               onPressed: onRetry,
-              child: const Text(Ar.retry),
+              child: Text(isArabic ? Ar.retry : En.retry),
             ),
           ],
         ],

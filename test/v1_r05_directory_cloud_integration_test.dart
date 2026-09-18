@@ -916,7 +916,7 @@ void main() {
       final repo = FakeCloudDirectoryRepository(const []);
       await tester.pumpWidget(_resolverApp(_kUuid1, repo));
       await tester.pumpAndSettle();
-      expect(find.text('Entity not found'), findsOneWidget);
+      expect(find.text('المزود غير موجود'), findsOneWidget);
       expect(find.byType(DirectoryProviderDetailScreen), findsNothing);
     });
 
