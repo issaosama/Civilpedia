@@ -762,10 +762,11 @@ Part 2 P2-C2: ACCEPTED / CLOSED
 Part 2 P2-D: ACCEPTED / CLOSED — P2-D FORMALLY CLOSED
 Part 2 P2-D1: ACCEPTED / CLOSED
 Part 2 P2-D2: ACCEPTED / CLOSED
-Part 2 P2-E: CURRENT — CONTRACT FROZEN
-Part 2 P2-E1: IMPLEMENTATION_AUTHORIZED — P2-E1 MAY BEGIN
-Part 2 P2-E2: LOCKED pending P2-E1 independent acceptance
-Part 2 P2-F through P2-G: LOCKED
+Part 2 P2-E: ACCEPTED / CLOSED — P2-E FORMALLY CLOSED
+Part 2 P2-E1: ACCEPTED / CLOSED
+Part 2 P2-E2: ACCEPTED / CLOSED
+Part 2 P2-F: NEXT — AUTHORIZABLE AFTER THIS CLOSURE CHECKPOINT (implementation NOT started)
+Part 2 P2-G: LOCKED
 Post-R09 Quality Gate (V1-R09Q): QUEUED after R09 (not started)
 V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
   (not started)
@@ -1943,3 +1944,61 @@ Status unchanged:
 - V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
 - V1-R11 through V1-R19: QUEUED (ordering unchanged)
 - V1-R14 / V1-R15 / V1-R17 / V1-R19: final-gate roles unchanged
+
+### V1-R09 Part 2 P2-E Closure Record
+
+Slice: P2-E — Staff Remote Read UX
+Contract: V1-R09-P2-E-CONTRACT-v1 frozen semantics preserved unchanged; only
+  the append-only P2-E closure record added.
+Status: CLOSED
+
+P2-E1: CLOSED / ACCEPTED
+  Implementation commit: cbc096b01e079a2627565c789d6a3bb9f5cfa537
+  Acceptance: PASS after independent review + correction micro-review
+
+P2-E2: CLOSED / ACCEPTED
+  Implementation commit: b4c46a718a3919fb4953fc29dd460939a98f512a
+  Acceptance: PASS — P2-E2 ACCEPTED — P2-E MAY CLOSE
+
+Closure summary (accepted outcomes, without rewriting the contract):
+  - typed Staff remote-read failure handling (StaffRemoteReadFailure +
+    StaffRemoteReadFailureKind, seven kinds)
+  - Staff domain outcome separation (P0AUT / P0PER / P0NOT / P0DAT remain
+    StaffReadDenied domain causes; StaffReadUnavailable preserved distinct)
+  - source-aware Staff RPC failure/domain classification
+  - RemoteOperationPolicy.read 15-second deadline at the Staff data boundary
+  - strict complete-response parsing (one malformed required row fails the
+    read; canonical-ID mismatch → malformedResponse)
+  - exact-key coalescing with request-epoch separation and stale-operation
+    protection
+  - session / auth-generation / resource-identity / disposal safety
+  - exact-key known-good preservation (fail-soft queue/detail)
+  - Staff mutation revision/read protection for queue and detail lanes
+  - authoritative capability-loss cleanup
+  - Staff queue/detail remote-read presentation (screen-scoped
+    StaffRemoteReadNotice adapter over shared RemoteDataNotice)
+  - manual retry only (no auto-refresh / polling / timers / reconnect reads)
+  - offline derived only from network + canonical unavailable transport
+  - shared RemoteDataNotice localization reuse; AR/EN and RTL/LTR presentation
+  - post-mutation read-failure separation (refresh-after-mutation warning
+    retained; committed outcome never cleared on read failure)
+  - no backend change (migration 00022 remains absent)
+  - no reconnect auto-refresh; no service_role
+
+Accepted evidence:
+  - P2-E1: implementation/correction evidence completed
+  - P2-E1 final micro-review: PASS — P2-E1 ACCEPTED — P2-E2 MAY BE UNLOCKED
+  - P2-E2 implementation focused evidence: 171 PASS / 0 FAIL / 0 SKIPPED
+  - P2-E2 independent acceptance: PASS — P2-E2 ACCEPTED — P2-E MAY CLOSE
+  - independent reviewer shell was unavailable; acceptance used static review
+    plus implementer deterministic test evidence (no independent test
+    execution is claimed)
+
+Outcome:
+  P2-E: CLOSED
+  P2-F: NEXT — MAY BE AUTHORIZED AFTER THIS CLOSURE CHECKPOINT
+    (implementation NOT authorized; NOT started)
+  P2-G: LOCKED
+  V1-R09: CURRENT (not closed)
+  V1-R09Q: QUEUED after R09 (not started)
+  V1-R10: QUEUED after V1-R09Q (not started)
