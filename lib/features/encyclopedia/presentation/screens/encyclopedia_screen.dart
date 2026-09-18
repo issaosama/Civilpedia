@@ -10,8 +10,10 @@ import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../core/widgets/civil_app_bar.dart';
 import '../../../../core/widgets/search_bar_widget.dart';
 import '../../../../core/widgets/section_header.dart';
+import '../../../../core/widgets/state_widgets.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../widgets/encyclopedia_content_notice.dart';
 import '../widgets/topic_compact_card.dart';
 import '../widgets/topic_list_card.dart';
 
@@ -101,9 +103,27 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
           Expanded(
             child: AsyncValueWidget(
               isLoading: provider.isLoading,
-              error: provider.error,
-              isEmpty: provider.topics.isEmpty && provider.error == null,
+              error: provider.hasContentFailure
+                  ? tr(Ar.encyclopediaContentError, En.encyclopediaContentError)
+                  : null,
+              isEmpty: provider.topics.isEmpty && !provider.hasContentFailure,
               onRetry: () => provider.loadAllTopics(),
+              onError: (error, onRetry) => provider.showingKnownGoodCatalog
+                  ? Column(
+                      children: [
+                        EncyclopediaContentNotice(
+                          message: tr(
+                            Ar.encyclopediaContentKnownGoodNotice,
+                            En.encyclopediaContentKnownGoodNotice,
+                          ),
+                          onRetry: onRetry,
+                        ),
+                        Expanded(
+                          child: _buildContent(provider, isDark: isDark, tr: tr),
+                        ),
+                      ],
+                    )
+                  : ErrorStateWidget(message: error, onRetry: onRetry),
               onEmpty: () => Center(
                 child: Padding(
                   padding: AppSpacing.padXl,
@@ -118,14 +138,22 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                   ),
                 ),
               ),
-              onData: () => provider.isSearchActive
-                  ? _buildSearchResults(provider, isDark: isDark)
-                  : _buildCategorySections(provider, isDark: isDark, tr: tr),
+              onData: () => _buildContent(provider, isDark: isDark, tr: tr),
             ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildContent(
+    EncyclopediaProvider provider, {
+    required bool isDark,
+    required String Function(String, String) tr,
+  }) {
+    return provider.isSearchActive
+        ? _buildSearchResults(provider, isDark: isDark)
+        : _buildCategorySections(provider, isDark: isDark, tr: tr);
   }
 
   Widget _buildSearchResults(EncyclopediaProvider provider, {required bool isDark}) {

@@ -7,9 +7,11 @@ import '../../../../core/widgets/civil_app_bar.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/widgets/state_widgets.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../../domain/entities/category_info.dart';
 import '../../presentation/providers/encyclopedia_provider.dart';
 import '../widgets/encyclopedia_category_card.dart';
+import '../widgets/encyclopedia_content_notice.dart';
 
 /// Full-screen view of all engineering encyclopedia categories.
 ///
@@ -72,9 +74,28 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       );
     }
 
-    if (provider.error != null && categories.isEmpty) {
-      return ErrorStateWidget(
-        onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
+    if (provider.hasContentFailure) {
+      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+      if (categories.isEmpty) {
+        return ErrorStateWidget(
+          message: isArabic
+              ? Ar.encyclopediaContentError
+              : En.encyclopediaContentError,
+          onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
+        );
+      }
+      return Column(
+        children: [
+          EncyclopediaContentNotice(
+            message: isArabic
+                ? Ar.encyclopediaContentKnownGoodNotice
+                : En.encyclopediaContentKnownGoodNotice,
+            onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
+          ),
+          Expanded(
+            child: _buildCategoriesGrid(context, provider, categories),
+          ),
+        ],
       );
     }
 
@@ -82,6 +103,14 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       return const EmptyStateWidget(icon: Icons.menu_book_outlined);
     }
 
+    return _buildCategoriesGrid(context, provider, categories);
+  }
+
+  Widget _buildCategoriesGrid(
+    BuildContext context,
+    EncyclopediaProvider provider,
+    List<CategoryInfo> categories,
+  ) {
     return GridView.builder(
       padding: const EdgeInsetsDirectional.all(AppConstants.paddingMedium),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

@@ -13,10 +13,13 @@ import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../core/widgets/civil_app_bar.dart';
+import '../../../../core/widgets/state_widgets.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../theme/encyclopedia_card_colors.dart';
 import '../theme/encyclopedia_topic_theme.dart';
 import '../widgets/content_block_widget.dart';
+import '../widgets/encyclopedia_content_notice.dart';
 import '../widgets/image_unavailable_fallback.dart';
 
 class TopicDetailScreen extends StatefulWidget {
@@ -41,6 +44,8 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     final provider = context.watch<EncyclopediaProvider>();
     final topic = provider.currentTopic;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    String tr(String ar, String en) => isArabic ? ar : en;
 
     return Scaffold(
       backgroundColor:
@@ -57,9 +62,36 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
         top: false,
         child: AsyncValueWidget(
           isLoading: provider.isLoading,
-          error: provider.error,
-          isEmpty: topic == null && provider.error == null,
+          error: provider.hasContentFailure
+              ? tr(Ar.encyclopediaContentError, En.encyclopediaContentError)
+              : null,
+          isEmpty: topic == null && !provider.hasContentFailure,
           onRetry: () => provider.loadTopicDetail(widget.topicId),
+          onError: (_, retry) {
+            if (provider.showingSameTopicKnownGood && topic != null) {
+              return Column(
+                children: [
+                  EncyclopediaContentNotice(
+                    message: tr(
+                      Ar.encyclopediaContentKnownGoodNotice,
+                      En.encyclopediaContentKnownGoodNotice,
+                    ),
+                    onRetry:
+                        retry ?? () => provider.loadTopicDetail(widget.topicId),
+                  ),
+                  Expanded(child: _buildArticle(context, provider, topic)),
+                ],
+              );
+            }
+            return ErrorStateWidget(
+              message: tr(
+                Ar.encyclopediaContentError,
+                En.encyclopediaContentError,
+              ),
+              onRetry:
+                  retry ?? () => provider.loadTopicDetail(widget.topicId),
+            );
+          },
           onEmpty: () => Center(
             child: Text(
               Ar.topicNotFound,

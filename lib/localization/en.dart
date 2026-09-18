@@ -553,6 +553,10 @@ class En {
   static const String topicNotFound = 'Topic not found';
   static const String noSectionsYet = 'No sections yet';
   static const String noContentYet = 'No content yet';
+  static const String encyclopediaContentError =
+      'Encyclopedia content could not be loaded';
+  static const String encyclopediaContentKnownGoodNotice =
+      'Showing the last successfully loaded content';
 
   // Article strings
   static const String articleSaved = 'Article saved for offline use';

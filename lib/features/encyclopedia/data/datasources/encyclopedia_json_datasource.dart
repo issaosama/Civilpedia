@@ -9,6 +9,61 @@ import '../../domain/entities/content_block.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../domain/entities/topic_section.dart';
 
+/// Frozen P2-F local-content failure classification.
+///
+/// The generated catalog authority has NO network/offline/timeout variants.
+/// Normal non-failure states (authoritative empty, searchNoResults,
+/// topicNotFound) are NOT represented here.
+enum EncyclopediaContentFailureKind {
+  /// The authoritative generated packaged asset cannot be read/opened/loaded.
+  assetUnavailable,
+
+  /// The authoritative catalog failed structural/integrity validation:
+  /// invalid JSON, invalid root shape, missing/wrong metadata, unsupported
+  /// schema version, count inconsistency, or ANY parse skip in authoritative
+  /// generated content. No partial authoritative publication.
+  malformedContent,
+
+  /// Any other unexpected local failure.
+  unexpected,
+}
+
+/// Typed local-content failure for the Encyclopedia generated-catalog lane.
+///
+/// This is the ONLY failure type the P2-F production path may surface.
+/// `cause` and `skips` are diagnostic-only; user-facing presentation MUST use
+/// localized controlled copy, never raw exception text.
+class EncyclopediaContentException implements Exception {
+  const EncyclopediaContentException(
+    this.kind, {
+    this.message,
+    this.cause,
+    this.skips = const [],
+  });
+
+  final EncyclopediaContentFailureKind kind;
+
+  /// Diagnostic message for development logging only. Never user-facing.
+  final String? message;
+
+  /// Underlying cause for diagnostics. Never user-facing.
+  final Object? cause;
+
+  /// Parse skips responsible for a [EncyclopediaContentFailureKind.
+  /// malformedContent] failure (diagnostic only).
+  final List<CatalogParseSkip> skips;
+
+  @override
+  String toString() {
+    final buffer = StringBuffer('EncyclopediaContentException(kind: $kind');
+    if (message != null) buffer.write(', message: $message');
+    if (cause != null) buffer.write(', cause: $cause');
+    if (skips.isNotEmpty) buffer.write(', skips: ${skips.length}');
+    buffer.write(')');
+    return buffer.toString();
+  }
+}
+
 /// Records a single content item that was skipped because it could not be
 /// parsed without aborting the rest of the catalog.
 class CatalogParseSkip {
@@ -63,8 +118,9 @@ class CatalogParseResult {
 /// the entire valid catalog.
 ///
 /// Only catalog-level structural failures (root not an object, or a top-level
-/// collection missing / not a list or map) throw [FormatException]; callers
-/// treat those as catastrophic and fall back to the legacy catalog.
+/// collection missing / not a list or map) throw [FormatException]. The P2-F
+/// production datasource treats those, and ANY recorded [CatalogParseSkip], as
+/// [EncyclopediaContentFailureKind.malformedContent] with no fallback.
 CatalogParseResult parseCatalogJson(Map<String, dynamic> json) {
   final skips = <CatalogParseSkip>[];
 
@@ -249,6 +305,13 @@ CatalogParseResult parseCatalogJson(Map<String, dynamic> json) {
 String? _stringOrNull(Object? value) => value is String ? value : null;
 
 class EncyclopediaJsonDataSource {
+  /// The ONLY production runtime authority (P2-F §3).
+  static const String authoritativeAssetPath =
+      'assets/encyclopedia/catalog.generated.json';
+
+  static const String _generatedFormat = 'civilpedia-catalog-generated';
+  static const int _generatedSchemaVersion = 1;
+
   EncyclopediaJsonDataSource({AssetBundle? bundle}) : _bundle = bundle;
 
   final AssetBundle? _bundle;
@@ -262,43 +325,145 @@ class EncyclopediaJsonDataSource {
 
   bool get usingGeneratedCatalog => _usingGeneratedCatalog;
 
-  /// Skips recorded during the most recent successful load.
+  /// Skips recorded during the most recent successful load. Diagnostic only;
+  /// any skip in authoritative content fails the load as malformedContent.
   @visibleForTesting
   List<CatalogParseSkip> get lastSkips => _skips;
 
   Future<void> _ensureLoaded() async {
     if (_loaded) return;
-
-    try {
-      await _tryLoad('assets/encyclopedia/catalog.generated.json');
-      _usingGeneratedCatalog = true;
-    } catch (_) {
-      await _tryLoad('assets/encyclopedia/catalog.json');
-      _usingGeneratedCatalog = false;
-    }
-
-    _loaded = true;
+    await _loadAuthoritative();
   }
 
-  Future<void> _tryLoad(String path) async {
-    final jsonString = await (_bundle ?? rootBundle).loadString(path);
-    final json = jsonDecode(jsonString);
-    if (json is! Map<String, dynamic>) {
-      throw const FormatException('catalog root must be a JSON object');
-    }
+  /// Runs the authoritative generated-catalog lane ONLY. There is no legacy or
+  /// mock fallback: a failed authoritative load surfaces a typed
+  /// [EncyclopediaContentException] and `_loaded` stays false so a retry
+  /// re-attempts the same lane.
+  Future<void> _loadAuthoritative() async {
+    final json = await _readAuthoritativeMap();
+    _validateMeta(json);
+    final result = _parseStrict(json);
+    _verifyDeclaredCounts(json['_meta'] as Map<String, dynamic>, result);
 
-    final result = parseCatalogJson(json);
     _topics = result.topics;
     _sections = result.sections;
     _blocks = result.blocks;
     _categories = result.categories;
-    _skips = result.skips;
-    _logSkips();
+    _skips = const [];
+    _usingGeneratedCatalog = true;
+    _loaded = true;
   }
 
-  void _logSkips() {
-    for (final skip in _skips) {
-      LoggerService.debug('[catalog] skipped malformed content: $skip');
+  Future<Map<String, dynamic>> _readAuthoritativeMap() async {
+    final String jsonString;
+    try {
+      // `cache: false` so a manual retry genuinely re-attempts the
+      // authoritative lane instead of replaying a memoized failed load
+      // (CachingAssetBundle._stringCache retains errored futures).
+      jsonString = await (_bundle ?? rootBundle)
+          .loadString(authoritativeAssetPath, cache: false);
+    } catch (e) {
+      throw EncyclopediaContentException(
+        EncyclopediaContentFailureKind.assetUnavailable,
+        message: 'could not load the generated catalog asset',
+        cause: e,
+      );
+    }
+
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(jsonString);
+    } catch (e) {
+      throw EncyclopediaContentException(
+        EncyclopediaContentFailureKind.malformedContent,
+        message: 'generated catalog is not valid JSON',
+        cause: e,
+      );
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw const EncyclopediaContentException(
+        EncyclopediaContentFailureKind.malformedContent,
+        message: 'generated catalog root must be a JSON object',
+      );
+    }
+    return decoded;
+  }
+
+  void _validateMeta(Map<String, dynamic> json) {
+    final meta = json['_meta'];
+    if (meta is! Map<String, dynamic>) {
+      throw const EncyclopediaContentException(
+        EncyclopediaContentFailureKind.malformedContent,
+        message: 'generated catalog requires a _meta object',
+      );
+    }
+    if (meta['format'] != _generatedFormat) {
+      throw const EncyclopediaContentException(
+        EncyclopediaContentFailureKind.malformedContent,
+        message: 'generated catalog format is not accepted',
+      );
+    }
+    if (meta['schemaVersion'] != _generatedSchemaVersion) {
+      throw const EncyclopediaContentException(
+        EncyclopediaContentFailureKind.malformedContent,
+        message: 'generated catalog schema version is not supported',
+      );
+    }
+  }
+
+  /// Strict complete authoritative parse (P2-F §7, §11). The tolerant parser
+  /// records per-item skips for diagnostics, but ANY skip fails the whole
+  /// authoritative catalog as malformedContent — no partial publication.
+  CatalogParseResult _parseStrict(Map<String, dynamic> json) {
+    final CatalogParseResult result;
+    try {
+      result = parseCatalogJson(json);
+    } catch (e) {
+      throw EncyclopediaContentException(
+        EncyclopediaContentFailureKind.malformedContent,
+        message: 'generated catalog structural parse failure',
+        cause: e,
+      );
+    }
+    if (result.skips.isNotEmpty) {
+      LoggerService.debug('[catalog] imposed failures: '
+          '${result.skips.length} malformed content items rejected');
+      throw EncyclopediaContentException(
+        EncyclopediaContentFailureKind.malformedContent,
+        message: 'generated catalog contains malformed content',
+        skips: result.skips,
+      );
+    }
+    return result;
+  }
+
+  void _verifyDeclaredCounts(
+    Map<String, dynamic> meta,
+    CatalogParseResult result,
+  ) {
+    var sectionCount = 0;
+    for (final list in result.sections.values) {
+      sectionCount += list.length;
+    }
+    var blockCount = 0;
+    for (final list in result.blocks.values) {
+      blockCount += list.length;
+    }
+
+    final declared = <String, int>{
+      'topicCount': result.topics.length,
+      'sectionCount': sectionCount,
+      'blockCount': blockCount,
+    };
+    for (final entry in declared.entries) {
+      final value = meta[entry.key];
+      if (value is! int || value != entry.value) {
+        throw EncyclopediaContentException(
+          EncyclopediaContentFailureKind.malformedContent,
+          message:
+              'generated catalog ${entry.key} does not match parsed content',
+        );
+      }
     }
   }
 

@@ -537,6 +537,9 @@ class Ar {
   static const String topicNotFound = 'الموضوع غير موجود';
   static const String noSectionsYet = 'لا توجد أقسام بعد';
   static const String noContentYet = 'لا توجد محتويات بعد';
+  static const String encyclopediaContentError = 'تعذر تحميل محتوى الموسوعة';
+  static const String encyclopediaContentKnownGoodNotice =
+      'يتم عرض آخر محتوى تم تحميله بنجاح';
 
   // Article strings
   static const String articleSaved = 'تم حفظ المقال للاستخدام بدون إنترنت';

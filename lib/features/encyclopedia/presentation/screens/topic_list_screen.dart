@@ -5,11 +5,13 @@ import '../providers/encyclopedia_provider.dart';
 import '../../domain/entities/engineering_topic.dart';
 import '../../../../core/widgets/async_value_widget.dart';
 import '../../../../core/widgets/civil_app_bar.dart';
+import '../../../../core/widgets/state_widgets.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/spacing.dart';
 import '../../../../core/services/language_provider.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
+import '../widgets/encyclopedia_content_notice.dart';
 import '../widgets/topic_list_card.dart';
 
 class TopicListScreen extends StatefulWidget {
@@ -46,9 +48,25 @@ class _TopicListScreenState extends State<TopicListScreen> {
       ),
       body: AsyncValueWidget(
         isLoading: provider.isLoading,
-        error: provider.error,
-        isEmpty: provider.categoryTopics.isEmpty && provider.error == null,
+        error: provider.hasContentFailure
+            ? tr(Ar.encyclopediaContentError, En.encyclopediaContentError)
+            : null,
+        isEmpty: provider.categoryTopics.isEmpty && !provider.hasContentFailure,
         onRetry: () => provider.loadTopicsByCategory(widget.categoryId),
+        onError: (error, onRetry) => provider.showingSameCategoryKnownGood
+            ? Column(
+                children: [
+                  EncyclopediaContentNotice(
+                    message: tr(
+                      Ar.encyclopediaContentKnownGoodNotice,
+                      En.encyclopediaContentKnownGoodNotice,
+                    ),
+                    onRetry: onRetry,
+                  ),
+                  Expanded(child: _buildTopicsList(provider, isDark: isDark)),
+                ],
+              )
+            : ErrorStateWidget(message: error, onRetry: onRetry),
         onEmpty: () => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -64,14 +82,18 @@ class _TopicListScreenState extends State<TopicListScreen> {
             ],
           ),
         ),
-        onData: () => ListView.separated(
-          padding: AppSpacing.padLg,
-          itemCount: provider.categoryTopics.length,
-          separatorBuilder: (_, __) => AppSpacing.gapMd,
-          itemBuilder: (context, index) =>
-              _topicCard(context, provider.categoryTopics[index], isDark: isDark),
-        ),
+        onData: () => _buildTopicsList(provider, isDark: isDark),
       ),
+    );
+  }
+
+  Widget _buildTopicsList(EncyclopediaProvider provider, {required bool isDark}) {
+    return ListView.separated(
+      padding: AppSpacing.padLg,
+      itemCount: provider.categoryTopics.length,
+      separatorBuilder: (_, __) => AppSpacing.gapMd,
+      itemBuilder: (context, index) =>
+          _topicCard(context, provider.categoryTopics[index], isDark: isDark),
     );
   }
 

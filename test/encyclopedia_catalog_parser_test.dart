@@ -67,6 +67,22 @@ void main() {
     if (categories != null) 'categories': categories,
   };
 
+  Map<String, dynamic> generatedCatalog(
+    Map<String, dynamic> catalog, {
+    int topicCount = 2,
+    int sectionCount = 1,
+    int blockCount = 1,
+  }) => {
+        ...catalog,
+        '_meta': {
+          'format': 'civilpedia-catalog-generated',
+          'schemaVersion': 1,
+          'topicCount': topicCount,
+          'sectionCount': sectionCount,
+          'blockCount': blockCount,
+        },
+      };
+
   group('parseCatalogJson - isolation', () {
     test('parses a valid catalog without skips', () {
       final result = parseCatalogJson(buildCatalog());
@@ -331,78 +347,117 @@ void main() {
     'EncyclopediaJsonDataSource - no mock fallback for isolated defects',
     () {
       test(
-        'loads generated catalog with one malformed block skipped',
+        'rejects the entire authoritative catalog when a block is malformed',
         () async {
-          final catalog = buildCatalog(
-            blocks: {
-              't1__s1': [
-                {'type': 'text', 'content': 'ok'},
-                {'type': 'boom', 'content': 'bad'},
-              ],
-            },
+          final catalog = generatedCatalog(
+            buildCatalog(
+              blocks: {
+                't1__s1': [
+                  {'type': 'text', 'content': 'ok'},
+                  {'type': 'boom', 'content': 'bad'},
+                ],
+              },
+            ),
+            blockCount: 2,
           );
           final dataSource = EncyclopediaJsonDataSource(
             bundle: _TestAssetBundle({
               'assets/encyclopedia/catalog.generated.json': jsonEncode(catalog),
             }),
           );
-          final topics = await dataSource.fetchAllTopics();
 
-          expect(topics.length, 2);
-          expect(dataSource.usingGeneratedCatalog, isTrue);
-          expect(dataSource.lastSkips.length, 1);
-          expect(dataSource.lastSkips.single.blockType, 'boom');
-
-          final sections = await dataSource.fetchSectionsForTopic('t1');
-          expect(sections.length, 1);
-
-          final blocks = await dataSource.fetchBlocksForSection('t1', 's1');
-          expect(blocks.length, 1);
-          expect((blocks.single as TextBlock).content, 'ok');
+          expect(
+            dataSource.fetchAllTopics(),
+            throwsA(
+              isA<EncyclopediaContentException>()
+                  .having(
+                    (e) => e.kind,
+                    'kind',
+                    EncyclopediaContentFailureKind.malformedContent,
+                  )
+                  .having((e) => e.skips.length, 'skips length', 1)
+                  .having(
+                    (e) => e.skips.single.blockType,
+                    'skipped block type',
+                    'boom',
+                  ),
+            ),
+          );
+          expect(dataSource.usingGeneratedCatalog, isFalse);
+          expect(dataSource.lastSkips, isEmpty);
         },
       );
 
-      test(
-        'all malformed topics yields empty list, not mock fallback',
-        () async {
-          final catalog = buildCatalog(
+      test('rejects the whole catalog when all topics are malformed', () async {
+        final catalog = generatedCatalog(
+          buildCatalog(
             topics: [
               {'id': null},
             ],
-          );
-          final dataSource = EncyclopediaJsonDataSource(
-            bundle: _TestAssetBundle({
-              'assets/encyclopedia/catalog.generated.json': jsonEncode(catalog),
-            }),
-          );
-          final topics = await dataSource.fetchAllTopics();
+          ),
+          topicCount: 1,
+        );
+        final dataSource = EncyclopediaJsonDataSource(
+          bundle: _TestAssetBundle({
+            'assets/encyclopedia/catalog.generated.json': jsonEncode(catalog),
+          }),
+        );
 
-          expect(topics, isEmpty);
-          expect(dataSource.usingGeneratedCatalog, isTrue);
-          expect(dataSource.lastSkips.single.kind, 'topic');
-        },
-      );
+        expect(
+          dataSource.fetchAllTopics(),
+          throwsA(
+            isA<EncyclopediaContentException>().having(
+              (e) => e.kind,
+              'kind',
+              EncyclopediaContentFailureKind.malformedContent,
+            ),
+          ),
+        );
+        expect(dataSource.usingGeneratedCatalog, isFalse);
+        expect(dataSource.lastSkips, isEmpty);
+      });
     },
   );
 
-  group('EncyclopediaRepositoryImpl - catastrophic fallback preserved', () {
-    test(
-      'falls back to local mock data when catalog files are invalid',
-      () async {
-        final repository = EncyclopediaRepositoryImpl(
-          EncyclopediaJsonDataSource(
-            bundle: _TestAssetBundle({
-              'assets/encyclopedia/catalog.generated.json': 'not json',
-              'assets/encyclopedia/catalog.json': 'also not json',
-            }),
-          ),
-          EncyclopediaLocalDataSource(),
-        );
-        final topics = await repository.getAllTopics();
+  group('EncyclopediaRepositoryImpl - fallback policy', () {
+    test('propagates the typed failure with no runtime fallback', () async {
+      final repository = EncyclopediaRepositoryImpl(
+        EncyclopediaJsonDataSource(
+          bundle: _TestAssetBundle({
+            'assets/encyclopedia/catalog.generated.json': 'not json',
+            'assets/encyclopedia/catalog.json': 'also not json',
+          }),
+        ),
+        EncyclopediaLocalDataSource(),
+      );
 
-        expect(topics.length, 7);
-      },
-    );
+      expect(
+        repository.getAllTopics(),
+        throwsA(
+          isA<EncyclopediaContentException>().having(
+            (e) => e.kind,
+            'kind',
+            EncyclopediaContentFailureKind.malformedContent,
+          ),
+        ),
+      );
+    });
+
+    test('routes to dev mock fallback only when explicitly enabled', () async {
+      final repository = EncyclopediaRepositoryImpl(
+        EncyclopediaJsonDataSource(
+          bundle: _TestAssetBundle({
+            'assets/encyclopedia/catalog.generated.json': 'not json',
+            'assets/encyclopedia/catalog.json': 'also not json',
+          }),
+        ),
+        EncyclopediaLocalDataSource(),
+        useDevFallback: true,
+      );
+
+      final topics = await repository.getAllTopics();
+      expect(topics.length, 7);
+    });
   });
 
   group('parseCatalogJson - production catalog regression', () {
