@@ -77,7 +77,7 @@ PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
 CURRENT_PHASE_ID: V1-R09Q
 CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
 LAST_CLOSED_PHASE_ID: V1-R09
-LAST_CLOSED_COMMIT: c7702a6
+LAST_CLOSED_COMMIT: 91e1625
 ROADMAP_STATUS: ACTIVE
 
 ---
@@ -95,7 +95,7 @@ ROADMAP_STATUS: ACTIVE
 | V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R08 | Auth + Profile Production Completion | CLOSED | Codex | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R09 | Offline / Connectivity / Error Hardening | CLOSED | Big Pickle | TBD BY ARCHITECT | MEDIUM | c7702a6 |
-| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | NEXT / AUTHORIZABLE | TBD BY ARCHITECT | TBD BY ARCHITECT | MEDIUM | — |
+| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | CURRENT — QUALITY CONTRACT FROZEN | Big Pickle (A) / Codex + Sol High (B) | GitHub Copilot Reviewer (A) / Copilot or independent strong reviewer (B) | MEDIUM | — |
 | V1-R10 | UI/UX & Core App Experience | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R12 | Tools / Calculators Final Engineering QA | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -119,8 +119,8 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R09Q
 CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
-CURRENT_PHASE_STATUS: NEXT / AUTHORIZABLE
-CURRENT_PHASE_CONTRACT: NOT_FROZEN
+CURRENT_PHASE_STATUS: CURRENT — QUALITY CONTRACT FROZEN
+CURRENT_PHASE_CONTRACT: V1-R09Q-CONTRACT-v1
 IMPLEMENTATION_AUTHORIZED: NO
 
 A roadmap CURRENT status identifies execution order.
@@ -804,11 +804,23 @@ No fake success.
 
 ## V1-R09Q — Post-R09 Cross-Cutting Quality Gate
 
-STATUS: QUEUED (after V1-R09 closes; BEFORE V1-R10 begins)
+STATUS: CURRENT — QUALITY CONTRACT FROZEN (see V1-R09Q Contract Freeze Record
+below)
+
+Contract:
+
+V1-R09Q_CROSS_CUTTING_QUALITY_GATE_CONTRACT.md (V1-R09Q-CONTRACT-v1)
 
 Primary:
 
-TBD BY ARCHITECT
+Big Pickle (R09Q-A — CI + Cross-Feature Smoke)
+
+Codex / GPT-5.6 Sol High (R09Q-B — Supabase Reproducibility + Security Evidence)
+
+R09Q-C — FORMAL CLOSURE ONLY (documentation; not a third implementation slice).
+
+IMPLEMENTATION_AUTHORIZED: NO — implementation begins only after the Architect
+checkpoint approves this frozen contract.
 
 This is NOT a feature phase.
 
@@ -1499,8 +1511,8 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R09Q — Post-R09 Cross-Cutting Quality Gate (NEXT / AUTHORIZABLE — NOT yet
-authorized; NOT started)
+V1-R09Q — Post-R09 Cross-Cutting Quality Gate (CURRENT — QUALITY CONTRACT
+FROZEN; IMPLEMENTATION_AUTHORIZED: NO until Architect checkpoint)
 
 NEXT AFTER AUTHORIZATION AND SUCCESSFUL CLOSE:
 
@@ -2391,3 +2403,119 @@ V1-R09Q boundary (preserved):
 
 Owner approval: PENDING OWNER STAGING (per operating model, the user is the
 sole Git staging/commit/push owner).
+
+---
+
+### V1-R09Q Contract Freeze Record
+
+Phase: V1-R09Q — Post-R09 Cross-Cutting Quality Gate
+Status: CURRENT — QUALITY CONTRACT FROZEN
+Contract: V1-R09Q-CONTRACT-v1
+Contract path: docs/architecture/contracts/V1-R09Q_CROSS_CUTTING_QUALITY_GATE_CONTRACT.md
+Architect decision: QUALITY CONTRACT FROZEN (docs only; no production code,
+  test, CI, Supabase, migration, seed, or staged file modified by this freeze)
+IMPLEMENTATION_AUTHORIZED: NO — R09Q-A / R09Q-B implementation begins only
+  after the Architect checkpoint approval
+
+Structure (frozen exactly):
+- R09Q-A — CI + Cross-Feature Smoke (implementer: Big Pickle; reviewer:
+  GitHub Copilot Civilpedia Reviewer)
+- R09Q-B — Supabase Reproducibility + Security Evidence (implementer:
+  Codex / GPT-5.6 Sol High; reviewer: GitHub Copilot Civilpedia Reviewer or
+  another independent strong reviewer)
+- R09Q-C — FORMAL CLOSURE ONLY (documentation/closure, NOT a third
+  implementation slice)
+
+R09Q-A decisions ratified:
+- ADD `.github/workflows/flutter_quality.yml` (ONE stable CI workflow; triggers:
+  pull_request, push to main, workflow_dispatch; NO nightly job);
+- ADD `tool/quality_gate.ps1` deterministic gate (runs
+  `flutter test --no-pub <single-suite>`, ONE SUITE AT A TIME; no analyzer,
+  no format enforcement, no Flutter build in the required fast gate);
+- CI Flutter version FROZEN: Flutter 3.32.8 stable / Dart 3.8.1 (pubspec
+  `sdk: ^3.8.1`; documented reports; local environment) — explicitly pinned,
+  never silent "latest";
+- CI: FRESH checkout -> setup pinned Flutter -> `flutter pub get` -> deterministic
+  quality gate -> selected suites sequentially;
+- selected CI test list FROZEN (exact paths in contract §10; 19 suites);
+- MODIFY `test/v1_r06_profile_management_server_test.dart` to remove stale
+  V1-R06 live-roadmap coupling (TEST/EVIDENCE reconciliation; preserve
+  server-contract/security intent; assert durable facts; no skip/delete/weaken;
+  no production change);
+- ADD `test/v1_r09q_smoke_journeys_test.dart` (Journeys A recovered auth chain,
+  B transport-flip coexistence, C sign-out only if a seam emerges);
+- full Flutter repository suite NOT required to close R09Q; nightly NOT
+  created; R17 remains the final comprehensive E2E gate;
+- baseline dirty tests excluded from CI evidence and untouched.
+
+R09Q-B decisions ratified:
+- ADD `supabase/seed.sql` (minimal/no-op; makes configured `./seed.sql` path
+  valid; no sample production data; no migration change to fix the reference);
+- ADD `test/v1_r09q_migration_lint_test.dart` (canonical numeric naming,
+  strictly increasing order, unique numbers, required historical baseline
+  present, configured seed path resolves, no filename collision; MUST NOT
+  assert "migration 00022 must not exist");
+- ADD `test/v1_r09q_security_matrix_test.dart` (static high-value invariants:
+  RLS where required, auth.uid() ownership anchors, revoked direct UPDATE stays
+  revoked, staff/audit/billing grant protection, no RPC execute grant to anon,
+  controlled search_path on SECURITY DEFINER, authenticated actor/capability
+  checks, non-callable helpers remain revoked, no client/service-role bypass);
+- runtime LOCAL Supabase security smoke MANDATORY (probe CLI/Docker READ ONLY
+  first; no automatic tool install; local stack only; never linked/staging/
+  prod); if tooling unavailable return
+  `R09Q-B LOCAL SECURITY GATE REQUIRES ARCHITECT DECISION`;
+- authorize local-only `supabase db reset` when tooling available; record CLI
+  version, reset exit status, migration/seed application result;
+- representative positive/negative profile/business/staff/RPC evidence only
+  (no exhaustive R15 matrix);
+- preferred runtime artifact `supabase/tests/v1_r09q_security_smoke.sql`
+  (pgTAP / `supabase test db` if supported; no bespoke broad DB test
+  framework);
+- fixed non-production UUID/test-identity local fixtures only; no real data,
+  no credentials, no service_role in Flutter; privileged local SQL fixture
+  setup stays inside the local test harness only;
+- no new migration / RLS / policy / RPC / grant modification authorized.
+
+R09Q-C: documentation closure only after A + B acceptance; then
+`V1-R09Q CLOSED` / `V1-R10 NEXT / AUTHORIZABLE`.
+
+Boundary (ratified):
+- R09Q is NOT R10 UI redesign, NOT R14 backend readiness, NOT R15 final
+  security audit, NOT R17 full E2E, NOT performance/load testing, NOT
+  observability rollout, NOT production deployment;
+- production Flutter code: NONE by default; a real production defect -> STOP
+  for Architect decision;
+- no observability (Sentry/provider selection) in R09Q; deferred to later
+  backend/release readiness;
+- no service-role secret committed (inspection confirmed none); HIGH blocker if
+  one is found;
+- execution order: freeze -> A -> A review -> B (Codex/Sol High) -> B security
+  review -> C closure -> R10 NEXT; no simultaneous A/B.
+
+Closure blockers frozen:
+- HIGH: unauthorized data access; stale authenticated data crossing identity;
+  ownership/staff authority bypass; committed service-role secret; local clean
+  DB cannot reproduce required schema due to migration defect; RLS/RPC bypass
+  proven by runtime smoke.
+- MEDIUM: CI fast gate absent/non-deterministic; stale R06 coupling not
+  reconciled; missing cross-feature smoke; incomplete migration lint/security
+  matrix; seed/config mismatch unresolved; local db reset not proven when
+  tooling available; missing representative positive/negative runtime security
+  evidence; selected CI suite failure.
+- LOW: non-functional naming/readability; historical wording; nightly/full
+  suite absence; analyzer exclusion.
+- HIGH/MEDIUM: R09Q cannot close.
+
+Git safety (this freeze):
+- HEAD == origin/main == 91e162553d9f67606ff0e4a081a6c31c159f8d40;
+- docs changes only: V1-R09Q contract + this roadmap update;
+- nothing staged/committed/pushed;
+- baseline dirty paths untouched.
+
+Live state (ONE authoritative live roadmap state):
+  V1-R09:  CLOSED
+  V1-R09Q: CURRENT — QUALITY CONTRACT FROZEN (IMPLEMENTATION_AUTHORIZED: NO)
+  V1-R10:  QUEUED AFTER R09Q
+
+V1-R09Q is NOT marked implemented by this freeze.
+Owner approval: PENDING OWNER STAGING (user is the sole Git owner).
