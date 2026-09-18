@@ -705,3 +705,155 @@ or
 
 V1-R09Q is NOT marked implemented by this freeze.
 IMPLEMENTATION_AUTHORIZED remains NO until the Architect checkpoint.
+
+---
+
+# ARCHITECT ADDENDUM A — CI ACTIVATION SEQUENCING
+
+CONTRACT: V1-R09Q-CONTRACT-v1
+ADDENDUM: ARCHITECT ADDENDUM A — CI ACTIVATION SEQUENCING
+STATUS: IMMUTABLE — append-only amendment to V1-R09Q-CONTRACT-v1; the original
+  frozen body above is preserved unchanged and remains in force where this
+  addendum does not modify it (no historical section is rewritten).
+MODE: DOCS ONLY — no production code, no tests, no CI, no Supabase modified by
+  this addendum persistence.
+BASELINE AT PERSISTENCE: HEAD == origin/main ==
+  63d79a3f0b83950f6f6b700b72f94f834020d07f
+
+## A.1 Reason
+
+The frozen final CI list (§10) includes:
+
+- `test/v1_r09q_migration_lint_test.dart`
+- `test/v1_r09q_security_matrix_test.dart`
+
+but those files are owned by R09Q-B and intentionally do not exist during
+R09Q-A.
+
+R09Q-A MUST NOT:
+
+- create them;
+- stub them;
+- skip missing required tests silently;
+- commit a permanently-red workflow.
+
+## A.2 R09Q-A CI Behavior
+
+During R09Q-A, `.github/workflows/flutter_quality.yml` and
+`tool/quality_gate.ps1` MUST execute the exact R09Q-A / existing selected CI
+subset whose files exist and are authorized at A.
+
+R09Q-A CI MUST be GREEN and deterministic at its own checkpoint.
+
+The two R09Q-B-owned tests are NOT required in the A-stage execution because
+their implementation is still locked.
+
+For required tests, do NOT use:
+
+- skip-if-file-missing;
+- try/catch suppression;
+- allow-failure;
+- continue-on-error.
+
+Their absence during A is an intentional phase boundary, not a test failure.
+Encode that boundary as a phase-scoped A-stage suite list, never as silent
+test suppression semantics intended to persist into the final gate.
+
+## A.3 R09Q-B Narrow CI Activation Authorization
+
+Expand the R09Q-B file boundary (§24) narrowly.
+
+After R09Q-B creates and accepts:
+
+- `test/v1_r09q_migration_lint_test.dart`
+- `test/v1_r09q_security_matrix_test.dart`
+
+R09Q-B is additionally authorized to MODIFY:
+
+- `tool/quality_gate.ps1`
+
+ONLY to activate/add those two frozen security/reproducibility suites to the
+permanent selected CI gate.
+
+R09Q-B may MODIFY:
+
+- `.github/workflows/flutter_quality.yml`
+
+ONLY IF technically required to activate the final B-inclusive gate.
+
+Preferred design:
+
+- the workflow invokes the gate script;
+- therefore only the gate script should normally require the B activation edit.
+
+No unrelated CI redesign is authorized in B.
+
+## A.4 Final R09Q CI Invariant
+
+Before R09Q can close, the permanent CI gate MUST include:
+
+- the complete frozen R09Q-A selected suite set (§10);
+- the R09Q smoke journey (`test/v1_r09q_smoke_journeys_test.dart`);
+- the R09Q migration lint (`test/v1_r09q_migration_lint_test.dart`);
+- the R09Q static security matrix (`test/v1_r09q_security_matrix_test.dart`).
+
+No test may be silently optional at final R09Q closure.
+
+R09Q-C MUST verify the final gate list explicitly, including confirming that the
+A-stage phase boundary was properly folded into the permanent gate.
+
+## A.5 Roadmap State (unchanged by this addendum)
+
+Keep:
+
+    V1-R09:  CLOSED
+    V1-R09Q: CURRENT — QUALITY CONTRACT FROZEN
+    R09Q-A:  NEXT / AUTHORIZABLE
+    R09Q-B:  LOCKED UNTIL A CLOSES
+    R09Q-C:  CLOSURE ONLY
+    V1-R10:  QUEUED
+
+Do NOT start implementation as a result of this persistence.
+
+## A.6 File Scope
+
+This addendum persistence modifies ONLY:
+
+- `docs/architecture/contracts/V1-R09Q_CROSS_CUTTING_QUALITY_GATE_CONTRACT.md`
+
+No roadmap file change is required for this addendum; the roadmap freeze record
+already references V1-R09Q-CONTRACT-v1 and this is a contract-level amendment.
+If future governance requires a roadmap freeze-record reference, that is a
+separate authorized action — not performed here.
+
+No other file is modified.
+
+## A.7 Git Safety
+
+    git diff --check
+    git status --short
+    git diff --name-only
+    git diff --cached --name-only
+    git rev-parse HEAD
+    git rev-parse origin/main
+
+Expected:
+
+- HEAD == origin/main == 63d79a3f0b83950f6f6b700b72f94f834020d07f;
+- only this contract file modified by this persistence;
+- nothing staged, committed, or pushed;
+- baseline dirty paths untouched:
+  `test/a5_6_profile_bootstrap_test.dart`,
+  `test/v1_r08_cloud_profile_foundation_test.dart`,
+  `test/v1_r08_profile_edit_screen_widget_test.dart`,
+  `OpenCode_Usage_Report.txt`.
+
+## A.8 Decision
+
+Result is exactly one of:
+
+    R09Q ADDENDUM A PERSISTED — READY FOR ARCHITECT CHECKPOINT
+
+or
+
+    R09Q ADDENDUM A REQUIRES ARCHITECT DECISION
