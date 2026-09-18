@@ -766,7 +766,7 @@ Part 2 P2-E: ACCEPTED / CLOSED — P2-E FORMALLY CLOSED
 Part 2 P2-E1: ACCEPTED / CLOSED
 Part 2 P2-E2: ACCEPTED / CLOSED
 Part 2 P2-F: ACCEPTED / CLOSED — P2-F FORMALLY CLOSED — PASS — P2-F ACCEPTED — P2-G MAY BE UNLOCKED
-Part 2 P2-G: NEXT / AUTHORIZABLE AFTER THIS CLOSURE CHECKPOINT (implementation NOT started)
+Part 2 P2-G: CURRENT — VERIFICATION CONTRACT FROZEN (implementation NOT started)
 Post-R09 Quality Gate (V1-R09Q): QUEUED after R09 (not started)
 V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
   (not started)
@@ -2071,7 +2071,8 @@ Live state:
   P2-D: CLOSED
   P2-E: CLOSED
   P2-F: CLOSED — P2-F FORMALLY CLOSED (see P2-F Closure Record below)
-  P2-G: NEXT / AUTHORIZABLE AFTER THIS CLOSURE CHECKPOINT (implementation NOT started)
+  P2-G: CURRENT — VERIFICATION CONTRACT FROZEN (see P2-G Contract Freeze
+    Record below)
   V1-R09Q: QUEUED after R09 (not started)
   V1-R10: QUEUED after V1-R09Q (not started)
 
@@ -2143,3 +2144,76 @@ Outcome:
   V1-R09: CURRENT (not closed)
   V1-R09Q: QUEUED after R09 (not started)
   V1-R10: QUEUED after V1-R09Q (not started)
+
+### V1-R09 Part 2 P2-G Contract Freeze Record
+
+Phase: V1-R09 Part 2
+Slice: P2-G — Integrated UX Verification and Closure
+Status: CURRENT
+Contract: V1-R09-P2-G-CONTRACT-v1
+Contract status: FROZEN (docs only; no production code / test / historical
+  report artifact modified by this freeze)
+Architect decision: FROZEN (per completed P2-G integrated verification
+  inspection report)
+Verification execution: NOT STARTED — authorized only after Architect
+  checkpoint
+
+P2-G decisions ratified:
+- verification-first integrated closure gate for V1-R09 Part 2 (NOT a feature
+  phase; NOT V1-R09Q; NOT R17 E2E; NOT full repository suite)
+- ONE mandatory surgical production correction founded by inspection:
+  lib/features/encyclopedia/presentation/widgets/encyclopedia_content_notice.dart
+  must render Ar.retry / En.retry by active locale (currently hard-codes
+  Ar.retry); reuse existing Ar.retry / En.retry keys; no new keys unless
+  genuinely necessary; no broader Encyclopedia localization cleanup; no P2-F
+  architecture redesign; may NOT be deferred to V1-R09Q
+- ONE focused integrated suite authorized:
+  test/v1_r09_p2_g_integrated_gate_test.dart
+- transport policy split enforced under the SAME canonical connectivity
+  authority where practical: Directory owns generation-gated reconnect (exactly
+  once per recovery); Profile/Business/Staff manual retry only; Encyclopedia has
+  no connectivity-driven behavior at all
+- offline/network presentation mapping frozen: network + unavailable -> offline;
+  network + available/unknown -> network; Encyclopedia local-content failure
+  stays local regardless of connectivity state
+- AppShell + Encyclopedia local-failure coexistence proven separately (no
+  duplicate transport authority; no semantic merging)
+- session/identity integration proven across the real coordinated reset seam
+  (account-bound providers + StaffOperationsScope); Directory stays public;
+  device-local Encyclopedia favorites are NOT cleared on auth change
+- retry/mutation safety: no P2-G retry/reconnect path may invoke a mutation
+- known-good priority preserved per frozen domain semantics
+- mandatory EN-locale EncyclopediaNotice regression (En.retry rendered; Ar.retry
+  MUST NOT render; Arabic behavior preserved)
+- exact selected regression path list persisted in the frozen contract
+  (verified to exist at freeze time)
+- all selected regression suites run SEQUENTIALLY, ONE SUITE AT A TIME; no
+  parallel execution; no flutter pub get / precache / pub cache repair /
+  analyzer unless separately authorized
+- production file boundary default: ONLY the one Encyclopedia notice widget for
+  the mandatory correction; any further production edit requires ARCHITECT
+  authorization with STOP-and-classify protocol
+- closure-evidence authority: formal roadmap closure records + frozen contracts
+  + accepted git commits + available acceptance evidence; no fabrication of
+  missing report artifacts; historical P2-D2 report tail preserved, superseded
+  by the formal P2-D closure record, with a reconciliation note at P2-G/V1-R09
+  closure
+- HIGH/MEDIUM blockers blocked; LOW recorded/deferred if no trust/behavior
+  impact remains
+- backend unchanged; migration 00022 remains absent
+
+Live state:
+  V1-R09:  CURRENT
+  P2-A:    CLOSED
+  P2-B:    CLOSED
+  P2-C:    CLOSED
+  P2-D:    CLOSED
+  P2-E:    CLOSED
+  P2-F:    CLOSED
+  P2-G:    CURRENT — VERIFICATION CONTRACT FROZEN
+  V1-R09Q: QUEUED after R09 (not started)
+  V1-R10:  QUEUED after V1-R09Q (not started)
+
+P2-G is NOT marked completed by this freeze.
+V1-R09 is NOT marked closed by this freeze.
+Owner approval: PENDING OWNER STAGING
