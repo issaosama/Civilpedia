@@ -74,10 +74,10 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R09
-CURRENT_PHASE_TITLE: Offline / Connectivity / Error Hardening
-LAST_CLOSED_PHASE_ID: V1-R08
-LAST_CLOSED_COMMIT: PENDING OWNER COMMIT
+CURRENT_PHASE_ID: V1-R09Q
+CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
+LAST_CLOSED_PHASE_ID: V1-R09
+LAST_CLOSED_COMMIT: c7702a6
 ROADMAP_STATUS: ACTIVE
 
 ---
@@ -94,8 +94,8 @@ ROADMAP_STATUS: ACTIVE
 | V1-R06 | Business / Provider Profile Management | CLOSED | Codex (backend) / Big Pickle (UI) | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R08 | Auth + Profile Production Completion | CLOSED | Codex | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
-| V1-R09 | Offline / Connectivity / Error Hardening | CURRENT | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
-| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | QUEUED | TBD BY ARCHITECT | TBD BY ARCHITECT | MEDIUM | — |
+| V1-R09 | Offline / Connectivity / Error Hardening | CLOSED | Big Pickle | TBD BY ARCHITECT | MEDIUM | c7702a6 |
+| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | NEXT / AUTHORIZABLE | TBD BY ARCHITECT | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R10 | UI/UX & Core App Experience | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R12 | Tools / Calculators Final Engineering QA | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -117,11 +117,11 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R09
-CURRENT_PHASE_TITLE: Offline / Connectivity / Error Hardening
-CURRENT_PHASE_STATUS: CURRENT
-CURRENT_PHASE_CONTRACT: V1-R09-CONTRACT-v1
-IMPLEMENTATION_AUTHORIZED: YES
+CURRENT_PHASE_ID: V1-R09Q
+CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
+CURRENT_PHASE_STATUS: NEXT / AUTHORIZABLE
+CURRENT_PHASE_CONTRACT: NOT_FROZEN
+IMPLEMENTATION_AUTHORIZED: NO
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
@@ -748,10 +748,10 @@ Production audit and completion of:
 
 ## V1-R09 — Offline / Connectivity / Error Hardening
 
-STATUS: CURRENT
+STATUS: CLOSED / ACCEPTED — V1-R09 FORMALLY CLOSED (see V1-R09 Final Closure Record below)
 
 Part 1: CLOSED / ACCEPTED — PASS - V1-R09 PART 1 ACCEPTED - PART 2 MAY BEGIN
-Part 2: CURRENT — current within V1-R09 (overall V1-R09 remains CURRENT)
+Part 2: CLOSED — current within V1-R09 (V1-R09 is now formally closed)
 Part 2 P2-A: ACCEPTED / CLOSED — PASS - P2-A ACCEPTED - P2-B MAY BEGIN
 Part 2 P2-B: ACCEPTED / CLOSED
 Part 2 P2-B1: ACCEPTED / CLOSED
@@ -766,8 +766,8 @@ Part 2 P2-E: ACCEPTED / CLOSED — P2-E FORMALLY CLOSED
 Part 2 P2-E1: ACCEPTED / CLOSED
 Part 2 P2-E2: ACCEPTED / CLOSED
 Part 2 P2-F: ACCEPTED / CLOSED — P2-F FORMALLY CLOSED — PASS — P2-F ACCEPTED — P2-G MAY BE UNLOCKED
-Part 2 P2-G: CURRENT — VERIFICATION CONTRACT FROZEN (implementation NOT started)
-Post-R09 Quality Gate (V1-R09Q): QUEUED after R09 (not started)
+Part 2 P2-G: ACCEPTED / CLOSED — P2-G FORMALLY CLOSED (see P2-G Formal Closure Record below)
+Post-R09 Quality Gate (V1-R09Q): NEXT / AUTHORIZABLE (not started)
 V1-R10 (UI/UX & Core App Experience): QUEUED after the Post-R09 Quality Gate
   (not started)
 
@@ -1499,15 +1499,12 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R09 — Offline / Connectivity / Error Hardening
+V1-R09Q — Post-R09 Cross-Cutting Quality Gate (NEXT / AUTHORIZABLE — NOT yet
+authorized; NOT started)
 
-NEXT AFTER SUCCESSFUL CLOSE:
+NEXT AFTER AUTHORIZATION AND SUCCESSFUL CLOSE:
 
-V1-R09Q — Post-R09 Cross-Cutting Quality Gate
-
-THEN (QUEUED after the Post-R09 Quality Gate):
-
-V1-R10 — UI/UX & Core App Experience
+V1-R10 — UI/UX & Core App Experience (QUEUED after V1-R09Q)
 
 No other phase may be selected by inference.
 
@@ -2217,3 +2214,180 @@ Live state:
 P2-G is NOT marked completed by this freeze.
 V1-R09 is NOT marked closed by this freeze.
 Owner approval: PENDING OWNER STAGING
+
+---
+
+### V1-R09 Part 2 P2-G Formal Closure Record
+
+Slice: P2-G — Integrated Verification and Closure
+Contract: V1-R09-P2-G-CONTRACT-v1 — frozen semantics preserved unchanged;
+  only this append-only formal closure record is added.
+Status: CLOSED / ACCEPTED
+
+Implementation commit:
+  c7702a6142a6c3f4dac22444b9b9a9544fa3dcff
+
+Independent acceptance:
+  PASS — P2-G ACCEPTED — V1-R09 MAY ENTER FORMAL CLOSURE
+
+P2-G delivered:
+  - one mandatory Encyclopedia AR/EN retry-label correction
+    (lib/features/encyclopedia/presentation/widgets/encyclopedia_content_notice.dart:
+    retry label now locale-aware — Arabic -> Ar.retry, English -> En.retry);
+  - one focused integrated R09 verification suite
+    (test/v1_r09_p2_g_integrated_gate_test.dart);
+  - integrated transport-policy verification (Directory generation-gated
+    auto-reconnect only; Profile/Business/Staff manual retry only; Encyclopedia
+    has no connectivity-driven content reload);
+  - offline/network presentation verification (network failure + confirmed
+    unavailable transport -> offline; available/unknown transport -> network);
+  - AppShell + local Encyclopedia-content-failure coexistence verification;
+  - coordinated account-bound identity/session reset verification;
+  - retry/mutation separation verification (read retries stay read-only);
+  - known-good policy consistency verification;
+  - EN/AR retry-label regression evidence;
+  - selected R09 regression gate execution;
+  - no backend change;
+  - no broad production expansion.
+
+Corrected execution evidence (verified arithmetic):
+  - P2-G integrated gate:          23 PASS / 0 FAIL / 0 SKIPPED
+  - selected frozen regression:    27 suites / 901 PASS / 0 FAIL / 0 SKIPPED
+      P2-A..P2-F accepted suites:   431 PASS
+      Shared / shell:                19 PASS
+      Historical R05 Directory:     200 PASS
+      R08 / auth / profile / user-area: 105 PASS
+      R04 / R06 Business:           146 PASS
+      431 + 19 + 200 + 105 + 146 = 901 PASS
+  - grand total (regression + gate): 901 + 23 = 924 PASS / 0 FAIL / 0 SKIPPED
+
+  Arithmetic correction note:
+    earlier implementer report wording used 839 / 862 totals; those values were
+    reporting arithmetic drift and are superseded. The verified persistent
+    totals are the 901 selected-regression PASS and the 924 grand-total PASS.
+    The regression total itself is 901 (not 924).
+
+Architect-authorized test-only exception (narrow boundary):
+  File: test/v1_r05_directory_cloud_integration_test.dart
+  Reason: a stale historical literal assertion expected "Entity not found"
+  while current accepted R09 behavior renders the localized Directory
+  entity-not-found copy.
+  Correction: a single assertion was updated to assert the accepted localized
+  copy (Ar.directoryEntityNotFound rendered under the harness default Arabic
+  LanguageProvider) while preserving the original behavioral intent:
+    - message/error state remains asserted;
+    - DirectoryProviderDetailScreen absence remains asserted;
+    - no skip / delete / weaken; no production behavior changed.
+  Classification: TEST/EVIDENCE RECONCILIATION ONLY — not a reopening of R05,
+  not a change to Directory authority, not a broadening of P2-G production
+  scope.
+  Re-run after correction: 83/83 PASS.
+
+Independent review:
+  - independent reviewer performed static source/diff review;
+  - independent shell execution was unavailable;
+  - reviewer did NOT independently rerun the 27 suites;
+  - implementer deterministic shell execution supplied the runtime evidence;
+  - independent review found no HIGH, MEDIUM, or LOW findings;
+  - file boundary, localization fix, integrated gate quality, identity reset,
+    reconnect ownership, retry/mutation safety, R05 exception, backend
+    protection, and direct regression were accepted.
+
+P2-G closure invariants:
+  - Directory remains the only R09 feature with generation-gated auto reconnect;
+  - Profile / Business / Staff manual retry only;
+  - Encyclopedia has no connectivity-driven content reload;
+  - remote network failure may become offline only when canonical transport is
+    confirmed unavailable; available/unknown never promotes network to offline;
+  - Encyclopedia local-content failure remains local regardless of transport;
+  - coordinated account-bound reset prevents stale User A authenticated state
+    surfacing under User B / sign-out; Directory remains public; device-local
+    Encyclopedia favorites are not cleared merely due to an auth change;
+  - read retries remain read-only; no P2-G retry/reconnect path invokes
+    mutation; accepted P2-A..P2-F authority boundaries unchanged;
+  - EncyclopediaContentNotice retry label is now locale-aware: Arabic -> Ar.retry;
+    English -> En.retry.
+
+Live state:
+  P2-G:    CLOSED / ACCEPTED
+  V1-R09:  CLOSED / ACCEPTED (see V1-R09 Final Closure Record below)
+  V1-R09Q: NEXT / AUTHORIZABLE (NOT started)
+  V1-R10:  QUEUED after V1-R09Q (NOT started)
+
+---
+
+### V1-R09 Final Closure Record
+
+Phase: V1-R09 — Offline / Connectivity / Error Hardening
+Previous status: CURRENT
+New status: CLOSED / ACCEPTED — V1-R09 FORMALLY CLOSED
+Contracts: V1-R09-CONTRACT-v1 (+ part/slice contracts and appendices,
+  incl. V1-R09-P2-G-CONTRACT-v1) — frozen semantics preserved unchanged; only
+  this append-only final closure record is added.
+Implementation commit: c7702a6142a6c3f4dac22444b9b9a9544fa3dcff
+Independent acceptance: PASS — P2-G ACCEPTED — V1-R09 MAY ENTER FORMAL CLOSURE
+Architect checkpoint: PENDING ARCHITECT CHECKPOINT
+Owner staging/commit/push: PENDING OWNER (user is the sole Git owner)
+
+V1-R09 delivered the full offline / connectivity / error-hardening program:
+  - recovery/auth resilience foundation (Part 1);
+  - shared transport UX (P2-A);
+  - Directory cache-first + reconnect (P2-B, incl. P2-B1/P2-B2/Addendum-A);
+  - authenticated Profile remote-read resilience (P2-C, incl. P2-C1/P2-C2);
+  - Business remote-read resilience (P2-D, incl. P2-D1/P2-D2);
+  - Staff remote-read resilience (P2-E, incl. P2-E1/P2-E2);
+  - Encyclopedia local-content hardening (P2-F);
+  - integrated P2-G verification and closure.
+
+Slice closure state:
+  P2-A: CLOSED / ACCEPTED
+  P2-B: CLOSED / ACCEPTED (incl. P2-B1, P2-B2, Addendum-A)
+  P2-C: CLOSED / ACCEPTED (incl. P2-C1, P2-C2)
+  P2-D: CLOSED / ACCEPTED (incl. P2-D1, P2-D2)
+  P2-E: CLOSED / ACCEPTED (incl. P2-E1, P2-E2)
+  P2-F: CLOSED / ACCEPTED
+  P2-G: CLOSED / ACCEPTED
+
+Closure-evidence reconciliation (persisted rule):
+  Formal roadmap closure records + frozen contracts + accepted git commits +
+  available acceptance evidence are the authoritative closure trail.
+  - historical P2-D2 artifact wording may show a transitional state; the later
+    formal roadmap closure supersedes it;
+  - missing standalone report artifacts for some accepted slices do NOT negate
+    accepted contract/roadmap/git evidence;
+  - no historical report artifact was edited; no missing report was fabricated;
+  - old artifacts were not rewritten to appear current.
+
+Backend / generated-protection (confirmed):
+  - no Supabase / migrations / RLS / grants / RPC / Edge / Realtime /
+    service_role change;
+  - migration 00022 remains absent;
+  - generated Encyclopedia JSON and Content Studio outputs unchanged;
+  - no search-semantics change.
+
+Live state (ONE authoritative live roadmap state):
+  V1-R09:  CLOSED / ACCEPTED
+  P2-A:    CLOSED
+  P2-B:    CLOSED
+  P2-C:    CLOSED
+  P2-D:    CLOSED
+  P2-E:    CLOSED
+  P2-F:    CLOSED
+  P2-G:    CLOSED
+  V1-R09Q: NEXT / AUTHORIZABLE
+  V1-R10:  QUEUED after V1-R09Q
+
+V1-R09Q boundary (preserved):
+  - V1-R09Q is the NEXT cross-cutting quality gate (CI baseline; selected
+    cross-feature integration smoke; auth/session/offline cross-feature
+    journeys; relevant Supabase/RLS positive + negative evidence;
+    migration/reproducibility baseline);
+  - no R09Q work is pulled back into this closure; R09Q claims only its own
+    authorized scope and does not claim already-verified R09 behavior as a
+    re-verification;
+  - R09Q implementation is NOT started; it begins only after the Architect
+    supplies its contract freeze / authorization;
+  - no additional R09 technical gate is invented.
+
+Owner approval: PENDING OWNER STAGING (per operating model, the user is the
+sole Git staging/commit/push owner).
