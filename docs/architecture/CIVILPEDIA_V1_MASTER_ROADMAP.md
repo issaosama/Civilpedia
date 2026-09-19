@@ -80,8 +80,8 @@ LAST_CLOSED_PHASE_ID: V1-R09
 LAST_CLOSED_COMMIT: c7702a6
 ROADMAP_STATUS: ACTIVE
 R09Q-A_STATUS: CLOSED / ACCEPTED
-R09Q-B_STATUS: NEXT / AUTHORIZABLE
-R09Q-C_STATUS: LOCKED — FORMAL CLOSURE ONLY AFTER B
+R09Q-B_STATUS: CLOSED / ACCEPTED
+R09Q-C_STATUS: CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
 
 ---
 
@@ -98,7 +98,7 @@ R09Q-C_STATUS: LOCKED — FORMAL CLOSURE ONLY AFTER B
 | V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R08 | Auth + Profile Production Completion | CLOSED | Codex | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R09 | Offline / Connectivity / Error Hardening | CLOSED | Big Pickle | TBD BY ARCHITECT | MEDIUM | c7702a6 |
-| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | CURRENT — R09Q-A CLOSED / R09Q-B AUTHORIZABLE | Big Pickle (A) / Codex + Sol High (B) | GitHub Copilot Reviewer (A) / Copilot or independent strong reviewer (B) | MEDIUM | — |
+| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | CURRENT — R09Q-A CLOSED / R09Q-B CLOSED / R09Q-C AUTHORIZED | Big Pickle (A) / Codex + Sol High (B) | GitHub Copilot Reviewer (A) / Copilot or independent strong reviewer (B) | MEDIUM | — |
 | V1-R10 | UI/UX & Core App Experience | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R12 | Tools / Calculators Final Engineering QA | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -122,9 +122,9 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R09Q
 CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
-CURRENT_PHASE_STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B NEXT / AUTHORIZABLE
+CURRENT_PHASE_STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C CURRENT / AUTHORIZED
 CURRENT_PHASE_CONTRACT: V1-R09Q-CONTRACT-v1
-IMPLEMENTATION_AUTHORIZED: NO for R09Q-B until Architect checkpoint; R09Q-A CLOSED
+IMPLEMENTATION_AUTHORIZED: YES for R09Q-C formal closure only; R09Q-A and R09Q-B CLOSED
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
@@ -807,8 +807,9 @@ No fake success.
 
 ## V1-R09Q — Post-R09 Cross-Cutting Quality Gate
 
-STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B NEXT / AUTHORIZABLE (see
-V1-R09Q Contract Freeze Record and R09Q-A Formal Closure Record below)
+STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C
+CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY (see V1-R09Q Contract Freeze Record,
+R09Q-A Formal Closure Record, and R09Q-B Formal Closure Record below)
 
 Contract:
 
@@ -1515,7 +1516,8 @@ Record them in this file before implementation.
 CURRENT:
 
 V1-R09Q — Post-R09 Cross-Cutting Quality Gate (CURRENT — R09Q-A CLOSED /
-ACCEPTED; R09Q-B NEXT / AUTHORIZABLE; R09Q-C LOCKED until B closes)
+ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C CURRENT / AUTHORIZED — FORMAL
+CLOSURE ONLY)
 
 NEXT AFTER R09Q FULLY CLOSES:
 
@@ -2389,7 +2391,7 @@ Live state (ONE authoritative live roadmap state):
   P2-E:    CLOSED
   P2-F:    CLOSED
   P2-G:    CLOSED
-  V1-R09Q: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B NEXT / AUTHORIZABLE
+  V1-R09Q: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C CURRENT / AUTHORIZED
   V1-R10:  QUEUED after V1-R09Q
 
 V1-R09Q boundary (preserved):
@@ -2518,13 +2520,14 @@ Git safety (this freeze):
 Live state (ONE authoritative live roadmap state):
   V1-R09:  CLOSED
   R09Q-A:  CLOSED / ACCEPTED
-  R09Q-B:  NEXT / AUTHORIZABLE
-  R09Q-C:  LOCKED — FORMAL CLOSURE ONLY AFTER B
+  R09Q-B:  CLOSED / ACCEPTED
+  R09Q-C:  CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
   V1-R09Q: CURRENT
   V1-R10:  QUEUED AFTER R09Q
 
-R09Q-A is formally closed; R09Q-B implementation is NOT authorized until the
-Architect checkpoint. R09Q-C remains locked until R09Q-B closes.
+R09Q-A and R09Q-B are formally closed. R09Q-C is now authorized as the final
+formal closure slice; it must NOT introduce production code, tests, migrations,
+security changes, UI work, or R10 implementation.
 Owner approval: PENDING OWNER STAGING (user is the sole Git owner).
 
 ---
@@ -2622,11 +2625,11 @@ Addendum A state preserved:
   those two suites into the FINAL R09Q permanent CI gate.
 - No test may remain silently optional at R09Q final closure.
 
-R09Q-B unlock:
+R09Q-B unlock (superseded by R09Q-B Formal Closure Record below):
 - Status after this closure checkpoint: NEXT / AUTHORIZABLE.
 - Purpose: Supabase Reproducibility + Security Evidence.
 - Preferred implementer: Codex / GPT-5.6 Sol High.
-- R09Q-B remains responsible for:
+- R09Q-B remained responsible for:
   - `supabase/seed.sql`
   - migration lint
   - static security matrix
@@ -2638,7 +2641,97 @@ R09Q-B unlock:
 Live state (ONE authoritative live roadmap state):
   V1-R09:    CLOSED / ACCEPTED
   R09Q-A:    CLOSED / ACCEPTED
-  R09Q-B:    NEXT / AUTHORIZABLE
-  R09Q-C:    LOCKED — FORMAL CLOSURE ONLY AFTER B
+  R09Q-B:    CLOSED / ACCEPTED
+  R09Q-C:    CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
+  V1-R09Q:   CURRENT
+  V1-R10:    QUEUED AFTER R09Q
+
+---
+
+### R09Q-B Formal Closure Record
+
+Slice: R09Q-B — Supabase Reproducibility + Security Evidence
+Status: CLOSED / ACCEPTED
+Contract: V1-R09Q-CONTRACT-v1 + ARCHITECT ADDENDUM A — CI ACTIVATION SEQUENCING
+Implementation commit: 8a1f38694165b535fad6fd8b1924464a1dcb1f9c
+Independent security review: PASS
+
+R09Q-B delivered:
+- `supabase/seed.sql` added to make the configured `./seed.sql` path valid;
+- `test/v1_r09q_migration_lint_test.dart` permanent migration lint evidence;
+- `test/v1_r09q_security_matrix_test.dart` permanent static RLS/RPC/grant
+  security evidence;
+- `tool/quality_gate.ps1` modified to activate the two B-owned suites into the
+  permanent 19-suite CI gate;
+- local Supabase reset proven clean (migrations 00001–00021 applied,
+  seed applied);
+- local pgTAP runtime security smoke covering Profile, Business/Application,
+  Staff, and protected SECURITY DEFINER RPC positive + negative cases;
+- no unauthorized runtime access;
+- no security defects discovered;
+- no existing migration, RLS, RPC, grant, or Flutter production code modified.
+
+Local acceptance evidence:
+- Migration lint: 5/5 PASS
+- Static security matrix: 10/10 PASS
+- Local `supabase db reset`: PASS
+  - migrations 00001 through 00021 applied successfully
+  - `supabase/seed.sql` applied successfully
+- Runtime pgTAP security smoke: 12/12 PASS
+- Local permanent Flutter quality gate: 19 selected suites / 19 PASS / 0 FAIL
+
+Hosted CI evidence:
+- Repository: Civilpedia
+- Workflow: flutter-quality
+- Commit: 8a1f38694165b535fad6fd8b1924464a1dcb1f9c
+- Job: selected-cross-cutting-suites
+- Status: SUCCESS
+- The B-inclusive 19-suite permanent gate completed green under GitHub-hosted
+  windows-latest.
+
+Tooling note:
+- Hosted annotation: Node.js 20 deprecation / actions being forced to Node.js 24.
+- Severity: LOW / NON-BLOCKING TOOLING NOTE.
+- Workflow completed SUCCESSFULLY; no R09Q remediation required.
+
+Live state (ONE authoritative live roadmap state):
+  V1-R09:    CLOSED / ACCEPTED
+  R09Q-A:    CLOSED / ACCEPTED
+  R09Q-B:    CLOSED / ACCEPTED
+  R09Q-C:    CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
+  V1-R09Q:   CURRENT
+  V1-R10:    QUEUED AFTER R09Q
+
+---
+
+### R09Q-C Opening
+
+Slice: R09Q-C — Formal Closure Only
+Status: CURRENT / AUTHORIZED
+Contract: V1-R09Q-CONTRACT-v1
+
+R09Q-C purpose:
+- reconcile final R09Q evidence from R09Q-A and R09Q-B;
+- verify A and B closures are complete and accepted;
+- confirm the permanent quality gate remains active;
+- formally close V1-R09Q;
+- authorize transition to V1-R10.
+
+R09Q-C must NOT introduce:
+- production code;
+- tests;
+- migrations;
+- security changes;
+- UI work;
+- V1-R10 implementation.
+
+Implementation authorized: YES — for documentation/closure only.
+Preferred agent: Big Pickle.
+
+Live state (ONE authoritative live roadmap state):
+  V1-R09:    CLOSED / ACCEPTED
+  R09Q-A:    CLOSED / ACCEPTED
+  R09Q-B:    CLOSED / ACCEPTED
+  R09Q-C:    CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
   V1-R09Q:   CURRENT
   V1-R10:    QUEUED AFTER R09Q
