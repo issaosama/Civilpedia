@@ -1,0 +1,2 @@
+-- Intentionally empty. R09Q-B keeps the configured local seed path
+-- reproducible without introducing application or production-like fixtures.

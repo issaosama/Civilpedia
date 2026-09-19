@@ -1,4 +1,4 @@
-# Civilpedia V1-R09Q-A deterministic CI quality gate.
+# Civilpedia V1-R09Q deterministic CI quality gate.
 #
 # Frozen authority: V1-R09Q-CONTRACT-v1 + ARCHITECT ADDENDUM A (CI ACTIVATION
 # SEQUENCING). This script is the suite-list SSOT.
@@ -11,11 +11,8 @@
 #     silent skip;
 #   - no analyzer, no format, no build, no `pub get`, and no Supabase here.
 #
-# The A-stage list below intentionally excludes the two R09Q-B-owned frozen
-# suites (`test/v1_r09q_migration_lint_test.dart`,
-# `test/v1_r09q_security_matrix_test.dart`), which do not exist during R09Q-A
-# and are activated by R09Q-B per Addendum A. That phase boundary is encoded
-# here as a phase-scoped suite list, not as skip/try-catch suppression.
+# The permanent list below includes the 17 accepted R09Q-A suites and the two
+# R09Q-B reproducibility/security suites activated per Addendum A.
 
 $ErrorActionPreference = 'Stop'
 
@@ -51,6 +48,8 @@ try {
     'test/v1_r06_profile_management_server_test.dart'
     'test/v1_r07_staff_operations_server_test.dart'
     'test/v1_r07_staff_gateway_production_test.dart'
+    'test/v1_r09q_migration_lint_test.dart'
+    'test/v1_r09q_security_matrix_test.dart'
   )
 
   $missing = @()
@@ -60,7 +59,7 @@ try {
     }
   }
   if ($missing.Count -gt 0) {
-    Write-Host 'ERROR: required A-stage suite files are missing:' -ForegroundColor Red
+    Write-Host 'ERROR: required R09Q suite files are missing:' -ForegroundColor Red
     $missing | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }
     exit 1
   }
