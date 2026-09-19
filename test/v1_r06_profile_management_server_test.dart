@@ -21,7 +21,7 @@ void main() {
   late String updateRpc;
 
   setUpAll(() {
-    migration = File(_migrationPath).readAsStringSync();
+    migration = File(_migrationPath).readAsStringSync().replaceAll('\r\n', '\n');
     readRpc = _functionBody(
       migration,
       'get_managed_business_profile',
