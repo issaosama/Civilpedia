@@ -74,14 +74,14 @@ Write this header near the top:
 ROADMAP_VERSION: 1
 ROADMAP_AUTHORITY: OWNER + CHATGPT ARCHITECT
 PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
-CURRENT_PHASE_ID: V1-R09Q
-CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
-LAST_CLOSED_PHASE_ID: V1-R09
-LAST_CLOSED_COMMIT: c7702a6
+CURRENT_PHASE_ID: V1-R10
+CURRENT_PHASE_TITLE: UI/UX & Core App Experience
+LAST_CLOSED_PHASE_ID: V1-R09Q
+LAST_CLOSED_COMMIT: 6b4bf99
 ROADMAP_STATUS: ACTIVE
 R09Q-A_STATUS: CLOSED / ACCEPTED
 R09Q-B_STATUS: CLOSED / ACCEPTED
-R09Q-C_STATUS: CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
+R09Q-C_STATUS: CLOSED / ACCEPTED
 
 ---
 
@@ -98,8 +98,8 @@ R09Q-C_STATUS: CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
 | V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R08 | Auth + Profile Production Completion | CLOSED | Codex | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R09 | Offline / Connectivity / Error Hardening | CLOSED | Big Pickle | TBD BY ARCHITECT | MEDIUM | c7702a6 |
-| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | CURRENT — R09Q-A CLOSED / R09Q-B CLOSED / R09Q-C AUTHORIZED | Big Pickle (A) / Codex + Sol High (B) | GitHub Copilot Reviewer (A) / Copilot or independent strong reviewer (B) | MEDIUM | — |
-| V1-R10 | UI/UX & Core App Experience | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
+| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | CLOSED / ACCEPTED | Big Pickle (A) / Codex + Sol High (B) | GitHub Copilot Reviewer (A) / Copilot or independent strong reviewer (B) | MEDIUM | 6b4bf99 |
+| V1-R10 | UI/UX & Core App Experience | CURRENT / AUTHORIZED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R12 | Tools / Calculators Final Engineering QA | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R13 | Encyclopedia / Content Studio Finalization | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -120,11 +120,11 @@ Rules for this table:
 
 # CURRENT PHASE CONTROL
 
-CURRENT_PHASE_ID: V1-R09Q
-CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
-CURRENT_PHASE_STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C CURRENT / AUTHORIZED
-CURRENT_PHASE_CONTRACT: V1-R09Q-CONTRACT-v1
-IMPLEMENTATION_AUTHORIZED: YES for R09Q-C formal closure only; R09Q-A and R09Q-B CLOSED
+CURRENT_PHASE_ID: V1-R10
+CURRENT_PHASE_TITLE: UI/UX & Core App Experience
+CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — IMPLEMENTATION BEGINS ONLY AFTER ARCHITECT CONTRACT FREEZE
+CURRENT_PHASE_CONTRACT: AWAITING V1-R10 CONTRACT FREEZE
+IMPLEMENTATION_AUTHORIZED: NO until Architect issues V1-R10 contract freeze
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
@@ -807,9 +807,9 @@ No fake success.
 
 ## V1-R09Q — Post-R09 Cross-Cutting Quality Gate
 
-STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C
-CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY (see V1-R09Q Contract Freeze Record,
-R09Q-A Formal Closure Record, and R09Q-B Formal Closure Record below)
+STATUS: CLOSED / ACCEPTED (see V1-R09Q Final Closure Record, V1-R09Q Contract
+Freeze Record, R09Q-A Formal Closure Record, and R09Q-B Formal Closure Record
+below)
 
 Contract:
 
@@ -1515,13 +1515,12 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R09Q — Post-R09 Cross-Cutting Quality Gate (CURRENT — R09Q-A CLOSED /
-ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C CURRENT / AUTHORIZED — FORMAL
-CLOSURE ONLY)
+V1-R10 — UI/UX & Core App Experience (CURRENT / AUTHORIZED — IMPLEMENTATION
+BEGINS ONLY AFTER ARCHITECT CONTRACT FREEZE)
 
-NEXT AFTER R09Q FULLY CLOSES:
+NEXT AFTER V1-R10 CLOSES:
 
-V1-R10 — UI/UX & Core App Experience (QUEUED after V1-R09Q)
+V1-R11 — Projects Production Pass (QUEUED after V1-R10)
 
 No other phase may be selected by inference.
 
@@ -2391,8 +2390,11 @@ Live state (ONE authoritative live roadmap state):
   P2-E:    CLOSED
   P2-F:    CLOSED
   P2-G:    CLOSED
-  V1-R09Q: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B CLOSED / ACCEPTED; R09Q-C CURRENT / AUTHORIZED
-  V1-R10:  QUEUED after V1-R09Q
+  V1-R09Q: CLOSED / ACCEPTED
+  R09Q-A:  CLOSED / ACCEPTED
+  R09Q-B:  CLOSED / ACCEPTED
+  R09Q-C:  CLOSED / ACCEPTED
+  V1-R10:  CURRENT / AUTHORIZED
 
 V1-R09Q boundary (preserved):
   - V1-R09Q is the NEXT cross-cutting quality gate (CI baseline; selected
@@ -2521,13 +2523,13 @@ Live state (ONE authoritative live roadmap state):
   V1-R09:  CLOSED
   R09Q-A:  CLOSED / ACCEPTED
   R09Q-B:  CLOSED / ACCEPTED
-  R09Q-C:  CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
-  V1-R09Q: CURRENT
-  V1-R10:  QUEUED AFTER R09Q
+  R09Q-C:  CLOSED / ACCEPTED
+  V1-R09Q: CLOSED / ACCEPTED
+  V1-R10:  CURRENT / AUTHORIZED
 
-R09Q-A and R09Q-B are formally closed. R09Q-C is now authorized as the final
-formal closure slice; it must NOT introduce production code, tests, migrations,
-security changes, UI work, or R10 implementation.
+R09Q-A, R09Q-B, and R09Q-C are formally closed. V1-R09Q is CLOSED / ACCEPTED.
+V1-R10 is now CURRENT / AUTHORIZED and awaits the Architect's V1-R10 contract
+freeze before implementation begins.
 Owner approval: PENDING OWNER STAGING (user is the sole Git owner).
 
 ---
@@ -2642,9 +2644,9 @@ Live state (ONE authoritative live roadmap state):
   V1-R09:    CLOSED / ACCEPTED
   R09Q-A:    CLOSED / ACCEPTED
   R09Q-B:    CLOSED / ACCEPTED
-  R09Q-C:    CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
-  V1-R09Q:   CURRENT
-  V1-R10:    QUEUED AFTER R09Q
+  R09Q-C:    CLOSED / ACCEPTED
+  V1-R09Q:   CLOSED / ACCEPTED
+  V1-R10:    CURRENT / AUTHORIZED
 
 ---
 
@@ -2698,16 +2700,16 @@ Live state (ONE authoritative live roadmap state):
   V1-R09:    CLOSED / ACCEPTED
   R09Q-A:    CLOSED / ACCEPTED
   R09Q-B:    CLOSED / ACCEPTED
-  R09Q-C:    CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
-  V1-R09Q:   CURRENT
-  V1-R10:    QUEUED AFTER R09Q
+  R09Q-C:    CLOSED / ACCEPTED
+  V1-R09Q:   CLOSED / ACCEPTED
+  V1-R10:    CURRENT / AUTHORIZED
 
 ---
 
 ### R09Q-C Opening
 
 Slice: R09Q-C — Formal Closure Only
-Status: CURRENT / AUTHORIZED
+Status: CLOSED / ACCEPTED
 Contract: V1-R09Q-CONTRACT-v1
 
 R09Q-C purpose:
@@ -2717,13 +2719,8 @@ R09Q-C purpose:
 - formally close V1-R09Q;
 - authorize transition to V1-R10.
 
-R09Q-C must NOT introduce:
-- production code;
-- tests;
-- migrations;
-- security changes;
-- UI work;
-- V1-R10 implementation.
+R09Q-C did NOT introduce production code, tests, migrations, security changes,
+UI work, or V1-R10 implementation.
 
 Implementation authorized: YES — for documentation/closure only.
 Preferred agent: Big Pickle.
@@ -2732,6 +2729,95 @@ Live state (ONE authoritative live roadmap state):
   V1-R09:    CLOSED / ACCEPTED
   R09Q-A:    CLOSED / ACCEPTED
   R09Q-B:    CLOSED / ACCEPTED
-  R09Q-C:    CURRENT / AUTHORIZED — FORMAL CLOSURE ONLY
-  V1-R09Q:   CURRENT
-  V1-R10:    QUEUED AFTER R09Q
+  R09Q-C:    CLOSED / ACCEPTED
+  V1-R09Q:   CLOSED / ACCEPTED
+  V1-R10:    CURRENT / AUTHORIZED
+
+---
+
+### V1-R09Q Final Closure Record
+
+Phase: V1-R09Q — Post-R09 Cross-Cutting Quality Gate
+Previous status: CURRENT
+New status: CLOSED / ACCEPTED — V1-R09Q FORMALLY CLOSED
+Contract: V1-R09Q-CONTRACT-v1 + ARCHITECT ADDENDUM A — CI ACTIVATION SEQUENCING
+Closure commit: 6b4bf99ad9a8bfe1583cb02760bf40b5e037fd08
+Owner approval: PENDING OWNER STAGING (user is the sole Git owner)
+
+R09Q-A accepted:
+- first repository GitHub Actions Flutter quality workflow established;
+- `tool/quality_gate.ps1` selected-suite SSOT established;
+- cross-feature smoke journeys added;
+- sequential fail-fast 17-suite A-stage gate green locally and hosted.
+
+R09Q-B accepted:
+- implementation commit `8a1f38694165b535fad6fd8b1924464a1dcb1f9c`;
+- independent security review PASS;
+- migration lint 5/5 PASS;
+- static security matrix 10/10 PASS;
+- local `supabase db reset` PASS (migrations 00001–00021, seed applied);
+- runtime pgTAP security smoke 12/12 PASS;
+- representative enforcement verified for Profile, Business/Application, Staff,
+  and protected SECURITY DEFINER RPC;
+- no unauthorized success; no security defects;
+- permanent quality gate expanded to 19 selected suites;
+- local final quality gate 19/19 PASS;
+- hosted GitHub Actions `selected-cross-cutting-suites` SUCCESS on commit
+  `8a1f386`.
+
+Unresolved findings:
+- HIGH: none
+- MEDIUM: none
+- LOW: Node.js 20 deprecation / GitHub Actions forced Node.js 24 annotation —
+  NON-BLOCKING TOOLING NOTE.
+
+R09Q technical invariants surviving into V1-R10:
+- 19-suite permanent fast quality gate;
+- fail-fast sequential execution;
+- migration lint;
+- static security matrix;
+- source-controlled `supabase/seed.sql`;
+- local reproducibility evidence;
+- no `service_role` in client/test paths;
+- representative runtime security smoke artifact retained;
+- no remote DB dependency in hosted fast CI.
+
+Live state (ONE authoritative live roadmap state):
+  V1-R09:    CLOSED / ACCEPTED
+  R09Q-A:    CLOSED / ACCEPTED
+  R09Q-B:    CLOSED / ACCEPTED
+  R09Q-C:    CLOSED / ACCEPTED
+  V1-R09Q:   CLOSED / ACCEPTED
+  V1-R10:    CURRENT / AUTHORIZED
+
+---
+
+### V1-R10 Opening
+
+Phase: V1-R10 — UI/UX & Core App Experience
+Status: CURRENT / AUTHORIZED
+Previous status: QUEUED after V1-R09Q
+
+V1-R10 is the PRIMARY V1 UI/UX / design-system phase. It defines the final V1
+visual direction and core app experience before later major features
+(V1-R11/V1-R12/V1-R13) are built.
+
+Implementation authorized: NO until ChatGPT Architect issues the V1-R10
+Contract Freeze / implementation prompt.
+
+Primary: Big Pickle.
+
+Architect-defined sub-phases (preserved from V1-R10 roadmap section):
+- R10.1 — Visual Direction Freeze
+- R10.2 — Design System
+- R10.3 — Core Screen Redesign / Harmonization
+- R10.4 — Responsive / Locale / Theme Hardening
+- R10.5 — Visual QA / UX Regression
+
+UI FREEZE PRINCIPLE (post-R10):
+- polish and small consistency fixes remain allowed;
+- wholesale navigation, typography, or layout-philosophy redesigns require
+  Architect decision.
+
+Next after V1-R10 closes:
+  V1-R11 — Projects Production Pass (QUEUED)
