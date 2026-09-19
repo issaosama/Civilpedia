@@ -77,8 +77,11 @@ PRODUCT_TARGET: PRODUCTION-GRADE CIVILPEDIA V1
 CURRENT_PHASE_ID: V1-R09Q
 CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
 LAST_CLOSED_PHASE_ID: V1-R09
-LAST_CLOSED_COMMIT: 91e1625
+LAST_CLOSED_COMMIT: c7702a6
 ROADMAP_STATUS: ACTIVE
+R09Q-A_STATUS: CLOSED / ACCEPTED
+R09Q-B_STATUS: NEXT / AUTHORIZABLE
+R09Q-C_STATUS: LOCKED — FORMAL CLOSURE ONLY AFTER B
 
 ---
 
@@ -95,7 +98,7 @@ ROADMAP_STATUS: ACTIVE
 | V1-R07 | Staff / Admin Operations Foundation | CLOSED | TBD BY ARCHITECT | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R08 | Auth + Profile Production Completion | CLOSED | Codex | TBD BY ARCHITECT | HIGH | PENDING OWNER COMMIT |
 | V1-R09 | Offline / Connectivity / Error Hardening | CLOSED | Big Pickle | TBD BY ARCHITECT | MEDIUM | c7702a6 |
-| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | CURRENT — QUALITY CONTRACT FROZEN | Big Pickle (A) / Codex + Sol High (B) | GitHub Copilot Reviewer (A) / Copilot or independent strong reviewer (B) | MEDIUM | — |
+| V1-R09Q | Post-R09 Cross-Cutting Quality Gate | CURRENT — R09Q-A CLOSED / R09Q-B AUTHORIZABLE | Big Pickle (A) / Codex + Sol High (B) | GitHub Copilot Reviewer (A) / Copilot or independent strong reviewer (B) | MEDIUM | — |
 | V1-R10 | UI/UX & Core App Experience | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R11 | Projects Production Pass | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
 | V1-R12 | Tools / Calculators Final Engineering QA | QUEUED | Big Pickle | TBD BY ARCHITECT | MEDIUM | — |
@@ -119,9 +122,9 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R09Q
 CURRENT_PHASE_TITLE: Post-R09 Cross-Cutting Quality Gate
-CURRENT_PHASE_STATUS: CURRENT — QUALITY CONTRACT FROZEN
+CURRENT_PHASE_STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B NEXT / AUTHORIZABLE
 CURRENT_PHASE_CONTRACT: V1-R09Q-CONTRACT-v1
-IMPLEMENTATION_AUTHORIZED: NO
+IMPLEMENTATION_AUTHORIZED: NO for R09Q-B until Architect checkpoint; R09Q-A CLOSED
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
@@ -804,8 +807,8 @@ No fake success.
 
 ## V1-R09Q — Post-R09 Cross-Cutting Quality Gate
 
-STATUS: CURRENT — QUALITY CONTRACT FROZEN (see V1-R09Q Contract Freeze Record
-below)
+STATUS: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B NEXT / AUTHORIZABLE (see
+V1-R09Q Contract Freeze Record and R09Q-A Formal Closure Record below)
 
 Contract:
 
@@ -1511,10 +1514,10 @@ Record them in this file before implementation.
 
 CURRENT:
 
-V1-R09Q — Post-R09 Cross-Cutting Quality Gate (CURRENT — QUALITY CONTRACT
-FROZEN; IMPLEMENTATION_AUTHORIZED: NO until Architect checkpoint)
+V1-R09Q — Post-R09 Cross-Cutting Quality Gate (CURRENT — R09Q-A CLOSED /
+ACCEPTED; R09Q-B NEXT / AUTHORIZABLE; R09Q-C LOCKED until B closes)
 
-NEXT AFTER AUTHORIZATION AND SUCCESSFUL CLOSE:
+NEXT AFTER R09Q FULLY CLOSES:
 
 V1-R10 — UI/UX & Core App Experience (QUEUED after V1-R09Q)
 
@@ -2386,7 +2389,7 @@ Live state (ONE authoritative live roadmap state):
   P2-E:    CLOSED
   P2-F:    CLOSED
   P2-G:    CLOSED
-  V1-R09Q: NEXT / AUTHORIZABLE
+  V1-R09Q: CURRENT — R09Q-A CLOSED / ACCEPTED; R09Q-B NEXT / AUTHORIZABLE
   V1-R10:  QUEUED after V1-R09Q
 
 V1-R09Q boundary (preserved):
@@ -2514,8 +2517,128 @@ Git safety (this freeze):
 
 Live state (ONE authoritative live roadmap state):
   V1-R09:  CLOSED
-  V1-R09Q: CURRENT — QUALITY CONTRACT FROZEN (IMPLEMENTATION_AUTHORIZED: NO)
+  R09Q-A:  CLOSED / ACCEPTED
+  R09Q-B:  NEXT / AUTHORIZABLE
+  R09Q-C:  LOCKED — FORMAL CLOSURE ONLY AFTER B
+  V1-R09Q: CURRENT
   V1-R10:  QUEUED AFTER R09Q
 
-V1-R09Q is NOT marked implemented by this freeze.
+R09Q-A is formally closed; R09Q-B implementation is NOT authorized until the
+Architect checkpoint. R09Q-C remains locked until R09Q-B closes.
 Owner approval: PENDING OWNER STAGING (user is the sole Git owner).
+
+---
+
+### R09Q-A Formal Closure Record
+
+Slice: R09Q-A — CI + Cross-Feature Smoke
+Status: CLOSED / ACCEPTED
+Contract: V1-R09Q-CONTRACT-v1 + ARCHITECT ADDENDUM A — CI ACTIVATION SEQUENCING
+Closure commit: c2b5c006b78398558b1aefc50cd71f6f97cdc637
+
+R09Q-A delivered:
+- first repository GitHub Actions Flutter quality workflow
+  (`.github/workflows/flutter_quality.yml`);
+- deterministic PowerShell quality-gate script (`tool/quality_gate.ps1`);
+- sequential one-suite-at-a-time execution;
+- fail-fast behavior;
+- hard failure for missing required suite;
+- no analyzer/format/build/Supabase in the required fast A-stage gate;
+- pinned Flutter 3.32.8 stable;
+- fresh CI `flutter pub get`;
+- cross-feature recovered-auth smoke (Journey A);
+- cross-feature transport-flip smoke (Journey B);
+- durable R06 server-test reconciliation (removed stale live-roadmap coupling);
+- no production Flutter changes;
+- no Supabase/backend changes.
+
+Implementation trail:
+- Initial R09Q-A implementation:
+  c460a69d91c7fbcc992ea0226a65d7e51f94624e
+  `ci(r09q): establish cross-cutting Flutter quality gate`
+- Hosted CI then exposed three historical Windows line-ending-sensitive
+  server-source tests. Architect-authorized test/evidence corrections:
+  - R03: 91da3b905d81a403607e52ce4312f4e7e52769e9
+    `test(r09q): normalize R03 migration line endings`
+  - R06: 87f727592919e19521756008277a8e2e2a0a7ef7
+    `test(r09q): normalize R06 migration line endings`
+  - R07: c2b5c006b78398558b1aefc50cd71f6f97cdc637
+    `test(r09q): normalize R07 migration line endings`
+- Each correction normalizes CRLF -> LF at the test source-read seam only, does
+  NOT change migrations, does NOT change production, and does NOT weaken
+  security assertions.
+
+Local acceptance evidence:
+- R09Q-A smoke suite: 2/2 PASS
+- R06 reconciled suite: 15/15 PASS
+- R03 after hosted correction: 21/21 PASS
+- R06 after hosted correction: 15/15 PASS
+- R07 after hosted correction: 28/28 PASS
+- Complete A-stage quality gate: 17 selected suites / 17 PASS / 0 FAIL
+
+Independent review:
+- Initial independent review: FAIL — one MEDIUM stale R06 roadmap coupling.
+- Surgical correction: accepted after final micro-review.
+- R03 hosted correction: independent micro-review PASS.
+- R06 hosted correction: independent micro-review PASS.
+- R07 hosted correction: independent micro-review PASS.
+- Reviewer shell was unavailable for those reviews; independent source/diff
+  inspection supplied review evidence and implementer shell supplied local
+  execution evidence. No independent test execution is claimed.
+
+Hosted CI evidence:
+- Repository: Civilpedia
+- Workflow: flutter-quality
+- Trigger: push to main
+- Commit: c2b5c006b78398558b1aefc50cd71f6f97cdc637
+- Run: #4
+- Result: SUCCESS
+- Job: selected-cross-cutting-suites — SUCCESS
+- The permanent R09Q-A selected gate completed green under GitHub-hosted
+  windows-latest. This satisfies the frozen formal-closure requirement that
+  hosted CI be green.
+
+Hosted failure history (test/evidence defects only; NOT production/migration
+/security defects):
+- Hosted run #1: R03 historical migration-source assertion failed due LF vs CRLF.
+- Hosted run #2: R06 historical migration-source assertions failed due LF vs CRLF.
+- Hosted run #3: R07 historical migration-source assertion failed due LF vs CRLF.
+- Each was corrected narrowly at the test source-read seam.
+- Final hosted run #4: SUCCESS.
+
+Tooling note:
+- Final hosted run contains a non-blocking GitHub Actions warning about Node.js
+  20 deprecation / action runtime moved to Node.js 24.
+- Severity: LOW / NON-BLOCKING TOOLING NOTE.
+- The workflow completed SUCCESSFULLY.
+- No R09Q-A correction required; no CI modification performed in this closure.
+
+Addendum A state preserved:
+- R09Q-A permanent gate contains the authorized A-stage suite list (17 suites).
+- R09Q-B remains responsible for creating:
+  - `test/v1_r09q_migration_lint_test.dart`
+  - `test/v1_r09q_security_matrix_test.dart`
+- R09Q-B is then authorized to modify ONLY `tool/quality_gate.ps1` to activate
+  those two suites into the FINAL R09Q permanent CI gate.
+- No test may remain silently optional at R09Q final closure.
+
+R09Q-B unlock:
+- Status after this closure checkpoint: NEXT / AUTHORIZABLE.
+- Purpose: Supabase Reproducibility + Security Evidence.
+- Preferred implementer: Codex / GPT-5.6 Sol High.
+- R09Q-B remains responsible for:
+  - `supabase/seed.sql`
+  - migration lint
+  - static security matrix
+  - local Supabase CLI/Docker probe
+  - local `supabase db reset`
+  - representative positive/negative runtime RLS/RPC security smoke
+  - activation of its two CI-safe tests in `tool/quality_gate.ps1`
+
+Live state (ONE authoritative live roadmap state):
+  V1-R09:    CLOSED / ACCEPTED
+  R09Q-A:    CLOSED / ACCEPTED
+  R09Q-B:    NEXT / AUTHORIZABLE
+  R09Q-C:    LOCKED — FORMAL CLOSURE ONLY AFTER B
+  V1-R09Q:   CURRENT
+  V1-R10:    QUEUED AFTER R09Q
