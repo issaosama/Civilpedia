@@ -26,7 +26,7 @@ void main() {
   late String detail;
 
   setUpAll(() {
-    migration = File(_migrationPath).readAsStringSync();
+    migration = File(_migrationPath).readAsStringSync().replaceAll('\r\n', '\n');
     capabilities = _function(
       migration,
       'get_staff_application_capabilities',
