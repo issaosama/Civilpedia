@@ -6,12 +6,15 @@ import 'core/theme/app_theme.dart';
 import 'core/services/theme_provider.dart';
 import 'core/services/language_provider.dart';
 import 'core/services/logger_service.dart';
+import 'features/splash/presentation/splash_screen.dart';
 
 import 'routes/app_router.dart';
 import 'localization/ar.dart';
 
 class CivilpediaApp extends StatelessWidget {
-  const CivilpediaApp({super.key});
+  const CivilpediaApp({required this.startupReady, super.key});
+
+  final Future<void> startupReady;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +45,13 @@ class CivilpediaApp extends StatelessWidget {
 
             return const Locale('ar');
           },
+          builder: (context, child) => ProductionSplashGate(
+            startupReady: startupReady,
+            currentRoutePath: () =>
+                appRouter.routerDelegate.currentConfiguration.uri.path,
+            onDestinationResolved: appRouter.go,
+            child: child ?? const SizedBox.expand(),
+          ),
         );
       },
     );

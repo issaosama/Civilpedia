@@ -83,14 +83,16 @@ void _runApp() {
     onAccountBoundReset: resetAccountBoundState,
     onSessionRefresh: AuthRefreshListenable.instance.refresh,
   );
-  auth.restoreSession();
+  final authBootstrap = auth.restoreSession();
 
   userProfileProvider = UserProfileProvider(
     repository: AppDependencies.userProfileRepo,
     cloudProfileGateway: AppDependencies.cloudProfileGateway,
     regionPreferenceGateway: AppDependencies.regionPreferenceGateway,
     auth: auth,
-  )..loadProfile();
+  );
+  final profileBootstrap = userProfileProvider.loadProfile();
+  final startupReady = Future.wait<void>([authBootstrap, profileBootstrap]);
 
   businessApplicationProvider = BusinessApplicationProvider(
     gateway: AppDependencies.businessApplicationGateway,
@@ -168,7 +170,7 @@ void _runApp() {
         ),
       ],
 
-      child: CivilpediaApp(),
+      child: CivilpediaApp(startupReady: startupReady),
     ),
   );
 }
