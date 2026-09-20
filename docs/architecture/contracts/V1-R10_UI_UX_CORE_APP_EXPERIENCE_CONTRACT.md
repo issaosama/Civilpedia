@@ -4,13 +4,14 @@ PHASE: V1-R10
 TITLE: UI/UX & Core App Experience
 CONTRACT: V1-R10-CONTRACT-v1
 STATUS: FROZEN — ARCHITECT ACCEPTED
-CURRENT AUTHORIZED SLICE: V1-R10.3 — APP SHELL, NAVIGATION & GLOBAL STATES
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.3 ONLY
-MODE: CONTRACT FROZEN — R10.3 IMPLEMENTATION
+CURRENT AUTHORIZED SLICE: V1-R10.4-A — HOME PRODUCTION VISUAL PASS
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.4-A ONLY
+MODE: CONTRACT FROZEN — R10.4-A IMPLEMENTATION
 R10.1: CLOSED / ACCEPTED
 R10.2: CLOSED / ACCEPTED — THEME + SHARED UI FOUNDATION
-R10.3: CURRENT / AUTHORIZED
-R10.4 THROUGH R10.7: LOCKED
+R10.3: CLOSED / ACCEPTED — APP SHELL, NAVIGATION & GLOBAL STATES
+R10.4-A: CURRENT / AUTHORIZED
+R10.4-B AND R10.5 THROUGH R10.7: LOCKED
 
 ---
 
@@ -753,18 +754,22 @@ No material contradictions remain unresolved.
 
 STATUS: FROZEN — ARCHITECT ACCEPTED
 
-CURRENT AUTHORIZED SLICE: V1-R10.3 — APP SHELL, NAVIGATION & GLOBAL STATES
+CURRENT AUTHORIZED SLICE: V1-R10.4-A — HOME PRODUCTION VISUAL PASS
 
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.3 ONLY
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.4-A ONLY
 
 R10.1: CLOSED / ACCEPTED
 
 R10.2: CLOSED / ACCEPTED — THEME + SHARED UI FOUNDATION
 
-R10.3: CURRENT / AUTHORIZED
+R10.3: CLOSED / ACCEPTED — APP SHELL, NAVIGATION & GLOBAL STATES
 
-R10.4 THROUGH R10.7: LOCKED. R10.4 may begin only after R10.3 is independently
-reviewed and CLOSED / ACCEPTED.
+R10.4-A: CURRENT / AUTHORIZED
+
+R10.4-B, Search, Saved, broader R10.4 propagation, and R10.5 THROUGH R10.7:
+LOCKED. Broader propagation may begin only after the R10.4-A Home baseline is
+rendered on an emulator/device, visually inspected, and accepted by the
+Architect/user.
 
 ### R10.2 closure evidence
 
@@ -782,42 +787,65 @@ reviewed and CLOSED / ACCEPTED.
   code 0, with no gate drift.
 - No unresolved R10.2 findings remain.
 
-### R10.3 authorization boundary
+### R10.3 closure evidence
 
-R10.3 may implement only its frozen scope:
+- Implementation: PASS.
+- Focused verification: 5 suites, 86 PASS / 0 FAIL.
+- Independent review: PASS.
+- Findings: HIGH none; MEDIUM none; LOW none.
+- Exactly five destinations preserved: Home, Encyclopedia, Tools, Projects,
+  and Directory.
+- Branch semantics, indexed-stack state retention, and double-back behavior
+  preserved.
+- Safe-area/inset behavior, responsive shell, RTL/LTR, and light/dark
+  presentation verified.
+- No router, startup/splash, or Home-composition semantic change.
+- No permanent 19-suite gate was required for this narrowly scoped shell-only
+  slice.
 
-- `AppShell` visual/chrome normalization;
-- five-item bottom-navigation presentation;
-- `CivilAppBar` adoption where in scope;
-- safe-area and shell-insets consistency;
-- global `TransportStatusBanner` and state presentation;
-- auth/ownership-conflict presentation alignment;
-- RTL/LTR navigation presentation;
-- light/dark shell presentation.
+### R10.4-A authorization boundary
 
-R10.3 MUST preserve existing routing semantics. It MUST NOT change route
-architecture, destination count, branch ownership, auth authority, redirect
-semantics, startup readiness, splash timing or animation, deep-link behavior,
-profile/onboarding precedence, calculator behavior, backend/Supabase/security,
-Home composition, or R11/R12/R13-owned functionality.
+R10.4-A may modify Home presentation and directly required Home-local/shared
+presentation pieces only. Authorized goals are:
 
-### Splash and startup protection
+- Home background and surface hierarchy;
+- header, signature search, and hero/featured presentation;
+- Quick Access and Engineering Tools preview/launcher presentation;
+- categories, section headers, spacing/rhythm, card consistency, and typography;
+- RTL/LTR, light/dark, responsive Home composition, and accessibility;
+- root-cause correction of known Home fixed-height overflows.
 
-Any R10.3 change touching app startup, router integration, `AppShell`, auth
-redirect presentation, or splash-adjacent navigation MUST preserve
-`animationComplete AND startupReady`, auth restoration readiness, one-time
-profile bootstrap, deep-link/current-route preservation, no forced
-`appRouter.go(...)` after the active route leaves `/splash`, no double
-navigation, cold-launch-only splash, and no splash replay on resume.
+R10.4-A uses the existing R10.2 theme tokens and the frozen Amber
+`#FE9E03`, Logo Blue `#0155DA`, Deep Technical Blue `#063284`, and warm-neutral
+foundation. It MUST NOT duplicate a hardcoded brand system.
 
-If implementation requires changing any of those semantics, STOP with:
+Home remains a single-column phone experience with adaptive medium/expanded
+layouts. Amber remains the signature rather than dominating the UI; Blue is
+technical/supporting; most surfaces remain neutral. Engineering Tools remains
+a preview/launcher and tool taps continue to dedicated tool screens.
 
-`R10.3 ROUTING/STARTUP SEMANTIC CHANGE — ARCHITECT REVIEW REQUIRED`
+R10.4-A MUST NOT change routing architecture, `AppShell` branch semantics,
+bottom destination count, startup/splash, deep links, auth, profile bootstrap,
+backend/Supabase, calculator formulas, project logic, Encyclopedia rendering
+semantics, or R11/R12/R13-owned behavior.
 
-### Home checkpoint
+If Home implementation unexpectedly requires semantic router/startup/auth
+changes, STOP with:
 
-Home redesign remains locked. Known legacy Home fixed-height overflows remain
-deferred to R10.4-A.
+`R10.4-A SEMANTIC SCOPE EXPANSION — ARCHITECT REVIEW REQUIRED`
+
+### Home visual checkpoint
+
+R10.4-A produces the first real production UI baseline and is not fully
+accepted from tests alone. After implementation, the real app MUST run on an
+emulator/device, Home MUST be visually inspected, a Light-mode screenshot MUST
+be captured, and a Dark-mode screenshot SHOULD be captured where practical.
+Architect/user visual approval and any required correction pass precede broader
+R10.4 propagation.
+
+Known Home fixed-height overflows are now authorized for root-cause correction;
+brittle fixed heights should yield to content-flexible, text-scale-resilient
+layout rather than clipping or accidental truncation.
 
 The accepted execution checkpoint remains:
 

@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -100,9 +100,9 @@ const List<ShellDestination> kShellDestinations = [
 /// `HomeMainScreen` for `/home`) - never to this widget.
 ///
 /// Single source of truth for the floating bottom-navigation content
-/// obstruction. The same metrics drive both the nav bar layout ([_navHeight],
-/// [_navBottomMargin]) and the [ShellContentInsets] published to branch
-/// content so screens can clear it without knowing any geometry details.
+/// obstruction. The nav metrics and the current device safe area drive the
+/// [ShellContentInsets] published to branch content so screens can clear the
+/// shell without knowing any geometry details.
 class AppShell extends StatefulWidget {
   /// Height of the floating bottom-navigation container.
   static const double _navHeight = 70;
@@ -110,13 +110,12 @@ class AppShell extends StatefulWidget {
   /// Bottom margin of the floating bottom-navigation container.
   static const double _navBottomMargin = 16;
 
-  /// Persistent content obstruction from the screen bottom caused by the
-  /// floating bottom navigation bar: its height plus its bottom margin.
+  /// Minimum content obstruction from the screen bottom caused by the floating
+  /// bottom navigation bar: its height plus its standard bottom margin.
   ///
-  /// This does NOT include the device safe-area inset, which is handled
-  /// separately by each screen via `MediaQuery.paddingOf(context).bottom`.
-  static const double shellBottomObstruction =
-      _navHeight + _navBottomMargin;
+  /// At build time, a larger device safe-area inset replaces the standard
+  /// margin in the value published through [ShellContentInsets].
+  static const double shellBottomObstruction = _navHeight + _navBottomMargin;
   final StatefulNavigationShell navigationShell;
 
   const AppShell({super.key, required this.navigationShell});
@@ -182,6 +181,16 @@ class _AppShellState extends State<AppShell> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final currentIndex = widget.navigationShell.currentIndex;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final deviceBottomInset = MediaQuery.paddingOf(context).bottom;
+    final bottomObstruction =
+        AppShell._navHeight +
+        math.max(deviceBottomInset, AppShell._navBottomMargin);
+    final horizontalGutter = screenWidth < 600
+        ? 16.0
+        : screenWidth < 840
+        ? 24.0
+        : 32.0;
 
     return PopScope(
       canPop: !_isAtShellRoot,
@@ -193,11 +202,12 @@ class _AppShellState extends State<AppShell> {
         }
       },
       child: Scaffold(
+        backgroundColor: theme.scaffoldBackgroundColor,
         extendBody: true,
         body: SafeArea(
           bottom: false,
           child: ShellContentInsets(
-            bottomObstruction: AppShell.shellBottomObstruction,
+            bottomObstruction: bottomObstruction,
             child: Column(
               children: [
                 const TransportStatusBanner(),
@@ -206,45 +216,54 @@ class _AppShellState extends State<AppShell> {
             ),
           ),
         ),
-        bottomNavigationBar: Padding(
-          padding: EdgeInsets.fromLTRB(
-            16,
-            0,
-            16,
-            AppShell._navBottomMargin,
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
-                height: AppShell._navHeight,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkBottomNav.withValues(alpha: 0.85)
-                      : AppColors.surfaceWhite.withValues(alpha: 0.85),
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
-                  border: Border.all(
+        bottomNavigationBar: SafeArea(
+          top: false,
+          minimum: const EdgeInsets.only(bottom: AppShell._navBottomMargin),
+          child: Align(
+            heightFactor: 1,
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: horizontalGutter),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 760),
+                child: Container(
+                  key: const ValueKey('shell-bottom-navigation'),
+                  height: AppShell._navHeight,
+                  decoration: BoxDecoration(
                     color: isDark
-                        ? AppColors.darkBorder.withValues(alpha: 0.5)
-                        : AppColors.border.withValues(alpha: 0.5),
-                    width: 1,
+                        ? AppColors.darkSurfaceElevated
+                        : AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
+                    border: Border.all(
+                      color: isDark ? AppColors.darkBorder : AppColors.border,
+                      width: 1,
+                    ),
+                    boxShadow: isDark
+                        ? null
+                        : [
+                            BoxShadow(
+                              color: AppColors.textPrimary.withValues(
+                                alpha: 0.12,
+                              ),
+                              blurRadius: 24,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                   ),
-                  boxShadow: isDark
-                      ? null
-                      : DesignTokens.cardShadow(AppColors.cardShadow),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    for (var i = 0; i < kShellDestinations.length; i++)
-                      _buildNavItem(
-                        index: i,
-                        destination: kShellDestinations[i],
-                        theme: theme,
-                        currentIndex: currentIndex,
-                      ),
-                  ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusXl),
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < kShellDestinations.length; i++)
+                          _buildNavItem(
+                            index: i,
+                            destination: kShellDestinations[i],
+                            theme: theme,
+                            currentIndex: currentIndex,
+                          ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -262,56 +281,71 @@ class _AppShellState extends State<AppShell> {
   }) {
     final isSelected = currentIndex == index;
     final isDark = theme.brightness == Brightness.dark;
-    final activeColor = AppColors.primary;
+    final activeColor = isDark
+        ? AppColors.darkBrandAmber
+        : AppColors.brandAmberPressed;
+    final inactiveColor = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
+    final selectedContainer = isDark
+        ? AppColors.darkWarningSoft
+        : AppColors.brandAmberSoft;
+    final label = _navLabel(destination);
 
     return Expanded(
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          if (!isSelected) {
-            HapticFeedback.selectionClick();
-            widget.navigationShell.goBranch(index);
-          }
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          alignment: Alignment.center,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.primary.withValues(alpha: 0.12)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: label,
+        excludeSemantics: true,
+        child: InkWell(
+          key: ValueKey('shell-nav-item-$index'),
+          onTap: () {
+            if (!isSelected) {
+              HapticFeedback.selectionClick();
+              widget.navigationShell.goBranch(index);
+            }
+          },
+          child: SizedBox.expand(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedContainer(
+                  key: ValueKey('shell-nav-icon-container-$index'),
+                  duration: DesignTokens.durationFast,
+                  curve: DesignTokens.curveFast,
+                  width: 40,
+                  height: 32,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isSelected ? selectedContainer : Colors.transparent,
+                    borderRadius: BorderRadius.circular(
+                      DesignTokens.radiusIcon,
+                    ),
+                  ),
+                  child: Icon(
+                    isSelected ? destination.activeIcon : destination.icon,
+                    key: ValueKey('shell-nav-icon-$index'),
+                    color: isSelected ? activeColor : inactiveColor,
+                    size: 24,
+                  ),
                 ),
-                child: Icon(
-                  isSelected ? destination.activeIcon : destination.icon,
-                  color: isSelected
-                      ? activeColor
-                      : (isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary),
-                  size: 24,
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  key: ValueKey('shell-nav-label-$index'),
+                  maxLines: 1,
+                  overflow: TextOverflow.fade,
+                  softWrap: false,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontSize: 11,
+                    height: 1.3,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? activeColor : inactiveColor,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                _navLabel(destination),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? activeColor
-                      : (isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.textSecondary),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
