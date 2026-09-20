@@ -6,6 +6,7 @@ import '../../localization/en.dart';
 import '../services/connectivity_provider.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
+import '../theme/spacing.dart';
 
 /// One canonical non-blocking transport status surface.
 ///
@@ -41,8 +42,12 @@ class TransportStatusBanner extends StatelessWidget {
         final theme = Theme.of(context);
         final isDark = theme.brightness == Brightness.dark;
         final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-        final title = isArabic ? Ar.transportUnavailableTitle : En.transportUnavailableTitle;
-        final message = isArabic ? Ar.transportUnavailableMessage : En.transportUnavailableMessage;
+        final title = isArabic
+            ? Ar.transportUnavailableTitle
+            : En.transportUnavailableTitle;
+        final message = isArabic
+            ? Ar.transportUnavailableMessage
+            : En.transportUnavailableMessage;
         final accessibility = isArabic
             ? Ar.transportUnavailableAccessibility
             : En.transportUnavailableAccessibility;
@@ -52,20 +57,21 @@ class TransportStatusBanner extends StatelessWidget {
           label: accessibility,
           child: Container(
             width: double.infinity,
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            margin: const EdgeInsetsDirectional.fromSTEB(
+              AppSpacing.lg,
+              AppSpacing.sm,
+              AppSpacing.lg,
+              0,
+            ),
             padding: const EdgeInsets.symmetric(
-              horizontal: DesignTokens.radiusSm,
-              vertical: 10,
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
             ),
             decoration: BoxDecoration(
-              color: isDark
-                  ? AppColors.darkSurfaceElevated
-                  : AppColors.warning.withValues(alpha: 0.08),
+              color: isDark ? AppColors.darkWarningSoft : AppColors.warningSoft,
               borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
               border: Border.all(
-                color: isDark
-                    ? AppColors.darkBorder
-                    : AppColors.warning.withValues(alpha: 0.25),
+                color: isDark ? AppColors.darkWarning : AppColors.warning,
                 width: 1,
               ),
             ),
@@ -74,9 +80,9 @@ class TransportStatusBanner extends StatelessWidget {
                 Icon(
                   Icons.wifi_off_rounded,
                   size: 18,
-                  color: isDark ? AppColors.warning : AppColors.primaryDark,
+                  color: isDark ? AppColors.darkWarning : AppColors.warning,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,19 +90,16 @@ class TransportStatusBanner extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                        style: theme.textTheme.labelMedium?.copyWith(
                           color: isDark
                               ? AppColors.darkTextPrimary
                               : AppColors.mainText,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
                         message,
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: isDark
                               ? AppColors.darkTextSecondary
                               : AppColors.textSecondary,

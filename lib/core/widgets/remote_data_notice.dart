@@ -4,6 +4,7 @@ import '../../localization/ar.dart';
 import '../../localization/en.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_tokens.dart';
+import '../theme/spacing.dart';
 
 /// Typed presentation causes for remote data issues.
 ///
@@ -69,7 +70,9 @@ class RemoteDataNotice extends StatelessWidget {
       case RemoteDataCause.timeout:
         return isArabic ? Ar.noticeTimeout : En.noticeTimeout;
       case RemoteDataCause.serviceUnavailable:
-        return isArabic ? Ar.noticeServiceUnavailable : En.noticeServiceUnavailable;
+        return isArabic
+            ? Ar.noticeServiceUnavailable
+            : En.noticeServiceUnavailable;
       case RemoteDataCause.malformed:
         return isArabic ? Ar.noticeMalformed : En.noticeMalformed;
       case RemoteDataCause.permissionDenied:
@@ -133,24 +136,21 @@ class RemoteDataNotice extends StatelessWidget {
 
   Widget _buildCompact(BuildContext context, bool isDark) {
     final title = _localizedTitle(context);
+    final theme = Theme.of(context);
     return Semantics(
       container: true,
       label: title,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(
-          horizontal: DesignTokens.radiusSm,
-          vertical: 10,
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: isDark
-              ? AppColors.darkSurfaceElevated
-              : AppColors.warning.withValues(alpha: 0.08),
+          color: isDark ? AppColors.darkWarningSoft : AppColors.warningSoft,
           borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
           border: Border.all(
-            color: isDark
-                ? AppColors.darkBorder
-                : AppColors.warning.withValues(alpha: 0.25),
+            color: isDark ? AppColors.darkWarning : AppColors.warning,
             width: 1,
           ),
         ),
@@ -159,37 +159,40 @@ class RemoteDataNotice extends StatelessWidget {
             Icon(
               _iconForCause(),
               size: 18,
-              color: isDark ? AppColors.warning : AppColors.primaryDark,
+              color: isDark ? AppColors.darkWarning : AppColors.warning,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.textPrimary,
                 ),
               ),
             ),
             if (onRetry != null) ...[
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Semantics(
                 button: true,
                 label: _localizedRetryAccessibility(context),
                 child: TextButton(
                   onPressed: onRetry,
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.xs,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: Text(
                     _localizedRetry(context),
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? AppColors.primary : AppColors.primaryDark,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: isDark
+                          ? AppColors.darkBrandBlue
+                          : AppColors.brandBlue,
                     ),
                   ),
                 ),
@@ -203,32 +206,35 @@ class RemoteDataNotice extends StatelessWidget {
 
   Widget _buildNoData(BuildContext context, bool isDark) {
     final title = _localizedTitle(context);
+    final theme = Theme.of(context);
     return Semantics(
       container: true,
       label: title,
       child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(DesignTokens.radiusMd),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 _iconForCause(),
                 size: 40,
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.darkTextPrimary : AppColors.mainText,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: isDark
+                      ? AppColors.darkTextPrimary
+                      : AppColors.mainText,
                 ),
               ),
               if (onRetry != null) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.lg),
                 Semantics(
                   button: true,
                   label: _localizedRetryAccessibility(context),
@@ -236,14 +242,6 @@ class RemoteDataNotice extends StatelessWidget {
                     onPressed: onRetry,
                     icon: const Icon(Icons.refresh_rounded, size: 18),
                     label: Text(_localizedRetry(context)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: AppColors.onPrimary,
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-                      ),
-                    ),
                   ),
                 ),
               ],

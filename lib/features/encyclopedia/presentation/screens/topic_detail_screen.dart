@@ -48,21 +48,25 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     String tr(String ar, String en) => isArabic ? ar : en;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.darkBackground : AppColors.pageBackground,
+      backgroundColor: isDark
+          ? AppColors.darkBackground
+          : AppColors.pageBackground,
       appBar: CivilAppBar(
         showBackButton: true,
-        backgroundColor:
-            isDark ? AppColors.darkBackground : AppColors.pageBackground,
-        foregroundColor:
-            isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+        backgroundColor: isDark
+            ? AppColors.darkBackground
+            : AppColors.pageBackground,
+        foregroundColor: isDark
+            ? AppColors.darkTextPrimary
+            : AppColors.textPrimary,
         actions: [_FavoriteButton(topicId: widget.topicId)],
       ),
       body: SafeArea(
         top: false,
         child: AsyncValueWidget(
           isLoading: provider.isLoading,
-          error: provider.hasContentFailure
+          error: provider.hasContentFailure ? true : null,
+          safeMessage: provider.hasContentFailure
               ? tr(Ar.encyclopediaContentError, En.encyclopediaContentError)
               : null,
           isEmpty: topic == null && !provider.hasContentFailure,
@@ -84,20 +88,20 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               );
             }
             return ErrorStateWidget(
-              message: tr(
+              safeMessage: tr(
                 Ar.encyclopediaContentError,
                 En.encyclopediaContentError,
               ),
-              onRetry:
-                  retry ?? () => provider.loadTopicDetail(widget.topicId),
+              onRetry: retry ?? () => provider.loadTopicDetail(widget.topicId),
             );
           },
           onEmpty: () => Center(
             child: Text(
               Ar.topicNotFound,
               style: TextStyle(
-                color:
-                    isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                color: isDark
+                    ? AppColors.darkTextSecondary
+                    : AppColors.textSecondary,
               ),
             ),
           ),
@@ -147,7 +151,12 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               ),
             ),
           if (_hasLegacyMetadata(topic))
-            ..._buildLegacySections(context, topic, isDark: isDark, startNumber: seq + 1),
+            ..._buildLegacySections(
+              context,
+              topic,
+              isDark: isDark,
+              startNumber: seq + 1,
+            ),
           if (topic.relatedToolRoutes.isNotEmpty)
             _buildRelatedToolsSection(context, topic, isDark: isDark),
           const SizedBox(height: AppSpacing.huge),
@@ -279,21 +288,34 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     int n = startNumber;
 
     if (_hasText(topic.siteNotes?.ar) || _hasText(topic.codeNotes?.ar)) {
-      widgets.add(_buildImportanceSection(context, topic, isDark: isDark, number: n++));
+      widgets.add(
+        _buildImportanceSection(context, topic, isDark: isDark, number: n++),
+      );
     }
 
     if (_localizedHasText(topic.beforeWork) ||
         _localizedHasText(topic.duringWork) ||
         _localizedHasText(topic.afterWork)) {
-      widgets.add(_buildLegacyAppSection(context, topic, isDark: isDark, number: n++));
+      widgets.add(
+        _buildLegacyAppSection(context, topic, isDark: isDark, number: n++),
+      );
     }
 
     if (topic.acceptRejectItems.any((item) => _hasText(item.criteriaAr))) {
-      widgets.add(_buildLegacyInspSection(context, topic, isDark: isDark, number: n++));
+      widgets.add(
+        _buildLegacyInspSection(context, topic, isDark: isDark, number: n++),
+      );
     }
 
     if (topic.commonMistakes.any((m) => _hasText(m.ar) || _hasText(m.en))) {
-      widgets.add(_buildCommonMistakesSection(context, topic, isDark: isDark, number: n++));
+      widgets.add(
+        _buildCommonMistakesSection(
+          context,
+          topic,
+          isDark: isDark,
+          number: n++,
+        ),
+      );
     }
 
     if (_hasText(topic.reportWording?.ar)) {
@@ -320,11 +342,26 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           isDark: isDark,
         ),
         if (_hasText(topic.beforeWork?.ar))
-          _buildSubSection(context, 'قبل العمل', topic.beforeWork!.ar, isDark: isDark),
+          _buildSubSection(
+            context,
+            'قبل العمل',
+            topic.beforeWork!.ar,
+            isDark: isDark,
+          ),
         if (_hasText(topic.duringWork?.ar))
-          _buildSubSection(context, 'أثناء العمل', topic.duringWork!.ar, isDark: isDark),
+          _buildSubSection(
+            context,
+            'أثناء العمل',
+            topic.duringWork!.ar,
+            isDark: isDark,
+          ),
         if (_hasText(topic.afterWork?.ar))
-          _buildSubSection(context, 'بعد العمل', topic.afterWork!.ar, isDark: isDark),
+          _buildSubSection(
+            context,
+            'بعد العمل',
+            topic.afterWork!.ar,
+            isDark: isDark,
+          ),
         const SizedBox(height: AppSpacing.sm),
       ],
     );
@@ -370,8 +407,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
   Widget _buildHeroSection(BuildContext context, EngineeringTopic topic) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final theme = Theme.of(context);
-    final category =
-        context.read<EncyclopediaProvider>().categoryLabel(topic.categoryId);
+    final category = context.read<EncyclopediaProvider>().categoryLabel(
+      topic.categoryId,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,20 +487,16 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     required bool isDark,
   }) {
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.xl,
-      ),
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'كلمات مفتاحية',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextMuted
-                      : AppColors.textMuted,
-                  fontWeight: FontWeight.w500,
-                ),
+              color: isDark ? AppColors.darkTextMuted : AppColors.textMuted,
+              fontWeight: FontWeight.w500,
+            ),
           ),
           const SizedBox(height: 6),
           Wrap(
@@ -486,9 +520,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
     required bool isDark,
   }) {
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.xl,
-      ),
+      padding: const EdgeInsetsDirectional.symmetric(horizontal: AppSpacing.xl),
       child: Wrap(
         spacing: 6,
         runSpacing: 4,
@@ -557,8 +589,10 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             url,
             fit: BoxFit.cover,
             width: double.infinity,
-            errorBuilder: (_, __, ___) =>
-                ImageUnavailableFallback(height: 200, borderRadius: DesignTokens.radiusSm),
+            errorBuilder: (_, __, ___) => ImageUnavailableFallback(
+              height: 200,
+              borderRadius: DesignTokens.radiusSm,
+            ),
           ),
         ),
       ),
@@ -591,7 +625,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             width: double.infinity,
             padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
             decoration: BoxDecoration(
-              color: isDark ? AppColors.darkSurfaceElevated : AppColors.surfaceWarm,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.surfaceWarm,
               borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
               border: BorderDirectional(
                 start: BorderSide(
@@ -604,9 +640,17 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (_hasText(topic.siteNotes?.ar))
-                  _buildImportanceItem(context, topic.siteNotes!.ar, isDark: isDark),
+                  _buildImportanceItem(
+                    context,
+                    topic.siteNotes!.ar,
+                    isDark: isDark,
+                  ),
                 if (_hasText(topic.codeNotes?.ar))
-                  _buildImportanceItem(context, topic.codeNotes!.ar, isDark: isDark),
+                  _buildImportanceItem(
+                    context,
+                    topic.codeNotes!.ar,
+                    isDark: isDark,
+                  ),
               ],
             ),
           ),
@@ -640,11 +684,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             child: Text(
               display,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary,
-                    height: 1.7,
-                  ),
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+                height: 1.7,
+              ),
             ),
           ),
         ],
@@ -671,21 +715,17 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           Text(
             title,
             style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary,
-                ),
+              fontWeight: FontWeight.w600,
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+            ),
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
             content,
             style: theme.textTheme.bodyMedium?.copyWith(
-                  color: isDark
-                      ? AppColors.darkTextPrimary
-                      : AppColors.textPrimary,
-                  height: 1.7,
-                ),
+              color: isDark ? AppColors.darkTextPrimary : AppColors.textPrimary,
+              height: 1.7,
+            ),
           ),
         ],
       ),
@@ -715,13 +755,13 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
           Padding(
             padding: const EdgeInsetsDirectional.only(top: 2),
             child: Icon(
-              isCritical ? Icons.check_circle_outline : Icons.radio_button_unchecked,
+              isCritical
+                  ? Icons.check_circle_outline
+                  : Icons.radio_button_unchecked,
               size: 18,
               color: isCritical
                   ? AppColors.error
-                  : (isDark
-                      ? AppColors.darkTextMuted
-                      : AppColors.textMuted),
+                  : (isDark ? AppColors.darkTextMuted : AppColors.textMuted),
             ),
           ),
           const SizedBox(width: 10),
@@ -738,8 +778,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   TextSpan(
                     text: criteria,
                     style: TextStyle(
-                      fontWeight:
-                          isCritical ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: isCritical
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                   if (limit != null && limit.isNotEmpty)
@@ -805,7 +846,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               color: EncyclopediaCardColors.mistakeBg,
               borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
               border: Border.all(
-                color: EncyclopediaCardColors.mistakeBorder.withValues(alpha: 0.15),
+                color: EncyclopediaCardColors.mistakeBorder.withValues(
+                  alpha: 0.15,
+                ),
               ),
             ),
             child: Column(
@@ -847,11 +890,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isDark
-                        ? AppColors.darkTextPrimary
-                        : AppColors.textPrimary,
-                    height: 1.6,
-                  ),
+                color: isDark
+                    ? AppColors.darkTextPrimary
+                    : AppColors.textPrimary,
+                height: 1.6,
+              ),
             ),
           ),
         ],
@@ -885,8 +928,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
               border: Border.all(
                 color: isDark ? AppColors.darkBorder : AppColors.border,
               ),
-              color:
-                  isDark ? AppColors.darkSurfaceElevated : AppColors.surfacePrimary,
+              color: isDark
+                  ? AppColors.darkSurfaceElevated
+                  : AppColors.surfacePrimary,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -894,11 +938,11 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                 Text(
                   wording,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? AppColors.darkTextPrimary
-                            : AppColors.textPrimary,
-                        height: 1.7,
-                      ),
+                    color: isDark
+                        ? AppColors.darkTextPrimary
+                        : AppColors.textPrimary,
+                    height: 1.7,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(
@@ -921,8 +965,9 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                         ),
                         decoration: BoxDecoration(
                           color: EncyclopediaCardColors.accentSoft,
-                          borderRadius:
-                              BorderRadius.circular(DesignTokens.radiusXs),
+                          borderRadius: BorderRadius.circular(
+                            DesignTokens.radiusXs,
+                          ),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -995,8 +1040,7 @@ class _TopicDetailScreenState extends State<TopicDetailScreen> {
                   ),
                   decoration: BoxDecoration(
                     color: EncyclopediaCardColors.accentSoft,
-                    borderRadius:
-                        BorderRadius.circular(DesignTokens.radiusXs),
+                    borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
                   ),
                   child: Text(
                     name,

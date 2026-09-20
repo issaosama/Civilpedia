@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/design_tokens.dart';
+import '../theme/spacing.dart';
 
 /// Canonical reusable surface primitive for the Civilpedia design system.
 ///
@@ -58,27 +59,33 @@ class CivilSurfaceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final effectiveColor = color ?? (warm ? colorScheme.surfaceContainer : colorScheme.surface);
+    final isDark = theme.brightness == Brightness.dark;
+    final effectiveColor =
+        color ?? (warm ? colorScheme.surfaceContainer : colorScheme.surface);
     final effectiveRadius = radius ?? DesignTokens.radiusMd;
-    final effectiveElevation = elevation ?? DesignTokens.elevation2;
+    final effectiveElevation =
+        elevation ??
+        (warm
+            ? (isDark ? DesignTokens.elevation0 : DesignTokens.elevation1)
+            : theme.cardTheme.elevation ??
+                  (isDark ? DesignTokens.elevation0 : DesignTokens.elevation2));
+    final showBorder = hasBorder || warm || isDark;
 
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(effectiveRadius),
-      side: hasBorder ? BorderSide(color: theme.dividerTheme.color ?? colorScheme.outline) : BorderSide.none,
+      side: showBorder
+          ? BorderSide(color: colorScheme.outlineVariant)
+          : BorderSide.none,
     );
 
     final borderRadius = BorderRadius.circular(effectiveRadius);
     final content = Padding(
-      padding: padding ?? const EdgeInsetsDirectional.all(16),
+      padding: padding ?? const EdgeInsetsDirectional.all(AppSpacing.lg),
       child: child,
     );
 
     final cardContent = onTap != null
-        ? InkWell(
-            onTap: onTap,
-            borderRadius: borderRadius,
-            child: content,
-          )
+        ? InkWell(onTap: onTap, borderRadius: borderRadius, child: content)
         : content;
 
     return Material(

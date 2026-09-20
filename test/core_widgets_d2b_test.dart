@@ -4,7 +4,7 @@ import 'package:civilpedia/core/widgets/civil_app_bar.dart';
 import 'package:civilpedia/core/widgets/civil_surface_card.dart';
 import 'package:civilpedia/core/widgets/search_bar_widget.dart';
 import 'package:civilpedia/core/widgets/section_header.dart';
-import 'package:civilpedia/localization/ar.dart';
+import 'package:civilpedia/localization/en.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,9 +13,7 @@ void main() {
     testWidgets('renders child', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: CivilSurfaceCard(child: Text('card content')),
-          ),
+          home: Scaffold(body: CivilSurfaceCard(child: Text('card content'))),
         ),
       );
 
@@ -23,17 +21,15 @@ void main() {
     });
 
     Finder cardMaterial() => find.descendant(
-          of: find.byType(CivilSurfaceCard),
-          matching: find.byType(Material),
-        );
+      of: find.byType(CivilSurfaceCard),
+      matching: find.byType(Material),
+    );
 
     testWidgets('defaults to theme surface color', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            body: CivilSurfaceCard(child: SizedBox()),
-          ),
+          home: const Scaffold(body: CivilSurfaceCard(child: SizedBox())),
         ),
       );
 
@@ -72,7 +68,10 @@ void main() {
 
       final materials = tester.widgetList<Material>(cardMaterial()).toList();
       expect(materials[0].color, AppTheme.darkTheme.colorScheme.surface);
-      expect(materials[1].color, AppTheme.darkTheme.colorScheme.surfaceContainer);
+      expect(
+        materials[1].color,
+        AppTheme.darkTheme.colorScheme.surfaceContainer,
+      );
     });
 
     testWidgets('tap callback is invoked', (tester) async {
@@ -96,9 +95,7 @@ void main() {
     testWidgets('uses canonical card radius and elevation', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: CivilSurfaceCard(child: SizedBox()),
-          ),
+          home: Scaffold(body: CivilSurfaceCard(child: SizedBox())),
         ),
       );
 
@@ -111,9 +108,7 @@ void main() {
     testWidgets('clips child to the card radius', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: CivilSurfaceCard(child: SizedBox()),
-          ),
+          home: Scaffold(body: CivilSurfaceCard(child: SizedBox())),
         ),
       );
 
@@ -126,9 +121,7 @@ void main() {
     testWidgets('renders title', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            appBar: CivilAppBar(title: Text('Page Title')),
-          ),
+          home: Scaffold(appBar: CivilAppBar(title: Text('Page Title'))),
         ),
       );
 
@@ -150,36 +143,44 @@ void main() {
       expect(find.byIcon(Icons.search), findsOneWidget);
     });
 
-    testWidgets('uses theme page background and onSurface foreground by default', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            appBar: CivilAppBar(title: Text('Page Title')),
+    testWidgets(
+      'uses theme page background and onSurface foreground by default',
+      (tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: const Scaffold(
+              appBar: CivilAppBar(title: Text('Page Title')),
+            ),
           ),
-        ),
-      );
+        );
 
-      final appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, AppTheme.lightTheme.scaffoldBackgroundColor);
-      expect(appBar.foregroundColor, AppTheme.lightTheme.colorScheme.onSurface);
-      expect(appBar.elevation, 0);
-    });
+        final appBar = tester.widget<AppBar>(find.byType(AppBar));
+        expect(
+          appBar.backgroundColor,
+          AppTheme.lightTheme.scaffoldBackgroundColor,
+        );
+        expect(
+          appBar.foregroundColor,
+          AppTheme.lightTheme.colorScheme.onSurface,
+        );
+        expect(appBar.elevation, 0);
+      },
+    );
 
     testWidgets('adapts to dark theme app bar colors', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: const Scaffold(
-            appBar: CivilAppBar(title: Text('Page Title')),
-          ),
+          home: const Scaffold(appBar: CivilAppBar(title: Text('Page Title'))),
         ),
       );
 
       final appBar = tester.widget<AppBar>(find.byType(AppBar));
-      expect(appBar.backgroundColor, AppTheme.darkTheme.scaffoldBackgroundColor);
+      expect(
+        appBar.backgroundColor,
+        AppTheme.darkTheme.scaffoldBackgroundColor,
+      );
       expect(appBar.foregroundColor, AppTheme.darkTheme.colorScheme.onSurface);
     });
 
@@ -225,10 +226,7 @@ void main() {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
-            appBar: CivilAppBar(
-              title: Text('No Back'),
-              showBackButton: false,
-            ),
+            appBar: CivilAppBar(title: Text('No Back'), showBackButton: false),
           ),
         ),
       );
@@ -255,16 +253,16 @@ void main() {
     testWidgets('divider is rendered by default', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            appBar: CivilAppBar(title: Text('Divided')),
-          ),
+          home: Scaffold(appBar: CivilAppBar(title: Text('Divided'))),
         ),
       );
 
       expect(find.byType(Divider), findsOneWidget);
     });
 
-    testWidgets('RTL layout places leading at the visual start', (tester) async {
+    testWidgets('RTL layout places leading at the visual start', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Directionality(
@@ -285,8 +283,12 @@ void main() {
 
       final leadingBox = tester.renderObject<RenderBox>(leadingFinder);
       final appBarBox = tester.renderObject<RenderBox>(find.byType(AppBar));
-      final leadingCenter = leadingBox.localToGlobal(leadingBox.size.center(Offset.zero));
-      final appBarCenter = appBarBox.localToGlobal(appBarBox.size.center(Offset.zero));
+      final leadingCenter = leadingBox.localToGlobal(
+        leadingBox.size.center(Offset.zero),
+      );
+      final appBarCenter = appBarBox.localToGlobal(
+        appBarBox.size.center(Offset.zero),
+      );
       // In RTL the leading widget should be on the right half of the AppBar.
       expect(leadingCenter.dx, greaterThan(appBarCenter.dx));
     });
@@ -308,11 +310,11 @@ void main() {
       expect(submitted, 'test query');
     });
 
-    testWidgets('uses TextAlign.start instead of hardcoded right', (tester) async {
+    testWidgets('uses TextAlign.start instead of hardcoded right', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: SearchBarWidget()),
-        ),
+        const MaterialApp(home: Scaffold(body: SearchBarWidget())),
       );
 
       final field = tester.widget<TextField>(find.byType(TextField));
@@ -335,25 +337,26 @@ void main() {
 
     testWidgets('uses radiusSearch token for border radius', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: SearchBarWidget()),
-        ),
+        const MaterialApp(home: Scaffold(body: SearchBarWidget())),
       );
 
       final field = tester.widget<TextField>(find.byType(TextField));
       final border = field.decoration!.border! as OutlineInputBorder;
-      expect(border.borderRadius, BorderRadius.circular(DesignTokens.radiusSearch));
+      expect(
+        border.borderRadius,
+        BorderRadius.circular(DesignTokens.radiusSearch),
+      );
     });
 
-    testWidgets('preserves default Ar.search hint', (tester) async {
+    testWidgets('uses the English default hint in English locale', (
+      tester,
+    ) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(body: SearchBarWidget()),
-        ),
+        const MaterialApp(home: Scaffold(body: SearchBarWidget())),
       );
 
       final field = tester.widget<TextField>(find.byType(TextField));
-      expect(field.decoration?.hintText, Ar.search);
+      expect(field.decoration?.hintText, En.search);
     });
   });
 
@@ -379,14 +382,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.lightTheme,
-          home: const Scaffold(
-            body: SectionHeader(title: 'Title'),
-          ),
+          home: const Scaffold(body: SectionHeader(title: 'Title')),
         ),
       );
 
       final text = tester.widget<Text>(find.text('Title'));
-      final style = text.style ?? DefaultTextStyle.of(tester.element(find.text('Title'))).style;
+      final style =
+          text.style ??
+          DefaultTextStyle.of(tester.element(find.text('Title'))).style;
       expect(style.color, AppTheme.lightTheme.colorScheme.onSurface);
     });
 
@@ -394,14 +397,14 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: AppTheme.darkTheme,
-          home: const Scaffold(
-            body: SectionHeader(title: 'Title'),
-          ),
+          home: const Scaffold(body: SectionHeader(title: 'Title')),
         ),
       );
 
       final text = tester.widget<Text>(find.text('Title'));
-      final style = text.style ?? DefaultTextStyle.of(tester.element(find.text('Title'))).style;
+      final style =
+          text.style ??
+          DefaultTextStyle.of(tester.element(find.text('Title'))).style;
       expect(style.color, AppTheme.darkTheme.colorScheme.onSurface);
     });
 
@@ -411,10 +414,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: Scaffold(
-              body: SectionHeader(
-                title: 'عنوان',
-                actionLabel: 'الكل',
-              ),
+              body: SectionHeader(title: 'عنوان', actionLabel: 'الكل'),
             ),
           ),
         ),
@@ -422,8 +422,12 @@ void main() {
 
       final titleBox = tester.renderObject<RenderBox>(find.text('عنوان'));
       final actionBox = tester.renderObject<RenderBox>(find.text('الكل'));
-      final titleCenter = titleBox.localToGlobal(titleBox.size.center(Offset.zero));
-      final actionCenter = actionBox.localToGlobal(actionBox.size.center(Offset.zero));
+      final titleCenter = titleBox.localToGlobal(
+        titleBox.size.center(Offset.zero),
+      );
+      final actionCenter = actionBox.localToGlobal(
+        actionBox.size.center(Offset.zero),
+      );
 
       // In RTL, the title (start) should be to the right of the action (end).
       expect(titleCenter.dx, greaterThan(actionCenter.dx));

@@ -17,13 +17,7 @@ import '../widgets/encyclopedia_content_notice.dart';
 import '../widgets/topic_compact_card.dart';
 import '../widgets/topic_list_card.dart';
 
-const _categoryOrder = [
-  'concrete',
-  'steel',
-  'soil',
-  'roads',
-  'finishing',
-];
+const _categoryOrder = ['concrete', 'steel', 'soil', 'roads', 'finishing'];
 
 class EncyclopediaScreen extends StatefulWidget {
   final String? initialQuery;
@@ -103,7 +97,8 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
           Expanded(
             child: AsyncValueWidget(
               isLoading: provider.isLoading,
-              error: provider.hasContentFailure
+              error: provider.hasContentFailure ? true : null,
+              safeMessage: provider.hasContentFailure
                   ? tr(Ar.encyclopediaContentError, En.encyclopediaContentError)
                   : null,
               isEmpty: provider.topics.isEmpty && !provider.hasContentFailure,
@@ -119,11 +114,15 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                           onRetry: onRetry,
                         ),
                         Expanded(
-                          child: _buildContent(provider, isDark: isDark, tr: tr),
+                          child: _buildContent(
+                            provider,
+                            isDark: isDark,
+                            tr: tr,
+                          ),
                         ),
                       ],
                     )
-                  : ErrorStateWidget(message: error, onRetry: onRetry),
+                  : ErrorStateWidget(safeMessage: error, onRetry: onRetry),
               onEmpty: () => Center(
                 child: Padding(
                   padding: AppSpacing.padXl,
@@ -132,8 +131,10 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
                         ? 'لا توجد نتائج للبحث عن "${_searchController.text}"'
                         : tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                        ),
+                      color: isDark
+                          ? AppColors.darkTextSecondary
+                          : AppColors.textSecondary,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -156,7 +157,10 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
         : _buildCategorySections(provider, isDark: isDark, tr: tr);
   }
 
-  Widget _buildSearchResults(EncyclopediaProvider provider, {required bool isDark}) {
+  Widget _buildSearchResults(
+    EncyclopediaProvider provider, {
+    required bool isDark,
+  }) {
     return ListView.separated(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -166,26 +170,37 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
       ),
       itemCount: provider.topics.length,
       separatorBuilder: (_, __) => AppSpacing.gapMd,
-      itemBuilder: (context, index) => _topicCard(context, provider.topics[index], isDark: isDark),
+      itemBuilder: (context, index) =>
+          _topicCard(context, provider.topics[index], isDark: isDark),
     );
   }
 
-  Widget _buildCategorySections(EncyclopediaProvider provider, {required bool isDark, required String Function(String, String) tr}) {
+  Widget _buildCategorySections(
+    EncyclopediaProvider provider, {
+    required bool isDark,
+    required String Function(String, String) tr,
+  }) {
     final grouped = <String, List<EngineeringTopic>>{};
     for (final topic in provider.topics) {
       grouped.putIfAbsent(topic.categoryId, () => []).add(topic);
     }
 
-    final unknownKeys = grouped.keys.where((k) => !_categoryOrder.contains(k)).toList()..sort();
-    final orderedKeys = _categoryOrder.where((k) => grouped.containsKey(k)).followedBy(unknownKeys).toList();
+    final unknownKeys =
+        grouped.keys.where((k) => !_categoryOrder.contains(k)).toList()..sort();
+    final orderedKeys = _categoryOrder
+        .where((k) => grouped.containsKey(k))
+        .followedBy(unknownKeys)
+        .toList();
 
     if (orderedKeys.isEmpty) {
       return Center(
         child: Text(
           tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-              ),
+            color: isDark
+                ? AppColors.darkTextSecondary
+                : AppColors.textSecondary,
+          ),
         ),
       );
     }
@@ -196,16 +211,30 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
       itemBuilder: (context, index) {
         final categoryId = orderedKeys[index];
         final topics = grouped[categoryId]!;
-        return _categorySection(context, categoryId, topics, isDark: isDark, tr: tr);
+        return _categorySection(
+          context,
+          categoryId,
+          topics,
+          isDark: isDark,
+          tr: tr,
+        );
       },
     );
   }
 
-  Widget _categorySection(BuildContext context, String categoryId, List<EngineeringTopic> topics, {required bool isDark, required String Function(String, String) tr}) {
+  Widget _categorySection(
+    BuildContext context,
+    String categoryId,
+    List<EngineeringTopic> topics, {
+    required bool isDark,
+    required String Function(String, String) tr,
+  }) {
     const previewCount = 4;
     final showAll = topics.length > previewCount;
     final displayTopics = showAll ? topics.take(previewCount).toList() : topics;
-    final catLabel = context.read<EncyclopediaProvider>().categoryLabel(categoryId);
+    final catLabel = context.read<EncyclopediaProvider>().categoryLabel(
+      categoryId,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +256,9 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
               topic: displayTopics[index],
               isDark: isDark,
               variant: TopicCompactCardVariant.preview,
-              onTap: () => context.push('/encyclopedia/topic/${displayTopics[index].id}'),
+              onTap: () => context.push(
+                '/encyclopedia/topic/${displayTopics[index].id}',
+              ),
             ),
           ),
         ),
@@ -235,7 +266,11 @@ class _EncyclopediaScreenState extends State<EncyclopediaScreen> {
     );
   }
 
-  Widget _topicCard(BuildContext context, EngineeringTopic topic, {required bool isDark}) {
+  Widget _topicCard(
+    BuildContext context,
+    EngineeringTopic topic, {
+    required bool isDark,
+  }) {
     return TopicListCard(
       topic: topic,
       isDark: isDark,

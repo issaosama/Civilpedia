@@ -44,9 +44,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     final categories = provider.categories.values.toList();
 
     return Scaffold(
-      appBar: const CivilAppBar(
-        title: Text(Ar.categories),
-      ),
+      appBar: const CivilAppBar(title: Text(Ar.categories)),
       body: _buildBody(context, provider, categories),
     );
   }
@@ -78,7 +76,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       final isArabic = Localizations.localeOf(context).languageCode == 'ar';
       if (categories.isEmpty) {
         return ErrorStateWidget(
-          message: isArabic
+          safeMessage: isArabic
               ? Ar.encyclopediaContentError
               : En.encyclopediaContentError,
           onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
@@ -92,9 +90,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 : En.encyclopediaContentKnownGoodNotice,
             onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
           ),
-          Expanded(
-            child: _buildCategoriesGrid(context, provider, categories),
-          ),
+          Expanded(child: _buildCategoriesGrid(context, provider, categories)),
         ],
       );
     }

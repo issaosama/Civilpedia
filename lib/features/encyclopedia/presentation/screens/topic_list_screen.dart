@@ -28,9 +28,9 @@ class _TopicListScreenState extends State<TopicListScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context
-          .read<EncyclopediaProvider>()
-          .loadTopicsByCategory(widget.categoryId);
+      context.read<EncyclopediaProvider>().loadTopicsByCategory(
+        widget.categoryId,
+      );
     });
   }
 
@@ -44,11 +44,14 @@ class _TopicListScreenState extends State<TopicListScreen> {
 
     return Scaffold(
       appBar: CivilAppBar(
-        title: Text(provider.categoryLabel(widget.categoryId, isArabic: isArabic)),
+        title: Text(
+          provider.categoryLabel(widget.categoryId, isArabic: isArabic),
+        ),
       ),
       body: AsyncValueWidget(
         isLoading: provider.isLoading,
-        error: provider.hasContentFailure
+        error: provider.hasContentFailure ? true : null,
+        safeMessage: provider.hasContentFailure
             ? tr(Ar.encyclopediaContentError, En.encyclopediaContentError)
             : null,
         isEmpty: provider.categoryTopics.isEmpty && !provider.hasContentFailure,
@@ -66,7 +69,7 @@ class _TopicListScreenState extends State<TopicListScreen> {
                   Expanded(child: _buildTopicsList(provider, isDark: isDark)),
                 ],
               )
-            : ErrorStateWidget(message: error, onRetry: onRetry),
+            : ErrorStateWidget(safeMessage: error, onRetry: onRetry),
         onEmpty: () => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -76,8 +79,10 @@ class _TopicListScreenState extends State<TopicListScreen> {
               Text(
                 tr(Ar.noTopicsInCategory, En.noTopicsInCategory),
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                    ),
+                  color: isDark
+                      ? AppColors.darkTextSecondary
+                      : AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -87,7 +92,10 @@ class _TopicListScreenState extends State<TopicListScreen> {
     );
   }
 
-  Widget _buildTopicsList(EncyclopediaProvider provider, {required bool isDark}) {
+  Widget _buildTopicsList(
+    EncyclopediaProvider provider, {
+    required bool isDark,
+  }) {
     return ListView.separated(
       padding: AppSpacing.padLg,
       itemCount: provider.categoryTopics.length,
@@ -97,7 +105,11 @@ class _TopicListScreenState extends State<TopicListScreen> {
     );
   }
 
-  Widget _topicCard(BuildContext context, EngineeringTopic topic, {required bool isDark}) {
+  Widget _topicCard(
+    BuildContext context,
+    EngineeringTopic topic, {
+    required bool isDark,
+  }) {
     return TopicListCard(
       topic: topic,
       isDark: isDark,

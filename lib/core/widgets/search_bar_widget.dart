@@ -1,36 +1,28 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_colors.dart';
-import '../../core/theme/design_tokens.dart';
-import '../../localization/ar.dart';
 
-/// Search field used by Home and Encyclopedia.
+import '../../localization/ar.dart';
+import '../../localization/en.dart';
+import '../theme/design_tokens.dart';
+
+/// Canonical Civilpedia search field.
 ///
-/// Supports a light-surface variant (Home) and the existing dark-surface
-/// variant (Encyclopedia). The D2B cleanup keeps the same public API while
-/// replacing raw hardcoded colors with semantic tokens and making the layout
-/// direction-aware.
+/// The active theme owns palette and contrast. [lightSurface] remains as a
+/// compatibility selector between the standard and grouped light surfaces;
+/// dark mode always uses its frozen grouped surface.
 class SearchBarWidget extends StatelessWidget {
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
-  /// Invoked when the user taps the field. Used by the Home launcher to open
-  /// `/search` without editing text on Home.
+  /// Invoked when the user taps the field. Used by read-only launchers.
   final VoidCallback? onTap;
 
-  final String hintText;
+  /// An explicit localized hint. When omitted, the widget derives its default
+  /// Arabic or English hint from the active locale.
+  final String? hintText;
 
-  /// When true, the search field renders with dark text/icons on a light
-  /// surface, suitable for the Home header. Defaults to the existing dark
-  /// surface styling used by EncyclopediaScreen.
   final bool lightSurface;
-
-  /// When true, the field is non-editable (used by the Home launcher). Defaults
-  /// to false, preserving every existing caller's editing behavior.
   final bool readOnly;
-
-  /// When true, the field requests focus on entry, so the Global Search input
-  /// is ready for typing immediately. Defaults to false.
   final bool autofocus;
 
   const SearchBarWidget({
@@ -39,7 +31,7 @@ class SearchBarWidget extends StatelessWidget {
     this.onChanged,
     this.onSubmitted,
     this.onTap,
-    this.hintText = Ar.search,
+    this.hintText,
     this.lightSurface = false,
     this.readOnly = false,
     this.autofocus = false,
@@ -47,37 +39,23 @@ class SearchBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final darkSurfaceColor = AppColors.darkTextPrimary;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final effectiveHint = hintText ?? (isArabic ? Ar.search : En.search);
+    final fillColor = isDark
+        ? colorScheme.surfaceContainer
+        : lightSurface
+        ? colorScheme.surface
+        : colorScheme.surfaceContainer;
 
-    final textColor = lightSurface ? AppColors.mainText : darkSurfaceColor;
-    final hintColor = lightSurface
-        ? AppColors.textSecondary.withValues(alpha: 0.75)
-        : darkSurfaceColor.withValues(alpha: 0.6);
-    final iconColor = lightSurface
-        ? AppColors.textSecondary
-        : darkSurfaceColor.withValues(alpha: 0.7);
-    final fillColor = lightSurface
-        ? AppColors.surfacePrimary.withValues(alpha: 0.95)
-        : darkSurfaceColor.withValues(alpha: 0.12);
-    final borderColor = lightSurface
-        ? AppColors.border.withValues(alpha: 0.8)
-        : Colors.transparent;
-
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(DesignTokens.radiusSearch),
-      borderSide: BorderSide(color: borderColor),
-    );
-    final enabledBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(DesignTokens.radiusSearch),
-      borderSide: BorderSide(color: borderColor.withValues(alpha: 0.5)),
-    );
-    final focusedBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(DesignTokens.radiusSearch),
-      borderSide: BorderSide(
-        color: borderColor.withValues(alpha: 0.8),
-        width: 1.5,
-      ),
-    );
+    OutlineInputBorder outline(Color color, {double width = 1}) {
+      return OutlineInputBorder(
+        borderRadius: BorderRadius.circular(DesignTokens.radiusSearch),
+        borderSide: BorderSide(color: color, width: width),
+      );
+    }
 
     return TextField(
       controller: controller,
@@ -88,23 +66,27 @@ class SearchBarWidget extends StatelessWidget {
       autofocus: autofocus,
       textInputAction: TextInputAction.search,
       textAlign: TextAlign.start,
+      style: theme.textTheme.bodyLarge?.copyWith(color: colorScheme.onSurface),
       decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: TextStyle(color: hintColor),
-        prefixIcon: Icon(Icons.search, color: iconColor),
+        hintText: effectiveHint,
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
+        prefixIcon: const Icon(Icons.search_rounded, size: 24),
+        prefixIconColor: WidgetStateColor.resolveWith(
+          (states) => states.contains(WidgetState.focused)
+              ? colorScheme.secondary
+              : colorScheme.onSurfaceVariant,
+        ),
         filled: true,
         fillColor: fillColor,
-        border: border,
-        enabledBorder: enabledBorder,
-        focusedBorder: focusedBorder,
-        contentPadding: const EdgeInsetsDirectional.only(
-          start: 20,
-          end: 20,
-          top: 14,
-          bottom: 14,
+        border: outline(colorScheme.outlineVariant),
+        enabledBorder: outline(colorScheme.outlineVariant),
+        focusedBorder: outline(colorScheme.secondary, width: 2),
+        contentPadding: const EdgeInsetsDirectional.symmetric(
+          horizontal: 20,
+          vertical: 14,
         ),
+        constraints: const BoxConstraints(minHeight: 56),
       ),
-      style: TextStyle(color: textColor),
     );
   }
 }

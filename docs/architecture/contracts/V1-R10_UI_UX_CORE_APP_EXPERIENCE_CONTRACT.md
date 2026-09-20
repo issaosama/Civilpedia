@@ -4,11 +4,13 @@ PHASE: V1-R10
 TITLE: UI/UX & Core App Experience
 CONTRACT: V1-R10-CONTRACT-v1
 STATUS: FROZEN — ARCHITECT ACCEPTED
-CURRENT AUTHORIZED SLICE: V1-R10.2 — THEME + SHARED UI FOUNDATION
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.2 ONLY
-MODE: CONTRACT FROZEN — R10.2 IMPLEMENTATION
+CURRENT AUTHORIZED SLICE: V1-R10.3 — APP SHELL, NAVIGATION & GLOBAL STATES
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.3 ONLY
+MODE: CONTRACT FROZEN — R10.3 IMPLEMENTATION
 R10.1: CLOSED / ACCEPTED
-R10.3 THROUGH R10.7: LOCKED
+R10.2: CLOSED / ACCEPTED — THEME + SHARED UI FOUNDATION
+R10.3: CURRENT / AUTHORIZED
+R10.4 THROUGH R10.7: LOCKED
 
 ---
 
@@ -751,23 +753,71 @@ No material contradictions remain unresolved.
 
 STATUS: FROZEN — ARCHITECT ACCEPTED
 
-CURRENT AUTHORIZED SLICE: V1-R10.2 — THEME + SHARED UI FOUNDATION
+CURRENT AUTHORIZED SLICE: V1-R10.3 — APP SHELL, NAVIGATION & GLOBAL STATES
 
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.2 ONLY
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.3 ONLY
 
 R10.1: CLOSED / ACCEPTED
 
-R10.3 THROUGH R10.7: LOCKED. R10.3 may begin only after R10.2 is independently
+R10.2: CLOSED / ACCEPTED — THEME + SHARED UI FOUNDATION
+
+R10.3: CURRENT / AUTHORIZED
+
+R10.4 THROUGH R10.7: LOCKED. R10.4 may begin only after R10.3 is independently
 reviewed and CLOSED / ACCEPTED.
 
-R10.2 authorization is limited to `ThemeData` / `ColorScheme`, `AppColors`,
-typography and theme tokens, spacing/radius/elevation compatibility work,
-Material component themes, and small justified shared primitives.
+### R10.2 closure evidence
 
-R10.2 does not authorize Home redesign, broad feature-screen redesign, App
-Shell/navigation redesign, Tools feature redesign, routing semantics,
-splash/startup behavior, backend/security/Supabase, calculator formulas, or
-R11/R12/R13 work.
+- Frozen Amber/Blue/warm-neutral theme implemented.
+- Light and dark Material themes implemented.
+- Shared primitives aligned.
+- `SearchBarWidget` locale defect fixed.
+- Shared raw-error exposure corrected.
+- Localized Error/Empty/Retry fallback established.
+- Focused implementation evidence before correction: 95 PASS / 0 FAIL.
+- Correction evidence: 141 PASS / 0 FAIL.
+- Independent correction re-review: PASS.
+- Findings after correction: HIGH none; MEDIUM none; LOW none.
+- Permanent R09Q integrated quality gate: 19/19 mandatory suites PASS, exit
+  code 0, with no gate drift.
+- No unresolved R10.2 findings remain.
+
+### R10.3 authorization boundary
+
+R10.3 may implement only its frozen scope:
+
+- `AppShell` visual/chrome normalization;
+- five-item bottom-navigation presentation;
+- `CivilAppBar` adoption where in scope;
+- safe-area and shell-insets consistency;
+- global `TransportStatusBanner` and state presentation;
+- auth/ownership-conflict presentation alignment;
+- RTL/LTR navigation presentation;
+- light/dark shell presentation.
+
+R10.3 MUST preserve existing routing semantics. It MUST NOT change route
+architecture, destination count, branch ownership, auth authority, redirect
+semantics, startup readiness, splash timing or animation, deep-link behavior,
+profile/onboarding precedence, calculator behavior, backend/Supabase/security,
+Home composition, or R11/R12/R13-owned functionality.
+
+### Splash and startup protection
+
+Any R10.3 change touching app startup, router integration, `AppShell`, auth
+redirect presentation, or splash-adjacent navigation MUST preserve
+`animationComplete AND startupReady`, auth restoration readiness, one-time
+profile bootstrap, deep-link/current-route preservation, no forced
+`appRouter.go(...)` after the active route leaves `/splash`, no double
+navigation, cold-launch-only splash, and no splash replay on resume.
+
+If implementation requires changing any of those semantics, STOP with:
+
+`R10.3 ROUTING/STARTUP SEMANTIC CHANGE — ARCHITECT REVIEW REQUIRED`
+
+### Home checkpoint
+
+Home redesign remains locked. Known legacy Home fixed-height overflows remain
+deferred to R10.4-A.
 
 The accepted execution checkpoint remains:
 

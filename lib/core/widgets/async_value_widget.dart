@@ -1,15 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../localization/ar.dart';
-import '../theme/app_colors.dart';
+import '../../localization/en.dart';
+import '../theme/spacing.dart';
 
 class AsyncValueWidget extends StatelessWidget {
   final bool isLoading;
-  final String? error;
+
+  /// Opaque error-state signal. Its value is never rendered or forwarded to
+  /// presentation builders, so exceptions and backend details remain private.
+  final Object? error;
+
+  /// Explicit, localized, user-safe copy for the error state.
+  ///
+  /// Callers must never pass exception text, backend messages, SQLSTATE values,
+  /// stack traces, or `error.toString()` here.
+  final String? safeMessage;
+
   final bool isEmpty;
   final Widget Function() onData;
   final Widget Function()? onLoading;
-  final Widget Function(String error, VoidCallback? onRetry)? onError;
+
+  /// Builds a custom error state from user-safe presentation copy only.
+  final Widget Function(String safeMessage, VoidCallback? onRetry)? onError;
+
   final Widget Function()? onEmpty;
   final VoidCallback? onRetry;
 
@@ -17,6 +31,7 @@ class AsyncValueWidget extends StatelessWidget {
     super.key,
     this.isLoading = false,
     this.error,
+    this.safeMessage,
     this.isEmpty = false,
     required this.onData,
     this.onLoading,
@@ -33,8 +48,10 @@ class AsyncValueWidget extends StatelessWidget {
     }
 
     if (error != null) {
-      return onError?.call(error!, onRetry) ??
-          _defaultError(context, error!, onRetry);
+      final presentationMessage =
+          safeMessage ?? _localizedErrorFallback(context);
+      return onError?.call(presentationMessage, onRetry) ??
+          _defaultError(context, presentationMessage, onRetry);
     }
 
     if (isEmpty) {
@@ -44,32 +61,56 @@ class AsyncValueWidget extends StatelessWidget {
     return onData();
   }
 
-  Widget _defaultError(BuildContext context, String msg, VoidCallback? retry) {
+  String _localizedErrorFallback(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    return isArabic ? Ar.errorOccurred : En.errorOccurred;
+  }
+
+  String _localizedEmptyFallback(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    return isArabic ? Ar.emptyHere : En.emptyHere;
+  }
+
+  String _localizedRetry(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    return isArabic ? Ar.retry : En.retry;
+  }
+
+  Widget _defaultError(
+    BuildContext context,
+    String presentationMessage,
+    VoidCallback? retry,
+  ) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.lg * 2),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
-            const SizedBox(height: 16),
+            Icon(
+              Icons.error_outline_rounded,
+              size: 48,
+              color: theme.colorScheme.error,
+            ),
+            const SizedBox(height: AppSpacing.lg),
             Text(
-              msg,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: AppColors.error),
+              presentationMessage,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurface,
+              ),
               textAlign: TextAlign.center,
             ),
             if (retry != null) ...[
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.lg),
               ElevatedButton.icon(
                 onPressed: () {
                   HapticFeedback.lightImpact();
                   retry();
                 },
                 icon: const Icon(Icons.refresh, size: 18),
-                label: const Text(Ar.retry),
+                label: Text(_localizedRetry(context)),
               ),
             ],
           ],
@@ -79,20 +120,25 @@ class AsyncValueWidget extends StatelessWidget {
   }
 
   Widget _defaultEmpty(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.lg * 2),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
+            Icon(
+              Icons.inbox_outlined,
+              size: 48,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: AppSpacing.lg),
             Text(
-              Ar.emptyHere,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: AppColors.textSecondary),
+              _localizedEmptyFallback(context),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),

@@ -13,6 +13,7 @@ import 'package:civilpedia/features/home/presentation/widgets/home_topic_card.da
 import 'package:civilpedia/features/home/presentation/widgets/engineering_topics_section.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -71,11 +72,14 @@ class _FakeEncyclopediaRepository implements EncyclopediaRepository {
   Future<Map<String, CategoryInfo>> getCategories() async => const {};
 
   @override
-  Future<List<TopicSection>> getSectionsForTopic(String topicId) async => const [];
+  Future<List<TopicSection>> getSectionsForTopic(String topicId) async =>
+      const [];
 
   @override
-  Future<List<ContentBlock>> getBlocksForSection(String topicId, String sectionId) async =>
-      const [];
+  Future<List<ContentBlock>> getBlocksForSection(
+    String topicId,
+    String sectionId,
+  ) async => const [];
 
   @override
   Future<List<EngineeringTopic>> searchTopics(String query) async => topics;
@@ -85,6 +89,9 @@ Widget _wrap(EncyclopediaProvider provider) {
   return ChangeNotifierProvider<EncyclopediaProvider>.value(
     value: provider,
     child: const MaterialApp(
+      locale: Locale('ar'),
+      supportedLocales: [Locale('ar'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: Scaffold(
         body: SingleChildScrollView(child: EngineeringTopicsSection()),
       ),
@@ -103,7 +110,9 @@ Future<void> _unmount(WidgetTester tester) async {
 
 void main() {
   group('Home initial load states', () {
-    testWidgets('shows a real loading shimmer, then content once loaded', (tester) async {
+    testWidgets('shows a real loading shimmer, then content once loaded', (
+      tester,
+    ) async {
       final repo = _FakeEncyclopediaRepository(
         topics: _catalog(),
         delay: const Duration(milliseconds: 200),
@@ -131,31 +140,36 @@ void main() {
       await _unmount(tester);
     });
 
-    testWidgets('never shows the empty state before the initial load completes', (tester) async {
-      final repo = _FakeEncyclopediaRepository(
-        topics: const [],
-        delay: const Duration(milliseconds: 200),
-      );
-      final provider = EncyclopediaProvider(repository: repo);
+    testWidgets(
+      'never shows the empty state before the initial load completes',
+      (tester) async {
+        final repo = _FakeEncyclopediaRepository(
+          topics: const [],
+          delay: const Duration(milliseconds: 200),
+        );
+        final provider = EncyclopediaProvider(repository: repo);
 
-      await tester.pumpWidget(_wrap(provider));
-      expect(find.byType(ShimmerSection), findsOneWidget);
-      expect(find.byType(EmptyStateWidget), findsNothing);
+        await tester.pumpWidget(_wrap(provider));
+        expect(find.byType(ShimmerSection), findsOneWidget);
+        expect(find.byType(EmptyStateWidget), findsNothing);
 
-      await tester.pump();
-      expect(repo.getAllTopicsCalls, 1);
-      expect(find.byType(ShimmerSection), findsOneWidget);
-      expect(find.byType(EmptyStateWidget), findsNothing);
+        await tester.pump();
+        expect(repo.getAllTopicsCalls, 1);
+        expect(find.byType(ShimmerSection), findsOneWidget);
+        expect(find.byType(EmptyStateWidget), findsNothing);
 
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pump();
-      // Only a completed real load may reveal the empty catalog.
-      expect(find.byType(EmptyStateWidget), findsOneWidget);
-      expect(find.byType(ShimmerSection), findsNothing);
-      await _unmount(tester);
-    });
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pump();
+        // Only a completed real load may reveal the empty catalog.
+        expect(find.byType(EmptyStateWidget), findsOneWidget);
+        expect(find.byType(ShimmerSection), findsNothing);
+        await _unmount(tester);
+      },
+    );
 
-    testWidgets('does not re-trigger a load when topics are already loaded', (tester) async {
+    testWidgets('does not re-trigger a load when topics are already loaded', (
+      tester,
+    ) async {
       final repo = _FakeEncyclopediaRepository(topics: _catalog());
       final provider = EncyclopediaProvider(repository: repo);
       await provider.loadAllTopics();
@@ -171,7 +185,9 @@ void main() {
       await _unmount(tester);
     });
 
-    testWidgets('shows a retryable error state when the initial load fails', (tester) async {
+    testWidgets('shows a retryable error state when the initial load fails', (
+      tester,
+    ) async {
       final repo = _FakeEncyclopediaRepository(
         topics: _catalog(),
         error: StateError('catalog unavailable'),
@@ -189,7 +205,9 @@ void main() {
       await _unmount(tester);
     });
 
-    testWidgets('retry after failure triggers a real reload and recovers', (tester) async {
+    testWidgets('retry after failure triggers a real reload and recovers', (
+      tester,
+    ) async {
       final repo = _FakeEncyclopediaRepository(
         topics: _catalog(),
         delay: const Duration(milliseconds: 100),
@@ -218,7 +236,9 @@ void main() {
       await _unmount(tester);
     });
 
-    testWidgets('shows an empty state when the catalog loads with no topics', (tester) async {
+    testWidgets('shows an empty state when the catalog loads with no topics', (
+      tester,
+    ) async {
       final provider = EncyclopediaProvider(
         repository: _FakeEncyclopediaRepository(topics: const []),
       );
@@ -235,45 +255,52 @@ void main() {
   });
 
   group('Refresh behavior', () {
-    testWidgets('refreshHomeData triggers a real reload and waits for completion', (tester) async {
-      final repo = _FakeEncyclopediaRepository(topics: _catalog());
-      final provider = EncyclopediaProvider(repository: repo);
-      await provider.loadAllTopics();
-      expect(repo.getAllTopicsCalls, 1);
+    testWidgets(
+      'refreshHomeData triggers a real reload and waits for completion',
+      (tester) async {
+        final repo = _FakeEncyclopediaRepository(topics: _catalog());
+        final provider = EncyclopediaProvider(repository: repo);
+        await provider.loadAllTopics();
+        expect(repo.getAllTopicsCalls, 1);
 
-      repo.delay = const Duration(milliseconds: 200);
+        repo.delay = const Duration(milliseconds: 200);
 
-      BuildContext? ctx;
-      await tester.pumpWidget(
-        ChangeNotifierProvider<EncyclopediaProvider>.value(
-          value: provider,
-          child: Builder(builder: (context) {
-            ctx = context;
-            return const SizedBox.shrink();
-          }),
-        ),
-      );
+        BuildContext? ctx;
+        await tester.pumpWidget(
+          ChangeNotifierProvider<EncyclopediaProvider>.value(
+            value: provider,
+            child: Builder(
+              builder: (context) {
+                ctx = context;
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        );
 
-      final refresh = refreshHomeData(ctx!);
-      expect(repo.getAllTopicsCalls, 2);
-      expect(provider.isLoading, isTrue);
+        final refresh = refreshHomeData(ctx!);
+        expect(repo.getAllTopicsCalls, 2);
+        expect(provider.isLoading, isTrue);
 
-      var completed = false;
-      refresh.whenComplete(() => completed = true);
+        var completed = false;
+        refresh.whenComplete(() => completed = true);
 
-      await tester.pump(const Duration(milliseconds: 100));
-      expect(completed, isFalse);
+        await tester.pump(const Duration(milliseconds: 100));
+        expect(completed, isFalse);
 
-      await tester.pump(const Duration(milliseconds: 100));
-      await refresh;
+        await tester.pump(const Duration(milliseconds: 100));
+        await refresh;
 
-      expect(completed, isTrue);
-      expect(provider.isLoading, isFalse);
-      expect(provider.allTopics.length, _catalog().length);
-      await _unmount(tester);
-    });
+        expect(completed, isTrue);
+        expect(provider.isLoading, isFalse);
+        expect(provider.allTopics.length, _catalog().length);
+        await _unmount(tester);
+      },
+    );
 
-    testWidgets('keeps showing content while a background refresh is running', (tester) async {
+    testWidgets('keeps showing content while a background refresh is running', (
+      tester,
+    ) async {
       final repo = _FakeEncyclopediaRepository(topics: _catalog());
       final provider = EncyclopediaProvider(repository: repo);
       await provider.loadAllTopics();
@@ -299,25 +326,28 @@ void main() {
       await _unmount(tester);
     });
 
-    testWidgets('a failed refresh keeps the existing content (no error takeover)', (tester) async {
-      final repo = _FakeEncyclopediaRepository(topics: _catalog());
-      final provider = EncyclopediaProvider(repository: repo);
-      await provider.loadAllTopics();
+    testWidgets(
+      'a failed refresh keeps the existing content (no error takeover)',
+      (tester) async {
+        final repo = _FakeEncyclopediaRepository(topics: _catalog());
+        final provider = EncyclopediaProvider(repository: repo);
+        await provider.loadAllTopics();
 
-      await tester.pumpWidget(_wrap(provider));
-      await tester.pump();
-      expect(find.byType(HomeTopicCard), findsWidgets);
+        await tester.pumpWidget(_wrap(provider));
+        await tester.pump();
+        expect(find.byType(HomeTopicCard), findsWidgets);
 
-      repo.error = StateError('reload failed');
-      await provider.loadAllTopics();
-      await tester.pump();
+        repo.error = StateError('reload failed');
+        await provider.loadAllTopics();
+        await tester.pump();
 
-      expect(provider.error, isNotNull);
-      expect(provider.allTopics, isNotEmpty);
-      expect(find.byType(ErrorStateWidget), findsNothing);
-      expect(find.byType(HomeTopicCard), findsWidgets);
-      await _unmount(tester);
-    });
+        expect(provider.error, isNotNull);
+        expect(provider.allTopics, isNotEmpty);
+        expect(find.byType(ErrorStateWidget), findsNothing);
+        expect(find.byType(HomeTopicCard), findsWidgets);
+        await _unmount(tester);
+      },
+    );
   });
 
   group('Duplicate-load protection', () {
@@ -338,63 +368,75 @@ void main() {
       expect(provider.allTopics.length, _catalog().length);
     });
 
-    test('a later call after completion starts a fresh reload (real refresh)', () async {
-      final repo = _FakeEncyclopediaRepository(topics: _catalog());
-      final provider = EncyclopediaProvider(repository: repo);
+    test(
+      'a later call after completion starts a fresh reload (real refresh)',
+      () async {
+        final repo = _FakeEncyclopediaRepository(topics: _catalog());
+        final provider = EncyclopediaProvider(repository: repo);
 
-      await provider.loadAllTopics();
-      expect(repo.getAllTopicsCalls, 1);
+        await provider.loadAllTopics();
+        expect(repo.getAllTopicsCalls, 1);
 
-      await provider.loadAllTopics();
-      expect(repo.getAllTopicsCalls, 2);
-    });
+        await provider.loadAllTopics();
+        expect(repo.getAllTopicsCalls, 2);
+      },
+    );
   });
 
   group('Initial-load lifecycle flag', () {
-    test('starts uncompleted, then becomes true after a successful empty load', () async {
-      final repo = _FakeEncyclopediaRepository(topics: const []);
-      final provider = EncyclopediaProvider(repository: repo);
+    test(
+      'starts uncompleted, then becomes true after a successful empty load',
+      () async {
+        final repo = _FakeEncyclopediaRepository(topics: const []);
+        final provider = EncyclopediaProvider(repository: repo);
 
-      expect(provider.hasCompletedInitialLoad, isFalse);
-      expect(provider.isLoading, isFalse);
+        expect(provider.hasCompletedInitialLoad, isFalse);
+        expect(provider.isLoading, isFalse);
 
-      await provider.loadAllTopics();
+        await provider.loadAllTopics();
 
-      expect(provider.hasCompletedInitialLoad, isTrue);
-      expect(provider.allTopics, isEmpty);
-    });
+        expect(provider.hasCompletedInitialLoad, isTrue);
+        expect(provider.allTopics, isEmpty);
+      },
+    );
 
-    test('becomes true even when the initial load fails (never empty before attempt)', () async {
-      final repo = _FakeEncyclopediaRepository(
-        topics: _catalog(),
-        error: StateError('catalog unavailable'),
-      );
-      final provider = EncyclopediaProvider(repository: repo);
+    test(
+      'becomes true even when the initial load fails (never empty before attempt)',
+      () async {
+        final repo = _FakeEncyclopediaRepository(
+          topics: _catalog(),
+          error: StateError('catalog unavailable'),
+        );
+        final provider = EncyclopediaProvider(repository: repo);
 
-      await provider.loadAllTopics();
+        await provider.loadAllTopics();
 
-      expect(provider.hasCompletedInitialLoad, isTrue);
-      expect(provider.error, isNotNull);
-      expect(provider.allTopics, isEmpty);
-    });
+        expect(provider.hasCompletedInitialLoad, isTrue);
+        expect(provider.error, isNotNull);
+        expect(provider.allTopics, isEmpty);
+      },
+    );
 
-    test('stays true across a successful retry after an initial failure', () async {
-      final repo = _FakeEncyclopediaRepository(
-        topics: _catalog(),
-        error: StateError('catalog unavailable'),
-      );
-      final provider = EncyclopediaProvider(repository: repo);
+    test(
+      'stays true across a successful retry after an initial failure',
+      () async {
+        final repo = _FakeEncyclopediaRepository(
+          topics: _catalog(),
+          error: StateError('catalog unavailable'),
+        );
+        final provider = EncyclopediaProvider(repository: repo);
 
-      await provider.loadAllTopics();
-      expect(provider.hasCompletedInitialLoad, isTrue);
-      expect(provider.error, isNotNull);
+        await provider.loadAllTopics();
+        expect(provider.hasCompletedInitialLoad, isTrue);
+        expect(provider.error, isNotNull);
 
-      repo.error = null;
-      await provider.loadAllTopics();
+        repo.error = null;
+        await provider.loadAllTopics();
 
-      expect(provider.hasCompletedInitialLoad, isTrue);
-      expect(provider.error, isNull);
-      expect(provider.allTopics.length, _catalog().length);
-    });
+        expect(provider.hasCompletedInitialLoad, isTrue);
+        expect(provider.error, isNull);
+        expect(provider.allTopics.length, _catalog().length);
+      },
+    );
   });
 }
