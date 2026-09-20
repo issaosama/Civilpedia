@@ -2,17 +2,20 @@
 
 PHASE: V1-R10.1
 TITLE: Visual Direction & Token Freeze
-STATUS: DRAFT — AWAITING ARCHITECT / USER VISUAL APPROVAL
+STATUS: CLOSED / ACCEPTED — VISUAL DIRECTION & TOKENS FROZEN
 AUTHORITY: V1-R10-CONTRACT-v1
 MODE: SPECIFICATION / VISUAL APPROVAL ONLY — NO PRODUCTION FLUTTER IMPLEMENTATION
+ARCHITECT_APPROVAL: PASS
+USER_VISUAL_APPROVAL: PASS
 
 ---
 
 ## 1. Purpose and authority boundary
 
-This document is the R10.1 visual-system candidate. It records measured brand
-evidence and an implementation-ready visual specification for later approval.
-It does not authorize or implement production Flutter changes.
+This document is the accepted R10.1 visual-system specification. It records
+measured brand evidence and the implementation-ready visual direction approved
+by the Architect and user. It did not authorize or implement production Flutter
+changes during R10.1.
 
 The frozen V1-R10 contract remains authoritative. In particular:
 
@@ -177,7 +180,7 @@ warning signal.
 
 ## 5. Candidate production tokens
 
-These are the exact R10.1 candidates for visual approval. Names describe roles;
+These are the exact approved R10.1 production tokens. Names describe roles;
 R10.2 may map them onto existing compatible names without needless churn.
 
 ### 5.1 Light palette
@@ -699,15 +702,15 @@ logo, arbitrary font, or decorative gradient UI.
   specific OEM skin.
 - Use representative realistic Civilpedia content; do not invent new product
   capabilities.
-- Architect/user approval of the rendered set is required before this document
-  can be frozen and R10.1 can close.
+- Architect/user approval of the rendered set was received; this document is
+  frozen and R10.1 is closed.
 
 ---
 
-## 18. Unresolved Architect / user visual decisions
+## 18. Approved Architect / user visual decisions
 
 No structural contract contradiction remains. The following visual choices
-require explicit approval through the mandatory references:
+were explicitly approved through the mandatory references:
 
 1. Approve `#FE9E03` as the flat signature Amber while preserving the source
    gradient only inside official artwork.
@@ -720,8 +723,9 @@ require explicit approval through the mandatory references:
 5. Approve the four visual references described in Sections 10–13 after they
    are rendered.
 
-Until those approvals occur, this document remains a draft candidate and R10.2
-is not authorized.
+Those approvals are complete. This document is frozen, R10.1 is CLOSED /
+ACCEPTED, and R10.2 is authorized under the active-slice controls in
+`V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md`.
 
 ---
 
@@ -733,6 +737,7 @@ is not authorized.
 - Component language: specified.
 - Home / Tools / Calculator / Dark references: render-ready specifications.
 - Production Flutter changes: none.
-- R10.1 closure: pending Architect/user visual approval.
-- R10.2 authorization: not granted.
-
+- Architect approval: PASS.
+- User visual approval: PASS.
+- R10.1 closure: CLOSED / ACCEPTED — VISUAL DIRECTION & TOKENS FROZEN.
+- R10.2 authorization: granted for Theme + Shared UI Foundation only.

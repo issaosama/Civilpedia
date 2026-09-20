@@ -4,8 +4,11 @@ PHASE: V1-R10
 TITLE: UI/UX & Core App Experience
 CONTRACT: V1-R10-CONTRACT-v1
 STATUS: FROZEN — ARCHITECT ACCEPTED
-IMPLEMENTATION_AUTHORIZED: R10.1 AUTHORIZED ONLY — VISUAL SPECIFICATION / APPROVAL WORK; NO PRODUCTION FLUTTER IMPLEMENTATION
-MODE: CONTRACT FROZEN — R10.1 SPECIFICATION / VISUAL APPROVAL ONLY
+CURRENT AUTHORIZED SLICE: V1-R10.2 — THEME + SHARED UI FOUNDATION
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.2 ONLY
+MODE: CONTRACT FROZEN — R10.2 IMPLEMENTATION
+R10.1: CLOSED / ACCEPTED
+R10.3 THROUGH R10.7: LOCKED
 
 ---
 
@@ -247,9 +250,9 @@ token tables alone. The minimum reference set is:
 
 The reference MUST demonstrate Logo Amber, supporting Logo Blue, warm neutral
 surfaces, restrained brand usage, Arabic RTL, realistic typography hierarchy,
-and a consistent card/button/search/navigation family. Explicit Architect
-approval of this reference is required before R10.1 can close or R10.2 can
-begin.
+and a consistent card/button/search/navigation family. Explicit Architect and
+user approval of this reference was received; R10.1 is CLOSED / ACCEPTED and
+R10.2 may begin within its frozen boundary.
 
 ### 6.6 Accessibility color rule
 
@@ -748,8 +751,26 @@ No material contradictions remain unresolved.
 
 STATUS: FROZEN — ARCHITECT ACCEPTED
 
-IMPLEMENTATION_AUTHORIZED: R10.1 AUTHORIZED ONLY — VISUAL SPECIFICATION / APPROVAL WORK; NO PRODUCTION FLUTTER IMPLEMENTATION
+CURRENT AUTHORIZED SLICE: V1-R10.2 — THEME + SHARED UI FOUNDATION
 
-Next step: execute R10.1 visual specification / approval work. Production UI
-implementation begins only after R10.1 is CLOSED / ACCEPTED and the Architect
-explicitly authorizes R10.2 — Theme + Shared UI Foundation.
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.2 ONLY
+
+R10.1: CLOSED / ACCEPTED
+
+R10.3 THROUGH R10.7: LOCKED. R10.3 may begin only after R10.2 is independently
+reviewed and CLOSED / ACCEPTED.
+
+R10.2 authorization is limited to `ThemeData` / `ColorScheme`, `AppColors`,
+typography and theme tokens, spacing/radius/elevation compatibility work,
+Material component themes, and small justified shared primitives.
+
+R10.2 does not authorize Home redesign, broad feature-screen redesign, App
+Shell/navigation redesign, Tools feature redesign, routing semantics,
+splash/startup behavior, backend/security/Supabase, calculator formulas, or
+R11/R12/R13 work.
+
+The accepted execution checkpoint remains:
+
+R10.2 foundation -> R10.3 shell -> R10.4-A Home Production Visual Pass ->
+emulator/device visual inspection -> Architect/user approval -> broader
+propagation.
