@@ -879,3 +879,254 @@ Accessibility, focus, semantic-color, light/dark parity, RTL/LTR, and all
 protected behavior requirements remain binding. This amendment changes no
 routing, shell, auth, startup, backend, Directory business, or Encyclopedia
 content authority.
+
+---
+
+## APPENDIX B — V1-R10.4-B IMPLEMENTATION CONTRACT FREEZE
+
+Status: ARCHITECT APPROVED / FROZEN — V1-R10.4-B IMPLEMENTATION FREEZE
+
+This append-only Architect addendum is newer than every prior R10.4 lock wording
+in this contract. It supersedes the older "R10.4-B ... LOCKED" and "Search,
+Saved ... LOCKED" status lines in sections 28 and the header for the specific
+purpose of authorizing the R10.4-B implementation slice defined below. All
+prior frozen semantics not explicitly superseded here remain binding.
+
+Architect decision: V1-R10.4-B PRE-IMPLEMENTATION AUDIT = PASS —
+V1-R10.4-B IS NOW READY FOR IMPLEMENTATION CONTRACT FREEZE.
+
+Baseline at freeze time: HEAD == origin/main ==
+81d6420781459532ec263d6a48dec8760b4ac346
+
+Current roadmap state (preserved):
+- R10.4-A: CLOSED / ACCEPTED
+- R10.4-B: CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+- R10.5: NOT AUTHORIZED
+
+### B.1 Slice title and purpose
+
+TITLE: V1-R10.4-B — Search + Saved Production Visual Pass
+
+PURPOSE: production-grade presentation harmonization of Search and Saved only.
+This is the already-defined remaining R10.4 Core Discovery work.
+
+### B.2 Authorized production boundary
+
+- `lib/features/search/presentation/screens/global_search_screen.dart`
+- `lib/features/saved/presentation/saved_screen.dart`
+- `lib/localization/ar.dart`
+- `lib/localization/en.dart`
+
+### B.3 Conditional shared seam
+
+`lib/features/encyclopedia/presentation/widgets/topic_list_card.dart`
+
+This shared seam is authorized ONLY for:
+- Saved topic unsave touch target >= 48x48;
+- locale-aware tooltip required by the active UI locale.
+
+No other TopicListCard redesign is authorized.
+
+### B.4 Search frozen semantics
+
+MUST preserve exactly:
+- canonical route `/search`;
+- root-navigator full-screen behavior;
+- Home launch behavior;
+- Back restoration behavior;
+- query parameters remain ignored;
+- Knowledge + Tool result types only;
+- Knowledge authority unchanged;
+- Tool authority unchanged;
+- SearchRouteResolver unchanged;
+- 280 ms debounce;
+- stale-request generation protection;
+- auto-search behavior;
+- keyboard submit fallback;
+- Knowledge before Tool ordering;
+- current source-failure isolation;
+- unresolved tool behavior;
+- no Saved/favorite action added;
+- no new filters/tabs/history/suggestions;
+- no Directory/Projects/Articles search integration.
+
+Authorized Search presentation work:
+- active-locale AR/EN chrome;
+- RTL/LTR-aware affordances;
+- responsive readable-width behavior: Compact <600, Medium 600-839, Expanded >=840;
+- theme-aware true-black dark presentation (per Appendix A);
+- frozen R10 colors/tokens;
+- SearchBarWidget reuse;
+- CivilAppBar / CivilSurfaceCard reuse where appropriate;
+- harmonized initial / no-results / loading presentation;
+- accessibility / semantics improvements;
+- text-scale resilience.
+
+### B.5 Saved frozen semantics
+
+MUST preserve exactly:
+- Encyclopedia topic favorites;
+- legacy article favorites;
+- Directory provider favorites;
+- Downloaded articles;
+- persistence/resolution authorities unchanged;
+- identity/reference formats;
+- ordering;
+- stale reference behavior;
+- local-first Directory resolution;
+- unavailable Directory reference behavior;
+- all canonical destination routes;
+- Favorites/Downloads two-tab contract;
+- shell/device bottom clearance;
+- no silent deletion;
+- no new Saved entity types;
+- no cloud Saved sync;
+- no persistence migration;
+- no ranking/reordering;
+- no Search/filter inside Saved;
+- no new inline remove actions for legacy article, Directory, or Download.
+
+Authorized Saved presentation work:
+- CivilAppBar;
+- active-locale AR/EN chrome;
+- coherent neutral/theme-aware row language;
+- preserve type-specific semantics;
+- responsive readable-width behavior;
+- true-black dark parity;
+- RTL/LTR correctness;
+- compact empty-state geometry;
+- consistent spacing/typography;
+- >= 48x48 touch targets where directly owned by this slice;
+- accessibility / text-scale resilience.
+
+### B.6 Saved error-state guardrail
+
+A distinct localized resolver Error/Retry state is authorized ONLY IF SavedScreen
+can distinguish the existing failure using already-available presentation-layer
+state WITHOUT changing:
+- SavedReferenceResolver contract;
+- domain result types;
+- persistence semantics;
+- data authority;
+- Directory resolution semantics.
+
+If implementing Error/Retry requires any domain/data/resolver semantic change:
+DEFER IT. Protected semantics may not be modified merely to produce an error
+screen.
+
+### B.7 Shared primitives
+
+SAFE TO REUSE WHERE APPROPRIATE:
+- SearchBarWidget;
+- CivilAppBar;
+- CivilSurfaceCard;
+- AppColors;
+- AppSpacing;
+- DesignTokens;
+- shellSafeBottomPadding;
+- TopicListCard within the exact conditional seam in B.3;
+- ArticleImage where existing semantics already fit.
+
+DO NOT:
+- force SectionHeader into Search/Saved;
+- reuse Home preview layout/card geometry;
+- reuse Directory business cards;
+- build a giant generic Search/Saved row abstraction;
+- introduce a new shared primitive unless Architect review explicitly
+  authorizes it.
+
+Expected new shared primitive: NONE.
+
+### B.8 Protected files / areas
+
+DO NOT MODIFY:
+- `lib/routes/app_routes.dart`
+- `lib/routes/app_router.dart`
+- `lib/core/navigation/app_shell.dart`
+- `lib/features/search/domain/**`
+- `lib/features/search/data/**`
+- `lib/features/search/navigation/**`
+- `lib/features/saved/domain/**`
+- `lib/features/saved/data/**`
+- `lib/data/local/hive_helper.dart`
+- Encyclopedia repositories/content/generated outputs
+- Directory repository/domain/detail logic
+- Auth
+- Startup
+- Backend
+- Supabase
+- Schema
+- RLS
+- Migrations
+- Article UI / R10.5 work
+- Content Studio
+- Exporter
+- `draft_jsons/**`
+- `app_ready_jsons/**`
+- `assets/encyclopedia/**`
+
+Protected dirty baseline (untouched):
+- `test/a5_6_profile_bootstrap_test.dart`
+- `test/v1_r08_cloud_profile_foundation_test.dart`
+- `test/v1_r08_profile_edit_screen_widget_test.dart`
+- `OpenCode_Usage_Report.txt`
+- `artifacts/`
+
+### B.9 Test boundary
+
+Expected focused tests:
+
+Search:
+- `test/global_search_screen_test.dart`
+- `test/home_search_hook_test.dart`
+- `test/search_aggregator_test.dart`
+- `test/search_route_resolver_test.dart`
+
+Saved:
+- `test/saved_screen_favorites_test.dart`
+- `test/w5_6_saved_screen_directory_test.dart`
+- `test/encyclopedia_favorites_test.dart`
+- `test/saved_reference_resolver_test.dart`
+- `test/w5_6_saved_reference_store_test.dart`
+- `test/ui_safe_1_screen_regression_test.dart`
+- `test/user_area_route_test.dart`
+
+Implementation may update existing presentation/widget tests and add a narrowly
+focused feature-local widget test only if necessary. Semantic regression tests
+must not be weakened.
+
+### B.10 Acceptance target
+
+SEARCH:
+- Arabic RTL;
+- English LTR;
+- Light;
+- Dark;
+- Compact;
+- Expanded/readable width;
+- direction-aware affordance;
+- existing lifecycle/route semantics unchanged.
+
+SAVED:
+- Arabic RTL;
+- English LTR;
+- Light;
+- Dark;
+- Compact;
+- Expanded/readable width;
+- Favorites/Downloads preserved;
+- type semantics preserved;
+- >= 48x48 owned touch target;
+- bottom clearance preserved.
+
+Manual runtime review is required after the automated implementation gate.
+
+### B.11 Boundaries with later phases (preserved)
+
+- R10.5 remains NOT AUTHORIZED and owns Article visual/presentation work and
+  cross-feature visual adoption. Article work is NOT pulled into R10.4-B.
+- R10.4-B makes no change to routing, auth/startup/backend, calculator
+  formulas, Directory business authority, Encyclopedia SSOT, Search/Saved
+  domain semantics, or content authority.
+
+---
