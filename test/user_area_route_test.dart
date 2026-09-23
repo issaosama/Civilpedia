@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -157,26 +158,30 @@ class _FakeBusinessAppGateway implements BusinessApplicationGateway {
     required String currentUserId,
     Map<String, dynamic>? metadata,
   }) async => const BusinessApplicationCreateDenied(
-      BusinessApplicationRejectionCause.invalidMetadata);
+    BusinessApplicationRejectionCause.invalidMetadata,
+  );
 
   @override
   Future<BusinessApplicationCreateResult> createClaimDraft({
     required String currentUserId,
     required String targetEntityId,
   }) async => const BusinessApplicationCreateDenied(
-      BusinessApplicationRejectionCause.missingTarget);
+    BusinessApplicationRejectionCause.missingTarget,
+  );
 
   @override
   Future<BusinessApplicationSubmitResult> submitApplication(
     BusinessApplication application,
   ) async => const BusinessApplicationSubmitDenied(
-      BusinessApplicationSubmitCause.invalidTransition);
+    BusinessApplicationSubmitCause.invalidTransition,
+  );
 
   @override
   Future<BusinessApplicationSubmitResult> resubmitApplication(
     BusinessApplication application,
   ) async => const BusinessApplicationSubmitDenied(
-      BusinessApplicationSubmitCause.invalidTransition);
+    BusinessApplicationSubmitCause.invalidTransition,
+  );
 }
 
 /// Minimal staff gateway for the User Area route test. The staff entry must not
@@ -187,7 +192,7 @@ class _FakeStaffAccessGateway implements BusinessApplicationStaffGateway {
 
   @override
   Future<StaffReadResult<StaffApplicationCapabilities>>
-      getCapabilities() async {
+  getCapabilities() async {
     return const StaffReadSuccess(StaffApplicationCapabilities.empty());
   }
 
@@ -202,23 +207,23 @@ class _FakeStaffAccessGateway implements BusinessApplicationStaffGateway {
   @override
   Future<StaffReadResult<StaffApplicationDetail>> getApplicationDetail(
     String applicationId,
-  ) async => const StaffReadDenied(
-    BusinessApplicationStaffCause.applicationNotFound,
-  );
+  ) async =>
+      const StaffReadDenied(BusinessApplicationStaffCause.applicationNotFound);
 
   @override
   Future<BusinessApplicationStaffResult> beginReview(
-          String applicationId) async =>
-      const BusinessApplicationStaffDenied(
-          BusinessApplicationStaffCause.staffPermissionDenied);
+    String applicationId,
+  ) async => const BusinessApplicationStaffDenied(
+    BusinessApplicationStaffCause.staffPermissionDenied,
+  );
 
   @override
   Future<BusinessApplicationStaffResult> returnForCorrection(
     String applicationId, {
     required String reason,
-  }) async =>
-      const BusinessApplicationStaffDenied(
-          BusinessApplicationStaffCause.staffPermissionDenied);
+  }) async => const BusinessApplicationStaffDenied(
+    BusinessApplicationStaffCause.staffPermissionDenied,
+  );
 
   @override
   Future<BusinessApplicationStaffResult> markContacted(
@@ -226,9 +231,9 @@ class _FakeStaffAccessGateway implements BusinessApplicationStaffGateway {
     required String contactType,
     String? result,
     String? notes,
-  }) async =>
-      const BusinessApplicationStaffDenied(
-          BusinessApplicationStaffCause.staffPermissionDenied);
+  }) async => const BusinessApplicationStaffDenied(
+    BusinessApplicationStaffCause.staffPermissionDenied,
+  );
 
   @override
   Future<BusinessApplicationStaffResult> scheduleVisit(
@@ -236,28 +241,29 @@ class _FakeStaffAccessGateway implements BusinessApplicationStaffGateway {
     required DateTime scheduledAt,
     String? location,
     String? notes,
-  }) async =>
-      const BusinessApplicationStaffDenied(
-          BusinessApplicationStaffCause.staffPermissionDenied);
+  }) async => const BusinessApplicationStaffDenied(
+    BusinessApplicationStaffCause.staffPermissionDenied,
+  );
 
   @override
   Future<BusinessApplicationStaffResult> approve(String applicationId) async =>
       const BusinessApplicationStaffDenied(
-          BusinessApplicationStaffCause.staffPermissionDenied);
+        BusinessApplicationStaffCause.staffPermissionDenied,
+      );
 
   @override
   Future<BusinessApplicationStaffResult> reject(
     String applicationId, {
     required String reason,
-  }) async =>
-      const BusinessApplicationStaffDenied(
-          BusinessApplicationStaffCause.staffPermissionDenied);
+  }) async => const BusinessApplicationStaffDenied(
+    BusinessApplicationStaffCause.staffPermissionDenied,
+  );
 
   @override
-  Future<BusinessApplicationStaffResult> activate(
-          String applicationId) async =>
+  Future<BusinessApplicationStaffResult> activate(String applicationId) async =>
       const BusinessApplicationStaffDenied(
-          BusinessApplicationStaffCause.staffPermissionDenied);
+        BusinessApplicationStaffCause.staffPermissionDenied,
+      );
 }
 
 /// V1-R08 — the User-area and business-application families are now
@@ -265,14 +271,14 @@ class _FakeStaffAccessGateway implements BusinessApplicationStaffGateway {
 /// authenticated [AuthProvider] so the router does not redirect to the
 /// session screen.
 AuthProvider _authenticatedAuth() => AuthProvider(
-      gateway: FakeAuthGateway(
-        restoredSession: const AuthSession(
-          userId: 'w3-4-authenticated-user',
-          email: 'w3.4@civilpedia.test',
-          displayName: 'W3.4 Tester',
-        ),
-      ),
-    );
+  gateway: FakeAuthGateway(
+    restoredSession: const AuthSession(
+      userId: 'w3-4-authenticated-user',
+      email: 'w3.4@civilpedia.test',
+      displayName: 'W3.4 Tester',
+    ),
+  ),
+);
 
 /// A guest session for the legacy public-route contract: `/profile/edit`
 /// remains reachable and keeps its W3.3 semantics for guests.
@@ -320,7 +326,12 @@ Widget _app(
           ),
         ),
     ],
-    child: MaterialApp.router(routerConfig: appRouter),
+    child: MaterialApp.router(
+      locale: const Locale('ar'),
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      routerConfig: appRouter,
+    ),
   );
 }
 
@@ -561,36 +572,39 @@ void main() {
       );
     });
 
-    testWidgets('exposes exactly My Managed Businesses/My Applications/Profile/Saved/Downloads and '
-        'no inventory-only entries', (tester) async {
-      final profileProvider = _profileProvider(stored: _profile());
-      await _open(tester, profileProvider, AppRoutes.user);
+    testWidgets(
+      'exposes exactly My Managed Businesses/My Applications/Profile/Saved/Downloads and '
+      'no inventory-only entries',
+      (tester) async {
+        final profileProvider = _profileProvider(stored: _profile());
+        await _open(tester, profileProvider, AppRoutes.user);
 
-      expect(
-        find.widgetWithText(ListTile, Ar.businessManageMyBusinesses),
-        findsOneWidget,
-      );
-      expect(
-        find.widgetWithText(ListTile, Ar.businessMyApplications),
-        findsOneWidget,
-      );
-      expect(find.widgetWithText(ListTile, Ar.profile), findsOneWidget);
-      expect(find.widgetWithText(ListTile, Ar.saved), findsOneWidget);
-      expect(find.widgetWithText(ListTile, Ar.downloads), findsOneWidget);
-      expect(
-        find.byType(ListTile),
-        findsNWidgets(5),
-        reason:
-            'hub is an aggregation surface for shipped destinations only — '
-            'My Managed Businesses (V1-R06), My Applications (V1-R04 §13), '
-            'Profile, Saved, Downloads are the shipped destinations; '
-            'activity/preferences/theme/language/backup/account are inventory '
-            'and must NOT be surfaced; the V1-R08 identity/cloud header '
-            'renders NO ListTiles, so the navigation-card inventory stays '
-            'exactly five',
-      );
-      expect(tester.takeException(), isNull);
-    });
+        expect(
+          find.widgetWithText(ListTile, Ar.businessManageMyBusinesses),
+          findsOneWidget,
+        );
+        expect(
+          find.widgetWithText(ListTile, Ar.businessMyApplications),
+          findsOneWidget,
+        );
+        expect(find.widgetWithText(ListTile, Ar.profile), findsOneWidget);
+        expect(find.widgetWithText(ListTile, Ar.saved), findsOneWidget);
+        expect(find.widgetWithText(ListTile, Ar.downloads), findsOneWidget);
+        expect(
+          find.byType(ListTile),
+          findsNWidgets(5),
+          reason:
+              'hub is an aggregation surface for shipped destinations only — '
+              'My Managed Businesses (V1-R06), My Applications (V1-R04 §13), '
+              'Profile, Saved, Downloads are the shipped destinations; '
+              'activity/preferences/theme/language/backup/account are inventory '
+              'and must NOT be surfaced; the V1-R08 identity/cloud header '
+              'renders NO ListTiles, so the navigation-card inventory stays '
+              'exactly five',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('tapping My Applications enters /business/applications', (
       tester,
@@ -598,7 +612,9 @@ void main() {
       final profileProvider = _profileProvider(stored: _profile());
       await _open(tester, profileProvider, AppRoutes.user);
 
-      await tester.tap(find.widgetWithText(ListTile, Ar.businessMyApplications));
+      await tester.tap(
+        find.widgetWithText(ListTile, Ar.businessMyApplications),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(MyApplicationsScreen), findsOneWidget);
@@ -679,9 +695,13 @@ void main() {
       await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
       await tester.pumpAndSettle();
 
-      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget,
-          reason: 'V1-R08 edits an authenticated session through the cloud '
-              'editor, never the local ProfileEditScreen');
+      expect(
+        find.byType(AuthenticatedProfileEditScreen),
+        findsOneWidget,
+        reason:
+            'V1-R08 edits an authenticated session through the cloud '
+            'editor, never the local ProfileEditScreen',
+      );
       expect(find.byType(ProfileEditScreen), findsNothing);
       expect(_topMatchedLocation(), AppRoutes.userProfileEdit);
       expect(tester.takeException(), isNull);
@@ -733,7 +753,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
 
-      await tester.pageBack();
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
 
       expect(find.byType(AuthenticatedProfileEditScreen), findsNothing);
@@ -761,9 +781,7 @@ void main() {
             ChangeNotifierProvider.value(value: auth),
             ChangeNotifierProvider.value(value: profileProvider),
           ],
-          child: const MaterialApp(
-            home: Scaffold(body: ProfileScreen()),
-          ),
+          child: const MaterialApp(home: Scaffold(body: ProfileScreen())),
         ),
       );
       await tester.pumpAndSettle();
@@ -787,7 +805,11 @@ void main() {
       await auth.restoreSession();
       await profileProvider.ensureCloudProfileLoaded();
 
-      await _pumpProfileScreen(tester, auth: auth, profileProvider: profileProvider);
+      await _pumpProfileScreen(
+        tester,
+        auth: auth,
+        profileProvider: profileProvider,
+      );
 
       // Cloud role + region are rendered from the canonical row.
       expect(profileProvider.isCloudBound, isTrue);
@@ -823,13 +845,20 @@ void main() {
       await auth.restoreSession();
       await profileProvider.ensureCloudProfileLoaded();
 
-      await _pumpProfileScreen(tester, auth: auth, profileProvider: profileProvider);
+      await _pumpProfileScreen(
+        tester,
+        auth: auth,
+        profileProvider: profileProvider,
+      );
 
       expect(profileProvider.isCloudBound, isTrue);
       expect(find.text(Ar.structuralEngineer), findsOneWidget);
       expect(find.text(Ar.profileNotSet), findsOneWidget);
-      expect(find.text(karkhId), findsNothing,
-          reason: 'a UUID literal must never be rendered');
+      expect(
+        find.text(karkhId),
+        findsNothing,
+        reason: 'a UUID literal must never be rendered',
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -869,10 +898,17 @@ void main() {
       await profileProvider.loadProfile();
       await profileProvider.ensureCloudProfileLoaded();
 
-      expect(profileProvider.profile, isNull,
-          reason: 'the local profile is never surfaced while authenticated');
+      expect(
+        profileProvider.profile,
+        isNull,
+        reason: 'the local profile is never surfaced while authenticated',
+      );
 
-      await _pumpProfileScreen(tester, auth: auth, profileProvider: profileProvider);
+      await _pumpProfileScreen(
+        tester,
+        auth: auth,
+        profileProvider: profileProvider,
+      );
 
       // Cloud (A) authority: displayed role + region come from the cloud row.
       expect(profileProvider.isCloudBound, isTrue);
@@ -880,10 +916,16 @@ void main() {
       expect(find.text(Ar.regionBaghdadKarkh), findsOneWidget);
 
       // Conflicting local (B) role + region must NOT be displayed anywhere.
-      expect(find.text(Ar.structuralEngineer), findsNothing,
-          reason: 'conflicting local role must never override the cloud role');
-      expect(find.text(Ar.regionBaghdadRusafa), findsNothing,
-          reason: 'conflicting local region must never override the cloud region');
+      expect(
+        find.text(Ar.structuralEngineer),
+        findsNothing,
+        reason: 'conflicting local role must never override the cloud role',
+      );
+      expect(
+        find.text(Ar.regionBaghdadRusafa),
+        findsNothing,
+        reason: 'conflicting local region must never override the cloud region',
+      );
       expect(tester.takeException(), isNull);
     });
   });
@@ -911,8 +953,11 @@ void main() {
 
       expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
       expect(find.byType(NotFoundScreen), findsNothing);
-      expect(find.text(Ar.profileNotAvailable), findsOneWidget,
-          reason: 'the authenticated editor fails closed without a cloud row');
+      expect(
+        find.text(Ar.profileNotAvailable),
+        findsOneWidget,
+        reason: 'the authenticated editor fails closed without a cloud row',
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -924,8 +969,11 @@ void main() {
 
       expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget);
       expect(find.byType(ProfileEditScreen), findsNothing);
-      expect(find.text(Ar.siteEngineer), findsNothing,
-          reason: 'a signed-in session must never edit a local surrogate');
+      expect(
+        find.text(Ar.siteEngineer),
+        findsNothing,
+        reason: 'a signed-in session must never edit a local surrogate',
+      );
       expect(tester.takeException(), isNull);
     });
 
@@ -1088,7 +1136,12 @@ void main() {
       // A GUEST owns the on-device profile: the legacy `/profile` →
       // `/profile/edit` local-edit flow is a signed-out contract (an
       // authenticated session edits the cloud SSOT instead).
-      await _open(tester, profileProvider, AppRoutes.profile, auth: _guestAuth());
+      await _open(
+        tester,
+        profileProvider,
+        AppRoutes.profile,
+        auth: _guestAuth(),
+      );
 
       await tester.tap(find.widgetWithText(ListTile, Ar.profileRole));
       await tester.pumpAndSettle();
@@ -1097,7 +1150,7 @@ void main() {
       expect(find.text(Ar.siteEngineer), findsOneWidget);
       expect(tester.takeException(), isNull);
 
-      await tester.pageBack();
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(find.byType(ProfileEditScreen), findsNothing);
       expect(find.text(Ar.backupAndRestore), findsOneWidget);
@@ -1161,9 +1214,13 @@ void main() {
 
       appRouter.go(AppRoutes.userProfileEdit, extra: _profile());
       await tester.pumpAndSettle();
-      expect(find.byType(AuthenticatedProfileEditScreen), findsOneWidget,
-          reason: 'an authenticated session must reach the cloud editor, '
-              'never the local ProfileEditScreen');
+      expect(
+        find.byType(AuthenticatedProfileEditScreen),
+        findsOneWidget,
+        reason:
+            'an authenticated session must reach the cloud editor, '
+            'never the local ProfileEditScreen',
+      );
       expect(find.byType(ProfileEditScreen), findsNothing);
       expect(_topMatchedLocation(), AppRoutes.userProfileEdit);
 
@@ -1187,10 +1244,7 @@ void main() {
       ]);
       // Saved and Profile are no longer visible shell destinations (they
       // remain directly routable root compatibility routes).
-      expect(
-        kShellDestinations.map((d) => d.route),
-        isNot(contains('/saved')),
-      );
+      expect(kShellDestinations.map((d) => d.route), isNot(contains('/saved')));
       expect(
         kShellDestinations.map((d) => d.route),
         isNot(contains('/profile')),

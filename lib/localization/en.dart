@@ -31,6 +31,8 @@ class En {
   static const String featuredCompanies = 'Featured Companies';
   static const String favorites = 'Favorites';
   static const String downloads = 'Downloads';
+  static const String savedArticlesSection = 'Articles';
+  static const String savedLoadError = 'Could not load saved items';
   static const String settings = 'Settings';
   static const String darkMode = 'Dark Mode';
   static const String language = 'Language';

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,8 @@ import 'helpers/canonical_directory_test_helpers.dart';
 
 class _FakeSavedStore implements SavedReferenceStore {
   final List<SavedItemReference> refs;
-  _FakeSavedStore([List<SavedItemReference> seed = const []]) : refs = List.of(seed);
+  _FakeSavedStore([List<SavedItemReference> seed = const []])
+    : refs = List.of(seed);
 
   @override
   Future<List<SavedItemReference>> loadAll() async => List.of(refs);
@@ -102,7 +104,8 @@ CanonicalDirectoryEntity _provider(
   );
 }
 
-String _uuid(int n) => '00000000-0000-0000-0000-${n.toString().padLeft(12, '0')}';
+String _uuid(int n) =>
+    '00000000-0000-0000-0000-${n.toString().padLeft(12, '0')}';
 
 SavedItemReference _dirRef(String id) => SavedItemReference(
   ownerDomain: SavedReferenceOwners.directory,
@@ -139,6 +142,9 @@ Future<void> _pump(
           ChangeNotifierProvider.value(value: favorites),
         ],
         child: MaterialApp.router(
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           routerConfig: canonicalDirectoryDetailRouter(
             home: SavedScreen(
               favoritesResolver: resolver,
@@ -164,7 +170,9 @@ void main() {
   const boxName = 'w5_6_saved_screen_directory_box';
 
   setUpAll(() async {
-    tempDir = await Directory.systemTemp.createTemp('civilpedia_w5_6_saved_dir');
+    tempDir = await Directory.systemTemp.createTemp(
+      'civilpedia_w5_6_saved_dir',
+    );
     await HiveHelper.init(path: tempDir.path, boxName: boxName);
   });
 
@@ -180,20 +188,28 @@ void main() {
   });
 
   group('W5.6 SavedScreen Directory section', () {
-    testWidgets('38. no Directory section when no Directory refs', (tester) async {
+    testWidgets('38. no Directory section when no Directory refs', (
+      tester,
+    ) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider(_uuid(1), name: 'Alpha'),
+        ]),
         store: _FakeSavedStore(const []),
       );
       expect(find.text(Ar.savedEngineeringDirectory), findsNothing);
       expect(find.text('Alpha'), findsNothing);
     });
 
-    testWidgets('39. Directory section appears with provider refs', (tester) async {
+    testWidgets('39. Directory section appears with provider refs', (
+      tester,
+    ) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider(_uuid(1), name: 'Alpha'),
+        ]),
         store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       expect(find.text(Ar.savedEngineeringDirectory), findsOneWidget);
@@ -202,7 +218,9 @@ void main() {
     testWidgets('40. resolved provider row shows name', (tester) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha Steel')]),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider(_uuid(1), name: 'Alpha Steel'),
+        ]),
         store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       expect(find.text('Alpha Steel'), findsOneWidget);
@@ -243,18 +261,32 @@ void main() {
           _provider(_uuid(2), name: 'Provider Two'),
           _provider(_uuid(3), name: 'Provider Three'),
         ]),
-        store: _FakeSavedStore([_dirRef(_uuid(1)), _dirRef(_uuid(2)), _dirRef(_uuid(3))]),
+        store: _FakeSavedStore([
+          _dirRef(_uuid(1)),
+          _dirRef(_uuid(2)),
+          _dirRef(_uuid(3)),
+        ]),
       );
-      expect(tester.getTopLeft(find.text('Provider One')).dy <
-          tester.getTopLeft(find.text('Provider Two')).dy, isTrue);
-      expect(tester.getTopLeft(find.text('Provider Two')).dy <
-          tester.getTopLeft(find.text('Provider Three')).dy, isTrue);
+      expect(
+        tester.getTopLeft(find.text('Provider One')).dy <
+            tester.getTopLeft(find.text('Provider Two')).dy,
+        isTrue,
+      );
+      expect(
+        tester.getTopLeft(find.text('Provider Two')).dy <
+            tester.getTopLeft(find.text('Provider Three')).dy,
+        isTrue,
+      );
     });
 
-    testWidgets('44. row tap opens DirectoryProviderDetailScreen', (tester) async {
+    testWidgets('44. row tap opens DirectoryProviderDetailScreen', (
+      tester,
+    ) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider(_uuid(1), name: 'Alpha'),
+        ]),
         store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       await tester.tap(find.text('Alpha'));
@@ -265,18 +297,22 @@ void main() {
     testWidgets('45. back returns to SavedScreen', (tester) async {
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider(_uuid(1), name: 'Alpha'),
+        ]),
         store: _FakeSavedStore([_dirRef(_uuid(1))]),
       );
       await tester.tap(find.text('Alpha'));
       await tester.pumpAndSettle();
       expect(find.byType(DirectoryProviderDetailScreen), findsOneWidget);
-      await tester.pageBack();
+      await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
       expect(find.byType(SavedScreen), findsOneWidget);
     });
 
-    testWidgets('46. missing provider renders Provider unavailable', (tester) async {
+    testWidgets('46. missing provider renders Provider unavailable', (
+      tester,
+    ) async {
       await _pump(
         tester,
         directoryRepo: FakeCloudDirectoryRepository(const []),
@@ -296,7 +332,9 @@ void main() {
       expect(find.byType(DirectoryProviderDetailScreen), findsNothing);
     });
 
-    testWidgets('48. missing provider ref is not silently deleted', (tester) async {
+    testWidgets('48. missing provider ref is not silently deleted', (
+      tester,
+    ) async {
       final store = _FakeSavedStore([_dirRef('missing')]);
       await _pump(
         tester,
@@ -309,11 +347,15 @@ void main() {
       expect(store.refs.single.entityId, 'missing');
     });
 
-    testWidgets('49. Knowledge Saved rendering remains unchanged', (tester) async {
+    testWidgets('49. Knowledge Saved rendering remains unchanged', (
+      tester,
+    ) async {
       // A Knowledge topic still renders alongside a Directory section.
       await _pump(
         tester,
-        directoryRepo: FakeCloudDirectoryRepository([_provider(_uuid(1), name: 'Alpha')]),
+        directoryRepo: FakeCloudDirectoryRepository([
+          _provider(_uuid(1), name: 'Alpha'),
+        ]),
         store: _FakeSavedStore([_dirRef(_uuid(1))]),
         topicIds: const ['t1'],
         topics: [_topic('t1', 'الموضوع الأول')],

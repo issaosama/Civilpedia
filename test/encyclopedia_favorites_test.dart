@@ -14,6 +14,7 @@ import 'package:civilpedia/features/saved/domain/saved_reference_resolver.dart';
 import 'package:civilpedia/features/saved/presentation/saved_screen.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -309,6 +310,9 @@ void main() {
       var removed = false;
       await tester.pumpWidget(
         MaterialApp(
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
           home: Scaffold(
             body: TopicListCard(
               topic: _topic('t1', 'الموضوع الأول'),
@@ -322,6 +326,29 @@ void main() {
 
       await tester.tap(find.byTooltip(Ar.removeFromFavorites));
       expect(removed, isTrue);
+      expect(tester.getSize(find.byType(IconButton)), const Size(48, 48));
+    });
+
+    testWidgets('TopicListCard remove tooltip follows English locale', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          locale: const Locale('en'),
+          supportedLocales: const [Locale('ar'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          home: Scaffold(
+            body: TopicListCard(
+              topic: _topic('t1', 'Topic'),
+              isDark: false,
+              onTap: () {},
+              onRemove: () {},
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byTooltip('Remove from favorites'), findsOneWidget);
     });
 
     testWidgets('SavedScreen shows encyclopedia topics and unsave updates UI', (
@@ -351,7 +378,12 @@ void main() {
             ),
             ChangeNotifierProvider.value(value: favoritesProvider),
           ],
-          child: MaterialApp(home: SavedScreen(favoritesResolver: resolver)),
+          child: MaterialApp(
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: SavedScreen(favoritesResolver: resolver),
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -392,7 +424,12 @@ void main() {
             ),
             ChangeNotifierProvider.value(value: favoritesProvider),
           ],
-          child: MaterialApp(home: SavedScreen(favoritesResolver: resolver)),
+          child: MaterialApp(
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: SavedScreen(favoritesResolver: resolver),
+          ),
         ),
       );
       await tester.pumpAndSettle();

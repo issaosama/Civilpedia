@@ -9,11 +9,14 @@ import 'package:provider/provider.dart';
 import 'package:civilpedia/core/navigation/app_shell.dart';
 import 'package:civilpedia/core/services/connectivity_provider.dart';
 import 'package:civilpedia/core/services/transport_source.dart';
+import 'package:civilpedia/core/theme/app_colors.dart';
+import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/core/widgets/civil_surface_card.dart';
 import 'package:civilpedia/features/search/domain/search_aggregator.dart';
 import 'package:civilpedia/features/search/domain/search_result.dart';
 import 'package:civilpedia/features/search/presentation/screens/global_search_screen.dart';
 import 'package:civilpedia/localization/ar.dart';
+import 'package:civilpedia/localization/en.dart';
 import 'package:civilpedia/routes/app_routes.dart';
 
 final GlobalKey<NavigatorState> _rootKey = GlobalKey<NavigatorState>();
@@ -134,20 +137,26 @@ SearchAggregator _gatedAggregator(
   );
 }
 
-Future<void> _pumpRouter(WidgetTester tester, GoRouter router) async {
+Future<void> _pumpRouter(
+  WidgetTester tester,
+  GoRouter router, {
+  Locale locale = const Locale('ar'),
+  ThemeData? theme,
+}) async {
   final connectivity = ConnectivityProvider(source: _FakeTransportSource());
   await connectivity.initialization;
   await tester.pumpWidget(
     ChangeNotifierProvider<ConnectivityProvider>.value(
       value: connectivity,
       child: MaterialApp.router(
-        locale: const Locale('ar'),
-        supportedLocales: const [Locale('ar')],
+        locale: locale,
+        supportedLocales: const [Locale('ar'), Locale('en')],
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
+        theme: theme,
         routerConfig: router,
       ),
     ),
@@ -597,6 +606,64 @@ void main() {
       Directionality.of(tester.element(find.byType(TextField))),
       TextDirection.rtl,
     );
+  });
+
+  testWidgets('English Search is LTR with a forward affordance', (
+    tester,
+  ) async {
+    final router = _buildTestRouter(
+      aggregator: _fakeAggregator(const [
+        SearchResult(
+          id: 'k1',
+          type: SearchResultType.knowledge,
+          title: 'Concrete',
+        ),
+      ]),
+    );
+    await _pumpRouter(tester, router, locale: const Locale('en'));
+    await _openSearch(tester, router);
+
+    expect(find.text(En.globalSearchTitle), findsOneWidget);
+    expect(
+      Directionality.of(tester.element(find.byType(TextField))),
+      TextDirection.ltr,
+    );
+
+    await _type(tester, 'Concrete');
+    expect(find.byIcon(Icons.chevron_right), findsOneWidget);
+    expect(find.byIcon(Icons.chevron_left), findsNothing);
+  });
+
+  testWidgets('Search uses dark technical tokens and a readable wide width', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1000, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final router = _buildTestRouter(
+      aggregator: _fakeAggregator(const [
+        SearchResult(
+          id: 'k1',
+          type: SearchResultType.knowledge,
+          title: 'Concrete',
+        ),
+      ]),
+    );
+    await _pumpRouter(
+      tester,
+      router,
+      locale: const Locale('en'),
+      theme: AppTheme.darkTheme,
+    );
+    await _openSearch(tester, router);
+    await _type(tester, 'Concrete');
+
+    final resultCard = find.byType(CivilSurfaceCard).first;
+    expect(tester.getSize(resultCard).width, lessThanOrEqualTo(760));
+    final knowledgeIcon = tester.widget<Icon>(
+      find.byIcon(Icons.menu_book_outlined),
+    );
+    expect(knowledgeIcon.color, AppColors.darkBrandBlue);
   });
 
   group('W2.4 refinement — launcher + live search contract', () {

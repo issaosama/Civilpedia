@@ -122,17 +122,17 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R10
 CURRENT_PHASE_TITLE: UI/UX & Core App Experience
-CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.4-B CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5 CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
 CURRENT_PHASE_CONTRACT: docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.4-B ONLY (implementation NOT started)
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5 ONLY (implementation NOT started)
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
 
-The Architect contract freeze is recorded. R10.4-A (Home Production Visual Pass)
-is CLOSED / ACCEPTED. Only the current R10.4-B slice (the already-defined
-remaining R10.4 Core Discovery work) is authorized; its implementation is NOT
-yet started. R10.5 and broader propagation remain future / locked.
+The Architect contract freeze is recorded. R10.4 (Core Discovery: Home / Search /
+Saved) is CLOSED / ACCEPTED via R10.4-A + R10.4-B. Only the current R10.5 slice
+(Cross-Feature Visual Adoption Pass) is authorized; its implementation is NOT
+yet started. R10.6 and R10.7 remain future / locked relative to R10.5.
 
 ---
 
@@ -2934,6 +2934,93 @@ Content Studio protection (unchanged by this task):
   Exporter, article data/model, article rendering, or Article UI.
 - The future R10.5 Article task will first perform a read-only ownership audit
   before any implementation.
+
+---
+
+### V1-R10.4-B Formal Closure Record
+
+Slice: R10.4-B — Search + Saved Production Visual Pass
+Contract: V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md APPENDIX B — V1-R10.4-B
+  IMPLEMENTATION CONTRACT FREEZE (frozen semantics preserved unchanged; only
+  this append-only formal closure record is added)
+Architect decision: PASS — R10.4-B ACCEPTED
+Status: CLOSED / ACCEPTED
+Implementation commit: PENDING OWNER COMMIT (R10.4-B work remains accumulated
+  and uncommitted above HEAD == origin/main == 00d09f1c8fc93be8f52e8ad0fad1d078daf56d75)
+Owner approval: PENDING OWNER STAGING (user is the sole Git owner)
+
+Acceptance evidence (all complete):
+- implementation: COMPLETED
+- Search focused gate: 58 PASS / 0 FAIL
+- Saved focused gate: 122 PASS / 0 FAIL
+- independent post-implementation review: PASS
+- manual runtime / visual review: PASS
+- Arabic RTL: PASS
+- English LTR: PASS
+- Light: PASS
+- Dark: PASS
+- responsive / readable-width behavior: PASS
+- Search semantics: PRESERVED
+- Saved persistence/resolution semantics: PRESERVED
+- unresolved HIGH findings: NONE
+- unresolved MEDIUM findings: NONE
+- unresolved LOW findings: NONE
+
+Scope / non-change confirmation (R10.4-B):
+- no routing semantic changes
+- no Search domain/data/navigation changes
+- no Saved domain/data changes
+- no Hive authority changes
+- no Directory authority changes
+- no Encyclopedia SSOT changes
+- no Article / Content Studio changes
+- no R10.5 implementation performed inside R10.4-B
+
+---
+
+### V1-R10.4 Formal Closure Record (parent slice)
+
+Slice: R10.4 — Core Discovery: Home / Search / Saved
+Status: CLOSED / ACCEPTED
+Composed of:
+- R10.4-A — Home Production Visual Pass: CLOSED / ACCEPTED
+- R10.4-B — Search + Saved Production Visual Pass: CLOSED / ACCEPTED
+Scope / non-change confirmation (R10.4 overall):
+- no routing semantic changes
+- no Search domain/data/navigation changes
+- no Saved domain/data changes
+- no Hive authority changes
+- no Directory authority changes
+- no Encyclopedia SSOT changes
+- no Article / Content Studio changes
+- no calculator formula changes
+- no auth / startup / backend changes
+
+---
+
+### V1-R10.5 Current / Authorized Record
+
+Slice: R10.5 — Cross-Feature Visual Adoption Pass
+Previous status: future / locked relative to the current R10.4-B slice
+New status: CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5 ONLY (implementation NOT started)
+Implementation: NOT STARTED
+
+Decisions (unchanged by this documentation task):
+- R10.5 scope remains the existing V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT
+  R10.5 Cross-Feature Visual Adoption Pass; existing R10.5 contract/scope is
+  preserved and NOT redefined.
+- implementation is NOT started by this task.
+- R10.6 and R10.7 remain future / locked relative to R10.5.
+
+Article sequencing (append-only, non-duplicative):
+- Article presentation work is now eligible under the existing V1-R10.5
+  Cross-Feature Visual Adoption scope.
+- No separate phase ID is required.
+- Future Article work must remain presentation-only unless a later Architect
+  decision explicitly expands scope.
+- Content Studio / content SSOT / article body ordering remain protected.
+- The Article implementation design is NOT frozen by this documentation task.
 
 ---
 

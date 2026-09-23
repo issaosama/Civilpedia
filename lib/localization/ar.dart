@@ -31,6 +31,7 @@ class Ar {
   static const String favorites = 'المفضلة';
   static const String downloads = 'التحميلات';
   static const String savedArticlesSection = 'المقالات';
+  static const String savedLoadError = 'تعذر تحميل المحفوظات';
   static const String settings = 'الإعدادات';
   static const String darkMode = 'الوضع الليلي';
   static const String language = 'اللغة';

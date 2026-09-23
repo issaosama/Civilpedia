@@ -10,6 +10,7 @@ import '../../../../core/widgets/civil_app_bar.dart';
 import '../../../../core/widgets/civil_surface_card.dart';
 import '../../../../core/widgets/search_bar_widget.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../../data/search_aggregator_production.dart';
 import '../../domain/search_aggregator.dart';
 import '../../domain/search_result.dart';
@@ -126,88 +127,102 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
 
     return Scaffold(
-      appBar: CivilAppBar(title: const Text(Ar.globalSearchTitle)),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.lg,
-              AppSpacing.md,
-              AppSpacing.lg,
-              AppSpacing.xs,
+      appBar: CivilAppBar(
+        title: Text(isArabic ? Ar.globalSearchTitle : En.globalSearchTitle),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final gutter = constraints.maxWidth < 600
+              ? AppSpacing.lg
+              : constraints.maxWidth < 840
+              ? AppSpacing.xl + AppSpacing.xs
+              : AppSpacing.xl + AppSpacing.md;
+          final availableWidth = constraints.maxWidth - (gutter * 2);
+          final contentWidth = availableWidth > 760.0 ? 760.0 : availableWidth;
+
+          return Align(
+            alignment: AlignmentDirectional.topCenter,
+            child: SizedBox(
+              width: contentWidth,
+              height: constraints.maxHeight,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(
+                      top: AppSpacing.md,
+                      bottom: AppSpacing.xs,
+                    ),
+                    child: SearchBarWidget(
+                      controller: _searchController,
+                      onChanged: _onQueryChanged,
+                      onSubmitted: _onSubmitted,
+                      hintText: isArabic
+                          ? Ar.globalSearchHint
+                          : En.globalSearchHint,
+                      lightSurface: !isDark,
+                      autofocus: true,
+                    ),
+                  ),
+                  Expanded(
+                    child: _buildResults(
+                      context,
+                      isDark,
+                      mutedText,
+                      isArabic: isArabic,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: SearchBarWidget(
-              controller: _searchController,
-              onChanged: _onQueryChanged,
-              onSubmitted: _onSubmitted,
-              hintText: Ar.globalSearchHint,
-              lightSurface: !isDark,
-              autofocus: true,
-            ),
-          ),
-          Expanded(child: _buildResults(context, isDark, mutedText)),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildResults(BuildContext context, bool isDark, Color mutedText) {
+  Widget _buildResults(
+    BuildContext context,
+    bool isDark,
+    Color mutedText, {
+    required bool isArabic,
+  }) {
     if (_loading) {
-      return const Center(child: CircularProgressIndicator());
+      return _SearchStateView.loading(
+        label: isArabic ? Ar.loading : En.loading,
+      );
     }
 
     if (_query.isEmpty) {
-      return _message(
+      return _SearchStateView.message(
         icon: Icons.search,
-        text: Ar.initialSearchPrompt,
+        text: isArabic ? Ar.initialSearchPrompt : En.initialSearchPrompt,
         color: mutedText,
       );
     }
 
     if (_results.isEmpty) {
-      return _message(
+      return _SearchStateView.message(
         icon: Icons.search_off,
-        text: Ar.noSearchResults,
+        text: isArabic ? Ar.noSearchResults : En.noSearchResults,
         color: mutedText,
       );
     }
 
     return ListView.separated(
-      padding: AppSpacing.padLg,
+      padding: const EdgeInsetsDirectional.only(
+        top: AppSpacing.md,
+        bottom: AppSpacing.xl,
+      ),
       itemCount: _results.length,
       separatorBuilder: (_, __) => AppSpacing.gapMd,
       itemBuilder: (context, index) =>
           _resultTile(context, _results[index], isDark: isDark),
-    );
-  }
-
-  Widget _message({
-    required IconData icon,
-    required String text,
-    required Color color,
-  }) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: color),
-            AppSpacing.gapMd,
-            Text(
-              text,
-              textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: color),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -218,58 +233,149 @@ class _GlobalSearchScreenState extends State<GlobalSearchScreen> {
   }) {
     final isTool = result.type == SearchResultType.tool;
     final resolved = _resolver.routeFor(type: result.type, id: result.id);
+    final isActionable = resolved != null;
     final secondary = isDark
         ? AppColors.darkTextSecondary
         : AppColors.textSecondary;
+    final accent = isTool
+        ? (isDark ? AppColors.darkBrandAmber : AppColors.brandAmberPressed)
+        : (isDark ? AppColors.darkBrandBlue : AppColors.brandBlue);
+    final iconSurface = isTool
+        ? (isDark ? AppColors.darkWarningSoft : AppColors.brandAmberSoft)
+        : (isDark ? AppColors.darkInfoSoft : AppColors.brandBlueSoft);
+    final forwardIcon = Directionality.of(context) == TextDirection.rtl
+        ? Icons.chevron_left
+        : Icons.chevron_right;
 
-    return CivilSurfaceCard(
-      onTap: resolved == null ? null : () => _openResult(result),
-      padding: const EdgeInsetsDirectional.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.md,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
+    return Semantics(
+      button: isActionable,
+      enabled: isActionable,
+      label: result.title,
+      child: CivilSurfaceCard(
+        hasBorder: true,
+        onTap: isActionable ? () => _openResult(result) : null,
+        padding: const EdgeInsetsDirectional.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: iconSurface,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
+              ),
+              child: Icon(
+                isTool ? Icons.calculate_outlined : Icons.menu_book_outlined,
+                color: accent,
+                size: 22,
+              ),
             ),
-            child: Icon(
-              isTool ? Icons.calculate_outlined : Icons.menu_book_outlined,
-              color: AppColors.primaryDark,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  result.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (result.subtitle != null && result.subtitle!.isNotEmpty) ...[
-                  const SizedBox(height: 2),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    result.subtitle!,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodySmall?.copyWith(color: secondary),
+                    result.title,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                  if (result.subtitle != null &&
+                      result.subtitle!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      result.subtitle!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(color: secondary),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
+            if (isActionable) Icon(forwardIcon, color: secondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchStateView extends StatelessWidget {
+  const _SearchStateView._({
+    required this.label,
+    this.icon,
+    this.color,
+    this.loading = false,
+  });
+
+  factory _SearchStateView.loading({required String label}) =>
+      _SearchStateView._(label: label, loading: true);
+
+  factory _SearchStateView.message({
+    required IconData icon,
+    required String text,
+    required Color color,
+  }) => _SearchStateView._(label: text, icon: icon, color: color);
+
+  final String label;
+  final IconData? icon;
+  final Color? color;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final effectiveColor = color ?? theme.colorScheme.onSurfaceVariant;
+
+    return Semantics(
+      label: label,
+      liveRegion: loading,
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.xl + AppSpacing.md),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (loading)
+                SizedBox.square(
+                  dimension: 36,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    color: theme.colorScheme.secondary,
+                  ),
+                )
+              else
+                Container(
+                  width: 48,
+                  height: 48,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainer,
+                    borderRadius: BorderRadius.circular(
+                      DesignTokens.radiusIcon,
+                    ),
+                  ),
+                  child: Icon(icon, size: 28, color: effectiveColor),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: effectiveColor,
+                ),
+              ),
+            ],
           ),
-          Icon(Icons.chevron_right, color: secondary),
-        ],
+        ),
       ),
     );
   }

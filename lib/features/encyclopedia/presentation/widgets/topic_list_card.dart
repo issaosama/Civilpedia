@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../../domain/entities/engineering_topic.dart';
 import 'topic_card_chip.dart';
 
@@ -21,13 +22,14 @@ class TopicListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final hasCover =
         topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
     final cardColor = isDark ? AppColors.darkSurface : AppColors.surfaceWarm;
-    final secondaryText =
-        isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
-    final mutedText =
-        isDark ? AppColors.darkTextMuted : AppColors.textMuted;
+    final secondaryText = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
+    final mutedText = isDark ? AppColors.darkTextMuted : AppColors.textMuted;
 
     return Card(
       elevation: 0,
@@ -35,7 +37,8 @@ class TopicListCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
         side: BorderSide(
-            color: isDark ? AppColors.darkBorder : AppColors.border),
+          color: isDark ? AppColors.darkBorder : AppColors.border,
+        ),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
@@ -50,25 +53,22 @@ class TopicListCard extends StatelessWidget {
                   hasCover
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(
-                              DesignTokens.radiusSm),
+                            DesignTokens.radiusSm,
+                          ),
                           child: SizedBox(
                             width: 44,
                             height: 44,
                             child: Image.asset(
                               topic.coverImageUrl!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _defaultTopicIcon(
+                              errorBuilder: (_, __, ___) => _defaultTopicIcon(
                                 isDark: isDark,
                                 mutedText: mutedText,
                               ),
                             ),
                           ),
                         )
-                      : _defaultTopicIcon(
-                          isDark: isDark,
-                          mutedText: mutedText,
-                        ),
+                      : _defaultTopicIcon(isDark: isDark, mutedText: mutedText),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(
@@ -76,9 +76,7 @@ class TopicListCard extends StatelessWidget {
                       children: [
                         Text(
                           topic.titleAr,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.w700),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -88,9 +86,7 @@ class TopicListCard extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 2),
                             child: Text(
                               topic.titleEn!,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(color: secondaryText),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -102,10 +98,19 @@ class TopicListCard extends StatelessWidget {
                   onRemove != null
                       ? IconButton(
                           onPressed: onRemove,
-                          icon: const Icon(Icons.favorite, size: 20, color: AppColors.error),
-                          tooltip: Ar.removeFromFavorites,
+                          icon: const Icon(
+                            Icons.favorite,
+                            size: 20,
+                            color: AppColors.error,
+                          ),
+                          tooltip: isArabic
+                              ? Ar.removeFromFavorites
+                              : En.removeFromFavorites,
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                          constraints: const BoxConstraints(
+                            minWidth: 48,
+                            minHeight: 48,
+                          ),
                         )
                       : Icon(_forwardIcon(context), color: mutedText),
                 ],
@@ -114,9 +119,9 @@ class TopicListCard extends StatelessWidget {
               Text(
                 topic.summary,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w400,
-                      color: secondaryText,
-                    ),
+                  fontWeight: FontWeight.w400,
+                  color: secondaryText,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -135,10 +140,7 @@ class TopicListCard extends StatelessWidget {
         : Icons.chevron_right;
   }
 
-  Widget _defaultTopicIcon({
-    required bool isDark,
-    required Color mutedText,
-  }) {
+  Widget _defaultTopicIcon({required bool isDark, required Color mutedText}) {
     final bgColor = mutedText.withValues(alpha: 0.10);
     return Container(
       width: 44,
@@ -166,7 +168,9 @@ class _TopicCardChipsList extends StatelessWidget {
     return Wrap(
       spacing: 4,
       runSpacing: 2,
-      children: chips.map((chip) => TopicCardChip(label: chip, isDark: isDark)).toList(),
+      children: chips
+          .map((chip) => TopicCardChip(label: chip, isDark: isDark))
+          .toList(),
     );
   }
 }

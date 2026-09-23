@@ -7,11 +7,12 @@ import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
+import '../../../core/widgets/civil_app_bar.dart';
 import '../../../core/widgets/civil_surface_card.dart';
-import '../../../core/widgets/custom_card.dart';
 import '../../../data/local/hive_helper.dart';
 import '../../../data/repositories/article_repository.dart';
 import '../../../localization/ar.dart';
+import '../../../localization/en.dart';
 import '../../../routes/app_routes.dart';
 import '../../articles/presentation/widgets/article_image.dart';
 import '../../directory/domain/canonical_directory_entity.dart';
@@ -76,6 +77,7 @@ class _SavedScreenState extends State<SavedScreen>
 
   List<SavedItemReference> _favorites = const [];
   bool _favoritesLoaded = false;
+  bool _favoritesLoadFailed = false;
   int _loadGeneration = 0;
   EncyclopediaFavoritesProvider? _favoritesProvider;
 
@@ -139,9 +141,12 @@ class _SavedScreenState extends State<SavedScreen>
           final directoryRefs = _directoryRefs(refs);
           setState(() {
             _favorites = refs;
-            _directoryProviders =
-                List<CanonicalDirectoryEntity?>.filled(directoryRefs.length, null);
+            _directoryProviders = List<CanonicalDirectoryEntity?>.filled(
+              directoryRefs.length,
+              null,
+            );
             _favoritesLoaded = true;
+            _favoritesLoadFailed = false;
           });
           await _resolveDirectoryProviders(directoryRefs, generation);
         })
@@ -151,6 +156,7 @@ class _SavedScreenState extends State<SavedScreen>
             _favorites = const <SavedItemReference>[];
             _directoryProviders = const [];
             _favoritesLoaded = true;
+            _favoritesLoadFailed = true;
           });
         });
   }
@@ -176,16 +182,17 @@ class _SavedScreenState extends State<SavedScreen>
     if (directoryRefs.isEmpty) return;
 
     final repo = widget.directoryRepository ?? AppDependencies.directoryRepo;
-    final providers =
-        List<CanonicalDirectoryEntity?>.filled(directoryRefs.length, null);
+    final providers = List<CanonicalDirectoryEntity?>.filled(
+      directoryRefs.length,
+      null,
+    );
     final unresolvedIndices = <int>[];
 
     // Read cache once and publish cached matches immediately.
     final cached = await repo.readCache();
     for (var i = 0; i < directoryRefs.length; i++) {
       final entityId = directoryRefs[i].entityId;
-      if (entityId.isEmpty ||
-          !CanonicalDirectoryEntity.isValidUuid(entityId)) {
+      if (entityId.isEmpty || !CanonicalDirectoryEntity.isValidUuid(entityId)) {
         continue;
       }
       final entity = cached?.byId(entityId);
@@ -229,21 +236,48 @@ class _SavedScreenState extends State<SavedScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(Ar.saved),
+      appBar: CivilAppBar(
+        title: Text(isArabic ? Ar.saved : En.saved),
+        showDivider: false,
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: Ar.favorites),
-            Tab(text: Ar.downloads),
+          tabs: [
+            Tab(text: isArabic ? Ar.favorites : En.favorites),
+            Tab(text: isArabic ? Ar.downloads : En.downloads),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildFavoritesList(), _buildDownloadsList()],
+        children: [
+          _responsiveTab(_buildFavoritesList()),
+          _responsiveTab(_buildDownloadsList()),
+        ],
       ),
+    );
+  }
+
+  Widget _responsiveTab(Widget child) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gutter = constraints.maxWidth < 600
+            ? AppSpacing.lg
+            : constraints.maxWidth < 840
+            ? AppSpacing.xl + AppSpacing.xs
+            : AppSpacing.xl + AppSpacing.md;
+        final availableWidth = constraints.maxWidth - (gutter * 2);
+        final contentWidth = availableWidth > 760.0 ? 760.0 : availableWidth;
+        return Align(
+          alignment: AlignmentDirectional.topCenter,
+          child: SizedBox(
+            width: contentWidth,
+            height: constraints.maxHeight,
+            child: child,
+          ),
+        );
+      },
     );
   }
 
@@ -253,7 +287,24 @@ class _SavedScreenState extends State<SavedScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (!favoritesProvider.isLoaded || !_favoritesLoaded) {
-      return const Center(child: CircularProgressIndicator());
+      return _buildLoadingState();
+    }
+
+    if (_favoritesLoadFailed) {
+      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+      return _buildStateView(
+        icon: Icons.error_outline_rounded,
+        message: isArabic ? Ar.savedLoadError : En.savedLoadError,
+        iconColor: Theme.of(context).colorScheme.error,
+        actionLabel: isArabic ? Ar.retry : En.retry,
+        onAction: () {
+          setState(() {
+            _favoritesLoaded = false;
+            _favoritesLoadFailed = false;
+          });
+          _loadFavorites();
+        },
+      );
     }
 
     final topicIds = <String>[];
@@ -278,41 +329,25 @@ class _SavedScreenState extends State<SavedScreen>
     final hasDirectory = _directoryProviders.isNotEmpty;
 
     if (!hasEncyclopedia && !hasLegacy && !hasDirectory) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.favorite_border,
-              size: 64,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              Ar.noFavorites,
-              style: TextStyle(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
+      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+      return _buildStateView(
+        icon: Icons.favorite_border,
+        message: isArabic ? Ar.noFavorites : En.noFavorites,
       );
     }
 
     return ListView(
       padding: EdgeInsets.only(
-        left: AppConstants.paddingMedium,
-        right: AppConstants.paddingMedium,
         top: AppConstants.paddingMedium,
         bottom: shellSafeBottomPadding(context),
       ),
       children: [
         if (hasEncyclopedia) ...[
-          _sectionHeader(Ar.engineeringEncyclopedia),
+          _sectionHeader(
+            Localizations.localeOf(context).languageCode == 'ar'
+                ? Ar.engineeringEncyclopedia
+                : En.engineeringEncyclopedia,
+          ),
           for (final topic in encyclopediaTopics) ...[
             TopicListCard(
               topic: topic,
@@ -324,9 +359,15 @@ class _SavedScreenState extends State<SavedScreen>
           ],
         ],
         if (hasLegacy) ...[
-          if (hasEncyclopedia) _sectionHeader(Ar.savedArticlesSection),
+          if (hasEncyclopedia)
+            _sectionHeader(
+              Localizations.localeOf(context).languageCode == 'ar'
+                  ? Ar.savedArticlesSection
+                  : En.savedArticlesSection,
+            ),
           for (final article in favoriteArticles) ...[
-            CustomCard(
+            CivilSurfaceCard(
+              hasBorder: true,
               onTap: () => context.push('/article/${article.id}'),
               child: Row(
                 children: [
@@ -355,7 +396,11 @@ class _SavedScreenState extends State<SavedScreen>
           ],
         ],
         if (hasDirectory) ...[
-          _sectionHeader(Ar.savedEngineeringDirectory),
+          _sectionHeader(
+            Localizations.localeOf(context).languageCode == 'ar'
+                ? Ar.savedEngineeringDirectory
+                : En.savedEngineeringDirectory,
+          ),
           for (final provider in _directoryProviders) ...[
             _buildDirectoryRow(provider),
             const SizedBox(height: 12),
@@ -374,10 +419,17 @@ class _SavedScreenState extends State<SavedScreen>
   /// verification/ranking/sponsored/plan signals, and no saved button inside
   /// the already-Saved list.
   Widget _buildDirectoryRow(CanonicalDirectoryEntity? provider) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final entityType = provider?.entityType ?? 'other';
     final icon = CanonicalEntityTypePresentation.iconFor(entityType);
+    final iconSurface = isDark
+        ? AppColors.darkInfoSoft
+        : AppColors.brandBlueSoft;
+    final iconColor = isDark ? AppColors.darkBrandBlue : AppColors.brandBlue;
     return CivilSurfaceCard(
+      hasBorder: true,
       onTap: provider == null ? null : () => _openSavedProvider(provider),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -385,11 +437,12 @@ class _SavedScreenState extends State<SavedScreen>
           Container(
             width: 40,
             height: 40,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.primarySoft.withValues(alpha: 0.5),
+              color: iconSurface,
               borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
             ),
-            child: Icon(icon, color: AppColors.primaryDark, size: 22),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -407,7 +460,9 @@ class _SavedScreenState extends State<SavedScreen>
                   )
                 else
                   Text(
-                    Ar.savedProviderUnavailable,
+                    isArabic
+                        ? Ar.savedProviderUnavailable
+                        : En.savedProviderUnavailable,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -420,7 +475,7 @@ class _SavedScreenState extends State<SavedScreen>
                 if (provider != null) ...[
                   const SizedBox(height: 2),
                   Text(
-                    _providerSubtitle(provider),
+                    _providerSubtitle(provider, isArabic: isArabic),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -438,10 +493,13 @@ class _SavedScreenState extends State<SavedScreen>
     );
   }
 
-  String _providerSubtitle(CanonicalDirectoryEntity provider) {
+  String _providerSubtitle(
+    CanonicalDirectoryEntity provider, {
+    required bool isArabic,
+  }) {
     final typeLabel = CanonicalEntityTypePresentation.labelFor(
       provider.entityType,
-      isArabic: true,
+      isArabic: isArabic,
     );
     final locationLabel = provider.locations.isNotEmpty
         ? provider.locations.first.regionName
@@ -464,7 +522,10 @@ class _SavedScreenState extends State<SavedScreen>
 
   Widget _sectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsetsDirectional.only(
+        top: AppSpacing.xs,
+        bottom: AppSpacing.md,
+      ),
       child: Text(
         title,
         style: Theme.of(
@@ -481,36 +542,15 @@ class _SavedScreenState extends State<SavedScreen>
         .toList();
 
     if (articles.isEmpty) {
-      final isDark = Theme.of(context).brightness == Brightness.dark;
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.download_outlined,
-              size: 64,
-              color: isDark
-                  ? AppColors.darkTextSecondary
-                  : AppColors.textSecondary,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              Ar.noDownloads,
-              style: TextStyle(
-                color: isDark
-                    ? AppColors.darkTextSecondary
-                    : AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
+      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+      return _buildStateView(
+        icon: Icons.download_outlined,
+        message: isArabic ? Ar.noDownloads : En.noDownloads,
       );
     }
 
     return ListView.separated(
       padding: EdgeInsets.only(
-        left: AppConstants.paddingMedium,
-        right: AppConstants.paddingMedium,
         top: AppConstants.paddingMedium,
         bottom: shellSafeBottomPadding(context),
       ),
@@ -518,7 +558,9 @@ class _SavedScreenState extends State<SavedScreen>
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final article = articles[index];
-        return CustomCard(
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return CivilSurfaceCard(
+          hasBorder: true,
           onTap: () => context.push('/article/${article.id}'),
           child: Row(
             children: [
@@ -538,15 +580,80 @@ class _SavedScreenState extends State<SavedScreen>
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.check_circle,
-                color: AppColors.success,
+                color: isDark ? AppColors.darkSuccess : AppColors.success,
                 size: 20,
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLoadingState() {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final theme = Theme.of(context);
+    return Semantics(
+      label: isArabic ? Ar.loading : En.loading,
+      liveRegion: true,
+      child: Center(
+        child: SizedBox.square(
+          dimension: 36,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: theme.colorScheme.secondary,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStateView({
+    required IconData icon,
+    required String message,
+    Color? iconColor,
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
+    final theme = Theme.of(context);
+    final effectiveIconColor = iconColor ?? theme.colorScheme.onSurfaceVariant;
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xl + AppSpacing.md),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 48,
+              height: 48,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
+              ),
+              child: Icon(icon, size: 28, color: effectiveIconColor),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            if (onAction != null && actionLabel != null) ...[
+              const SizedBox(height: AppSpacing.lg),
+              ElevatedButton.icon(
+                onPressed: onAction,
+                icon: const Icon(Icons.refresh, size: 18),
+                label: Text(actionLabel),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

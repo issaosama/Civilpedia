@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:civilpedia/core/storage/app_storage_keys.dart';
+import 'package:civilpedia/core/theme/app_colors.dart';
+import 'package:civilpedia/core/widgets/civil_surface_card.dart';
 import 'package:civilpedia/data/local/hive_helper.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/category_info.dart';
 import 'package:civilpedia/features/encyclopedia/domain/entities/content_block.dart';
@@ -13,7 +15,9 @@ import 'package:civilpedia/features/encyclopedia/presentation/widgets/topic_list
 import 'package:civilpedia/features/saved/domain/saved_reference_resolver.dart';
 import 'package:civilpedia/features/saved/presentation/saved_screen.dart';
 import 'package:civilpedia/localization/ar.dart';
+import 'package:civilpedia/localization/en.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -103,11 +107,13 @@ void main() {
 
   setUpAll(() async {
     tempDir = await Directory.systemTemp.createTemp('civilpedia_w3_2_test');
-    const pathProviderChannel = MethodChannel('plugins.flutter.io/path_provider');
+    const pathProviderChannel = MethodChannel(
+      'plugins.flutter.io/path_provider',
+    );
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(pathProviderChannel, (call) async {
-      return tempDir.path;
-    });
+          return tempDir.path;
+        });
     previousHttpOverrides = HttpOverrides.current;
     HttpOverrides.global = PngHttpOverrides();
     await HiveHelper.init(path: tempDir.path, boxName: _boxName);
@@ -139,6 +145,8 @@ void main() {
     EncyclopediaFavoritesProvider? favoritesProvider,
     SavedReferenceResolver? favoritesResolver,
     GoRouter? router,
+    Locale locale = const Locale('ar'),
+    ThemeData? theme,
   }) async {
     final favorites =
         favoritesProvider ??
@@ -152,20 +160,31 @@ void main() {
           encyclopediaTopicIds: () async => List.of(efIds),
           legacyArticleIds: () async => List.of(favIds),
         );
+    final materialApp = router != null
+        ? MaterialApp.router(
+            locale: locale,
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            theme: theme,
+            routerConfig: router,
+          )
+        : MaterialApp(
+            locale: locale,
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            theme: theme,
+            home: SavedScreen(favoritesResolver: resolver),
+          );
     final app = MultiProvider(
       providers: [
         ChangeNotifierProvider.value(
-          value:
-              EncyclopediaProvider(
-                repository: _FakeEncyclopediaRepository(topics),
-              ),
+          value: EncyclopediaProvider(
+            repository: _FakeEncyclopediaRepository(topics),
+          ),
         ),
         ChangeNotifierProvider.value(value: favorites),
       ],
-      child:
-          router != null
-              ? MaterialApp.router(routerConfig: router)
-              : MaterialApp(home: SavedScreen(favoritesResolver: resolver)),
+      child: materialApp,
     );
     await tester.runAsync(() async {
       await tester.pumpWidget(app);
@@ -236,57 +255,59 @@ void main() {
 
   group('W3.2 ordering and hydration', () {
     testWidgets(
-        'renders topics in stored most-recent-first order and legacy articles '
-        'in ArticleRepository catalog order', (tester) async {
+      'renders topics in stored most-recent-first order and legacy articles '
+      'in ArticleRepository catalog order',
+      (tester) async {
+        _useTallViewport(tester);
+        await pumpSaved(
+          tester,
+          topics: [
+            _topic('t1', 'الموضوع الأول'),
+            _topic('t2', 'الموضوع الثاني'),
+            _topic('t3', 'الموضوع الثالث'),
+          ],
+          efIds: const ['t3', 't1', 't2'],
+          favIds: const ['5', '1'],
+        );
+
+        double dy(String text) => tester.getTopLeft(find.text(text)).dy;
+
+        expect(
+          dy('الموضوع الثالث') < dy('الموضوع الأول'),
+          isTrue,
+          reason:
+              'topics render most-recent-first exactly as stored (pre-W3.2 '
+              'topic behavior preserved)',
+        );
+        expect(dy('الموضوع الأول') < dy('الموضوع الثاني'), isTrue);
+        expect(
+          dy('الموضوع الثاني') < dy(Ar.engineeringEncyclopedia),
+          isFalse,
+          reason: 'topics stay under their section header',
+        );
+        expect(
+          dy(Ar.savedArticlesSection) > dy('الموضوع الثاني'),
+          isTrue,
+          reason: 'articles section follows topics section',
+        );
+        expect(
+          dy('أنواع الخرسانة المسلحة') < dy('طبقات الرصف للطرق'),
+          isTrue,
+          reason:
+              'legacy articles display in ArticleRepository catalog order '
+              'even though stored append order is [5, 1]; stored order does NOT '
+              'redefine visible ordering',
+        );
+      },
+    );
+
+    testWidgets('topic hydration keeps the stored most-recent-first order', (
+      tester,
+    ) async {
       _useTallViewport(tester);
       await pumpSaved(
         tester,
-        topics: [
-          _topic('t1', 'الموضوع الأول'),
-          _topic('t2', 'الموضوع الثاني'),
-          _topic('t3', 'الموضوع الثالث'),
-        ],
-        efIds: const ['t3', 't1', 't2'],
-        favIds: const ['5', '1'],
-      );
-
-      double dy(String text) => tester.getTopLeft(find.text(text)).dy;
-
-      expect(
-        dy('الموضوع الثالث') < dy('الموضوع الأول'),
-        isTrue,
-        reason: 'topics render most-recent-first exactly as stored (pre-W3.2 '
-            'topic behavior preserved)',
-      );
-      expect(dy('الموضوع الأول') < dy('الموضوع الثاني'), isTrue);
-      expect(
-        dy('الموضوع الثاني') < dy(Ar.engineeringEncyclopedia),
-        isFalse,
-        reason: 'topics stay under their section header',
-      );
-      expect(
-        dy(Ar.savedArticlesSection) > dy('الموضوع الثاني'),
-        isTrue,
-        reason: 'articles section follows topics section',
-      );
-      expect(
-        dy('أنواع الخرسانة المسلحة') < dy('طبقات الرصف للطرق'),
-        isTrue,
-        reason: 'legacy articles display in ArticleRepository catalog order '
-            'even though stored append order is [5, 1]; stored order does NOT '
-            'redefine visible ordering',
-      );
-    });
-
-    testWidgets('topic hydration keeps the stored most-recent-first order',
-        (tester) async {
-      _useTallViewport(tester);
-      await pumpSaved(
-        tester,
-        topics: [
-          _topic('t2', 'الموضوع الثاني'),
-          _topic('t1', 'الموضوع الأول'),
-        ],
+        topics: [_topic('t2', 'الموضوع الثاني'), _topic('t1', 'الموضوع الأول')],
         efIds: const ['t2', 't1'],
       );
 
@@ -299,35 +320,36 @@ void main() {
   });
 
   group('W3.2 stale references', () {
-    testWidgets('unresolvable reference is skipped without crashing or writing',
-        (tester) async {
-      await pumpSaved(
-        tester,
-        topics: [_topic('t1', 'الموضوع الأول')],
-        efIds: const ['missing', 't1'],
-        favIds: const ['999'],
-      );
+    testWidgets(
+      'unresolvable reference is skipped without crashing or writing',
+      (tester) async {
+        await pumpSaved(
+          tester,
+          topics: [_topic('t1', 'الموضوع الأول')],
+          efIds: const ['missing', 't1'],
+          favIds: const ['999'],
+        );
 
-      expect(find.text('الموضوع الأول'), findsOneWidget);
-      expect(find.text('missing'), findsNothing);
-      expect(find.text('999'), findsNothing);
-      expect(tester.takeException(), isNull);
-      expect(HiveHelper.getEncyclopediaFavorites(), isEmpty);
-      expect(HiveHelper.getFavorites(), isEmpty);
-      expect(
-        find.text(Ar.noFavorites),
-        findsNothing,
-        reason: 'valid favorites still render alongside stale ones',
-      );
-    });
+        expect(find.text('الموضوع الأول'), findsOneWidget);
+        expect(find.text('missing'), findsNothing);
+        expect(find.text('999'), findsNothing);
+        expect(tester.takeException(), isNull);
+        expect(HiveHelper.getEncyclopediaFavorites(), isEmpty);
+        expect(HiveHelper.getFavorites(), isEmpty);
+        expect(
+          find.text(Ar.noFavorites),
+          findsNothing,
+          reason: 'valid favorites still render alongside stale ones',
+        );
+      },
+    );
   });
 
   group('W3.2 behavior preservation', () {
-    testWidgets('empty Favorites state shows the same empty UI', (tester) async {
-      await pumpSaved(
-        tester,
-        topics: [_topic('t1', 'الموضوع الأول')],
-      );
+    testWidgets('empty Favorites state shows the same empty UI', (
+      tester,
+    ) async {
+      await pumpSaved(tester, topics: [_topic('t1', 'الموضوع الأول')]);
 
       expect(find.byIcon(Icons.favorite_border), findsOneWidget);
       expect(find.text(Ar.noFavorites), findsOneWidget);
@@ -349,17 +371,13 @@ void main() {
           ),
           GoRoute(
             path: '/encyclopedia/topic/:id',
-            builder: (_, __) => Scaffold(
-              appBar: AppBar(),
-              body: const Text('topic-detail'),
-            ),
+            builder: (_, __) =>
+                Scaffold(appBar: AppBar(), body: const Text('topic-detail')),
           ),
           GoRoute(
             path: '/article/:id',
-            builder: (_, __) => Scaffold(
-              appBar: AppBar(),
-              body: const Text('article-detail'),
-            ),
+            builder: (_, __) =>
+                Scaffold(appBar: AppBar(), body: const Text('article-detail')),
           ),
         ],
       );
@@ -375,7 +393,7 @@ void main() {
       await pumpFrames(tester);
       expect(find.text('topic-detail'), findsOneWidget);
 
-      await tester.pageBack();
+      await tester.binding.handlePopRoute();
       await pumpFrames(tester);
       expect(find.text('الموضوع الأول'), findsOneWidget);
 
@@ -384,8 +402,9 @@ void main() {
       expect(find.text('article-detail'), findsOneWidget);
     });
 
-    testWidgets('Downloads tab renders downloads and stays unaffected',
-        (tester) async {
+    testWidgets('Downloads tab renders downloads and stays unaffected', (
+      tester,
+    ) async {
       await tester.runAsync(() async {
         await Hive.box(
           _boxName,
@@ -413,65 +432,69 @@ void main() {
   group('W3.2 refresh through existing write paths', () {
     testWidgets(
       'legacy article favorite added via HiveHelper is visible after tab '
-      'revisit', (tester) async {
-      _useTallViewport(tester);
-      await tester.runAsync(() async {
-        final box = Hive.box(_boxName);
-        await box.put(AppStorageKeys.favorites, const <String>['2']);
-        await box.put(AppStorageKeys.encyclopediaFavorites, const <String>[]);
-      });
-      final resolver = SavedReferenceResolver(
-        encyclopediaTopicIds: () async => HiveHelper.getEncyclopediaFavorites(),
-        legacyArticleIds: () async => HiveHelper.getFavorites(),
-      );
-      final favoritesProvider = EncyclopediaFavoritesProvider();
-      await favoritesProvider.load();
+      'revisit',
+      (tester) async {
+        _useTallViewport(tester);
+        await tester.runAsync(() async {
+          final box = Hive.box(_boxName);
+          await box.put(AppStorageKeys.favorites, const <String>['2']);
+          await box.put(AppStorageKeys.encyclopediaFavorites, const <String>[]);
+        });
+        final resolver = SavedReferenceResolver(
+          encyclopediaTopicIds: () async =>
+              HiveHelper.getEncyclopediaFavorites(),
+          legacyArticleIds: () async => HiveHelper.getFavorites(),
+        );
+        final favoritesProvider = EncyclopediaFavoritesProvider();
+        await favoritesProvider.load();
 
-      await pumpSaved(
-        tester,
-        topics: [_topic('t1', 'الموضوع الأول')],
-        favoritesProvider: favoritesProvider,
-        favoritesResolver: resolver,
-      );
+        await pumpSaved(
+          tester,
+          topics: [_topic('t1', 'الموضوع الأول')],
+          favoritesProvider: favoritesProvider,
+          favoritesResolver: resolver,
+        );
 
-      expect(find.text('أساسيات تصميم الأساسات'), findsOneWidget);
-      expect(find.text('أنواع حديد التسليح'), findsNothing);
+        expect(find.text('أساسيات تصميم الأساسات'), findsOneWidget);
+        expect(find.text('أنواع حديد التسليح'), findsNothing);
 
-      await tester.runAsync(() => HiveHelper.toggleFavorite('3'));
+        await tester.runAsync(() => HiveHelper.toggleFavorite('3'));
 
-      await tester.tap(find.text(Ar.downloads));
-      await pumpFrames(tester);
-      await tester.tap(find.text(Ar.favorites));
-      await pumpFrames(tester);
+        await tester.tap(find.text(Ar.downloads));
+        await pumpFrames(tester);
+        await tester.tap(find.text(Ar.favorites));
+        await pumpFrames(tester);
 
-      expect(find.text('أنواع حديد التسليح'), findsOneWidget);
-      expect(
-        tester.getTopLeft(find.text('أساسيات تصميم الأساسات')).dy <
-            tester.getTopLeft(find.text('أنواع حديد التسليح')).dy,
-        isTrue,
-        reason: 'legacy articles keep ArticleRepository catalog order after '
-            'refresh through the existing write path',
-      );
-    });
+        expect(find.text('أنواع حديد التسليح'), findsOneWidget);
+        expect(
+          tester.getTopLeft(find.text('أساسيات تصميم الأساسات')).dy <
+              tester.getTopLeft(find.text('أنواع حديد التسليح')).dy,
+          isTrue,
+          reason:
+              'legacy articles keep ArticleRepository catalog order after '
+              'refresh through the existing write path',
+        );
+      },
+    );
 
     testWidgets(
       'topic favorite saved through the provider is picked up automatically',
       (tester) async {
-final sharedIds = <String>['t1'];
-      final favoritesProvider = EncyclopediaFavoritesProvider(
-        store: _ListBackedEncyclopediaFavoritesStore(sharedIds),
-      );
-      await favoritesProvider.load();
+        final sharedIds = <String>['t1'];
+        final favoritesProvider = EncyclopediaFavoritesProvider(
+          store: _ListBackedEncyclopediaFavoritesStore(sharedIds),
+        );
+        await favoritesProvider.load();
 
-      await pumpSaved(
-        tester,
-        topics: [
-          _topic('t1', 'الموضوع الأول'),
-          _topic('t2', 'الموضوع الثاني'),
-        ],
-        favoritesProvider: favoritesProvider,
-        efIds: sharedIds,
-      );
+        await pumpSaved(
+          tester,
+          topics: [
+            _topic('t1', 'الموضوع الأول'),
+            _topic('t2', 'الموضوع الثاني'),
+          ],
+          favoritesProvider: favoritesProvider,
+          efIds: sharedIds,
+        );
 
         expect(find.text('الموضوع الثاني'), findsNothing);
 
@@ -481,5 +504,70 @@ final sharedIds = <String>['t1'];
         expect(find.text('الموضوع الثاني'), findsOneWidget);
       },
     );
+  });
+
+  group('R10.4-B Saved presentation', () {
+    testWidgets('English chrome and empty states follow the active locale', (
+      tester,
+    ) async {
+      await pumpSaved(tester, topics: const [], locale: const Locale('en'));
+
+      expect(find.text(En.saved), findsOneWidget);
+      expect(find.text(En.favorites), findsOneWidget);
+      expect(find.text(En.downloads), findsOneWidget);
+      expect(find.text(En.noFavorites), findsOneWidget);
+      expect(
+        Directionality.of(tester.element(find.byType(SavedScreen))),
+        TextDirection.ltr,
+      );
+
+      await tester.tap(find.text(En.downloads));
+      await pumpFrames(tester);
+      expect(find.text(En.noDownloads), findsOneWidget);
+    });
+
+    testWidgets('resolver failure exposes localized retry presentation', (
+      tester,
+    ) async {
+      final resolver = SavedReferenceResolver(
+        encyclopediaTopicIds: () async => throw StateError('test failure'),
+        legacyArticleIds: () async => const <String>[],
+      );
+      await pumpSaved(
+        tester,
+        topics: const [],
+        favoritesResolver: resolver,
+        locale: const Locale('en'),
+      );
+
+      expect(find.text(En.savedLoadError), findsOneWidget);
+      expect(find.text(En.retry), findsOneWidget);
+    });
+
+    testWidgets('dark Saved content stays centered at readable width', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1000, 900);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await pumpSaved(
+        tester,
+        topics: const [],
+        favIds: const ['2'],
+        locale: const Locale('en'),
+        theme: ThemeData.dark().copyWith(
+          scaffoldBackgroundColor: AppColors.darkBackground,
+        ),
+      );
+
+      final card = find.byType(CivilSurfaceCard).first;
+      expect(tester.getSize(card).width, lessThanOrEqualTo(760));
+      expect(
+        Theme.of(
+          tester.element(find.byType(SavedScreen)),
+        ).scaffoldBackgroundColor,
+        AppColors.darkBackground,
+      );
+    });
   });
 }
