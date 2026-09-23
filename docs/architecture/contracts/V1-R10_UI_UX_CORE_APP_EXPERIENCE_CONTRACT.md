@@ -1130,3 +1130,205 @@ Manual runtime review is required after the automated implementation gate.
   domain semantics, or content authority.
 
 ---
+
+## APPENDIX C — V1-R10.5-A ARTICLE PRODUCTION VISUAL PASS FREEZE
+
+Status: ARCHITECT APPROVED / FROZEN — V1-R10.5-A IMPLEMENTATION FREEZE
+
+This append-only Architect addendum authorizes the V1-R10.5-A implementation
+slice under the existing V1-R10.5 Cross-Feature Visual Adoption Pass
+(section 24, "R10.5"). It supersedes no earlier contract semantics. It only
+freezes the R10.5-A Article slice boundary; all prior frozen semantics not
+explicitly addressed here remain binding, and R10.5-B and later slices remain
+LOCKED.
+
+Architect decision: V1-R10.5 SCOPE PARTITION AUDIT = ACCEPTED.
+V1-R10.5-A (Article Production Visual Pass) = FROZEN / READY FOR
+IMPLEMENTATION.
+
+Baseline at freeze time: HEAD == origin/main ==
+615039945f003770803dac1d2cfebbaf0a04190d
+
+Current roadmap state (preserved):
+- R10.4: CLOSED / ACCEPTED
+- R10.5: CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED (R10.5-A now frozen)
+- R10.6: future / locked relative to R10.5
+- R10.7: future / locked relative to R10.5
+
+### C.1 Slice title and purpose
+
+TITLE: V1-R10.5-A — Article Production Visual Pass
+
+PURPOSE: production-grade presentation harmonization of the existing legacy
+Article feature only. This is PRESENTATION ONLY; no behavior, data, or
+content change is authorized.
+
+### C.2 Architect decisions (recorded)
+
+1. TopicCompactCard legacy gradient: LEAVE UNCHANGED in R10.5-A. Do not
+   reopen accepted Home presentation.
+2. EncyclopediaCardColors / EncyclopediaTopicTheme: DEFER. Do not consolidate
+   or migrate the Encyclopedia block-color layer in R10.5-A.
+3. Directory: no R10.5-A work.
+4. Article / Content Studio: the current legacy Article feature has no
+   Content Studio / Encyclopedia SSOT ownership. R10.5-A MUST NOT introduce
+   such a dependency.
+
+### C.3 Authorized production boundary
+
+Primary files:
+- `lib/features/articles/presentation/screens/articles_screen.dart`
+- `lib/features/articles/presentation/screens/all_articles_screen.dart`
+- `lib/features/articles/presentation/screens/article_details_screen.dart`
+
+Existing reusable widget:
+- `lib/features/articles/presentation/widgets/article_image.dart`
+
+`ArticleImage` should preferably be REUSED UNCHANGED. Edit is NOT authorized
+unless implementation proves a directly necessary presentation defect that
+cannot be solved from the three screens. If an `ArticleImage` edit becomes
+necessary: STOP and request Architect review first.
+
+Localization files (conditional):
+- `lib/localization/ar.dart`
+- `lib/localization/en.dart`
+
+May be edited ONLY if a genuinely missing Article presentation string
+requires active-locale UI copy. Do not add speculative keys.
+
+### C.4 Article Detail — frozen presentation target
+
+Use ONLY existing Article fields. Frozen presentation hierarchy:
+
+1. Minimal `CivilAppBar`: Back; existing favorite action; existing download
+   action; no large generic "Article Details" title competing with the
+   article title.
+2. Existing article image, when present.
+3. Existing category: presentation below/adjacent to the image as a
+   restrained token-aware chip; do NOT use white-on-Amber; direction-aware
+   placement; no hardcoded right positioning.
+4. Existing article title: visually dominant; tokenized typography;
+   direction-aware alignment.
+5. Existing article body: preserve exact existing content; preserve exact
+   ordering; typography/spacing only; no rewriting.
+
+DO NOT ADD: reading time; last updated; summary; author; date; metadata row;
+table of contents; new CTA; new article fields. No invented information.
+
+### C.5 Article list / All Articles target
+
+Preserve: existing article source; existing ordering; existing navigation;
+existing category behavior; existing image; title/content identity.
+
+Presentation may improve: `CivilAppBar`; `CivilSurfaceCard` or appropriate
+accepted surface composition; `ArticleImage` reuse; tokenized
+spacing/radius/typography; direction-aware chevrons; coherent image geometry;
+restrained category treatment; Light/Dark parity; RTL/LTR parity.
+
+DO NOT introduce: new sort; filter; ranking; pagination; search; new
+categories; new data source. Do not weaken semantic tests.
+
+### C.6 Protected Article semantics
+
+DO NOT MODIFY:
+- `lib/models/article_model.dart`
+- `lib/data/repositories/article_repository.dart`
+- `lib/data/local/hive_helper.dart`
+
+Article routes (preserved):
+- `/articles`
+- `/article/:id`
+- `/articles/category/:id`
+
+Preserved behavior: favorite behavior; download behavior; Hive persistence;
+snackbar semantics; offline/local behavior; Hero identity/tag semantics
+unless presentation can keep it unchanged. Do not alter Article IDs or
+content.
+
+### C.7 Content Studio / SSOT protection
+
+STRICTLY OUT OF SCOPE:
+- `draft_jsons/**`
+- `app_ready_jsons/**`
+- `assets/encyclopedia/**`
+- Content Studio
+- Content Studio Preview
+- Exporter
+- generated catalog/content
+- Encyclopedia content block renderers
+- article schema/model expansion
+
+Current R10.5-A presentation does NOT require Content Studio changes. Do not
+create a relationship between legacy Articles and Content Studio in this
+slice.
+
+### C.8 Visual language
+
+Follow frozen R10 visual direction:
+- Amber = signature/accent; Blue = technical/support; neutrals = majority.
+- Dark: canvas `#000000`; primary surface `#121212`; secondary surface
+  `#1A1A1A`; elevated surface `#262626`; approved border hierarchy.
+
+Avoid: white-on-Amber low contrast; raw `Colors.white` / `Colors.black` when
+tokens exist; raw `primaryColor` styling; arbitrary shadows; giant category
+color palette; hardcoded directional positioning.
+
+Use accepted: `CivilAppBar`; `CivilSurfaceCard` where semantically
+appropriate; `AppColors`; `AppSpacing`; `DesignTokens`; `textTheme` /
+`AppTypography`; `ArticleImage`.
+
+No new shared primitive is expected.
+
+### C.9 Responsive / accessibility boundary
+
+R10.5-A handles only feature-local presentation resilience: reasonable
+Compact layout; no obvious wide-screen stretching; RTL/LTR; Light/Dark;
+normal text-scaling resilience; `>= 48x48` owned actions.
+
+Do NOT consume the full R10.6 repository-wide responsive/accessibility
+sweep.
+
+### C.10 Test freeze
+
+Inspect existing tests first. Expected useful regressions:
+- `test/home_latest_articles_test.dart`
+- `test/article_image_test.dart`
+- `test/ui_safe_1_screen_regression_test.dart`
+- `test/v1_r09q_smoke_journeys_test.dart`
+
+Add focused Article presentation/widget tests for the three affected screens
+where necessary. Coverage required: list renders/navigates; All Articles
+renders/navigates; Detail hierarchy; existing favorite action; existing
+download action; AR/EN presentation where chrome exists; RTL/LTR
+directionality; Light/Dark token behavior; category treatment; no invented
+metadata; existing Article data preserved.
+
+### C.11 Manual acceptance
+
+Manual runtime / visual review is required before closure, covering: Articles
+list; All Articles; Article Detail; Light; Dark; Arabic RTL; English LTR
+where applicable; favorite toggle; download action; Home → Article / All
+Articles → Detail → Back.
+
+### C.12 Future R10.5 slices (preserved)
+
+- R10.5-A Articles — CURRENT (frozen)
+- R10.5-B Tools + Calculators — LOCKED
+- R10.5-C Projects — LOCKED
+- R10.5-D Profile + User Area — LOCKED
+- R10.5-E Business + Staff — LOCKED
+- R10.5-F Encyclopedia micro-polish — LOCKED
+
+Do NOT start any later slice from R10.5-A.
+
+### C.13 Protected dirty baseline
+
+- `test/a5_6_profile_bootstrap_test.dart`
+- `test/v1_r08_cloud_profile_foundation_test.dart`
+- `test/v1_r08_profile_edit_screen_widget_test.dart`
+- `OpenCode_Usage_Report.txt`
+- `artifacts/`
+
+Do not touch, format, stage, commit, push, restore, reset, or clean.
+
+---
