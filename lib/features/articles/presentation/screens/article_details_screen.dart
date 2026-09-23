@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import '../../../../core/constants/app_constants.dart';
+
 import '../../../../core/services/language_provider.dart';
-import '../../../../data/repositories/article_repository.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/theme/spacing.dart';
+import '../../../../core/widgets/civil_app_bar.dart';
 import '../../../../data/local/hive_helper.dart';
+import '../../../../data/repositories/article_repository.dart';
 import '../../../../localization/ar.dart';
 import '../../../../localization/en.dart';
 import '../widgets/article_image.dart';
@@ -45,9 +49,11 @@ class _ArticleDetailsScreenState extends State<ArticleDetailsScreen> {
       final isArabic = context.read<LanguageProvider>().isArabic;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isDownloaded
-              ? (isArabic ? Ar.articleSaved : En.articleSaved)
-              : (isArabic ? Ar.articleRemoved : En.articleRemoved)),
+          content: Text(
+            _isDownloaded
+                ? (isArabic ? Ar.articleSaved : En.articleSaved)
+                : (isArabic ? Ar.articleRemoved : En.articleRemoved),
+          ),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -59,76 +65,137 @@ class _ArticleDetailsScreenState extends State<ArticleDetailsScreen> {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     String tr(String ar, String en) => isArabic ? ar : en;
     final repo = ArticleRepository();
-    final article = HiveHelper.getOfflineArticle(widget.articleId) ?? repo.getArticleById(widget.articleId);
+    final article =
+        HiveHelper.getOfflineArticle(widget.articleId) ??
+        repo.getArticleById(widget.articleId);
 
     if (article == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text(Ar.articleDetails)),
+        appBar: CivilAppBar(
+          title: Text(tr(Ar.articleDetails, En.articleDetails)),
+        ),
         body: Center(child: Text(tr(Ar.articleNotFound, En.articleNotFound))),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(Ar.articleDetails),
+      appBar: CivilAppBar(
+        title: const SizedBox.shrink(),
         actions: [
           IconButton(
             icon: Icon(_isFavorite ? Icons.favorite : Icons.favorite_border),
             onPressed: _toggleFavorite,
-            tooltip: _isFavorite ? Ar.removeFromFavorites : Ar.addToFavorites,
+            tooltip: _isFavorite
+                ? tr(Ar.removeFromFavorites, En.removeFromFavorites)
+                : tr(Ar.addToFavorites, En.addToFavorites),
           ),
           IconButton(
             icon: Icon(_isDownloaded ? Icons.download_done : Icons.download),
             onPressed: _toggleDownload,
-            tooltip: _isDownloaded ? Ar.downloaded : Ar.download,
+            tooltip: _isDownloaded
+                ? tr(Ar.downloaded, En.downloaded)
+                : tr(Ar.download, En.download),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(AppConstants.paddingMedium),
-        children: [
-          Hero(
-            tag: 'article_img_${article.id}',
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(AppConstants.cardRadius),
-              child: Stack(
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final gutter = constraints.maxWidth < 600
+              ? AppSpacing.lg
+              : constraints.maxWidth < 840
+              ? AppSpacing.xxl
+              : AppSpacing.xxl + AppSpacing.sm;
+          final contentWidth = (constraints.maxWidth - gutter * 2)
+              .clamp(0, 760)
+              .toDouble();
+          final imageHeight = constraints.maxWidth < 600 ? 210.0 : 280.0;
+
+          return Align(
+            alignment: AlignmentDirectional.topCenter,
+            child: SizedBox(
+              width: contentWidth,
+              height: constraints.maxHeight,
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
                 children: [
-                  ArticleImage(
-                    imageUrl: article.image,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor.withValues(alpha: 0.85),
-                        borderRadius: BorderRadius.circular(8),
+                  Hero(
+                    tag: 'article_img_${article.id}',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        DesignTokens.radiusMd,
                       ),
-                      child: Text(
-                        article.category,
-                        style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
+                      child: ArticleImage(
+                        imageUrl: article.image,
+                        height: imageHeight,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
+                  AppSpacing.gapLg,
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: _CategoryChip(
+                      label: article.category,
+                      isDark: Theme.of(context).brightness == Brightness.dark,
+                    ),
+                  ),
+                  AppSpacing.gapMd,
+                  Text(
+                    article.title,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      height: 1.35,
+                    ),
+                  ),
+                  AppSpacing.gapLg,
+                  Text(
+                    article.content,
+                    textAlign: TextAlign.start,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyLarge?.copyWith(height: 1.8),
+                  ),
+                  AppSpacing.gapXl,
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            article.title,
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            article.content,
-            style: const TextStyle(fontSize: 16, height: 1.8),
-          ),
-        ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  const _CategoryChip({required this.label, required this.isDark});
+
+  final String label;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkWarningSoft : AppColors.brandAmberSoft,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
+        border: Border.all(
+          color: isDark ? AppColors.darkWarning : AppColors.brandAmber,
+        ),
+      ),
+      child: Text(
+        label,
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: isDark
+              ? AppColors.darkBrandAmber
+              : AppColors.brandAmberPressed,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

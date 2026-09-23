@@ -1332,3 +1332,114 @@ Do NOT start any later slice from R10.5-A.
 Do not touch, format, stage, commit, push, restore, reset, or clean.
 
 ---
+
+## APPENDIX D — V1-R10.5-A FORMAL CLOSURE + LANGUAGE-SCOPE SYNCHRONIZATION
+
+Status: ARCHITECT APPROVED / RECORDED — V1-R10.5-A CLOSED / ACCEPTED
+
+This append-only addendum records: (1) the formal closure of the V1-R10.5-A
+slice frozen in APPENDIX C, (2) the Owner language-scope decision, and
+(3) the transition of the current authorized slice to R10.5-B. It changes no
+frozen presentation semantics and rewrites no historical record.
+
+Architect decision: PASS — V1-R10.5-A ACCEPTED
+
+Closure baseline: HEAD == origin/main == 4e53d634d1c61f90e8a9cdd939d7fb501c3270ce
+
+### D.1 R10.5-A closure evidence
+
+- implementation completed (3 Article screens presentation pass)
+- focused presentation tests: 4 PASS / 0 FAIL
+- Article-focused regression gate: 16 PASS / 0 FAIL
+- independent post-implementation review: PASS
+- HIGH findings: NONE; MEDIUM findings: NONE; LOW findings: 2 non-blocking /
+  deferred
+- manual runtime visual review: PASS (Light, Dark, Arabic RTL, Article list,
+  Article detail)
+- favorite / download presentation preserved
+- no invented metadata
+- Article data / body semantics preserved
+- Content Studio / Encyclopedia SSOT untouched
+
+### D.2 Scope / non-change confirmation (V1-R10.5-A)
+
+- ArticleModel unchanged
+- ArticleRepository unchanged
+- Hive unchanged
+- ArticleImage unchanged
+- Article routes unchanged
+- Content Studio untouched
+- Encyclopedia SSOT untouched
+- no R10.5-B or later slice implementation performed inside R10.5-A
+- no service_role; no new data source; no new provider/state authority
+
+### D.3 Owner language-scope decision (recorded)
+
+Civilpedia V1 user-facing product is ARABIC-ONLY. The user-facing Arabic <-> English
+language switch has been cancelled / disabled.
+
+Therefore:
+- Arabic RTL is the active V1 user-facing locale requirement.
+- English / LTR is NOT a manual runtime acceptance requirement while the
+  user-facing language switch remains disabled.
+- Do NOT enable an English switch.
+- Do NOT treat unavailable user-facing English switching as a defect.
+- Existing En localization resources may remain.
+- Existing dormant English-support code / tests do NOT need to be removed merely
+  because switching is disabled.
+- Do NOT perform a broad localization cleanup or delete En keys.
+- A future Owner / Architect decision may reactivate English.
+
+This decision supersedes any R10 manual-acceptance wording that requires
+English/LTR as an active user-facing V1 path (including the English/LTR wording
+in C.11, which applies to the active V1 path only for Arabic RTL).
+It does NOT rewrite historical test evidence and does NOT reopen accepted
+R10.4 work.
+
+### D.4 Non-blocking deferred content note (image/content mismatch)
+
+- "طبقات الرصف للطرق" currently displays a residential-building image (observed
+  during manual QA).
+- NOT an R10.5-A presentation defect; R10.5-A explicitly preserved existing
+  Article image/data sources.
+- Do NOT change the image, ArticleRepository, ArticleModel, or content in this
+  scope. Classify for later content/media cleanup only.
+
+### D.5 R10.5-A closure status
+
+V1-R10.5-A — Article Production Visual Pass:
+
+STATUS: CLOSED / ACCEPTED
+
+### D.6 Next slice transition
+
+V1-R10.5-B — Tools + Calculators Presentation Pass:
+
+STATUS: CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+
+Preserved:
+- V1-R10.5-C Projects — LOCKED
+- V1-R10.5-D Profile + User Area — LOCKED
+- V1-R10.5-E Business + Staff — LOCKED
+- V1-R10.5-F Encyclopedia micro-polish — LOCKED
+- V1-R10.6 / V1-R10.7 — LOCKED
+
+Implementation of R10.5-B is NOT started by this documentation task.
+
+### D.7 Protected dirty baseline
+
+Do NOT touch:
+- test/a5_6_profile_bootstrap_test.dart
+- test/v1_r08_cloud_profile_foundation_test.dart
+- test/v1_r08_profile_edit_screen_widget_test.dart
+- OpenCode_Usage_Report.txt
+- artifacts/
+
+### D.8 Git confirmation at closure
+
+- git diff --check: exit 0 (LF/CRLF informational warnings only)
+- git status --short: R10.5-A implementation + protected baseline only
+- nothing staged / cached
+- HEAD == origin/main == 4e53d634d1c61f90e8a9cdd939d7fb501c3270ce
+
+---

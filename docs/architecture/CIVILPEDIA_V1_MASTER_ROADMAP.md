@@ -122,17 +122,19 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R10
 CURRENT_PHASE_TITLE: UI/UX & Core App Experience
-CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5 CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5-A CLOSED / ACCEPTED — R10.5-B CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
 CURRENT_PHASE_CONTRACT: docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5 ONLY (implementation NOT started)
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5-B ONLY (implementation NOT started)
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
 
-The Architect contract freeze is recorded. R10.4 (Core Discovery: Home / Search /
-Saved) is CLOSED / ACCEPTED via R10.4-A + R10.4-B. Only the current R10.5 slice
-(Cross-Feature Visual Adoption Pass) is authorized; its implementation is NOT
-yet started. R10.6 and R10.7 remain future / locked relative to R10.5.
+V1-R10.5-A (Article Production Visual Pass) is CLOSED / ACCEPTED (see its Formal
+Closure Record below). Only the current R10.5-B (Tools + Calculators
+Presentation Pass) slice is authorized; its implementation is NOT started.
+R10.5-C through R10.5-F, R10.6, and R10.7 remain future / locked relative to
+R10.5-B. V1 user-facing language scope = ARABIC-ONLY (see the V1 Owner
+Language-Scope Decision Record below).
 
 ---
 
@@ -3021,6 +3023,94 @@ Article sequencing (append-only, non-duplicative):
   decision explicitly expands scope.
 - Content Studio / content SSOT / article body ordering remain protected.
 - The Article implementation design is NOT frozen by this documentation task.
+
+### V1-R10.5-A Formal Closure Record
+
+Slice: V1-R10.5-A — Article Production Visual Pass
+Contract: V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md APPENDIX C —
+          V1-R10.5-A ARTICLE PRODUCTION VISUAL PASS FREEZE
+Previous status: CURRENT / AUTHORIZED — FROZEN
+New status: CLOSED / ACCEPTED
+Architect decision: PASS — V1-R10.5-A ACCEPTED
+Closure baseline: HEAD == origin/main == 4e53d634d1c61f90e8a9cdd939d7fb501c3270ce
+
+Acceptance evidence:
+- implementation completed (3 Article screens presentation pass)
+- focused presentation tests: 4 PASS / 0 FAIL
+- Article-focused regression gate: 16 PASS / 0 FAIL
+- independent post-implementation review: PASS
+- HIGH findings: NONE; MEDIUM findings: NONE; LOW findings: 2 non-blocking /
+  deferred
+- manual runtime visual review: PASS (Light, Dark, Arabic RTL, Article list,
+  Article detail)
+- favorite / download presentation preserved
+- no invented metadata
+- Article data / body semantics preserved
+
+Scope / non-change confirmation (V1-R10.5-A):
+- ArticleModel unchanged; ArticleRepository unchanged; Hive unchanged
+- ArticleImage unchanged; Article routes unchanged
+- Content Studio untouched; Encyclopedia SSOT untouched
+- no R10.5-B or later slice implementation performed inside R10.5-A
+- no service_role; no new data source; no new provider/state authority
+
+Non-blocking deferred content note (image/content mismatch):
+- "طبقات الرصف للطرق" currently displays a residential-building image (observed
+  during manual QA). NOT an R10.5-A presentation defect; R10.5-A preserved
+  existing Article image/data sources. Do NOT change the image,
+  ArticleRepository, or ArticleModel here. Classify for later content/media
+  cleanup only.
+
+Language scope (recorded):
+- See the V1 Owner Language-Scope Decision Record below.
+
+Status:
+V1-R10.5-A:  CLOSED / ACCEPTED
+V1-R10.5-B:  NEXT / CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+V1-R10.5-C through R10.5-F: LOCKED
+V1-R10.6 / V1-R10.7: future / locked relative to R10.5
+
+### V1-R10.5-B Current / Authorized Record
+
+Slice: V1-R10.5-B — Tools + Calculators Presentation Pass
+Previous status: future / locked relative to the current R10.5-A slice
+New status: CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5-B ONLY (implementation NOT started)
+Implementation: NOT STARTED
+
+Decisions (recorded by this documentation task):
+- R10.5-B scope remains the existing V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT
+  R10.5 Cross-Feature Visual Adoption scope, Tools + Calculators presentation
+  pass, as preserved in APPENDIX C.12 and the R10.5 slice plan.
+- R10.5-B contract is NOT redefined or expanded by this documentation task.
+- implementation is NOT started by this task.
+- R10.5-C through R10.5-F remain LOCKED.
+- R10.6 and R10.7 remain future / locked relative to R10.5.
+
+### V1 Owner Language-Scope Decision Record
+
+Decision: Civilpedia V1 user-facing product is ARABIC-ONLY.
+Authority: ChatGPT Architect + explicit Owner product decision.
+Status: ACTIVE / RECORDED — supersedes any R10 manual-acceptance wording that
+requires English/LTR as an active user-facing V1 path.
+
+Consequences:
+- Arabic RTL is the active V1 user-facing locale requirement.
+- English / LTR is NOT a manual runtime acceptance requirement while the
+  user-facing language switch remains disabled.
+- Do NOT enable an English switch.
+- Do NOT treat unavailable user-facing English switching as a defect.
+- Existing En localization resources may remain.
+- Existing dormant English-support code / tests do NOT need to be removed merely
+  because switching is disabled.
+- Do NOT perform a broad localization cleanup or delete En keys.
+- A future Owner / Architect decision may reactivate English.
+
+Governance:
+- Arabic RTL remains the required manual acceptance path for the active V1
+  language scope.
+- Do NOT retroactively rewrite historical test evidence.
+- Do NOT reopen already accepted R10.4 (or any earlier) work.
 
 ---
 
