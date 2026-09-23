@@ -1443,3 +1443,267 @@ Do NOT touch:
 - HEAD == origin/main == 4e53d634d1c61f90e8a9cdd939d7fb501c3270ce
 
 ---
+
+## APPENDIX E — V1-R10.5-B TOOLS + CALCULATORS PRESENTATION PASS FREEZE
+
+Status: ARCHITECT APPROVED / FROZEN — V1-R10.5-B IMPLEMENTATION FREEZE
+
+The V1-R10.5-B Pre-Implementation Audit is ACCEPTED. V1-R10.5-B is frozen as a
+PRESENTATION-ONLY slice. NO calculator domain/formula changes are authorized.
+
+Owner language scope (preserved):
+- V1 user-facing UI = ARABIC-ONLY
+- English switch = DISABLED
+- English runtime QA = NOT REQUIRED
+- Dormant En resources remain untouched
+
+Freeze baseline: HEAD == origin/main ==
+78000cd43d18b630a044d8ddd4b2878c5b9915df
+
+### E.1 Exact production boundary (authorized files ONLY)
+
+1. lib/features/tools/presentation/screens/calculators/calculator_screen.dart
+2. lib/features/tools/presentation/screens/calculators/tile_calculator_screen.dart
+3. lib/features/tools/presentation/widgets/calculator/calculator_primary_button.dart
+4. lib/features/tools/presentation/screens/checklist/checklist_screen.dart
+5. lib/features/tools/presentation/screens/checklist/checklist_category_detail_screen.dart
+6. lib/features/tools/presentation/screens/checklist/widgets/inspection_category_card.dart
+7. lib/features/tools/presentation/screens/checklist/widgets/inspection_summary_card.dart
+
+No other production file is authorized.
+
+### E.2 Tools landing (leave unchanged)
+
+lib/features/tools/presentation/screens/tools_screen.dart — LEAVE UNCHANGED.
+Reason: already R10-aligned and protected by its existing visual control test
+(test/tools_screen_d4a_test.dart). Do NOT perform cleanup merely for
+consistency.
+
+### E.3 Calculator domain — strictly protected
+
+DO NOT MODIFY: lib/features/tools/domain/**
+
+Includes all authorities for:
+- Concrete calculations
+- Steel calculations
+- Masonry / Brick calculations
+- Tile calculations
+- calculator snapshots/presets
+- ToolKey
+- checklist contracts/domain (including checklist_repository /
+  local_checklist_repository / local data sources)
+
+Frozen semantics include: formulas; units; conversions; defaults; validation
+semantics; output values; rounding; ceil/floor behavior; density constants;
+waste calculations; stock-bar behavior; truck calculations; preset dimensions.
+ZERO engineering calculation changes.
+
+### E.4 Routing / navigation — protected
+
+DO NOT MODIFY:
+- lib/routes/app_routes.dart
+- lib/routes/app_router.dart
+- lib/core/navigation/app_shell.dart
+
+Preserve: /tools; /calculator/concrete; /calculator/steel; /calculator/brick;
+/calculator/tile; /calculator/checklist; project navigation behavior; shell
+ownership.
+
+### E.5 Calculator screen target (calculator_screen.dart)
+
+Presentation changes apply ONLY to the routed Concrete builder, Steel builder,
+and Brick / Masonry builder. DO NOT touch the unreachable
+`_buildSimpleScreen` fallback.
+
+A. APP BAR: Replace raw full-width Amber AppBar with CivilAppBar. Preserve:
+exact title meaning; refresh/reset action; action callback; navigation/back
+semantics. No white-on-Amber title/action treatment.
+
+B. INPUT AREAS: Input behavior and controllers remain unchanged. Presentation
+may harmonize neutral surfaces, borders, spacing, typography. Do NOT rename
+engineering inputs; change unit selectors; change validation; change
+controller lifecycle; change keyboard/input semantics.
+
+C. CARDS: Legacy CustomCard may be replaced by CivilSurfaceCard where it is a
+presentation-only 1:1 replacement. Do not force conversion if doing so changes
+layout semantics.
+
+D. RESULTS: CalculatorResultRow is PROTECTED. Do NOT restructure it. Preserve
+all labels/values and Row sibling structure.
+
+E. ERRORS: CalculatorErrorCard is PROTECTED. Do NOT convert it to
+CivilSurfaceCard.
+
+F. BOTTOM / GRAND TOTAL SURFACES: May replace raw Colors.white / Colors.black
+shadow styling with approved theme surface/border/shadow tokens. Preserve:
+hierarchy; data; labels; values; existing structure required by tests.
+
+### E.6 Tile calculator target (tile_calculator_screen.dart)
+
+Authorized: CivilAppBar; presentation-only card harmonization; tokenized
+bottom-bar surface/border/shadow; spacing/typography alignment.
+
+STRICTLY PRESERVE: TileQuantityCalculator; TileCalculationSnapshot;
+save-to-project behavior; reset behavior; all inputs/units; all outputs;
+Key('tile_bottom_bar_value'); Ar.finalTileCount; existing bottom-bar semantic
+structure.
+
+### E.7 Calculator primary button (calculator_primary_button.dart)
+
+Required correction: background remains AppColors.primary; foreground becomes
+AppColors.textOnAmber. Reason: white-on-Amber fails the frozen contrast
+requirement.
+
+Preserve: ElevatedButton; full-width SizedBox behavior; callback behavior;
+enabled/disabled semantics; sizing/layout contract.
+
+No other shared calculator widget redesign. Note: only the background is
+asserted today (test/calculator_widgets_test.dart), so the foreground change is
+test-safe.
+
+### E.8 Checklist screen target (checklist_screen.dart)
+
+Authorized: raw Amber AppBar -> CivilAppBar; direction-aware chevron for Arabic
+RTL; presentation-only card/surface harmonization where safe.
+
+Preserve EXACTLY: checklist statuses; item ordering; notes behavior;
+debounce/save behavior; persistence; progress math; reset semantics; reset
+confirmation; project integration; My Projects navigation; category/content
+data.
+
+### E.9 Checklist category detail (checklist_category_detail_screen.dart)
+
+Purpose: checklist-family AppBar consistency ONLY plus directly related
+presentation token alignment if necessary. Do NOT change checklist item
+behavior; item ordering; notes; statuses; persistence; domain/state logic.
+
+### E.10 Inspection category card (inspection_category_card.dart)
+
+Authorized: make chevron Directionality-aware; presentation-only
+CivilSurfaceCard adoption if it is a true 1:1 replacement. Preserve: tap
+behavior; labels; icons; progress/status data; callback semantics.
+
+### E.11 Inspection summary card (inspection_summary_card.dart)
+
+Required: reset action touch target >=48x48. Presentation-only surface
+harmonization allowed. Preserve: reset callback; confirmation flow; summary
+math; labels; status counts; persistence semantics.
+
+### E.12 Leave unchanged / protected
+
+DO NOT MODIFY:
+- lib/features/tools/presentation/widgets/project_picker_dialog.dart
+- lib/features/tools/presentation/widgets/calculator/calculator_result_row.dart
+- lib/features/tools/presentation/widgets/calculator/calculator_error_card.dart
+- lib/features/tools/presentation/screens/checklist/widgets/inspection_item_tile.dart
+- lib/features/tools/presentation/screens/checklist/widgets/inspection_badge.dart
+- lib/features/tools/presentation/screens/checklist/widgets/inspection_notes_field.dart
+- lib/features/tools/presentation/screens/checklist/widgets/inspection_progress_card.dart
+- lib/features/tools/presentation/screens/checklist/models/**
+- lib/features/tools/presentation/screens/checklist/data/inspection_seed_data.dart
+- lib/features/tools/presentation/screens/checklist/inspection_localization.dart
+- lib/features/tools/presentation/screens/checklist/project_list_screen.dart
+
+Do NOT modify localization files in R10.5-B. Arabic copy already exists for the
+active V1 acceptance path.
+
+### E.13 Visual language
+
+Follow frozen R10 direction: Amber = signature/accent only; Blue =
+technical/support role; Neutrals = majority. Dark: #000000 canvas; #121212
+primary surface; #1A1A1A secondary surface; #262626 elevated surface.
+
+Use existing: CivilAppBar; CivilSurfaceCard; AppColors; AppSpacing;
+DesignTokens; textTheme; existing Calculator widgets.
+
+Avoid: white-on-Amber; raw white/black where tokens exist; large raw
+primary-color areas; arbitrary shadows; new category/color palettes.
+New shared primitive: NOT AUTHORIZED / NOT REQUIRED.
+
+### E.14 Deferred (non-blockers)
+
+Explicitly DEFER: ChoiceChip redesign; broad inline font-size cleanup;
+repository-wide responsive framework; broad readable-width enforcement;
+unreachable `_buildSimpleScreen`; checklist_repository domain->presentation
+import cleanup; MasonryPreset.label ownership cleanup; calculator architecture
+refactor; new calculator primitives. These are NOT blockers for R10.5-B.
+
+### E.15 Test freeze
+
+Presentation/widget tests: test/concrete_calculator_widget_test.dart;
+test/steel_calculator_widget_test.dart; test/brick_calculator_widget_test.dart;
+test/tile_calculator_widget_test.dart; test/calculator_widgets_test.dart;
+test/checklist_widget_test.dart; test/tools_screen_d4a_test.dart;
+test/project_list_screen_test.dart.
+
+Add: test/v1_r10_5b_calculators_visual_test.dart. New focused visual test
+should verify at minimum: CivilAppBar on Concrete/Steel/Brick/Tile/Checklist;
+no legacy white-on-Amber full header; CalculatorPrimaryButton foreground ==
+AppColors.textOnAmber; RTL direction-aware checklist chevron; reset control
+>=48x48; dark theme uses approved token surfaces; critical existing refresh
+actions remain.
+
+Pure domain regressions (run unchanged): test/concrete_volume_calculator_test.dart;
+test/steel_weight_calculator_test.dart; test/masonry_quantity_calculator_test.dart;
+test/tile_quantity_calculator_test.dart; test/checklist_state_test.dart;
+test/checklist_persistence_test.dart; test/tool_key_test.dart.
+
+Do NOT weaken existing structural assertions.
+
+### E.16 Critical regression invariants
+
+Preserve: Concrete refresh action; Steel refresh action; Brick refresh action;
+Tile refresh action. Tile: Key('tile_bottom_bar_value'); Ar.finalTileCount.
+Steel: CalculatorResultRow Row-sibling structure. CalculatorPrimaryButton:
+background = AppColors.primary; full-width wrapper preserved.
+CalculatorErrorCard: Container / BoxDecoration structure preserved.
+Tools landing: existing d4a visual-control expectations remain green.
+
+### E.17 Focused gate
+
+Implementation gate runs with --no-pub. Do NOT run full flutter test, flutter
+analyze, flutter pub get, emulator, or Supabase.
+
+Presentation gate:
+flutter test --no-pub test/concrete_calculator_widget_test.dart test/steel_calculator_widget_test.dart test/brick_calculator_widget_test.dart test/tile_calculator_widget_test.dart test/calculator_widgets_test.dart test/checklist_widget_test.dart test/tools_screen_d4a_test.dart test/project_list_screen_test.dart test/v1_r10_5b_calculators_visual_test.dart
+
+Domain gate:
+flutter test --no-pub test/concrete_volume_calculator_test.dart test/steel_weight_calculator_test.dart test/masonry_quantity_calculator_test.dart test/tile_quantity_calculator_test.dart test/checklist_state_test.dart test/checklist_persistence_test.dart test/tool_key_test.dart
+
+### E.18 Manual acceptance (post-implementation Owner runtime QA)
+
+Concrete: valid result; invalid/error input; unit switch; add element; grand
+total; refresh.
+Steel: normal calculation; waste/cost/stock; refresh.
+Brick: preset; openings; result; refresh.
+Tile: preset/custom; box/cost estimate; reset; save-to-project area.
+Checklist: categories; category detail; status changes; notes; reset dialog;
+My Projects navigation.
+Themes: Light; Dark. Direction: Arabic RTL.
+English runtime QA: NOT REQUIRED.
+
+### E.19 Later slices (preserved)
+
+- V1-R10.5-C Projects — LOCKED
+- V1-R10.5-D Profile + User Area — LOCKED
+- V1-R10.5-E Business + Staff — LOCKED
+- V1-R10.5-F Encyclopedia micro-polish — LOCKED
+- V1-R10.6 / V1-R10.7 — LOCKED
+
+No later-slice implementation from R10.5-B.
+
+### E.20 Protected dirty baseline
+
+Do NOT touch: test/a5_6_profile_bootstrap_test.dart;
+test/v1_r08_cloud_profile_foundation_test.dart;
+test/v1_r08_profile_edit_screen_widget_test.dart; OpenCode_Usage_Report.txt;
+artifacts/. Do not stage, commit, push, restore, reset, or clean.
+
+### E.21 Git confirmation at freeze
+
+- git diff --check: exit 0 (LF/CRLF informational warnings only)
+- git status --short: protected dirty baseline only
+- nothing staged / cached
+- HEAD == origin/main == 78000cd43d18b630a044d8ddd4b2878c5b9915df
+
+---
