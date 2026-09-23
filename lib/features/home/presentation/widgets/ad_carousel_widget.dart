@@ -71,22 +71,24 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) return _shimmerPlaceholder();
+    if (_isLoading) return _shimmerPlaceholder(context);
 
     // F0.4 (honest ads): no campaign => no ads => render nothing, reserving
     // no vertical gap on Home. Content below flows up into the freed space.
     if (_ads.isEmpty) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 200,
-            child: Stack(
-              children: [
-                PageView.builder(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final heroHeight = constraints.maxWidth < 600 ? 172.0 : 184.0;
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                key: const ValueKey('home-hero'),
+                height: heroHeight,
+                child: PageView.builder(
                   controller: _pageController,
                   onPageChanged: (i) => setState(() => _currentPage = i),
                   itemCount: _ads.length,
@@ -95,13 +97,13 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
                     return _adCard(context, ad);
                   },
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+              _indicatorRow(),
+            ],
           ),
-          const SizedBox(height: 10),
-          _indicatorRow(),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -127,33 +129,33 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
               ),
               errorWidget: (_, __, ___) => Container(
                 color: AppColors.primary.withValues(alpha: 0.08),
-                child: const Icon(Icons.broken_image, size: 40, color: AppColors.textSecondary),
+                child: const Icon(
+                  Icons.broken_image,
+                  size: 40,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Colors.black.withValues(alpha: 0.65),
-                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.8),
+                    Colors.black.withValues(alpha: 0.45),
                     Colors.transparent,
                     Colors.black.withValues(alpha: 0.3),
                   ],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  stops: const [0.0, 0.3, 0.7, 1.0],
+                  stops: const [0.0, 0.45, 0.8, 1.0],
                 ),
               ),
             ),
-            Positioned(
-              top: 12,
-              right: 12,
-              child: _badge(ad),
-            ),
-            Positioned(
+            PositionedDirectional(top: 12, end: 12, child: _badge(ad)),
+            PositionedDirectional(
               bottom: 14,
-              left: 14,
-              right: 14,
+              start: 14,
+              end: 14,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -164,6 +166,8 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   if (ad.subtitle != null) ...[
                     const SizedBox(height: 3),
@@ -192,7 +196,9 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
                     if (ad.actionUrl != null) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
-                          content: Text('${tr(Ar.openingAd, En.openingAd)}: ${ad.title}'),
+                          content: Text(
+                            '${tr(Ar.openingAd, En.openingAd)}: ${ad.title}',
+                          ),
                           behavior: SnackBarBehavior.floating,
                         ),
                       );
@@ -209,24 +215,16 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
 
   Widget _badge(AdBanner ad) {
     if (ad.badgeText == null) return const SizedBox.shrink();
-    final color = ad.badgeColor ?? AppColors.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color,
+        color: AppColors.brandAmber,
         borderRadius: BorderRadius.circular(DesignTokens.radiusFull),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Text(
         ad.badgeText!,
         style: const TextStyle(
-          color: Colors.black87,
+          color: AppColors.textOnAmber,
           fontSize: 11,
           fontWeight: FontWeight.bold,
         ),
@@ -243,8 +241,8 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
         return AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: isActive ? 24 : 8,
-          height: 8,
+          width: isActive ? 18 : 6,
+          height: 6,
           decoration: BoxDecoration(
             color: isActive
                 ? AppColors.primary
@@ -256,17 +254,18 @@ class _AdCarouselWidgetState extends State<AdCarouselWidget> {
     );
   }
 
-  Widget _shimmerPlaceholder() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6),
-      child: Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
-        ),
-        child: const Center(
-          child: CircularProgressIndicator(strokeWidth: 2),
+  Widget _shimmerPlaceholder(BuildContext context) {
+    final theme = Theme.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) => Padding(
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: 6),
+        child: Container(
+          height: constraints.maxWidth < 600 ? 172 : 184,
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusLg),
+          ),
+          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
         ),
       ),
     );

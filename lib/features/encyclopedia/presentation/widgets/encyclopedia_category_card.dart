@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 
 /// A neutral, scalable category card used by both the Home category strip and
 /// the full categories grid.
@@ -33,26 +34,31 @@ class EncyclopediaCategoryCard extends StatelessWidget {
     this.compact = false,
   });
 
-  String get _countLabel {
+  String _countLabel(BuildContext context) {
     final count = topicCount;
     if (count == null) return '';
-    if (count == 1) return '1 ${Ar.topic}';
-    return '$count ${Ar.topics}';
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    if (count == 1) return '1 ${isArabic ? Ar.topic : En.topic}';
+    return '$count ${isArabic ? Ar.topics : En.topics}';
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final muted = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final muted = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
 
-    final cardPadding = compact ? const EdgeInsets.all(10) : const EdgeInsets.all(12);
+    final cardPadding = compact
+        ? const EdgeInsets.all(6)
+        : const EdgeInsets.all(12);
     final iconContainerSize = compact ? 32.0 : 40.0;
     final iconPadding = compact ? 6.0 : 8.0;
     final iconSize = compact ? 18.0 : 22.0;
     final titleFontSize = compact ? 12.0 : 13.0;
     final countFontSize = compact ? 10.0 : 11.0;
-    final contentSpacing = compact ? 8.0 : 12.0;
+    final contentSpacing = compact ? 6.0 : 12.0;
 
     return Material(
       color: Colors.transparent,
@@ -108,19 +114,16 @@ class EncyclopediaCategoryCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                       fontSize: titleFontSize,
                     ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                    maxLines: compact ? null : 2,
+                    overflow: compact ? null : TextOverflow.ellipsis,
                   ),
                   if (topicCount != null) ...[
                     const SizedBox(height: 2),
                     Text(
-                      _countLabel,
-                      style: TextStyle(
-                        color: muted,
-                        fontSize: countFontSize,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                      _countLabel(context),
+                      style: TextStyle(color: muted, fontSize: countFontSize),
+                      maxLines: compact ? null : 1,
+                      overflow: compact ? null : TextOverflow.ellipsis,
                     ),
                   ],
                 ],

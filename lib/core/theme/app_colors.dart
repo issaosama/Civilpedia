@@ -40,15 +40,15 @@ class AppColors {
   static const Color scrim = Color(0x7A221F18);
 
   // Dark surfaces and content.
-  static const Color darkBackground = Color(0xFF121820);
-  static const Color darkSurface = Color(0xFF19212B);
-  static const Color darkSurfaceSecondary = Color(0xFF202A35);
-  static const Color darkSurfaceElevated = Color(0xFF273340);
+  static const Color darkBackground = Color(0xFF000000);
+  static const Color darkSurface = Color(0xFF121212);
+  static const Color darkSurfaceSecondary = Color(0xFF1A1A1A);
+  static const Color darkSurfaceElevated = Color(0xFF262626);
   static const Color darkTextPrimary = Color(0xFFF5F1E8);
   static const Color darkTextSecondary = Color(0xFFC9C2B7);
   static const Color darkTextMuted = Color(0xFF9D968C);
-  static const Color darkBorder = Color(0xFF3A4653);
-  static const Color darkBorderStrong = Color(0xFF687482);
+  static const Color darkBorder = Color(0xFF2B2B2B);
+  static const Color darkBorderStrong = Color(0xFF666666);
   static const Color darkBrandAmber = Color(0xFFFFB02E);
   static const Color darkTextOnAmber = Color(0xFF241A0E);
   static const Color darkBrandBlue = Color(0xFF63A4FF);
@@ -64,8 +64,8 @@ class AppColors {
   static const Color darkInfo = Color(0xFF78B2FF);
   static const Color darkInfoSoft = Color(0xFF152F50);
   static const Color darkDisabled = Color(0xFF717983);
-  static const Color darkDisabledSurface = Color(0xFF252E38);
-  static const Color darkScrim = Color(0xB80B1016);
+  static const Color darkDisabledSurface = Color(0xFF1A1A1A);
+  static const Color darkScrim = Color(0xD9000000);
 
   // Third-party brand color.
   static const Color googleBlue = Color(0xFF4285F4);

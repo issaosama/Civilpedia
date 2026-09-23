@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -64,14 +65,14 @@ class _FakeEncyclopediaRepository implements EncyclopediaRepository {
   }
 
   @override
-  Future<List<TopicSection>> getSectionsForTopic(String topicId) async => const [];
+  Future<List<TopicSection>> getSectionsForTopic(String topicId) async =>
+      const [];
 
   @override
   Future<List<ContentBlock>> getBlocksForSection(
     String topicId,
     String sectionId,
-  ) async =>
-      const [];
+  ) async => const [];
 
   @override
   Future<List<EngineeringTopic>> searchTopics(String query) async => [];
@@ -87,14 +88,18 @@ Future<EncyclopediaProvider> _createLoadedProvider() async {
 
 void main() {
   group('Home CategoriesSection authoritative source', () {
-    testWidgets('renders real encyclopedia categories, not legacy names',
-        (tester) async {
+    testWidgets('renders real encyclopedia categories, not legacy names', (
+      tester,
+    ) async {
       final provider = await _createLoadedProvider();
 
       await tester.pumpWidget(
         ChangeNotifierProvider.value(
           value: provider,
           child: const MaterialApp(
+            locale: Locale('ar'),
+            supportedLocales: [Locale('ar'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
             home: Scaffold(body: CategoriesSection()),
           ),
         ),
@@ -111,8 +116,9 @@ void main() {
       expect(find.text('تربة'), findsNothing);
     });
 
-    testWidgets('tapping a category routes to /encyclopedia/topics/:id',
-        (tester) async {
+    testWidgets('tapping a category routes to /encyclopedia/topics/:id', (
+      tester,
+    ) async {
       final provider = await _createLoadedProvider();
 
       final router = GoRouter(
@@ -124,9 +130,8 @@ void main() {
           ),
           GoRoute(
             path: '/encyclopedia/topics/:categoryId',
-            builder: (_, state) => Text(
-              'topic-list-${state.pathParameters['categoryId']}',
-            ),
+            builder: (_, state) =>
+                Text('topic-list-${state.pathParameters['categoryId']}'),
           ),
         ],
       );
@@ -134,7 +139,12 @@ void main() {
       await tester.pumpWidget(
         ChangeNotifierProvider.value(
           value: provider,
-          child: MaterialApp.router(routerConfig: router),
+          child: MaterialApp.router(
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            routerConfig: router,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -145,8 +155,9 @@ void main() {
       expect(find.text('topic-list-concrete'), findsOneWidget);
     });
 
-    testWidgets('category journey reaches topic detail via shared routes',
-        (tester) async {
+    testWidgets('category journey reaches topic detail via shared routes', (
+      tester,
+    ) async {
       final provider = await _createLoadedProvider();
 
       final router = GoRouter(
@@ -165,9 +176,8 @@ void main() {
           ),
           GoRoute(
             path: '/encyclopedia/topic/:topicId',
-            builder: (_, state) => Text(
-              'topic-detail-${state.pathParameters['topicId']}',
-            ),
+            builder: (_, state) =>
+                Text('topic-detail-${state.pathParameters['topicId']}'),
           ),
         ],
       );
@@ -175,7 +185,12 @@ void main() {
       await tester.pumpWidget(
         ChangeNotifierProvider.value(
           value: provider,
-          child: MaterialApp.router(routerConfig: router),
+          child: MaterialApp.router(
+            locale: const Locale('ar'),
+            supportedLocales: const [Locale('ar'), Locale('en')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            routerConfig: router,
+          ),
         ),
       );
       await tester.pumpAndSettle();
@@ -190,28 +205,31 @@ void main() {
   });
 
   group('View All categories screen', () {
-    testWidgets('CategoriesScreen renders authoritative encyclopedia categories',
-        (tester) async {
-      final provider = await _createLoadedProvider();
+    testWidgets(
+      'CategoriesScreen renders authoritative encyclopedia categories',
+      (tester) async {
+        final provider = await _createLoadedProvider();
 
-      await tester.pumpWidget(
-        ChangeNotifierProvider.value(
-          value: provider,
-          child: const MaterialApp(home: CategoriesScreen()),
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ChangeNotifierProvider.value(
+            value: provider,
+            child: const MaterialApp(home: CategoriesScreen()),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('الخرسانة الحقيقية'), findsOneWidget);
-      expect(find.text('أعمال الإنهاءات الحقيقية'), findsOneWidget);
-      expect(find.text('أساسيات الهندسة الحقيقية'), findsOneWidget);
+        expect(find.text('الخرسانة الحقيقية'), findsOneWidget);
+        expect(find.text('أعمال الإنهاءات الحقيقية'), findsOneWidget);
+        expect(find.text('أساسيات الهندسة الحقيقية'), findsOneWidget);
 
-      expect(find.text('خرسانة'), findsNothing);
-      expect(find.text('حديد'), findsNothing);
-    });
+        expect(find.text('خرسانة'), findsNothing);
+        expect(find.text('حديد'), findsNothing);
+      },
+    );
 
-    testWidgets('CategoriesScreen tap routes to /encyclopedia/topics/:id',
-        (tester) async {
+    testWidgets('CategoriesScreen tap routes to /encyclopedia/topics/:id', (
+      tester,
+    ) async {
       final provider = await _createLoadedProvider();
 
       final router = GoRouter(
@@ -223,9 +241,8 @@ void main() {
           ),
           GoRoute(
             path: '/encyclopedia/topics/:categoryId',
-            builder: (_, state) => Text(
-              'topic-list-${state.pathParameters['categoryId']}',
-            ),
+            builder: (_, state) =>
+                Text('topic-list-${state.pathParameters['categoryId']}'),
           ),
         ],
       );

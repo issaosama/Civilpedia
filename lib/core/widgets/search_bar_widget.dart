@@ -25,6 +25,9 @@ class SearchBarWidget extends StatelessWidget {
   final bool readOnly;
   final bool autofocus;
 
+  /// Uses the same search contract in a denser 48px presentation.
+  final bool compact;
+
   const SearchBarWidget({
     super.key,
     this.controller,
@@ -35,6 +38,7 @@ class SearchBarWidget extends StatelessWidget {
     this.lightSurface = false,
     this.readOnly = false,
     this.autofocus = false,
+    this.compact = false,
   });
 
   @override
@@ -70,7 +74,10 @@ class SearchBarWidget extends StatelessWidget {
       decoration: InputDecoration(
         hintText: effectiveHint,
         hintStyle: theme.textTheme.bodyMedium?.copyWith(color: theme.hintColor),
-        prefixIcon: const Icon(Icons.search_rounded, size: 24),
+        prefixIcon: Icon(Icons.search_rounded, size: compact ? 22 : 24),
+        prefixIconConstraints: compact
+            ? const BoxConstraints(minWidth: 48, minHeight: 48)
+            : null,
         prefixIconColor: WidgetStateColor.resolveWith(
           (states) => states.contains(WidgetState.focused)
               ? colorScheme.secondary
@@ -81,11 +88,12 @@ class SearchBarWidget extends StatelessWidget {
         border: outline(colorScheme.outlineVariant),
         enabledBorder: outline(colorScheme.outlineVariant),
         focusedBorder: outline(colorScheme.secondary, width: 2),
-        contentPadding: const EdgeInsetsDirectional.symmetric(
-          horizontal: 20,
-          vertical: 14,
+        isDense: compact,
+        contentPadding: EdgeInsetsDirectional.symmetric(
+          horizontal: compact ? 16 : 20,
+          vertical: compact ? 10 : 14,
         ),
-        constraints: const BoxConstraints(minHeight: 56),
+        constraints: BoxConstraints(minHeight: compact ? 48 : 56),
       ),
     );
   }

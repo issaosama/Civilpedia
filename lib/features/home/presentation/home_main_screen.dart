@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../../core/navigation/shell_content_insets.dart';
-import '../../../core/services/language_provider.dart';
 import '../../../core/widgets/search_bar_widget.dart';
 import '../../../core/widgets/section_header.dart';
 import '../../../features/encyclopedia/presentation/providers/encyclopedia_provider.dart';
@@ -16,9 +15,9 @@ import '../data/home_content_source.dart';
 import 'widgets/ad_carousel_widget.dart';
 import 'widgets/categories_section.dart';
 import 'widgets/engineering_topics_section.dart';
+import 'widgets/engineering_directory_section.dart';
 import 'widgets/home_header.dart';
 import 'widgets/latest_articles_section.dart';
-import 'widgets/quick_access_section.dart';
 import 'widgets/quick_tools_section.dart';
 
 /// Activates the Encyclopedia shell branch with [query] already applied.
@@ -61,9 +60,10 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = context.watch<LanguageProvider>().isArabic;
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     String tr(String ar, String en) => isArabic ? ar : en;
     final bottomSpacer = shellSafeBottomPadding(context);
+    final amberAction = Theme.of(context).colorScheme.primary;
 
     return Scaffold(
       body: RefreshIndicator(
@@ -71,48 +71,80 @@ class _HomeMainScreenState extends State<HomeMainScreen> {
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
-            const HomeHeader(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-              child: SearchBarWidget(
-                lightSurface: true,
-                hintText: Ar.homeEngineeringSearchHint,
-                readOnly: true,
-                onTap: () => openHomeSearch(context),
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const HomeHeader(),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(
+                        16,
+                        0,
+                        16,
+                        4,
+                      ),
+                      child: SearchBarWidget(
+                        compact: true,
+                        lightSurface: true,
+                        hintText: tr(
+                          Ar.homeEngineeringSearchHint,
+                          En.homeEngineeringSearchHint,
+                        ),
+                        readOnly: true,
+                        onTap: () => openHomeSearch(context),
+                      ),
+                    ),
+                    AdCarouselWidget(
+                      dataSource: kDebugMode
+                          ? MockAdDataSource()
+                          : LocalAdDataSource(),
+                    ),
+                    SectionHeader(
+                      homeAccent: true,
+                      title: tr(Ar.siteTools, En.siteTools),
+                    ),
+                    const QuickToolsSection(),
+                    const SizedBox(height: 8),
+                    const EngineeringDirectorySection(),
+                    const SizedBox(height: 8),
+                    SectionHeader(
+                      homeAccent: true,
+                      title: tr(
+                        Ar.exploreEngineeringContent,
+                        En.exploreEngineeringContent,
+                      ),
+                      actionLabel: tr(Ar.viewAll, En.viewAll),
+                      actionColor: amberAction,
+                      onAction: () => context.push('/categories'),
+                    ),
+                    const CategoriesSection(),
+                    const SizedBox(height: 8),
+                    SectionHeader(
+                      homeAccent: true,
+                      title: tr(Ar.engineeringTopics, En.engineeringTopics),
+                      actionLabel: tr(Ar.viewAll, En.viewAll),
+                      actionColor: amberAction,
+                      onAction: () => context.go('/encyclopedia'),
+                    ),
+                    const EngineeringTopicsSection(),
+                    const SizedBox(height: 8),
+                    SectionHeader(
+                      homeAccent: true,
+                      title: tr(Ar.latestArticles, En.latestArticles),
+                      actionLabel: tr(Ar.viewAll, En.viewAll),
+                      actionColor: amberAction,
+                      onAction: () => context.push('/articles'),
+                    ),
+                    LatestArticlesSection(
+                      articles: const HomeContentSource().latestArticles,
+                    ),
+                    SizedBox(height: bottomSpacer),
+                  ],
+                ),
               ),
             ),
-            AdCarouselWidget(
-              dataSource: kDebugMode ? MockAdDataSource() : LocalAdDataSource(),
-            ),
-            SectionHeader(title: Ar.quickAccess),
-            const QuickAccessSection(),
-            const SizedBox(height: 6),
-            SectionHeader(title: Ar.siteTools),
-            const QuickToolsSection(),
-            const SizedBox(height: 6),
-            SectionHeader(
-              title: Ar.exploreEngineeringContent,
-              actionLabel: tr(Ar.viewAll, En.viewAll),
-              onAction: () => context.push('/categories'),
-            ),
-            const CategoriesSection(),
-            const SizedBox(height: 6),
-            SectionHeader(
-              title: Ar.engineeringTopics,
-              actionLabel: tr(Ar.viewAll, En.viewAll),
-              onAction: () => context.go('/encyclopedia'),
-            ),
-            const EngineeringTopicsSection(),
-            const SizedBox(height: 6),
-            SectionHeader(
-              title: Ar.latestArticles,
-              actionLabel: tr(Ar.viewAll, En.viewAll),
-              onAction: () => context.push('/articles'),
-            ),
-            LatestArticlesSection(
-              articles: const HomeContentSource().latestArticles,
-            ),
-            SizedBox(height: bottomSpacer),
           ],
         ),
       ),

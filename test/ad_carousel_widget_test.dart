@@ -47,10 +47,13 @@ Future<void> _settle(WidgetTester tester) async {
 
 void main() {
   group('AdDataSource production versus preview contract', () {
-    test('LocalAdDataSource returns a genuinely empty result (no campaign)', () async {
-      final ads = await LocalAdDataSource().fetchActiveAds();
-      expect(ads, isEmpty);
-    });
+    test(
+      'LocalAdDataSource returns a genuinely empty result (no campaign)',
+      () async {
+        final ads = await LocalAdDataSource().fetchActiveAds();
+        expect(ads, isEmpty);
+      },
+    );
 
     test('MockAdDataSource explicitly provides preview ads', () async {
       final ads = await MockAdDataSource().fetchActiveAds();
@@ -60,47 +63,85 @@ void main() {
   });
 
   group('AdCarouselWidget', () {
-    testWidgets('default behavior uses honest production source: no ad slot and no blank gap',
-        (tester) async {
-      await tester.pumpWidget(_host());
-      await _settle(tester);
+    testWidgets(
+      'default behavior uses honest production source: no ad slot and no blank gap',
+      (tester) async {
+        await tester.pumpWidget(_host());
+        await _settle(tester);
 
-      expect(find.byType(AdCarouselWidget), findsOneWidget);
-      expect(find.byType(PageView), findsNothing);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+        expect(find.byType(AdCarouselWidget), findsOneWidget);
+        expect(find.byType(PageView), findsNothing);
+        expect(find.byType(CircularProgressIndicator), findsNothing);
 
-      final renderBox =
-          tester.renderObject<RenderBox>(find.byType(AdCarouselWidget));
-      expect(renderBox.size.height, 0);
-    });
+        final renderBox = tester.renderObject<RenderBox>(
+          find.byType(AdCarouselWidget),
+        );
+        expect(renderBox.size.height, 0);
+      },
+    );
 
-    testWidgets('empty ads do not throw and content flows up into the vacated space',
-        (tester) async {
-      await tester.pumpWidget(_host());
-      await _settle(tester);
+    testWidgets(
+      'empty ads do not throw and content flows up into the vacated space',
+      (tester) async {
+        await tester.pumpWidget(_host());
+        await _settle(tester);
 
-      final belowOffset = tester.getTopLeft(find.text('below')).dy;
-      expect(belowOffset, lessThan(10));
-    });
+        final belowOffset = tester.getTopLeft(find.text('below')).dy;
+        expect(belowOffset, lessThan(10));
+      },
+    );
 
-    testWidgets('an explicitly injected preview source renders the existing carousel',
-        (tester) async {
-      await tester.pumpWidget(_host(dataSource: _PreviewAdSource()));
-      await _settle(tester);
+    testWidgets(
+      'an explicitly injected preview source renders the existing carousel',
+      (tester) async {
+        await tester.pumpWidget(_host(dataSource: _PreviewAdSource()));
+        await _settle(tester);
 
-      expect(find.byType(PageView), findsOneWidget);
-      expect(find.text('Preview'), findsOneWidget);
+        expect(find.byType(PageView), findsOneWidget);
+        expect(find.text('Preview'), findsOneWidget);
 
-      final renderBox =
-          tester.renderObject<RenderBox>(find.byType(AdCarouselWidget));
-      expect(renderBox.size.height, greaterThan(0));
-    });
+        final renderBox = tester.renderObject<RenderBox>(
+          find.byType(AdCarouselWidget),
+        );
+        expect(renderBox.size.height, greaterThan(0));
+      },
+    );
 
-    testWidgets('injected MockAdDataSource renders the existing carousel', (tester) async {
+    testWidgets('injected MockAdDataSource renders the existing carousel', (
+      tester,
+    ) async {
       await tester.pumpWidget(_host(dataSource: MockAdDataSource()));
       await _settle(tester);
 
       expect(find.byType(PageView), findsOneWidget);
+    });
+
+    testWidgets('compact Home hero uses the final 172px height', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        ChangeNotifierProvider(
+          create: (_) => LanguageProvider(),
+          child: MaterialApp(
+            home: Scaffold(
+              body: Align(
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: 390,
+                  child: AdCarouselWidget(dataSource: _PreviewAdSource()),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await _settle(tester);
+
+      expect(
+        tester.getSize(find.byKey(const ValueKey('home-hero'))).height,
+        172,
+      );
+      expect(tester.takeException(), isNull);
     });
   });
 }

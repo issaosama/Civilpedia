@@ -5,18 +5,22 @@ import '../../core/constants/app_constants.dart';
 ///
 /// Title is positioned at the start (right in RTL, left in LTR), with an
 /// optional action label at the end. Horizontal margins match the rest of the
-/// Home sections. Title color is theme-aware; action color remains the brand
-/// primary accent.
+/// Home sections. Title color is theme-aware; callers may supply the action
+/// accent required by their surface while the shared default remains Blue.
 class SectionHeader extends StatelessWidget {
   final String title;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final Color? actionColor;
+  final bool homeAccent;
 
   const SectionHeader({
     super.key,
     required this.title,
     this.actionLabel,
     this.onAction,
+    this.actionColor,
+    this.homeAccent = false,
   });
 
   @override
@@ -24,19 +28,31 @@ class SectionHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsetsDirectional.symmetric(
+      padding: EdgeInsetsDirectional.symmetric(
         horizontal: AppConstants.paddingMedium,
-        vertical: 6,
+        vertical: homeAccent ? 2 : 6,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          if (homeAccent) ...[
+            Container(
+              width: 3,
+              height: 18,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(width: 6),
+          ],
           Expanded(
             child: Text(
               title,
               textAlign: TextAlign.start,
               overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.titleMedium?.copyWith(
+              style:
+                  theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ) ??
                   const TextStyle(fontWeight: FontWeight.bold),
@@ -45,10 +61,9 @@ class SectionHeader extends StatelessWidget {
           if (actionLabel != null)
             TextButton(
               style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.primary,
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(0, 32),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                foregroundColor: actionColor ?? theme.colorScheme.secondary,
+                padding: const EdgeInsetsDirectional.symmetric(horizontal: 8),
+                minimumSize: const Size(48, 48),
               ),
               onPressed: onAction,
               child: Text(

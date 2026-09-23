@@ -852,3 +852,30 @@ The accepted execution checkpoint remains:
 R10.2 foundation -> R10.3 shell -> R10.4-A Home Production Visual Pass ->
 emulator/device visual inspection -> Architect/user approval -> broader
 propagation.
+
+---
+
+## APPENDIX A — PRODUCTION TRUE-BLACK DARK-MODE GOVERNANCE AMENDMENT
+
+Status: ARCHITECT APPROVED / BINDING
+
+For production V1, this append-only amendment supersedes older contract wording
+that describes the dark palette as navy-charcoal. The authoritative dark-mode
+surface hierarchy is:
+
+- main canvas: `#000000`;
+- primary surfaces: `#121212`;
+- secondary surfaces: `#1A1A1A`;
+- elevated surfaces: `#262626`.
+
+True-black is the canvas authority, not a mandate to make every surface pure
+black. Layered near-black surfaces remain required. Borders remain layered: a
+subtle normal border is used where contrast is not the sole cue, while the
+stronger boundary used for essential controls must satisfy the frozen `3:1`
+non-text contrast requirement against its adjacent control surface.
+
+Civilpedia Amber and Blue remain the signature and technical accents.
+Accessibility, focus, semantic-color, light/dark parity, RTL/LTR, and all
+protected behavior requirements remain binding. This amendment changes no
+routing, shell, auth, startup, backend, Directory business, or Encyclopedia
+content authority.

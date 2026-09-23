@@ -122,14 +122,17 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R10
 CURRENT_PHASE_TITLE: UI/UX & Core App Experience
-CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — IMPLEMENTATION BEGINS ONLY AFTER ARCHITECT CONTRACT FREEZE
-CURRENT_PHASE_CONTRACT: AWAITING V1-R10 CONTRACT FREEZE
-IMPLEMENTATION_AUTHORIZED: NO until Architect issues V1-R10 contract freeze
+CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.4-B CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+CURRENT_PHASE_CONTRACT: docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.4-B ONLY (implementation NOT started)
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
 
-Implementation begins only after ChatGPT Architect supplies the phase-specific Contract Freeze / implementation prompt.
+The Architect contract freeze is recorded. R10.4-A (Home Production Visual Pass)
+is CLOSED / ACCEPTED. Only the current R10.4-B slice (the already-defined
+remaining R10.4 Core Discovery work) is authorized; its implementation is NOT
+yet started. R10.5 and broader propagation remain future / locked.
 
 ---
 
@@ -2821,3 +2824,368 @@ UI FREEZE PRINCIPLE (post-R10):
 
 Next after V1-R10 closes:
   V1-R11 — Projects Production Pass (QUEUED)
+
+---
+
+### V1-R10 Current Status Synchronization
+
+This append-only synchronization supersedes the stale authorization wording in
+the historical V1-R10 Opening record without rewriting that history.
+
+Authoritative current state:
+
+- R10.1: CLOSED / ACCEPTED;
+- R10.2: CLOSED / ACCEPTED — Theme + Shared UI Foundation;
+- R10.3: CLOSED / ACCEPTED — App Shell, Navigation & Global States;
+- R10.4-A: CURRENT / OPEN — Home Production Visual Pass;
+- R10.4-B: LOCKED / NOT AUTHORIZED;
+- Search, Saved, broader R10.4 propagation, and R10.5 through R10.7: LOCKED.
+
+Implementation authorization remains limited to V1-R10.4-A. R10.4-A is not
+closed by this synchronization and still requires its remaining manual visual
+closure actions and Architect acceptance.
+
+---
+
+### V1-R10.4-A Formal Closure Record
+
+Slice: R10.4-A — Home Production Visual Pass
+Contract: V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md (R10.4-A Home Production
+  Visual Pass scope) — frozen semantics preserved unchanged; only this
+  append-only formal closure record is added.
+Architect decision: PASS — R10.4-A ACCEPTED
+Status: CLOSED / ACCEPTED
+Implementation commit: PENDING OWNER COMMIT (R10.4-A work remains accumulated
+  and uncommitted above HEAD == origin/main == 658415ee46ffd774ddfab82205c4828a091129cc)
+Owner approval: PENDING OWNER STAGING (user is the sole Git owner)
+
+Acceptance evidence (all complete):
+- final scope audit: COMPLETED
+- audit correction implementation: COMPLETED
+- post-correction independent re-review: PASS
+- focused regression gate: 90 PASSED / 0 FAILED
+- unresolved HIGH findings: NONE
+- unresolved MEDIUM findings: NONE
+- Directory manual runtime taps: PASS
+  - الموردون
+  - الشركات
+  - المكاتب الهندسية
+  - الخدمات
+  - عرض الكل
+- manual Home bottom-navigation clearance runtime check: PASS
+- true-black governance amendment: synchronized / PASS
+- Future Product Backlog roadmap addendum: independently verified PASS
+
+Scope / non-change confirmation (R10.4-A):
+- no routing semantic changes
+- no auth/startup/backend changes
+- no calculator formula changes
+- no Directory business-authority changes
+- no Encyclopedia SSOT changes
+- no Search/Saved redesign performed inside R10.4-A
+
+Live state (ONE authoritative live roadmap state):
+  R10.1:    CLOSED / ACCEPTED
+  R10.2:    CLOSED / ACCEPTED
+  R10.3:    CLOSED / ACCEPTED
+  R10.4-A:  CLOSED / ACCEPTED
+  R10.4-B:  NEXT / CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+  R10.5:    future relative to the current R10.4-B slice
+  Search / Saved / broader R10.4 propagation: LOCKED
+
+---
+
+### V1-R10.4-B Current / Authorized Record
+
+Slice: R10.4-B — remaining R10.4 Core Discovery work (already-defined scope)
+Previous status: LOCKED / NOT AUTHORIZED
+New status: CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.4-B ONLY (implementation NOT started)
+Implementation: NOT STARTED
+
+Decisions (unchanged by this documentation task):
+- R10.4-B scope remains the already-defined remaining R10.4 Core Discovery work
+  only.
+- R10.4-B contract is NOT redefined or expanded in this documentation task.
+- implementation is NOT started by this task.
+- Article work is NOT pulled into R10.4-B.
+- R10.5 is NOT authorized; R10.5 remains future relative to the current
+  R10.4-B slice.
+- Search / Saved redesign and broader R10.4 propagation remain outside this
+  slice's already-defined scope (LOCKED).
+
+---
+
+### R10.4 Article Sequencing Note
+
+Minimal Architect sequencing note (non-duplicative):
+- Article visual/presentation work remains owned by the existing V1-R10.5
+  Cross-Feature Visual Adoption scope.
+- It MUST NOT be pulled into R10.4-B.
+- No new phase ID is created.
+- Article work is NOT added to the Future Product Backlog because V1-R10.5
+  already owns article presentation.
+- No Article source, Content Studio file, JSON, content, or Flutter file is
+  edited by this documentation task.
+
+Content Studio protection (unchanged by this task):
+- no change to draft_jsons/**, app_ready_jsons/**, assets/encyclopedia/**,
+  the generated catalog, Content Studio Editor, Content Studio Preview, the
+  Exporter, article data/model, article rendering, or Article UI.
+- The future R10.5 Article task will first perform a read-only ownership audit
+  before any implementation.
+
+---
+
+## Future Product Backlog — Architect Notes
+
+STATUS: PLANNING NOTES ONLY
+
+IMPLEMENTATION_AUTHORIZED: NO
+
+These items preserve future product intent only. They do NOT:
+
+- modify the CURRENT phase;
+- unlock a future slice;
+- define final implementation scope;
+- override future phase contracts;
+- establish backend/schema requirements;
+- authorize UI implementation.
+
+Final scope, architecture, data model, UX, tests, and ownership must be frozen
+through the relevant future phase/contract before implementation.
+
+### Engineering Unit Converter
+
+Probable owner: V1-R12 — Tools / Calculators Final Engineering QA
+
+Status: FUTURE CANDIDATE / NOT AUTHORIZED
+
+Product intent: Create an engineering-focused offline unit conversion tool.
+
+Initial conversion families recorded as candidates:
+
+- Length
+- Area
+- Volume
+- Mass
+- Force
+- Pressure / Stress
+- Moment / Torque
+- Density
+- Flow rate
+- Velocity
+- Temperature
+- Angle
+
+Potential later enhancements:
+
+- fast bidirectional conversion
+- recent conversions
+- favorite units
+- engineering-first unit ordering
+- integration with calculator inputs/results
+- contextual conversion from engineering content
+
+Architecture principle: Conversion formulas must eventually have ONE canonical
+conversion authority. Do not duplicate conversion formulas independently
+across calculators. No implementation is authorized by this note.
+
+### Additional Engineering Calculators
+
+Probable owner: V1-R12
+
+Status: FUTURE CANDIDATE / NOT AUTHORIZED
+
+Intent: Expand Civilpedia's calculator library after a dedicated engineering
+QA / scope freeze.
+
+Candidate families may include:
+
+- Quantity calculations
+- Concrete calculations
+- Reinforcement calculations
+- Masonry / blockwork calculations
+- Area / volume calculations
+- Bar count / tonnage
+- Development length
+- Lap splice
+- selected structural/site engineering checks where appropriate
+
+Important: Do NOT freeze exact formulas or calculator inventory in this
+roadmap note. R12 must later create the authoritative calculator master list
+and validate engineering formulas, units, references, assumptions, and
+limitations.
+
+### Site Tools & Instruments Encyclopedia
+
+Probable owner: V1-R13 — Encyclopedia / Content Studio Finalization
+
+Status: FUTURE CANDIDATE / NOT AUTHORIZED
+
+Intent: Create a visual engineering reference for tools, instruments, testing
+devices, and small site equipment used in civil engineering.
+
+Each future entry may contain:
+
+- Arabic name
+- English name
+- common Iraqi/site name where useful
+- image / illustration
+- category
+- primary function
+- where it is used
+- basic usage guidance
+- safety notes
+- common mistakes / misuse
+- related Civilpedia topics
+- related calculators/tools where applicable
+
+Possible category groups:
+
+- Surveying instruments
+- Concrete tools
+- Reinforcement tools
+- Formwork/carpentry tools
+- Earthworks/compaction tools
+- Masonry/finishing tools
+- Laboratory/testing equipment
+- Measuring tools
+- Safety equipment
+- Lifting/handling tools
+- General site equipment
+
+Examples may later include:
+
+- Total Station
+- Auto Level
+- Theodolite
+- Slump Cone
+- Cube Mould
+- Concrete Vibrator / Poker Vibrator
+- Rebar Cutter
+- Rebar Bender
+- Plate Compactor
+- Rammer
+- Core Drill
+
+Do NOT create content records now. Respect the existing Civilpedia content SSOT
+when R13 eventually implements it.
+
+### Construction Machinery & Heavy Equipment Encyclopedia
+
+Probable owner: V1-R13
+
+Status: FUTURE CANDIDATE / NOT AUTHORIZED
+
+Intent: Create a structured visual reference for major construction machinery
+and heavy equipment, recorded as a distinct content family from hand
+tools/instruments.
+
+Potential examples:
+
+- Excavator
+- Backhoe Loader
+- Bulldozer
+- Wheel Loader
+- Motor Grader
+- Roller / Compactor
+- Mobile Crane
+- Tower Crane
+- Concrete Pump
+- Transit Mixer
+- Piling Rig
+- Forklift
+- Telehandler
+
+Each future entry may include:
+
+- Arabic name
+- English name
+- common site/local name
+- image
+- equipment category
+- primary function
+- typical applications
+- main types
+- important specifications
+- basic selection guidance
+- safety considerations
+- common misuse
+- related Civilpedia construction activities/topics
+
+Important: Site Tools / Instruments and Heavy Machinery should remain distinct
+content families even if presented under a wider umbrella such as
+"Site Tools & Equipment" or "معدات وأدوات الموقع". Final taxonomy belongs to
+R13.
+
+### Engineering Directory Media System
+
+Probable owner: TBD BY ARCHITECT
+
+Status: FUTURE CANDIDATE / NOT AUTHORIZED
+
+Intent: Allow richer visual identity for real Directory entities in a future
+Directory evolution.
+
+Potential entity media:
+
+- Company/provider logo
+- Engineering-office logo
+- Supplier/store logo
+- Cover image
+- Project/work gallery
+- Material/product gallery
+- default placeholder identity
+- optimized/cached media
+
+Important distinction: HOME DIRECTORY CATEGORY SHORTCUTS and REAL DIRECTORY
+ENTITY MEDIA are NOT the same system.
+
+For the Home category shortcuts (الموردون، الشركات، المكاتب الهندسية، الخدمات)
+the current compact icon-based design remains accepted. A future visual pass may
+optionally replace generic icons with custom Civilpedia engineering
+illustrations/icons. Do NOT require photographic images on those compact Home
+shortcut cards.
+
+For individual Directory entities: logo should normally be the primary identity
+for companies, suppliers, engineering offices, and stores/organizations.
+Future individual-person profiles, if ever authorized by the Directory domain,
+may use profile photography instead. Cover/gallery media is separate from the
+entity's primary logo.
+
+Do NOT design storage/schema/upload architecture in this roadmap note. Phase
+ownership and backend/media architecture remain TBD BY ARCHITECT.
+
+### Product Relationships
+
+These future candidates should eventually support the Civilpedia product flow:
+
+Engineering Knowledge → Engineering Decision → Engineering Action
+
+Examples:
+
+- Encyclopedia equipment entry → related calculator → unit conversion →
+  related field/site guidance;
+- Directory category → provider/company identity → future provider
+  media/profile.
+
+These are conceptual relationships only. Do NOT implement cross-feature
+navigation now.
+
+### Current Phase Protection
+
+None of these backlog notes change:
+
+- V1-R10.4-A scope;
+- Home closure requirements;
+- Search/Saved authorization;
+- R10.4-B status;
+- R11;
+- R12 authorization state;
+- R13 authorization state;
+- Directory business authority;
+- Encyclopedia SSOT;
+- backend/storage/schema authority.
+
+They are FUTURE PLANNING NOTES ONLY.

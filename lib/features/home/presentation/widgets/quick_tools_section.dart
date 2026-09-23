@@ -1,119 +1,149 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/design_tokens.dart';
-import '../../data/home_content_source.dart';
 
-/// Reference-style compact tool rail for Home.
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/civil_surface_card.dart';
+import '../../../../localization/en.dart';
+import '../../data/home_content_source.dart';
+import 'home_preview_layout.dart';
+
+/// Adaptive Home preview of the existing engineering-tool registry.
 ///
-/// Uses the real tool registry exposed through the Home read-facing boundary
-/// ([HomeContentSource.tools]) and preserves all calculator/checklist
-/// navigation contracts. Only presentation is adjusted to match the approved
-/// Home reference layout.
+/// Every item remains a launcher to its dedicated route; no calculator logic
+/// or inputs are embedded on Home.
 class QuickToolsSection extends StatelessWidget {
   const QuickToolsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final tools = const HomeContentSource().tools;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    const horizontalPadding = AppConstants.paddingMedium;
-    const gap = 10.0;
+    final tools = const HomeContentSource().tools.take(4);
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth - (horizontalPadding * 2);
-        final cardWidth = (availableWidth - (gap * 3)) / 4;
+        final width = constraints.maxWidth;
+        final gutter = width < 600
+            ? 16.0
+            : width < 840
+            ? 24.0
+            : 32.0;
+        final columns = homePreviewColumns(context, width);
+        const gap = 8.0;
+        final cardWidth =
+            (width - (gutter * 2) - (gap * (columns - 1))) / columns;
 
-        return SizedBox(
-          height: 108,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
-            itemCount: tools.length,
-            separatorBuilder: (_, __) => const SizedBox(width: gap),
-            itemBuilder: (context, index) {
-              final tool = tools[index];
-              return _ToolCard(
-                width: cardWidth,
-                tool: tool,
-                isDark: isDark,
-              );
-            },
+        return Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: gutter),
+          child: Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (final tool in tools)
+                SizedBox(
+                  width: cardWidth,
+                  child: _ToolCard(
+                    name: isArabic ? tool.name : _englishToolName(tool.id),
+                    description: isArabic
+                        ? switch (tool.id) {
+                            'concrete' => 'حجم الخرسانة',
+                            'steel' => 'وزن الأسياخ',
+                            'brick' => 'عدد الطابوق',
+                            _ => 'تحقق موقعي',
+                          }
+                        : switch (tool.id) {
+                            'concrete' => 'Concrete volume',
+                            'steel' => 'Bar weight',
+                            'brick' => 'Brick quantity',
+                            _ => 'Site checks',
+                          },
+                    icon: tool.icon,
+                    route: tool.route,
+                    useAmber: tool.id == 'checklist',
+                  ),
+                ),
+            ],
           ),
         );
       },
     );
   }
+
+  String _englishToolName(String id) {
+    return switch (id) {
+      'concrete' => En.concreteCalc,
+      'steel' => En.steelWeightCalc,
+      'brick' => En.brickCalc,
+      'tile' => En.tileCalc,
+      'checklist' => En.checklistItem,
+      _ => En.tools,
+    };
+  }
 }
 
 class _ToolCard extends StatelessWidget {
-  final double width;
-  final dynamic tool;
-  final bool isDark;
+  final String name;
+  final String description;
+  final IconData icon;
+  final String route;
+  final bool useAmber;
 
   const _ToolCard({
-    required this.width,
-    required this.tool,
-    required this.isDark,
+    required this.name,
+    required this.description,
+    required this.icon,
+    required this.route,
+    required this.useAmber,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-      color: isDark ? AppColors.darkSurface : AppColors.surfaceWhite,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        onTap: () => context.push('/${tool.route}'),
-          child: Container(
-          width: width,
-          height: 108,
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-            border: Border.all(
-              color: isDark ? AppColors.darkBorder : AppColors.border,
-            ),
-            boxShadow: isDark ? null : DesignTokens.cardShadow(AppColors.cardShadow),
-          ),
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = useAmber
+        ? (isDark ? AppColors.darkBrandAmber : AppColors.brandAmberPressed)
+        : (isDark ? AppColors.darkBrandBlue : AppColors.brandBlue);
+    final iconSurface = useAmber
+        ? (isDark ? AppColors.darkWarningSoft : AppColors.brandAmberSoft)
+        : (isDark ? AppColors.darkInfoSoft : AppColors.brandBlueSoft);
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 104),
+      child: CivilSurfaceCard(
+        hasBorder: true,
+        padding: EdgeInsets.zero,
+        onTap: () => context.push('/$route'),
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(6),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 30,
                 height: 30,
-                padding: const EdgeInsets.all(6),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
+                  color: iconSurface,
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(tool.icon, size: 18, color: AppColors.primary),
+                child: Icon(icon, size: 18, color: accent),
               ),
-              const SizedBox(height: 4),
-                Text(
-                  tool.name,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? AppColors.darkTextPrimary : AppColors.mainText,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+              const SizedBox(height: 6),
+              Text(
+                name,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  tool.description,
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                description,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
+              ),
             ],
           ),
         ),

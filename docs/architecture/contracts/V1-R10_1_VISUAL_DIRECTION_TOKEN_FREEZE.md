@@ -741,3 +741,37 @@ ACCEPTED, and R10.2 is authorized under the active-slice controls in
 - User visual approval: PASS.
 - R10.1 closure: CLOSED / ACCEPTED — VISUAL DIRECTION & TOKENS FROZEN.
 - R10.2 authorization: granted for Theme + Shared UI Foundation only.
+
+---
+
+## APPENDIX A — ARCHITECT-APPROVED TRUE-BLACK DARK-MODE AMENDMENT
+
+Status: APPROVED / BINDING for production V1
+
+This append-only amendment supersedes only the older navy-charcoal dark-surface
+values and their dependent contrast examples in sections 5.2, 6, and 18. All
+other R10.1 visual direction, semantic roles, accessibility requirements, and
+acceptance rules remain binding.
+
+The amended production dark hierarchy is:
+
+| Token | Amended value | Role |
+|---|---:|---|
+| `darkBackground` | `#000000` | Main canvas |
+| `darkSurface` | `#121212` | Primary card/control surface |
+| `darkSurfaceSecondary` | `#1A1A1A` | Grouped/input surface |
+| `darkSurfaceElevated` | `#262626` | Dialog, sheet, and floating surface |
+| `darkBorder` | `#2B2B2B` | Subtle non-essential structural boundary |
+| `darkBorderStrong` | `#666666` | Essential input/control boundary |
+
+`darkBorderStrong #666666` against `darkSurfaceSecondary #1A1A1A` is
+approximately `3.03:1` using WCAG relative luminance and therefore satisfies
+the frozen minimum `3:1` requirement for meaningful non-text control
+boundaries. Regular `darkBorder` remains intentionally subtle and must not be
+the sole cue for focus, error, selection, or an essential interactive edge.
+
+True-black applies to the main canvas; it does not make every surface pure
+black. Layered near-black surfaces remain required for hierarchy. Civilpedia
+Amber and Blue remain the signature and technical accents, and all existing
+text, semantic-color, focus, and accessibility contrast requirements remain
+binding.

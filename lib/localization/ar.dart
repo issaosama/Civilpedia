@@ -652,6 +652,18 @@ class Ar {
   // Directory
   static const String directoryLandingTitle = 'الدليل الهندسي';
 
+  // V1-R10.4-A — Home Directory preview
+  static const String homeDirectoryDescription =
+      'تواصل مع الموردين والشركات والمكاتب الهندسية ومقدمي الخدمات';
+  static const String homeDirectorySuppliersTitle = 'الموردون';
+  static const String homeDirectorySuppliersSubtitle = 'مواد وتجهيزات';
+  static const String homeDirectoryCompaniesTitle = 'الشركات';
+  static const String homeDirectoryCompaniesSubtitle = 'شركات ومصانع';
+  static const String homeDirectoryEngineeringOfficesTitle = 'المكاتب الهندسية';
+  static const String homeDirectoryEngineeringOfficesSubtitle =
+      'مكاتب واستشارات هندسية';
+  static const String homeDirectoryServicesSubtitle = 'خدمات هندسية وميدانية';
+
   // W6.3 — Bottom Navigation tab label for the Directory branch (short form).
   static const String directory = 'الدليل';
   static const String directoryTypeSupplier = 'مورّد';
@@ -1129,14 +1141,12 @@ class Ar {
   static const String noticeOfflineCompact = 'غير متصل';
   static const String noticeNetwork = 'تعذّر الاتصال بالخدمة. حاول مرة أخرى.';
   static const String noticeTimeout = 'انتهت مهلة الاتصال';
-  static const String noticeServiceUnavailable =
-      'الخدمة غير متاحة مؤقتاً';
+  static const String noticeServiceUnavailable = 'الخدمة غير متاحة مؤقتاً';
   static const String noticeMalformed = 'البيانات غير صالحة أو غير متوفرة';
   static const String noticePermissionDenied = 'ليس لديك صلاحية للوصول';
   static const String noticeAuthRestricted =
       'يجب تسجيل الدخول للوصول إلى هذه البيانات';
-  static const String noticeInvalidState =
-      'الحالة غير صالحة لإجراء هذا الطلب';
+  static const String noticeInvalidState = 'الحالة غير صالحة لإجراء هذا الطلب';
   static const String noticeConflict = 'تعارض في البيانات المحدثة';
   static const String noticeUnexpected = 'حدث خطأ غير متوقع';
   static const String noticeRetryAccessibility = 'اضغط لإعادة المحاولة';

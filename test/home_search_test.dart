@@ -208,7 +208,12 @@ void main() {
 
     testWidgets('uses the generic Ar.search hint by default', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(home: Scaffold(body: SearchBarWidget())),
+        const MaterialApp(
+          locale: Locale('ar'),
+          supportedLocales: [Locale('ar'), Locale('en')],
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          home: Scaffold(body: SearchBarWidget()),
+        ),
       );
 
       final field = tester.widget<TextField>(find.byType(TextField));

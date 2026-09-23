@@ -1,71 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/design_tokens.dart';
-import '../../../../localization/ar.dart';
 
-/// The reference-style "الوصول السريع" row exposing the four current real
-/// platform destinations: Encyclopedia, Tools, Articles, Saved.
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/civil_surface_card.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
+import 'home_preview_layout.dart';
+
+/// Home's compact entry points to four existing product destinations.
 ///
-/// No fake Directory destinations are added. Each card uses a deterministic
-/// accent tint from the existing Civilpedia palette.
+/// Cards use flexible minimum sizing so Cairo line height and supported text
+/// scaling can grow without clipping. Routing behavior remains unchanged.
 class QuickAccessSection extends StatelessWidget {
   const QuickAccessSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    String tr(String ar, String en) => isArabic ? ar : en;
+    final items = [
+      _QuickAccessItem(
+        title: tr(Ar.encyclopedia, En.encyclopedia),
+        subtitle: tr(Ar.engineeringKnowledge, En.engineeringKnowledge),
+        icon: Icons.menu_book_outlined,
+        route: '/encyclopedia',
+        useAmber: false,
+      ),
+      _QuickAccessItem(
+        title: tr(Ar.tools, En.tools),
+        subtitle: tr(Ar.calculatorsAndTools, En.calculatorsAndTools),
+        icon: Icons.build_outlined,
+        route: '/tools',
+        useAmber: true,
+      ),
+      _QuickAccessItem(
+        title: tr(Ar.articles, En.articles),
+        subtitle: tr(Ar.latestArticles, En.latestArticles),
+        icon: Icons.article_outlined,
+        route: '/articles',
+        useAmber: false,
+      ),
+      _QuickAccessItem(
+        title: tr(Ar.saved, En.saved),
+        subtitle: tr(Ar.savedItems, En.savedItems),
+        icon: Icons.bookmark_outline,
+        route: '/saved',
+        useAmber: true,
+      ),
+    ];
+
     return LayoutBuilder(
       builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final gutter = width < 600
+            ? 16.0
+            : width < 840
+            ? 24.0
+            : 32.0;
+        final columns = homePreviewColumns(context, width);
         const gap = 8.0;
-        const horizontalPadding = 16.0;
-        const count = 4;
-        const cardHeight = 88.0;
-        final availableWidth = constraints.maxWidth - (horizontalPadding * 2);
-        final cardWidth = (availableWidth - (gap * (count - 1))) / count;
+        final cardWidth =
+            (width - (gutter * 2) - (gap * (columns - 1))) / columns;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: Row(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: gutter),
+          child: Wrap(
+            spacing: gap,
+            runSpacing: gap,
             children: [
-              _QuickAccessCard(
-                width: cardWidth,
-                height: cardHeight,
-                title: Ar.encyclopedia,
-                subtitle: Ar.engineeringKnowledge,
-                icon: Icons.menu_book_outlined,
-                route: '/encyclopedia',
-                accent: AppColors.primary,
-              ),
-              const SizedBox(width: gap),
-              _QuickAccessCard(
-                width: cardWidth,
-                height: cardHeight,
-                title: Ar.tools,
-                subtitle: Ar.calculatorsAndTools,
-                icon: Icons.build_outlined,
-                route: '/tools',
-                accent: AppColors.brandBlue,
-              ),
-              const SizedBox(width: gap),
-              _QuickAccessCard(
-                width: cardWidth,
-                height: cardHeight,
-                title: Ar.articles,
-                subtitle: Ar.latestArticles,
-                icon: Icons.article_outlined,
-                route: '/articles',
-                accent: AppColors.brandNeutral,
-              ),
-              const SizedBox(width: gap),
-              _QuickAccessCard(
-                width: cardWidth,
-                height: cardHeight,
-                title: Ar.saved,
-                subtitle: Ar.savedItems,
-                icon: Icons.bookmark_outline,
-                route: '/saved',
-                accent: AppColors.primary,
-              ),
+              for (final item in items)
+                SizedBox(
+                  width: cardWidth,
+                  child: _QuickAccessCard(item: item),
+                ),
             ],
           ),
         );
@@ -74,106 +81,90 @@ class QuickAccessSection extends StatelessWidget {
   }
 }
 
-class _QuickAccessCard extends StatelessWidget {
-  final double width;
-  final double height;
+class _QuickAccessItem {
   final String title;
   final String subtitle;
   final IconData icon;
   final String route;
-  final Color accent;
+  final bool useAmber;
 
-  const _QuickAccessCard({
-    required this.width,
-    required this.height,
+  const _QuickAccessItem({
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.route,
-    required this.accent,
+    required this.useAmber,
   });
+}
+
+class _QuickAccessCard extends StatelessWidget {
+  final _QuickAccessItem item;
+
+  const _QuickAccessCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accent = item.useAmber
+        ? (isDark ? AppColors.darkBrandAmber : AppColors.brandAmberPressed)
+        : (isDark ? AppColors.darkBrandBlue : AppColors.brandBlue);
+    final iconSurface = item.useAmber
+        ? (isDark ? AppColors.darkWarningSoft : AppColors.brandAmberSoft)
+        : (isDark ? AppColors.darkInfoSoft : AppColors.brandBlueSoft);
 
-    return SizedBox(
-      width: width,
-      height: height,
-      child: Material(
-        color: isDark ? AppColors.darkSurface : AppColors.surfaceWhite,
-        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        child: InkWell(
-          onTap: () {
-            // Shell branches switch tabs with go(); detail screens above the
-            // shell should push so the user can return to Home.
-            const shellBranches = {
-              '/home',
-              '/encyclopedia',
-              '/tools',
-              '/saved',
-              '/profile',
-            };
-            if (shellBranches.contains(route)) {
-              context.go(route);
-            } else {
-              context.push(route);
-            }
-          },
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-              border: Border.all(
-                color: isDark
-                    ? AppColors.darkBorder.withValues(alpha: 0.6)
-                    : AppColors.border.withValues(alpha: 0.6),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 104),
+      child: CivilSurfaceCard(
+        hasBorder: true,
+        padding: EdgeInsets.zero,
+        onTap: () {
+          const shellBranches = {
+            '/home',
+            '/encyclopedia',
+            '/tools',
+            '/saved',
+            '/profile',
+          };
+          if (shellBranches.contains(item.route)) {
+            context.go(item.route);
+          } else {
+            context.push(item.route);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsetsDirectional.all(6),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: iconSurface,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(item.icon, size: 18, color: accent),
               ),
-              boxShadow: isDark ? null : DesignTokens.cardShadow(AppColors.cardShadow),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
-                  ),
-                  child: Icon(icon, size: 22, color: accent),
+              const SizedBox(height: 6),
+              Text(
+                item.title,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? AppColors.darkTextPrimary : AppColors.mainText,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                item.subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontSize: 10,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

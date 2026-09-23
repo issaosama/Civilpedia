@@ -22,12 +22,25 @@ void main() {
       expect(AppColors.textOnAmber, const Color(0xFF221F18));
     });
 
-    test('dark palette matches the accepted R10.1 tokens', () {
-      expect(AppColors.darkBackground, const Color(0xFF121820));
-      expect(AppColors.darkSurface, const Color(0xFF19212B));
-      expect(AppColors.darkSurfaceElevated, const Color(0xFF273340));
+    test('dark palette matches the approved true-black amendment', () {
+      expect(AppColors.darkBackground, const Color(0xFF000000));
+      expect(AppColors.darkSurface, const Color(0xFF121212));
+      expect(AppColors.darkSurfaceSecondary, const Color(0xFF1A1A1A));
+      expect(AppColors.darkSurfaceElevated, const Color(0xFF262626));
+      expect(AppColors.darkBorder, const Color(0xFF2B2B2B));
+      expect(AppColors.darkBorderStrong, const Color(0xFF666666));
       expect(AppColors.darkBrandAmber, const Color(0xFFFFB02E));
       expect(AppColors.darkBrandBlue, const Color(0xFF63A4FF));
+    });
+
+    test('dark strong control boundary meets 3:1 contrast', () {
+      expect(
+        _contrastRatio(
+          AppColors.darkBorderStrong,
+          AppColors.darkSurfaceSecondary,
+        ),
+        greaterThanOrEqualTo(3),
+      );
     });
   });
 
@@ -70,7 +83,7 @@ void main() {
     );
 
     testWidgets(
-      'dark theme uses navy surfaces, bright accents, and border depth',
+      'dark theme uses true-black surfaces, bright accents, and border depth',
       (tester) async {
         final theme = AppTheme.darkTheme;
         final scheme = theme.colorScheme;
@@ -181,4 +194,16 @@ Future<void> _pumpSearch(WidgetTester tester, Locale locale) {
       ),
     ),
   );
+}
+
+double _contrastRatio(Color first, Color second) {
+  final firstLuminance = first.computeLuminance();
+  final secondLuminance = second.computeLuminance();
+  final lighter = firstLuminance > secondLuminance
+      ? firstLuminance
+      : secondLuminance;
+  final darker = firstLuminance > secondLuminance
+      ? secondLuminance
+      : firstLuminance;
+  return (lighter + 0.05) / (darker + 0.05);
 }

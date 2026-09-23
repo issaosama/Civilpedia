@@ -25,79 +25,96 @@ class HomeTopicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasCover = topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
-    final secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+    final theme = Theme.of(context);
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final hasCover =
+        topic.coverImageUrl != null && topic.coverImageUrl!.trim().isNotEmpty;
+    final secondaryText = isDark
+        ? AppColors.darkTextSecondary
+        : AppColors.textSecondary;
     final labels = topicCardLabels(topic, maxChips: 2);
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : AppColors.surfaceWhite,
-          borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.border),
-          boxShadow: isDark ? null : DesignTokens.cardShadow(AppColors.cardShadow),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            hasCover
-                ? ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(DesignTokens.radiusMd),
-                      topRight: Radius.circular(DesignTokens.radiusMd),
-                    ),
-                    child: SizedBox(
-                      height: _imageHeight,
-                      width: double.infinity,
-                      child: Image.asset(
-                        topic.coverImageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _categoryHeader(topic.categoryId),
-                      ),
-                    ),
-                  )
-                : _categoryHeader(topic.categoryId),
-            Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    topic.titleAr,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
-                        ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    topic.summary,
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: secondaryText,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  if (labels.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 4,
-                      runSpacing: 0,
-                      children: labels
-                          .map((label) => TopicCardChip(label: label, isDark: isDark))
-                          .toList(),
-                    ),
-                  ],
-                ],
-              ),
+    return Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? AppColors.darkSurface : AppColors.surfaceWhite,
+            borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
+            border: Border.all(
+              color: isDark ? AppColors.darkBorder : AppColors.border,
             ),
-          ],
+            boxShadow: isDark
+                ? null
+                : DesignTokens.cardShadow(AppColors.cardShadow),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              hasCover
+                  ? ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(DesignTokens.radiusMd),
+                        topRight: Radius.circular(DesignTokens.radiusMd),
+                      ),
+                      child: SizedBox(
+                        height: _imageHeight,
+                        width: double.infinity,
+                        child: Image.asset(
+                          topic.coverImageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              _categoryHeader(topic.categoryId),
+                        ),
+                      ),
+                    )
+                  : _categoryHeader(topic.categoryId),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      isArabic || topic.titleEn == null
+                          ? topic.titleAr
+                          : topic.titleEn!,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      topic.summary,
+                      style: TextStyle(fontSize: 11, color: secondaryText),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    if (labels.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 4,
+                        runSpacing: 0,
+                        children: labels
+                            .map(
+                              (label) =>
+                                  TopicCardChip(label: label, isDark: isDark),
+                            )
+                            .toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -107,35 +124,20 @@ class HomeTopicCard extends StatelessWidget {
     return Container(
       height: _imageHeight,
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _categoryColor(id),
-            _categoryColor(id).withValues(alpha: 0.6),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: isDark ? AppColors.darkInfoSoft : AppColors.brandBlueSoft,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(DesignTokens.radiusMd),
           topRight: Radius.circular(DesignTokens.radiusMd),
         ),
       ),
       child: Center(
-        child: Icon(_categoryIcon(id), color: Colors.white, size: 28),
+        child: Icon(
+          _categoryIcon(id),
+          color: isDark ? AppColors.darkBrandBlue : AppColors.brandBlue,
+          size: 28,
+        ),
       ),
     );
-  }
-
-  static const _mutedCategoryColors = {
-    'concrete': Color(0xFFD4A373),
-    'steel': Color(0xFFBA8A8A),
-    'soil': Color(0xFF9B8B7A),
-    'roads': Color(0xFF7D9B7D),
-    'finishing': Color(0xFFB8A88A),
-  };
-
-  Color _categoryColor(String id) {
-    return _mutedCategoryColors[id] ?? const Color(0xFFB0A090);
   }
 
   IconData _categoryIcon(String id) {

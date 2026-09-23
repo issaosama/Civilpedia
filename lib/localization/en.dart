@@ -670,6 +670,21 @@ class En {
   // Directory
   static const String directoryLandingTitle = 'Engineering Directory';
 
+  // V1-R10.4-A — Home Directory preview
+  static const String homeDirectoryDescription =
+      'Connect with suppliers, companies, engineering offices, and service providers';
+  static const String homeDirectorySuppliersTitle = 'Suppliers';
+  static const String homeDirectorySuppliersSubtitle = 'Materials and supplies';
+  static const String homeDirectoryCompaniesTitle = 'Companies';
+  static const String homeDirectoryCompaniesSubtitle =
+      'Companies and factories';
+  static const String homeDirectoryEngineeringOfficesTitle =
+      'Engineering Offices';
+  static const String homeDirectoryEngineeringOfficesSubtitle =
+      'Engineering offices and consulting';
+  static const String homeDirectoryServicesSubtitle =
+      'Engineering and field services';
+
   // W6.3 — Bottom Navigation tab label for the Directory branch (short form).
   static const String directory = 'Directory';
   static const String directoryTypeSupplier = 'Supplier';
@@ -1159,7 +1174,8 @@ class En {
 
   static const String noticeOffline = 'No network connection';
   static const String noticeOfflineCompact = 'Offline';
-  static const String noticeNetwork = 'Couldn’t connect to the service. Try again.';
+  static const String noticeNetwork =
+      'Couldn’t connect to the service. Try again.';
   static const String noticeTimeout = 'Connection timed out';
   static const String noticeServiceUnavailable =
       'Service temporarily unavailable';

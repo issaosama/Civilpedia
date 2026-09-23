@@ -42,7 +42,8 @@ class _EngineeringTopicsSectionState extends State<EngineeringTopicsSection> {
     final provider = context.watch<EncyclopediaProvider>();
     final allTopics = provider.allTopics;
     final isInitiallyLoading =
-        allTopics.isEmpty && (provider.isLoading || !provider.hasCompletedInitialLoad);
+        allTopics.isEmpty &&
+        (provider.isLoading || !provider.hasCompletedInitialLoad);
 
     if (isInitiallyLoading) {
       return const ShimmerSection(itemHeight: 200);
@@ -58,34 +59,50 @@ class _EngineeringTopicsSectionState extends State<EngineeringTopicsSection> {
       return const EmptyStateWidget(icon: Icons.menu_book_outlined);
     }
 
-    final displayTopics = allTopics.take(EngineeringTopicsSection.homeTopicLimit).toList();
+    final displayTopics = allTopics
+        .take(EngineeringTopicsSection.homeTopicLimit)
+        .toList();
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: HomeTopicCard(
-                topic: displayTopics[0],
-                isDark: isDark,
-                onTap: () => context.push('/encyclopedia/topic/${displayTopics[0].id}'),
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final gutter = constraints.maxWidth < 600
+            ? 16.0
+            : constraints.maxWidth < 840
+            ? 24.0
+            : 32.0;
+        final cards = [
+          for (final topic in displayTopics)
+            HomeTopicCard(
+              topic: topic,
+              isDark: isDark,
+              onTap: () => context.push('/encyclopedia/topic/${topic.id}'),
             ),
-            if (displayTopics.length > 1) ...[
-              const SizedBox(width: 12),
-              Expanded(
-                child: HomeTopicCard(
-                  topic: displayTopics[1],
-                  isDark: isDark,
-                  onTap: () => context.push('/encyclopedia/topic/${displayTopics[1].id}'),
+        ];
+
+        return Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: gutter),
+          child: constraints.maxWidth < 600
+              ? Column(
+                  children: [
+                    for (var i = 0; i < cards.length; i++) ...[
+                      cards[i],
+                      if (i < cards.length - 1) const SizedBox(height: 12),
+                    ],
+                  ],
+                )
+              : IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < cards.length; i++) ...[
+                        Expanded(child: cards[i]),
+                        if (i < cards.length - 1) const SizedBox(width: 12),
+                      ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

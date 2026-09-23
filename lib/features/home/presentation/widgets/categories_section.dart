@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/constants/app_constants.dart';
 import '../../../../core/widgets/shimmer_loading.dart';
 import '../../../../core/widgets/state_widgets.dart';
 import '../../../encyclopedia/presentation/providers/encyclopedia_provider.dart';
 import '../../../encyclopedia/presentation/widgets/encyclopedia_category_card.dart';
+import 'home_preview_layout.dart';
 
 /// Home's horizontal category strip.
 ///
@@ -37,10 +37,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     });
   }
 
-  int _topicCountFor(
-    EncyclopediaProvider provider,
-    String categoryId,
-  ) {
+  int _topicCountFor(EncyclopediaProvider provider, String categoryId) {
     return provider.allTopics.where((t) => t.categoryId == categoryId).length;
   }
 
@@ -54,9 +51,7 @@ class _CategoriesSectionState extends State<CategoriesSection> {
         height: 150,
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppConstants.paddingMedium,
-          ),
+          padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
           itemCount: CategoriesSection.homeCategoryLimit,
           separatorBuilder: (_, __) => const SizedBox(width: 12),
           itemBuilder: (_, __) => const ShimmerCategoryCard(),
@@ -65,8 +60,8 @@ class _CategoriesSectionState extends State<CategoriesSection> {
     }
 
     if (provider.error != null && categories.isEmpty) {
-      return SizedBox(
-        height: 150,
+      return Padding(
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
         child: ErrorStateWidget(
           onRetry: () => context.read<EncyclopediaProvider>().loadAllTopics(),
         ),
@@ -77,29 +72,49 @@ class _CategoriesSectionState extends State<CategoriesSection> {
       return const SizedBox.shrink();
     }
 
-    final displayCategories = categories.take(CategoriesSection.homeCategoryLimit).toList();
+    final displayCategories = categories
+        .take(CategoriesSection.homeCategoryLimit)
+        .toList();
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
-    return SizedBox(
-      height: 112,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppConstants.paddingMedium,
-        ),
-        itemCount: displayCategories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 9),
-        itemBuilder: (context, index) {
-          final category = displayCategories[index];
-          return EncyclopediaCategoryCard(
-            compact: true,
-            width: 100,
-            height: 112,
-            title: category.titleAr,
-            topicCount: _topicCountFor(provider, category.id),
-            onTap: () => context.push('/encyclopedia/topics/${category.id}'),
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final gutter = width < 600
+            ? 16.0
+            : width < 840
+            ? 24.0
+            : 32.0;
+        final columns = homePreviewColumns(context, width);
+        const gap = 8.0;
+        final cardWidth =
+            (width - (gutter * 2) - (gap * (columns - 1))) / columns;
+
+        return Padding(
+          padding: EdgeInsetsDirectional.symmetric(horizontal: gutter),
+          child: Wrap(
+            spacing: gap,
+            runSpacing: gap,
+            children: [
+              for (final category in displayCategories)
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: cardWidth,
+                    maxWidth: cardWidth,
+                    minHeight: 104,
+                  ),
+                  child: EncyclopediaCategoryCard(
+                    compact: true,
+                    title: isArabic ? category.titleAr : category.titleEn,
+                    topicCount: _topicCountFor(provider, category.id),
+                    onTap: () =>
+                        context.push('/encyclopedia/topics/${category.id}'),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

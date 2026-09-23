@@ -1,6 +1,7 @@
 import 'package:civilpedia/features/home/presentation/widgets/quick_access_section.dart';
 import 'package:civilpedia/localization/ar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -32,12 +33,19 @@ GoRouter _quickAccessRouter() {
   );
 }
 
+Widget _arabicApp(GoRouter router) {
+  return MaterialApp.router(
+    locale: const Locale('ar'),
+    supportedLocales: const [Locale('ar'), Locale('en')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
+    routerConfig: router,
+  );
+}
+
 void main() {
   group('QuickAccessSection', () {
     testWidgets('renders four real destination cards', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp.router(routerConfig: _quickAccessRouter()),
-      );
+      await tester.pumpWidget(_arabicApp(_quickAccessRouter()));
       await tester.pumpAndSettle();
 
       expect(find.text(Ar.encyclopedia), findsOneWidget);
@@ -51,21 +59,26 @@ void main() {
       expect(find.text(Ar.savedItems), findsOneWidget);
     });
 
-    testWidgets('tapping Encyclopedia switches to the encyclopedia branch', (tester) async {
+    testWidgets('tapping Encyclopedia switches to the encyclopedia branch', (
+      tester,
+    ) async {
       final router = _quickAccessRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(_arabicApp(router));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(Ar.encyclopedia));
       await tester.pumpAndSettle();
 
       expect(find.text('Encyclopedia screen'), findsOneWidget);
-      expect(router.routerDelegate.currentConfiguration.uri.path, '/encyclopedia');
+      expect(
+        router.routerDelegate.currentConfiguration.uri.path,
+        '/encyclopedia',
+      );
     });
 
     testWidgets('tapping Tools switches to the tools branch', (tester) async {
       final router = _quickAccessRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(_arabicApp(router));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(Ar.tools));
@@ -77,7 +90,7 @@ void main() {
 
     testWidgets('tapping Saved switches to the saved branch', (tester) async {
       final router = _quickAccessRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(_arabicApp(router));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(Ar.saved));
@@ -87,9 +100,11 @@ void main() {
       expect(router.routerDelegate.currentConfiguration.uri.path, '/saved');
     });
 
-    testWidgets('tapping Articles pushes the articles list screen', (tester) async {
+    testWidgets('tapping Articles pushes the articles list screen', (
+      tester,
+    ) async {
       final router = _quickAccessRouter();
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpWidget(_arabicApp(router));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text(Ar.articles));
