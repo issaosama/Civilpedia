@@ -2260,3 +2260,118 @@ Freeze-time verification:
 This documentation freeze modifies only this authoritative contract file.
 
 ---
+
+### G.21 Appendix G test-gate correction / addendum
+
+Status: ARCHITECT APPROVED / RECORDED — TEST MANIFEST CORRECTION ONLY
+
+This is an append-only additive correction under APPENDIX G. It does not
+rewrite, delete, or supersede the historical APPENDIX G text, evidence, or
+the original G.15 command text as a historical record. It changes only the
+executable R10.5-C test manifest.
+
+Correction baseline: HEAD == origin/main ==
+`b71856009ac3229c28e4af059ea23cc4c160ddcf`
+
+Implementation state at this correction: the R10.5-C production implementation
+is currently UNCOMMITTED and MUST NOT be touched by this documentation
+correction.
+
+#### G.21.1 Defect classification
+
+Two test paths frozen into the original G.15 regression gate do not exist in
+current HEAD:
+
+- `test/w3_4_app_navigation_responsive_test.dart`;
+- `test/w3_5_app_navigation_behavior_test.dart`.
+
+Codex also reports that Git history contains no record of either path.
+
+These two references were stale audit / test-manifest references. This is NOT
+a production-code defect.
+
+Do NOT create, restore, or invent replacement tests. No replacement tests are
+required merely to preserve obsolete filenames.
+
+#### G.21.2 Removal from the executable gate
+
+The two nonexistent paths are removed from the executable R10.5-C regression
+gate:
+
+- `test/w3_4_app_navigation_responsive_test.dart`;
+- `test/w3_5_app_navigation_behavior_test.dart`.
+
+The original G.15 command text is retained above as the historical record of
+the gate as originally frozen. For execution, this addendum governs.
+
+#### G.21.3 Existing evidence, recorded without change
+
+- New R10.5-C visual test: 11 PASS / 0 FAIL.
+- Original frozen regression command: exit code 1 ONLY because the two
+  referenced test files were absent.
+- All regression files that actually exist in current HEAD: 333 tests passed.
+
+This evidence does NOT yet replace the requirement to run the corrected
+authoritative regression command once after this addendum is committed.
+
+#### G.21.4 Corrected authoritative regression gate
+
+```
+flutter test --no-pub test/project_list_screen_test.dart test/w4_1_project_domain_split_test.dart test/w4_2_project_canonicalization_test.dart test/w4_3_project_create_edit_test.dart test/w4_4_archive_restore_test.dart test/w4_5_save_calculation_test.dart test/w4_6_calculation_history_test.dart test/w4_7_notes_test.dart test/w4_8_executions_test.dart test/checklist_persistence_test.dart test/w6_1_projects_route_test.dart test/w6_3_nav_transition_test.dart test/app_storage_keys_test.dart
+```
+
+All existing project / domain / persistence / routing regressions that exist in
+current HEAD remain required. Do not weaken or drop them.
+
+#### G.21.5 Required visual gate — unchanged
+
+```
+flutter test --no-pub test/v1_r10_5c_projects_visual_test.dart
+```
+
+The new R10.5-C visual test remains required.
+
+#### G.21.6 No scope change
+
+This addendum changes ONLY the test manifest. It does NOT change:
+
+- the production boundary;
+- visual requirements;
+- project behavior;
+- domain / data authority;
+- persistence;
+- routing;
+- checklist association;
+- `ProjectPicker` semantics;
+- localization;
+- manual visual QA scope.
+
+The authorized production boundary remains exactly:
+
+- `lib/features/projects/presentation/project_list_screen.dart`;
+- `lib/features/tools/presentation/widgets/project_picker_dialog.dart`.
+
+The required test remains:
+
+- `test/v1_r10_5c_projects_visual_test.dart`.
+
+#### G.21.7 Protected baseline — unchanged
+
+DO NOT TOUCH:
+
+- `test/a5_6_profile_bootstrap_test.dart`;
+- `test/v1_r08_cloud_profile_foundation_test.dart`;
+- `test/v1_r08_profile_edit_screen_widget_test.dart`;
+- `OpenCode_Usage_Report.txt`;
+- `artifacts/`.
+
+Also DO NOT touch the current uncommitted R10.5-C production implementation:
+
+- `lib/features/projects/presentation/project_list_screen.dart`;
+- `lib/features/tools/presentation/widgets/project_picker_dialog.dart`.
+
+Do not stage, commit, push, restore, reset, or clean.
+
+This documentation correction modifies only this authoritative contract file.
+
+---
