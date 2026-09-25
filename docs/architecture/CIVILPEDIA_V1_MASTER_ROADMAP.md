@@ -122,29 +122,24 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R10
 CURRENT_PHASE_TITLE: UI/UX & Core App Experience
-CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5-B CLOSED / ACCEPTED — R10.5-C CURRENT / AUTHORIZED — CONTRACT FROZEN (APPENDIX G) — IMPLEMENTATION NOT STARTED
+CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5-B CLOSED / ACCEPTED — R10.5-C CLOSED / ACCEPTED — R10.5-D CURRENT / AUTHORIZED — PRE-IMPLEMENTATION AUDIT ONLY — IMPLEMENTATION NOT STARTED
 CURRENT_PHASE_CONTRACT: docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md
-CURRENT_PHASE_CONTRACT_FREEZE: FROZEN — APPENDIX G
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5-C PROJECTS PRESENTATION PASS ONLY; CONTRACT FROZEN BY APPENDIX G; IMPLEMENTATION NOT STARTED
+CURRENT_PHASE_CONTRACT_FREEZE: NOT FROZEN FOR V1-R10.5-D — FOCUSED AUDIT ONLY (R10.5-C IS CLOSED UNDER APPENDIX G WITH THE APPENDIX H CLOSURE RECORD)
+IMPLEMENTATION_AUTHORIZED: NO — V1-R10.5-D PROFILE + USER AREA PRESENTATION PASS IS AUTHORIZED FOR ITS FOCUSED PRE-IMPLEMENTATION AUDIT ONLY; IMPLEMENTATION REQUIRES THE AUDIT AND A SUBSEQUENT ARCHITECT PRODUCTION-BOUNDARY FREEZE
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
-For V1-R10.5-C, implementation authorization is granted by the frozen
-APPENDIX G implementation contract, not by this roadmap status line.
 
-V1-R10.5-A (Article Production Visual Pass) and V1-R10.5-B (Tools +
-Calculators Presentation Pass) are CLOSED / ACCEPTED (see their Formal Closure
-Records below). The current R10.5-C (Projects Presentation Pass) slice is
-CURRENT / AUTHORIZED: its focused pre-implementation audit is complete, the
-Architect accepted that audit, and its implementation contract is FROZEN as
-APPENDIX G of
-docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md.
-IMPLEMENTATION_AUTHORIZED: YES. Implementation is NOT started, and the
-frozen production boundary is exactly the two files recorded in APPENDIX G.
-Projects domain, data, and persistence semantics remain strictly protected.
-R10.5-D through R10.5-F, R10.6, and R10.7 remain LOCKED. V1 user-facing
-language scope = ARABIC-ONLY (see the V1 Owner Language-Scope Decision Record
-below).
+V1-R10.5-A (Article Production Visual Pass), V1-R10.5-B (Tools + Calculators
+Presentation Pass), and V1-R10.5-C (Projects Presentation Pass) are CLOSED /
+ACCEPTED (see their Formal Closure Records below). The current R10.5-D
+(Profile + User Area Presentation Pass) slice is CURRENT / AUTHORIZED for its
+focused pre-implementation audit only. R10.5-D implementation is NOT started,
+IMPLEMENTATION_AUTHORIZED is NO, and no R10.5-D production boundary, file
+list, or implementation detail is frozen yet. Do NOT invent the R10.5-D
+production boundary; the next authorized task is the focused audit only.
+R10.5-E, R10.5-F, R10.6, and R10.7 remain LOCKED. V1 user-facing language scope
+= ARABIC-ONLY (see the V1 Owner Language-Scope Decision Record below).
 
 ---
 
@@ -3504,3 +3499,133 @@ Unchanged governance:
 
 - the existing Arabic-only V1 user-facing language decision remains active;
 - the existing QA and AI-usage governance remain unchanged.
+
+---
+
+### V1-R10.5-C Formal Closure + V1-R10.5-D Transition Record
+
+Record type: CURRENT phase closure / phase transition
+(append-only governance record; no historical record is rewritten)
+
+Slice: V1-R10.5-C — Projects Presentation Pass
+
+Contract: `V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md` APPENDIX G (frozen
+implementation boundary, including the G.21 test-gate correction / addendum) and
+the append-only APPENDIX H formal-closure record.
+
+Previous status: CURRENT / AUTHORIZED — IMPLEMENTATION_AUTHORIZED: YES —
+IMPLEMENTATION NOT STARTED
+
+New status: CLOSED / ACCEPTED
+
+Architect final acceptance: PASS — R10.5-C ACCEPTED
+
+Authority: ChatGPT Architect + Owner Visual Acceptance
+
+Closure baseline: HEAD == origin/main ==
+`eb9173086bbfbba4f3efe3073ff464e23fc719a7`
+
+Implementation commit: PENDING OWNER COMMIT — the accepted R10.5-C
+implementation remains uncommitted.
+
+Acceptance evidence:
+
+- focused R10.5-C visual gate: 11 PASS / 0 FAIL;
+- corrected authoritative Projects regression gate: 333 PASS / 0 FAIL;
+- independent focused review: initially CORRECTION REQUIRED within authorized
+  scope;
+- review findings: HIGH 0; MEDIUM 1; LOW 2;
+- targeted post-correction gate: 20 PASS / 0 FAIL;
+- Owner visual / UX acceptance: PASS;
+- Arabic RTL review: PASS;
+- Light / Dark review: PASS;
+- no additional technical or visual review is required for R10.5-C.
+
+Corrected findings:
+
+- MEDIUM — hardcoded user-facing failure copy bypassing the Ar/En localization
+  SSOT: CORRECTED by using the existing `Ar.errorOccurred` / `En.errorOccurred`
+  and existing retry labels, with no localization-file change;
+- LOW — missing leading `mounted` guard on the async load entry points:
+  CORRECTED in both authorized files with no change to generation, stale-
+  completion, or known-good-data behavior.
+
+Remaining deferred LOW observations (non-blocking):
+
+- Project List 1.3 text-scale test coverage;
+- decorative state icon scale observation.
+
+Accepted production boundary (unchanged):
+
+- `lib/features/projects/presentation/project_list_screen.dart`;
+- `lib/features/tools/presentation/widgets/project_picker_dialog.dart`.
+
+Accepted focused test:
+
+- `test/v1_r10_5c_projects_visual_test.dart`.
+
+Accepted presentation outcomes:
+
+- `CivilAppBar`;
+- `CivilSurfaceCard` project rows;
+- theme-aware Light / Dark roles;
+- Arabic RTL;
+- feature-local responsive gutters;
+- approximately 760 dp readable width;
+- loading / valid empty / failure / retry distinction;
+- known-good project data preserved on later reload failure;
+- safe async generation and mounted handling;
+- `ProjectPicker` loading / success / empty / failure / retry states;
+- no raw exception text.
+
+Protected semantics confirmed:
+
+- Projects domain unchanged;
+- Projects data / persistence unchanged;
+- project IDs / schema / ordering unchanged;
+- create, rename, archive, restore, and delete semantics unchanged;
+- `LocalChecklistRepository.clearProject(project.id)` cleanup ordering
+  preserved;
+- `ChecklistScreen(project: project)` exact association preserved;
+- `ProjectPicker` active-only filtering and exact `Project` return preserved;
+- routes and application shell unchanged;
+- storage keys unchanged;
+- localization files unchanged;
+- shared theme / widget files unchanged;
+- R10.5-D+ implementation untouched.
+
+Next-slice transition:
+
+- V1-R10.5-D — Profile + User Area Presentation Pass:
+  CURRENT / AUTHORIZED — PRE-IMPLEMENTATION AUDIT ONLY;
+- implementation authorization: NO;
+- implementation: NOT STARTED;
+- no R10.5-D production boundary, file list, or implementation detail is frozen
+  by this record, and none may be invented;
+- the next authorized task is the focused pre-implementation audit only.
+
+Locked:
+
+- V1-R10.5-E — Business + Staff;
+- V1-R10.5-F — Encyclopedia Micro-polish;
+- V1-R10.6;
+- V1-R10.7.
+
+Unchanged governance:
+
+- V1 user-facing language: ARABIC-ONLY;
+- English switch: DISABLED;
+- Owner manual QA: subjective UI / UX acceptance by default;
+- programmatic behavior: agent / automated verification by default;
+- AI execution: highest reliable quality with lowest reasonable usage.
+
+Protected dirty baseline — DO NOT touch:
+
+- `test/a5_6_profile_bootstrap_test.dart`;
+- `test/v1_r08_cloud_profile_foundation_test.dart`;
+- `test/v1_r08_profile_edit_screen_widget_test.dart`;
+- `OpenCode_Usage_Report.txt`;
+- `artifacts/`.
+
+This closure documentation task does not alter the uncommitted accepted R10.5-C
+implementation and does not stage, commit, push, restore, reset, or clean.

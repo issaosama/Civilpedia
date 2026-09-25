@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:civilpedia/core/services/language_provider.dart';
-import 'package:civilpedia/core/theme/app_colors.dart';
 import 'package:civilpedia/core/theme/spacing.dart';
 import 'package:civilpedia/features/projects/data/local_project_repository.dart';
 import 'package:civilpedia/features/projects/data/project_local_data_source.dart';
@@ -30,22 +29,38 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
   late final ProjectRepository _repository;
   List<Project> _active = [];
   bool _loading = true;
+  bool _loadFailed = false;
+  int _loadGeneration = 0;
 
   @override
   void initState() {
     super.initState();
-    _repository = widget.repository ??
-        LocalProjectRepository(ProjectLocalDataSource());
+    _repository =
+        widget.repository ?? LocalProjectRepository(ProjectLocalDataSource());
     _load();
   }
 
   Future<void> _load() async {
-    final all = await _repository.loadProjects();
     if (!mounted) return;
+    final generation = ++_loadGeneration;
     setState(() {
-      _active = all.where((p) => !p.isArchived).toList();
-      _loading = false;
+      _loading = true;
+      _loadFailed = false;
     });
+    try {
+      final all = await _repository.loadProjects();
+      if (!mounted || generation != _loadGeneration) return;
+      setState(() {
+        _active = all.where((p) => !p.isArchived).toList();
+        _loading = false;
+      });
+    } catch (_) {
+      if (!mounted || generation != _loadGeneration) return;
+      setState(() {
+        _loadFailed = true;
+        _loading = false;
+      });
+    }
   }
 
   bool get _isArabic => context.read<LanguageProvider>().isArabic;
@@ -58,15 +73,45 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
 
     Widget content;
     if (_loading) {
-      content = const Center(child: CircularProgressIndicator());
+      content = const Center(
+        key: Key('project-picker-loading-state'),
+        child: CircularProgressIndicator(),
+      );
+    } else if (_loadFailed) {
+      content = Padding(
+        key: const Key('project-picker-failure-state'),
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 40, color: theme.colorScheme.error),
+            AppSpacing.gapMd,
+            Text(
+              _tr(Ar.errorOccurred, En.errorOccurred),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            AppSpacing.gapSm,
+            FilledButton.tonalIcon(
+              key: const Key('project-picker-retry-action'),
+              onPressed: _load,
+              icon: const Icon(Icons.refresh),
+              label: Text(_tr(Ar.retry, En.retry)),
+            ),
+          ],
+        ),
+      );
     } else if (_active.isEmpty) {
       content = Padding(
+        key: const Key('project-picker-empty-state'),
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Text(
           _tr(Ar.projectNoActiveProjects, En.projectNoActiveProjects),
           textAlign: TextAlign.center,
           style: theme.textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       );
@@ -78,9 +123,22 @@ class _ProjectPickerDialogState extends State<ProjectPickerDialog> {
           children: [
             for (final project in _active)
               ListTile(
-                leading: const Icon(Icons.folder, color: AppColors.primary),
-                title: Text(project.name),
+                key: ValueKey('project-picker-option-${project.id}'),
                 onTap: () => Navigator.pop(context, project),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                ),
+                leading: Icon(
+                  Icons.folder,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
+                title: Text(
+                  project.name,
+                  softWrap: true,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
               ),
           ],
         ),

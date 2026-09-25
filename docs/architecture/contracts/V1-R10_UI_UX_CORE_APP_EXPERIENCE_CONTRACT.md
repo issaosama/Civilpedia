@@ -2375,3 +2375,150 @@ Do not stage, commit, push, restore, reset, or clean.
 This documentation correction modifies only this authoritative contract file.
 
 ---
+
+## APPENDIX H — V1-R10.5-C FORMAL CLOSURE + R10.5-D PHASE TRANSITION
+
+Status: ARCHITECT APPROVED / RECORDED — R10.5-C CLOSED / ACCEPTED
+
+This append-only addendum records the formal closure of V1-R10.5-C and the
+phase transition to V1-R10.5-D. It does not rewrite APPENDIX G, the G.21
+test-gate correction / addendum, APPENDIX A-F, earlier evidence, or any
+historical status. Where older current-slice wording would conflict with the
+live state below, this newer addendum supersedes it.
+
+Authority: ChatGPT Architect + Owner Visual Acceptance
+
+Closure baseline: HEAD == origin/main ==
+`eb9173086bbfbba4f3efe3073ff464e23fc719a7`
+
+Implementation commit: PENDING OWNER COMMIT — the accepted R10.5-C
+implementation remains uncommitted.
+
+No production code is changed by this closure addendum.
+
+### H.1 Final acceptance
+
+Architect final acceptance: PASS — R10.5-C ACCEPTED
+
+- focused R10.5-C visual gate: 11 PASS / 0 FAIL;
+- corrected authoritative Projects regression gate: 333 PASS / 0 FAIL;
+- independent focused review: initially CORRECTION REQUIRED within authorized
+  scope;
+- review findings: HIGH 0; MEDIUM 1; LOW 2;
+- targeted post-correction gate: 20 PASS / 0 FAIL;
+- Owner visual / UX acceptance: PASS;
+- Arabic RTL review: PASS;
+- Light / Dark review: PASS;
+- no additional technical or visual review is required for R10.5-C.
+
+### H.2 Corrected findings
+
+MEDIUM — hardcoded user-facing failure copy bypassing the Ar / En localization
+SSOT:
+
+- CORRECTED by using the existing `Ar.errorOccurred` / `En.errorOccurred` keys
+  and the existing retry labels;
+- no localization file was modified and no new key was added.
+
+LOW — missing leading `mounted` guard on the async load entry points:
+
+- CORRECTED in both authorized files;
+- `_loadGeneration` protection, the `archivedView` capture, the completion
+  `mounted` checks, and known-good-data preservation were all kept unchanged.
+
+Remaining deferred LOW observations (non-blocking):
+
+- Project List 1.3 text-scale test coverage;
+- decorative state icon scale observation.
+
+### H.3 Accepted production result
+
+The accepted R10.5-C production boundary remains exactly:
+
+- `lib/features/projects/presentation/project_list_screen.dart`;
+- `lib/features/tools/presentation/widgets/project_picker_dialog.dart`.
+
+The accepted focused test remains:
+
+- `test/v1_r10_5c_projects_visual_test.dart`.
+
+Accepted presentation outcomes:
+
+- `CivilAppBar`;
+- `CivilSurfaceCard` project rows;
+- theme-aware Light / Dark roles;
+- Arabic RTL;
+- feature-local responsive gutters;
+- approximately 760 dp readable width;
+- loading / valid empty / failure / retry distinction;
+- known-good project data preserved on later reload failure;
+- safe async generation and mounted handling;
+- `ProjectPicker` loading / success / empty / failure / retry states;
+- no raw exception text.
+
+### H.4 Protected semantics confirmed
+
+- Projects domain unchanged;
+- Projects data and persistence unchanged;
+- project IDs / schema / ordering unchanged;
+- create semantics unchanged;
+- rename semantics unchanged;
+- archive / restore semantics unchanged;
+- delete semantics unchanged;
+- `LocalChecklistRepository.clearProject(project.id)` cleanup ordering
+  preserved;
+- `ChecklistScreen(project: project)` exact association preserved;
+- `ProjectPicker` active-only behavior preserved;
+- `ProjectPicker` exact `Project` return preserved;
+- routes and application shell unchanged;
+- storage keys unchanged;
+- localization files unchanged;
+- shared theme / widget files unchanged;
+- R10.5-D+ implementation untouched.
+
+R10.5-C is CLOSED and MUST NOT be reopened for the deferred LOW observations.
+
+### H.5 Next-slice transition
+
+V1-R10.5-D — Profile + User Area Presentation Pass:
+
+- status: CURRENT / AUTHORIZED — PRE-IMPLEMENTATION AUDIT ONLY;
+- implementation authorization: NO;
+- implementation: NOT STARTED;
+- no R10.5-D production boundary, file list, or implementation detail is frozen
+  by this record, and none may be invented;
+- the next authorized task is the focused pre-implementation audit only.
+
+### H.6 Locked later slices
+
+- V1-R10.5-E — Business + Staff: LOCKED;
+- V1-R10.5-F — Encyclopedia Micro-polish: LOCKED;
+- V1-R10.6: LOCKED;
+- V1-R10.7: LOCKED.
+
+### H.7 Language, QA, and AI-usage governance — unchanged
+
+- V1 user-facing language: ARABIC-ONLY;
+- English switch: DISABLED;
+- English runtime QA: NOT REQUIRED;
+- dormant `En` resources: RETAINED and UNCHANGED;
+- Owner manual QA: subjective UI / UX acceptance by default;
+- programmatic behavior: agent / automated verification by default;
+- AI execution: highest reliable quality with lowest reasonable usage.
+
+### H.8 Protected dirty baseline
+
+DO NOT TOUCH:
+
+- `test/a5_6_profile_bootstrap_test.dart`;
+- `test/v1_r08_cloud_profile_foundation_test.dart`;
+- `test/v1_r08_profile_edit_screen_widget_test.dart`;
+- `OpenCode_Usage_Report.txt`;
+- `artifacts/`.
+
+This closure documentation task does not alter the uncommitted accepted R10.5-C
+implementation.
+
+Do not stage, commit, push, restore, reset, or clean.
+
+---
