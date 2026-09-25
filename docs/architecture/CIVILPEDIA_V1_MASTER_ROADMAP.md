@@ -122,22 +122,29 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R10
 CURRENT_PHASE_TITLE: UI/UX & Core App Experience
-CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5-B CLOSED / ACCEPTED — R10.5-C CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5-B CLOSED / ACCEPTED — R10.5-C CURRENT / AUTHORIZED — CONTRACT FROZEN (APPENDIX G) — IMPLEMENTATION NOT STARTED
 CURRENT_PHASE_CONTRACT: docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md
-IMPLEMENTATION_AUTHORIZED: NO — V1-R10.5-C IS AUTHORIZED FOR PRE-IMPLEMENTATION AUDIT ONLY; IMPLEMENTATION REQUIRES THE FOCUSED AUDIT AND ARCHITECT PRODUCTION-BOUNDARY FREEZE
+CURRENT_PHASE_CONTRACT_FREEZE: FROZEN — APPENDIX G
+IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5-C PROJECTS PRESENTATION PASS ONLY; CONTRACT FROZEN BY APPENDIX G; IMPLEMENTATION NOT STARTED
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
+For V1-R10.5-C, implementation authorization is granted by the frozen
+APPENDIX G implementation contract, not by this roadmap status line.
 
 V1-R10.5-A (Article Production Visual Pass) and V1-R10.5-B (Tools +
 Calculators Presentation Pass) are CLOSED / ACCEPTED (see their Formal Closure
 Records below). The current R10.5-C (Projects Presentation Pass) slice is
-authorized for its focused pre-implementation audit only; its implementation is
-NOT started and its production boundary is NOT yet frozen. R10.5-D through
-R10.5-F, R10.6, and R10.7 remain LOCKED. Projects domain, data, and persistence
-semantics remain protected until the R10.5-C audit and Architect freeze. V1
-user-facing language scope = ARABIC-ONLY (see the V1 Owner Language-Scope
-Decision Record below).
+CURRENT / AUTHORIZED: its focused pre-implementation audit is complete, the
+Architect accepted that audit, and its implementation contract is FROZEN as
+APPENDIX G of
+docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md.
+IMPLEMENTATION_AUTHORIZED: YES. Implementation is NOT started, and the
+frozen production boundary is exactly the two files recorded in APPENDIX G.
+Projects domain, data, and persistence semantics remain strictly protected.
+R10.5-D through R10.5-F, R10.6, and R10.7 remain LOCKED. V1 user-facing
+language scope = ARABIC-ONLY (see the V1 Owner Language-Scope Decision Record
+below).
 
 ---
 
@@ -3447,3 +3454,53 @@ Live state:
   IMPLEMENTATION NOT STARTED;
 - V1-R10.5-D through V1-R10.5-F: LOCKED;
 - V1-R10.6 / V1-R10.7: LOCKED.
+
+---
+
+### V1-R10.5-C Authorization Synchronization Record
+
+Record type: CURRENT phase-control / authorization synchronization
+(append-only governance note; not a new historical audit record)
+
+Status: ARCHITECT APPROVED / RECORDED
+
+Synchronization baseline: HEAD == origin/main ==
+`270c6423090f2f4c7e3a1dba85c4392109902ba7`
+
+Contract:
+`docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md`
+APPENDIX G — V1-R10.5-C PROJECTS PRESENTATION PASS FREEZE
+
+Recorded facts:
+
+- the R10.5-C focused pre-implementation audit is complete;
+- the Architect accepted that audit;
+- APPENDIX G is frozen and states `IMPLEMENTATION_AUTHORIZED: YES`;
+- roadmap phase-control authorization is now
+  `V1-R10.5-C CURRENT / AUTHORIZED` with `IMPLEMENTATION_AUTHORIZED: YES`,
+  `CONTRACT: FROZEN — APPENDIX G`, and `IMPLEMENTATION: NOT STARTED`;
+- the earlier R10.5-B closure-record transition wording and the `Live state`
+  block quoted in that record are historical snapshots as of the R10.5-B
+  closure baseline. They are NOT current phase control and are NOT rewritten
+  by this synchronization. The `CURRENT PHASE CONTROL` section above and this
+  record are the current authorization authority for R10.5-C;
+- no R10.5-C production implementation has started;
+- no production code was changed by this documentation synchronization;
+- APPENDIX G was not altered, and the R10.5-C audit is not reopened;
+- the frozen production boundary is unchanged and is defined only by APPENDIX G;
+- Projects domain, data, persistence, storage keys, routes, shell, checklist,
+  calculator, localization, and shared-theme protections remain exactly as
+  frozen in APPENDIX G.
+
+Locked:
+
+- V1-R10.5-D — Profile + User Area;
+- V1-R10.5-E — Business + Staff;
+- V1-R10.5-F — Encyclopedia Micro-polish;
+- V1-R10.6;
+- V1-R10.7.
+
+Unchanged governance:
+
+- the existing Arabic-only V1 user-facing language decision remains active;
+- the existing QA and AI-usage governance remain unchanged.
