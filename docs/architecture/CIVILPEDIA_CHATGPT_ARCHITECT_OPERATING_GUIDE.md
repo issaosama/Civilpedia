@@ -589,3 +589,131 @@ Verification surgical
 Strong models reserved for high-value risk
 Production quality never optional
 ```
+
+---
+
+## 22. Project-Wide QA Responsibility Decision
+
+Status: ACTIVE / OWNER + ARCHITECT APPROVED
+
+This decision defines the default division of QA responsibility across
+Civilpedia. It prevents duplicated manual testing while preserving subjective
+product acceptance with the Owner and deterministic technical evidence with
+agents.
+
+### Owner manual QA responsibility
+
+The Owner is responsible primarily for subjective UI / UX acceptance,
+including:
+
+- visual quality;
+- layout;
+- spacing;
+- typography;
+- colors;
+- Light / Dark appearance;
+- Arabic RTL appearance;
+- visual hierarchy;
+- perceived polish;
+- product desirability and suitability.
+
+The Owner is not expected to manually repeat routine programmatic behavior
+that can be verified reliably through automated tests and targeted code review.
+
+### Agent technical QA responsibility
+
+Implementation and review agents are responsible for verifying, as appropriate:
+
+- navigation;
+- routing;
+- callbacks;
+- state behavior;
+- persistence;
+- validation;
+- calculations;
+- domain semantics;
+- reset and refresh behavior;
+- deep links;
+- data integrity;
+- regressions;
+- protected architecture;
+- resource and lifecycle correctness when relevant.
+
+Automated tests and targeted code inspection are the primary evidence for
+programmatic behavior.
+
+### Owner manual functional QA conditions
+
+Manual functional QA should be requested from the Owner only when:
+
+- behavior depends on real-device or OS integration;
+- automation cannot verify the behavior reliably;
+- the visual interaction itself is the acceptance target;
+- the Architect explicitly requires manual functional QA because of risk.
+
+Do not routinely ask the Owner to repeat programmatic tests already proven by
+strong automated and review evidence.
+
+Project defaults:
+
+```text
+OWNER MANUAL QA = SUBJECTIVE UI / UX ACCEPTANCE BY DEFAULT
+PROGRAMMATIC BEHAVIOR = AGENT / AUTOMATED VERIFICATION BY DEFAULT
+```
+
+---
+
+## 23. Project-Wide AI-Usage Efficiency Decision
+
+Status: ACTIVE / OWNER + ARCHITECT APPROVED
+
+Target:
+
+```text
+HIGHEST RELIABLE QUALITY WITH THE LOWEST REASONABLE AI USAGE
+```
+
+For this governance decision, AI usage includes:
+
+- model invocations;
+- token usage;
+- duplicated agent work;
+- unnecessary repeated reviews;
+- unnecessary broad test runs;
+- unnecessary repository-wide reading.
+
+It does not include application CPU or RAM optimization unless the task itself
+is performance-related.
+
+Binding execution rules:
+
+1. Default reasoning effort is **Medium**.
+2. Escalate to **High** only when material risk justifies it, including
+   authentication or session authority, migrations, RLS or security, destructive
+   data operations, routing or startup architecture, concurrency or race
+   conditions, major shared architecture, or another high-impact semantic risk.
+3. Prefer focused repository boundaries. Do not ask an agent to inspect the
+   entire project when a precise scope exists.
+4. Prefer focused test gates. Do not run the full suite when targeted regression
+   evidence is sufficient.
+5. Avoid duplicate reviews. Once implementation, focused tests, and an
+   appropriate independent review provide strong evidence, do not add another
+   reviewer merely for confidence.
+6. Independent review is risk-based. Require it where semantic or architectural
+   risk warrants it; do not require it automatically for every trivial
+   presentation or documentation task.
+7. Do not repeat audits whose questions have already been answered by current
+   repository evidence.
+8. Do not ask agents to run emulator or device QA when automated verification is
+   sufficient and the Owner owns visual acceptance.
+9. Stop when evidence is sufficient for acceptance. Do not consume additional
+   AI usage for marginal confidence improvements.
+10. Quality must not be reduced merely to save AI usage.
+
+Project principle:
+
+```text
+SCOPE MAY BE LIMITED.
+QUALITY MAY NOT BE LIMITED.
+AI WORK SHOULD NOT BE DUPLICATED WITHOUT A MATERIAL REASON.
+```

@@ -5,6 +5,7 @@ import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
+import '../../../../../core/widgets/civil_app_bar.dart';
 import '../../../../../localization/ar.dart';
 import '../../widgets/calculator/calculator_error_card.dart';
 import '../../widgets/calculator/calculator_primary_button.dart';
@@ -727,15 +728,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      appBar: AppBar(
-        title: Text(_title, style: const TextStyle(color: Colors.white)),
-        backgroundColor: AppColors.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
+      appBar: CivilAppBar(
+        title: Text(_title),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: Ar.reset,
-            color: Colors.white,
             onPressed: _resetAll,
           ),
         ],
@@ -860,17 +858,17 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? AppColors.darkSurface : Colors.white,
+          color: isDark ? AppColors.darkSurface : AppColors.surface,
           borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-          border: Border.all(color: AppColors.primary.withValues(alpha: 0.15), width: 1),
-          boxShadow: [
+          border: Border.all(color: isDark ? AppColors.darkBorder : AppColors.border, width: 1),
+          boxShadow: isDark ? const [] : [
             BoxShadow(
-              color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+              color: AppColors.cardShadow,
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
             BoxShadow(
-              color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.02),
+              color: AppColors.cardShadow.withValues(alpha: 0.5),
               blurRadius: 4,
               offset: const Offset(0, 1),
             ),
@@ -1207,13 +1205,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
+          top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border, width: 1),
         ),
-        boxShadow: [
+        boxShadow: isDark ? const [] : const [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+            color: AppColors.cardShadow,
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -1321,15 +1319,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      appBar: AppBar(
-        title: Text(_title, style: const TextStyle(color: Colors.white)),
-        backgroundColor: AppColors.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
+      appBar: CivilAppBar(
+        title: Text(_title),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: Ar.reset,
-            color: Colors.white,
             onPressed: _resetSteel,
           ),
         ],
@@ -1710,13 +1705,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
+          top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border, width: 1),
         ),
-        boxShadow: [
+        boxShadow: isDark ? const [] : const [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+            color: AppColors.cardShadow,
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),
@@ -1841,15 +1836,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      appBar: AppBar(
-        title: Text(_title, style: const TextStyle(color: Colors.white)),
-        backgroundColor: AppColors.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
+      appBar: CivilAppBar(
+        title: Text(_title),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             tooltip: Ar.reset,
-            color: Colors.white,
             onPressed: _resetBrick,
           ),
         ],
@@ -2151,13 +2143,13 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
+          top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border, width: 1),
         ),
-        boxShadow: [
+        boxShadow: isDark ? const [] : const [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+            color: AppColors.cardShadow,
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),

@@ -4,7 +4,8 @@ import 'models/inspection_item.dart';
 import 'models/inspection_status.dart';
 import 'inspection_localization.dart';
 import 'widgets/inspection_item_tile.dart';
-import '../../../../../core/widgets/custom_card.dart';
+import '../../../../../core/widgets/civil_app_bar.dart';
+import '../../../../../core/widgets/civil_surface_card.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/spacing.dart';
@@ -68,13 +69,14 @@ class _ChecklistCategoryDetailScreenState
     final allPassed = items.isNotEmpty && items.every((i) => i.status == InspectionStatus.pass);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: CivilAppBar(
         title: Text(widget.l10n(widget.category.titleKey)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          CustomCard(
+          CivilSurfaceCard(
+            hasBorder: true,
             padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg,
               vertical: AppSpacing.md,

@@ -1707,3 +1707,95 @@ artifacts/. Do not stage, commit, push, restore, reset, or clean.
 - HEAD == origin/main == 78000cd43d18b630a044d8ddd4b2878c5b9915df
 
 ---
+
+## APPENDIX F — V1-R10.5-B FORMAL CLOSURE + R10.5-C PHASE TRANSITION
+
+Status: ARCHITECT APPROVED / RECORDED — R10.5-B CLOSED / ACCEPTED
+
+This append-only addendum records the formal closure of V1-R10.5-B and the
+phase transition to V1-R10.5-C. It does not rewrite APPENDIX E, the frozen
+7-file production boundary, earlier evidence, or any historical status. This
+newer addendum supersedes older current-slice wording only where that wording
+would otherwise conflict with the live state below.
+
+Architect final acceptance: PASS — R10.5-B ACCEPTED
+
+Closure baseline: HEAD == origin/main ==
+`be7a4b322903c8fe8609fa175833b7002e37523d`
+
+Implementation commit: PENDING OWNER COMMIT — implementation remains uncommitted
+
+### F.1 R10.5-B closure evidence
+
+- implementation completed inside the frozen APPENDIX E production boundary;
+- presentation gate: 138 PASS / 0 FAIL;
+- domain gate: 133 PASS / 0 FAIL;
+- independent review: PASS;
+- findings: HIGH 0; MEDIUM 0; LOW 1 — accepted/deferred, non-blocking;
+- Owner manual visual review: PASS;
+- Light / Dark visual review: PASS;
+- Arabic RTL visual review: PASS.
+
+### F.2 Accepted deferred LOW finding
+
+The new R10.5-B visual test does not explicitly assert that the Checklist
+`CivilAppBar` background differs from `AppColors.primary`.
+
+This finding is accepted and deferred as LOW / NON-BLOCKING. R10.5-B MUST NOT
+be reopened solely to address this finding.
+
+### F.3 R10.5-B protected-scope confirmation
+
+The accepted implementation preserved:
+
+- calculator formulas and engineering domain semantics;
+- checklist state, progress, reset behavior, and persistence semantics;
+- routes and application shell;
+- localization resources and active Arabic RTL behavior;
+- the Tools landing;
+- `ProjectPicker`;
+- all R10.5-C and later-slice production implementation.
+
+No localization, domain, data, persistence, routing, shell, or later-slice
+production change was accepted as part of this closure.
+
+### F.4 Next-slice transition
+
+V1-R10.5-C — Projects Presentation Pass:
+
+- status: CURRENT / AUTHORIZED FOR FOCUSED PRE-IMPLEMENTATION AUDIT;
+- implementation: NOT STARTED;
+- implementation authorization: NO — it begins only after the focused audit
+  and a subsequent Architect production-boundary freeze;
+- the next authorized task is the pre-implementation audit only;
+- no production boundary, file list, semantic change, or implementation detail
+  is frozen by this transition.
+
+### F.5 R10.5-C high-level protection
+
+- Projects domain, data, and persistence semantics remain protected until the
+  focused audit and Architect freeze;
+- no R10.5-C production implementation is authorized or performed by this
+  closure addendum;
+- R10.5-C+ remains untouched by the R10.5-B implementation.
+
+### F.6 Locked later slices
+
+- V1-R10.5-D — Profile + User Area: LOCKED;
+- V1-R10.5-E — Business + Staff: LOCKED;
+- V1-R10.5-F — Encyclopedia Micro-polish: LOCKED;
+- V1-R10.6: LOCKED;
+- V1-R10.7: LOCKED.
+
+### F.7 Protected dirty baseline
+
+This documentation closure does not touch, format, stage, commit, push,
+restore, reset, or clean:
+
+- `test/a5_6_profile_bootstrap_test.dart`;
+- `test/v1_r08_cloud_profile_foundation_test.dart`;
+- `test/v1_r08_profile_edit_screen_widget_test.dart`;
+- `OpenCode_Usage_Report.txt`;
+- `artifacts/`.
+
+---

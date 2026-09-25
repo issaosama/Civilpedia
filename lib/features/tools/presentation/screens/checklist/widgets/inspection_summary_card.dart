@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/inspection_summary.dart';
 import 'inspection_progress_card.dart';
-import '../../../../../../core/widgets/custom_card.dart';
+import '../../../../../../core/widgets/civil_surface_card.dart';
 import '../../../../../../core/theme/app_colors.dart';
 
 import '../../../../../../core/theme/spacing.dart';
@@ -41,7 +41,8 @@ class InspectionSummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return CustomCard(
+    return CivilSurfaceCard(
+      hasBorder: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -99,9 +100,8 @@ class InspectionSummaryCard extends StatelessWidget {
                 ),
               ),
               style: TextButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                minimumSize: Size.zero,
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: const Size(48, 48),
               ),
             ),
           ),

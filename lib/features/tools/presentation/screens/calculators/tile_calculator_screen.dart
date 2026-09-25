@@ -4,6 +4,7 @@ import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/spacing.dart';
 import '../../../../../core/widgets/custom_card.dart';
+import '../../../../../core/widgets/civil_app_bar.dart';
 import '../../../../../localization/ar.dart';
 import '../../../../tools/domain/tile/tile_calculation_snapshot.dart';
 import '../../../../tools/domain/tile/tile_quantity_calculator.dart';
@@ -286,13 +287,11 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
     final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
-      appBar: AppBar(
-        title: Text(Ar.tileCalc, style: const TextStyle(color: Colors.white)),
-        backgroundColor: AppColors.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
+      appBar: CivilAppBar(
+        title: Text(Ar.tileCalc),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), tooltip: Ar.reset,
-              color: Colors.white, onPressed: _reset),
+              onPressed: _reset),
         ],
       ),
       body: ListView(
@@ -323,13 +322,13 @@ class _TileCalculatorScreenState extends State<TileCalculatorScreen> {
         bottom: MediaQuery.of(context).padding.bottom + 16,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : Colors.white,
+        color: isDark ? AppColors.darkSurface : AppColors.surface,
         border: Border(
-          top: BorderSide(color: AppColors.primary.withValues(alpha: 0.12), width: 1),
+          top: BorderSide(color: isDark ? AppColors.darkBorder : AppColors.border, width: 1),
         ),
-        boxShadow: [
+        boxShadow: isDark ? const [] : const [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.04),
+            color: AppColors.cardShadow,
             blurRadius: 16,
             offset: const Offset(0, -4),
           ),

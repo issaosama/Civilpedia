@@ -17,6 +17,8 @@ import '../../../../../core/services/language_provider.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/theme/spacing.dart';
+import '../../../../../core/widgets/civil_app_bar.dart';
+import '../../../../../core/widgets/civil_surface_card.dart';
 import '../../../domain/checklist/checklist_repository.dart';
 import '../../../data/checklist/local_checklist_repository.dart';
 import '../../../data/checklist/checklist_local_data_source.dart';
@@ -237,14 +239,10 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
     final codeRefLabel = tr(Ar.inspectionCodeRef, En.inspectionCodeRef);
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: CivilAppBar(
         title: Text(
           _isProject ? _projectName! : tr(Ar.siteChecklist, En.siteChecklist),
-          style: const TextStyle(color: Colors.white),
         ),
-        backgroundColor: AppColors.primary,
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -264,19 +262,15 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
             onReset: _resetAll,
           ),
           const SizedBox(height: 12),
-          Card(
-            margin: EdgeInsets.zero,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const ProjectListScreen()),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Row(
+          CivilSurfaceCard(
+            hasBorder: true,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ProjectListScreen()),
+              );
+            },
+            child: Row(
                   children: [
                     Icon(Icons.folder, size: 20, color: AppColors.primary),
                     const SizedBox(width: 12),
@@ -288,11 +282,15 @@ class _ChecklistScreenState extends State<ChecklistScreen> {
                         ),
                       ),
                     ),
-                    Icon(Icons.chevron_right, size: 20, color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
+                    Icon(
+                      Directionality.of(context) == TextDirection.rtl
+                          ? Icons.chevron_left
+                          : Icons.chevron_right,
+                      size: 20,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                    ),
                   ],
                 ),
-              ),
-            ),
           ),
           const SizedBox(height: 16),
           ...kCategories.map((cat) {

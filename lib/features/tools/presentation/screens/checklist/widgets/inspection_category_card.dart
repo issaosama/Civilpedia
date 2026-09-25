@@ -4,7 +4,7 @@ import '../models/inspection_item.dart';
 import '../models/inspection_status.dart';
 import '../inspection_localization.dart';
 import 'inspection_progress_card.dart';
-import '../../../../../../core/widgets/custom_card.dart';
+import '../../../../../../core/widgets/civil_surface_card.dart';
 import '../../../../../../core/theme/app_colors.dart';
 import '../../../../../../core/theme/design_tokens.dart';
 import '../../../../../../core/theme/spacing.dart';
@@ -31,14 +31,10 @@ class InspectionCategoryCard extends StatelessWidget {
     final progress = items.isEmpty ? 0.0 : done / items.length;
     final allPassed = items.isNotEmpty && items.every((i) => i.status == InspectionStatus.pass);
 
-    return CustomCard(
-      padding: EdgeInsets.zero,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(DesignTokens.radiusMd),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Row(
+    return CivilSurfaceCard(
+      hasBorder: true,
+      onTap: onTap,
+      child: Row(
             children: [
               Container(
                 width: 36,
@@ -81,14 +77,16 @@ class InspectionCategoryCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Icon(
-                allPassed ? Icons.check_circle : Icons.chevron_right,
+                allPassed
+                    ? Icons.check_circle
+                    : Directionality.of(context) == TextDirection.rtl
+                        ? Icons.chevron_left
+                        : Icons.chevron_right,
                 size: 20,
                 color: allPassed ? AppColors.success : (isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
               ),
             ],
           ),
-        ),
-      ),
     );
   }
 }

@@ -27,7 +27,7 @@ class CalculatorPrimaryButton extends StatelessWidget {
         label: Text(label),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.textOnAmber,
           padding: padding,
           elevation: 0,
           shape: RoundedRectangleBorder(

@@ -122,19 +122,22 @@ Rules for this table:
 
 CURRENT_PHASE_ID: V1-R10
 CURRENT_PHASE_TITLE: UI/UX & Core App Experience
-CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5-A CLOSED / ACCEPTED — R10.5-B CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
+CURRENT_PHASE_STATUS: CURRENT / AUTHORIZED — R10.5-B CLOSED / ACCEPTED — R10.5-C CURRENT / AUTHORIZED — IMPLEMENTATION NOT STARTED
 CURRENT_PHASE_CONTRACT: docs/architecture/contracts/V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md
-IMPLEMENTATION_AUTHORIZED: YES — V1-R10.5-B ONLY (implementation NOT started)
+IMPLEMENTATION_AUTHORIZED: NO — V1-R10.5-C IS AUTHORIZED FOR PRE-IMPLEMENTATION AUDIT ONLY; IMPLEMENTATION REQUIRES THE FOCUSED AUDIT AND ARCHITECT PRODUCTION-BOUNDARY FREEZE
 
 A roadmap CURRENT status identifies execution order.
 It does NOT by itself authorize implementation.
 
-V1-R10.5-A (Article Production Visual Pass) is CLOSED / ACCEPTED (see its Formal
-Closure Record below). Only the current R10.5-B (Tools + Calculators
-Presentation Pass) slice is authorized; its implementation is NOT started.
-R10.5-C through R10.5-F, R10.6, and R10.7 remain future / locked relative to
-R10.5-B. V1 user-facing language scope = ARABIC-ONLY (see the V1 Owner
-Language-Scope Decision Record below).
+V1-R10.5-A (Article Production Visual Pass) and V1-R10.5-B (Tools +
+Calculators Presentation Pass) are CLOSED / ACCEPTED (see their Formal Closure
+Records below). The current R10.5-C (Projects Presentation Pass) slice is
+authorized for its focused pre-implementation audit only; its implementation is
+NOT started and its production boundary is NOT yet frozen. R10.5-D through
+R10.5-F, R10.6, and R10.7 remain LOCKED. Projects domain, data, and persistence
+semantics remain protected until the R10.5-C audit and Architect freeze. V1
+user-facing language scope = ARABIC-ONLY (see the V1 Owner Language-Scope
+Decision Record below).
 
 ---
 
@@ -3366,3 +3369,81 @@ None of these backlog notes change:
 - backend/storage/schema authority.
 
 They are FUTURE PLANNING NOTES ONLY.
+
+---
+
+### V1-R10.5-B Formal Closure + V1-R10.5-C Transition Record
+
+Slice: V1-R10.5-B — Tools + Calculators Presentation Pass
+
+Contract: `V1-R10_UI_UX_CORE_APP_EXPERIENCE_CONTRACT.md` APPENDIX E (frozen
+implementation boundary preserved) and the append-only formal-closure addendum.
+
+Previous status: CURRENT / AUTHORIZED
+
+New status: CLOSED / ACCEPTED
+
+Architect final acceptance: PASS — R10.5-B ACCEPTED
+
+Implementation commit: PENDING OWNER COMMIT — implementation remains uncommitted
+
+Closure baseline: HEAD == origin/main ==
+`be7a4b322903c8fe8609fa175833b7002e37523d`
+
+Acceptance evidence:
+
+- implementation completed inside the frozen 7-file production boundary;
+- presentation gate: 138 PASS / 0 FAIL;
+- domain gate: 133 PASS / 0 FAIL;
+- independent review: PASS;
+- findings: HIGH 0; MEDIUM 0; LOW 1 — accepted/deferred, non-blocking;
+- Owner manual visual review: PASS;
+- Light / Dark visual review: PASS;
+- Arabic RTL visual review: PASS.
+
+Accepted deferred LOW finding:
+
+- the new R10.5-B visual test does not explicitly assert that the Checklist
+  `CivilAppBar` background differs from `AppColors.primary`;
+- classification: LOW / NON-BLOCKING / ACCEPTED / DEFERRED;
+- R10.5-B implementation MUST NOT be reopened for this finding.
+
+Protected and unchanged:
+
+- calculator formulas and engineering domain semantics;
+- checklist state, progress, reset behavior, and persistence semantics;
+- routes and application shell;
+- localization resources and active Arabic RTL behavior;
+- Tools landing;
+- `ProjectPicker`;
+- R10.5-C and all later-slice production implementation.
+
+Next-slice transition:
+
+- V1-R10.5-C — Projects Presentation Pass:
+  CURRENT / AUTHORIZED FOR FOCUSED PRE-IMPLEMENTATION AUDIT — IMPLEMENTATION
+  NOT STARTED;
+- no V1-R10.5-C production boundary is frozen by this closure record;
+- implementation requires the focused audit and a subsequent Architect
+  production-boundary freeze;
+- Projects domain, data, and persistence semantics remain protected until that
+  audit and freeze;
+- no R10.5-C production implementation is authorized or performed by this
+  documentation closure.
+
+Locked:
+
+- V1-R10.5-D — Profile + User Area;
+- V1-R10.5-E — Business + Staff;
+- V1-R10.5-F — Encyclopedia Micro-polish;
+- V1-R10.6;
+- V1-R10.7.
+
+Live state:
+
+- V1-R10.5-A: CLOSED / ACCEPTED;
+- V1-R10.5-B: CLOSED / ACCEPTED;
+- V1-R10.5-C: CURRENT / AUTHORIZED — PRE-IMPLEMENTATION AUDIT ONLY —
+  IMPLEMENTATION NOT STARTED;
+- V1-R10.5-D through V1-R10.5-F: LOCKED;
+- V1-R10.6 / V1-R10.7: LOCKED.
