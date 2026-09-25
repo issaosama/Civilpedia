@@ -1799,3 +1799,464 @@ restore, reset, or clean:
 - `artifacts/`.
 
 ---
+
+## APPENDIX G — V1-R10.5-C PROJECTS PRESENTATION PASS FREEZE
+
+Status: ARCHITECT APPROVED / FROZEN — R10.5-C IMPLEMENTATION AUTHORIZED
+
+This append-only addendum records the accepted focused R10.5-C Projects audit
+and freezes the implementation contract. It does not rewrite APPENDIX A-F, the
+R10.5-B closure, earlier evidence, or any historical status. Where older
+current-slice wording would conflict with the live state below, this newer
+addendum supersedes it.
+
+Implementation authorization: YES
+
+Risk: MEDIUM
+
+The production boundary is small, but Projects contains persistent data,
+destructive actions, checklist association, asynchronous loading, and picker
+flows whose existing semantics must remain exact.
+
+This is a presentation-only slice. No domain, data, route, persistence,
+storage-key, checklist, calculator, localization, or shared-theme change is
+authorized.
+
+Freeze baseline: HEAD == origin/main ==
+`de8e6a0212944e0d2f84a0cfec787bf9c83df158`
+
+### G.1 Exact authorized production boundary
+
+Only these two production files are authorized:
+
+1. `lib/features/projects/presentation/project_list_screen.dart`;
+2. `lib/features/tools/presentation/widgets/project_picker_dialog.dart`.
+
+Required new focused test:
+
+- `test/v1_r10_5c_projects_visual_test.dart`.
+
+There are no conditional production files. If implementation requires any
+other production file, stop with:
+
+`ARCHITECT REVIEW REQUIRED`
+
+Do not add a second implementation, compatibility replacement, new shared
+primitive, or adjacent presentation file inside this slice.
+
+### G.2 Projects domain and data protection
+
+DO NOT MODIFY:
+
+- `lib/features/projects/domain/**`;
+- `lib/features/projects/data/**`.
+
+Preserve exactly:
+
+- project IDs;
+- names;
+- timestamps;
+- stored schema;
+- persisted ordering;
+- active/archive filtering;
+- create semantics;
+- rename semantics;
+- archive semantics;
+- restore semantics;
+- delete semantics;
+- repository calls;
+- persisted data;
+- backward compatibility;
+- checklist-project association.
+
+Do not change any domain, repository, caching, serialization, or persistence
+behavior. Presentation changes must continue to consume the existing
+authorities exactly as they do today.
+
+### G.3 Storage and checklist protection
+
+DO NOT MODIFY:
+
+- `lib/core/storage/app_storage_keys.dart`;
+- `lib/features/tools/data/checklist/**`;
+- `lib/features/tools/presentation/screens/checklist/project_list_screen.dart`;
+- `lib/features/tools/presentation/screens/checklist/checklist_screen.dart`.
+
+The deletion invariant MUST remain exact:
+`LocalChecklistRepository.clearProject(project.id)` continues to execute
+according to the existing deletion flow before project deletion.
+
+The `ChecklistScreen(project: project)` navigation association MUST remain
+exact. No checklist behavior, storage key, project key, cleanup order, or
+navigation payload may change.
+
+### G.4 Routing and shell protection
+
+DO NOT MODIFY:
+
+- `lib/routes/app_routes.dart`;
+- `lib/routes/app_router.dart`;
+- `lib/core/navigation/app_shell.dart`.
+
+No new nested project route, project-detail route, selected/current-project
+route state, or navigation architecture is authorized. Existing branch
+ownership, route identity, and navigation remain unchanged.
+
+### G.5 Project list screen — app bar
+
+In `lib/features/projects/presentation/project_list_screen.dart`:
+
+- replace the raw `AppBar` with `CivilAppBar`;
+- preserve the current title meaning;
+- preserve the active/archive title state;
+- preserve the existing action, callback, and navigation semantics;
+- use the neutral canonical R10 chrome.
+
+No title, action, or navigation semantics may change as part of the visual
+alignment.
+
+### G.6 Project list screen — project rows
+
+Adopt `CivilSurfaceCard` where it is a true presentation-only replacement.
+
+Use theme-aware `ColorScheme` and existing tokens for:
+
+- surface;
+- outline/border;
+- title;
+- metadata;
+- destructive action presentation.
+
+Light-only static secondary text colors MUST NOT remain in dark mode.
+
+Preserve exactly:
+
+- row tap behavior;
+- the exact project object passed to callbacks and navigation;
+- title/name;
+- timestamp;
+- overflow/menu;
+- callbacks;
+- archive state.
+
+### G.7 Project list screen — readable width
+
+Apply feature-local responsive presentation:
+
+- compact: `< 600`;
+- medium: `600-839`;
+- expanded: `>= 840`.
+
+Use the frozen R10 gutters and approximately `maxWidth: 760` dp.
+
+Apply the same readable-width treatment consistently to:
+
+- populated state;
+- loading state;
+- empty state;
+- failure/retry state.
+
+Do not introduce a new responsive framework and do not move this concern into
+shared infrastructure.
+
+### G.8 Project list screen — loading, empty, and failure states
+
+The existing project load MUST visually distinguish:
+
+- loading;
+- valid empty;
+- loaded projects;
+- failure.
+
+On initial load failure, show a safe Arabic user-facing error presentation with
+retry. Do not expose raw exception text.
+
+If a later reload fails after known-good data is already present, preserve the
+known-good visible data. Do not replace known-good data with a false empty
+state.
+
+This is presentation-state handling only. Do not change repository authority,
+persistence, data ordering, or project semantics.
+
+Use existing localization/copy resources if available. Do not modify
+localization files. If safe required copy cannot be produced inside the frozen
+boundary without localization-file changes, stop with:
+
+`ARCHITECT REVIEW REQUIRED`
+
+### G.9 Create, rename, archive, restore, and delete
+
+Preserve the existing flows exactly and keep the existing Material
+`AlertDialog` approach. Do not redesign dialog architecture.
+
+CREATE:
+
+- callback;
+- validation;
+- save/cancel behavior;
+- repository action.
+
+RENAME:
+
+- callback;
+- validation;
+- existing project identity.
+
+ARCHIVE / RESTORE:
+
+- exact action semantics;
+- filtering behavior.
+
+DELETE:
+
+- confirmation;
+- destructive callback;
+- checklist cleanup;
+- project deletion ordering.
+
+Only visual token alignment already owned by the authorized screen may occur.
+No semantic change is authorized.
+
+### G.10 Project picker
+
+`lib/features/tools/presentation/widgets/project_picker_dialog.dart` is
+explicitly AUTHORIZED in R10.5-C. Its prior R10.5-B protection applied only to
+that earlier slice.
+
+Preserve:
+
+- active-project-only filtering;
+- persisted project ordering;
+- exact selected `Project` object returned;
+- no persisted selected/current project;
+- dialog navigation and dismiss semantics.
+
+Add presentation states for:
+
+- loading;
+- success;
+- empty;
+- retryable failure.
+
+Guard asynchronous loading safely. Do not expose exception text. Retry must
+re-attempt the existing load only.
+
+Use theme-aware typography and colors. Long project names must remain usable
+at:
+
+- `390 x 844`;
+- Arabic;
+- text scale 1.0;
+- text scale 1.3.
+
+Scrolling and wrapping may be presentation-adjusted as needed without changing
+project selection semantics.
+
+### G.11 Shared primitives
+
+Reuse the existing:
+
+- `CivilAppBar`;
+- `CivilSurfaceCard`;
+- `AppColors`;
+- `AppSpacing`;
+- `DesignTokens`;
+- `Theme.of(context).colorScheme`;
+- existing typography.
+
+A new shared primitive is NOT AUTHORIZED and NOT REQUIRED.
+
+Do not modify shared theme or widget files.
+
+### G.12 Explicitly protected and out of scope
+
+DO NOT MODIFY:
+
+- `lib/features/projects/domain/**`;
+- `lib/features/projects/data/**`;
+- `lib/routes/app_routes.dart`;
+- `lib/routes/app_router.dart`;
+- `lib/core/navigation/app_shell.dart`;
+- `lib/features/tools/presentation/screens/checklist/project_list_screen.dart`;
+- `lib/features/tools/presentation/screens/checklist/checklist_screen.dart`;
+- `lib/features/tools/data/checklist/**`;
+- `lib/features/tools/presentation/screens/calculators/tile_calculator_screen.dart`;
+- `lib/core/storage/app_storage_keys.dart`;
+- all localization files;
+- all shared theme/widget files.
+
+`ProjectNotesView` and `ProjectCalculationHistoryView` remain
+production-unexposed and out of scope.
+
+### G.13 Deferred scope
+
+Explicitly deferred:
+
+- `ProjectNotesView` visual work;
+- `ProjectCalculationHistoryView` visual work;
+- nested project routes;
+- a project-detail route;
+- persisted selected/current project;
+- shared visual abstractions;
+- new localization keys;
+- controller-lifecycle refactor;
+- domain/data refactor;
+- repository/storage cleanup;
+- broad R10.6 responsive/accessibility work;
+- R10.5-D and later.
+
+### G.14 Required new focused test
+
+Add:
+
+`test/v1_r10_5c_projects_visual_test.dart`
+
+Meaningfully verify:
+
+PROJECT LIST:
+
+- `CivilAppBar`;
+- `CivilSurfaceCard`;
+- exact project ordering preserved;
+- Arabic RTL;
+- compact gutter behavior;
+- approximately 760 dp maximum width;
+- light theme roles;
+- dark theme roles;
+- active state;
+- archived state;
+- valid empty state;
+- loading state;
+- failure state;
+- retry;
+- known-good data is not replaced by a false empty state after later failure.
+
+PROJECT ASSOCIATION:
+
+- a project row opens `ChecklistScreen` with the exact selected `Project`.
+
+PROJECT PICKER:
+
+- active-only filtering;
+- ordering;
+- exact `Project` selection;
+- loading;
+- empty;
+- failure;
+- retry.
+
+LAYOUT:
+
+- no overflow at `390 x 844`;
+- Arabic text scale 1.0;
+- Arabic text scale 1.3.
+
+Do not write brittle pixel tests. Do not weaken existing regression tests.
+
+### G.15 Focused test gate
+
+Use `--no-pub`.
+
+First run the new focused visual test:
+
+```
+flutter test --no-pub test/v1_r10_5c_projects_visual_test.dart
+```
+
+Then run the existing Projects regression gate:
+
+```
+flutter test --no-pub test/project_list_screen_test.dart test/w3_4_app_navigation_responsive_test.dart test/w3_5_app_navigation_behavior_test.dart test/w4_1_project_domain_split_test.dart test/w4_2_project_canonicalization_test.dart test/w4_3_project_create_edit_test.dart test/w4_4_archive_restore_test.dart test/w4_5_save_calculation_test.dart test/w4_6_calculation_history_test.dart test/w4_7_notes_test.dart test/w4_8_executions_test.dart test/checklist_persistence_test.dart test/w6_1_projects_route_test.dart test/w6_3_nav_transition_test.dart test/app_storage_keys_test.dart
+```
+
+Do NOT run:
+
+- full `flutter test`;
+- `flutter analyze`;
+- `flutter pub get`;
+- emulator;
+- Supabase.
+
+### G.16 Owner manual QA boundary
+
+Owner manual QA is VISUAL / UX only.
+
+The Owner should not be required to manually re-test:
+
+- create callback;
+- rename callback;
+- archive/restore semantics;
+- delete semantics;
+- persistence;
+- checklist-project association;
+- picker selection semantics;
+- routing,
+
+when those are reliably verified by automated tests and review.
+
+Owner visual acceptance focuses on:
+
+- Projects populated screen;
+- Projects archived screen;
+- empty/loading/error presentation;
+- Project picker;
+- Light / Dark;
+- Arabic RTL;
+- Compact / Medium / Expanded appearance;
+- text-scale appearance where visually relevant;
+- spacing;
+- hierarchy;
+- polish;
+- overflow and clipping.
+
+### G.17 Language scope
+
+V1 user-facing scope: ARABIC-ONLY.
+
+- English switch: DISABLED;
+- English runtime QA: NOT REQUIRED;
+- dormant `En` resources: RETAINED and UNCHANGED.
+
+### G.18 AI usage governance
+
+Follow the highest reliable quality with the lowest reasonable AI usage:
+
+- no broad repository audit;
+- no full-suite test;
+- no redundant reviewer;
+- no emulator run;
+- no duplicate verification;
+- stop when focused evidence is sufficient.
+
+### G.19 Locked later slices
+
+Keep LOCKED:
+
+- V1-R10.5-D — Profile + User Area;
+- V1-R10.5-E — Business + Staff;
+- V1-R10.5-F — Encyclopedia Micro-polish;
+- V1-R10.6;
+- V1-R10.7.
+
+### G.20 Git safety
+
+Protected dirty baseline — DO NOT touch:
+
+- `test/a5_6_profile_bootstrap_test.dart`;
+- `test/v1_r08_cloud_profile_foundation_test.dart`;
+- `test/v1_r08_profile_edit_screen_widget_test.dart`;
+- `OpenCode_Usage_Report.txt`;
+- `artifacts/`.
+
+Do not stage, commit, push, restore, reset, or clean.
+
+Freeze-time verification:
+
+- `git diff --check`: informational LF/CRLF warnings only on protected files;
+- `git status --short`: protected dirty baseline only before this contract edit;
+- nothing staged / cached;
+- `HEAD == origin/main ==` `de8e6a0212944e0d2f84a0cfec787bf9c83df158`.
+
+This documentation freeze modifies only this authoritative contract file.
+
+---
