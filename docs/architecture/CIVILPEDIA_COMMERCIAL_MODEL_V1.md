@@ -1,7 +1,8 @@
 # CIVILPEDIA — COMMERCIAL MODEL V1 (CANONICAL SSOT)
 
 DOCUMENT_ID: `CIVILPEDIA_COMMERCIAL_MODEL_V1`
-DOCUMENT_STATUS: ACTIVE — CANONICAL COMMERCIAL SSOT
+DOCUMENT_STATUS: ACTIVE DESIGN — CANONICAL COMMERCIAL SSOT — **NOT YET FROZEN**
+FREEZE_STATE: NOT FROZEN. Commercial Model V1 is **not** complete, **not** final, and **not** frozen. See §1.6 (Document maturity and freeze status) and the Open Question register in §24.3.
 DOCUMENT_AUTHORITY: OWNER + CHATGPT ARCHITECT (commercial decisions)
 SCOPE: Documentation / consolidation only
 IMPLEMENTATION_AUTHORIZED: NO — this document does not authorize any code, schema, contract, or phase change
@@ -9,6 +10,7 @@ BASELINE_COMMIT: `30aa1b23` (V1-R10.5-C closed / accepted)
 ROADMAP_PHASE_AT_BASELINE: V1-R10 UI/UX & Core App Experience — R10.5-D CURRENT (pre-implementation audit only); R10.5-E Business + Staff LOCKED
 SOURCE_OF_DECISIONS: Owner-approved commercial decisions consolidated by the Architect; conversation history is NOT a source of truth
 AMENDMENT: A1 — Conflict Reconciliation (2026-09-27), authority: ChatGPT Architect. Reconciles C-1…C-10 by authority separation. No commercial intent changed. No production, schema, contract, or roadmap change authorized or performed.
+AMENDMENT: A2 — Register Integrity + Documentary Corrections (2026-09-28), authority: ChatGPT Architect. **Register/governance amendment only.** Rebuilds the Open Question register (§24.3) so that every in-body unresolved commercial marker carries a registered Open Question ID, adds freeze-triage metadata (severity / owner / classification), corrects one LOCKED-rule **wording** contradiction in §2.4 (branch billing vs the approved Extra Branch add-on model), and records the document maturity as **ACTIVE DESIGN / NOT YET FROZEN**. A2 **creates no commercial decision, resolves no open question, changes no price, and changes no commercial intent.** No production, test, migration, Supabase, contract, UI, or roadmap change authorized or performed.
 
 ---
 
@@ -69,11 +71,25 @@ Rules for classification:
 2. `PROVISIONAL` values must not be presented to customers, in UI copy, in
    contracts, or in sales conversations as final pricing or final policy.
 3. A missing rule stays missing. It is recorded in §24.3 as an open question.
-   Agents and authors must not invent it.
+   Agents and authors must not invent it. Every such record must carry a
+   registered Open Question ID (`OQ-nn`) and an in-body marker must cite that
+   ID — see rule 6.
 4. `DEFERRED` means "not in Commercial V1", not "rejected".
 5. Commercial policy status is independent of implementation status. A concept or
    value may be `LOCKED` as policy while its database, enum, schema, or UI
    representation remains `PROVISIONAL` or unimplemented (§1.2).
+6. **Open Question ID rule (mandatory, added by Amendment A2).** Any in-body
+   marker that leaves a commercial rule unresolved — "Not decided",
+   "not stated by the Owner", "Not defined", "→ open question", or any
+   equivalent wording — **must** cite a registered `OQ-nn` ID from §24.3 in the
+   same row or sentence. §24.3 is the single authoritative register of unresolved
+   commercial rules. An unresolved marker without a registered `OQ-nn` ID is a
+   **document defect**: it must be repaired by registering the item, not by
+   answering it.
+7. **Freeze rule (mandatory, added by Amendment A2).** While any §24.3 entry
+   carries the classification `MUST RESOLVE BEFORE FREEZE`, this document is
+   **NOT FROZEN** and must not be described as complete, final, closed, or
+   approved for freeze (§1.6).
 
 ### 1.4 Relationship to existing repository authority
 
@@ -99,6 +115,51 @@ Future commercial decisions must be applied as follows:
    new value, and whether implementation/sales impact is immediate.
 5. Conversation history, chat memory, ad-hoc notes, and verbal statements are
    never sufficient. If it is not in this document, it is not decided.
+6. Amendment A2 adds a **register obligation**: the change log entry must also
+   confirm that every new in-body unresolved marker cites a registered
+   `OQ-nn` ID, or that no such marker was added (§1.3 rule 6).
+
+**Known documentary gap (registered, not decided — Amendment A2).** This document
+contains **no Terms, Privacy, or business-agreement policy register**. The policy
+areas that will eventually require such language are identified in the audit that
+prompted A2 and are registered as a single Owner decision — `OQ-41`. A2 does not
+create, enumerate as decided, or pre-empt that register.
+
+### 1.6 Document maturity and freeze status (added by Amendment A2)
+
+| Statement | Meaning | Status |
+|---|---|---|
+| This document is the **CANONICAL COMMERCIAL SSOT**. | It is the only authority for the commercial model. | `LOCKED` (governance fact) |
+| Its state is **ACTIVE DESIGN**. | Commercial content is still being designed and amended. | `LOCKED` (governance fact) |
+| It is **NOT YET FROZEN**. | Commercial Model V1 is **not** complete, **not** final, and **not** closed. | `LOCKED` (governance fact) |
+
+Consequences, mandatory:
+
+1. No agent, document, message, or sales material may describe Commercial
+   Model V1 as complete, final, frozen, closed, approved-for-freeze, or
+   "the finished commercial model".
+2. Values marked `PROVISIONAL` remain unquotable (§1.3 rule 2), and this
+   remains true regardless of document maturity.
+3. Freeze requires, at minimum:
+   a. zero §24.3 entries classified `MUST RESOLVE BEFORE FREEZE`;
+   b. every in-body unresolved marker citing a registered `OQ-nn` ID
+      (§1.3 rule 6); and
+   c. an explicit Owner update to this document per §1.5 that states the
+      freeze. Only the Owner may declare the freeze.
+4. A freeze declaration is a **commercial** act and is separate from
+   implementation authority, which remains unchanged (§1.2, L-47).
+5. The Open Question register in §24.3 is the **authoritative freeze-triage
+   instrument**. Its severity, owner, and classification fields exist to make
+   readiness reviewable; they are triage metadata and are not themselves
+   commercial decisions.
+6. **Terminology collision (registered, not decided).** "Owner" denotes both the
+   business capability role (§11.1, §11.1a) and the document decision authority
+   (§1.3, §1.5). This document does **not** resolve the collision and no glossary
+   term may be introduced by an agent — `OQ-63`. Until it is decided, an agent
+   must not infer a decision authority from the business role.
+7. **Document housekeeping.** No named custodian and no next-review date are
+   recorded for this SSOT — `OQ-70`. This is documentary only and has no
+   commercial effect.
 
 ---
 
@@ -150,8 +211,8 @@ enum, or migration. See §1.2 and §24.1 (C-6).
 |---|---|---|
 | Same ownership **and** same operating business, multiple locations | **One** Business Entity, **one** Business subscription, multiple Branches. | `LOCKED` |
 | Same brand name, but independently owned and/or independently operated entities | **Separate** Business Entities and **separate** subscriptions. | `LOCKED` |
-| A Branch is a location of a Business Entity; it is never a separately billed or separately owned entity by default. | `LOCKED` |
-| Whether a Branch may ever be a separately owned legal entity inside a shared brand. | Not decided. | `PROVISIONAL` — see §24.3 |
+| A Branch is a location of a Business Entity (multi-location business). | A Branch is **not** a separately owned and **not** a separately subscribed Business Entity: it never requires its own complete Business subscription merely because it is a location. **Additional branches beyond the plan's included count may carry approved Extra Branch add-on pricing under the parent Business subscription** (§4.2). Wording corrected by Amendment A2; commercial intent unchanged. | `LOCKED` |
+| Whether a Branch may ever be a separately owned legal entity inside a shared brand. | Not decided — `OQ-19`. | `PROVISIONAL` — see §24.3 |
 | Branch as a first-class searchable/local-discovery unit while remaining part of one Business Entity. | Approved direction. | `PROVISIONAL` — see §18 |
 
 ### 2.5 Paid-Only scope: commercial production vs development data (C-9)
@@ -162,8 +223,10 @@ enum, or migration. See §1.2 and §24.1 (C-6).
 | Paid-Only does **not** require immediate removal of development listings, mock listings, seed data, test fixtures, or preview/demo businesses. | `LOCKED` |
 | Existing seed/mock/development data may continue to exist and be used during development. | `LOCKED` |
 | Before commercial production launch, public production eligibility must follow the Paid-Only rule (§2.1) **and** the Publication Quality rule (§19). | `LOCKED` |
-| The disposition of specific existing non-production rows at launch (convert, grandfather, or remove) remains undecided. | `PROVISIONAL` — open question §24.3 |
+| The disposition of specific existing non-production rows at launch (convert, grandfather, or remove) remains undecided — `OQ-22`. | `PROVISIONAL` — open question §24.3 |
 | Any enforcement, conversion, or cleanup action on existing data. | `PROVISIONAL` — requires a separately authorized slice |
+| Launch density and sequencing: minimum paid businesses required per Category × Area before an area opens publicly, category rollout order, launch geography, and the user experience of an empty category or area. | Not decided → `OQ-37` |
+| Which directory categories are eligible for a paid Business listing, and which are withheld pending the deferred professional/organisation models (§22). | Not decided → `OQ-26` |
 
 No seed data, mock data, fixture, or preview record was modified by this document.
 
@@ -196,15 +259,21 @@ baseline**. It is a baseline, not an immutable constant: any change must be made
 an explicit update to this document per §1.5, and no agent may quote a different
 price from memory or inference.
 
+The commercial **consequences** of a future price change are not decided and are
+not implied by the sentence above: the effective moment of a change, its effect on
+an already-paid unexpired term, its effect on the next renewal, and the customer
+notice period and channel. → `OQ-28`. Whether instalment or deferred payment is
+permitted at all is also not decided → `OQ-60`.
+
 ### 3.3 Default recommendation
 
 | Rule | Status |
 |---|---|
 | Business Pro is the intended primary/default commercial recommendation. | `LOCKED` |
 | Where, how, and in what wording that recommendation is surfaced (sales material, Business Center, comparison tables). | `PROVISIONAL` |
-| Plan feature/entitlement matrix per tier beyond branches (§4) and media (§16). | `PROVISIONAL` — see §24.3 |
-| Corporate plan contents, minimum commitment, and quotation process. | `PROVISIONAL` |
-| Discounts for multi-year, early payment, or volume beyond Founding Partner. | Not decided. → `PROVISIONAL` / open question |
+| Plan feature/entitlement matrix per tier beyond branches (§4) and media (§16). | `PROVISIONAL` — entitlement review (dependency D-3; registry P-03). This item is **not** an Owner open question; it is an entitlement-review dependency. |
+| Corporate plan contents, minimum commitment, and quotation process. | `PROVISIONAL` — `OQ-04` |
+| Discounts for multi-year, early payment, or volume beyond Founding Partner, and whether discounts stack. | Not decided — `OQ-42`. → `PROVISIONAL` / open question |
 
 ### 3.4 Derived arithmetic observations (non-binding)
 
@@ -219,7 +288,7 @@ create no new price.
 
 Observation: longer durations are priced at roughly a 10-month effective cost for
 a 12-month term. Whether this discount structure is intentional, and whether it
-stays, is not stated by the Owner. → `PROVISIONAL`
+stays, is not stated by the Owner → `OQ-42`. → `PROVISIONAL`
 
 ### 3.5 Commercial catalog vs existing plan implementation (non-authorization)
 
@@ -263,10 +332,10 @@ nor worsens it. See §24.1 (C-2).
 | The Extra Branch add-on attaches to the existing Business Entity and its single subscription. | `LOCKED` |
 | Exact Extra Branch pricing. | `PROVISIONAL` |
 | Current exploratory range: **10,000–15,000 IQD / month** or **100,000–150,000 IQD / year**. | `PROVISIONAL` — exploratory only, **not final pricing**, not quotable |
-| Whether a 3-month extra-branch price exists. | Not decided → open question |
-| Maximum branch count per entity, and behavior past the cap. | Not decided → open question |
-| Whether extra-branch pricing differs by city/area or branch type. | Not decided → open question |
-| Whether extra branches are transferable/resettable annually. | Not decided → open question |
+| Whether a 3-month extra-branch price exists. | Not decided → `OQ-03` |
+| Maximum branch count per entity, and behavior past the cap. | Not decided → `OQ-03` |
+| Whether extra-branch pricing differs by city/area or branch type. | Not decided → `OQ-64` |
+| Whether extra branches are transferable/resettable annually. | Not decided → `OQ-65` |
 
 Derived observation only: the annual range equals 10 × the monthly range, which is
 consistent with the annual pricing factor observed in §3.4. This is arithmetic, not
@@ -298,11 +367,11 @@ The −25% column is a **derived observation**, not a stated policy.
 
 | Open item | Status |
 |---|---|
-| Founding Partner price for a 1-month or 3-month first term. | Not decided → open question (§24.3) |
-| How the "first 50" counter is defined, incremented, and evidenced. | Not decided → open question |
-| What happens to businesses #51+ (standard pricing is implied, execution detail is not decided). | `PROVISIONAL` |
-| Whether the Founding Partner badge appears on search results, profile, and Business Center. | `PROVISIONAL` |
-| Whether Founding Partner is re-offered in a later cohort. | Not decided → `DEFERRED`-adjacent open question |
+| Founding Partner price for a 1-month or 3-month first term. | Not decided → `OQ-01` (§24.3) |
+| How the "first 50" counter is defined, incremented, and evidenced. | Not decided → `OQ-02` |
+| What happens to businesses #51+ (standard pricing is implied, execution detail is not decided). | `PROVISIONAL` — see `OQ-02` |
+| Whether the Founding Partner badge appears on search results, profile, and Business Center. | `PROVISIONAL` — see `OQ-14` |
+| Whether Founding Partner is re-offered in a later cohort. | Not decided → `OQ-66` (`DEFERRED`-adjacent) |
 
 ### 5.8 Founding Partner storage is non-canonical (C-5)
 
@@ -335,6 +404,7 @@ No existing field was modified, removed, or reinterpreted by this document. See
 | 6.1.8 | Sponsored is purchasable initially by **Business Pro / Business Plus** businesses. | `LOCKED` (explicitly changeable by Owner) |
 | 6.1.9 | Sponsored impressions/clicks must be counted separately from organic and never inflated into organic. | `LOCKED` |
 | 6.1.10 | If a sponsored entity is unavailable, the placement is suppressed; no blank or broken slot. | `LOCKED` |
+| 6.1.11 | Minimum advertiser eligibility (whether a Verified state is required to buy a placement) and the prohibited advertiser categories / prohibited advertising content. | Not decided → `OQ-34` |
 
 ### 6.2 Current approved Sponsored pricing (IQD)
 
@@ -351,11 +421,11 @@ Status: `LOCKED` as the current approved Commercial V1 price baseline.
 | Rule | Status |
 |---|---|
 | Target of approximately **2–3 active sponsored positions per Category × Area**. | `PROVISIONAL` — a target, not a frozen cap |
-| Whether 2–3 is a hard cap, a soft target, or queue-based. | Not decided → open question |
-| How "Area" is defined for inventory purposes (governorate / district / custom radius). | Not decided → open question |
-| Oversubscription behaviour, rotation, and fairness policy. | Not decided → open question |
+| Whether 2–3 is a hard cap, a soft target, or queue-based. | Not decided → `OQ-18` |
+| How "Area" is defined for inventory purposes (governorate / district / custom radius). | Not decided → `OQ-18` |
+| Oversubscription behaviour, rotation, and fairness policy. | Not decided → `OQ-18` |
 | Campaign management tooling, creative rules, and disclosure copy. | `DEFERRED` (§21) |
-| Sponsored renewal, cancellation, and refund terms. | Not decided → open question |
+| Sponsored renewal, cancellation, and refund terms, and the commercial outcome when an advertised entity becomes unavailable mid-campaign. | Not decided → `OQ-33` |
 
 ### 6.4 Product approved vs production implementation deferred (C-4)
 
@@ -406,6 +476,8 @@ Clarifications:
 | 7.2.2 | Activation occurs **only after funds are independently verified**. | `LOCKED` |
 | 7.2.3 | Civilpedia may share the approved transfer identifier needed to reconcile the payment. | `LOCKED` |
 | 7.2.4 | Civilpedia must follow a least-data principle: collect the minimum needed to identify the transfer. | `LOCKED` |
+| 7.2.5 | The commercial **outcome** rules for payment exceptions (short, long, wrong account/agent, duplicate claim of one transfer, third-party payer, payment for an Expired or closed business). The 10th step above is reached only from a `Payment Verified` state and is never a bypass. | Not decided → `OQ-31` |
+| 7.2.6 | Retention period, access control, business-facing visibility, and deletion of transfer receipts, business registration files, identification documents, and internal staff notes. | Not decided → `OQ-40` |
 
 ### 7.3 Never requested, never distributed
 
@@ -435,11 +507,12 @@ requires an explicit Owner-approved regulated flow before it may be applied.
 |---|---|
 | Commercial V1 payment is manual/assisted via WhatsApp Business and verified by Civilpedia. | `LOCKED` |
 | No automated payment gateway in Commercial V1. | `DEFERRED` (§21) |
-| Accepted bank accounts / transfer rails, supported currencies, and settlement accounts. | Not decided → open question |
-| Invoicing, receipts, tax/fiscal treatment, and accounting export. | Not decided → open question |
-| Refund, cancellation, and partial-refund policy. | Not decided → open question |
-| Anti-fraud controls beyond receipt verification (duplicate transfer, mismatched amount, third-party payer). | Not decided → open question |
-| Staff handling rules for payment conversations (who may confirm, who may activate). | Not decided → open question |
+| Accepted bank accounts / transfer rails, supported currencies, and settlement accounts. | Not decided → `OQ-09` |
+| Invoicing, receipts, tax/fiscal treatment, and accounting export. | Not decided → `OQ-08` |
+| Refund, cancellation, and partial-refund policy. | Not decided → `OQ-07` |
+| Anti-fraud controls beyond receipt verification (duplicate transfer, mismatched amount, third-party payer). | Not decided → `OQ-10` |
+| Customer-outcome rules for payment exceptions: short payment, overpayment, wrong account/agent, duplicate claim of one transfer, third-party payer, and payment for an Expired or closed business. | Not decided → `OQ-31` |
+| Staff handling rules for payment conversations (who may confirm, who may activate), and the expected verification turnaround. | Not decided → `OQ-11`, `OQ-62` |
 
 ---
 
@@ -458,6 +531,13 @@ The states below are the approved **commercial workflow vocabulary**. They are
 | Active | Subscription live; public publication subject to §19 quality gate. | `LOCKED` |
 | Grace Period | Term ended; business retains its data and its management access during a defined window. | `LOCKED` |
 | Expired | Grace Period ended; public directory presence hidden. | `LOCKED` |
+
+**Known vocabulary gap (registered, not decided — Amendment A2).** The approved
+vocabulary above has **no state for administrative suspension or termination for
+policy violation**, and it has no date-anchor rule (no defined term start, end,
+or renewal date). Both gaps are registered as `OQ-25` and `OQ-30` (§8.3.13,
+§8.3.15) and are **not** resolved here. No state may be added, renamed, or
+inferred to close them.
 
 ### 8.2 Three separate conceptual workflows
 
@@ -478,7 +558,7 @@ They must not be conflated, and no single storage representation is implied.
 |---|---|---|
 | Pending Verification | Payment instruction issued / transfer expected, funds not yet confirmed. | `LOCKED` (behavior, §7.2) |
 | Verified | Funds independently confirmed. | `LOCKED` (behavior, §7.2) |
-| Rejected / unresolved | Only where a later defined policy introduces it. | `PROVISIONAL` / not defined |
+| Rejected / unresolved | Only where a later defined policy introduces it. | `PROVISIONAL` / not defined → `OQ-31` |
 
 **C. Subscription entitlement lifecycle**
 
@@ -503,13 +583,17 @@ another (§9.1, §6.1.4, §19).
 | 8.3.3 | After Grace Period, an expired business is **hidden from the public directory**. | `LOCKED` |
 | 8.3.4 | Renewal **restores publication without rebuilding the profile**. | `LOCKED` |
 | 8.3.5 | The Business Entity, its Branches, and its memberships survive expiry. | `LOCKED` |
-| 8.3.6 | Grace Period exact duration. | `PROVISIONAL` |
-| 8.3.7 | Current Grace Period target: approximately **3–7 days**. | `PROVISIONAL` — target, not frozen |
-| 8.3.8 | Whether management access continues during Grace Period (read/write), and what the owner sees. | `PROVISIONAL` |
-| 8.3.9 | Renewal pricing, upgrade/downgrade mid-term, proration, and downgrade when branch count exceeds the new tier. | Not decided → open question |
-| 8.3.10 | Whether an expired business retains analytics history and internal records visibility. | Not decided → open question |
-| 8.3.11 | Grace-period expiry notices, channels, and language (Arabic-first). | Not decided → open question |
+| 8.3.6 | Grace Period exact duration. | `PROVISIONAL` — `OQ-12` |
+| 8.3.7 | Current Grace Period target: approximately **3–7 days**. | `PROVISIONAL` — target, not frozen — `OQ-12` |
+| 8.3.8 | Whether management access continues during Grace Period (read/write), and what the owner sees. | `PROVISIONAL` — `OQ-12` |
+| 8.3.9 | Renewal pricing, upgrade/downgrade mid-term, proration, and downgrade when branch count exceeds the new tier. | Not decided → `OQ-05`, `OQ-06` |
+| 8.3.10 | Whether an expired business retains analytics history and internal records visibility. | Not decided → `OQ-17` |
+| 8.3.11 | Grace-period expiry notices, channels, and language (Arabic-first). | Not decided → `OQ-29` |
 | 8.3.12 | State-machine / persistence mapping to existing production state values. | `PROVISIONAL` — reconciled as C-3, see §8.4 |
+| 8.3.13 | Subscription term anchor: when the paid term starts, when it ends, and when the renewal date falls. | Not decided → `OQ-25` |
+| 8.3.14 | Renewal mechanics: whether renewal must remain manual through WhatsApp / manual payment verification, whether auto-charge is prohibited or merely deferred, and whether stored payment instruments are excluded from Commercial V1; plus early-renewal term extension and renewal notice cadence. | Not decided → `OQ-29` |
+| 8.3.15 | Administrative suspension and termination for policy violation, including who may suspend, public visibility, whether the term clock pauses, money outcome, appeal, and re-entry condition. | Not decided → `OQ-30` |
+| 8.3.16 | Permanent business closure as a commercial event distinct from expiry, including its effect on subscription, prepaid funds, badges, sponsorship, data, and reactivation. | Not decided → `OQ-36` |
 
 ### 8.4 State machines, enum names, and persistence mapping (C-3 — non-authorization)
 
@@ -569,14 +653,15 @@ Status: `PROVISIONAL`
 
 The **state vocabulary** is approved as the intended set; the exact verification
 policy, thresholds, evidence per category, turnaround, appeals, and suspension
-triggers remain a **later detailed policy** — not decided here.
+triggers remain a **later detailed policy** — not decided here (`OQ-13`).
 
 | Open item | Status |
 |---|---|
-| Verification policy document and per-category evidence checklists. | `DEFERRED` to a later policy |
-| Who may verify, and whether verification is staff-only. | Not decided → open question |
+| Verification policy document and per-category evidence checklists. | `DEFERRED` to a later policy — `OQ-13` |
+| Who may verify, and whether verification is staff-only. | Not decided → `OQ-50` |
 | Whether verification affects organic ranking. | `PROVISIONAL` (see §18.2) |
-| Public display of verification state and its exact wording. | `PROVISIONAL` (see §14.5) |
+| Public display of verification state and its exact wording. | `PROVISIONAL` (see §14.5) — `OQ-14` |
+| Verification validity period, reverification triggers, whether renewal requires re-verification, verification granularity for multi-branch entities, the consequence of false documents, and what the badge substantively asserts. | Not decided → `OQ-35`, `OQ-56` |
 
 ---
 
@@ -593,8 +678,11 @@ triggers remain a **later detailed policy** — not decided here.
 | A business may exist as a Business Entity before any owner user account exists. | `LOCKED` (implied by the draft/ownership sequence) |
 | Exact UI, invitation mechanics, and acceptance screens for ownership transfer-in during onboarding. | `PROVISIONAL` |
 | Handling of a pre-existing Civilpedia User Account that later owns a business. | `PROVISIONAL` |
-| Whether a User Account is mandatory before publication. | Not decided → open question |
-| Rejected/expired lead handling and re-application. | Not decided → open question |
+| Whether a User Account is mandatory before publication. | Not decided → `OQ-21` |
+| Rejected/expired lead handling and re-application. | Not decided → `OQ-51` |
+| Business claiming: which directory categories may hold a paid Business listing versus which are reserved for the deferred professional/organisation models (§22), and which parties may be listed at all. | Not decided → `OQ-26` |
+| Claiming, competing claims, and duplicate real-world businesses: who may claim, what evidence resolves a claim, who arbitrates a competing claim, and what a false claim causes. | Not decided → `OQ-27` |
+| Duplicate/overlapping Business Entity control: detection basis, merge authority, and consequence where one real business exists as several entities. | Not decided → `OQ-32` |
 
 ---
 
@@ -614,6 +702,11 @@ stored roles, enum values, or permission checks. See §11.1a.
 
 Descriptive intent of each role: `PROVISIONAL`.
 Exact permission matrix: **`PROVISIONAL` until Business Center design** — not frozen.
+
+Not decided: team seat limits per plan, and which capability levels may view
+payment and financial records inside Business Center → `OQ-46`. Also unresolved:
+the "Owner" name is used both for this business capability role and for the
+document decision authority → `OQ-63` (§1.6 item 6).
 
 ### 11.1a Capability levels vs stored role vocabulary (C-1 — non-authorization)
 
@@ -661,8 +754,9 @@ This document neither renames nor redefines those values. See §1.2 and §24.1 (
 | — | **No instant, uncontrolled transfer.** | `LOCKED` |
 | — | Exact request/accept UI, evidence, timeouts, and rejection handling. | `PROVISIONAL` |
 | — | What happens to other memberships when ownership moves. | `PROVISIONAL` |
-| — | Co-ownership, multiple simultaneous owners, or an entity without an owner. | Not decided → open question |
-| — | Ownership transfer of a Branch independent of the parent entity. | Not decided → open question |
+| — | Co-ownership, multiple simultaneous owners, or an entity without an owner. | Not decided → `OQ-20` |
+| — | Ownership transfer of a Branch independent of the parent entity. | Not decided → `OQ-19` |
+| — | Ownership transfer while the Business Entity is Expired or suspended, and transferability of a paid subscription when a business is sold to a new legal person. | Not decided → `OQ-30`, `OQ-39` |
 
 ### 11.4 Naming reconciliation summary (C-1)
 
@@ -691,8 +785,8 @@ maps them deliberately. This document does not require them to be identical.
 | 12.4 | The Business retains **ownership of its presence and content**. | `LOCKED` |
 | 12.5 | Civilpedia controls **platform publication standards, verification, and commercial entitlements**. | `LOCKED` |
 | 12.6 | Managed service does not transfer business ownership to Civilpedia. | `LOCKED` |
-| 12.7 | Which requests for managed service are accepted, priced, or bundled. | Not decided → open question |
-| 12.8 | Whether managed service is recorded in Business Center, and any audit expectations. | `PROVISIONAL` |
+| 12.7 | Which requests for managed service are accepted, priced, or bundled. | Not decided → `OQ-24` |
+| 12.8 | Whether managed service is recorded in Business Center, and any audit expectations. | `PROVISIONAL` — `OQ-24` |
 | 12.9 | Staff-side tooling and permissioning for managed service. | `PROVISIONAL` (V1-R07 foundation exists) |
 
 ---
@@ -731,8 +825,14 @@ maps them deliberately. This document does not require them to be identical.
 |---|---|
 | For sensitive changes, the **currently published value is preserved** while the new value is `Pending Review`, whenever practical. | `LOCKED` (with an explicit "whenever practical" qualifier) |
 | The "whenever practical" exception set — cases where the published value may be replaced or removed immediately (e.g. illegal content, a verified complaint, safety). | `PROVISIONAL` |
-| Review turnaround, reviewer roles, and rejection messaging. | Not decided → open question |
-| Change history / audit visibility to the business. | `PROVISIONAL` |
+| Review turnaround, reviewer roles, and rejection messaging. | Not decided → `OQ-52` |
+| Change history / audit visibility to the business, and rollback of an approved change. | `PROVISIONAL` — `OQ-52` |
+| Appeal route for a **content** rejection (distinct from verification appeals, `OQ-13`), public abuse reporting against a business, and repeat-offender handling. | Not decided → `OQ-57` |
+| Prohibited and misleading claim policy (superlatives, false certification, false institutional affiliation, fabricated projects). | Not decided → `OQ-45` |
+| Rights declaration for uploaded media, takedown, and repeat media infringement. | `PROVISIONAL` — `OQ-45` |
+| Accuracy responsibility for business-submitted prices, "price on request" content, and stale prices. | Not decided → `OQ-43` |
+| Offer validity window and behaviour of an expired offer. | Not decided → `OQ-43` |
+| Evidence required before a business may state that it is an authorised dealer, agent, or representative of a Brand. | Not decided → `OQ-44` |
 
 ---
 
@@ -785,8 +885,8 @@ authorized UI phases.
 | Item | Publicly visible? | Status |
 |---|---|---|
 | Paid subscription existence | Implied by presence; the plan/price itself is not exposed. | `LOCKED` |
-| Founding Partner | May be visible according to policy. | `PROVISIONAL` |
-| Verified | May be visible according to policy. | `PROVISIONAL` |
+| Founding Partner | May be visible according to policy. | `PROVISIONAL` — `OQ-14` |
+| Verified | May be visible according to policy. | `PROVISIONAL` — `OQ-14` |
 | Sponsored | Visible **only** when clearly labeled. | `LOCKED` |
 | Business analytics | Not public. | `LOCKED` |
 
@@ -794,9 +894,12 @@ authorized UI phases.
 
 | Open item | Status |
 |---|---|
-| Exact badge wording, placement, and Arabic copy for Verified / Founding Partner / Sponsored. | `PROVISIONAL` |
-| Whether Sponsored labeling appears in search results, category lists, map views, and related-business rails. | `PROVISIONAL` |
+| Exact badge wording, placement, and Arabic copy for Verified / Founding Partner / Sponsored. | `PROVISIONAL` — `OQ-14` |
+| What the Verified badge substantively asserts, and what it expressly does not guarantee. | Not decided → `OQ-35` |
+| Whether Sponsored labeling appears in search results, category lists, map views, and related-business rails. | `PROVISIONAL` — `OQ-14` |
 | Whether similar-businesses ordering may be influenced commercially. | `PROVISIONAL` — must not become covert organic ranking (§6.1.4) |
+| Public experience of an Expired, suspended, or removed listing reached by direct link, and whether its content is replaced or only marked. | Not decided → `OQ-68` |
+| Whether a branch manager's personal contact details may be published on a branch page. | Not decided → `OQ-59` |
 
 ---
 
@@ -837,9 +940,9 @@ Center design phase must produce the frozen module contract.
 | Media must support distinct roles/categories rather than one undifferentiated gallery. | `LOCKED` |
 | Recognised media roles: `Logo`, `Cover`, `Business Gallery`, `Products`, `Projects`, `Offers`. | `LOCKED` (role set) |
 | Media role semantics, ordering, cropping rules, and required/optional status. | `PROVISIONAL` |
-| Moderation, rights confirmation, and takedown handling. | `PROVISIONAL` |
-| Storage limits, file size/type limits, and external hosting. | Not decided → open question |
-| Per-category module media limits. | Not decided → open question |
+| Moderation, rights confirmation, and takedown handling. | `PROVISIONAL` — `OQ-45`, `OQ-57` |
+| Storage limits, file size/type limits, and external hosting. | Not decided → `OQ-16` |
+| Per-category module media limits. | Not decided → `OQ-16` |
 
 ### 16.1 Current working media baseline (NOT frozen)
 
@@ -848,7 +951,7 @@ Center design phase must produce the frozen module contract.
 | Business | 6 images | `PROVISIONAL` |
 | Business Pro | 20 images | `PROVISIONAL` |
 | Business Plus | 40 images | `PROVISIONAL` |
-| Corporate | not defined | `PROVISIONAL` |
+| Corporate | not defined | `PROVISIONAL` — see P-02 / `OQ-04` |
 
 These counts are a **current working baseline only**. They must **not** be marked
 permanently frozen, presented as contractual limits, or quoted to customers until
@@ -877,8 +980,9 @@ an entitlement review is completed and recorded in this document per §1.5.
 | WhatsApp Clicks | `PROVISIONAL` |
 | Directions Clicks | `PROVISIONAL` |
 
-Whether these four are guaranteed on **every** paid tier including Business, and the
-metric definitions themselves, remain `PROVISIONAL`.
+Whether these four are guaranteed on **every** paid tier including Business is an
+entitlement-review matter (`PROVISIONAL` — P-03 / dependency D-3); the metric
+definitions themselves remain `PROVISIONAL` — `OQ-17`.
 
 ### 17.3 Possible advanced-tier analytics
 
@@ -894,10 +998,11 @@ metric definitions themselves, remain `PROVISIONAL`.
 
 | Open item | Status |
 |---|---|
-| Retention window, aggregation, and reset behaviour. | Not decided → open question |
-| Data export. | `PROVISIONAL` |
-| Counting rules: unique vs total, bot filtering, self-view exclusion. | Not decided → open question |
-| Privacy/consent handling for viewer-side measurement. | Not decided → open question |
+| Retention window, aggregation, and reset behaviour. | Not decided → `OQ-17` |
+| Data export. | `PROVISIONAL` — `OQ-17` |
+| Counting rules: unique vs total, bot filtering, self-view exclusion. | Not decided → `OQ-17` |
+| Privacy/consent handling for viewer-side measurement. | Not decided → `OQ-55` |
+| Definition and permitted commercial use of the approved framing word "Lead", and the mandatory qualifier wherever it is used, given that Civilpedia cannot identify or contact individuals. | Not decided → `OQ-38` |
 
 ---
 
@@ -924,7 +1029,9 @@ Candidate inputs only — **not** an algorithm and **not** a freeze:
 - data quality / freshness.
 
 Status: `PROVISIONAL`. Ranking algorithm design is explicitly out of scope for this
-document (consistent with the existing Directory architecture).
+document (consistent with the existing Directory architecture). Whether
+verification may act as a ranking input at all is not decided here — `OQ-35`; it
+must never become a purchasable or paid-adjacent signal (§6.1.4, L-42).
 
 ### 18.3 Branch-level local discovery
 
@@ -933,9 +1040,11 @@ document (consistent with the existing Directory architecture).
 | Branches may appear independently in local search results while remaining part of one Business Entity. | `PROVISIONAL` (approved direction) |
 | Selecting a branch keeps the user within the same Business brand/profile relationship. | `PROVISIONAL` |
 | Whether a branch result shows branch-only data or entity-level data. | `PROVISIONAL` |
-| Branch-level deduplication and cannibalisation handling in results. | Not decided → open question |
-| Verification's effect on ranking. | `PROVISIONAL` |
+| Branch-level deduplication and cannibalisation handling in results. | Not decided → `OQ-67` |
+| Verification's effect on ranking. | `PROVISIONAL` — `OQ-35` |
 | Example relationship (one brand, multiple named branches) is illustrative, not a data commitment. | `PROVISIONAL` |
+| Whether a Sponsored placement may be bought at **branch** level rather than entity level, and how that interacts with Category × Area inventory. | Not decided → `OQ-53` |
+| Branch lifecycle: activation and deactivation of a branch, branch closure, relocation, and the effect of relocation on verification. | Not decided → `OQ-54` |
 
 ---
 
@@ -965,10 +1074,10 @@ frozen by this document.
 
 | Open item | Status |
 |---|---|
-| The quantitative Minimum Profile Quality standard and its validation mechanism. | Not decided → open question |
-| Per-category variation of the minimum (e.g. manufacturer vs. contractor). | `PROVISIONAL` |
-| Consequence of falling below the minimum after publication (demotion, warning, grace). | Not decided → open question |
-| Who may approve publication (staff-only vs automated + audit). | Not decided → open question |
+| The quantitative Minimum Profile Quality standard and its validation mechanism. | Not decided → `OQ-47` |
+| Per-category variation of the minimum (e.g. manufacturer vs. contractor). | `PROVISIONAL` — `OQ-47` |
+| Consequence of falling below the minimum after publication (demotion, warning, grace). | Not decided → `OQ-48` |
+| Who may approve publication (staff-only vs automated + audit). | Not decided → `OQ-49` |
 
 ---
 
@@ -994,11 +1103,21 @@ frozen by this document.
 | Analytics | `PROVISIONAL` |
 | Team / Roles | `PROVISIONAL` |
 | Subscription / Renewal | `PROVISIONAL` |
+| Payment status | `PROVISIONAL` (expected) — `OQ-58` |
+| Verification status | `PROVISIONAL` (expected) — `OQ-58` |
+| Pending changes | `PROVISIONAL` (expected) — `OQ-58` |
+| Support / Contact Civilpedia | `PROVISIONAL` (expected) — `OQ-58` |
+| Business switching (multiple Business Entities) | `PROVISIONAL` (expected; implied by L-06 / §2.1.6) — `OQ-58` |
+| Verification evidence upload | `PROVISIONAL` (expected) — `OQ-40`, `OQ-58` |
 
 The module **set** is the approved expectation. Order, navigation, screens, and
 per-plan availability are unfrozen and must be produced by a Business Center design
 and contract phase. The existing roadmap slice **V1-R10.5-E — Business + Staff**
 remains `LOCKED`; this document does not unfreeze it and does not authorize it.
+
+Team seat limits per plan, and which capability levels may see payment and
+financial records, are commercial entitlement matters and are **not** decided
+here — `OQ-46`.
 
 ---
 
@@ -1117,6 +1236,14 @@ during Amendment A1. Every remaining implementation question is explicitly
 `PROVISIONAL` and routed to a future authorized slice (§24.2) or recorded as an
 open question (§24.3).
 
+**Amendment A2 note.** A2 added **no conflict** and resolved **no** conflict. It
+corrected the **wording** of one `LOCKED` rule in §2.4 that contradicted the
+approved Extra Branch add-on model (§4.2); the commercial intent — one Business
+Entity, one Business subscription, branches as locations, add-on pricing for
+additional branches, and no second full subscription merely because a location is
+a branch — is unchanged. A2 also rebuilt the §24.3 register. The statement above
+("unresolved blocking conflicts: none") remains true and is unaffected.
+
 ### 24.2 Dependencies (not conflicts)
 
 | ID | Dependency | Note |
@@ -1129,34 +1256,153 @@ open question (§24.3).
 | D-6 | Future RBAC design slice | Required before any capability-level → stored-role mapping is frozen (C-1). |
 | D-7 | Future monetization architecture slice | Required before commercial catalog → PlanType/PlanTier/plans mapping is frozen (C-2). |
 | D-8 | Future entitlement/persistence design slice | Required before §8 state machines and §2.3 Brand/Branch persistence are frozen (C-3, C-6). |
+| D-9 | Language precedence for the commercial agreement (not decided — `OQ-69`) | D-5 covers user-interface strings only. Which language governs the commercial terms themselves is an Owner decision, not a localization task. |
 
+### 24.3 Open Question register — undefined by the Owner (must not be invented)
 
-### 24.3 Open questions — undefined by the Owner (must not be invented)
+Rebuilt by **Amendment A2** (2026-09-28) for register integrity. **No entry below
+is answered, and A2 decided none of them.** The pre-A1/A1 wording of the first 24
+items is preserved in meaning; each now carries a stable `OQ-nn` ID, a severity,
+a decision owner, a freeze classification, and its dependent section.
 
-1. Founding Partner price for 1-month and 3-month first terms.
-2. Mechanism and evidence for the "first 50 businesses" Founding Partner counter.
-3. Extra Branch add-on price for a 3-month term; maximum branch cap; behaviour past the cap.
-4. Corporate plan contents, minimum term, and quotation process.
-5. Renewal pricing and whether renewal differs from first purchase.
-6. Upgrade / downgrade mid-term, proration, and downgrade when branch count exceeds the tier.
-7. Refund, cancellation, and no-show policy.
-8. Invoicing, fiscal/tax treatment, and accounting export.
-9. Accepted transfer rails, bank accounts, and supported currencies.
-10. Anti-fraud controls beyond independent receipt verification.
-11. Which staff roles may confirm payment and activate a subscription.
-12. Grace Period exact duration and behaviour inside it.
-13. Verification evidence per category; verification turnaround; appeals.
-14. Exact public wording/placement of Verified, Founding Partner, and Sponsored badges.
-15. `CP-BIZ-xxxxx` / `CP-PAY-xxxxx` generation rules and visibility surface.
-16. Media storage limits and per-category module media limits.
-17. Analytics retention, counting rules, and export.
-18. Sponsored inventory: hard cap vs target; definition of "Area"; oversubscription policy.
-19. A Branch that is a separately owned legal entity inside a shared brand.
-20. Multiple simultaneous owners, or an entity temporarily without an owner.
-21. Whether a User Account is mandatory before a business can be published.
-22. Launch-time disposition of existing and seed public listings under the paid-only rule (§2.5, C-9).
-23. Plan catalog code values and price storage/currency representation.
-24. Whether managed service (§12) is ever separately priced.
+#### 24.3.0 Register rules (mandatory)
+
+1. This register is the **single authoritative list** of unresolved commercial
+   rules. §1.3 rule 3 and rule 6 make it mandatory that every in-body
+   unresolved marker cites one of these IDs.
+2. Status of every entry: **`OPEN` — undefined by the Owner**. No agent may
+   answer an entry, infer an answer, or present one as decided.
+3. `MUST RESOLVE BEFORE FREEZE` means Commercial Model V1 cannot be frozen while
+   the entry remains `OPEN` (§1.3 rule 7, §1.6).
+4. `REGISTER BEFORE FREEZE` means the item must be visible and owned in the
+   register, but does not by itself block the freeze.
+5. `BUSINESS CENTER`, `IMPLEMENTATION ARCHITECTURE`, `LEGAL/POLICY REVIEW`, and
+   `DEFERRED` mean the decision belongs to a later authorized phase; the entry
+   records the dependency and must not be answered here.
+6. Severity, owner, and classification are **triage metadata**, not commercial
+   decisions. They were assigned by the Architect during A2 and carry no
+   commercial meaning beyond freeze readiness.
+7. An in-body unresolved marker without a registered ID is a **document defect**
+   to be repaired by registering the item — never by answering it.
+
+Severity scale: `CRITICAL` / `HIGH` / `MEDIUM` / `LOW`.
+Classification values: `MUST RESOLVE BEFORE FREEZE` / `REGISTER BEFORE FREEZE` /
+`BUSINESS CENTER` / `IMPLEMENTATION ARCHITECTURE` / `DEFERRED` /
+`LEGAL/POLICY REVIEW`.
+Owner values: `Owner` (commercial decision) / `Architect` (design proposal within
+Owner authority) / `Future Architecture` / `Legal Review` / `Owner + Architect`.
+
+#### 24.3.1 CRITICAL — must be resolved before any freeze
+
+| ID | Title | Status | Severity | Owner | Classification | Dependency / affected section | Decision needed |
+|---|---|---|---|---|---|---|---|
+| OQ-25 | Subscription term anchor | `OPEN` | CRITICAL | Owner | MUST RESOLVE BEFORE FREEZE | §7.1, §8.1, §8.3.13 | When does the paid term start (agreement, payment verified, or first publication), when does it end, and what is the renewal date. |
+| OQ-26 | Category eligibility vs the professionals boundary | `OPEN` | CRITICAL | Owner | MUST RESOLVE BEFORE FREEZE | §2.1, §2.5, §10.1, §22 | Which directory categories may hold a paid Business listing, which are withheld pending the deferred professional/organisation models, and what users see in withheld categories. |
+| OQ-27 | Business claiming, competing claims, false claims | `OPEN` | CRITICAL | Owner | MUST RESOLVE BEFORE FREEZE | §10.1, §2.4 | Whether claiming exists in Commercial V1; if yes, eligibility, evidence, dispute arbiter, fee, and losing-claim outcome; if no, the explicit launch consequence. |
+
+#### 24.3.2 HIGH — must be resolved before any freeze
+
+| ID | Title | Status | Severity | Owner | Classification | Dependency / affected section | Decision needed |
+|---|---|---|---|---|---|---|---|
+| OQ-28 | Price change and grandfathering | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §3.2, §1.5 | Effective moment of a list-price change, its effect on a paid unexpired term, its effect on the next renewal, and the notice period and channel. |
+| OQ-29 | Renewal mechanics and notices | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §8.3.11, §8.3.14 | Whether renewal must remain manual through WhatsApp / manual payment verification; whether auto-charge is prohibited or merely deferred; whether stored payment instruments are excluded from Commercial V1. Plus early-renewal term extension and renewal/expiry notice cadence, channel, and language. **None of this is decided by A2.** |
+| OQ-30 | Suspension and termination for policy violation | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §8.1, §8.2-C, §8.3.15, §11.3 | Who may suspend or terminate, public visibility during suspension, whether the term clock pauses, the money outcome, appeal, re-entry condition, and ownership transfer while in a non-Active state. |
+| OQ-31 | Payment exception outcomes | `OPEN` | HIGH | Owner + Architect | MUST RESOLVE BEFORE FREEZE | §7.2.5, §7.5 | Customer and staff outcome for short payment, overpayment, wrong account/agent, duplicate claim of one transfer, third-party payer, and payment for an Expired or closed business. |
+| OQ-32 | Duplicate / overlapping Business Entity control | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §2.4, §10.1 | Detection basis, merge authority, and consequence where one real business exists as several entities (abuse of §2.4 / L-05 / L-06). |
+| OQ-33 | Sponsored commercial lifecycle and terms | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §6.1.11, §6.3 | Sponsor campaign states, renewal, cancellation notice, refund, and the money outcome when the advertised entity becomes unavailable mid-campaign. |
+| OQ-34 | Sponsored advertiser eligibility and prohibited advertisers | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §6.1.11, §9.1 | Minimum eligibility to buy a placement (including whether Verified is required) and the prohibited advertiser categories and prohibited advertising content. |
+| OQ-35 | Verification validity, meaning, and fraud | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §9.3, §14.5, §18.2, §18.3 | Verification validity period and reverification triggers; whether renewal requires re-verification; the consequence of false documents; what the badge asserts and expressly does not guarantee; whether verification may act as a ranking input. |
+| OQ-36 | Permanent business closure | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §8.3.16, §14.5 | Closure as a commercial event distinct from expiry: who declares it, effect on subscription and prepaid funds, badges, sponsorship, data retention and eventual anonymisation, and reactivation. |
+| OQ-37 | Launch density, sequencing, and empty-area experience | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §2.5, §14 | Minimum paid businesses per Category × Area before an area opens; category rollout order; launch geography; user experience of an empty category or area. |
+| OQ-38 | Definition and permitted use of the word "Lead" | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §17.1, §17.3 | What "Lead" means in Civilpedia's vocabulary given that individuals are neither identified nor contacted, and the mandatory qualifier wherever the word is used commercially. |
+| OQ-39 | Subscription transferability | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §2.1.3, §11.3 | Whether a paid subscription transfers to a new legal person when a business is sold, and the evidence, fee, or credit outcome if it does not. |
+| OQ-40 | Records retention, access, and deletion | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §7.2.6, §9.2, §20.1 | Retention period, access control, business-facing visibility, and deletion of transfer receipts, business registration files, identification documents, and internal staff notes. |
+| OQ-41 | Terms / Privacy / business-agreement policy register | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §1.5 | Whether Civilpedia adopts a policy-obligations register covering content rights, accuracy, prohibited content, refunds, suspension/termination, verification disclaimer, Sponsored disclosure, analytics disclaimer, records handling, and limitations of guarantee. Content is a later legal review. |
+
+#### 24.3.3 MEDIUM
+
+| ID | Title | Status | Severity | Owner | Classification | Dependency / affected section | Decision needed |
+|---|---|---|---|---|---|---|---|
+| OQ-42 | Discounts beyond Founding Partner, and discount stacking | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §3.3, §3.4 | Whether multi-year, early-payment, or volume discounts exist, and whether any discount stacks with the Founding Partner price. |
+| OQ-43 | Offer validity and price accuracy | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §13.2, §13.3; legal/policy review required before the rule is published | Offer validity window and expired-offer behaviour; who bears accuracy responsibility for displayed prices and "price on request" content; stale-price handling. |
+| OQ-44 | Brand representation claims and Brand governance | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §2.2, §15.2 | Evidence required before a business may claim authorised dealer / agent / representative status for a Brand, and which authority governs the Brand concept. |
+| OQ-45 | Prohibited and misleading claims; media rights | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §13.2, §13.3, §16; legal/policy review required before the rule is published | Prohibited claim categories, rights declaration for uploaded media, takedown, and repeat-offender handling. |
+| OQ-46 | Team seat limits and financial visibility | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §11.1, §20.1 | Whether a seat limit applies per plan, and which capability levels may view payment and financial records in Business Center. |
+| OQ-47 | Quantitative Minimum Profile Quality standard | `OPEN` | MEDIUM | Architect + Owner | REGISTER BEFORE FREEZE | §19, §19.1 | The quantitative thresholds, per-category variation, and the validation mechanism. |
+| OQ-48 | Falling below the publication minimum after publication | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §19 | Consequence: warning, demotion, grace, or suspension, and who decides. |
+| OQ-49 | Who may approve publication | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §19, §13.3 | Staff-only approval versus automated validation plus audit, and the reviewer authority. |
+| OQ-50 | Verification authority | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §9.3, §7.5 | Who may verify, and whether verification is staff-only. |
+| OQ-51 | Rejected / expired lead handling and re-application | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §10.1 | Re-application eligibility, cooldown, and any fee. |
+| OQ-52 | Review turnaround, reviewer roles, rejection messaging, change history | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §13.3 | Internal review service expectation, reviewer roles, rejection messaging (Arabic-first, D-5), and business-visible audit/rollback expectations. |
+| OQ-53 | Branch-level Sponsored placement | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §6.1.7, §6.3, §18.3 | Whether a Sponsored placement may be bought per branch rather than per entity, and how that interacts with Category × Area inventory. |
+| OQ-54 | Branch lifecycle | `OPEN` | MEDIUM | Owner | BUSINESS CENTER | §4.2, §13.1, §18.3 | Branch activation and deactivation, branch closure, relocation, and the effect of relocation on verification. |
+| OQ-55 | Privacy / consent for viewer-side measurement | `OPEN` | MEDIUM | Owner + Architect | IMPLEMENTATION ARCHITECTURE | §17.3 | Consent basis and data handling for viewer-side analytics measurement. |
+| OQ-56 | Verification granularity for multi-branch entities | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §9.2, §9.3 | Whether verification is per Business Entity or per Branch. |
+| OQ-57 | Content-rejection appeal, abuse reporting, repeat offenders | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §13.3, §16 | Appeal route for content rejection (distinct from verification appeals, OQ-13), public abuse reporting against a business, and repeat-offender policy. |
+| OQ-58 | Business Center module set completeness | `OPEN` | MEDIUM | Architect | BUSINESS CENTER | §20.1 | Whether payment status, verification status, pending changes, support/contact, business switching, and verification evidence upload are required modules. |
+| OQ-59 | Branch manager personal data and non-Active ownership transfer | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §11.3, §14.5; legal/policy review required before the rule is published | Whether a branch manager's personal contact details may be published, and how ownership transfer behaves for a non-Active entity. |
+| OQ-60 | Instalments, deferred payment, and quotation validity | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §3.2, §3.3 | Whether any instalment or deferred payment structure is permitted, and how long a quotation or offer remains valid. |
+| OQ-61 | Commercial measurement and pricing experiments | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §1.5, §3.2 | Which commercial KPIs are tracked (conversion, renewal, churn), and whether controlled pricing experiments are permitted given §1.5. |
+| OQ-62 | Payment verification turnaround | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §7.1, §7.5 | The internal verification service expectation and the customer-facing wording while a payment sits in Payment Pending. |
+| OQ-63 | "Owner" terminology collision | `OPEN` | MEDIUM | Owner + Architect | REGISTER BEFORE FREEZE | §1.3, §1.6, §11.1 | Whether the business capability role and the document decision authority keep the same word, and any glossary term. |
+
+#### 24.3.4 LOW
+
+| ID | Title | Status | Severity | Owner | Classification | Dependency / affected section | Decision needed |
+|---|---|---|---|---|---|---|---|
+| OQ-64 | Extra Branch price variation by area or branch type | `OPEN` | LOW | Owner | REGISTER BEFORE FREEZE | §4.2 | Whether extra-branch pricing differs by city/area or branch type. |
+| OQ-65 | Extra Branch annual transferability / reset | `OPEN` | LOW | Owner | REGISTER BEFORE FREEZE | §4.2 | Whether extra branches are transferable or resettable annually. |
+| OQ-66 | Founding Partner later cohorts | `OPEN` | LOW | Owner | DEFERRED | §5.7 | Whether Founding Partner pricing is re-offered in a later cohort. |
+| OQ-67 | Branch-level deduplication and cannibalisation in results | `OPEN` | LOW | Architect | IMPLEMENTATION ARCHITECTURE | §18.3 | How multiple branches of one entity are represented in results without crowding out other businesses. |
+| OQ-68 | Public experience of an expired, suspended, or removed listing | `OPEN` | LOW | Architect | IMPLEMENTATION ARCHITECTURE | §8.3.3, §14.5 | What a user sees on direct link, and whether content is replaced or only marked. |
+| OQ-69 | Language precedence for commercial terms | `OPEN` | LOW | Owner | LEGAL/POLICY REVIEW | §1.6, D-5, D-9 | Which language governs the commercial agreement (UI localization is separate, D-5). |
+| OQ-70 | SSOT custodian and next-review date | `OPEN` | LOW | Owner | REGISTER BEFORE FREEZE | §1.6 | The named document custodian and a review cadence. Documentary only. |
+
+#### 24.3.5 Pre-existing entries (carried forward from A1, IDs assigned by A2)
+
+Wording and meaning preserved from the original 24 numbered items. A2 added the
+ID, severity, owner, and classification columns only.
+
+| ID | Title | Status | Severity | Owner | Classification | Dependency / affected section | Decision needed |
+|---|---|---|---|---|---|---|---|
+| OQ-01 | Founding Partner price, 1-month and 3-month first terms | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §5.7 | The Founding Partner price for a 1-month or 3-month first term. |
+| OQ-02 | "First 50" Founding Partner counter | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §5.7 | How the counter is defined, incremented, and evidenced; and the execution detail for businesses #51+. |
+| OQ-03 | Extra Branch 3-month price, maximum branch cap | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §4.2 | Whether a 3-month extra-branch price exists; the maximum branch count per entity and behaviour past the cap. |
+| OQ-04 | Corporate contents, minimum term, quotation process | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §3.1, §3.3, §4.1 | Corporate plan contents, included branch count, minimum commitment, and the quotation process. |
+| OQ-05 | Renewal pricing | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §8.3.9 | Whether renewal pricing differs from first purchase. |
+| OQ-06 | Upgrade, downgrade, proration | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §8.3.9 | Upgrade/downgrade mid-term, proration, and downgrade when branch count exceeds the new tier. |
+| OQ-07 | Refund, cancellation, no-show | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §7.5, §8.3 | Refund, cancellation, partial-refund, and no-show policy. |
+| OQ-08 | Invoicing, fiscal/tax treatment, accounting export | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §7.5; legal/policy review required before the rule is published | Invoicing, receipts, tax/fiscal treatment, and accounting export. |
+| OQ-09 | Transfer rails, bank accounts, currencies | `OPEN` | MEDIUM | Owner | MUST RESOLVE BEFORE FREEZE | §7.5 | Accepted bank accounts / transfer rails, settlement accounts, and supported currencies. |
+| OQ-10 | Payment anti-fraud controls | `OPEN` | MEDIUM | Owner | MUST RESOLVE BEFORE FREEZE | §7.5 | Anti-fraud controls beyond independent receipt verification (duplicate transfer, mismatched amount, third-party payer). Customer-outcome rules are OQ-31. |
+| OQ-11 | Payment staff authority | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §7.5 | Which staff roles may confirm payment and which may activate a subscription. |
+| OQ-12 | Grace Period duration and behaviour | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §8.1, §8.3.6–§8.3.8 | Exact Grace Period duration (target ~3–7 days is not frozen) and whether management access continues, in which mode, and what the owner sees. |
+| OQ-13 | Verification evidence, turnaround, appeals | `OPEN` | MEDIUM | Owner | DEFERRED | §9.2, §9.3 | The verification policy document, per-category evidence checklists, turnaround, and appeals. Validity and meaning are OQ-35. |
+| OQ-14 | Badge wording, placement, and Arabic copy | `OPEN` | MEDIUM | Owner + Architect | REGISTER BEFORE FREEZE | §5.6, §9.3, §14.4, §14.5 | Exact wording, placement, and Arabic copy for Verified / Founding Partner / Sponsored, and where Sponsored labeling appears. |
+| OQ-15 | `CP-BIZ` / `CP-PAY` generation and visibility | `OPEN` | MEDIUM | Architect | IMPLEMENTATION ARCHITECTURE | §7.4 | Exact reference format, sequence source, uniqueness scope, and display surface. |
+| OQ-16 | Media storage and per-category media limits | `OPEN` | MEDIUM | Architect | IMPLEMENTATION ARCHITECTURE | §16, §16.1 | Storage limits, file size/type limits, external hosting, and per-category module media limits. |
+| OQ-17 | Analytics retention, counting rules, export, post-expiry visibility | `OPEN` | MEDIUM | Architect | REGISTER BEFORE FREEZE | §8.3.10, §17.2, §17.3 | Retention window, aggregation and reset behaviour, unique vs total counting, bot filtering, self-view exclusion, export, and whether an Expired business retains analytics history and internal records visibility. |
+| OQ-18 | Sponsored inventory cap, Area, oversubscription | `OPEN` | HIGH | Owner | MUST RESOLVE BEFORE FREEZE | §6.3 | Whether 2–3 per Category × Area is a hard cap, soft target, or queue; the definition of "Area"; and oversubscription, rotation, and fairness policy. |
+| OQ-19 | Branch as a separately owned legal entity; independent branch transfer | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §2.4, §11.3 | Whether a Branch may ever be a separately owned legal entity inside a shared brand, and whether a Branch's ownership may be transferred independently of the parent entity. |
+| OQ-20 | Multiple, simultaneous, or absent owners | `OPEN` | MEDIUM | Owner | MUST RESOLVE BEFORE FREEZE | §11.3 | Co-ownership, multiple simultaneous owners, and an entity temporarily without an owner. |
+| OQ-21 | User Account required before publication | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §10.1 | Whether a User Account is mandatory before a business can be published. |
+| OQ-22 | Launch disposition of existing and seed listings | `OPEN` | MEDIUM | Owner | MUST RESOLVE BEFORE FREEZE | §2.5, C-9 | Whether existing and seed public listings are converted, grandfathered, or removed at launch. |
+| OQ-23 | Plan code values, price storage, currency representation | `OPEN` | MEDIUM | Future Architecture | IMPLEMENTATION ARCHITECTURE | §3.5, C-2 | Plan catalog code values and price storage / currency representation. |
+| OQ-24 | Managed service acceptance and pricing | `OPEN` | MEDIUM | Owner | REGISTER BEFORE FREEZE | §12.7, §12.8 | Which managed-service requests are accepted at all, and whether managed service is ever separately priced, bundled, or recorded in Business Center. |
+
+#### 24.3.6 Register totals (informational)
+
+| Classification | Count |
+|---|---|
+| Registered Open Questions | 70 |
+| `CRITICAL` | 3 |
+| `HIGH` | 21 |
+| `MEDIUM` | 39 |
+| `LOW` | 7 |
+| `MUST RESOLVE BEFORE FREEZE` | 28 |
+| Entries answered by Amendment A2 | **0** |
+
+Counts are informational. The tables in §24.3.1–§24.3.5 are the authority.
 
 ### 24.4 Change log (append-only)
 
@@ -1164,16 +1410,24 @@ open question (§24.3).
 |---|---|---|---|---|---|
 | 2026-09-27 | Owner + ChatGPT Architect | Document created as Commercial Model V1 SSOT | none | Initial consolidation of §1–§25 | Documentation only. No production change. No sales change until separately communicated. |
 | 2026-09-27 | ChatGPT Architect | **Amendment A1 — Conflict reconciliation (C-1…C-10)** | C-1…C-10 recorded as unresolved conflicts requiring Architect decisions | Added §1.2 commercial-policy vs implementation-authority rule; added §2.3, §2.5, §3.5, §5.8, §6.4, §8.2, §8.4, §11.1a, §11.4 reconciliation sections; restructured §8 into three separate conceptual workflows; rewrote §24.1 as a resolved conflict registry; updated §25 registry | **No commercial intent changed.** No production code, test, migration, Supabase, roadmap, or UI-contract change. No implementation authorized. |
+| 2026-09-28 | ChatGPT Architect | **Amendment A2 — Register integrity + documentary corrections** | 24 plain-numbered open questions; 14 in-body unresolved markers with no registered entry and 4 more only partially covered; no severity/owner/classification fields; no statement of document maturity; §2.4 `LOCKED` wording ("never a separately **billed** … entity") contradicting the approved Extra Branch add-on model in §4.2; §3.3 pointed at §24.3 for an entitlement item that was never registered there | Rebuilt §24.3 as a single authoritative Open Question register with stable IDs `OQ-01`…`OQ-70`, per-entry status/severity/owner/classification/dependency/decision-needed fields (§24.3.1–§24.3.5, §24.3.6 totals); added the mandatory Open Question ID rule (§1.3 rule 6) and freeze rule (§1.3 rule 7); added §1.6 document maturity (**CANONICAL SSOT / ACTIVE DESIGN / NOT YET FROZEN**) with a freeze gate; added in-body `OQ-nn` citations to every unresolved marker and to registered gaps (§2.4, §2.5, §3.2, §3.3, §3.4, §4.2, §5.7, §6.1, §6.3, §7.2, §7.5, §8.1, §8.3, §9.3, §10.1, §11.1, §11.3, §12.7, §13.3, §14.4, §14.5, §16, §17.2, §17.3, §18.2, §18.3, §19, §20.1); corrected §2.4 branch wording to "not a separately owned and not a separately subscribed Business Entity … additional branches may carry approved Extra Branch add-on pricing under the parent Business subscription"; added dependency D-9 and standing prohibitions 11–12; added **no** `L-nn` registry entry (A2 governance rules stay outside the commercial decision registry) and updated §25.5 counts | **Documentation / governance only. No commercial decision, no price change, and no commercial intent change.** **0 open questions answered; 0 new commercial rules created.** Wording correction in §2.4 preserves the approved intent (one Business Entity, one subscription, add-on pricing, no second full subscription for a branch). No production code, test, migration, Supabase, contract, UI, or roadmap change. No implementation authorized. No sales impact: no `PROVISIONAL` value became quotable. |
 
 ---
 
 ## 25. FINAL STATUS — DECISION REGISTRY
 
-Registry state after **Amendment A1** (2026-09-27). Amendment A1 reconciled
+Registry state after **Amendment A2** (2026-09-28). Amendment A1 reconciled
 implementation-mapping conflicts and did **not** change any commercial intent, so
 no previously approved rule was downgraded, removed, or reclassified. New entries
 below record the authority-separation rules and the implementation mappings that
 are deliberately `PROVISIONAL`.
+
+**Amendment A2 effect on this registry.** A2 added **no** `LOCKED` entry and
+changed **no** commercial decision, **no** price, **no** `PROVISIONAL` value, and
+**no** `DEFERRED` item. It answered **none** of the open questions in §24.3. Its
+own additions (§1.3 rules 6–7, §1.6) are mandatory **governance** rules and are
+intentionally not registered as `L-nn` commercial decisions. The only registry
+change is informational: §25.5 now also reports the §24.3 open-question counts.
 
 ### 25.1 LOCKED
 
@@ -1233,6 +1487,13 @@ are deliberately `PROVISIONAL`.
 | L-52 | Roadmap remains the sole phase/implementation authority; monetization implementation stays outside the currently authorized V1 scope unless separately opened by the Master Roadmap / Architect (§24.1 C-7). |
 | L-53 | Existing backend role values, plan enums, `plans` table, and `subscriptions.status` definitions are unchanged by this document (C-1, C-2, C-3). |
 | L-54 | Sponsored is an approved commercial product with no current production behavior; mock/seed/architecture artifacts are not the commercial product (§6.4). |
+
+**Amendment A2 note.** A2 added **no** `LOCKED` commercial decision. The `LOCKED`
+count therefore remains **54**. The A2 additions — document maturity (§1.6), the
+Open Question ID obligation (§1.3 rule 6), and the freeze rule (§1.3 rule 7) — are
+**mandatory governance rules of this document**, not commercial decisions, and are
+deliberately **not** registered as `L-nn` entries here. They create no commercial
+policy and change no price, entitlement, or lifecycle.
 
 ### 25.2 PROVISIONAL
 
@@ -1311,6 +1572,13 @@ are deliberately `PROVISIONAL`.
    development (L-48, §2.5).
 10. Do not surface Sponsored, mock ads, or plan-coupled seed as delivery of the
     commercial Sponsored product (L-54, D-14).
+11. Do not answer, infer, soften, or delete a registered Open Question without an
+    explicit Owner update per §1.5; and do not introduce an in-body unresolved
+    commercial marker that does not cite a registered `OQ-nn` ID (§1.3 rule 6,
+    §24.3.0).
+12. Do not describe Commercial Model V1 as complete, final, closed, or frozen, and
+    do not treat §24.3 triage metadata as a commercial decision (§1.3 rule 7,
+    §1.6).
 
 ### 25.5 Registry counts (informational)
 
@@ -1319,9 +1587,16 @@ are deliberately `PROVISIONAL`.
 | `LOCKED` | 54 |
 | `PROVISIONAL` | 33 |
 | `DEFERRED` | 14 |
+| OPEN QUESTIONS (`OPEN`, §24.3) | 70 |
+| — of which `MUST RESOLVE BEFORE FREEZE` | 28 |
 | Unresolved blocking conflicts | 0 |
+| Commercial decisions changed by Amendment A2 | 0 |
 
-Counts are informational. The tables in §25.1–§25.3 are the authority.
+Counts are informational. The tables in §25.1–§25.3 and §24.3.1–§24.3.5 are the
+authority. Amendment A2 changed **no** `LOCKED`, `PROVISIONAL`, or `DEFERRED`
+decision; the 54 / 33 / 14 counts are unchanged from Amendment A1. A2's own
+additions (§1.3 rules 6–7, §1.6) are governance rules, not commercial decisions,
+and are intentionally outside the `L-nn` registry.
 
 ---
 
