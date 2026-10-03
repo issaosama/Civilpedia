@@ -1096,3 +1096,69 @@ Authorization covers only the already-frozen canonical M1b reference-data seed. 
 | test/commercial_m1b_catalog_reference_data_migration_test.dart | Focused future M1b source/inventory gate. |
 
 No production Flutter file is authorized. This pass records authorization only: DO NOT IMPLEMENT YET. No migration, test or seed is created, no runtime action is taken, and no staging, commit or push is authorized.
+
+## Architect Clarification — Conflict Case C′
+
+Authority: **ChatGPT Architect**. Scope: **contract clarification only**.
+
+The `business-pro` example in §16.1 must trigger **Case C′ — STOP** and must not fall through to Case F. The historical `lower(btrim(code))` predicate wording is incomplete relative to its examples. This appended clarification records the effective collision detector, C′ predicate, F boundary and classification precedence for §16.1 and its §23 pre-deployment inventory. The accepted historical text remains preserved.
+
+### Canonical collision normalization
+
+For collision-detection **only**, define exactly:
+
+```text
+normalized_code =
+btrim(
+  regexp_replace(
+    lower(btrim(code)),
+    '[-._[:space:]]+',
+    '_',
+    'g'
+  ),
+  '_'
+)
+```
+
+Canonical plan codes remain exactly `business`, `business_pro`, `business_plus` and `corporate`.
+
+This normalization is **only a conflict detector**. It must never rewrite a deployed code, rename a row, merge identities or automatically reconcile legacy data. A detected collision raises an exception; it does not authorize normalization of stored data.
+
+### Case C′ — precise predicate
+
+Case C′ applies when all three conditions hold:
+
+1. The row has not already been classified as an exact UUID/code identity case requiring C or D.
+2. `normalized_code` equals one of the canonical plan codes.
+3. `lower(btrim(code))` is **not** exactly equal to that canonical code.
+
+Result: **STOP / RAISE EXCEPTION**.
+
+For a noncanonical UUID with no prior C/D classification, each of the following normalizes to `business_pro` and must trigger C′: `business-pro`, `business pro`, `business.pro`, `business__pro` and `BUSINESS-PRO`. These near-collisions must not be silently accepted, normalized, renamed, merged or treated as unrelated Case F rows.
+
+### Case F — precise boundary
+
+Case F applies only to unexpected legacy rows that:
+
+- do not use a canonical UUID;
+- do not use an exact canonical code;
+- do not normalize under the C′ rule to any canonical code;
+- do not otherwise trigger C, D, E or G.
+
+`business_legacy`, `company` and `pro_business` may remain Case F if no other conflict rule applies. Case F rows remain untouched and do not abort. A normalized canonical collision cannot be classified as Case F.
+
+### Effective conflict-classification precedence
+
+**D / C → B or E for exact canonical identity → C′ near-collision → F unrelated legacy row.**
+
+- Canonical UUID + different code ⇒ **D**, even if that different code also normalizes to a canonical code.
+- Exact canonical code + different UUID ⇒ **C**.
+- Exact canonical UUID/code identity ⇒ **B** only when the existing frozen metadata requirements match; incompatible metadata remains **E — STOP**.
+- Noncanonical UUID + a near-collision code such as `business-pro` ⇒ **C′ — STOP**.
+- **G** remains the plan-version linkage conflict rule and is **STOP**.
+
+### Preserved design and execution boundary
+
+This clarification changes only migration conflict-classification precision. All 40 canonical rows, UUIDs, plan codes, plan identity metadata, plan versions, DR-1 sentinel, bundles, 19 bundle items, nine retail prices, timestamps, exclusions and commercial policy remain unchanged. No OQ is closed, reclassified or otherwise changed. HARDEN-1 security and runtime exclusions remain intact.
+
+M1b implementation remains **authorized in principle** for the existing **SCOPE-A = 17 + SCOPE-B = 23 = 40 rows** under the Post-HARDEN-1 M1b Seed Reopening Authorization Record. Implementation execution is **PAUSED until this clarification is persisted and committed**. This pass does not execute that authority: **do not create 00024, create M1b implementation tests or seed data**. No staging, commit or push is authorized in this pass.
