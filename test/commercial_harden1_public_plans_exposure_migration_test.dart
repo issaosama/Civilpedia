@@ -590,6 +590,69 @@ The authorized implementation scope is exactly the four paths above. The fourth 
 
 This provenance record changes no commercial policy, security architecture, executable SQL semantics, OQ status, M1b authority or implementation scope. M1b seed remains unauthorized and ROWS_AUTHORIZED remains 0. The original acceptance metadata and historical acceptance record above remain unchanged and describe the contract state at acceptance. No staging, commit or push is authorized by this addendum.
 ''';
+    const acceptedM1bReopeningAddendum =
+        '\n'
+        r'''## Post-HARDEN-1 M1b Seed Reopening Authorization Record
+
+```text
+HARDEN1_IMPLEMENTATION_COMMIT:
+3c676f1
+
+HARDEN1_STATUS:
+CLOSED / ACCEPTED / IMPLEMENTED
+
+HARDEN1_PREREQUISITE:
+SATISFIED
+
+M1B_SEED_REOPENED:
+YES
+
+SCOPE_A_AUTHORIZED:
+YES — 17 rows
+
+SCOPE_B_AUTHORIZED:
+YES — 23 rows
+
+TOTAL_CANONICAL_ROWS_AUTHORIZED:
+40
+
+CUTOVER_MODE:
+ONE ATOMIC DETERMINISTIC REFERENCE-DATA CUTOVER
+
+ARCHITECT_IMPLEMENTATION_AUTHORIZATION:
+YES — M1b REFERENCE DATA ONLY
+
+M1B_DEC_3:
+D3-A RATIFIED AND NOW REOPENED AFTER HARDEN-1
+
+AUTHORITY:
+ChatGPT Architect
+```
+
+This record persists the new ChatGPT Architect decision issued after HARDEN-1 was contracted, accepted, implementation-authorized, implemented, independently security-reviewed, finally Architect-accepted, committed and pushed in `3c676f1` (`3c676f1042b5f8e6f6eff6b7cb4681417c7e140f`, `feat(commercial): harden public plans exposure`). HARDEN-1 satisfies the sequencing prerequisite in §4 and DR-2's blocking raw-public-exposure prerequisite. The Architect explicitly reopens both SCOPE-A and SCOPE-B together: 17 + 23 = 40 canonical reference-data rows, in one atomic deterministic full-catalog cutover. M1b-DEC-3 D3-A remains the governing choice; D3-B standalone SCOPE-B seeding remains rejected.
+
+The original acceptance metadata and §§1–30 remain preserved as historical design, sequencing and acceptance records. This new decision supersedes their earlier deferred / zero-authorized seed disposition for the future full-catalog reference-data implementation only. It does not redesign the accepted catalog: all 40 canonical UUIDs, plan codes, plan versions, bundles, 19 bundle items, nine retail prices, DR-1 sentinel invariants, the fail-closed conflict matrix, Founding and Launch Partner exclusions, Sponsored base-plan exclusion and Corporate Plus-floor semantics remain unchanged. No OQ is closed or reclassified.
+
+### Migration number consequence
+
+M1b's earlier proposed `00023_commercial_catalog_reference_data.sql` is permanently superseded because HARDEN-1 consumed `00023`. The implementing pass must independently verify the actual next free migration number. The expected candidate is `00024_commercial_catalog_reference_data.sql`; it is not created or reserved by this documentation pass. If `00024` is occupied at implementation time, STOP and obtain Architect reauthorization for the actual migration number.
+
+### Public exposure and runtime boundary
+
+The future seed must preserve HARDEN-1: no ordinary raw `public.plans` SELECT, no public plan-name exposure, no price exposure and no entitlement metadata exposure. M1b must not restore grants, policies, proxies or any other access path that weakens HARDEN-1.
+
+Authorization covers only the already-frozen canonical M1b reference-data seed. Reference data != entitlement. It excludes Business Entity subscription or entity-to-plan assignments, purchased terms, payment records, Launch Partner grants, Founding Partner promotion rows, Sponsored campaigns, publication authority, an entitlement evaluator, a Business Center runtime API, a public catalog API and Flutter commercial UI. No commercial runtime authority is added.
+
+### Future implementation surface — not created in this pass
+
+| Expected future path | Boundary |
+| --- | --- |
+| supabase/migrations/00024_commercial_catalog_reference_data.sql | Canonical reference-data cutover only; independently verify the next free prefix before implementation. |
+| supabase/tests/commercial_m1b_catalog_reference_data_test.sql | Focused future M1b reference-data runtime/security gate. |
+| test/commercial_m1b_catalog_reference_data_migration_test.dart | Focused future M1b source/inventory gate. |
+
+No production Flutter file is authorized. This pass records authorization only: DO NOT IMPLEMENT YET. No migration, test or seed is created, no runtime action is taken, and no staging, commit or push is authorized.
+''';
     for (final path in paths) {
       final expected =
           _baselineFile(path) +
@@ -597,6 +660,10 @@ This provenance record changes no commercial policy, security architecture, exec
                   'docs/architecture/contracts/'
                       'CIVILPEDIA_COMMERCIAL_HARDEN1_PUBLIC_PLANS_EXPOSURE_IMPLEMENTATION_CONTRACT_V1.md'
               ? acceptedAuthorizationAddendum
+              : path ==
+                    'docs/architecture/contracts/'
+                        'CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md'
+              ? acceptedM1bReopeningAddendum
               : '');
       expect(_read(path), expected, reason: path);
     }
