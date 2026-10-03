@@ -700,12 +700,12 @@ FROM (VALUES ('anon'), ('authenticated'), ('service_role')) roles(role_name);
 -- test client escalation rather than misrepresenting owner-session switching.
 SELECT is(current_user::text, 'postgres', 'role attempts restored owner for pgTAP');
 
--- Existing client/public behavior, including inactive plans and active-parent
--- Directory filtering. Operational HTTP probes remain an external gate.
-SELECT is(pg_temp.m1a_read($$ SELECT count(*)::text FROM public.plans
+-- HARDEN-1 denies raw plans reads; unrelated active-parent Directory filtering
+-- remains preserved. Operational HTTP probes remain an external gate.
+SELECT is(pg_temp.m1a_result($$ SELECT count(*)::text FROM public.plans
   WHERE id IN ('c1a20000-0000-4000-8000-000000000001', 'c1a20000-0000-4000-8000-000000000002',
     'c1a20000-0000-4000-8000-000000000003', 'c1a20000-0000-4000-8000-000000000004') $$,
-  role_name::name), '4', role_name || ' public plans read still unfiltered by active flag')
+  role_name::name), '42501|', role_name || ' raw public plans read denied after HARDEN-1')
 FROM (VALUES ('anon'), ('authenticated')) roles(role_name);
 SELECT is(pg_temp.m1a_read($$ SELECT count(*)::text FROM public.directory_entities
   WHERE id IN ('c1a50000-0000-4000-8000-000000000001', 'c1a50000-0000-4000-8000-000000000002') $$,

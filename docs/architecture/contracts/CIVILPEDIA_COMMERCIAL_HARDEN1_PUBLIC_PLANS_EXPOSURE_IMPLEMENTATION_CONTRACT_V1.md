@@ -389,3 +389,41 @@ This record persists the supplied Architect decision after applying only the two
 Acceptance is of the implementation contract only. **IMPLEMENTATION_AUTHORIZED remains NO; ROWS_AUTHORIZED remains 0.** The revoke-only design, exact four-file future allowlist and narrow M1a raw-plans assertion edit remain unchanged. Migration 00023 remains **PROPOSED / UNRESERVED**; no migration or test is created or modified by acceptance. No grants, RLS, plan data, Flutter, config.toml, M1b, 00022 or roadmap is changed. All OQs retain their existing meaning and status.
 
 Successful HARDEN-1 contract acceptance does **not** authorize M1b seed. The required sequence remains: **HARDEN-1 contract accepted → explicit HARDEN-1 implementation authorization → HARDEN-1 implementation → independent implementation review → land/commit/push → verification → separate explicit Architect authorization reopening M1b seed**. The user remains Git owner; this sequence grants no staging, commit or push authorization now. Rows authorized now: **0**.
+
+## Post-Acceptance Implementation Authorization Record
+
+```text
+CONTRACT_ACCEPTANCE_COMMIT:
+6d064521307b57f17b45249fcfc3713882b59c61
+
+CONTRACT_STATE_AT_ACCEPTANCE:
+IMPLEMENTATION_AUTHORIZED = NO
+
+POST_ACCEPTANCE_ARCHITECT_IMPLEMENTATION_AUTHORIZATION:
+YES
+
+AUTHORIZATION_TIMING:
+Issued by ChatGPT Architect in the Civilpedia project conversation
+after contract commit/push 6d06452 and before HARDEN-1 implementation began.
+
+AUTHORIZED_SCOPE:
+1. supabase/migrations/00023_commercial_public_plans_exposure_hardening.sql
+2. supabase/tests/commercial_harden1_public_plans_exposure_test.sql
+3. test/commercial_harden1_public_plans_exposure_migration_test.dart
+4. supabase/tests/commercial_m1a_private_catalog_foundation_test.sql
+
+M1B_SEED_AUTHORIZED:
+NO
+
+ROWS_AUTHORIZED:
+0
+
+AUTHORITY:
+ChatGPT Architect
+```
+
+This addendum persists the already-issued project-conversation authorization. Commit 6d06452 accepted the contract with implementation authorization still NO; that commit itself did not contain implementation authority. The ChatGPT Architect issued the separate YES authorization after the contract commit/push and before implementation began. This record documents that existing authorization and does not retroactively create authority that did not exist.
+
+The authorized implementation scope is exactly the four paths above. The fourth path remains limited to the raw public.plans assertions intentionally invalidated by HARDEN-1 and immediately adjacent wording; the following Directory assertion and all other M1a test content remain preserved.
+
+This provenance record changes no commercial policy, security architecture, executable SQL semantics, OQ status, M1b authority or implementation scope. M1b seed remains unauthorized and ROWS_AUTHORIZED remains 0. The original acceptance metadata and historical acceptance record above remain unchanged and describe the contract state at acceptance. No staging, commit or push is authorized by this addendum.
