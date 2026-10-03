@@ -718,6 +718,87 @@ Case F applies only to unexpected legacy rows that:
 This clarification changes only migration conflict-classification precision. All 40 canonical rows, UUIDs, plan codes, plan identity metadata, plan versions, DR-1 sentinel, bundles, 19 bundle items, nine retail prices, timestamps, exclusions and commercial policy remain unchanged. No OQ is closed, reclassified or otherwise changed. HARDEN-1 security and runtime exclusions remain intact.
 
 M1b implementation remains **authorized in principle** for the existing **SCOPE-A = 17 + SCOPE-B = 23 = 40 rows** under the Post-HARDEN-1 M1b Seed Reopening Authorization Record. Implementation execution is **PAUSED until this clarification is persisted and committed**. This pass does not execute that authority: **do not create 00024, create M1b implementation tests or seed data**. No staging, commit or push is authorized in this pass.
+
+## Architect Clarification #2 — Case-Only / Whitespace C′ Collisions
+
+Authority: **ChatGPT Architect**. Scope: **contract clarification only**.
+
+The Architect confirms that condition 3 in the preceding C′ clarification is incomplete. The following is the **final, controlling C′ predicate** for §16.1, the §23 conflict inventory and the preceding clarification. It supersedes the earlier condition 3 without rewriting historical text.
+
+### Final collision-only normalization and C′ predicate
+
+Keep the existing normalization exactly:
+
+```text
+normalized_code =
+btrim(
+  regexp_replace(
+    lower(btrim(code)),
+    '[-._[:space:]]+',
+    '_',
+    'g'
+  ),
+  '_'
+)
+```
+
+Canonical codes remain exactly `business`, `business_pro`, `business_plus` and `corporate`.
+
+Case C′ applies when **all** of the following hold:
+
+1. The row has not already been classified by the higher-precedence exact canonical UUID/code cases C or D.
+2. `normalized_code` equals one of the canonical plan codes.
+3. The **original stored code** is not byte/SQL-text equal to that canonical code:
+
+```sql
+code IS DISTINCT FROM canonical_code
+```
+
+Result: **STOP / RAISE EXCEPTION**.
+
+Condition 3 must compare the original stored code, without trimming, case conversion or separator normalization. **Do not use `lower(btrim(code)) IS DISTINCT FROM canonical_code`**: that incorrectly excludes case-only and surrounding-space variants from C′.
+
+Normalization is a conflict detector only. No automatic normalization of stored data, rewrite, rename, merge or reconciliation is authorized.
+
+### Classification examples
+
+The table assumes a **noncanonical UUID** and no other conflict. Single quotes delimit the stored code; spaces inside those quotes are part of the stored value.
+
+| Original stored code | `normalized_code` | Classification / result |
+| --- | --- | --- |
+| `'business_pro'` | `business_pro` | **C — STOP**: exact canonical code with a different UUID |
+| `'BUSINESS_PRO'` | `business_pro` | **C′ — STOP** |
+| `'Business_Pro'` | `business_pro` | **C′ — STOP** |
+| `' business_pro'` | `business_pro` | **C′ — STOP** |
+| `'business_pro '` | `business_pro` | **C′ — STOP** |
+| `' business_pro '` | `business_pro` | **C′ — STOP** |
+| `'business-pro'` | `business_pro` | **C′ — STOP** |
+| `'business pro'` | `business_pro` | **C′ — STOP** |
+| `'business.pro'` | `business_pro` | **C′ — STOP** |
+| `'business__pro'` | `business_pro` | **C′ — STOP** |
+| `'BUSINESS-PRO'` | `business_pro` | **C′ — STOP** |
+| `'business_legacy'` | `business_legacy` | **F** when otherwise unrelated: untouched, no abort |
+| `'company'` | `company` | **F** when otherwise unrelated: untouched, no abort |
+| `'pro_business'` | `pro_business` | **F** when otherwise unrelated: untouched, no abort |
+
+### Precedence and final Case F boundary
+
+Preserve **D / C → B or E → C′ → F**.
+
+- Canonical UUID + different stored code ⇒ **D — STOP**.
+- Exact canonical stored code + different UUID ⇒ **C — STOP**.
+- Exact canonical UUID/code identity ⇒ **B** only if the frozen metadata matches; otherwise **E — STOP**.
+- Noncanonical UUID + any canonical-normalizing but non-exact stored code ⇒ **C′ — STOP**.
+- Unrelated noncanonical UUID/code that does not normalize to a canonical code ⇒ **F**, provided no other conflict applies.
+- **G** remains a separate plan-version linkage conflict requiring **STOP**.
+
+Case F applies **only** when the row does not use a canonical UUID, does not use an exact canonical code, does not normalize to any canonical code, and does not otherwise trigger C, D, E or G. The `business_legacy`, `company` and `pro_business` examples remain untouched and do not abort when otherwise unrelated. Case F cannot capture a normalized canonical collision.
+
+### Preserved design, authority and implementation pause
+
+No canonical UUID or row definition changes. The four plan identities, four plan versions, four bundles, 19 bundle items, nine retail prices, DR-1 sentinel, timestamps, exclusions and commercial policy remain unchanged. No OQ is closed, reclassified or otherwise changed. HARDEN-1 remains intact.
+
+M1b implementation authorization remains valid **in principle** for **SCOPE-A = 17 + SCOPE-B = 23 = 40 canonical rows**. Execution remains **PAUSED until clarification #2 is persisted and committed**. This pass creates no 00024, M1b SQL test, M1b Dart implementation test or seed, and does not modify 00022/00023 or production Flutter. Only this contract append and the exact corresponding M1b snapshot expectation in the HARDEN-1 Dart static test are authorized. No semantic HARDEN-1 assertion may be weakened. No staging, commit or push is authorized.
 ''';
     for (final path in paths) {
       final expected =
