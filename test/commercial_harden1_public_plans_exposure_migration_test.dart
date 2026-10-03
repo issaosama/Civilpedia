@@ -799,6 +799,71 @@ Case F applies **only** when the row does not use a canonical UUID, does not use
 No canonical UUID or row definition changes. The four plan identities, four plan versions, four bundles, 19 bundle items, nine retail prices, DR-1 sentinel, timestamps, exclusions and commercial policy remain unchanged. No OQ is closed, reclassified or otherwise changed. HARDEN-1 remains intact.
 
 M1b implementation authorization remains valid **in principle** for **SCOPE-A = 17 + SCOPE-B = 23 = 40 canonical rows**. Execution remains **PAUSED until clarification #2 is persisted and committed**. This pass creates no 00024, M1b SQL test, M1b Dart implementation test or seed, and does not modify 00022/00023 or production Flutter. Only this contract append and the exact corresponding M1b snapshot expectation in the HARDEN-1 Dart static test are authorized. No semantic HARDEN-1 assertion may be weakened. No staging, commit or push is authorized.
+
+## Architect Clarification — Predecessor Gate Compatibility After Canonical Seed
+
+Authority: **ChatGPT Architect**. Scope: **contract clarification only**.
+
+Independent M1b implementation review reports that `00024` is technically correct, the M1b gate passes **378/378**, HARDEN-1 security remains correct, and atomicity and conflict handling pass. The accepted predecessor M1a and HARDEN-1 SQL gates are nevertheless RED after `00024`: they retain pre-M1b zero-seed assumptions, and M1a fixtures reuse the now-canonical plan codes. This is predecessor-test compatibility evidence, not a redesign of M1b.
+
+### Superseded sufficiency premise and governing principle
+
+The earlier statement that **"the three M1b implementation files are sufficient and no existing test/gate requires editing"** is **SUPERSEDED** by this independent runtime review evidence. This clarification supersedes the no-existing-test-edit sufficiency premise in §21 and inherited M1b implementation guidance. Historical text remains preserved.
+
+The canonical catalog is an intentional accepted phase transition. Predecessor tests must preserve their original security and foundation purpose while accepting both the verified pre-M1b empty reference-data state and the exact accepted post-M1b canonical baseline. Security assertions must not be weakened to make tests green.
+
+### M1a phase-aware reference-data expectations
+
+| Verified phase | `plan_versions` | `entitlement_bundles` | `bundle_items` | `term_prices` | Accepted state |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `00024` has NOT been applied | 0 | 0 | 0 | 0 | Preserve the original exact zero-seed expectations. |
+| `00024` HAS been applied | 4 | 4 | 19 | 9 | Only the exact authorized M1b canonical reference-data baseline is accepted. |
+
+Use verified local migration-history authority or another deterministic explicit phase detector. Non-empty tables alone never establish phase or acceptance. The post-`00024` state must match the frozen M1b identities, relationships, values and metadata; the counts are not permission for arbitrary rows. No unrelated or extra private row becomes acceptable.
+
+### Narrow M1a fixture-code compatibility
+
+Only the four colliding disposable fixture codes and directly corresponding expected literals may change:
+
+| Historical fixture code | Authorized test-only replacement |
+| --- | --- |
+| `business` | `m1a_fixture_plan_01` |
+| `business_pro` | `m1a_fixture_plan_02` |
+| `business_plus` | `m1a_fixture_plan_03` |
+| `corporate` | `m1a_fixture_plan_04` |
+
+Preserve existing fixture UUIDs unless objectively impossible, and preserve fixture relationships and test purpose. Replacement codes must not normalize to any canonical M1b code and must not be interpreted as commercial product identities. No production migration or data is changed.
+
+### HARDEN-1 phase-aware expectations and privacy
+
+Before `00024`, retain the original exact zero expectations for production plans, canonical M1b identities and private catalog seed. After verified `00024`, expect exactly the frozen canonical baseline: **4 plans + 4 plan versions + 4 bundles + 19 items + 9 prices = 40**.
+
+Both phases must still prove raw `public.plans` denial, no replacement public API, private `commercial_private` access boundaries, and that reference data creates no entitlement, subscription or publication authority. HARDEN-1 privacy, grants and RLS are not relaxed.
+
+### Fixture cleanup — exact baseline restoration
+
+Capture and validate the relevant accepted phase baseline **before** creating fixtures. After cleanup, prove that row counts, canonical identities, security state and relevant fingerprints return **exactly** to that pre-fixture baseline. This applies both before and after `00024`. Unconditional zero-row cleanup expectations must not replace a valid seeded baseline; baseline restoration must not permit residual fixture rows or changed canonical data.
+
+### Future compatibility-edit surface and execution boundary
+
+The smallest newly authorized future predecessor SQL compatibility surface is exactly:
+
+1. `supabase/tests/commercial_m1a_private_catalog_foundation_test.sql`
+2. `supabase/tests/commercial_harden1_public_plans_exposure_test.sql`
+
+These compatibility edits begin **only after this clarification is persisted and committed**. This documentary pass does not edit either predecessor SQL test.
+
+The existing three uncommitted M1b implementation files remain authorized and unchanged in principle. **M1b FINAL ACCEPTANCE IS PAUSED** pending predecessor-gate compatibility reconciliation. This pass must not modify `00024`, the M1b SQL test or the M1b Dart implementation test.
+
+Because the HARDEN-1 Dart test freezes the exact M1b contract, this pass permits only the necessary mechanical expected-snapshot reconciliation in `test/commercial_harden1_public_plans_exposure_migration_test.dart`. No semantic assertion may be removed, weakened, broadened or bypassed. Only the focused snapshot/static test is run in this pass.
+
+### Preserved design, authority and carry-forward observations
+
+All 40 canonical rows, UUIDs, codes, price and bundle matrices, DR-1 sentinel, timestamps, exclusions, prior C′ clarifications and C/C′/D/E/F/G semantics remain unchanged. HARDEN-1 grants/RLS and `00024` executable SQL are unchanged. No OQ is closed, reclassified or otherwise changed. No M1b runtime entitlement, subscription, payment or publication authority is granted.
+
+The independent review observations **Supabase CLI runner file-atomicity wording** and **broad ID-based fingerprint latent limitation** are recorded as non-blocking carry-forward observations only. Neither authorizes an implementation change in this pass, and neither is an M1b acceptance blocker.
+
+No database operation, SQL-test correction, staging, commit or push is authorized in this clarification pass.
 ''';
     for (final path in paths) {
       final expected =
