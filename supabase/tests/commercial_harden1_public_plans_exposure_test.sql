@@ -134,6 +134,122 @@ SELECT jsonb_build_object(
 );
 $body$;
 
+-- Phase authority is migration history, never arbitrary row presence.
+CREATE TEMP TABLE harden1_phase AS
+SELECT EXISTS (SELECT 1 FROM supabase_migrations.schema_migrations
+  WHERE version = '00023') AS harden1_applied,
+  EXISTS (SELECT 1 FROM supabase_migrations.schema_migrations
+  WHERE version = '00024') AS m1b_applied;
+SELECT is((SELECT name FROM supabase_migrations.schema_migrations
+  WHERE version = '00022'), 'commercial_private_catalog_foundation',
+  'verified M1a migration-history identity');
+SELECT is((SELECT name FROM supabase_migrations.schema_migrations
+  WHERE version = '00023'),
+  CASE WHEN harden1_applied THEN 'commercial_public_plans_exposure_hardening' END,
+  'verified HARDEN-1 migration-history identity') FROM harden1_phase;
+SELECT is((SELECT name FROM supabase_migrations.schema_migrations
+  WHERE version = '00024'),
+  CASE WHEN m1b_applied THEN 'commercial_catalog_reference_data' END,
+  'verified M1b migration-history identity') FROM harden1_phase;
+SELECT ok(NOT m1b_applied OR harden1_applied,
+  'M1b phase requires the recorded HARDEN-1 predecessor') FROM harden1_phase;
+
+-- Independent expected values from frozen M1b §§7–15, including every UUID,
+-- relationship, typed value, timestamp and NULL. Never read migration source.
+CREATE TEMP TABLE harden1_catalog_expected (
+  relation_name text PRIMARY KEY, expected_rows jsonb NOT NULL
+);
+INSERT INTO harden1_catalog_expected
+SELECT 'public.plans', jsonb_agg(jsonb_build_object(
+  'id', id, 'code', code, 'name', name, 'description', NULL,
+  'is_active', false, 'created_at', TIMESTAMPTZ '2026-01-01 00:00:00+00',
+  'updated_at', TIMESTAMPTZ '2026-01-01 00:00:00+00') ORDER BY id)
+FROM (VALUES
+  ('1a7b0001-0000-4000-8000-000000000001', 'business', 'Business'),
+  ('1a7b0002-0000-4000-8000-000000000002', 'business_pro', 'Business Pro'),
+  ('1a7b0003-0000-4000-8000-000000000003', 'business_plus', 'Business Plus'),
+  ('1a7b0004-0000-4000-8000-000000000004', 'corporate', 'Corporate')) e(id, code, name);
+INSERT INTO harden1_catalog_expected
+SELECT 'commercial_private.entitlement_bundles', jsonb_agg(jsonb_build_object(
+  'id', id, 'code', code, 'version', 1, 'registry_version', 1,
+  'status', 'draft', 'published_at', NULL, 'retired_at', NULL, 'created_at', TIMESTAMPTZ '2026-01-01 00:00:00+00') ORDER BY id)
+FROM (VALUES
+  ('2e7b0001-0000-4000-8000-000000000001', 'business_entitlements'),
+  ('2e7b0002-0000-4000-8000-000000000002', 'business_pro_entitlements'),
+  ('2e7b0003-0000-4000-8000-000000000003', 'business_plus_entitlements'),
+  ('2e7b0004-0000-4000-8000-000000000004', 'corporate_entitlements')) e(id, code);
+INSERT INTO harden1_catalog_expected
+SELECT 'commercial_private.bundle_items', jsonb_agg(jsonb_build_object(
+  'id', id, 'bundle_version_id', bundle_id, 'capability_key', capability_key,
+  'value_kind', value_kind, 'value_boolean', value_boolean,
+  'value_integer', value_integer, 'value_text', NULL, 'is_required', true,
+  'created_at', TIMESTAMPTZ '2026-01-01 00:00:00+00') ORDER BY id)
+FROM (VALUES
+  ('3a7b0001-0000-4000-8000-000000000001', '2e7b0001-0000-4000-8000-000000000001', 'branches.included', 'integer', NULL::boolean, 1),
+  ('3a7b0002-0000-4000-8000-000000000002', '2e7b0001-0000-4000-8000-000000000001', 'team.active_member_max', 'integer', NULL, 5),
+  ('3a7b0003-0000-4000-8000-000000000003', '2e7b0001-0000-4000-8000-000000000001', 'media.upload_enabled', 'boolean', true, NULL),
+  ('3a7b0004-0000-4000-8000-000000000004', '2e7b0001-0000-4000-8000-000000000001', 'analytics.available', 'boolean', true, NULL),
+  ('3a7b0005-0000-4000-8000-000000000005', '2e7b0001-0000-4000-8000-000000000001', 'sponsored.purchase_eligible', 'boolean', false, NULL),
+  ('3a7b0006-0000-4000-8000-000000000001', '2e7b0002-0000-4000-8000-000000000002', 'branches.included', 'integer', NULL, 2),
+  ('3a7b0007-0000-4000-8000-000000000001', '2e7b0002-0000-4000-8000-000000000002', 'team.active_member_max', 'integer', NULL, 5),
+  ('3a7b0008-0000-4000-8000-000000000001', '2e7b0002-0000-4000-8000-000000000002', 'media.upload_enabled', 'boolean', true, NULL),
+  ('3a7b0009-0000-4000-8000-000000000001', '2e7b0002-0000-4000-8000-000000000002', 'analytics.available', 'boolean', true, NULL),
+  ('3a7b0010-0000-4000-8000-000000000001', '2e7b0002-0000-4000-8000-000000000002', 'sponsored.purchase_eligible', 'boolean', true, NULL),
+  ('3a7b0011-0000-4000-8000-000000000001', '2e7b0003-0000-4000-8000-000000000003', 'branches.included', 'integer', NULL, 3),
+  ('3a7b0012-0000-4000-8000-000000000001', '2e7b0003-0000-4000-8000-000000000003', 'team.active_member_max', 'integer', NULL, 5),
+  ('3a7b0013-0000-4000-8000-000000000001', '2e7b0003-0000-4000-8000-000000000003', 'media.upload_enabled', 'boolean', true, NULL),
+  ('3a7b0014-0000-4000-8000-000000000001', '2e7b0003-0000-4000-8000-000000000003', 'analytics.available', 'boolean', true, NULL),
+  ('3a7b0015-0000-4000-8000-000000000001', '2e7b0003-0000-4000-8000-000000000003', 'sponsored.purchase_eligible', 'boolean', true, NULL),
+  ('3a7b0016-0000-4000-8000-000000000001', '2e7b0004-0000-4000-8000-000000000004', 'branches.included', 'integer', NULL, 3),
+  ('3a7b0017-0000-4000-8000-000000000001', '2e7b0004-0000-4000-8000-000000000004', 'team.active_member_max', 'integer', NULL, 5),
+  ('3a7b0018-0000-4000-8000-000000000001', '2e7b0004-0000-4000-8000-000000000004', 'media.upload_enabled', 'boolean', true, NULL),
+  ('3a7b0019-0000-4000-8000-000000000001', '2e7b0004-0000-4000-8000-000000000004', 'analytics.available', 'boolean', true, NULL)) e(id, bundle_id, capability_key, value_kind, value_boolean, value_integer);
+INSERT INTO harden1_catalog_expected
+SELECT 'commercial_private.plan_versions', jsonb_agg(jsonb_build_object(
+  'id', id, 'plan_id', plan_id, 'version', 1, 'bundle_version_id', bundle_id,
+  'pricing_mode', pricing_mode, 'name_ar', '__AR_LOCALIZATION_PENDING__',
+  'description_ar', NULL, 'sort_order', sort_order, 'status', 'draft', 'published_at', NULL, 'retired_at', NULL,
+  'effective_from', NULL, 'effective_until', NULL, 'created_at', TIMESTAMPTZ '2026-01-01 00:00:00+00') ORDER BY id)
+FROM (VALUES
+  ('4c7b0001-0000-4000-8000-000000000001', '1a7b0001-0000-4000-8000-000000000001', '2e7b0001-0000-4000-8000-000000000001', 'retail', 1),
+  ('4c7b0002-0000-4000-8000-000000000002', '1a7b0002-0000-4000-8000-000000000002', '2e7b0002-0000-4000-8000-000000000002', 'retail', 2),
+  ('4c7b0003-0000-4000-8000-000000000003', '1a7b0003-0000-4000-8000-000000000003', '2e7b0003-0000-4000-8000-000000000003', 'retail', 3),
+  ('4c7b0004-0000-4000-8000-000000000004', '1a7b0004-0000-4000-8000-000000000004', '2e7b0004-0000-4000-8000-000000000004', 'custom_quote', 4)) e(id, plan_id, bundle_id, pricing_mode, sort_order);
+INSERT INTO harden1_catalog_expected
+SELECT 'commercial_private.term_prices', jsonb_agg(jsonb_build_object(
+  'id', id, 'plan_version_id', plan_version_id, 'pricing_mode', 'retail',
+  'version', 1, 'duration_months', duration_months, 'amount_iqd', amount_iqd,
+  'currency', 'IQD', 'status', 'draft', 'published_at', NULL, 'retired_at', NULL, 'effective_from', NULL, 'effective_until', NULL,
+  'created_at', TIMESTAMPTZ '2026-01-01 00:00:00+00') ORDER BY id)
+FROM (VALUES
+  ('5d7b0001-0000-4000-8000-000000000001', '4c7b0001-0000-4000-8000-000000000001', 1, 20000),
+  ('5d7b0002-0000-4000-8000-000000000002', '4c7b0001-0000-4000-8000-000000000001', 3, 55000),
+  ('5d7b0003-0000-4000-8000-000000000003', '4c7b0001-0000-4000-8000-000000000001', 12, 200000),
+  ('5d7b0004-0000-4000-8000-000000000004', '4c7b0002-0000-4000-8000-000000000002', 1, 40000),
+  ('5d7b0005-0000-4000-8000-000000000005', '4c7b0002-0000-4000-8000-000000000002', 3, 110000),
+  ('5d7b0006-0000-4000-8000-000000000006', '4c7b0002-0000-4000-8000-000000000002', 12, 400000),
+  ('5d7b0007-0000-4000-8000-000000000007', '4c7b0003-0000-4000-8000-000000000003', 1, 70000),
+  ('5d7b0008-0000-4000-8000-000000000008', '4c7b0003-0000-4000-8000-000000000003', 3, 190000),
+  ('5d7b0009-0000-4000-8000-000000000009', '4c7b0003-0000-4000-8000-000000000003', 12, 700000)) e(id, plan_version_id, duration_months, amount_iqd);
+
+CREATE FUNCTION pg_temp.harden1_catalog_rows(p_relation regclass)
+RETURNS jsonb LANGUAGE plpgsql SECURITY INVOKER
+SET search_path = pg_catalog, pg_temp AS $body$
+DECLARE rows jsonb;
+BEGIN
+  EXECUTE format('SELECT coalesce(jsonb_agg(to_jsonb(t) ORDER BY id),
+    ''[]''::jsonb) FROM %s t', p_relation) INTO rows;
+  RETURN rows;
+END;
+$body$;
+
+-- Capture before any catalog fixture/probe; validate the accepted phase below.
+CREATE TEMP TABLE harden1_catalog_snapshot AS
+SELECT relation_name, row_data, jsonb_array_length(row_data) AS row_count
+FROM (SELECT relation_name,
+  pg_temp.harden1_catalog_rows(relation_name::regclass) AS row_data
+  FROM harden1_catalog_expected) baseline;
+
 CREATE TEMP TABLE harden1_data_snapshot AS
 SELECT c.oid AS relation_id, n.nspname || '.' || c.relname AS relation_name,
   pg_temp.harden1_data_fingerprint(c.oid) AS fingerprint
@@ -376,22 +492,35 @@ SELECT is((SELECT count(*)::integer FROM pg_publication_tables
 SELECT is((SELECT count(*)::integer FROM pg_publication WHERE puballtables), 0,
   'no blanket all-table Realtime publication');
 
--- The accepted disposable clean chain has zero catalog/subscription rows.
+-- The verified pre-M1b chain is empty; after 00024 only the frozen 40-row
+-- catalog is accepted. Expected data is independent of migration source.
 -- This does not assert emptiness of an unknown deployed environment.
-SELECT is((SELECT count(*)::integer FROM public.plans), 0, 'no production plan seed');
+SELECT is((SELECT count(*)::integer FROM public.plans),
+  CASE WHEN (SELECT m1b_applied FROM harden1_phase) THEN 4 ELSE 0 END,
+  'exact accepted phase production plan count');
 SELECT is((SELECT count(*)::integer FROM public.subscriptions), 0,
   'no production subscription or entity-to-plan assignment');
 SELECT is((SELECT count(*)::integer FROM public.plans
-  WHERE lower(btrim(code)) IN ('business', 'business_pro', 'business_plus', 'corporate')), 0,
-  'no canonical M1b commercial identity is present');
-SELECT is((SELECT count(*)::integer FROM commercial_private.entitlement_bundles), 0,
-  'no production bundle seed');
-SELECT is((SELECT count(*)::integer FROM commercial_private.bundle_items), 0,
-  'no production bundle-item seed');
-SELECT is((SELECT count(*)::integer FROM commercial_private.plan_versions), 0,
-  'no production plan-version seed');
-SELECT is((SELECT count(*)::integer FROM commercial_private.term_prices), 0,
-  'no production retail price seed');
+  WHERE lower(btrim(code)) IN ('business', 'business_pro', 'business_plus', 'corporate')),
+  CASE WHEN (SELECT m1b_applied FROM harden1_phase) THEN 4 ELSE 0 END,
+  'exact accepted phase canonical M1b identity count');
+SELECT is((SELECT count(*)::integer FROM commercial_private.entitlement_bundles),
+  CASE WHEN (SELECT m1b_applied FROM harden1_phase) THEN 4 ELSE 0 END,
+  'exact accepted phase bundle count');
+SELECT is((SELECT count(*)::integer FROM commercial_private.bundle_items),
+  CASE WHEN (SELECT m1b_applied FROM harden1_phase) THEN 19 ELSE 0 END,
+  'exact accepted phase bundle-item count');
+SELECT is((SELECT count(*)::integer FROM commercial_private.plan_versions),
+  CASE WHEN (SELECT m1b_applied FROM harden1_phase) THEN 4 ELSE 0 END,
+  'exact accepted phase plan-version count');
+SELECT is((SELECT count(*)::integer FROM commercial_private.term_prices),
+  CASE WHEN (SELECT m1b_applied FROM harden1_phase) THEN 9 ELSE 0 END,
+  'exact accepted phase retail price count');
+
+SELECT is(pg_temp.harden1_catalog_rows(relation_name::regclass)::text,
+  (CASE WHEN m1b_applied THEN expected_rows ELSE '[]'::jsonb END)::text,
+  relation_name || ' exact accepted phase rows; no extra catalog seed')
+FROM harden1_catalog_expected CROSS JOIN harden1_phase ORDER BY relation_name;
 
 -- Independent, noncanonical identities: never the 40 M1b reserved UUIDs/codes.
 INSERT INTO auth.users (id, email, created_at, updated_at) VALUES
@@ -542,18 +671,27 @@ FROM harden1_data_snapshot ORDER BY relation_name;
 SELECT is(pg_temp.harden1_metadata_fingerprint()::text, fingerprint::text,
   'all captured schema/ACL/default/policy/RPC/FK/role/extension metadata preserved by probes')
 FROM harden1_metadata_snapshot;
-SELECT is((SELECT count(*)::integer FROM public.plans), 0,
-  'fixture cleanup leaves zero public plan rows');
+SELECT is((SELECT count(*)::integer FROM public.plans),
+  (SELECT row_count FROM harden1_catalog_snapshot WHERE relation_name = 'public.plans'),
+  'fixture cleanup restores accepted public.plans count');
 SELECT is((SELECT count(*)::integer FROM public.subscriptions), 0,
   'fixture cleanup leaves zero legacy subscription rows');
-SELECT is((SELECT count(*)::integer FROM commercial_private.entitlement_bundles), 0,
-  'fixture cleanup leaves zero bundles');
-SELECT is((SELECT count(*)::integer FROM commercial_private.bundle_items), 0,
-  'fixture cleanup leaves zero bundle items');
-SELECT is((SELECT count(*)::integer FROM commercial_private.plan_versions), 0,
-  'fixture cleanup leaves zero private versions');
-SELECT is((SELECT count(*)::integer FROM commercial_private.term_prices), 0,
-  'fixture cleanup leaves zero term prices');
+SELECT is((SELECT count(*)::integer FROM commercial_private.entitlement_bundles),
+  (SELECT row_count FROM harden1_catalog_snapshot WHERE relation_name = 'commercial_private.entitlement_bundles'),
+  'fixture cleanup restores accepted commercial_private.entitlement_bundles count');
+SELECT is((SELECT count(*)::integer FROM commercial_private.bundle_items),
+  (SELECT row_count FROM harden1_catalog_snapshot WHERE relation_name = 'commercial_private.bundle_items'),
+  'fixture cleanup restores accepted commercial_private.bundle_items count');
+SELECT is((SELECT count(*)::integer FROM commercial_private.plan_versions),
+  (SELECT row_count FROM harden1_catalog_snapshot WHERE relation_name = 'commercial_private.plan_versions'),
+  'fixture cleanup restores accepted commercial_private.plan_versions count');
+SELECT is((SELECT count(*)::integer FROM commercial_private.term_prices),
+  (SELECT row_count FROM harden1_catalog_snapshot WHERE relation_name = 'commercial_private.term_prices'),
+  'fixture cleanup restores accepted commercial_private.term_prices count');
+
+SELECT is(pg_temp.harden1_catalog_rows(relation_name::regclass)::text,
+  row_data::text, relation_name || ' exact baseline identities/values restored')
+FROM harden1_catalog_snapshot ORDER BY relation_name;
 
 SELECT * FROM finish();
 ROLLBACK;
