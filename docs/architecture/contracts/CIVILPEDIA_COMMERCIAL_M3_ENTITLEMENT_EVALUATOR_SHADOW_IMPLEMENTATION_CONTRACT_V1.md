@@ -849,7 +849,7 @@ Signature: m3_evaluate_publication_v1(p_entitlement_result jsonb, p_publication_
 
 The descriptor names/proofs are the closed M3 fixture interface, not a public DTO/schema or permission to store content. Hand-authored safe/unsafe content fixtures must separately test §17's recursive allowlist/privacy obligation and the conformance proof they supply; a field manifest alone does not certify a future snapshot builder or actual row values. Missing/unsafe/stale descriptors deny. Only allowed descriptor IDs/revisions/conformance summaries may be persisted; content/input blobs are excluded. Known private-field or wildcard manifests return PROJECTION_NOT_PROVEN, never ignore the offending path.
 
-All Gate null/binding rules from §33.4 apply. Launch PASS/FAIL requires matching scope; verification REQUIRED requires VERIFIED plus bound PASS proof. NOT_REQUIRED may retain UNVERIFIED and still pass through proven applicability; UNKNOWN or missing applicability fails closed. BLOCKED_POLICY always reports the exact unresolved dependency, including OQ-84, without choosing continuation/re-gating or other policy. Known ownership recovery continuity requires prior publication and attributable accepted Gate evidence, not a new universal recovery exception.
+All Gate null/binding rules from §33.4 apply. Launch PASS/FAIL requires matching scope; verification REQUIRED requires VERIFIED plus bound PASS proof. NOT_REQUIRED may retain UNVERIFIED and still pass through proven applicability; UNKNOWN or missing applicability fails closed. BLOCKED_POLICY reports the exact validated dependency, including OQ-84, through the affected existing Gate's policy_dependency in the bound publication input together with the typed output; no separate OQ output column is required or authorized (§35). This reports dependency evidence without choosing continuation/re-gating or other policy. Known ownership recovery continuity requires prior publication and attributable accepted Gate evidence, not a new universal recovery exception.
 
 ### 33.8 Publication return: exactly one typed row
 
@@ -1031,3 +1031,39 @@ All three are **NON-BLOCKING** carry-forward implementation-hygiene observations
 **M3 implementation remains BLOCKED until a separately authorized and Owner-committed commercial-track roadmap/control authorization record exists under §31. IMPLEMENTATION_AUTHORIZED remains NO.** The current formal UI roadmap state is unchanged; no roadmap/control record is created by this pass.
 
 Acceptance authorizes none of: 00025 execution, SQL/migration, pgTAP/test changes, Flutter/Directory changes, entitlement activation, grants, payment, M4, M5, roadmap implementation, staging, commit or push. The two-table/four-function design, 00025 proposal, evaluator/result schemas, reason semantics, JSONB boundary, A8, Grace/time, synthetic safety, predecessor compatibility, M4/M5 boundary, OQ-84 and ZERO public behavior delta remain unchanged. Only documentary status/acceptance metadata and this record are finalized.
+
+## 35. Architect Clarification / Binding Interpretation — Policy Dependency Reporting — 2026-10-04
+
+Authority: Owner-provided Architect decision. This is a narrow clarification of §33.7 / §33.8, with no reopening of the accepted architecture.
+
+SEMANTIC_SCOPE: clarifies dependency-reporting carrier only; no output/schema/authority change.
+
+### 35.1 Existing input carrier and typed output
+
+The complete dependency-reporting context is **validated publication input + typed publication output**. The exact policy/OQ identifier remains in the supplied, validated input; it is not duplicated into an output column, encoded into POLICY_DEPENDENCY_BLOCKED, or replaced by a dynamic reason string.
+
+The Architect instruction's notation **p_publication_input.policy_dependency** refers to the policy_dependency member of the affected **existing Gate** within the publication input, under §33.4 / §33.7. It does not add a root field or JSON alias to the closed 28-field publication envelope. The existing Gate paths are required_fields, onboarding, moderation, verification, launch, projection.approval and projection.conformance; each carries its own policy_dependency. An identifier from another gate cannot substitute for the dependency of the evaluated blocked path.
+
+**BLOCKED_POLICY** remains the existing Gate.status / affected gate_results dimension's gate-status token. A policy-blocked publication result reports that status with **POLICY_DEPENDENCY_BLOCKED** in reason_codes. It does not add BLOCKED_POLICY to authority_outcome or discoverability_outcome. The authority, readiness, discoverability, stronger-denial precedence and flags continue to follow §33.8; the publication return remains exactly 29 columns.
+
+“Report the exact OQ identifier” means that the evaluated/reportable result context retains the exact validated policy_dependency supplied for that blocked path, while the typed output carries the existing status and generic reason. The identifier remains included in the normalized publication input and its publication_input_revision binding under §33.3. It is never inferred, synthesized or defaulted by the evaluator.
+
+### 35.2 Cross-field invariant, converse and validation
+
+For every existing publication-input Gate, **status = BLOCKED_POLICY requires a present, non-null policy_dependency from the existing finite vocabulary**: OQ-48, OQ-49, OQ-72, OQ-76, OQ-77, OQ-79, OQ-80, OQ-81, OQ-82, OQ-83 or OQ-84. Conversely, policy_dependency is NULL for a non-blocked Gate, as §33.4 already requires. All other Gate null/evidence/binding rules remain unchanged.
+
+If the publication evaluator reports BLOCKED_POLICY plus POLICY_DEPENDENCY_BLOCKED, the exact accepted dependency for the affected path MUST be supplied in that validated input. It cannot emit POLICY_DEPENDENCY_BLOCKED without a valid exact input-carried policy_dependency consistent with the requested blocked path, including when a blocked reason is composed with the bound entitlement result. Multiple blocked paths retain their own identifiers in the input; the existing reason set remains deduplicated and sorted.
+
+Missing, null, malformed, unsupported or inconsistent dependency input **fails closed under the existing §33.1 / §33.11 validation semantics and precedence**: an omitted required Gate member uses MISSING_REQUIRED_FIELD; a wrong scalar or forbidden null uses INVALID_FIELD_TYPE; an identifier outside the finite vocabulary uses INVALID_ENUM; a well-typed binding inconsistency uses BINDING_MISMATCH. No fallback OQ, new reason token, new SQLSTATE or affirmative result is created.
+
+policy_dependency grants **NO authority** and answers **NO OQ**. OQ-84 remains unresolved: M3 must never choose among its continuation, re-gating, Coming Soon or other policy alternatives.
+
+### 35.3 Preserved interfaces, status and execution boundary
+
+Publication input remains **28 fields** and publication output **29 columns**. The entitlement and capture interfaces, RunSummary, two-table design, four-function design, 00025 proposal, reason vocabulary and SQLSTATE model remain unchanged. There is no new schema/object, public behavior or canonical policy authority.
+
+M3 remains shadow-only. This clarification adds no policy authority table, shadow/output/publication column, OQ resolution record or persistence solely to echo policy_dependency. The input and its existing revision binding retain the evaluated dependency context; any future long-term dependency persistence beyond the accepted M3 evidence model requires separate authorization.
+
+DOCUMENT_STATUS remains **ACCEPTED — CANONICAL M3 IMPLEMENTATION CONTRACT**; ARCHITECT_ACCEPTANCE remains **ACCEPTED — 2026-10-04**; FREEZE_STATE remains **FROZEN — ACCEPTED M3 SLICE DEFINITION ONLY**. The acceptance-time IMPLEMENTATION_AUTHORIZED metadata, separately committed commercial control, §29 implementation scope and UI roadmap locks are unchanged.
+
+This pass is **NARROW CONTRACT CLARIFICATION ONLY**: no implementation, SQL, migration, test edit, roadmap edit, staging, commit or push. It executes none of the separately controlled M3 implementation authority.
