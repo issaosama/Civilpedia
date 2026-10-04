@@ -947,7 +947,8 @@ No database operation, SQL-test correction, staging, commit or push is authorize
       ).allMatches(roadmap),
       hasLength(1),
     );
-    const contractCommit = 'f348e0609300858073e8a5143f685fef04362b6b';
+    // Accepted contract plus committed §35 policy-dependency clarification.
+    const contractCommit = '7d1d671e7b837be8b1ffed55116aa495d4922eb5';
     const contractPath =
         'docs/architecture/contracts/'
         'CIVILPEDIA_COMMERCIAL_M3_ENTITLEMENT_EVALUATOR_SHADOW_IMPLEMENTATION_CONTRACT_V1.md';

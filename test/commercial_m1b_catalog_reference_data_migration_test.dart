@@ -328,25 +328,39 @@ void main() {
       "SELECT '';",
     );
   });
-  test('00024 is unique and immutable 00001-00023 chain is preserved', () {
-    final files =
-        Directory('supabase/migrations').listSync().whereType<File>().toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
-    expect(files, hasLength(24));
-    expect(
-      files.last.uri.pathSegments.last,
-      '00024_commercial_catalog_reference_data.sql',
-    );
-    for (var i = 0; i < files.length; i++) {
-      final name = files[i].uri.pathSegments.last;
-      expect(name.startsWith('${(i + 1).toString().padLeft(5, '0')}_'), isTrue);
-      if (i < 23)
+  test(
+    '00024 checkpoint and explicit authorized 00025 suffix are preserved',
+    () {
+      final files =
+          Directory('supabase/migrations').listSync().whereType<File>().toList()
+            ..sort((a, b) => a.path.compareTo(b.path));
+      expect(files, hasLength(25));
+      expect(
+        files[23].uri.pathSegments.last,
+        '00024_commercial_catalog_reference_data.sql',
+      );
+      expect(
+        files.last.uri.pathSegments.last,
+        '00025_commercial_entitlement_evaluator_shadow.sql',
+      );
+      expect(
+        _read(_path),
+        _git(['show', 'dcc736ba7a8dc0b068f6c8bfc11b74566ab756dc:$_path']),
+      );
+      for (var i = 0; i < files.length; i++) {
+        final name = files[i].uri.pathSegments.last;
         expect(
-          _read(files[i].path),
-          _git(['show', '$_baseline:supabase/migrations/$name']),
+          name.startsWith('${(i + 1).toString().padLeft(5, '0')}_'),
+          isTrue,
         );
-    }
-  });
+        if (i < 23)
+          expect(
+            _read(files[i].path),
+            _git(['show', '$_baseline:supabase/migrations/$name']),
+          );
+      }
+    },
+  );
   for (final family in _expected().keys) {
     test(
       'exact frozen rows and every column: $family',
@@ -574,19 +588,63 @@ void main() {
   test(
     'authorities, existing tests, config, seed and production sources unchanged',
     () {
+      // Exact accepted checkpoint pins; the original M1b authority remains
+      // _baseline for configuration, seed and 00001-00023 source.
+      for (final path in ['supabase/config.toml', 'supabase/seed.sql']) {
+        expect(_read(path), _git(['show', '$_baseline:$path']), reason: path);
+      }
+      const catalogCheckpoint = 'dcc736ba7a8dc0b068f6c8bfc11b74566ab756dc';
+      const governanceCheckpoint = '611f2dd30a32b730fc254a247dd4701a98e8b4f6';
+      const clarifiedContract = '7d1d671e7b837be8b1ffed55116aa495d4922eb5';
       for (final path in [
-        'supabase/config.toml',
-        'supabase/seed.sql',
         'supabase/tests/commercial_m1a_private_catalog_foundation_test.sql',
         'supabase/tests/commercial_harden1_public_plans_exposure_test.sql',
-        'test/commercial_harden1_public_plans_exposure_migration_test.dart',
         'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md',
-      ])
-        expect(_read(path), _git(['show', '$_baseline:$path']), reason: path);
+      ]) {
+        expect(
+          _read(path),
+          _git(['show', '$catalogCheckpoint:$path']),
+          reason: path,
+        );
+      }
+      const hardenPath =
+          'test/commercial_harden1_public_plans_exposure_migration_test.dart';
+      final retainedHarden = _git([
+        'show',
+        '$governanceCheckpoint:$hardenPath',
+      ]);
       expect(
-        _git(['diff', '--name-only', _baseline, '--', 'lib', 'docs']).trim(),
-        isEmpty,
+        _read(hardenPath),
+        retainedHarden.replaceFirst(
+          "const contractCommit = 'f348e0609300858073e8a5143f685fef04362b6b';",
+          "// Accepted contract plus committed §35 policy-dependency clarification.\n    const contractCommit = '$clarifiedContract';",
+        ),
       );
+      final approvedDocs = <String, String>{
+        'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md':
+            governanceCheckpoint,
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md':
+            catalogCheckpoint,
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_M3_ENTITLEMENT_EVALUATOR_SHADOW_IMPLEMENTATION_CONTRACT_V1.md':
+            clarifiedContract,
+      };
+      final actual = _git([
+        'diff',
+        '--name-only',
+        _baseline,
+        '--',
+        'lib',
+        'docs',
+      ]).trim().split('\n')..sort();
+      final approved = approvedDocs.keys.toList()..sort();
+      expect(actual, approved);
+      for (final entry in approvedDocs.entries) {
+        expect(
+          _read(entry.key),
+          _git(['show', '${entry.value}:${entry.key}']),
+          reason: entry.key,
+        );
+      }
       expect(
         _git([
           'ls-files',
