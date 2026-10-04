@@ -6,6 +6,44 @@ import 'package:flutter_test/flutter_test.dart';
 // Accepted HARDEN-1 facts are fixed here, independently of migration output.
 // This source gate cannot prove live SQL/API denial or runner atomicity.
 const _baseline = '6d064521307b57f17b45249fcfc3713882b59c61';
+const _roadmapPath = 'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md';
+// Hand-authored Owner/Architect governance oracle; the historical Git checkpoint
+// remains fixed and no expectation is generated from the current roadmap.
+const _commercialTrackControl =
+    '\n'
+    r'''# COMMERCIAL TRACK CURRENT CONTROL
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_CURRENT_SLICE: M3 — Entitlement Evaluator + Shadow
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_M3_ENTITLEMENT_EVALUATOR_SHADOW_IMPLEMENTATION_CONTRACT_V1.md
+CONTRACT_STATE: ACCEPTED / FROZEN
+CONTRACT_COMMIT: f348e0609300858073e8a5143f685fef04362b6b
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES
+AUTHORIZED_DATE: 2026-10-04
+PUBLIC_BEHAVIOR_DELTA: ZERO
+```
+
+Authority: Owner + ChatGPT Architect. M1b is CLOSED / IMPLEMENTED / INDEPENDENTLY ACCEPTED / COMMITTED / PUSHED at `dcc736ba7a8dc0b068f6c8bfc11b74566ab756dc`. The accepted M3 contract is committed at the CONTRACT_COMMIT above.
+
+This distinct commercial backend track runs in parallel with the existing UI control. UI CURRENT remains R10.5-D — Profile + User Area, CURRENT / AUTHORIZED — PRE-IMPLEMENTATION AUDIT ONLY, implementation NO / NOT STARTED. R10.5-D implementation, R10.5-E, R10.5-F, R10.6 and R10.7 remain LOCKED. The existing UI current-phase control is unchanged.
+
+This record supplies the separately required commercial implementation authorization under Frozen Commercial Model §33.2 and accepted M3 §§31/34.2. The M3 contract's internal `IMPLEMENTATION_AUTHORIZED: NO` means **contract acceptance alone did not authorize execution**; its acceptance-time metadata remains unchanged. Execution becomes authorized only after the Owner commits this roadmap/control record. The implementation agent must begin from that committed governance baseline. This governance/static-compatibility pass performs NO M3 implementation.
+
+Authorization applies ONLY to accepted M3: **INTERNAL EVALUATOR + SHADOW ONLY**, two private shadow tables and four internal functions, with **USER-VISIBLE DELTA = ZERO**. The [accepted M3 contract](contracts/CIVILPEDIA_COMMERCIAL_M3_ENTITLEMENT_EVALUATOR_SHADOW_IMPLEMENTATION_CONTRACT_V1.md), especially §§27–29, is the canonical detailed file/object/data/test-gate authority. All its preflight, checkpoint/composed-phase and focused SQL/security/API/atomicity obligations remain mandatory; this source gate does not discharge runtime evidence.
+
+Expected NEW future implementation family — not created by this pass:
+
+| Future path | Accepted boundary |
+| --- | --- |
+| supabase/migrations/00025_commercial_entitlement_evaluator_shadow.sql | Additive empty M3 evaluator/shadow infrastructure only; verify the free migration prefix before execution. |
+| supabase/tests/commercial_m3_entitlement_evaluator_shadow_test.sql | Accepted focused SQL/pgTAP, security/composed-phase and rollback-fixture gates only. |
+| test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart | Accepted focused M3 source/inventory/semantic gate only. |
+
+Potential compatibility edits are limited to the exact paths and assertion boundaries permitted by accepted M3 §§27.2/29, only when mechanically required: `test/commercial_m1b_catalog_reference_data_migration_test.dart` and `test/commercial_harden1_public_plans_exposure_migration_test.dart`. Preserve historical checkpoints, unrelated-file protection and every security/catalog assertion. Any further path requires an explicit exact contract-boundary amendment; no wildcard repository edit is authorized. M1b static reconciliation remains deferred to the separately authorized M3 implementation compatibility pass.
+
+This authorization excludes M4, M5, payment implementation, purchased production terms, production grants, real Launch Partner allocations, Founding allocations, publication cutover, Directory visibility change, lifecycle semantics change, Flutter UI change, cache authority change, public commercial API, worker/scheduler, public projection, OQ-84 decision, Profile/User Area implementation and later UI roadmap slices. No public behavior or commercial policy changes; staging, commit and push remain Owner-controlled and are not authorized by this record.
+''';
 const _migrationName = '00023_commercial_public_plans_exposure_hardening.sql';
 const _migrationPath = 'supabase/migrations/$_migrationName';
 const _m1aTestPath =
@@ -477,10 +515,20 @@ void main() {
   );
 
   test(
-    'only original M1a raw-plans assertion and adjacent wording changed',
+    'original M1a HARDEN-1 checkpoint and accepted M1b compatibility stay exact',
     () {
       final old = _baselineFile(_m1aTestPath);
-      final current = _read(_m1aTestPath);
+      // Retain the original HARDEN-1 proof at its accepted implementation
+      // checkpoint; M1b later authorized phase-aware fixtures and cleanup.
+      final current = _git([
+        'show',
+        '3c676f1042b5f8e6f6eff6b7cb4681417c7e140f:$_m1aTestPath',
+      ]);
+      expect(
+        _read(_m1aTestPath),
+        _git(['show', 'dcc736ba7a8dc0b068f6c8bfc11b74566ab756dc:$_m1aTestPath']),
+        reason: 'Only the accepted M1b compatibility; no additional M1a drift',
+      );
       final oldLines = old.split('\n');
       final prefix = oldLines.take(702).join('\n') + '\n';
       final suffix = oldLines.skip(709).join('\n');
@@ -876,6 +924,8 @@ No database operation, SQL-test correction, staging, commit or push is authorize
                     'docs/architecture/contracts/'
                         'CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md'
               ? acceptedM1bReopeningAddendum
+              : path == _roadmapPath
+              ? _commercialTrackControl
               : '');
       expect(_read(path), expected, reason: path);
     }
@@ -883,6 +933,31 @@ No database operation, SQL-test correction, staging, commit or push is authorize
     expect(config, contains('schemas = ["public", "graphql_public"]'));
     expect(config, contains('extra_search_path = ["public", "extensions"]'));
     expect(_cleanSql(_read('supabase/seed.sql')).trim(), isEmpty);
+  });
+
+  test('commercial M3 governance preserves the checkpoint and contract', () {
+    final roadmap = _read(_roadmapPath);
+    final checkpoint = _baselineFile(_roadmapPath);
+    expect(roadmap.substring(0, checkpoint.length), checkpoint);
+    expect(roadmap.substring(checkpoint.length), _commercialTrackControl);
+    expect(
+      RegExp(
+        r'^# COMMERCIAL TRACK CURRENT CONTROL$',
+        multiLine: true,
+      ).allMatches(roadmap),
+      hasLength(1),
+    );
+    const contractCommit = 'f348e0609300858073e8a5143f685fef04362b6b';
+    const contractPath =
+        'docs/architecture/contracts/'
+        'CIVILPEDIA_COMMERCIAL_M3_ENTITLEMENT_EVALUATOR_SHADOW_IMPLEMENTATION_CONTRACT_V1.md';
+    final contract = _read(contractPath);
+    expect(contract, _git(['show', '$contractCommit:$contractPath']));
+    expect(
+      contract,
+      contains('DOCUMENT_STATUS: ACCEPTED — CANONICAL M3 IMPLEMENTATION CONTRACT'),
+    );
+    expect(contract, contains('IMPLEMENTATION_AUTHORIZED: NO'));
   });
 
   test(
