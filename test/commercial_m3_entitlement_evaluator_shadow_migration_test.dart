@@ -88,6 +88,84 @@ The UI track is unchanged: R10.5-D remains CURRENT / AUTHORIZED — PRE-IMPLEMEN
 
 This formal closure changes documentary control and exact static compatibility only. No production SQL, migration, Supabase configuration, Flutter implementation, contract, commercial policy or public behavior changes. Staging, commit and push remain Owner-controlled and are not authorized by this closure.
 ''';
+const _cui1Authorization =
+    '\n'
+    r'''# COMMERCIAL CUI-1 IMPLEMENTATION AUTHORIZATION — 2026-10-05
+
+## Current Commercial Track Control
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_LAST_CLOSED_SLICE: M3 — Entitlement Evaluator + Shadow
+COMMERCIAL_CURRENT_SLICE: CUI-1 — Commercial Business Experience Foundation
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CONTRACT_STATE: ACCEPTED / FROZEN
+CONTRACT_COMMIT: 889ff1da4389ba891247cfb5497554ca98fa58b3
+CUI1_PREIMPLEMENTATION_BASELINE_COMMIT: 47096d45b98853af97ab5f3333b1b62b045dad81
+CUI1_PREIMPLEMENTATION_BASELINE: 344 PASS / 0 FAIL
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES
+AUTHORIZED_DATE: 2026-10-05
+PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO
+COMMERCIAL_AUTHORITY_DELTA: ZERO
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+IMPLEMENTATION: NOT STARTED
+AUTHORIZATION_EFFECTIVE: ONLY AFTER OWNER COMMITS THIS GOVERNANCE RECORD
+```
+
+Authority: Owner-provided ChatGPT Architect production implementation authorization. This additive record is the current Commercial Track control and supersedes only the active-slice meaning of the earlier M3 closure control. The historical M3 authorization and closure records, accepted evidence and carry-forward boundaries remain intact. This governance pass performs no production implementation.
+
+The frozen CUI-1 contract at the exact CONTRACT_COMMIT remains unchanged, including `IMPLEMENTATION_AUTHORIZED: NO`: contract acceptance alone never grants execution authority. CUI-1 implementation becomes authorized only after the Owner commits this governance record. The implementer must start from that committed governance baseline and reconfirm the frozen preflight before the first production edit. No implementation may begin during this documentary pass.
+
+The committed pre-implementation correction at the exact CUI1_PREIMPLEMENTATION_BASELINE_COMMIT satisfies the contract's §14.1 committed GREEN prerequisite: the complete twelve-file focused gate passed **344 / 344, 0 FAIL**, with production behavior unchanged. The historical 341 PASS / 3 FAIL is chronology only, not the current baseline and not a waiver. No UI test rerun is performed by this governance record.
+
+### Exact frozen production boundary — eight paths
+
+```text
+lib/features/directory/presentation/directory_landing_screen.dart
+lib/features/directory/presentation/directory_search_screen.dart
+lib/features/directory/presentation/directory_provider_card.dart
+lib/features/directory/presentation/directory_provider_detail_screen.dart
+lib/features/directory/presentation/directory_verification_badge.dart
+lib/features/directory/presentation/widgets/directory_sponsored_provider_card.dart
+lib/localization/ar.dart
+lib/localization/en.dart
+```
+
+Only contract §§5–15 presentation is authorized: responsive Directory and public Business identity/detail polish, supplied locations/addresses, existing contacts, local Saved presentation, existing Directory verification, the isolated Sponsored seam, generic “إدارة أعمالي” entry, neutral commercial information and Arabic-first responsive polish. No new data authority. A ninth production file requires STOP. Any provider/domain/repository change requires STOP and a separate Architect-authorized authority/data slice.
+
+### Exact frozen implementation test boundary — six paths
+
+```text
+test/commercial_cui1_business_experience_foundation_widget_test.dart (new)
+test/w5_2_directory_landing_test.dart
+test/w5_3_directory_search_screen_test.dart
+test/w5_4_directory_provider_card_test.dart
+test/w5_4_directory_provider_detail_screen_test.dart
+test/w5_5_verification_display_test.dart
+```
+
+These tests are limited to frozen CUI-1 assertions after the committed authorization. The corrected `test/w7_2_directory_sponsored_search_screen_test.dart` and `test/v1_r09_p2_b_directory_ux_test.dart` are read-only regressions during production implementation; their separate harness-correction authorization is completed, not renewed. All other files remain read-only unless separately authorized. The contract's focused regression and executable visual-QA obligations remain mandatory; a source/static gate is not visual or runtime acceptance.
+
+### Authority separations and exclusions
+
+- Existing Directory Verification ≠ Commercial Verification V1.
+- Sponsored ≠ Verified; Paid ≠ Verified ≠ Sponsored.
+- Directory Location ≠ Commercial Branch.
+- Saved ≠ Ownership.
+- Claim ≠ Management authority; public entity ID ≠ Management authority.
+- Commercial information shell ≠ catalog authority.
+
+M4 and M5 remain NOT AUTHORIZED. No payments, subscription/plan purchase, upgrade/downgrade, commercial entitlement decisions, Commercial Verification V1 authority, Sponsored purchase/eligibility authority, commercial lifecycle authority, Branch authority/quotas, team quotas, ownership transfer, invitations, Launch Partner allocation or Founding allocation. No backend, SQL/migration, provider/domain/repository, route addition, DI, search/ranking, publication eligibility, Profile/User Area redesign or Business editor redesign. No M4 contract/migration, legacy classification/linking, IQD conversion, projection authority or publication cutover. The frozen contract's remaining exclusions and unresolved carry-forward continue unchanged.
+
+The ordinary V1-R10 track is unchanged: R10.5-D remains CURRENT / AUTHORIZED FOR PRE-IMPLEMENTATION AUDIT ONLY, `IMPLEMENTATION_AUTHORIZED: NO`, implementation NOT STARTED. R10.5-E, R10.5-F, R10.6 and R10.7 remain LOCKED. CUI-1 is a separate Commercial UI track; its authorization grants no ordinary UI-track advancement.
+
+This pass changes documentary governance and exact static compatibility only. No lib implementation, production localization, backend, SQL, migration or Supabase change. The frozen contracts and protected dirty baseline remain untouched. Staging, commit and push remain Owner-controlled and are not authorized by this record.
+''';
+bool _matchesCui1Roadmap(String actual, String closedCheckpoint) =>
+    actual == closedCheckpoint + _cui1Authorization;
+
 String _read(String p) => File(p).readAsStringSync().replaceAll('\r\n', '\n');
 String _git(List<String> args) {
   final r = Process.runSync(
@@ -454,15 +532,22 @@ void main() {
         'show',
         '7d1d671e7b837be8b1ffed55116aa495d4922eb5:$roadmapPath',
       ]);
-      // Retain the exact pre-implementation authority, allowing only the
-      // historical heading designation and hand-authored formal closure.
+      // Keep every historical byte; only the exact additive CUI-1 record is new.
+      final closedCheckpoint = authorizedRoadmap.replaceFirst(
+            '# COMMERCIAL TRACK CURRENT CONTROL',
+            '# COMMERCIAL TRACK HISTORICAL M3 AUTHORIZATION',
+          ) +
+          _m3FormalClosure;
       expect(
-        _read(roadmapPath),
-        authorizedRoadmap.replaceFirst(
-              '# COMMERCIAL TRACK CURRENT CONTROL',
-              '# COMMERCIAL TRACK HISTORICAL M3 AUTHORIZATION',
-            ) +
-            _m3FormalClosure,
+        _matchesCui1Roadmap(_read(roadmapPath), closedCheckpoint),
+        isTrue,
+      );
+      const cui1ContractPath =
+          'docs/architecture/contracts/'
+          'CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md';
+      expect(
+        _read(cui1ContractPath),
+        _git(['show', '889ff1da4389ba891247cfb5497554ca98fa58b3:$cui1ContractPath']),
       );
       for (final path in [
         'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_M3_ENTITLEMENT_EVALUATOR_SHADOW_IMPLEMENTATION_CONTRACT_V1.md',
@@ -484,11 +569,72 @@ void main() {
           'docs',
           'supabase/config.toml',
           'supabase/seed.sql',
-        ]).trim(),
-        roadmapPath,
+        ]).trim().split('\n')..sort(),
+        [roadmapPath, cui1ContractPath]..sort(),
       );
     },
   );
+  // Mutations stay in memory: use the same exact guard as the live roadmap gate.
+  for (final mutation in <String, List<String>>{
+    'M4 authorization': ['M4_STATE: NOT AUTHORIZED', 'M4_STATE: AUTHORIZED'],
+    'M5 authorization': ['M5_STATE: NOT AUTHORIZED', 'M5_STATE: AUTHORIZED'],
+    'next commercial slice': [
+      'COMMERCIAL_CURRENT_SLICE: CUI-1 — Commercial Business Experience Foundation',
+      'COMMERCIAL_CURRENT_SLICE: CUI-2 — Arbitrary next slice',
+    ],
+    'ordinary R10.5-D implementation': [
+      '`IMPLEMENTATION_AUTHORIZED: NO`, implementation NOT STARTED',
+      '`IMPLEMENTATION_AUTHORIZED: YES`, implementation STARTED',
+    ],
+    'contract substitution': [
+      'COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md',
+      'COMMERCIAL_CONTRACT: docs/architecture/contracts/ARBITRARY_CONTRACT.md',
+    ],
+    'contract commit': [
+      'CONTRACT_COMMIT: 889ff1da4389ba891247cfb5497554ca98fa58b3',
+      'CONTRACT_COMMIT: 0000000000000000000000000000000000000000',
+    ],
+    'baseline-fix commit': [
+      'CUI1_PREIMPLEMENTATION_BASELINE_COMMIT: 47096d45b98853af97ab5f3333b1b62b045dad81',
+      'CUI1_PREIMPLEMENTATION_BASELINE_COMMIT: 0000000000000000000000000000000000000000',
+    ],
+    'ninth production path': [
+      'lib/localization/en.dart\n```',
+      'lib/localization/en.dart\nlib/features/directory/presentation/ninth.dart\n```',
+    ],
+    'backend authority expansion': [
+      'PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO',
+      'PUBLIC_BACKEND_AUTHORITY_DELTA: NONZERO',
+    ],
+    'provider authority expansion': [
+      'Any provider/domain/repository change requires STOP',
+      'Any provider/domain/repository change is authorized',
+    ],
+  }.entries) {
+    test('CUI-1 governance rejects ${mutation.key}', () {
+      const path = 'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md';
+      final closedCheckpoint = _git([
+        'show', '798b2af358735e871463790e746c8f5761fbb989:$path',
+      ]);
+      expect(_matchesCui1Roadmap(closedCheckpoint + _cui1Authorization, closedCheckpoint), isTrue);
+      expect(_cui1Authorization, contains(mutation.value.first));
+      final changedRecord = _cui1Authorization.replaceFirst(
+        mutation.value.first, mutation.value.last,
+      );
+      expect(_matchesCui1Roadmap(closedCheckpoint + changedRecord, closedCheckpoint), isFalse);
+    });
+  }
+  test('CUI-1 governance rejects unrelated historical roadmap mutation', () {
+    const path = 'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md';
+    final closedCheckpoint = _git([
+      'show', '798b2af358735e871463790e746c8f5761fbb989:$path',
+    ]);
+    expect(closedCheckpoint, contains('ROADMAP_VERSION: 1'));
+    expect(_matchesCui1Roadmap(
+      closedCheckpoint.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2') + _cui1Authorization,
+      closedCheckpoint,
+    ), isFalse);
+  });
   test(
     'SQL gate carries explicit clarification cases and rolls fixtures back',
     () {

@@ -132,6 +132,83 @@ final _closedCommercialTrackControl =
       '# COMMERCIAL TRACK HISTORICAL M3 AUTHORIZATION',
     ) +
     _m3FormalClosure;
+const _cui1Authorization =
+    '\n'
+    r'''# COMMERCIAL CUI-1 IMPLEMENTATION AUTHORIZATION — 2026-10-05
+
+## Current Commercial Track Control
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_LAST_CLOSED_SLICE: M3 — Entitlement Evaluator + Shadow
+COMMERCIAL_CURRENT_SLICE: CUI-1 — Commercial Business Experience Foundation
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CONTRACT_STATE: ACCEPTED / FROZEN
+CONTRACT_COMMIT: 889ff1da4389ba891247cfb5497554ca98fa58b3
+CUI1_PREIMPLEMENTATION_BASELINE_COMMIT: 47096d45b98853af97ab5f3333b1b62b045dad81
+CUI1_PREIMPLEMENTATION_BASELINE: 344 PASS / 0 FAIL
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES
+AUTHORIZED_DATE: 2026-10-05
+PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO
+COMMERCIAL_AUTHORITY_DELTA: ZERO
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+IMPLEMENTATION: NOT STARTED
+AUTHORIZATION_EFFECTIVE: ONLY AFTER OWNER COMMITS THIS GOVERNANCE RECORD
+```
+
+Authority: Owner-provided ChatGPT Architect production implementation authorization. This additive record is the current Commercial Track control and supersedes only the active-slice meaning of the earlier M3 closure control. The historical M3 authorization and closure records, accepted evidence and carry-forward boundaries remain intact. This governance pass performs no production implementation.
+
+The frozen CUI-1 contract at the exact CONTRACT_COMMIT remains unchanged, including `IMPLEMENTATION_AUTHORIZED: NO`: contract acceptance alone never grants execution authority. CUI-1 implementation becomes authorized only after the Owner commits this governance record. The implementer must start from that committed governance baseline and reconfirm the frozen preflight before the first production edit. No implementation may begin during this documentary pass.
+
+The committed pre-implementation correction at the exact CUI1_PREIMPLEMENTATION_BASELINE_COMMIT satisfies the contract's §14.1 committed GREEN prerequisite: the complete twelve-file focused gate passed **344 / 344, 0 FAIL**, with production behavior unchanged. The historical 341 PASS / 3 FAIL is chronology only, not the current baseline and not a waiver. No UI test rerun is performed by this governance record.
+
+### Exact frozen production boundary — eight paths
+
+```text
+lib/features/directory/presentation/directory_landing_screen.dart
+lib/features/directory/presentation/directory_search_screen.dart
+lib/features/directory/presentation/directory_provider_card.dart
+lib/features/directory/presentation/directory_provider_detail_screen.dart
+lib/features/directory/presentation/directory_verification_badge.dart
+lib/features/directory/presentation/widgets/directory_sponsored_provider_card.dart
+lib/localization/ar.dart
+lib/localization/en.dart
+```
+
+Only contract §§5–15 presentation is authorized: responsive Directory and public Business identity/detail polish, supplied locations/addresses, existing contacts, local Saved presentation, existing Directory verification, the isolated Sponsored seam, generic “إدارة أعمالي” entry, neutral commercial information and Arabic-first responsive polish. No new data authority. A ninth production file requires STOP. Any provider/domain/repository change requires STOP and a separate Architect-authorized authority/data slice.
+
+### Exact frozen implementation test boundary — six paths
+
+```text
+test/commercial_cui1_business_experience_foundation_widget_test.dart (new)
+test/w5_2_directory_landing_test.dart
+test/w5_3_directory_search_screen_test.dart
+test/w5_4_directory_provider_card_test.dart
+test/w5_4_directory_provider_detail_screen_test.dart
+test/w5_5_verification_display_test.dart
+```
+
+These tests are limited to frozen CUI-1 assertions after the committed authorization. The corrected `test/w7_2_directory_sponsored_search_screen_test.dart` and `test/v1_r09_p2_b_directory_ux_test.dart` are read-only regressions during production implementation; their separate harness-correction authorization is completed, not renewed. All other files remain read-only unless separately authorized. The contract's focused regression and executable visual-QA obligations remain mandatory; a source/static gate is not visual or runtime acceptance.
+
+### Authority separations and exclusions
+
+- Existing Directory Verification ≠ Commercial Verification V1.
+- Sponsored ≠ Verified; Paid ≠ Verified ≠ Sponsored.
+- Directory Location ≠ Commercial Branch.
+- Saved ≠ Ownership.
+- Claim ≠ Management authority; public entity ID ≠ Management authority.
+- Commercial information shell ≠ catalog authority.
+
+M4 and M5 remain NOT AUTHORIZED. No payments, subscription/plan purchase, upgrade/downgrade, commercial entitlement decisions, Commercial Verification V1 authority, Sponsored purchase/eligibility authority, commercial lifecycle authority, Branch authority/quotas, team quotas, ownership transfer, invitations, Launch Partner allocation or Founding allocation. No backend, SQL/migration, provider/domain/repository, route addition, DI, search/ranking, publication eligibility, Profile/User Area redesign or Business editor redesign. No M4 contract/migration, legacy classification/linking, IQD conversion, projection authority or publication cutover. The frozen contract's remaining exclusions and unresolved carry-forward continue unchanged.
+
+The ordinary V1-R10 track is unchanged: R10.5-D remains CURRENT / AUTHORIZED FOR PRE-IMPLEMENTATION AUDIT ONLY, `IMPLEMENTATION_AUTHORIZED: NO`, implementation NOT STARTED. R10.5-E, R10.5-F, R10.6 and R10.7 remain LOCKED. CUI-1 is a separate Commercial UI track; its authorization grants no ordinary UI-track advancement.
+
+This pass changes documentary governance and exact static compatibility only. No lib implementation, production localization, backend, SQL, migration or Supabase change. The frozen contracts and protected dirty baseline remain untouched. Staging, commit and push remain Owner-controlled and are not authorized by this record.
+''';
+final _authorizedCommercialTrackControl =
+    _closedCommercialTrackControl + _cui1Authorization;
 const _migrationName = '00023_commercial_public_plans_exposure_hardening.sql';
 const _migrationPath = 'supabase/migrations/$_migrationName';
 const _m1aTestPath =
@@ -1013,7 +1090,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
                         'CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md'
               ? acceptedM1bReopeningAddendum
               : path == _roadmapPath
-              ? _closedCommercialTrackControl
+              ? _authorizedCommercialTrackControl
               : '');
       expect(_read(path), expected, reason: path);
     }
@@ -1027,7 +1104,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
     final roadmap = _read(_roadmapPath);
     final checkpoint = _baselineFile(_roadmapPath);
     expect(roadmap.substring(0, checkpoint.length), checkpoint);
-    expect(roadmap.substring(checkpoint.length), _closedCommercialTrackControl);
+    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl);
     expect(
       RegExp(
         r'^# COMMERCIAL TRACK CURRENT CONTROL$',
