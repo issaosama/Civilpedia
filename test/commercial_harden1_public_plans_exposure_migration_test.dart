@@ -388,7 +388,274 @@ final _dropPolicy = RegExp(
   caseSensitive: false,
 );
 
+// CUI-1 composition: fixed historical evidence plus only the frozen UI delta.
+const _cui1GovernanceCommit = '5d511256a4364a3226383c2a631d70bef02ecba6';
+const _cui1ContractCommit = '889ff1da4389ba891247cfb5497554ca98fa58b3';
+const _cui1BaselineCommit = '47096d45b98853af97ab5f3333b1b62b045dad81';
+const _cui1RoadmapPath = 'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md';
+const _cui1ContractPath =
+    'docs/architecture/contracts/'
+    'CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md';
+const _cui1ProductionPaths = <String>{
+  'lib/features/directory/presentation/directory_landing_screen.dart',
+  'lib/features/directory/presentation/directory_search_screen.dart',
+  'lib/features/directory/presentation/directory_provider_card.dart',
+  'lib/features/directory/presentation/directory_provider_detail_screen.dart',
+  'lib/features/directory/presentation/directory_verification_badge.dart',
+  'lib/features/directory/presentation/widgets/directory_sponsored_provider_card.dart',
+  'lib/localization/ar.dart',
+  'lib/localization/en.dart',
+};
+// Separate exact test boundaries and incoming dirty artifacts, never lib/docs
+// prefixes. Preservation of incoming dirty bytes is independently checked.
+const _cui1NonProductionPaths = <String>{
+  'test/commercial_harden1_public_plans_exposure_migration_test.dart',
+  'test/commercial_m1b_catalog_reference_data_migration_test.dart',
+  'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart',
+  'test/commercial_cui1_business_experience_foundation_widget_test.dart',
+  'test/w5_2_directory_landing_test.dart',
+  'test/w5_3_directory_search_screen_test.dart',
+  'test/w5_4_directory_provider_card_test.dart',
+  'test/w5_4_directory_provider_detail_screen_test.dart',
+  'test/w5_5_verification_display_test.dart',
+  'test/a5_6_profile_bootstrap_test.dart',
+  'test/v1_r08_cloud_profile_foundation_test.dart',
+  'test/v1_r08_profile_edit_screen_widget_test.dart',
+  'OpenCode_Usage_Report.txt',
+  'artifacts/r10_4a/home_dark.png',
+  'artifacts/r10_4a/home_light.png',
+};
+bool _allowsCui1Composition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  String committedRoadmap, {
+  String governanceCommit = _cui1GovernanceCommit,
+  String contractCommit = _cui1ContractCommit,
+  String baselineCommit = _cui1BaselineCommit,
+}) =>
+    governanceCommit == '5d511256a4364a3226383c2a631d70bef02ecba6' &&
+    contractCommit == '889ff1da4389ba891247cfb5497554ca98fa58b3' &&
+    baselineCommit == '47096d45b98853af97ab5f3333b1b62b045dad81' &&
+    committedRoadmap.endsWith(_cui1Authorization) &&
+    roadmap == committedRoadmap &&
+    changedPaths
+        .where((path) => !_cui1NonProductionPaths.contains(path))
+        .every(_cui1ProductionPaths.contains);
+
+List<String> _cui1ChangedPaths(String output) =>
+    output.trim().isEmpty ? <String>[] : output.trim().split('\n');
+
+void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
+  // A committed, fixed input; never a snapshot of the current working tree.
+  final committedRoadmap = _git([
+    'show',
+    '$_cui1GovernanceCommit:$_cui1RoadmapPath',
+  ]);
+  test(
+    'CUI-1 composed delta pins authorities and rejects unrelated live drift',
+    () {
+      expect(
+        _git(['merge-base', _cui1ContractCommit, _cui1BaselineCommit]).trim(),
+        _cui1ContractCommit,
+      );
+      expect(
+        _git(['merge-base', _cui1BaselineCommit, _cui1GovernanceCommit]).trim(),
+        _cui1BaselineCommit,
+      );
+      // Baseline repair and governance were both production/backend-free.
+      expect(
+        _git([
+          'diff',
+          '--name-only',
+          _cui1ContractCommit,
+          _cui1BaselineCommit,
+          '--',
+          'lib',
+          'docs',
+          'supabase',
+        ]).trim(),
+        isEmpty,
+      );
+      expect(
+        _git([
+          'diff',
+          '--name-only',
+          _cui1BaselineCommit,
+          _cui1GovernanceCommit,
+          '--',
+          'lib',
+          'supabase',
+        ]).trim(),
+        isEmpty,
+      );
+      expect(
+        _read(_cui1ContractPath),
+        _git(['show', '$_cui1ContractCommit:$_cui1ContractPath']),
+      );
+      final paths = <String>[
+        ..._cui1ChangedPaths(
+          _git(['diff', '--name-only', '--no-renames', _cui1GovernanceCommit]),
+        ),
+        ..._cui1ChangedPaths(
+          _git(['ls-files', '--others', '--exclude-standard']),
+        ),
+      ];
+      expect(
+        _allowsCui1Composition(
+          paths,
+          _read(_cui1RoadmapPath),
+          committedRoadmap,
+        ),
+        isTrue,
+        reason: 'Exact CUI-1 production/test paths only: $paths',
+      );
+    },
+  );
+  test('CUI-1 composition accepts empty and each of the frozen eight paths', () {
+    // Independently fixed positive cases also catch an accidentally narrowed
+    // or expanded implementation set; the negative cases catch a ninth path.
+    const expected = <String>[
+      'lib/features/directory/presentation/directory_landing_screen.dart',
+      'lib/features/directory/presentation/directory_search_screen.dart',
+      'lib/features/directory/presentation/directory_provider_card.dart',
+      'lib/features/directory/presentation/directory_provider_detail_screen.dart',
+      'lib/features/directory/presentation/directory_verification_badge.dart',
+      'lib/features/directory/presentation/widgets/directory_sponsored_provider_card.dart',
+      'lib/localization/ar.dart',
+      'lib/localization/en.dart',
+    ];
+    expect(_cui1ProductionPaths, expected.toSet());
+    expect(
+      _allowsCui1Composition([], committedRoadmap, committedRoadmap),
+      isTrue,
+    );
+    for (final path in expected) {
+      expect(
+        _allowsCui1Composition([path], committedRoadmap, committedRoadmap),
+        isTrue,
+        reason: path,
+      );
+    }
+    expect(
+      _allowsCui1Composition(expected, committedRoadmap, committedRoadmap),
+      isTrue,
+    );
+  });
+  test(
+    'CUI-1 composition rejects exact out-of-scope production and document paths',
+    () {
+      const denied = <String>[
+        'lib/features/directory/presentation/ninth.dart',
+        'lib/features/directory/presentation/providers/directory_provider.dart',
+        'lib/features/directory/data/supabase_directory_read_gateway.dart',
+        'lib/features/directory/domain/cloud_directory_repository.dart',
+        'lib/features/directory/domain/canonical_directory_entity.dart',
+        'lib/routes/app_router.dart',
+        'lib/routes/app_routes.dart',
+        'lib/core/di/app_dependencies.dart',
+        'lib/core/theme/app_colors.dart',
+        'supabase/functions/new_public_authority/index.ts',
+        'supabase/config.toml',
+        'supabase/seed.sql',
+        'supabase/tests/commercial_m3_entitlement_evaluator_shadow_test.sql',
+        'supabase/migrations/00026_unauthorized.sql',
+        'lib/features/profile/presentation/profile_screen.dart',
+        'lib/localization/fr.dart',
+        'lib/localization/ar.dart.bak',
+        'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md',
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md',
+        'docs/unrelated.md',
+        'assets/unauthorized.png',
+        'pubspec.yaml',
+        'test/unrelated_test.dart',
+        'test/w7_2_directory_sponsored_search_screen_test.dart',
+        'test/v1_r09_p2_b_directory_ux_test.dart',
+        'artifacts/unrelated.png',
+      ];
+      for (final path in denied) {
+        expect(
+          _allowsCui1Composition(
+            ['lib/localization/ar.dart', path],
+            committedRoadmap,
+            committedRoadmap,
+          ),
+          isFalse,
+          reason: path,
+        );
+      }
+    },
+  );
+  test(
+    'CUI-1 composition rejects substituted contract, baseline and governance commits',
+    () {
+      const wrong = '0000000000000000000000000000000000000000';
+      expect(
+        _allowsCui1Composition(
+          [],
+          committedRoadmap,
+          committedRoadmap,
+          contractCommit: wrong,
+        ),
+        isFalse,
+      );
+      expect(
+        _allowsCui1Composition(
+          [],
+          committedRoadmap,
+          committedRoadmap,
+          baselineCommit: wrong,
+        ),
+        isFalse,
+      );
+      expect(
+        _allowsCui1Composition(
+          [],
+          committedRoadmap,
+          committedRoadmap,
+          governanceCommit: wrong,
+        ),
+        isFalse,
+      );
+    },
+  );
+  // M3 already has exact live-roadmap controls for these cases. Retain them
+  // instead of registering duplicate rejection tests in that suite.
+  if (!roadmapControlsCovered) {
+    test(
+      'CUI-1 composition rejects unauthorized governance and historical drift',
+      () {
+        const mutations = <String, String>{
+          'M4_STATE: NOT AUTHORIZED': 'M4_STATE: AUTHORIZED',
+          'M5_STATE: NOT AUTHORIZED': 'M5_STATE: AUTHORIZED',
+          '`IMPLEMENTATION_AUTHORIZED: NO`, implementation NOT STARTED':
+              '`IMPLEMENTATION_AUTHORIZED: YES`, implementation STARTED',
+          'PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO':
+              'PUBLIC_BACKEND_AUTHORITY_DELTA: NONZERO',
+          'COMMERCIAL_AUTHORITY_DELTA: ZERO':
+              'COMMERCIAL_AUTHORITY_DELTA: NONZERO',
+          'COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md':
+              'COMMERCIAL_CONTRACT: docs/architecture/contracts/ARBITRARY.md',
+          'ROADMAP_VERSION: 1': 'ROADMAP_VERSION: 2',
+        };
+        for (final mutation in mutations.entries) {
+          expect(committedRoadmap, contains(mutation.key));
+          expect(
+            _allowsCui1Composition(
+              [],
+              committedRoadmap.replaceFirst(mutation.key, mutation.value),
+              committedRoadmap,
+            ),
+            isFalse,
+            reason: mutation.key,
+          );
+        }
+      },
+    );
+  }
+}
+
 void main() {
+  _registerCui1CompatibilityTests();
   late String raw;
   late List<String> statements;
   setUpAll(() {
@@ -1130,7 +1397,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
     'no production Flutter change or raw-plans consumer enters this slice',
     () {
       expect(
-        _git(['diff', '--name-only', _baseline, '--', 'lib']).trim(),
+        _git(['diff', '--name-only', _baseline, _cui1GovernanceCommit, '--', 'lib']).trim(),
         isEmpty,
       );
       expect(
