@@ -75,7 +75,7 @@ Widget _sponsoredCardApp(CanonicalDirectoryEntity entity, {VoidCallback? onTap})
   final savedStore = _FakeSavedStore();
   final card = Builder(
     builder: (context) => DirectorySponsoredProviderCard(
-      placement: _placement(),
+      placement: _placement(subject: _ref(entity.id)),
       entity: entity,
       onTap: onTap ??
           () {
@@ -148,7 +148,10 @@ void main() {
 
     testWidgets('G: sponsored tap → real DirectoryProviderDetailScreen',
         (tester) async {
-      final entity = fakeEntity(id: 'p-1', name: 'Sponsored Co');
+      final entity = fakeEntity(
+        id: '00000000-0000-0000-0000-000000000001',
+        name: 'Sponsored Co',
+      );
       await tester.pumpWidget(_sponsoredCardApp(entity));
       await tester.tap(find.text('Sponsored Co'));
       await tester.pumpAndSettle();

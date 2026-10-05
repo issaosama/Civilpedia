@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -246,7 +247,7 @@ Future<void> _pumpSaved(
   await tester.pumpWidget(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider(isArabic: true)),
         ChangeNotifierProvider(
           create: (_) => EncyclopediaProvider(
             repository: _FakeEncyclopediaRepository(),
@@ -255,6 +256,9 @@ Future<void> _pumpSaved(
         ChangeNotifierProvider.value(value: favorites),
       ],
       child: MaterialApp.router(
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         routerConfig: canonicalDirectoryDetailRouter(
           home: SavedScreen(
             favoritesResolver: resolver,
@@ -665,6 +669,11 @@ void main() {
       await tester.pump(); // resolve() completes
       await tester.pump(); // readCache (null) -> full list set
       await tester.pump(); // refresh awaits gate -> still pending
+
+      final savedContext = tester.element(find.byType(SavedScreen));
+      expect(Localizations.localeOf(savedContext), const Locale('ar'));
+      expect(Directionality.of(savedContext), TextDirection.rtl);
+      expect(savedContext.read<LanguageProvider>().isArabic, isTrue);
 
       // Local-only frame: unavailable row is already rendered, no remote name.
       expect(find.text(Ar.savedEngineeringDirectory), findsOneWidget);
