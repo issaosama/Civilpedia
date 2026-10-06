@@ -3815,3 +3815,43 @@ M4 and M5 remain NOT AUTHORIZED. No payments, subscription/plan purchase, upgrad
 The ordinary V1-R10 track is unchanged: R10.5-D remains CURRENT / AUTHORIZED FOR PRE-IMPLEMENTATION AUDIT ONLY, `IMPLEMENTATION_AUTHORIZED: NO`, implementation NOT STARTED. R10.5-E, R10.5-F, R10.6 and R10.7 remain LOCKED. CUI-1 is a separate Commercial UI track; its authorization grants no ordinary UI-track advancement.
 
 This pass changes documentary governance and exact static compatibility only. No lib implementation, production localization, backend, SQL, migration or Supabase change. The frozen contracts and protected dirty baseline remain untouched. Staging, commit and push remain Owner-controlled and are not authorized by this record.
+
+# COMMERCIAL CUI-1 MEDIA AUTHORITY RECONCILIATION — 2026-10-06
+
+## Current CUI-1 media control — additive narrow exception
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_LAST_CLOSED_SLICE: M3 — Entitlement Evaluator + Shadow
+COMMERCIAL_CURRENT_SLICE: CUI-1 — Commercial Business Experience Foundation
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CONTRACT_STATE: ACCEPTED / FROZEN — HISTORICAL CONTRACT PRESERVED
+CUI1_MEDIA_ADDENDUM: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md
+MEDIA_ADDENDUM_STATUS: ACCEPTED — CANONICAL CUI-1 MEDIA AUTHORITY ADDENDUM
+MEDIA_ARCHITECT_ACCEPTANCE: ACCEPTED — 2026-10-06
+MEDIA_FREEZE_STATE: FROZEN — CUI-1 AUTHORITATIVE MEDIA DELTA ONLY
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES — BOUNDED CUI-1 CORRECTION ONLY
+CUI1_OWNER_VISUAL_QA: PASS / ACCEPTED
+CUI1_INDEPENDENT_REVIEW: CONTRACT / MEDIA AUTHORITY CONFLICT IDENTIFIED — CORRECTION AND RE-REVIEW REQUIRED
+CUI1_STATE: NOT CLOSED
+CUI1_IMPLEMENTATION_CORRECTION: REQUIRED
+PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO
+COMMERCIAL_AUTHORITY_DELTA: ZERO
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+CURRENT_PASS: ARCHITECTURE / GOVERNANCE ONLY — NO PRODUCTION OR TEST IMPLEMENTATION
+```
+
+Authority: Owner-provided Architect media-authority reconciliation instruction. The Owner confirms PASS / ACCEPTED visual intent for Business Detail with authoritative cover, logo/avatar and gallery, plus honest no-media fallback. Independent review, as recorded by that instruction, identified conflict with the frozen CUI-1 contract's older “No media loading in CUI-1” restriction and corresponding media/placeholder clauses.
+
+The [Authoritative Media Addendum V1](contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md) is now the controlling narrow authority for that point. It supersedes only the blanket no-loading/media-deferral boundary to allow cover, logo/avatar and gallery thumbnails from existing authoritative typed Directory media fields, after HTTPS validation. No invented production URLs, fake/generated company media, QA fixture leakage or placeholder pretending to be real branding. Absent/invalid/unavailable media retains a neutral hero/type-icon avatar and omitted unavailable gallery. Media never implies verification, ownership, Sponsored, paid entitlement or Commercial Verification V1, and never changes organic search ranking.
+
+The original frozen contract and all previous roadmap bytes remain historical records, including their acceptance-time status and prerequisites. All non-media requirements remain active. This record does not amend responsive geometry, categories/services copy or other independent-review points; implementation correction and independent re-review remain required. Owner Visual QA PASS does not close CUI-1 or establish overall contract compliance. No cleanup completion, independent-review PASS or implementation acceptance is asserted here.
+
+The exact eight production paths and six CUI-1 test paths in the preceding authorization/original §13 remain unchanged; no ninth production file is authorized. No backend, SQL/migration, provider/repository/domain, route, DI, global theme, dependency/SDK, commercial static-guard, search/ranking or unrelated UI work is authorized. Tests may prove supplied typed/HTTPS media and honest fallback under the addendum without interpreting the superseded blanket media prohibition as active. The correction regressions remain read-only. Mechanically necessary static/documentary compatibility requires separate exact authorization; no guard is changed in this pass.
+
+M3 remains CLOSED; M4/M5 remain NOT AUTHORIZED; R10.5-D remains CURRENT for audit only / IMPLEMENTATION NO. Later UI locks and unresolved commercial carry-forward remain unchanged. The future Engineering Directory Media System is not broadly activated: uploads, Storage/schema/delivery architecture and new authority providers remain outside this existing-field presentation exception.
+
+This reconciliation is architecture/governance only. It records the supplied narrow correction authority, preserves the accepted visual implementation, and prepares the addendum for Architect review. No production/test implementation, reset/revert/clean, SQL/Supabase operation, staging, commit or push is performed or authorized by this pass. User retains Git ownership.
