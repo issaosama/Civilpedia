@@ -3855,3 +3855,71 @@ The exact eight production paths and six CUI-1 test paths in the preceding autho
 M3 remains CLOSED; M4/M5 remain NOT AUTHORIZED; R10.5-D remains CURRENT for audit only / IMPLEMENTATION NO. Later UI locks and unresolved commercial carry-forward remain unchanged. The future Engineering Directory Media System is not broadly activated: uploads, Storage/schema/delivery architecture and new authority providers remain outside this existing-field presentation exception.
 
 This reconciliation is architecture/governance only. It records the supplied narrow correction authority, preserves the accepted visual implementation, and prepares the addendum for Architect review. No production/test implementation, reset/revert/clean, SQL/Supabase operation, staging, commit or push is performed or authorized by this pass. User retains Git ownership.
+
+# COMMERCIAL CUI-1 FINAL CLOSURE — 2026-10-07
+
+## Current Commercial Track Control — CUI-1 closed
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_LAST_CLOSED_SLICE: CUI-1 — Commercial Business Experience Foundation
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+COMMERCIAL_CONTROL: CUI-1 CLOSED — NO NEXT COMMERCIAL IMPLEMENTATION SLICE AUTHORIZED
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CONTRACT_STATE: ACCEPTED / FROZEN — HISTORICAL CONTRACT PRESERVED
+CONTRACT_COMMIT: 889ff1da4389ba891247cfb5497554ca98fa58b3
+CUI1_MEDIA_ADDENDUM: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md
+CUI1_MEDIA_ADDENDUM_COMMIT: f94e96c2c510a6cef25f9f491163c5ce4f9320bb
+MEDIA_ADDENDUM_STATUS: COMMITTED / CONTROLLING — ACCEPTED FROZEN NARROW MEDIA AUTHORITY
+CUI1_IMPLEMENTATION_COMMIT: 47fba3f64581c9a24eefaee18265a437d8c55505
+CUI1_IMPLEMENTATION_STATUS: COMMITTED / PUSHED — OWNER CONFIRMED
+CUI1_STATE: CLOSED
+CUI1_OWNER_VISUAL_QA: PASS / ACCEPTED
+CUI1_INDEPENDENT_REVIEW: PASS
+INDEPENDENT_FINAL_RE_REVIEW: PASS — READY FOR ARCHITECT ACCEPTANCE
+CUI1_ARCHITECT_ACCEPTANCE: ACCEPTED
+CUI1_IMPLEMENTATION_CORRECTION: COMPLETE — H1/H2/M1/M2 RESOLVED
+PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO
+COMMERCIAL_AUTHORITY_DELTA: ZERO
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+CURRENT_PASS: GOVERNANCE / CLOSURE DOCUMENTATION ONLY
+```
+
+Authority: Owner-provided final CUI-1 closure instruction, recording **Owner Visual QA PASS / ACCEPTED**, **independent final re-review PASS — READY FOR ARCHITECT ACCEPTANCE**, and **Architect Final Acceptance ACCEPTED**. The implementation is committed/pushed at the exact implementation commit above, as confirmed by the Owner; local HEAD and origin/main both match it. This additive record is the current Commercial Track control and supersedes only the active CUI-1 implementation/correction/re-review status in earlier entries. All historical roadmap bytes, the original frozen contract and the committed authoritative media addendum remain intact. This is a documentary record of supplied acceptance, not agent self-acceptance or new runtime verification.
+
+The [CUI-1 Closure Record](reports/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_CLOSURE.md) records the exact accepted scope: **eight production files, six implementation-test files and three commercial static guards**. The final implementation commit contains exactly those 17 paths. No backend, SQL/migration, provider, repository, domain, routes, DI, global theme, dependency/SDK, publication-authority or entitlement-authority delta occurred. The media addendum remains controlling only for validated HTTPS cover, logo/avatar and gallery from existing authoritative typed Directory media, with honest absent/invalid/unavailable fallback; no broader media system or new data authority is activated.
+
+### Final accepted gates and findings
+
+| Accepted final gate | PASS | FAIL | SKIP |
+| --- | ---: | ---: | ---: |
+| CUI focused, CUI1_CAIRO_FONT_DIR unset | 357 | 0 | 0 |
+| Modified Directory | 163 | 0 | 0 |
+| Full frozen twelve-file baseline | 344 | 0 | 0 |
+| Sponsored read-only regressions | 23 | 0 | 0 |
+| Saved read-only regressions | 25 | 0 | 0 |
+| Commercial static | 91 | 0 | 0 |
+
+Commercial static breakdown: **HARDEN-1 18 PASS / M1a 24 PASS / M1b 21 PASS / M3 28 PASS**. These overlapping gates are accepted implementation/re-review evidence, not new runs in this documentation-only pass or a summed unique suite count.
+
+Prior findings **H1 / H2 / M1 / M2: RESOLVED**. Final independent counts: **CRITICAL 0 / HIGH 0 / MEDIUM 0 / LOW 0**. Remaining INFO only: known Flutter 3.32.8 / Dart 3.8.1 SDK analyzer crash, `Bad state: No definition of type Enum` / `LibraryCycleLinkException`, independently classified as SDK/tooling rather than a repository-source defect. No SDK modification occurred; bounded source verification and focused compile/test gates remained green. This INFO is not an unresolved CUI-1 blocker.
+
+### Authority separations and next-slice control
+
+- Directory Verification ≠ Commercial Verification V1.
+- Sponsored ≠ Verified; Paid ≠ Verified ≠ Sponsored.
+- Location ≠ Commercial Branch.
+- Saved ≠ Ownership.
+- Public entity ID ≠ Management authority; Claim ≠ Management authority.
+- Commercial information shell ≠ Catalog authority.
+- Media ≠ Verification ≠ Ownership ≠ Sponsored ≠ Paid.
+
+**CUI-1 CLOSED — NO NEXT COMMERCIAL IMPLEMENTATION SLICE AUTHORIZED.** M3 remains CLOSED; M4 and M5 remain NOT AUTHORIZED. No next commercial slice is created, promoted or authorized. Existing unresolved commercial carry-forward, including classification/linking, integer-IQD conversion, the known 00020 issue, projection-authority reconciliation, OQ-84, future authority providers, persistent publication projection and M5 cutover, remains unchanged. A future commercial implementation requires separate governing authorization and frozen scope.
+
+The ordinary V1-R10 track is unchanged: R10.5-D remains CURRENT for pre-implementation audit only, `IMPLEMENTATION_AUTHORIZED: NO`, implementation NOT STARTED. R10.5-E, R10.5-F, R10.6 and R10.7 remain LOCKED. CUI-1 closure grants no ordinary UI-track advancement.
+
+This closure pass changes only governance/closure documentation. Production, tests, commercial static guards, frozen contracts, the committed media addendum and protected dirty baseline are preserved. No backend operation, dependency/SDK change, staging, commit or push is performed or authorized. The Owner retains Git ownership; this documentary closure record is prepared for Architect review.
