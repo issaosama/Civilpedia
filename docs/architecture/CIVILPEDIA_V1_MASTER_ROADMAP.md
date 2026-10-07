@@ -3958,3 +3958,81 @@ Implementation authorization remains blocked on **both**:
 This dependency is **NOT RESOLVED** by contract acceptance. No static guard is edited and no test is run in this freeze pass; historical CUI-1 evidence is not a fresh preimplementation gate. Subsequent explicit implementation authorization is required after those gates. This record itself authorizes no compatibility implementation, SQL/migration, lib/test/supabase change, provisioning or deployment. Frozen technical clauses and exclusions remain unchanged; production readiness remains a later separate gate.
 
 This pass changes only the contract's acceptance/status metadata and acceptance record, plus this governance-only roadmap append. Protected baseline, production, tests, SQL and all other files remain untouched. Staging, commit and push remain User-controlled and are neither performed nor authorized here.
+
+# COMMERCIAL CUI-2A0 IMPLEMENTATION AUTHORIZATION — 2026-10-07
+
+## Current Commercial Track Control — bounded CUI-2A0 implementation authorized
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN
+CUI2A0_CONTRACT_FREEZE_COMMIT: c60dbdda61bd656e281902b452ad937e14aa8c78
+STATIC_COMPATIBILITY_GATE: GREEN / ACCEPTED
+STATIC_COMPATIBILITY_COMMIT: 1031bfd00135e8891dc25164d222daa892f4e3c1
+CUI2A0_IMPLEMENTATION_AUTHORIZED: YES
+COMMERCIAL_CURRENT_SLICE: CUI-2A0 — Admin Business Draft Authority Foundation
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES — CUI-2A0 ONLY
+CUI2A0_IMPLEMENTATION_STATE: NOT STARTED
+AUTHORIZED_MIGRATION: 00026_commercial_admin_business_draft_foundation.sql
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+CUI2A1_STATE: NOT AUTHORIZED
+PUBLICATION_AUTHORITY_DELTA: ZERO
+ENTITLEMENT_AUTHORITY_DELTA: ZERO
+PAYMENT_AUTHORITY_DELTA: ZERO
+UI_AUTHORITY_DELTA: ZERO
+CURRENT_PASS: GOVERNANCE ONLY — IMPLEMENTATION AUTHORIZATION RECORD
+```
+
+Authority: Owner-provided **CIVILPEDIA — COMMERCIAL CUI-2A0 IMPLEMENTATION AUTHORIZATION GOVERNANCE RECORD**, supplying the Architect's separate decision to authorize implementation strictly within the [accepted frozen CUI-2A0 contract](contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md). This records that supplied decision; it is not agent self-acceptance, implementation completion, deployment acceptance or production/live readiness.
+
+### Chronology and controlling authorization
+
+1. The contract was accepted/frozen at `c60dbdda61bd656e281902b452ad937e14aa8c78`. Contract acceptance alone did not authorize implementation.
+2. The required preimplementation static compatibility prerequisite was completed and accepted at `1031bfd00135e8891dc25164d222daa892f4e3c1`.
+3. The Architect now separately authorizes only the frozen CUI-2A0 Admin Business Draft Authority Foundation.
+
+This later roadmap record supersedes the freeze-time **IMPLEMENTATION_AUTHORIZED: NO** only for the bounded CUI-2A0 implementation decision and supplies the current commercial slice/control above. The contract's historical header `IMPLEMENTATION_AUTHORIZED: NO` and the preceding freeze record remain unchanged as acceptance-time history. No frozen technical requirement is expanded, reinterpreted or waived. A later implementation pass must start from this Owner-committed authorization record, recheck its exact committed governance baseline and satisfy the frozen preflight/STOP requirements before any implementation edit.
+
+### Accepted static GREEN prerequisite
+
+The Owner-supplied accepted evidence records **Big Pickle focused verification: PASS** and **Kimi independent adversarial review: PASS**. The authoritative static-gate fact is that **all four focused commercial guard files pass with zero failures** at the STATIC_COMPATIBILITY_COMMIT above:
+
+| Focused guard | Accepted state |
+| --- | --- |
+| M1a — commercial_m1a_private_catalog_migration_test.dart | GREEN / unchanged |
+| HARDEN-1 — commercial_harden1_public_plans_exposure_migration_test.dart | GREEN |
+| M1b — commercial_m1b_catalog_reference_data_migration_test.dart | GREEN |
+| M3 — commercial_m3_entitlement_evaluator_shadow_migration_test.dart | GREEN |
+
+Runner-count semantics are not an authority condition. This record persists the supplied accepted preimplementation evidence; no review or test is rerun in this governance pass, and no post-authorization or post-implementation GREEN result is asserted here.
+
+### Exact future implementation boundary
+
+Implementation must conform exactly to the frozen contract, including its private receipt namespace/table and helpers, four granular staff permissions, six public A0 RPCs, narrow replacement/hardening of the canonical CLAIM guard with preserved trigger binding and non-A0 CLAIM/NEW behavior, exact ACL/RLS/security-definer rules, and mandatory backend/static/security/concurrency evidence. CUI-2A0 remains **DRAFT-ONLY staff authority**: canonical Business identity, ownerless non-public Drafts, the frozen four authoring types and complete-location eligibility rules. Public discoverability/publication authority remains unchanged.
+
+The exact future seven-file implementation/test boundary is frozen §19:
+
+```text
+supabase/migrations/00026_commercial_admin_business_draft_foundation.sql
+supabase/tests/commercial_cui2a0_admin_business_draft_foundation_test.sql
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_m1a_private_catalog_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+```
+
+Existing-guard edits are permitted only when narrowly and mechanically necessary under the frozen compatibility boundary: recognize this exact separately Owner-committed authorization record, the exact authorized 00026 filename and the bounded A0 delta; preserve historical pins, migrations 00001–00025 and all retained security/catalog/authority checks and negative protections. No fifth existing guard, extra runner/implementation file, arbitrary future append or migration is authorized. Any scope expansion requires a new Architect decision and exact contract-boundary addendum.
+
+### Preserved exclusions and execution status
+
+Still NOT AUTHORIZED: M4; M5; publication entitlement; subscription-enforcement expansion; payment or Sponsored implementation; public Claim CTA; Business Center ownership/invitation workflow; CUI-2A1 Admin Draft Console UI; R10.5-D implementation; Branch system; media management system; production Flutter UI; ownership redesign; a second Business identity table or owner_id shortcut; arbitrary future migrations, including 00027+; or entitlement/publication authority beyond the already closed M3 shadow state. CUI-1 and M3 remain CLOSED; all existing unresolved policy/carry-forward and later UI locks remain unchanged.
+
+**This is implementation authorization, not implementation completion.** Migration inventory at this governance pass remains exactly 00001–00025. **00026 remains absent until a later implementation pass.** No SQL, migration, Supabase, Flutter, test, configuration or data implementation occurs here; CUI-2A0 implementation is NOT STARTED. Production readiness remains the contract's separate later gate.
+
+This pass appends only this roadmap governance record and preserves every prior roadmap byte, the frozen contract and the protected dirty baseline. Staging, commit and push remain User-controlled; none is performed or authorized by this governance pass.
