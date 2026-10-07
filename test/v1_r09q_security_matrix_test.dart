@@ -340,13 +340,17 @@ void main() {
         ),
       );
       expect(
-        mutations,
+        _readNormalized('supabase/migrations/00026_commercial_admin_business_draft_foundation.sql'),
         contains(
-          'REVOKE EXECUTE ON FUNCTION public.append_audit_log(\n'
-          '  uuid, text, text, uuid, jsonb, jsonb, text\n'
-          ') FROM PUBLIC;',
+          'REVOKE EXECUTE ON FUNCTION\n'
+          'public.append_audit_log(uuid,text,text,uuid,jsonb,jsonb,text)\n'
+          'FROM PUBLIC, anon, authenticated, service_role;',
         ),
       );
+      final runtime = _readNormalized('supabase/tests/commercial_cui2a0_admin_business_draft_foundation_test.sql');
+      for (final marker in ['ACL-01', 'ACL-02', 'ACL-03', 'ACL-04', 'ACL-05', '42501', 'has_function_privilege', 'aclexplode']) {
+        expect(runtime, contains(marker));
+      }
     });
 
     test('client and CI sources contain no real privileged key material', () {

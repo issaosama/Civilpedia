@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'commercial_cui2a0_admin_business_draft_foundation_migration_test.dart' as cui2a0;
 
 // Hand-authored accepted M3 interface and boundary expectations.
 // PostgreSQL, API and runner atomicity are separate mandatory gates.
@@ -331,6 +332,7 @@ const _currentDocumentBlobs = <String, String>{
   _cui1MediaAddendumPath: '6bd5e0e41b52e5a8b4a4df481a09b7bc196e56ea',
   _cui1ClosureReportPath: '309536865a922631a12db5db0111004c4822e695',
   _cui2a0ContractPath: 'ed23e9136a39f71d95f91da7dd22e087a59dfca8',
+  'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_APPEND_AUDIT_LOG_ACL_SECURITY_ADDENDUM_V1.md': '38016765af82de2e5a25e3b2169536bcf5fab44b',
 };
 // These immutable Git objects are documentary authority, never live snapshots.
 final _historicalMediaRoadmap =
@@ -343,7 +345,18 @@ final _cui1ClosureAppend =
     _cui1ClosedRoadmap.substring(_historicalMediaRoadmap.length);
 final _cui2a0FreezeAppend =
     _cui2a0FrozenRoadmap.substring(_cui1ClosedRoadmap.length);
-final _currentRoadmapAdditions = _cui1ClosureAppend + _cui2a0FreezeAppend;
+// Exact Owner-committed authorization; historical freeze controls stay intact.
+const _cui2a0AuthorizationCommit = 'a813b8c99309757bd7d03ac96dde0e7c12cfed79';
+final _cui2a0AuthorizedRoadmap =
+    _git(['cat-file', 'blob', 'a36067d0634ae36437006175f825e68d70f92d0a']);
+final _cui2a0AuthorizationAppend =
+    _cui2a0AuthorizedRoadmap.substring(_cui2a0FrozenRoadmap.length);
+const _cui2a0SecurityCommit = 'd9bc74d42e0d3ebc56455b928f2dbc57d8ca6fb8';
+const _cui2a0SecurityPath = 'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_APPEND_AUDIT_LOG_ACL_SECURITY_ADDENDUM_V1.md';
+final _cui2a0SecurityRoadmap = _git(['cat-file', 'blob', 'a5586dfdea1770f58d2333bcabad26ea00d8e747']);
+final _cui2a0SecurityAppend = _cui2a0SecurityRoadmap.substring(_cui2a0AuthorizedRoadmap.length);
+final _currentRoadmapAdditions =
+    _cui1ClosureAppend + _cui2a0FreezeAppend + _cui2a0AuthorizationAppend + _cui2a0SecurityAppend;
 final _currentCommittedDocuments = _currentDocumentBlobs.map(
   (path, blob) => MapEntry(path, _git(['cat-file', 'blob', blob])),
 );
@@ -365,7 +378,7 @@ bool _allowsCurrentComposition(
 ) =>
     _allowsCui1Composition(
       changedPaths.where(
-        (path) => path != _cui1ClosureReportPath && path != _cui2a0ContractPath,
+        (path) => path != _cui1ClosureReportPath && path != _cui2a0ContractPath && path != _cui2a0SecurityPath && !cui2a0.cui2a0ImplementationPaths.contains(path),
       ),
       _historicalMediaRoadmap,
       _historicalMediaRoadmap,
@@ -379,11 +392,23 @@ bool _allowsCurrentComposition(
     ) &&
     _cui2a0FreezeAppend.contains('CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN') &&
     _cui2a0FreezeAppend.contains('CUI2A0_IMPLEMENTATION_AUTHORIZED: NO') &&
+    _cui2a0AuthorizedRoadmap.startsWith(_cui2a0FrozenRoadmap) &&
+    _git(['rev-parse', '$_cui2a0AuthorizationCommit:$_cui1RoadmapPath']).trim() ==
+        'a36067d0634ae36437006175f825e68d70f92d0a' &&
+    _cui2a0AuthorizationAppend.contains('CUI2A0_IMPLEMENTATION_AUTHORIZED: YES') &&
+    _cui2a0AuthorizationAppend.contains('COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES — CUI-2A0 ONLY') &&
+    _cui2a0AuthorizationAppend.contains('M4_STATE: NOT AUTHORIZED') &&
+    _cui2a0AuthorizationAppend.contains('M5_STATE: NOT AUTHORIZED') &&
+    _cui2a0AuthorizationAppend.contains('CUI2A1_STATE: NOT AUTHORIZED') &&
+    _cui2a0SecurityRoadmap.startsWith(_cui2a0AuthorizedRoadmap) &&
+    _git(['rev-parse', '$_cui2a0SecurityCommit:$_cui1RoadmapPath']).trim() == 'a5586dfdea1770f58d2333bcabad26ea00d8e747' &&
+    _git(['rev-parse', '$_cui2a0SecurityCommit:$_cui2a0SecurityPath']).trim() == '38016765af82de2e5a25e3b2169536bcf5fab44b' &&
+    _cui2a0SecurityAppend.contains('MAXIMUM_IMPLEMENTATION_SECURITY_TEST_FILES: 8') &&
     documents.length == _currentCommittedDocuments.length &&
     _currentCommittedDocuments.entries.every(
       (entry) => documents[entry.key] == entry.value,
     ) &&
-    postClosureImplementationChanges.isEmpty;
+    postClosureImplementationChanges.isEmpty && cui2a0.hasAuthorizedCui2a0Boundary();
 
 bool _matchesCui1MediaAuthority(String actual, String committed) => actual == committed;
 
@@ -543,7 +568,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         implementationChanges ?? postClosureChanges,
       );
       expect(acceptsCurrent(), isTrue, reason: 'Exact frozen current composition: $paths');
-      for (final path in [_cui1ClosureReportPath, _cui2a0ContractPath]) {
+      for (final path in [_cui1ClosureReportPath, _cui2a0ContractPath, ...cui2a0.cui2a0ImplementationPaths]) {
         expect(acceptsCurrent(changedPaths: [path]), isTrue, reason: path);
       }
 
@@ -552,7 +577,6 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         _cui2a0ContractPath.replaceFirst('_V1.md', '_V2.md'),
         _cui2a0ContractPath.replaceFirst('_V1.md', '_RENAMED_V1.md'),
         '$_cui2a0ContractPath.bak',
-        'supabase/migrations/00026_commercial_admin_business_draft_foundation.sql',
         'supabase/migrations/00026_renamed.sql',
         'supabase/migrations/00027_unauthorized.sql',
         'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V2.md',
@@ -563,8 +587,9 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         expect(acceptsCurrent(changedPaths: [...paths, path]), isFalse, reason: path);
       }
       final migrations = Directory('supabase/migrations').listSync().whereType<File>().toList();
-      expect(migrations, hasLength(25));
+      expect(migrations, hasLength(26));
       for (final migration in migrations) {
+        if (migration.uri.pathSegments.last == cui2a0.cui2a0MigrationName) continue;
         final path = 'supabase/migrations/${migration.uri.pathSegments.last}';
         expect(acceptsCurrent(changedPaths: [...paths, path]), isFalse, reason: 'Historical migration mutation: $path');
       }
@@ -804,8 +829,9 @@ void main() {
             .map((f) => f.uri.pathSegments.last)
             .toList()
           ..sort();
-    expect(names, hasLength(25));
-    expect(names.last, '00025_commercial_entitlement_evaluator_shadow.sql');
+    expect(names, hasLength(26));
+    expect(names[24], '00025_commercial_entitlement_evaluator_shadow.sql');
+    expect(names.last, cui2a0.cui2a0MigrationName);
     for (var i = 0; i < 24; i++) {
       expect(
         names[i].startsWith('${(i + 1).toString().padLeft(5, '0')}_'),
