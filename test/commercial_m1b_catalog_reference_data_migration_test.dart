@@ -557,6 +557,83 @@ bool _allowsCui1Composition(
         .where((path) => !_cui1NonProductionPaths.contains(path) && !_cui1DocumentPaths.contains(path))
         .every(_cui1ProductionPaths.contains);
 
+// Current preimplementation composition; historical CUI-1 oracles stay fixed.
+const _cui1ImplementationCommit = '47fba3f64581c9a24eefaee18265a437d8c55505';
+const _cui1ClosureCommit = 'f4e1331cdca6ec87cb37d32d1d2473479ffb2852';
+const _cui2a0FreezeCommit = 'c60dbdda61bd656e281902b452ad937e14aa8c78';
+const _cui1ClosureReportPath =
+    'docs/architecture/reports/'
+    'CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_CLOSURE.md';
+const _cui2a0ContractPath =
+    'docs/architecture/contracts/'
+    'CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md';
+const _cui1ImplementationTestPaths = <String>{
+  'test/commercial_cui1_business_experience_foundation_widget_test.dart',
+  'test/w5_2_directory_landing_test.dart',
+  'test/w5_3_directory_search_screen_test.dart',
+  'test/w5_4_directory_provider_card_test.dart',
+  'test/w5_4_directory_provider_detail_screen_test.dart',
+  'test/w5_5_verification_display_test.dart',
+};
+const _currentDocumentBlobs = <String, String>{
+  _cui1ContractPath: '7a2ab8a4f9665726e86f59c0947ebf3fb6543fd7',
+  _cui1MediaAddendumPath: '6bd5e0e41b52e5a8b4a4df481a09b7bc196e56ea',
+  _cui1ClosureReportPath: '309536865a922631a12db5db0111004c4822e695',
+  _cui2a0ContractPath: 'ed23e9136a39f71d95f91da7dd22e087a59dfca8',
+};
+// These immutable Git objects are documentary authority, never live snapshots.
+final _historicalMediaRoadmap =
+    _git(['show', '$_cui1MediaCommit:$_cui1RoadmapPath']);
+final _cui1ClosedRoadmap =
+    _git(['cat-file', 'blob', 'f9e793b3d001d75fee5da822cb43a8be12264942']);
+final _cui2a0FrozenRoadmap =
+    _git(['cat-file', 'blob', 'd2ea2d137df6a002cd114494ddf60500653df900']);
+final _cui1ClosureAppend =
+    _cui1ClosedRoadmap.substring(_historicalMediaRoadmap.length);
+final _cui2a0FreezeAppend =
+    _cui2a0FrozenRoadmap.substring(_cui1ClosedRoadmap.length);
+final _currentRoadmapAdditions = _cui1ClosureAppend + _cui2a0FreezeAppend;
+final _currentCommittedDocuments = _currentDocumentBlobs.map(
+  (path, blob) => MapEntry(path, _git(['cat-file', 'blob', blob])),
+);
+const _currentClosedControls = <String>[
+  'COMMERCIAL_CURRENT_SLICE: NONE',
+  'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO',
+  'CUI1_STATE: CLOSED',
+  'M3_STATE: CLOSED',
+  'M4_STATE: NOT AUTHORIZED',
+  'M5_STATE: NOT AUTHORIZED',
+  'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO',
+];
+
+bool _allowsCurrentComposition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) =>
+    _allowsCui1Composition(
+      changedPaths.where(
+        (path) => path != _cui1ClosureReportPath && path != _cui2a0ContractPath,
+      ),
+      _historicalMediaRoadmap,
+      _historicalMediaRoadmap,
+    ) &&
+    _cui1ClosedRoadmap.startsWith(_historicalMediaRoadmap) &&
+    _cui2a0FrozenRoadmap.startsWith(_cui1ClosedRoadmap) &&
+    roadmap == _historicalMediaRoadmap + _currentRoadmapAdditions &&
+    _currentClosedControls.every(
+      (control) => _cui1ClosureAppend.contains(control) &&
+          _cui2a0FreezeAppend.contains(control),
+    ) &&
+    _cui2a0FreezeAppend.contains('CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN') &&
+    _cui2a0FreezeAppend.contains('CUI2A0_IMPLEMENTATION_AUTHORIZED: NO') &&
+    documents.length == _currentCommittedDocuments.length &&
+    _currentCommittedDocuments.entries.every(
+      (entry) => documents[entry.key] == entry.value,
+    ) &&
+    postClosureImplementationChanges.isEmpty;
+
 bool _matchesCui1MediaAuthority(String actual, String committed) => actual == committed;
 
 List<String> _cui1ChangedPaths(String output) =>
@@ -657,15 +734,150 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
           _git(['ls-files', '--others', '--exclude-standard']),
         ),
       ];
+      // Bind the exact documentary objects to their authorized commits.
+      for (final pin in <(String, String, String)>[
+        (_cui1ContractCommit, _cui1ContractPath, _currentDocumentBlobs[_cui1ContractPath]!),
+        (_cui1MediaCommit, _cui1MediaAddendumPath, _currentDocumentBlobs[_cui1MediaAddendumPath]!),
+        (_cui1ClosureCommit, _cui1ClosureReportPath, _currentDocumentBlobs[_cui1ClosureReportPath]!),
+        (_cui2a0FreezeCommit, _cui2a0ContractPath, _currentDocumentBlobs[_cui2a0ContractPath]!),
+        (_cui1ClosureCommit, _cui1RoadmapPath, 'f9e793b3d001d75fee5da822cb43a8be12264942'),
+        (_cui2a0FreezeCommit, _cui1RoadmapPath, 'd2ea2d137df6a002cd114494ddf60500653df900'),
+      ]) {
+        expect(_git(['rev-parse', '${pin.$1}:${pin.$2}']).trim(), pin.$3);
+      }
+      for (final boundary in <(String, List<String>)>[
+        (_cui1ClosureCommit, [_cui1RoadmapPath, _cui1ClosureReportPath]),
+        (_cui2a0FreezeCommit, [_cui1RoadmapPath, _cui2a0ContractPath]),
+      ]) {
+        expect(
+          _cui1ChangedPaths(_git(['diff', '--name-only', '${boundary.$1}^', boundary.$1]))..sort(),
+          boundary.$2..sort(),
+        );
+      }
+      for (final ancestor in <(String, String)>[
+        (_cui1MediaCommit, _cui1ImplementationCommit),
+        (_cui1ImplementationCommit, _cui1ClosureCommit),
+        (_cui1ClosureCommit, _cui2a0FreezeCommit),
+      ]) {
+        expect(_git(['merge-base', ancestor.$1, ancestor.$2]).trim(), ancestor.$1);
+      }
       expect(
-        _allowsCui1Composition(
-          paths,
-          _read(_cui1RoadmapPath),
-          committedRoadmap,
-        ),
-        isTrue,
-        reason: 'Exact CUI-1 production/test paths only: $paths',
+        _cui1ChangedPaths(_git(['diff', '--name-only', '$_cui1ImplementationCommit^', _cui1ImplementationCommit]))..sort(),
+        [
+          ..._cui1ProductionPaths,
+          ..._cui1ImplementationTestPaths,
+          'test/commercial_harden1_public_plans_exposure_migration_test.dart',
+          'test/commercial_m1b_catalog_reference_data_migration_test.dart',
+          'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart',
+        ]..sort(),
       );
+      final currentRoadmap = _read(_cui1RoadmapPath);
+      final currentDocuments = <String, String>{
+        for (final path in _currentDocumentBlobs.keys) path: _read(path),
+      };
+      // Accepted production/test paths are immutable after CUI-1 closure.
+      final postClosureChanges = _cui1ChangedPaths(_git([
+        'diff', '--name-only', '--no-renames', _cui1ImplementationCommit,
+        '--', 'lib', ..._cui1ImplementationTestPaths,
+      ]));
+      bool acceptsCurrent({
+        Iterable<String>? changedPaths,
+        String? roadmap,
+        Map<String, String>? documents,
+        Iterable<String>? implementationChanges,
+      }) => _allowsCurrentComposition(
+        changedPaths ?? paths,
+        roadmap ?? currentRoadmap,
+        documents ?? currentDocuments,
+        implementationChanges ?? postClosureChanges,
+      );
+      expect(acceptsCurrent(), isTrue, reason: 'Exact frozen current composition: $paths');
+      for (final path in [_cui1ClosureReportPath, _cui2a0ContractPath]) {
+        expect(acceptsCurrent(changedPaths: [path]), isTrue, reason: path);
+      }
+
+      // All probes use the live predicate and mutate inputs only in memory.
+      for (final path in <String>[
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_V2.md'),
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_RENAMED_V1.md'),
+        '$_cui2a0ContractPath.bak',
+        'supabase/migrations/00026_commercial_admin_business_draft_foundation.sql',
+        'supabase/migrations/00026_renamed.sql',
+        'supabase/migrations/00027_unauthorized.sql',
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V2.md',
+        'docs/architecture/contracts/ARBITRARY_MEDIA_ADDENDUM.md',
+        'docs/architecture/ARBITRARY_GOVERNANCE.md',
+        'lib/features/directory/presentation/ninth.dart',
+      ]) {
+        expect(acceptsCurrent(changedPaths: [...paths, path]), isFalse, reason: path);
+      }
+      final migrations = Directory('supabase/migrations').listSync().whereType<File>().toList();
+      expect(migrations, hasLength(25));
+      for (final migration in migrations) {
+        final path = 'supabase/migrations/${migration.uri.pathSegments.last}';
+        expect(acceptsCurrent(changedPaths: [...paths, path]), isFalse, reason: 'Historical migration mutation: $path');
+      }
+      for (final path in [..._cui1ProductionPaths, ..._cui1ImplementationTestPaths]) {
+        expect(acceptsCurrent(implementationChanges: [path]), isFalse, reason: 'Closed implementation mutation: $path');
+      }
+      for (final mutation in <String, String>{
+        'CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN': 'CUI2A0_CONTRACT_STATE: DRAFT',
+        'CUI2A0_IMPLEMENTATION_AUTHORIZED: NO': 'CUI2A0_IMPLEMENTATION_AUTHORIZED: YES',
+        'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO': 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES',
+        'COMMERCIAL_CURRENT_SLICE: NONE': 'COMMERCIAL_CURRENT_SLICE: CUI-2A0',
+        'CUI1_STATE: CLOSED': 'CUI1_STATE: OPEN',
+        'M3_STATE: CLOSED': 'M3_STATE: OPEN',
+        'M4_STATE: NOT AUTHORIZED': 'M4_STATE: AUTHORIZED',
+        'M5_STATE: NOT AUTHORIZED': 'M5_STATE: AUTHORIZED',
+        'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO': 'R10.5-D_STATE: IMPLEMENTATION YES',
+      }.entries) {
+        expect(_cui2a0FreezeAppend, contains(mutation.key));
+        expect(acceptsCurrent(roadmap:
+          committedRoadmap + _cui1ClosureAppend +
+          _cui2a0FreezeAppend.replaceFirst(mutation.key, mutation.value),
+        ), isFalse, reason: mutation.key);
+      }
+      expect(_cui1ClosureAppend, contains('CUI1_STATE: CLOSED'));
+      expect(acceptsCurrent(roadmap: committedRoadmap +
+        _cui1ClosureAppend.replaceFirst('CUI1_STATE: CLOSED', 'CUI1_STATE: OPEN') +
+        _cui2a0FreezeAppend,
+      ), isFalse, reason: 'Reopened closure');
+      expect(currentRoadmap, contains('ROADMAP_VERSION: 1'));
+      for (final altered in [
+        committedRoadmap,
+        _cui1ClosedRoadmap,
+        committedRoadmap + _cui2a0FreezeAppend,
+        currentRoadmap.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2'),
+        currentRoadmap + '\n# Arbitrary future governance\n',
+      ]) {
+        expect(acceptsCurrent(roadmap: altered), isFalse, reason: 'Missing/altered historical or current governance');
+      }
+      for (final entry in currentDocuments.entries) {
+        expect(acceptsCurrent(documents: {
+          ...currentDocuments, entry.key: '${entry.value}\n# Altered bytes\n',
+        }), isFalse, reason: 'Frozen document mutation: ${entry.key}');
+      }
+      for (final probe in <(String, String, String)>[
+        (_cui2a0ContractPath, 'IMPLEMENTATION_AUTHORIZED: NO', 'IMPLEMENTATION_AUTHORIZED: YES'),
+        (_cui1ClosureReportPath, 'CUI1_STATE: CLOSED', 'CUI1_STATE: OPEN'),
+        (_cui1MediaAddendumPath, 'PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO', 'PUBLIC_BACKEND_AUTHORITY_DELTA: NONZERO'),
+      ]) {
+        expect(currentDocuments[probe.$1], contains(probe.$2));
+        expect(acceptsCurrent(documents: {
+          ...currentDocuments,
+          probe.$1: currentDocuments[probe.$1]!.replaceFirst(probe.$2, probe.$3),
+        }), isFalse, reason: 'Frozen authority mutation: ${probe.$1}');
+      }
+      for (final alternate in [
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_V2.md'),
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_RENAMED_V1.md'),
+        '$_cui2a0ContractPath.bak',
+      ]) {
+        final substitutedDocuments = {...currentDocuments}
+          ..remove(_cui2a0ContractPath);
+        substitutedDocuments[alternate] = currentDocuments[_cui2a0ContractPath]!;
+        expect(acceptsCurrent(documents: substitutedDocuments), isFalse, reason: alternate);
+      }
     },
   );
   test('CUI-1 composition accepts empty and each of the frozen eight paths', () {
@@ -933,6 +1145,83 @@ bool _allowsCui1Composition(
         .where((path) => !_cui1NonProductionPaths.contains(path) && !_cui1DocumentPaths.contains(path))
         .every(_cui1ProductionPaths.contains);
 
+// Current preimplementation composition; historical CUI-1 oracles stay fixed.
+const _cui1ImplementationCommit = '47fba3f64581c9a24eefaee18265a437d8c55505';
+const _cui1ClosureCommit = 'f4e1331cdca6ec87cb37d32d1d2473479ffb2852';
+const _cui2a0FreezeCommit = 'c60dbdda61bd656e281902b452ad937e14aa8c78';
+const _cui1ClosureReportPath =
+    'docs/architecture/reports/'
+    'CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_CLOSURE.md';
+const _cui2a0ContractPath =
+    'docs/architecture/contracts/'
+    'CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md';
+const _cui1ImplementationTestPaths = <String>{
+  'test/commercial_cui1_business_experience_foundation_widget_test.dart',
+  'test/w5_2_directory_landing_test.dart',
+  'test/w5_3_directory_search_screen_test.dart',
+  'test/w5_4_directory_provider_card_test.dart',
+  'test/w5_4_directory_provider_detail_screen_test.dart',
+  'test/w5_5_verification_display_test.dart',
+};
+const _currentDocumentBlobs = <String, String>{
+  _cui1ContractPath: '7a2ab8a4f9665726e86f59c0947ebf3fb6543fd7',
+  _cui1MediaAddendumPath: '6bd5e0e41b52e5a8b4a4df481a09b7bc196e56ea',
+  _cui1ClosureReportPath: '309536865a922631a12db5db0111004c4822e695',
+  _cui2a0ContractPath: 'ed23e9136a39f71d95f91da7dd22e087a59dfca8',
+};
+// These immutable Git objects are documentary authority, never live snapshots.
+final _historicalMediaRoadmap =
+    _git(['show', '$_cui1MediaCommit:$_cui1RoadmapPath']);
+final _cui1ClosedRoadmap =
+    _git(['cat-file', 'blob', 'f9e793b3d001d75fee5da822cb43a8be12264942']);
+final _cui2a0FrozenRoadmap =
+    _git(['cat-file', 'blob', 'd2ea2d137df6a002cd114494ddf60500653df900']);
+final _cui1ClosureAppend =
+    _cui1ClosedRoadmap.substring(_historicalMediaRoadmap.length);
+final _cui2a0FreezeAppend =
+    _cui2a0FrozenRoadmap.substring(_cui1ClosedRoadmap.length);
+final _currentRoadmapAdditions = _cui1ClosureAppend + _cui2a0FreezeAppend;
+final _currentCommittedDocuments = _currentDocumentBlobs.map(
+  (path, blob) => MapEntry(path, _git(['cat-file', 'blob', blob])),
+);
+const _currentClosedControls = <String>[
+  'COMMERCIAL_CURRENT_SLICE: NONE',
+  'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO',
+  'CUI1_STATE: CLOSED',
+  'M3_STATE: CLOSED',
+  'M4_STATE: NOT AUTHORIZED',
+  'M5_STATE: NOT AUTHORIZED',
+  'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO',
+];
+
+bool _allowsCurrentComposition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) =>
+    _allowsCui1Composition(
+      changedPaths.where(
+        (path) => path != _cui1ClosureReportPath && path != _cui2a0ContractPath,
+      ),
+      _historicalMediaRoadmap,
+      _historicalMediaRoadmap,
+    ) &&
+    _cui1ClosedRoadmap.startsWith(_historicalMediaRoadmap) &&
+    _cui2a0FrozenRoadmap.startsWith(_cui1ClosedRoadmap) &&
+    roadmap == _historicalMediaRoadmap + _currentRoadmapAdditions &&
+    _currentClosedControls.every(
+      (control) => _cui1ClosureAppend.contains(control) &&
+          _cui2a0FreezeAppend.contains(control),
+    ) &&
+    _cui2a0FreezeAppend.contains('CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN') &&
+    _cui2a0FreezeAppend.contains('CUI2A0_IMPLEMENTATION_AUTHORIZED: NO') &&
+    documents.length == _currentCommittedDocuments.length &&
+    _currentCommittedDocuments.entries.every(
+      (entry) => documents[entry.key] == entry.value,
+    ) &&
+    postClosureImplementationChanges.isEmpty;
+
 bool _matchesCui1MediaAuthority(String actual, String committed) => actual == committed;
 
 List<String> _cui1ChangedPaths(String output) =>
@@ -1033,15 +1322,150 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
           _git(['ls-files', '--others', '--exclude-standard']),
         ),
       ];
+      // Bind the exact documentary objects to their authorized commits.
+      for (final pin in <(String, String, String)>[
+        (_cui1ContractCommit, _cui1ContractPath, _currentDocumentBlobs[_cui1ContractPath]!),
+        (_cui1MediaCommit, _cui1MediaAddendumPath, _currentDocumentBlobs[_cui1MediaAddendumPath]!),
+        (_cui1ClosureCommit, _cui1ClosureReportPath, _currentDocumentBlobs[_cui1ClosureReportPath]!),
+        (_cui2a0FreezeCommit, _cui2a0ContractPath, _currentDocumentBlobs[_cui2a0ContractPath]!),
+        (_cui1ClosureCommit, _cui1RoadmapPath, 'f9e793b3d001d75fee5da822cb43a8be12264942'),
+        (_cui2a0FreezeCommit, _cui1RoadmapPath, 'd2ea2d137df6a002cd114494ddf60500653df900'),
+      ]) {
+        expect(_git(['rev-parse', '${pin.$1}:${pin.$2}']).trim(), pin.$3);
+      }
+      for (final boundary in <(String, List<String>)>[
+        (_cui1ClosureCommit, [_cui1RoadmapPath, _cui1ClosureReportPath]),
+        (_cui2a0FreezeCommit, [_cui1RoadmapPath, _cui2a0ContractPath]),
+      ]) {
+        expect(
+          _cui1ChangedPaths(_git(['diff', '--name-only', '${boundary.$1}^', boundary.$1]))..sort(),
+          boundary.$2..sort(),
+        );
+      }
+      for (final ancestor in <(String, String)>[
+        (_cui1MediaCommit, _cui1ImplementationCommit),
+        (_cui1ImplementationCommit, _cui1ClosureCommit),
+        (_cui1ClosureCommit, _cui2a0FreezeCommit),
+      ]) {
+        expect(_git(['merge-base', ancestor.$1, ancestor.$2]).trim(), ancestor.$1);
+      }
       expect(
-        _allowsCui1Composition(
-          paths,
-          _read(_cui1RoadmapPath),
-          committedRoadmap,
-        ),
-        isTrue,
-        reason: 'Exact CUI-1 production/test paths only: $paths',
+        _cui1ChangedPaths(_git(['diff', '--name-only', '$_cui1ImplementationCommit^', _cui1ImplementationCommit]))..sort(),
+        [
+          ..._cui1ProductionPaths,
+          ..._cui1ImplementationTestPaths,
+          'test/commercial_harden1_public_plans_exposure_migration_test.dart',
+          'test/commercial_m1b_catalog_reference_data_migration_test.dart',
+          'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart',
+        ]..sort(),
       );
+      final currentRoadmap = _read(_cui1RoadmapPath);
+      final currentDocuments = <String, String>{
+        for (final path in _currentDocumentBlobs.keys) path: _read(path),
+      };
+      // Accepted production/test paths are immutable after CUI-1 closure.
+      final postClosureChanges = _cui1ChangedPaths(_git([
+        'diff', '--name-only', '--no-renames', _cui1ImplementationCommit,
+        '--', 'lib', ..._cui1ImplementationTestPaths,
+      ]));
+      bool acceptsCurrent({
+        Iterable<String>? changedPaths,
+        String? roadmap,
+        Map<String, String>? documents,
+        Iterable<String>? implementationChanges,
+      }) => _allowsCurrentComposition(
+        changedPaths ?? paths,
+        roadmap ?? currentRoadmap,
+        documents ?? currentDocuments,
+        implementationChanges ?? postClosureChanges,
+      );
+      expect(acceptsCurrent(), isTrue, reason: 'Exact frozen current composition: $paths');
+      for (final path in [_cui1ClosureReportPath, _cui2a0ContractPath]) {
+        expect(acceptsCurrent(changedPaths: [path]), isTrue, reason: path);
+      }
+
+      // All probes use the live predicate and mutate inputs only in memory.
+      for (final path in <String>[
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_V2.md'),
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_RENAMED_V1.md'),
+        '$_cui2a0ContractPath.bak',
+        'supabase/migrations/00026_commercial_admin_business_draft_foundation.sql',
+        'supabase/migrations/00026_renamed.sql',
+        'supabase/migrations/00027_unauthorized.sql',
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V2.md',
+        'docs/architecture/contracts/ARBITRARY_MEDIA_ADDENDUM.md',
+        'docs/architecture/ARBITRARY_GOVERNANCE.md',
+        'lib/features/directory/presentation/ninth.dart',
+      ]) {
+        expect(acceptsCurrent(changedPaths: [...paths, path]), isFalse, reason: path);
+      }
+      final migrations = Directory('supabase/migrations').listSync().whereType<File>().toList();
+      expect(migrations, hasLength(25));
+      for (final migration in migrations) {
+        final path = 'supabase/migrations/${migration.uri.pathSegments.last}';
+        expect(acceptsCurrent(changedPaths: [...paths, path]), isFalse, reason: 'Historical migration mutation: $path');
+      }
+      for (final path in [..._cui1ProductionPaths, ..._cui1ImplementationTestPaths]) {
+        expect(acceptsCurrent(implementationChanges: [path]), isFalse, reason: 'Closed implementation mutation: $path');
+      }
+      for (final mutation in <String, String>{
+        'CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN': 'CUI2A0_CONTRACT_STATE: DRAFT',
+        'CUI2A0_IMPLEMENTATION_AUTHORIZED: NO': 'CUI2A0_IMPLEMENTATION_AUTHORIZED: YES',
+        'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO': 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES',
+        'COMMERCIAL_CURRENT_SLICE: NONE': 'COMMERCIAL_CURRENT_SLICE: CUI-2A0',
+        'CUI1_STATE: CLOSED': 'CUI1_STATE: OPEN',
+        'M3_STATE: CLOSED': 'M3_STATE: OPEN',
+        'M4_STATE: NOT AUTHORIZED': 'M4_STATE: AUTHORIZED',
+        'M5_STATE: NOT AUTHORIZED': 'M5_STATE: AUTHORIZED',
+        'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO': 'R10.5-D_STATE: IMPLEMENTATION YES',
+      }.entries) {
+        expect(_cui2a0FreezeAppend, contains(mutation.key));
+        expect(acceptsCurrent(roadmap:
+          committedRoadmap + _cui1ClosureAppend +
+          _cui2a0FreezeAppend.replaceFirst(mutation.key, mutation.value),
+        ), isFalse, reason: mutation.key);
+      }
+      expect(_cui1ClosureAppend, contains('CUI1_STATE: CLOSED'));
+      expect(acceptsCurrent(roadmap: committedRoadmap +
+        _cui1ClosureAppend.replaceFirst('CUI1_STATE: CLOSED', 'CUI1_STATE: OPEN') +
+        _cui2a0FreezeAppend,
+      ), isFalse, reason: 'Reopened closure');
+      expect(currentRoadmap, contains('ROADMAP_VERSION: 1'));
+      for (final altered in [
+        committedRoadmap,
+        _cui1ClosedRoadmap,
+        committedRoadmap + _cui2a0FreezeAppend,
+        currentRoadmap.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2'),
+        currentRoadmap + '\n# Arbitrary future governance\n',
+      ]) {
+        expect(acceptsCurrent(roadmap: altered), isFalse, reason: 'Missing/altered historical or current governance');
+      }
+      for (final entry in currentDocuments.entries) {
+        expect(acceptsCurrent(documents: {
+          ...currentDocuments, entry.key: '${entry.value}\n# Altered bytes\n',
+        }), isFalse, reason: 'Frozen document mutation: ${entry.key}');
+      }
+      for (final probe in <(String, String, String)>[
+        (_cui2a0ContractPath, 'IMPLEMENTATION_AUTHORIZED: NO', 'IMPLEMENTATION_AUTHORIZED: YES'),
+        (_cui1ClosureReportPath, 'CUI1_STATE: CLOSED', 'CUI1_STATE: OPEN'),
+        (_cui1MediaAddendumPath, 'PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO', 'PUBLIC_BACKEND_AUTHORITY_DELTA: NONZERO'),
+      ]) {
+        expect(currentDocuments[probe.$1], contains(probe.$2));
+        expect(acceptsCurrent(documents: {
+          ...currentDocuments,
+          probe.$1: currentDocuments[probe.$1]!.replaceFirst(probe.$2, probe.$3),
+        }), isFalse, reason: 'Frozen authority mutation: ${probe.$1}');
+      }
+      for (final alternate in [
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_V2.md'),
+        _cui2a0ContractPath.replaceFirst('_V1.md', '_RENAMED_V1.md'),
+        '$_cui2a0ContractPath.bak',
+      ]) {
+        final substitutedDocuments = {...currentDocuments}
+          ..remove(_cui2a0ContractPath);
+        substitutedDocuments[alternate] = currentDocuments[_cui2a0ContractPath]!;
+        expect(acceptsCurrent(documents: substitutedDocuments), isFalse, reason: alternate);
+      }
     },
   );
   test('CUI-1 composition accepts empty and each of the frozen eight paths', () {
@@ -1596,10 +2020,10 @@ void main() {
           "_git(['diff', '--name-only', _baseline, _cui1GovernanceCommit, '--', 'lib']).trim(),",
         ).replaceFirst(
           '? _authorizedCommercialTrackControl\n',
-          '? _authorizedCommercialTrackControl + _cui1MediaReconciliation\n',
+          '? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _currentRoadmapAdditions\n',
         ).replaceFirst(
           'expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl);',
-          'expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation);',
+          'expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _currentRoadmapAdditions);',
         ),
       );
       final approvedDocs = <String, String>{
@@ -1633,7 +2057,8 @@ void main() {
                   ) +
                   _m3FormalClosure +
                   _cui1Authorization +
-                  _cui1MediaReconciliation
+                  _cui1MediaReconciliation +
+                  _currentRoadmapAdditions
             : checkpoint;
         expect(_read(entry.key), expected, reason: entry.key);
       }
