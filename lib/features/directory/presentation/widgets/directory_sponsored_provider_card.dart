@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/services/language_provider.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/theme/spacing.dart';
+import '../../../../localization/ar.dart';
+import '../../../../localization/en.dart';
 import '../../../monetization/domain/entities/sponsored_placement.dart';
 import '../../domain/canonical_directory_entity.dart';
 import '../directory_provider_card.dart';
@@ -51,7 +54,7 @@ class DirectorySponsoredProviderCard extends StatelessWidget {
 
 /// Compact, clearly-disclosed sponsorship marker shown above the sponsored
 /// provider card. Deliberately distinct from the verification badge (no icon
-/// reuse, warning-tinted surface) so it cannot be mistaken for verification.
+/// reuse, separate advertising boundary) so it cannot be mistaken for verification.
 class _DisclosureChip extends StatelessWidget {
   const _DisclosureChip({required this.label});
 
@@ -60,33 +63,54 @@ class _DisclosureChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = AppColors.primaryDark;
+    final colors = theme.colorScheme;
+    final isArabic = context.watch<LanguageProvider>().isArabic;
+    final paidLabel = isArabic
+        ? Ar.cui1PaidAdvertisement
+        : En.cui1PaidAdvertisement;
 
     return Semantics(
-      label: label,
+      label: '$label, $paidLabel',
       container: true,
+      excludeSemantics: true,
       child: Container(
         padding: const EdgeInsetsDirectional.symmetric(
-          horizontal: AppSpacing.sm,
-          vertical: AppSpacing.xs,
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: AppColors.primarySoft,
+          color: colors.secondaryContainer,
           borderRadius: BorderRadius.circular(DesignTokens.radiusXs),
+          border: Border.all(color: colors.outlineVariant),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.ads_click_outlined, size: 13, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: color,
-                letterSpacing: 0.3,
+            Icon(
+              Icons.ads_click_outlined,
+              size: 18,
+              color: colors.onSecondaryContainer,
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.onSecondaryContainer,
+                    ),
+                  ),
+                  Text(
+                    paidLabel,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSecondaryContainer,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -8,7 +8,6 @@ import '../../../core/di/app_dependencies.dart';
 import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/services/connectivity_provider.dart';
 import '../../../core/services/language_provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/civil_app_bar.dart';
@@ -25,31 +24,12 @@ import '../domain/cloud_directory_repository.dart';
 import 'canonical_entity_type_presentation.dart';
 import 'directory_provider_card.dart';
 
-/// V1-R05 — Directory-local search + location/category filter surface.
-///
-/// Uses canonical cloud-backed data from [CloudDirectoryRepository].
-/// Loads the bounded canonical dataset via cache-first + cloud-refresh, then
-/// applies search/filter purely in memory via [CanonicalDirectoryQueryEngine].
-///
-/// State exposure:
-/// * loading: cloud refresh in progress, no cached data yet;
-/// * fresh: successfully refreshed canonical data;
-/// * stale: rendered from cache, cloud refresh failed/unavailable;
-/// * empty: authoritative empty cloud directory;
-/// * error: neither cache nor cloud produced data.
+/// Organic canonical Directory discovery. Localized labels and responsive
+/// layout do not change query identities, debounce, ordering or refresh policy.
 class DirectorySearchScreen extends StatefulWidget {
-  /// Pre-selected canonical entity type to start with. Null = browse mode.
   final String? initialEntityType;
-
-  /// Repository to load canonical entities from. Production default is
-  /// [AppDependencies.directoryRepo].
   final CloudDirectoryRepository? repository;
-
-  /// Canonical transport observer. Production passes [ConnectivityProvider];
-  /// tests may leave null to keep reconnect observation out of scope.
   final ConnectivityProvider? connectivityProvider;
-
-  /// Bottom scroll clearance for the result list.
   final double bottomContentPadding;
 
   const DirectorySearchScreen({
@@ -68,10 +48,8 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
   static const Duration _debounceDuration = Duration(milliseconds: 280);
 
   final TextEditingController _searchController = TextEditingController();
-
   Timer? _debounce;
   DirectoryRefreshController? _controller;
-
   String _text = '';
   String? _entityType;
   String? _regionCode;
@@ -147,8 +125,6 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
     );
   }
 
-  /// Collect all distinct region codes from the loaded entities for the
-  /// region filter dropdown.
   List<String> get _availableRegionCodes {
     final codes = <String>{};
     for (final entity in _controllerState.entities) {
@@ -159,7 +135,6 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
     return codes.toList()..sort();
   }
 
-  /// Collect all distinct category ids from the loaded entities.
   List<CanonicalDirectoryCategory> get _availableCategories {
     final cats = <String, CanonicalDirectoryCategory>{};
     for (final entity in _controllerState.entities) {
@@ -167,209 +142,344 @@ class _DirectorySearchScreenState extends State<DirectorySearchScreen> {
         cats[cat.id] = cat;
       }
     }
+    // Keep the accepted generic-name sort; bilingual display adds no ranking.
     return cats.values.toList()..sort((a, b) => a.name.compareTo(b.name));
+  }
+
+  String _categoryLabel(CanonicalDirectoryCategory category, bool isArabic) {
+    final candidates = isArabic
+        ? [category.nameAr, category.nameEn, category.name, category.code]
+        : [category.nameEn, category.nameAr, category.name, category.code];
+    for (final value in candidates) {
+      if (value != null && value.trim().isNotEmpty) return value.trim();
+    }
+    return isArabic ? Ar.directoryNotSpecified : En.directoryNotSpecified;
+  }
+
+  String _regionLabel(String code, bool isArabic) {
+    // First useful label in existing entity/location order, retaining the
+    // original code as the dropdown value and query identity.
+    for (final entity in _controllerState.entities) {
+      for (final location in entity.locations) {
+        if (location.regionCode != code) continue;
+        final names = isArabic
+            ? [
+                location.regionNameAr,
+                location.regionNameEn,
+                location.regionName,
+              ]
+            : [
+                location.regionNameEn,
+                location.regionNameAr,
+                location.regionName,
+              ];
+        for (final name in names) {
+          if (name != null && name.trim().isNotEmpty) return name.trim();
+        }
+      }
+    }
+    return code;
   }
 
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
-    final title = isArabic ? Ar.directorySearchTitle : En.directorySearchTitle;
-
     final controller = _controller;
 
     return Scaffold(
-      appBar: CivilAppBar(title: Text(title)),
-      body: ListenableBuilder(
-        listenable: controller ?? const _EmptyListenable(),
-        builder: (context, _) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(
-                  AppSpacing.lg,
-                  AppSpacing.md,
-                  AppSpacing.lg,
-                  AppSpacing.xs,
-                ),
-                child: SearchBarWidget(
-                  controller: _searchController,
-                  onChanged: _onTextChanged,
-                  hintText: isArabic ? Ar.directorySearchHint : En.directorySearchHint,
-                  lightSurface: true,
-                ),
-              ),
-              _buildFilters(context, isArabic),
-              Expanded(child: _buildBody(context, isArabic)),
-            ],
+      appBar: CivilAppBar(
+        title: Text(
+          isArabic ? Ar.directorySearchTitle : En.directorySearchTitle,
+        ),
+      ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final gutter = width < 600
+              ? AppSpacing.lg
+              : width < 840
+              ? AppSpacing.xxl
+              : 2 * AppSpacing.lg;
+          return ListenableBuilder(
+            listenable: controller ?? const _EmptyListenable(),
+            builder: (context, _) =>
+                _buildContent(context, isArabic, width, gutter),
           );
         },
       ),
     );
   }
 
-  Widget _buildFilters(BuildContext context, bool isArabic) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.lg,
-        AppSpacing.xs,
-        AppSpacing.lg,
-        AppSpacing.sm,
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: _FilterDropdown<String>(
-                  label: isArabic ? Ar.directoryFilterCategory : En.directoryFilterCategory,
-                  value: _entityType,
-                  allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
-                  options: CanonicalEntityTypePresentation.orderedTypes,
-                  optionLabel: (type) =>
-                      CanonicalEntityTypePresentation.labelFor(type, isArabic: isArabic),
-                  onChanged: _onEntityTypeChanged,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: _FilterDropdown<String>(
-                  label: isArabic ? Ar.directoryFilterLocation : En.directoryFilterLocation,
-                  value: _regionCode,
-                  allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
-                  options: _availableRegionCodes,
-                  optionLabel: (code) => code,
-                  onChanged: _onRegionChanged,
-                ),
-              ),
-            ],
-          ),
-          if (_availableCategories.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            _FilterDropdown<String>(
-              label: isArabic ? Ar.directoryFilterCategory : En.directoryFilterCategory,
-              value: _categoryId,
-              allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
-              options: _availableCategories.map((c) => c.id).toList(),
-              optionLabel: (id) => _availableCategories
-                  .firstWhere((c) => c.id == id, orElse: () => _availableCategories.first)
-                  .name,
-              onChanged: _onCategoryChanged,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context, bool isArabic) {
-    final controller = _controller;
-    if (controller == null || (controller.isLoading && !controller.hasSnapshot)) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final results = _results;
-    final cause = controller.cause;
-    final loadState = controller.loadState;
-    final entities = controller.entities;
-
-    // Stale with cached data: show typed notice and the cached list.
-    // A valid cached-empty snapshot renders the directory empty state.
-    if (loadState == DirectoryLoadState.stale) {
-      return Column(
-        children: [
-          if (cause != null)
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                AppSpacing.lg,
-                AppSpacing.xs,
-                AppSpacing.lg,
-                0,
-              ),
-              child: RemoteDataNotice(
-                cause: cause,
-                mode: RemoteDataNoticeMode.compact,
-                onRetry: controller.refresh,
-              ),
-            ),
-          Expanded(
-            child: controller.entities.isEmpty
-                ? EmptyStateWidget(
-                    icon: Icons.business_center_outlined,
-                    message: isArabic
-                        ? Ar.directoryEmptyDirectory
-                        : En.directoryEmptyDirectory,
-                  )
-                : _buildResultsList(context, results),
-          ),
-        ],
-      );
-    }
-
-    if (loadState == DirectoryLoadState.error) {
-      return RemoteDataNotice(
-        cause: cause ?? RemoteDataCause.unexpected,
-        mode: RemoteDataNoticeMode.noData,
-        onRetry: controller.refresh,
-      );
-    }
-
-    if (loadState == DirectoryLoadState.empty || (entities.isEmpty && results.isEmpty)) {
-      return EmptyStateWidget(
-        icon: Icons.business_center_outlined,
-        message: isArabic ? Ar.directoryEmptyDirectory : En.directoryEmptyDirectory,
-      );
-    }
-
-    if (results.isEmpty) {
-      return EmptyStateWidget(
-        icon: Icons.search_off,
-        message: isArabic ? Ar.directoryNoResults : En.directoryNoResults,
-      );
-    }
-
-    return _buildResultsList(context, results);
-  }
-
-  Widget _buildResultsList(
+  Widget _buildContent(
     BuildContext context,
-    List<CanonicalDirectoryEntity> results,
+    bool isArabic,
+    double width,
+    double gutter,
   ) {
+    final controller = _controller;
     final isShellHosted = ShellContentInsets.maybeOf(context) != null;
     final effectiveBottomPadding = isShellHosted
         ? shellSafeBottomPadding(context)
         : widget.bottomContentPadding + MediaQuery.paddingOf(context).bottom;
+    final results = controller == null
+        ? const <CanonicalDirectoryEntity>[]
+        : _results;
+    final loading =
+        controller == null || (controller.isLoading && !controller.hasSnapshot);
+    final stale = controller?.loadState == DirectoryLoadState.stale;
+    final error = !loading && controller.loadState == DirectoryLoadState.error;
+    // Only a successful empty read or an explicitly stale empty snapshot is
+    // empty content. An error with zero entities remains a real failure.
+    final empty =
+        !loading &&
+        (controller.loadState == DirectoryLoadState.empty ||
+            (stale && controller.entities.isEmpty));
+    final noMatch = !loading && !error && !empty && results.isEmpty;
 
     return RefreshIndicator(
       onRefresh: _refresh,
-      child: ListView.separated(
+      child: CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: EdgeInsetsDirectional.only(
-          start: AppSpacing.lg,
-          end: AppSpacing.lg,
-          top: AppSpacing.lg,
-          bottom: effectiveBottomPadding,
-        ),
-        itemCount: results.length,
-        separatorBuilder: (_, __) => AppSpacing.gapMd,
-        itemBuilder: (context, index) {
-          final entity = results[index];
-          return DirectoryProviderCard(
-            entity: entity,
-            onTap: () => _openDetail(context, entity),
-          );
-        },
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsetsDirectional.fromSTEB(
+              gutter,
+              AppSpacing.lg,
+              gutter,
+              AppSpacing.xxl,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      SearchBarWidget(
+                        controller: _searchController,
+                        onChanged: _onTextChanged,
+                        hintText: isArabic
+                            ? Ar.directorySearchHint
+                            : En.directorySearchHint,
+                        lightSurface: true,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      _buildFilters(context, isArabic, width),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          if (stale && !loading)
+            SliverPadding(
+              padding: EdgeInsetsDirectional.fromSTEB(
+                gutter,
+                0,
+                gutter,
+                AppSpacing.lg,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _readable(
+                  _buildStaleNotice(context, isArabic, controller),
+                ),
+              ),
+            ),
+          if (loading || error || empty || noMatch)
+            SliverPadding(
+              padding: EdgeInsetsDirectional.only(
+                start: gutter,
+                end: gutter,
+                bottom: effectiveBottomPadding,
+              ),
+              sliver: SliverFillRemaining(
+                hasScrollBody: false,
+                child: _readable(
+                  loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : error
+                      ? _buildError(context, isArabic, controller)
+                      : EmptyStateWidget(
+                          key: ValueKey(
+                            empty
+                                ? 'cui1-directory-empty'
+                                : 'cui1-directory-no-match',
+                          ),
+                          icon: empty
+                              ? Icons.business_center_outlined
+                              : Icons.search_off,
+                          message: empty
+                              ? (isArabic
+                                    ? Ar.cui1EmptyDirectory
+                                    : En.cui1EmptyDirectory)
+                              : (isArabic
+                                    ? Ar.cui1NoResults
+                                    : En.cui1NoResults),
+                        ),
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: EdgeInsetsDirectional.only(
+                start: gutter,
+                end: gutter,
+                bottom: effectiveBottomPadding,
+              ),
+              sliver: SliverList(
+                key: const ValueKey('cui1-search-results'),
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  if (index.isOdd) return const SizedBox(height: AppSpacing.md);
+                  final entity = results[index ~/ 2];
+                  return _readable(
+                    DirectoryProviderCard(
+                      entity: entity,
+                      onTap: () => _openDetail(context, entity),
+                    ),
+                  );
+                }, childCount: results.length * 2 - 1),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  /// Opens provider detail through the canonical `/directory/entity/:id`
-  /// route. The canonical `directory_entities.id` is the route identity; the
-  /// whole entity is passed only as a non-authoritative first-frame hint.
-  void _openDetail(BuildContext context, CanonicalDirectoryEntity entity) {
-    context.push(
-      AppRoutes.directoryEntityDetailFor(entity.id),
-      extra: entity,
+  Widget _readable(Widget child) => Center(
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 760),
+      child: child,
+    ),
+  );
+
+  Widget _buildFilters(BuildContext context, bool isArabic, double width) {
+    final categories = _availableCategories;
+    final filters = <Widget>[
+      _FilterDropdown<String>(
+        label: isArabic ? Ar.cui1EntityType : En.cui1EntityType,
+        value: _entityType,
+        allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
+        options: CanonicalEntityTypePresentation.orderedTypes,
+        optionLabel: (type) =>
+            CanonicalEntityTypePresentation.labelFor(type, isArabic: isArabic),
+        onChanged: _onEntityTypeChanged,
+      ),
+      _FilterDropdown<String>(
+        label: isArabic
+            ? Ar.directoryFilterLocation
+            : En.directoryFilterLocation,
+        value: _regionCode,
+        allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
+        options: _availableRegionCodes,
+        optionLabel: (code) => _regionLabel(code, isArabic),
+        onChanged: _onRegionChanged,
+      ),
+      if (categories.isNotEmpty)
+        _FilterDropdown<String>(
+          label: isArabic
+              ? Ar.directoryFilterCategory
+              : En.directoryFilterCategory,
+          value: _categoryId,
+          allLabel: isArabic ? Ar.directoryFilterAll : En.directoryFilterAll,
+          options: categories.map((category) => category.id).toList(),
+          optionLabel: (id) => _categoryLabel(
+            categories.firstWhere(
+              (category) => category.id == id,
+              orElse: () => categories.first,
+            ),
+            isArabic,
+          ),
+          onChanged: _onCategoryChanged,
+        ),
+    ];
+    final columns = width < 600
+        ? 1
+        : width < 840
+        ? 2
+        : 3;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final fieldWidth =
+            (constraints.maxWidth - AppSpacing.md * (columns - 1)) / columns;
+        return Wrap(
+          spacing: AppSpacing.md,
+          runSpacing: AppSpacing.md,
+          children: [
+            for (final filter in filters)
+              SizedBox(width: fieldWidth, child: filter),
+          ],
+        );
+      },
     );
+  }
+
+  Widget _buildStaleNotice(
+    BuildContext context,
+    bool isArabic,
+    DirectoryRefreshController controller,
+  ) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (controller.cause != null) ...[
+          RemoteDataNotice(
+            cause: controller.cause!,
+            mode: RemoteDataNoticeMode.compact,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: _retryButton(isArabic, controller),
+          ),
+        ] else if (controller.isLoading)
+          Text(
+            isArabic ? Ar.cui1Updating : En.cui1Updating,
+            key: const ValueKey('cui1-directory-updating'),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          isArabic ? Ar.cui1Snapshot : En.cui1Snapshot,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildError(
+    BuildContext context,
+    bool isArabic,
+    DirectoryRefreshController controller,
+  ) => Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      RemoteDataNotice(
+        cause: controller.cause ?? RemoteDataCause.unexpected,
+        mode: RemoteDataNoticeMode.noData,
+      ),
+      const SizedBox(height: AppSpacing.lg),
+      _retryButton(isArabic, controller),
+    ],
+  );
+
+  Widget _retryButton(bool isArabic, DirectoryRefreshController controller) =>
+      OutlinedButton.icon(
+        onPressed: controller.isLoading ? null : controller.refresh,
+        style: OutlinedButton.styleFrom(minimumSize: const Size(48, 48)),
+        icon: const Icon(Icons.refresh_rounded),
+        label: Text(isArabic ? Ar.retry : En.retry),
+      );
+
+  /// The canonical ID is authority; the extra remains only a first-frame hint.
+  void _openDetail(BuildContext context, CanonicalDirectoryEntity entity) {
+    context.push(AppRoutes.directoryEntityDetailFor(entity.id), extra: entity);
   }
 }
 
@@ -402,35 +512,90 @@ class _FilterDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<T?>(
-      value: value,
-      isExpanded: true,
-      decoration: InputDecoration(
-        labelText: label,
-        isDense: true,
-        filled: true,
-        fillColor: AppColors.surfaceWhite.withValues(alpha: 0.95),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
-          borderSide: BorderSide.none,
-        ),
-        contentPadding: const EdgeInsetsDirectional.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-      ),
-      items: [
-        DropdownMenuItem<T?>(value: null, child: Text(allLabel)),
-        for (final option in options)
-          DropdownMenuItem<T?>(
-            value: option,
+    final theme = Theme.of(context);
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ExcludeSemantics(
+          child: Padding(
+            padding: const EdgeInsetsDirectional.only(
+              start: AppSpacing.md,
+              bottom: AppSpacing.xs,
+            ),
             child: Text(
-              optionLabel(option),
-              overflow: TextOverflow.ellipsis,
+              label,
+              key: ValueKey('cui1-filter-label-$label'),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
             ),
           ),
+        ),
+        Semantics(
+          label: label,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 48),
+            child: DropdownButtonFormField<T?>(
+              value: value,
+              isExpanded: true,
+              isDense: false,
+              itemHeight: null,
+              // Unselected long popup labels must not enlarge the closed field.
+              // The current selection still grows naturally when its text wraps.
+              selectedItemBuilder: (context) => [
+                for (var index = 0; index <= options.length; index++)
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    heightFactor: 1,
+                    child: Text(
+                      value == null ? allLabel : optionLabel(value as T),
+                    ),
+                  ),
+              ],
+              dropdownColor: colors.surfaceContainer,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: colors.surface,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                  borderSide: BorderSide(color: colors.outlineVariant),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(DesignTokens.radiusSm),
+                  borderSide: BorderSide(color: colors.outlineVariant),
+                ),
+                contentPadding: const EdgeInsetsDirectional.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+              ),
+              items: [
+                DropdownMenuItem<T?>(
+                  value: null,
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.symmetric(
+                      vertical: AppSpacing.sm,
+                    ),
+                    child: Text(allLabel),
+                  ),
+                ),
+                for (final option in options)
+                  DropdownMenuItem<T?>(
+                    value: option,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.symmetric(
+                        vertical: AppSpacing.sm,
+                      ),
+                      child: Text(optionLabel(option)),
+                    ),
+                  ),
+              ],
+              onChanged: onChanged,
+            ),
+          ),
+        ),
       ],
-      onChanged: onChanged,
     );
   }
 }

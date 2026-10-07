@@ -82,15 +82,21 @@ class DirectoryVerificationBadge extends StatelessWidget {
       isArabic: isArabic,
     );
     final icon = DirectoryVerificationPresentation.iconFor(status);
-    final color = DirectoryVerificationPresentation.colorFor(status);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final accent = DirectoryVerificationPresentation.colorFor(status);
+    final color = theme.brightness == Brightness.dark
+        ? Color.lerp(accent, colors.onSurface, 0.3)!
+        : accent;
 
     return Semantics(
       label: label,
       container: true,
+      excludeSemantics: true,
       child: Container(
         padding: const EdgeInsetsDirectional.symmetric(
           horizontal: AppSpacing.sm,
-          vertical: 2,
+          vertical: AppSpacing.xs,
         ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.12),
@@ -100,16 +106,15 @@ class DirectoryVerificationBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 13, color: color),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: color,
+            Icon(icon, size: 16, color: color),
+            const SizedBox(width: AppSpacing.xs),
+            Flexible(
+              child: Text(
+                label,
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurface,
+                ),
               ),
             ),
           ],

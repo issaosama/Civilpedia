@@ -164,7 +164,7 @@ The ordinary V1-R10 track is unchanged: R10.5-D remains CURRENT / AUTHORIZED FOR
 This pass changes documentary governance and exact static compatibility only. No lib implementation, production localization, backend, SQL, migration or Supabase change. The frozen contracts and protected dirty baseline remain untouched. Staging, commit and push remain Owner-controlled and are not authorized by this record.
 ''';
 bool _matchesCui1Roadmap(String actual, String closedCheckpoint) =>
-    actual == closedCheckpoint + _cui1Authorization;
+    actual == closedCheckpoint + _cui1Authorization + _cui1MediaReconciliation;
 
 String _read(String p) => File(p).readAsStringSync().replaceAll('\r\n', '\n');
 String _git(List<String> args) {
@@ -206,10 +206,57 @@ List<String> _returns(String source, String name) {
 const _cui1GovernanceCommit = '5d511256a4364a3226383c2a631d70bef02ecba6';
 const _cui1ContractCommit = '889ff1da4389ba891247cfb5497554ca98fa58b3';
 const _cui1BaselineCommit = '47096d45b98853af97ab5f3333b1b62b045dad81';
+const _cui1MediaCommit = 'f94e96c2c510a6cef25f9f491163c5ce4f9320bb';
+const _cui1MediaAddendumPath =
+    'docs/architecture/contracts/'
+    'CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md';
+const _cui1MediaReconciliation =
+    '\n'
+    r"""# COMMERCIAL CUI-1 MEDIA AUTHORITY RECONCILIATION — 2026-10-06
+
+## Current CUI-1 media control — additive narrow exception
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_LAST_CLOSED_SLICE: M3 — Entitlement Evaluator + Shadow
+COMMERCIAL_CURRENT_SLICE: CUI-1 — Commercial Business Experience Foundation
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CONTRACT_STATE: ACCEPTED / FROZEN — HISTORICAL CONTRACT PRESERVED
+CUI1_MEDIA_ADDENDUM: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md
+MEDIA_ADDENDUM_STATUS: ACCEPTED — CANONICAL CUI-1 MEDIA AUTHORITY ADDENDUM
+MEDIA_ARCHITECT_ACCEPTANCE: ACCEPTED — 2026-10-06
+MEDIA_FREEZE_STATE: FROZEN — CUI-1 AUTHORITATIVE MEDIA DELTA ONLY
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES — BOUNDED CUI-1 CORRECTION ONLY
+CUI1_OWNER_VISUAL_QA: PASS / ACCEPTED
+CUI1_INDEPENDENT_REVIEW: CONTRACT / MEDIA AUTHORITY CONFLICT IDENTIFIED — CORRECTION AND RE-REVIEW REQUIRED
+CUI1_STATE: NOT CLOSED
+CUI1_IMPLEMENTATION_CORRECTION: REQUIRED
+PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO
+COMMERCIAL_AUTHORITY_DELTA: ZERO
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+CURRENT_PASS: ARCHITECTURE / GOVERNANCE ONLY — NO PRODUCTION OR TEST IMPLEMENTATION
+```
+
+Authority: Owner-provided Architect media-authority reconciliation instruction. The Owner confirms PASS / ACCEPTED visual intent for Business Detail with authoritative cover, logo/avatar and gallery, plus honest no-media fallback. Independent review, as recorded by that instruction, identified conflict with the frozen CUI-1 contract's older “No media loading in CUI-1” restriction and corresponding media/placeholder clauses.
+
+The [Authoritative Media Addendum V1](contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md) is now the controlling narrow authority for that point. It supersedes only the blanket no-loading/media-deferral boundary to allow cover, logo/avatar and gallery thumbnails from existing authoritative typed Directory media fields, after HTTPS validation. No invented production URLs, fake/generated company media, QA fixture leakage or placeholder pretending to be real branding. Absent/invalid/unavailable media retains a neutral hero/type-icon avatar and omitted unavailable gallery. Media never implies verification, ownership, Sponsored, paid entitlement or Commercial Verification V1, and never changes organic search ranking.
+
+The original frozen contract and all previous roadmap bytes remain historical records, including their acceptance-time status and prerequisites. All non-media requirements remain active. This record does not amend responsive geometry, categories/services copy or other independent-review points; implementation correction and independent re-review remain required. Owner Visual QA PASS does not close CUI-1 or establish overall contract compliance. No cleanup completion, independent-review PASS or implementation acceptance is asserted here.
+
+The exact eight production paths and six CUI-1 test paths in the preceding authorization/original §13 remain unchanged; no ninth production file is authorized. No backend, SQL/migration, provider/repository/domain, route, DI, global theme, dependency/SDK, commercial static-guard, search/ranking or unrelated UI work is authorized. Tests may prove supplied typed/HTTPS media and honest fallback under the addendum without interpreting the superseded blanket media prohibition as active. The correction regressions remain read-only. Mechanically necessary static/documentary compatibility requires separate exact authorization; no guard is changed in this pass.
+
+M3 remains CLOSED; M4/M5 remain NOT AUTHORIZED; R10.5-D remains CURRENT for audit only / IMPLEMENTATION NO. Later UI locks and unresolved commercial carry-forward remain unchanged. The future Engineering Directory Media System is not broadly activated: uploads, Storage/schema/delivery architecture and new authority providers remain outside this existing-field presentation exception.
+
+This reconciliation is architecture/governance only. It records the supplied narrow correction authority, preserves the accepted visual implementation, and prepares the addendum for Architect review. No production/test implementation, reset/revert/clean, SQL/Supabase operation, staging, commit or push is performed or authorized by this pass. User retains Git ownership.
+""";
 const _cui1RoadmapPath = 'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md';
 const _cui1ContractPath =
     'docs/architecture/contracts/'
     'CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md';
+const _cui1DocumentPaths = <String>{_cui1RoadmapPath, _cui1MediaAddendumPath};
 const _cui1ProductionPaths = <String>{
   'lib/features/directory/presentation/directory_landing_screen.dart',
   'lib/features/directory/presentation/directory_search_screen.dart',
@@ -246,15 +293,19 @@ bool _allowsCui1Composition(
   String governanceCommit = _cui1GovernanceCommit,
   String contractCommit = _cui1ContractCommit,
   String baselineCommit = _cui1BaselineCommit,
+  String mediaCommit = _cui1MediaCommit,
 }) =>
     governanceCommit == '5d511256a4364a3226383c2a631d70bef02ecba6' &&
     contractCommit == '889ff1da4389ba891247cfb5497554ca98fa58b3' &&
     baselineCommit == '47096d45b98853af97ab5f3333b1b62b045dad81' &&
-    committedRoadmap.endsWith(_cui1Authorization) &&
+    mediaCommit == 'f94e96c2c510a6cef25f9f491163c5ce4f9320bb' &&
+    committedRoadmap.endsWith(_cui1Authorization + _cui1MediaReconciliation) &&
     roadmap == committedRoadmap &&
     changedPaths
-        .where((path) => !_cui1NonProductionPaths.contains(path))
+        .where((path) => !_cui1NonProductionPaths.contains(path) && !_cui1DocumentPaths.contains(path))
         .every(_cui1ProductionPaths.contains);
+
+bool _matchesCui1MediaAuthority(String actual, String committed) => actual == committed;
 
 List<String> _cui1ChangedPaths(String output) =>
     output.trim().isEmpty ? <String>[] : output.trim().split('\n');
@@ -263,7 +314,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
   // A committed, fixed input; never a snapshot of the current working tree.
   final committedRoadmap = _git([
     'show',
-    '$_cui1GovernanceCommit:$_cui1RoadmapPath',
+    '$_cui1MediaCommit:$_cui1RoadmapPath',
   ]);
   test(
     'CUI-1 composed delta pins authorities and rejects unrelated live drift',
@@ -306,6 +357,46 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         _read(_cui1ContractPath),
         _git(['show', '$_cui1ContractCommit:$_cui1ContractPath']),
       );
+      // The new authority is a fixed committed input, never the live tree.
+      expect(
+        _git(['merge-base', _cui1GovernanceCommit, _cui1MediaCommit]).trim(),
+        _cui1GovernanceCommit,
+      );
+      expect(
+        committedRoadmap,
+        _git(['show', '$_cui1GovernanceCommit:$_cui1RoadmapPath']) +
+            _cui1MediaReconciliation,
+      );
+      expect(
+        _git(['diff', '--name-only', '$_cui1MediaCommit^', _cui1MediaCommit])
+            .trim().split('\n')..sort(),
+        [_cui1RoadmapPath, _cui1MediaAddendumPath]..sort(),
+      );
+      final committedMedia = _git(['show', '$_cui1MediaCommit:$_cui1MediaAddendumPath']);
+      expect(_matchesCui1MediaAuthority(_read(_cui1MediaAddendumPath), committedMedia), isTrue);
+      expect(_matchesCui1MediaAuthority(committedMedia + '\n# Arbitrary future authority', committedMedia), isFalse);
+      for (final mutation in <String, String>{
+        'PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO': 'PUBLIC_BACKEND_AUTHORITY_DELTA: NONZERO',
+        'COMMERCIAL_AUTHORITY_DELTA: ZERO': 'COMMERCIAL_AUTHORITY_DELTA: NONZERO',
+        'FROZEN — CUI-1 AUTHORITATIVE MEDIA DELTA ONLY': 'FROZEN — UNBOUNDED COMMERCIAL AUTHORITY',
+      }.entries) {
+        expect(committedMedia, contains(mutation.key));
+        expect(_matchesCui1MediaAuthority(committedMedia.replaceFirst(mutation.key, mutation.value), committedMedia), isFalse);
+      }
+      for (final mutation in <String, String>{
+        'CUI1_STATE: NOT CLOSED': 'CUI1_STATE: CLOSED',
+        'M3_STATE: CLOSED': 'M3_STATE: OPEN',
+        'M4_STATE: NOT AUTHORIZED': 'M4_STATE: AUTHORIZED',
+        'M5_STATE: NOT AUTHORIZED': 'M5_STATE: AUTHORIZED',
+        'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO': 'R10.5-D_STATE: IMPLEMENTATION YES',
+        'PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO': 'PUBLIC_BACKEND_AUTHORITY_DELTA: NONZERO',
+        'COMMERCIAL_AUTHORITY_DELTA: ZERO': 'COMMERCIAL_AUTHORITY_DELTA: NONZERO',
+      }.entries) {
+        expect(_cui1MediaReconciliation, contains(mutation.key));
+        final alteredMedia = _cui1MediaReconciliation.replaceFirst(mutation.key, mutation.value);
+        final alteredRoadmap = committedRoadmap.substring(0, committedRoadmap.length - _cui1MediaReconciliation.length) + alteredMedia;
+        expect(_allowsCui1Composition([], alteredRoadmap, committedRoadmap), isFalse);
+      }
       final paths = <String>[
         ..._cui1ChangedPaths(
           _git(['diff', '--name-only', '--no-renames', _cui1GovernanceCommit]),
@@ -339,6 +430,14 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
       'lib/localization/en.dart',
     ];
     expect(_cui1ProductionPaths, expected.toSet());
+    expect(_cui1DocumentPaths, {
+      'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md',
+      'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md',
+    });
+    for (final path in _cui1DocumentPaths) {
+      expect(_allowsCui1Composition([path], committedRoadmap, committedRoadmap), isTrue, reason: path);
+    }
+
     expect(
       _allowsCui1Composition([], committedRoadmap, committedRoadmap),
       isTrue,
@@ -376,7 +475,13 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         'lib/features/profile/presentation/profile_screen.dart',
         'lib/localization/fr.dart',
         'lib/localization/ar.dart.bak',
-        'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md',
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V2.md',
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_AUTHORITATIVE_MEDIA_ADDENDUM_V1.md.bak',
+        'docs/architecture/contracts/ARBITRARY_MEDIA_ADDENDUM.md',
+        'lib/features/auth/presentation/providers/auth_provider.dart',
+        'lib/core/theme/app_theme.dart',
+        'pubspec.lock',
+        'sdk/unauthorized.dart',
         'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md',
         'docs/unrelated.md',
         'assets/unauthorized.png',
@@ -403,6 +508,11 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
     'CUI-1 composition rejects substituted contract, baseline and governance commits',
     () {
       const wrong = '0000000000000000000000000000000000000000';
+      expect(
+        _allowsCui1Composition([], committedRoadmap, committedRoadmap, mediaCommit: wrong),
+        isFalse,
+      );
+
       expect(
         _allowsCui1Composition(
           [],
@@ -884,12 +994,12 @@ void main() {
       final closedCheckpoint = _git([
         'show', '798b2af358735e871463790e746c8f5761fbb989:$path',
       ]);
-      expect(_matchesCui1Roadmap(closedCheckpoint + _cui1Authorization, closedCheckpoint), isTrue);
+      expect(_matchesCui1Roadmap(closedCheckpoint + _cui1Authorization + _cui1MediaReconciliation, closedCheckpoint), isTrue);
       expect(_cui1Authorization, contains(mutation.value.first));
       final changedRecord = _cui1Authorization.replaceFirst(
         mutation.value.first, mutation.value.last,
       );
-      expect(_matchesCui1Roadmap(closedCheckpoint + changedRecord, closedCheckpoint), isFalse);
+      expect(_matchesCui1Roadmap(closedCheckpoint + changedRecord + _cui1MediaReconciliation, closedCheckpoint), isFalse);
     });
   }
   test('CUI-1 governance rejects unrelated historical roadmap mutation', () {
@@ -899,7 +1009,7 @@ void main() {
     ]);
     expect(closedCheckpoint, contains('ROADMAP_VERSION: 1'));
     expect(_matchesCui1Roadmap(
-      closedCheckpoint.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2') + _cui1Authorization,
+      closedCheckpoint.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2') + _cui1Authorization + _cui1MediaReconciliation,
       closedCheckpoint,
     ), isFalse);
   });

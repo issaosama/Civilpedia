@@ -704,6 +704,45 @@ class Ar {
   static const String directoryEntityNotFound = 'المزود غير موجود';
   static const String directoryInvalidEntityId = 'معرّف غير صالح';
 
+  // Commercial CUI-1 — public Directory presentation only.
+  static const String cui1Introduction =
+      'اكتشف الجهات والتخصصات في قطاع الهندسة والبناء';
+  static const String cui1BrowseTypes = 'تصفح حسب نوع الجهة';
+  static const String cui1EntityType = 'نوع الجهة';
+  static const String cui1Categories = 'الفئات';
+  static const String cui1About = 'نبذة';
+  static const String cui1Gallery = 'معرض الصور';
+  static const String cui1Specialties = 'التخصصات والخدمات';
+  static const String cui1SaveAction = 'حفظ';
+  static const String cui1SavedAction = 'محفوظ';
+  static const String cui1Phone = 'رقم الهاتف';
+  static const String cui1WhatsAppNumber = 'رقم واتساب';
+  static const String cui1ManageInformation =
+      'الانتقال إلى قائمة إدارة الأعمال في حسابك.';
+  static const String cui1Locations = 'المواقع';
+  static const String cui1PrimaryLocation = 'الموقع الرئيسي';
+  static const String cui1NoDescription = 'لم يُضف وصف';
+  static const String cui1NoCategories = 'لم تُضف فئات';
+  static const String cui1NoLocations = 'لا تتوفر معلومات عن المواقع';
+  static const String cui1NoContacts = 'لا تتوفر معلومات اتصال';
+  static const String cui1VerificationHeading = 'التوثيق في الدليل';
+  static const String cui1VerificationContext =
+      'حالة التوثيق المسجّلة في الدليل؛ لا تعني ضمان جودة العمل أو حالة الاشتراك.';
+  static const String cui1PaidAdvertisement = 'إعلان مدفوع';
+  static const String cui1Updating = 'جاري تحديث بيانات الدليل';
+  static const String cui1Snapshot = 'قد تكون البيانات المعروضة غير محدثة';
+  static const String cui1Unavailable = 'هذه الصفحة غير متاحة في الدليل حاليًا';
+  static const String cui1EmptyDirectory = 'لا توجد جهات مضافة حاليًا';
+  static const String cui1NoResults = 'لا توجد نتائج مطابقة';
+  static const String cui1ManageBusinesses = 'إدارة أعمالي';
+  static const String cui1CommercialHeading = 'الخدمات التجارية';
+  static const String cui1CommercialInformation =
+      'لا تعرض هذه الصفحة حالة الاشتراك أو مزايا الخطة.';
+  static const String cui1Email = 'البريد الإلكتروني';
+  static const String cui1Website = 'الموقع الإلكتروني';
+  static const String cui1OtherContact = 'وسيلة اتصال أخرى';
+  static const String cui1ContactFailure = 'تعذر فتح وسيلة الاتصال.';
+
   // W5.5 — Verification display (5-state)
   static const String verificationUnverified = 'غير موثّق';
   static const String verificationPending = 'قيد المراجعة';

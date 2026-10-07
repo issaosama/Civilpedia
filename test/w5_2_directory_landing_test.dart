@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,9 @@ Widget _app({ValueChanged<String>? onCategorySelected, double width = 412}) {
   return MediaQuery(
     data: MediaQueryData(size: Size(width, 900)),
     child: MaterialApp(
+      locale: const Locale('ar'),
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: AppTheme.lightTheme,
       home: ChangeNotifierProvider(
         create: (_) => LanguageProvider(),
@@ -265,10 +269,11 @@ void main() {
   });
 
   group('W5.2 NON-SCOPE UI', () {
-    testWidgets('20. no search field', (tester) async {
+    testWidgets('20. Directory search entry is read-only', (tester) async {
       await _pump(tester);
-      expect(find.byType(TextField), findsNothing);
-      expect(find.byIcon(Icons.search), findsNothing);
+      expect(find.byType(TextField), findsOneWidget);
+      expect(tester.widget<TextField>(find.byType(TextField)).readOnly, isTrue);
+      expect(find.byIcon(Icons.search_rounded), findsOneWidget);
     });
 
     testWidgets('21. no filter control', (tester) async {

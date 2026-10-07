@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +16,7 @@ CanonicalDirectoryEntity _p({
   required String id,
   String name = '',
   String entityType = 'other',
+  String? description,
   List<CanonicalDirectoryCategory> categories = const [],
   List<CanonicalDirectoryLocation> locations = const [],
   List<CanonicalDirectoryContact> contacts = const [],
@@ -24,6 +26,7 @@ CanonicalDirectoryEntity _p({
     id: id,
     name: name,
     entityType: entityType,
+    description: description,
     categories: categories,
     locations: locations,
     contacts: contacts,
@@ -33,6 +36,9 @@ CanonicalDirectoryEntity _p({
 
 Widget _app(CanonicalDirectoryEntity entity, {VoidCallback? onTap}) {
   return MaterialApp(
+    locale: const Locale('ar'),
+    supportedLocales: const [Locale('ar'), Locale('en')],
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     theme: AppTheme.lightTheme,
     home: ChangeNotifierProvider(
       create: (_) => LanguageProvider(),
@@ -153,11 +159,11 @@ void main() {
       expect(find.textContaining('lifecycle'), findsNothing);
     });
 
-    testWidgets('13. description does not appear on card', (tester) async {
-      final p = _p(id: 'a', name: 'Alpha');
+    testWidgets('13. supplied description appears as card context', (tester) async {
+      final p = _p(id: 'a', name: 'Alpha', description: 'Supplied description');
       await tester.pumpWidget(_app(p));
       expect(find.text('Alpha'), findsOneWidget);
-      expect(find.textContaining('description'), findsNothing);
+      expect(find.text('Supplied description'), findsOneWidget);
     });
   });
 }

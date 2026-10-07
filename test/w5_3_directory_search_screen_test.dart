@@ -200,7 +200,9 @@ void main() {
 
     testWidgets('39. empty repository shows empty-directory state', (tester) async {
       await _pump(tester, entities: const []);
-      expect(find.text(Ar.directoryEmptyDirectory), findsOneWidget);
+      expect(find.text(Ar.cui1EmptyDirectory), findsOneWidget);
+      expect(find.text(Ar.retry), findsNothing);
+      expect(find.text(Ar.noticeServiceUnavailable), findsNothing);
     });
 
     testWidgets('40. non-empty repo + zero matches shows no-results state', (tester) async {
@@ -208,12 +210,16 @@ void main() {
       await _pump(tester, entities: entities);
       await tester.enterText(find.byType(TextField), 'zzz-none');
       await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text(Ar.directoryNoResults), findsOneWidget);
+      expect(find.text(Ar.cui1NoResults), findsOneWidget);
+      expect(find.text(Ar.cui1EmptyDirectory), findsNothing);
+      expect(find.text(Ar.retry), findsNothing);
     });
 
     testWidgets('50. error state on repository refresh failure', (tester) async {
       await _pump(tester, throwOnLoad: Exception('boom'));
       expect(find.text(Ar.noticeNetwork), findsOneWidget);
+      expect(find.text(Ar.retry), findsOneWidget);
+      expect(find.text(Ar.cui1EmptyDirectory), findsNothing);
     });
   });
 
@@ -237,7 +243,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.text('Alpha Steel'), findsOneWidget);
       await tester.pump(const Duration(milliseconds: 200));
-      expect(find.text(Ar.directoryNoResults), findsOneWidget);
+      expect(find.text(Ar.cui1NoResults), findsOneWidget);
     });
   });
 
@@ -266,7 +272,7 @@ void main() {
       await _pump(tester, entities: entities);
       await tester.tap(find.byType(DropdownButtonFormField<String?>).at(1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('adhamiya').last);
+      await tester.tap(find.text('الأعظمية').last);
       await tester.pumpAndSettle();
       expect(find.text('Co A'), findsOneWidget);
       expect(find.text('Co B'), findsNothing);
@@ -295,7 +301,7 @@ void main() {
       await _pump(tester, entities: entities);
       await tester.tap(find.byType(DropdownButtonFormField<String?>).at(1));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('adhamiya').last);
+      await tester.tap(find.text('الأعظمية').last);
       await tester.pumpAndSettle();
       expect(find.text('Co A'), findsOneWidget);
       expect(find.text('Co B'), findsNothing);

@@ -726,6 +726,47 @@ class En {
   static const String directoryEntityNotFound = 'Provider not found';
   static const String directoryInvalidEntityId = 'Invalid provider ID';
 
+  // Commercial CUI-1 — public Directory presentation only.
+  static const String cui1Introduction =
+      'Explore organizations and specialists in engineering and construction';
+  static const String cui1BrowseTypes = 'Browse by entity type';
+  static const String cui1EntityType = 'Entity type';
+  static const String cui1Categories = 'Categories';
+  static const String cui1About = 'About';
+  static const String cui1Gallery = 'Photo gallery';
+  static const String cui1Specialties = 'Specialties and services';
+  static const String cui1SaveAction = 'Save';
+  static const String cui1SavedAction = 'Saved';
+  static const String cui1Phone = 'Phone number';
+  static const String cui1WhatsAppNumber = 'WhatsApp number';
+  static const String cui1ManageInformation =
+      'Open the business management list for your account.';
+  static const String cui1Locations = 'Locations';
+  static const String cui1PrimaryLocation = 'Primary location';
+  static const String cui1NoDescription = 'No description added';
+  static const String cui1NoCategories = 'No categories added';
+  static const String cui1NoLocations = 'No location information available';
+  static const String cui1NoContacts = 'No contact information available';
+  static const String cui1VerificationHeading = 'Directory verification';
+  static const String cui1VerificationContext =
+      'The verification status recorded in the Directory does not guarantee work quality or indicate subscription status.';
+  static const String cui1PaidAdvertisement = 'Paid advertisement';
+  static const String cui1Updating = 'Updating Directory information';
+  static const String cui1Snapshot = 'The information shown may be out of date';
+  static const String cui1Unavailable =
+      'This page is currently unavailable in the Directory';
+  static const String cui1EmptyDirectory = 'No entries have been added yet';
+  static const String cui1NoResults = 'No matching results';
+  static const String cui1ManageBusinesses = 'My businesses';
+  static const String cui1CommercialHeading = 'Commercial services';
+  static const String cui1CommercialInformation =
+      'This page does not show subscription status or plan benefits.';
+  static const String cui1Email = 'Email';
+  static const String cui1Website = 'Website';
+  static const String cui1OtherContact = 'Other contact';
+  static const String cui1ContactFailure =
+      'Unable to open this contact method.';
+
   // W5.5 — Verification display (5-state)
   static const String verificationUnverified = 'Unverified';
   static const String verificationPending = 'Pending review';

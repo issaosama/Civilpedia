@@ -1,40 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/navigation/shell_content_insets.dart';
 import '../../../core/services/language_provider.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/design_tokens.dart';
 import '../../../core/theme/spacing.dart';
 import '../../../core/widgets/civil_app_bar.dart';
 import '../../../core/widgets/civil_surface_card.dart';
+import '../../../core/widgets/search_bar_widget.dart';
 import '../../../localization/ar.dart';
 import '../../../localization/en.dart';
+import '../../../routes/app_routes.dart';
 import 'canonical_entity_type_presentation.dart';
 
-/// Directory Landing — heading + canonical entity type browse grid.
-///
-/// V1-R05 — adapted to canonical cloud `directory_entities.entity_type`
-/// taxonomy (9 values) from the canonical [CanonicalEntityTypePresentation].
-/// The legacy local fixed [BusinessType] taxonomy is no longer authoritative
-/// on the production Directory path.
-///
-/// The Landing represents the taxonomy, not current data volume: it performs
-/// ZERO entity reads, shows no counts, and renders identically whether or not
-/// the cloud Directory has any data.
-///
-/// A category tap invokes [onCategorySelected] with the tapped canonical
-/// entity type string. When [onCategorySelected] is null the cards are inert.
+/// Canonical nine-type Directory browse surface. It performs no entity reads,
+/// shows no counts, and retains the supplied category navigation callback.
 class DirectoryLandingScreen extends StatelessWidget {
-  /// Reusable presentation seam for listing phase. When provided,
-  /// tapping a category invokes it with the canonical entity type string.
-  /// When null, no navigation and no action.
   final ValueChanged<String>? onCategorySelected;
-
-  /// Bottom scroll padding for the category grid.
-  ///
-  /// Shell-independent: this screen detects the AppShell ancestor and
-  /// applies the closed UI-SAFE-1 contract when hosted inside the shell.
   final double bottomContentPadding;
 
   const DirectoryLandingScreen({
@@ -46,8 +29,8 @@ class DirectoryLandingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
+    final theme = Theme.of(context);
     final types = CanonicalEntityTypePresentation.orderedTypes;
-
     final isShellHosted = ShellContentInsets.maybeOf(context) != null;
     final effectiveBottomPadding = isShellHosted
         ? shellSafeBottomPadding(context)
@@ -56,36 +39,116 @@ class DirectoryLandingScreen extends StatelessWidget {
     return Scaffold(
       appBar: CivilAppBar(
         showBackButton: false,
-        title: Text(isArabic ? Ar.directoryLandingTitle : En.directoryLandingTitle),
+        title: Text(
+          isArabic ? Ar.directoryLandingTitle : En.directoryLandingTitle,
+        ),
       ),
-      body: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: EdgeInsetsDirectional.only(
-              start: AppSpacing.lg,
-              end: AppSpacing.lg,
-              top: AppSpacing.lg,
-              bottom: effectiveBottomPadding,
-            ),
-            sliver: SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisExtent: 140,
-                crossAxisSpacing: AppSpacing.lg,
-                mainAxisSpacing: AppSpacing.lg,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final gutter = width < 600
+              ? AppSpacing.lg
+              : width < 840
+              ? AppSpacing.xxl
+              : 2 * AppSpacing.lg;
+          final textScale = MediaQuery.textScalerOf(context).scale(16) / 16;
+          final columns = width < 600
+              ? (width < 360 || textScale > 1.4 ? 1 : 2)
+              : width < 840
+              ? 3
+              : 4;
+
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  gutter,
+                  AppSpacing.xxl,
+                  gutter,
+                  AppSpacing.xxl,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            isArabic
+                                ? Ar.cui1Introduction
+                                : En.cui1Introduction,
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xxl),
+                          SearchBarWidget(
+                            readOnly: true,
+                            lightSurface: true,
+                            hintText: isArabic
+                                ? Ar.directorySearchHint
+                                : En.directorySearchHint,
+                            onTap: () => GoRouter.maybeOf(
+                              context,
+                            )?.push(AppRoutes.directorySearch),
+                          ),
+                          const SizedBox(height: AppSpacing.xxl),
+                          Text(
+                            isArabic ? Ar.cui1BrowseTypes : En.cui1BrowseTypes,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.onSurface,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              delegate: SliverChildBuilderDelegate((context, index) {
-                final entityType = types[index];
-                return _CategoryCard(
-                  entityType: entityType,
-                  onTap: onCategorySelected == null
-                      ? null
-                      : () => onCategorySelected!(entityType),
-                );
-              }, childCount: types.length),
-            ),
-          ),
-        ],
+              SliverPadding(
+                padding: EdgeInsetsDirectional.only(
+                  start: gutter,
+                  end: gutter,
+                  bottom: effectiveBottomPadding,
+                ),
+                sliver: SliverToBoxAdapter(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: LayoutBuilder(
+                        builder: (context, gridConstraints) {
+                          final tileWidth =
+                              (gridConstraints.maxWidth -
+                                  AppSpacing.lg * (columns - 1)) /
+                              columns;
+                          return Wrap(
+                            key: const ValueKey('cui1-landing-grid'),
+                            spacing: AppSpacing.lg,
+                            runSpacing: AppSpacing.lg,
+                            children: [
+                              for (final entityType in types)
+                                SizedBox(
+                                  width: tileWidth,
+                                  child: _CategoryCard(
+                                    entityType: entityType,
+                                    onTap: onCategorySelected == null
+                                        ? null
+                                        : () => onCategorySelected!(entityType),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -101,6 +164,7 @@ class _CategoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isArabic = context.watch<LanguageProvider>().isArabic;
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final label = CanonicalEntityTypePresentation.labelFor(
       entityType,
       isArabic: isArabic,
@@ -108,34 +172,40 @@ class _CategoryCard extends StatelessWidget {
 
     return CivilSurfaceCard(
       onTap: onTap,
-      padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsetsDirectional.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
+      hasBorder: true,
+      elevation: DesignTokens.elevation0,
+      padding: const EdgeInsetsDirectional.all(AppSpacing.lg),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 108),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: colors.secondaryContainer,
+                borderRadius: BorderRadius.circular(DesignTokens.radiusIcon),
+              ),
+              child: Icon(
+                CanonicalEntityTypePresentation.iconFor(entityType),
+                size: 24,
+                color: colors.onSecondaryContainer,
+              ),
             ),
-            child: Icon(
-              CanonicalEntityTypePresentation.iconFor(entityType),
-              size: 24,
-              color: AppColors.primary,
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              label,
+              textAlign: TextAlign.start,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: colors.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            label,
-            textAlign: TextAlign.start,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

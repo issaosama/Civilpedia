@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -9,7 +10,6 @@ import 'package:civilpedia/core/theme/app_theme.dart';
 import 'package:civilpedia/features/directory/domain/canonical_directory_entity.dart';
 import 'package:civilpedia/features/directory/domain/directory_query.dart';
 import 'package:civilpedia/features/directory/domain/directory_query_engine.dart';
-import 'package:civilpedia/features/directory/presentation/canonical_entity_type_presentation.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_card.dart';
 import 'package:civilpedia/features/directory/presentation/directory_provider_detail_screen.dart';
 import 'package:civilpedia/features/directory/presentation/directory_verification_badge.dart';
@@ -122,6 +122,9 @@ Widget _badgeApp(VerificationStatus status) {
   return ChangeNotifierProvider(
     create: (_) => LanguageProvider(),
     child: MaterialApp(
+      locale: const Locale('ar'),
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: AppTheme.lightTheme,
       home: Scaffold(
         body: Center(child: DirectoryVerificationBadge(status: status)),
@@ -139,6 +142,9 @@ Future<_FakeLauncher> _pumpDetail(
     ChangeNotifierProvider(
       create: (_) => LanguageProvider(),
       child: MaterialApp(
+        locale: const Locale('ar'),
+        supportedLocales: const [Locale('ar'), Locale('en')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
         theme: AppTheme.lightTheme,
         home: DirectoryProviderDetailScreen(
           entity: entity,
@@ -483,9 +489,10 @@ void main() {
         tester,
         _e(id: 'a', name: 'Alpha', contacts: [fakePhone('0770000000'), fakePhone('0780000000')], verificationStatus: VerificationStatus.verified),
       );
-      expect(find.text('اتصال — 0770000000'), findsOneWidget);
-      expect(find.text('اتصال — 0780000000'), findsOneWidget);
-      await tester.tap(find.text('اتصال — 0770000000'));
+      expect(find.text('0770000000'), findsOneWidget);
+      expect(find.text('0780000000'), findsOneWidget);
+      await tester.ensureVisible(find.text('0770000000'));
+      await tester.tap(find.text('0770000000'));
       expect(launcher.launchedPhones, ['0770000000']);
     });
 
@@ -495,13 +502,14 @@ void main() {
         _e(id: 'a', name: 'Alpha', contacts: [fakeWhatsApp('0770 000 0000')], verificationStatus: VerificationStatus.verified),
       );
       // All digits are extracted (including any leading 0); display only.
-      await tester.tap(find.text('واتساب — 07700000000'));
+      await tester.ensureVisible(find.text('07700000000'));
+      await tester.tap(find.text('07700000000'));
       expect(launcher.launchedWhatsApps, ['07700000000']);
     });
 
     testWidgets('40. no-contact state unchanged', (tester) async {
       await _pumpDetail(tester, _e(id: 'a', name: 'Alpha', verificationStatus: VerificationStatus.verified));
-      expect(find.text('لا توجد معلومات اتصال'), findsOneWidget);
+      expect(find.text('لا تتوفر معلومات اتصال'), findsOneWidget);
     });
 
     testWidgets('41. address unchanged', (tester) async {

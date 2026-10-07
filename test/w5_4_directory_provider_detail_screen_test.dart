@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
@@ -87,6 +88,9 @@ Widget _app(CanonicalDirectoryEntity entity, _FakeLauncher launcher,
   return ChangeNotifierProvider(
     create: (_) => LanguageProvider(),
     child: MaterialApp(
+      locale: const Locale('ar'),
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: AppTheme.lightTheme,
       home: DirectoryProviderDetailScreen(
         entity: entity,
@@ -131,7 +135,7 @@ void main() {
           locations: [fakeLocation('karrada', regionName: 'كرادة')],
         ),
       );
-      expect(find.text('كرادة'), findsOneWidget);
+      expect(find.text('كرادة'), findsNWidgets(2));
     });
   });
 
@@ -141,9 +145,10 @@ void main() {
       expect(find.textContaining('A real description'), findsOneWidget);
     });
 
-    testWidgets('18. description hidden when absent', (tester) async {
+    testWidgets('18. missing description is explicitly described', (tester) async {
       await _pump(tester, _p(id: 'a', name: 'Alpha'));
-      expect(find.text(Ar.directoryDescription), findsNothing);
+      expect(find.text(Ar.cui1About), findsOneWidget);
+      expect(find.text(Ar.cui1NoDescription), findsOneWidget);
     });
 
     testWidgets('19. address shown when present', (tester) async {
@@ -224,13 +229,13 @@ void main() {
 
     testWidgets('27. no-contact state when no phone/WhatsApp', (tester) async {
       await _pump(tester, _p(id: 'a', name: 'Alpha'));
-      expect(find.text(Ar.directoryNoContactInformation), findsOneWidget);
+      expect(find.text(Ar.cui1NoContacts), findsOneWidget);
     });
 
     testWidgets('28. no-contact state absent when actionable contact exists', (tester) async {
       final p = _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]);
       await _pump(tester, p);
-      expect(find.text(Ar.directoryNoContactInformation), findsNothing);
+      expect(find.text(Ar.cui1NoContacts), findsNothing);
     });
   });
 
@@ -296,12 +301,14 @@ void main() {
   group('W5.4 CONTACT LAUNCH', () {
     testWidgets('35. phone URI uses tel scheme via launcher', (tester) async {
       final l = await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]));
+      await tester.ensureVisible(find.byIcon(Icons.phone));
       await tester.tap(find.byIcon(Icons.phone));
       expect(l.launchedPhones, ['0771111111']);
     });
 
     testWidgets('36. phone uses trimmed stored value', (tester) async {
       final l = await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('  0771111111  ')]));
+      await tester.ensureVisible(find.byIcon(Icons.phone));
       await tester.tap(find.byIcon(Icons.phone));
       expect(l.launchedPhones, ['0771111111']);
     });
@@ -312,8 +319,10 @@ void main() {
         _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111'), fakePhone('0772222222')]),
       );
       expect(find.byIcon(Icons.phone), findsNWidgets(2));
+      await tester.ensureVisible(find.byIcon(Icons.phone).first);
       await tester.tap(find.byIcon(Icons.phone).first);
       expect(l.launchedPhones, ['0771111111']);
+      await tester.ensureVisible(find.byIcon(Icons.phone).last);
       await tester.tap(find.byIcon(Icons.phone).last);
       expect(l.launchedPhones, ['0771111111', '0772222222']);
     });
@@ -346,22 +355,25 @@ void main() {
         ),
       );
       // WhatsApp is its own button (chat icon), distinct from call (phone).
+      await tester.ensureVisible(find.byIcon(Icons.chat));
       await tester.tap(find.byIcon(Icons.chat));
       expect(l.launchedWhatsApps, ['07801234567']);
-      expect(find.text(Ar.directoryUnableToOpenApp), findsNothing);
+      expect(find.text(Ar.cui1ContactFailure), findsNothing);
     });
 
     testWidgets('42. launcher failure produces benign error feedback', (tester) async {
       final l = _FakeLauncher()..succeed = false;
       await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]), launcher: l);
+      await tester.ensureVisible(find.byIcon(Icons.phone));
       await tester.tap(find.byIcon(Icons.phone));
       await tester.pump();
-      expect(find.text(Ar.directoryUnableToOpenApp), findsOneWidget);
+      expect(find.text(Ar.cui1ContactFailure), findsOneWidget);
     });
 
     testWidgets('43. launch failure does not crash', (tester) async {
       final l = _FakeLauncher()..succeed = false;
       await _pump(tester, _p(id: 'a', name: 'Alpha', contacts: [fakePhone('0771111111')]), launcher: l);
+      await tester.ensureVisible(find.byIcon(Icons.phone));
       await tester.tap(find.byIcon(Icons.phone));
       await tester.pump();
       expect(tester.takeException(), isNull);
