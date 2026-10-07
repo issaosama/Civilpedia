@@ -4134,3 +4134,71 @@ Broader public-schema default-privilege remediation remains deferred: future pos
 M4, M5 and CUI-2A1 remain NOT AUTHORIZED; publication, entitlement, payment and UI authority deltas remain ZERO. CUI-1 and M3 remain CLOSED; R10.5-D remains AUDIT-ONLY / IMPLEMENTATION NO. No broader commercial scope or ordinary UI-track advancement is created.
 
 This governance pass creates only the addendum and appends only this roadmap record, preserving all prior roadmap bytes and the original frozen contract. Existing partial implementation files/guards, their compilation errors and the protected dirty baseline remain untouched. No 00026/test/SQL/Supabase/lib modification, migration/backend operation, test execution, staging, commit, push, reset, revert, clean or stash is performed. User retains Git ownership; implementation remains blocked pending the Owner's addendum commit.
+
+
+# COMMERCIAL CUI-2A0 FINAL IMPLEMENTATION CLOSURE — 2026-10-08
+
+## Current Commercial Track Control — CUI-2A0 closed; no next implementation slice authorized
+
+```text
+CUI2A0_STATE: CLOSED
+CUI2A0_IMPLEMENTATION_STATE: ACCEPTED / CLOSED
+CUI2A0_IMPLEMENTATION_COMMIT: 41276132ba6a1606cd779f5ce92473bacfbcc7c8
+CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN
+CUI2A0_SECURITY_ADDENDUM: SATISFIED
+CUI2A0_ARCHITECT_IMPLEMENTATION_ACCEPTANCE: PASS
+CUI2A0_IMPLEMENTATION_AUTHORIZED: NO — SLICE CLOSED
+APPEND_AUDIT_LOG_ACL_STATE: ACCEPTED — OWNER-ONLY DIRECT EXECUTE
+LOCAL_MIGRATION_CHAIN_IMPLEMENTATION: VERIFIED
+REMOTE_DEPLOYED_STATE: UNVERIFIED
+REMOTE_DEPLOYED_DATABASE: UNVERIFIED
+COMMERCIAL_LAST_CLOSED_SLICE: CUI-2A0 — Admin Business Draft Authority Foundation
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+COMMERCIAL_CONTROL: CUI-2A0 CLOSED — NO NEXT COMMERCIAL IMPLEMENTATION SLICE AUTHORIZED
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+CUI2A1_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+PRODUCTION_LIB_DELTA: ZERO
+UI_AUTHORITY_DELTA: ZERO
+ENTITLEMENT_AUTHORITY_DELTA: ZERO
+PUBLICATION_AUTHORITY_DELTA: ZERO
+PAYMENT_AUTHORITY_DELTA: ZERO
+CURRENT_PASS: GOVERNANCE / DOCUMENTATION ONLY — FINAL CLOSURE RECORD
+```
+
+Authority: Owner-provided **CIVILPEDIA — COMMERCIAL CUI-2A0 FINAL CLOSURE RECORD + ROADMAP CLOSURE**, supplying completed independent verification and Architect implementation acceptance for commit `41276132ba6a1606cd779f5ce92473bacfbcc7c8`. Local HEAD and local origin/main match that accepted implementation commit. This records the supplied final decision; it is not agent self-acceptance, a new review/test PASS or remote/deployed readiness.
+
+The [CUI-2A0 final closure record](reports/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_CLOSURE.md) records **CUI-2A0 CLOSED / IMPLEMENTATION ACCEPTED**, under the [frozen implementation contract](contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md) and the [committed ACL Security Addendum](contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_APPEND_AUDIT_LOG_ACL_SECURITY_ADDENDUM_V1.md). The addendum is **SATISFIED**. This latest chronological control supersedes prior active CUI-2A0 implementation/security-blocked status only; all earlier roadmap bytes, frozen contract clauses and historical addendum wording remain intact.
+
+### Accepted scope and security outcome
+
+Accepted implementation: migration 00026; private business_admin_private schema and draft_create_requests receipt; two private helpers; four independent staff permission references; six public CUI-2A0 RPCs; canonical CLAIM guard hardening with preserved trigger; three bounded indexes; ACL/RLS/SECURITY DEFINER hardening; exact append_audit_log ACL correction; SQL runtime evidence; and Dart/static compatibility/security guards. The committed delta contains seven implementation/test paths; M1a is unchanged. No production lib/** or UI delta occurred; entitlement, publication and payment authority deltas remain ZERO.
+
+**append_audit_log ACL: ACCEPTED — OWNER-ONLY DIRECT EXECUTE.** PUBLIC, anon, authenticated and service_role have **NO EXECUTE**; postgres/owner retains **EXECUTE**. The accepted local final ACL is `{postgres=X/postgres}`. The exact REVOKE is part of atomic 00026 before preflight, with no service_role regrant. Helper signature/body/prosrc/owner/SECURITY DEFINER/search_path/return type and audit schema are preserved; legitimate owner-executed audited callers and mutation rollback behavior remain accepted.
+
+### Accepted evidence and non-blocking observations
+
+| Evidence | Accepted outcome |
+| --- | --- |
+| Codex focused Dart/static, SQL runtime, concurrency/race, genuine local HTTP and migration rollback evidence | GREEN; no production/lib delta |
+| Independent Big Pickle verification | PASS — CUI-2A0 IMPLEMENTATION VERIFIED |
+| Independent adversarial review | PASS — CUI-2A0 IMPLEMENTATION SAFE TO ACCEPT |
+| Architect implementation acceptance | PASS |
+
+These are supplied accepted implementation/review outcomes and preceding implementation evidence, not new executions in this documentary pass. No unconfirmed numeric counts are introduced.
+
+Accepted non-blocking/deferred observations: the audit wrapper may reclassify transaction/deadlock SQLSTATEs such as 40001 / 40P01 to P0AUD while retaining rollback; adversarial review identified minor static-guard coverage limitations without an exploitable authority path. These observations **do not reopen CUI-2A0** and grant no SQL or guard-fix authority here.
+
+### Deferred security, deployment and follow-on controls
+
+Still outside CUI-2A0 closure: Supabase public-schema defaults for future postgres-created public functions; legacy sibling RPC ACL permissiveness; and region_preferences ACL/RLS posture. These were not silently remediated and require future explicit Architect hardening authority.
+
+**LOCAL MIGRATION-CHAIN / IMPLEMENTATION: VERIFIED. REMOTE DEPLOYED DATABASE: UNVERIFIED.** Repository implementation closure and deployment are separate states. No remote production migration, deployment, provisioning or live readiness is implied or performed.
+
+COMMERCIAL_CURRENT_SLICE is **NONE** and COMMERCIAL_IMPLEMENTATION_AUTHORIZED is **NO**, until a later explicit Architect authorization record opens the next slice. M4, M5 and CUI-2A1 remain NOT AUTHORIZED; R10.5-D remains AUDIT-ONLY / IMPLEMENTATION NO. CUI-1 and M3 remain CLOSED. **No next slice is automatically authorized.**
+
+This governance pass creates only the closure report and appends this single chronological roadmap record. Frozen governing documents, implementation/SQL/tests/lib/Supabase, protected dirty files and all prior roadmap bytes are preserved. No implementation, backend operation, migration/test run, staging, commit, push, reset, revert, clean or stash occurs. Staging remains EMPTY and the User retains Git ownership; these closure documents are prepared for Architect verification.
