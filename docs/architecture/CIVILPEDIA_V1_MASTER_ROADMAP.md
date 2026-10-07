@@ -4036,3 +4036,101 @@ Still NOT AUTHORIZED: M4; M5; publication entitlement; subscription-enforcement 
 **This is implementation authorization, not implementation completion.** Migration inventory at this governance pass remains exactly 00001–00025. **00026 remains absent until a later implementation pass.** No SQL, migration, Supabase, Flutter, test, configuration or data implementation occurs here; CUI-2A0 implementation is NOT STARTED. Production readiness remains the contract's separate later gate.
 
 This pass appends only this roadmap governance record and preserves every prior roadmap byte, the frozen contract and the protected dirty baseline. Staging, commit and push remain User-controlled; none is performed or authorized by this governance pass.
+
+
+# COMMERCIAL CUI-2A0 append_audit_log ACL SECURITY ADDENDUM — 2026-10-07
+
+## Current Commercial Track Control — accepted security addendum, Owner commit required before resume
+
+```text
+COMMERCIAL_TRACK: ACTIVE
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN
+CUI2A0_SECURITY_ADDENDUM: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_APPEND_AUDIT_LOG_ACL_SECURITY_ADDENDUM_V1.md
+DOCUMENT_STATUS: ACCEPTED — CUI-2A0 SECURITY ADDENDUM
+ARCHITECT_ACCEPTANCE: ACCEPTED — 2026-10-07
+FREEZE_STATE: FROZEN
+ADDENDUM_IMPLEMENTATION_AUTHORIZED: YES — WITHIN CUI-2A0 ONLY
+CUI2A0_IMPLEMENTATION_AUTHORIZED: YES
+COMMERCIAL_CURRENT_SLICE: CUI-2A0 — Admin Business Draft Authority Foundation
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES — CUI-2A0 ONLY
+CUI2A0_IMPLEMENTATION_STATE: PARTIAL / UNACCEPTED — SECURITY-BLOCKED
+CUI2A0_EXECUTION_STATE: BLOCKED — PREDECESSOR SECURITY ACL DISCREPANCY
+CUI2A0_SECURITY_STOP: ACCEPTED AS CORRECT
+CUI2A0_PREDECESSOR_ACL_FINDING: HIGH / CONFIRMED
+CUI2A0_SECURITY_STRATEGY: STRATEGY 1 — ACL CORRECTION INSIDE AUTHORIZED MIGRATION 00026
+IMPLEMENTATION_RESUME_GATE: OWNER COMMIT OF SECURITY ADDENDUM AND THIS ROADMAP RECORD
+AUTHORIZED_MIGRATION: 00026_commercial_admin_business_draft_foundation.sql
+MAXIMUM_IMPLEMENTATION_SECURITY_TEST_FILES: 8
+CUI2A0_SECURITY_REGRESSION_SUPPORT: test/v1_r09q_security_matrix_test.dart
+PREDECESSOR_MIGRATION_CHAIN: VULNERABLE — CONFIRMED LOCALLY ON FRESH 00001–00025 BUILD
+REMOTE_DEPLOYED_DATABASE: UNVERIFIED
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+CUI2A1_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+PUBLICATION_AUTHORITY_DELTA: ZERO
+ENTITLEMENT_AUTHORITY_DELTA: ZERO
+PAYMENT_AUTHORITY_DELTA: ZERO
+UI_AUTHORITY_DELTA: ZERO
+CURRENT_PASS: GOVERNANCE ONLY — SECURITY ADDENDUM RECORD / NO IMPLEMENTATION
+```
+
+Authority: Owner-provided **CIVILPEDIA — CUI-2A0 append_audit_log ACL SECURITY ADDENDUM — GOVERNANCE-ONLY PASS**, supplying the Architect's accepted forensic finding, acceptance of the Codex STOP as correct and the exact narrow security decision. The [ACL Security Addendum V1](contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_APPEND_AUDIT_LOG_ACL_SECURITY_ADDENDUM_V1.md) records that supplied ACCEPTED / FROZEN decision. This is not agent self-acceptance, a newly executed forensic review/test PASS, implementation acceptance or deployed readiness.
+
+### Confirmed predecessor discrepancy and exact correction authority
+
+The supplied independent forensic review confirms a **HIGH** predecessor discrepancy: a fresh database built from committed migrations 00001–00025 grants direct EXECUTE on public.append_audit_log(uuid,text,text,uuid,jsonb,jsonb,text) to anon, authenticated and service_role, while PUBLIC itself does not retain EXECUTE. Both anon and authenticated were independently proven able to directly insert audit events. No legitimate client flow requires direct helper EXECUTE; all legitimate production callers are internal postgres-owned SECURITY DEFINER functions, and direct-client revocation was proven not to break their nested legitimate calls.
+
+**Strategy 1 is selected:** the future authorized 00026 implementation may place exactly the following ACL metadata correction before its security preflight:
+
+```sql
+REVOKE EXECUTE ON FUNCTION
+public.append_audit_log(
+  uuid,
+  text,
+  text,
+  uuid,
+  jsonb,
+  jsonb,
+  text
+)
+FROM PUBLIC, anon, authenticated, service_role;
+```
+
+The ensuing preflight must assert the complete effective ACL: postgres/owner EXECUTE allowed; PUBLIC, anon, authenticated and service_role EXECUTE denied. **No service_role re-grant.** The REVOKE, preflight and all remaining 00026 work must execute in the same migration transaction; any later failure must roll back the ACL correction with the rest of 00026. The permission discrepancy is a specifically reviewed normalization exception only for this exact helper ACL. All other original preflight/STOP requirements remain active.
+
+Function signature, body/prosrc, postgres owner, SECURITY DEFINER state and existing search_path remain unchanged; audit_logs schema remains unchanged. No migration 00016 or any migration 00001–00025 edit, helper replacement, new helper or parallel audit path is authorized. The original frozen contract remains byte-identical; the addendum supplements only its narrowly affected ACL/preflight and file/evidence requirements.
+
+### Implementation gate and exact expanded boundary
+
+CUI-2A0 remains ACTIVE / IMPLEMENTATION AUTHORIZED — CUI-2A0 ONLY, with the partial implementation unaccepted and execution **security-blocked until this addendum and roadmap record are Owner-committed**. After that commit, a later implementation pass may resume under the original frozen contract plus this addendum, rechecking the committed baseline and retained preflight gates. No future commit hash is invented and no implementation is resumed in this governance pass.
+
+The maximum authorized implementation/security/test boundary becomes **eight files**, adding only test/v1_r09q_security_matrix_test.dart as narrowly necessary CUI-2A0 security-regression support:
+
+```text
+supabase/migrations/00026_commercial_admin_business_draft_foundation.sql
+supabase/tests/commercial_cui2a0_admin_business_draft_foundation_test.sql
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_m1a_private_catalog_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+test/v1_r09q_security_matrix_test.dart
+```
+
+This does not require every path to change. Changes remain permitted only where required by the original frozen contract and addendum. The added security matrix support may correct textual PUBLIC-revoke expectations to complete effective ACL coverage while retaining unrelated protections. Composed commercial guards may recognize only the exact Owner-committed governance/addendum, bounded ACL correction and exact support path; no ninth implementation file, extra migration or production lib change is authorized.
+
+Resumed implementation must prove all addendum ACL-01–ACL-14 requirements: complete principal/effective ACLs, unauthorized direct-call 42501 denials with no forged audit event, owner access, preserved legitimate nested SECURITY DEFINER auditing, mutation rollback on audit failure, unchanged function metadata/body and predecessor bytes. It must also prove migration failure rolls back the ACL correction itself. All original T01–T34 / T32A–H requirements remain mandatory; this governance record supplies no replacement runtime evidence.
+
+### Deferred findings, remote status and preserved exclusions
+
+Broader public-schema default-privilege remediation remains deferred: future postgres-created public functions may inherit client EXECUTE. Legacy sibling RPC ACL permissiveness from 00016 and region_preferences direct INSERT ACL, with RLS currently providing the effective deny, also remain separately deferred. No ALTER DEFAULT PRIVILEGES IN SCHEMA public correction, sibling RPC ACL change or region_preferences ACL/RLS change is authorized under this addendum or CUI-2A0.
+
+**REMOTE DEPLOYED DATABASE: UNVERIFIED.** No remote production connection or remediation is authorized. Confirmed local predecessor vulnerability is not a deployed-state assertion.
+
+M4, M5 and CUI-2A1 remain NOT AUTHORIZED; publication, entitlement, payment and UI authority deltas remain ZERO. CUI-1 and M3 remain CLOSED; R10.5-D remains AUDIT-ONLY / IMPLEMENTATION NO. No broader commercial scope or ordinary UI-track advancement is created.
+
+This governance pass creates only the addendum and appends only this roadmap record, preserving all prior roadmap bytes and the original frozen contract. Existing partial implementation files/guards, their compilation errors and the protected dirty baseline remain untouched. No 00026/test/SQL/Supabase/lib modification, migration/backend operation, test execution, staging, commit, push, reset, revert, clean or stash is performed. User retains Git ownership; implementation remains blocked pending the Owner's addendum commit.
