@@ -3923,3 +3923,38 @@ Prior findings **H1 / H2 / M1 / M2: RESOLVED**. Final independent counts: **CRIT
 The ordinary V1-R10 track is unchanged: R10.5-D remains CURRENT for pre-implementation audit only, `IMPLEMENTATION_AUTHORIZED: NO`, implementation NOT STARTED. R10.5-E, R10.5-F, R10.6 and R10.7 remain LOCKED. CUI-1 closure grants no ordinary UI-track advancement.
 
 This closure pass changes only governance/closure documentation. Production, tests, commercial static guards, frozen contracts, the committed media addendum and protected dirty baseline are preserved. No backend operation, dependency/SDK change, staging, commit or push is performed or authorized. The Owner retains Git ownership; this documentary closure record is prepared for Architect review.
+
+# COMMERCIAL CUI-2A0 CONTRACT ACCEPTANCE + FREEZE — 2026-10-07
+
+## Candidate contract control — implementation not authorized
+
+```text
+COMMERCIAL_CANDIDATE_SLICE: CUI-2A0 — Admin Business Draft Authority Foundation
+CUI2A0_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md
+CUI2A0_CONTRACT_STATE: ACCEPTED / FROZEN
+CUI2A0_ARCHITECT_ACCEPTANCE: ACCEPTED — 2026-10-07
+CUI2A0_IMPLEMENTATION_AUTHORIZED: NO
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+CURRENT_PASS: GOVERNANCE ONLY — CONTRACT ACCEPTANCE / FREEZE RECORD
+```
+
+Authority: Owner-provided **CIVILPEDIA — COMMERCIAL CUI-2A0 ARCHITECT CONTRACT ACCEPTANCE + FREEZE RECORD**, recording the supplied Architect decision **ACCEPTED** after review of the corrected contract. The [CUI-2A0 contract](contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md) is accepted as the canonical frozen implementation specification. Acceptance/freeze is not agent self-acceptance, implementation acceptance, a new runtime/test PASS or deployed readiness evidence.
+
+CUI-2A0 remains a **CANDIDATE / CONTRACT FROZEN — IMPLEMENTATION NOT YET AUTHORIZED**. COMMERCIAL_CURRENT_SLICE remains NONE; no next commercial implementation slice is activated. No 00026 authorization or next implementation commit placeholder is created. CUI-1 and M3 remain CLOSED; M4/M5 remain NOT AUTHORIZED. The ordinary UI track remains R10.5-D AUDIT-ONLY / IMPLEMENTATION NO; no later UI slice is unlocked. All prior roadmap bytes and historical authorization/closure records remain intact.
+
+### Static compatibility and preimplementation GREEN dependency
+
+Implementation authorization remains blocked on **both**:
+
+1. A narrow, separately and explicitly authorized reconciliation of stale commercial static expectations with the already committed CUI-1 final closure.
+2. A fresh focused commercial static baseline **GREEN**.
+
+This dependency is **NOT RESOLVED** by contract acceptance. No static guard is edited and no test is run in this freeze pass; historical CUI-1 evidence is not a fresh preimplementation gate. Subsequent explicit implementation authorization is required after those gates. This record itself authorizes no compatibility implementation, SQL/migration, lib/test/supabase change, provisioning or deployment. Frozen technical clauses and exclusions remain unchanged; production readiness remains a later separate gate.
+
+This pass changes only the contract's acceptance/status metadata and acceptance record, plus this governance-only roadmap append. Protected baseline, production, tests, SQL and all other files remain untouched. Staging, commit and push remain User-controlled and are neither performed nor authorized here.
