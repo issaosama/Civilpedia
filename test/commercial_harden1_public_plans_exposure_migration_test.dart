@@ -593,6 +593,38 @@ bool _allowsCurrentComposition(
     ) &&
     postClosureImplementationChanges.isEmpty && cui2a0.hasAuthorizedCui2a0Boundary();
 
+// Exact post-closure recognition; the predecessor predicates and pins remain
+// historical. This path accepts no future A1 contract, source or authority.
+const _cui2a0ClosureReportPath = cui2a0.cui2a0ClosureReportPath;
+final _cui2a0ClosedRoadmap =
+    _git(['cat-file', 'blob', '8fa8595cfe9cc21a00db8016f930b45cf76b52d2']);
+final _cui2a0ClosureAppend =
+    _cui2a0ClosedRoadmap.substring(_cui2a0SecurityRoadmap.length);
+final _closedRoadmapAdditions = _currentRoadmapAdditions + _cui2a0ClosureAppend;
+final _closedCommittedDocuments = <String, String>{
+  ..._currentCommittedDocuments,
+  _cui2a0ClosureReportPath:
+      _git(['cat-file', 'blob', '068307bb6e3d64a0cb479f127d1c162a155cb0cd']),
+};
+bool _allowsClosedCui2a0Composition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) =>
+    roadmap == _cui2a0ClosedRoadmap &&
+    _cui2a0ClosedRoadmap == _historicalMediaRoadmap + _closedRoadmapAdditions &&
+    documents.length == _closedCommittedDocuments.length &&
+    _closedCommittedDocuments.entries.every(
+      (entry) => documents[entry.key] == entry.value,
+    ) &&
+    _allowsCurrentComposition(
+      changedPaths.where((path) => path != _cui2a0ClosureReportPath),
+      _cui2a0SecurityRoadmap,
+      Map.fromEntries(documents.entries.where((entry) => entry.key != _cui2a0ClosureReportPath)),
+      postClosureImplementationChanges,
+    );
+
 bool _matchesCui1MediaAuthority(String actual, String committed) => actual == committed;
 
 List<String> _cui1ChangedPaths(String output) =>
@@ -732,7 +764,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
       );
       final currentRoadmap = _read(_cui1RoadmapPath);
       final currentDocuments = <String, String>{
-        for (final path in _currentDocumentBlobs.keys) path: _read(path),
+        for (final path in _closedCommittedDocuments.keys) path: _read(path),
       };
       // Accepted production/test paths are immutable after CUI-1 closure.
       final postClosureChanges = _cui1ChangedPaths(_git([
@@ -744,18 +776,34 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         String? roadmap,
         Map<String, String>? documents,
         Iterable<String>? implementationChanges,
-      }) => _allowsCurrentComposition(
+      }) => _allowsClosedCui2a0Composition(
         changedPaths ?? paths,
         roadmap ?? currentRoadmap,
         documents ?? currentDocuments,
         implementationChanges ?? postClosureChanges,
       );
       expect(acceptsCurrent(), isTrue, reason: 'Exact frozen current composition: $paths');
-      for (final path in [_cui1ClosureReportPath, _cui2a0ContractPath, ...cui2a0.cui2a0ImplementationPaths]) {
+      for (final path in [_cui1ClosureReportPath, _cui2a0ContractPath, _cui2a0ClosureReportPath, ...cui2a0.cui2a0ImplementationPaths]) {
         expect(acceptsCurrent(changedPaths: [path]), isTrue, reason: path);
       }
 
       // All probes use the live predicate and mutate inputs only in memory.
+      // Mutate the final closure controls, not an earlier historical block.
+      for (final mutation in <String, String>{
+        'CUI2A0_STATE: CLOSED': 'CUI2A0_STATE: OPEN',
+        'CUI2A0_IMPLEMENTATION_AUTHORIZED: NO — SLICE CLOSED': 'CUI2A0_IMPLEMENTATION_AUTHORIZED: YES',
+        'CUI2A1_STATE: NOT AUTHORIZED': 'CUI2A1_STATE: IMPLEMENTATION AUTHORIZED',
+        'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO': 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES',
+        'COMMERCIAL_CURRENT_SLICE: NONE': 'COMMERCIAL_CURRENT_SLICE: CUI-2A1',
+        'M4_STATE: NOT AUTHORIZED': 'M4_STATE: AUTHORIZED',
+        'M5_STATE: NOT AUTHORIZED': 'M5_STATE: AUTHORIZED',
+        'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO': 'R10.5-D_STATE: IMPLEMENTATION YES',
+      }.entries) {
+        expect(_cui2a0ClosureAppend, contains(mutation.key));
+        expect(acceptsCurrent(roadmap: _cui2a0SecurityRoadmap +
+          _cui2a0ClosureAppend.replaceFirst(mutation.key, mutation.value)),
+          isFalse, reason: 'Closed authority must remain denied: ${mutation.key}');
+      }
       for (final path in <String>[
         _cui2a0ContractPath.replaceFirst('_V1.md', '_V2.md'),
         _cui2a0ContractPath.replaceFirst('_V1.md', '_RENAMED_V1.md'),
@@ -766,6 +814,12 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         'docs/architecture/contracts/ARBITRARY_MEDIA_ADDENDUM.md',
         'docs/architecture/ARBITRARY_GOVERNANCE.md',
         'lib/features/directory/presentation/ninth.dart',
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A1_ADMIN_BUSINESS_DRAFT_CONSOLE_IMPLEMENTATION_CONTRACT_V1.md',
+        'docs/unauthorized.md',
+        'lib/features/business/data/supabase_commercial_admin_gateway.dart',
+        'lib/features/business/presentation/providers/commercial_admin_provider.dart',
+        'lib/features/business/presentation/screens/admin_businesses_screen.dart',
+        'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
       ]) {
         expect(acceptsCurrent(changedPaths: [...paths, path]), isFalse, reason: path);
       }
@@ -819,6 +873,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
       for (final probe in <(String, String, String)>[
         (_cui2a0ContractPath, 'IMPLEMENTATION_AUTHORIZED: NO', 'IMPLEMENTATION_AUTHORIZED: YES'),
         (_cui1ClosureReportPath, 'CUI1_STATE: CLOSED', 'CUI1_STATE: OPEN'),
+        (_cui2a0ClosureReportPath, 'CUI2A0_STATE: CLOSED', 'CUI2A0_STATE: OPEN'),
         (_cui1MediaAddendumPath, 'PUBLIC_BACKEND_AUTHORITY_DELTA: ZERO', 'PUBLIC_BACKEND_AUTHORITY_DELTA: NONZERO'),
       ]) {
         expect(currentDocuments[probe.$1], contains(probe.$2));
@@ -1704,7 +1759,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
                         'CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md'
               ? acceptedM1bReopeningAddendum
               : path == _roadmapPath
-              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _currentRoadmapAdditions
+              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions
               : '');
       expect(_read(path), expected, reason: path);
     }
@@ -1718,7 +1773,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
     final roadmap = _read(_roadmapPath);
     final checkpoint = _baselineFile(_roadmapPath);
     expect(roadmap.substring(0, checkpoint.length), checkpoint);
-    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _currentRoadmapAdditions);
+    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions);
     expect(
       RegExp(
         r'^# COMMERCIAL TRACK CURRENT CONTROL$',

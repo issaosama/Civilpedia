@@ -1,9 +1,26 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 const cui2a0MigrationName = '00026_commercial_admin_business_draft_foundation.sql';
 const cui2a0MigrationPath = 'supabase/migrations/$cui2a0MigrationName';
 const cui2a0AuthorizationCommit = 'd9bc74d42e0d3ebc56455b928f2dbc57d8ca6fb8';
+const cui2a0AcceptedImplementationCommit = '41276132ba6a1606cd779f5ce92473bacfbcc7c8';
+const cui2a0AcceptedClosureCommit = '5642f329dc5dbf096847a08b1e5a30d3fc9d7c4f';
+const cui2a0RoadmapPath = 'docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md';
+const cui2a0ClosureReportPath = 'docs/architecture/reports/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_CLOSURE.md';
+const cui2a0RuntimePath = 'supabase/tests/commercial_cui2a0_admin_business_draft_foundation_test.sql';
+const cui2a0ClosedDocumentBlobs = <String, String>{
+  cui2a0RoadmapPath: '8fa8595cfe9cc21a00db8016f930b45cf76b52d2',
+  cui2a0ClosureReportPath: '068307bb6e3d64a0cb479f127d1c162a155cb0cd',
+  'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_ADMIN_BUSINESS_DRAFT_AUTHORITY_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md': 'ed23e9136a39f71d95f91da7dd22e087a59dfca8',
+  'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A0_APPEND_AUDIT_LOG_ACL_SECURITY_ADDENDUM_V1.md': '38016765af82de2e5a25e3b2169536bcf5fab44b',
+};
+const _acceptedSourceBlobs = <String, String>{
+  ...cui2a0ClosedDocumentBlobs,
+  cui2a0MigrationPath: '0de3aef18e9687a24917442649e5ffe831f391e0',
+  cui2a0RuntimePath: '96a2bd1f6cff8d2bbe9ad6433eb223267da96b4b',
+};
 const cui2a0ImplementationPaths = <String>{
   cui2a0MigrationPath,
   'supabase/tests/commercial_cui2a0_admin_business_draft_foundation_test.sql',
@@ -45,7 +62,7 @@ END;
 String _clean(String s) => s.replaceAll(RegExp(r'--[^\n]*'), '');
 String _compact(String s) => _clean(s).replaceAll(RegExp(r'\s+'), ' ').trim();
 String _git(List<String> args) {
-  final r=Process.runSync('git',args);
+  final r=Process.runSync('git',args,stdoutEncoding:utf8,stderrEncoding:utf8);
   if(r.exitCode!=0) throw StateError('Git source verification failed');
   return (r.stdout as String).replaceAll('\r\n','\n');
 }
@@ -142,7 +159,8 @@ bool isAuthorizedCui2a0Sql(String source) {
     RegExp(r'(INSERT INTO|UPDATE|DELETE FROM) public[.](business_memberships|subscriptions|business_applications|entity_media)').hasMatch(create+update)) return false;
   return true;
 }
-bool hasAuthorizedCui2a0Boundary() {
+// Retained historical implementation boundary. Closure does not renew it.
+bool hasHistoricalAuthorizedCui2a0Boundary() {
   final file=File(cui2a0MigrationPath);
   if(!file.existsSync() || !isAuthorizedCui2a0Sql(file.readAsStringSync())) return false;
   final historical=_git(['ls-tree','-r','--name-only',cui2a0AuthorizationCommit,'--','supabase/migrations']).trim().split('\n');
@@ -152,6 +170,72 @@ bool hasAuthorizedCui2a0Boundary() {
     historical.length==25 && actual.join('\n')==expected.join('\n') &&
     _git(['diff','--name-only',cui2a0AuthorizationCommit,'--',...historical]).trim().isEmpty &&
     _git(['diff','--name-only',cui2a0AuthorizationCommit,'--','lib','docs']).trim().isEmpty;
+}
+final _acceptedSources = _acceptedSourceBlobs.map(
+  (path, blob) => MapEntry(path, _git(['cat-file', 'blob', blob])),
+);
+final _acceptedCommitPinsMatch =
+    _git(['merge-base', cui2a0AuthorizationCommit, cui2a0AcceptedImplementationCommit]).trim() == cui2a0AuthorizationCommit &&
+    _git(['rev-parse', '$cui2a0AcceptedClosureCommit^']).trim() == cui2a0AcceptedImplementationCommit &&
+    _git(['rev-parse', '$cui2a0AcceptedImplementationCommit:$cui2a0RoadmapPath']).trim() == 'a5586dfdea1770f58d2333bcabad26ea00d8e747' &&
+    _acceptedSourceBlobs.entries.every((entry) =>
+      _git(['rev-parse', '$cui2a0AcceptedClosureCommit:${entry.key}']).trim() == entry.value &&
+      (entry.key == cui2a0RoadmapPath || entry.key == cui2a0ClosureReportPath ||
+        _git(['rev-parse', '$cui2a0AcceptedImplementationCommit:${entry.key}']).trim() == entry.value));
+
+List<String> _paths(String output) => output.trim().isEmpty ? [] : output.trim().split('\n');
+bool _samePaths(Iterable<String> actual, Iterable<String> expected) {
+  final left = actual.toList()..sort();
+  final right = expected.toList()..sort();
+  return left.join('\n') == right.join('\n');
+}
+
+// Current recognition is exact accepted closure evidence, never continuing
+// implementation authority. Optional inputs are adversarial in-memory probes.
+bool hasAuthorizedCui2a0Boundary({
+  Map<String, String>? sources,
+  Iterable<String>? libDocsChanges,
+  Iterable<String>? migrationNames,
+  Iterable<String>? predecessorChanges,
+  Iterable<String>? backendChanges,
+  Iterable<String>? untrackedAuthorityPaths,
+  String implementationCommit = cui2a0AcceptedImplementationCommit,
+  String closureCommit = cui2a0AcceptedClosureCommit,
+}) {
+  if (implementationCommit != cui2a0AcceptedImplementationCommit ||
+      closureCommit != cui2a0AcceptedClosureCommit || !_acceptedCommitPinsMatch) return false;
+  final actualSources = sources ?? {
+    for (final path in _acceptedSources.keys)
+      path: File(path).readAsStringSync().replaceAll('\r\n', '\n'),
+  };
+  if (actualSources.length != _acceptedSources.length ||
+      !_acceptedSources.entries.every((entry) => actualSources[entry.key] == entry.value) ||
+      !isAuthorizedCui2a0Sql(actualSources[cui2a0MigrationPath]!)) return false;
+  final securityRoadmap = _git(['cat-file', 'blob', 'a5586dfdea1770f58d2333bcabad26ea00d8e747']);
+  final closedRoadmap = actualSources[cui2a0RoadmapPath]!;
+  if (!closedRoadmap.startsWith(securityRoadmap)) return false;
+  final closureAppend = closedRoadmap.substring(securityRoadmap.length);
+  for (final control in [
+    'CUI2A0_STATE: CLOSED',
+    'CUI2A0_IMPLEMENTATION_AUTHORIZED: NO — SLICE CLOSED',
+    'COMMERCIAL_CURRENT_SLICE: NONE',
+    'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO',
+    'CUI2A1_STATE: NOT AUTHORIZED',
+    'M4_STATE: NOT AUTHORIZED', 'M5_STATE: NOT AUTHORIZED',
+    'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO',
+  ]) {
+    if (!closureAppend.contains(control) ||
+        !actualSources[cui2a0ClosureReportPath]!.contains(control)) return false;
+  }
+  final historical = _paths(_git(['ls-tree', '-r', '--name-only', cui2a0AuthorizationCommit, '--', 'supabase/migrations']));
+  return historical.length == 25 && hasAuthorizedCui2a0SecuritySupport() &&
+    _samePaths(migrationNames ?? Directory('supabase/migrations').listSync().whereType<File>().map((f) => f.uri.pathSegments.last),
+      [...historical.map((p) => p.split('/').last), cui2a0MigrationName]) &&
+    (predecessorChanges ?? _paths(_git(['diff', '--name-only', cui2a0AuthorizationCommit, '--', ...historical]))).isEmpty &&
+    _samePaths(libDocsChanges ?? _paths(_git(['diff', '--name-only', cui2a0AuthorizationCommit, '--', 'lib', 'docs'])),
+      [cui2a0RoadmapPath, cui2a0ClosureReportPath]) &&
+    (backendChanges ?? _paths(_git(['diff', '--name-only', cui2a0AcceptedImplementationCommit, '--', 'supabase']))).isEmpty &&
+    (untrackedAuthorityPaths ?? _paths(_git(['ls-files', '--others', '--exclude-standard', '--', 'lib', 'docs', 'supabase']))).isEmpty;
 }
 // The extra security-support path permits only this exact expectation change.
 // Removing any unrelated RLS/actor/secret assertion is still rejected.
@@ -194,6 +278,78 @@ void main() {
     }
     expect(RegExp(r'SECURITY INVOKER').allMatches(sql),hasLength(2));
     expect(RegExp(r'SECURITY DEFINER').allMatches(sql),hasLength(7));
+  });
+  test('post-closure pins exact implementation and two-file documentary closure', () {
+    expect(_acceptedCommitPinsMatch, isTrue);
+    expect(hasAuthorizedCui2a0Boundary(), isTrue);
+    expect(hasHistoricalAuthorizedCui2a0Boundary(), isFalse,
+      reason: 'The historical implementation boundary must not become continuing authority');
+    expect(_samePaths(_paths(_git(['diff', '--name-only', '$cui2a0AcceptedImplementationCommit^', cui2a0AcceptedImplementationCommit])), [
+      ...cui2a0ImplementationPaths,
+      'test/commercial_harden1_public_plans_exposure_migration_test.dart',
+      'test/commercial_m1b_catalog_reference_data_migration_test.dart',
+      'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart',
+    ]), isTrue);
+    expect(_samePaths(_paths(_git(['diff', '--name-only', cui2a0AcceptedImplementationCommit, cui2a0AcceptedClosureCommit])),
+      [cui2a0RoadmapPath, cui2a0ClosureReportPath]), isTrue);
+    const wrong = '0000000000000000000000000000000000000000';
+    expect(hasAuthorizedCui2a0Boundary(implementationCommit: wrong), isFalse);
+    expect(hasAuthorizedCui2a0Boundary(closureCommit: wrong), isFalse);
+  });
+  for (final entry in _acceptedSources.entries) {
+    test('post-closure rejects changed accepted source: ${entry.key}', () {
+      expect(hasAuthorizedCui2a0Boundary(sources: {
+        ..._acceptedSources, entry.key: '${entry.value}\n-- unauthorized bytes\n',
+      }), isFalse);
+    });
+  }
+  final securityRoadmap = _git(['cat-file', 'blob', 'a5586dfdea1770f58d2333bcabad26ea00d8e747']);
+  final closureAppend = _acceptedSources[cui2a0RoadmapPath]!.substring(securityRoadmap.length);
+  for (final mutation in <String, String>{
+    'CUI2A0_STATE: CLOSED': 'CUI2A0_STATE: OPEN',
+    'CUI2A0_IMPLEMENTATION_AUTHORIZED: NO — SLICE CLOSED': 'CUI2A0_IMPLEMENTATION_AUTHORIZED: YES',
+    'CUI2A1_STATE: NOT AUTHORIZED': 'CUI2A1_STATE: IMPLEMENTATION AUTHORIZED',
+    'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO': 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES',
+    'COMMERCIAL_CURRENT_SLICE: NONE': 'COMMERCIAL_CURRENT_SLICE: CUI-2A1',
+    'M4_STATE: NOT AUTHORIZED': 'M4_STATE: AUTHORIZED',
+    'M5_STATE: NOT AUTHORIZED': 'M5_STATE: AUTHORIZED',
+    'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO': 'R10.5-D_STATE: IMPLEMENTATION YES',
+  }.entries) {
+    test('post-closure rejects final control mutation: ${mutation.key}', () {
+      expect(closureAppend, contains(mutation.key));
+      expect(hasAuthorizedCui2a0Boundary(sources: {
+        ..._acceptedSources,
+        cui2a0RoadmapPath: securityRoadmap + closureAppend.replaceFirst(mutation.key, mutation.value),
+      }), isFalse);
+    });
+  }
+  test('post-closure rejects future A1 paths and arbitrary documentary suffixes', () {
+    for (final path in [
+      'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A1_ADMIN_BUSINESS_DRAFT_CONSOLE_IMPLEMENTATION_CONTRACT_V1.md',
+      'docs/unauthorized.md',
+      'lib/unauthorized.dart',
+      'lib/features/business/data/supabase_commercial_admin_gateway.dart',
+      'lib/features/business/presentation/providers/commercial_admin_provider.dart',
+      'lib/features/business/presentation/screens/admin_businesses_screen.dart',
+      'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
+    ]) {
+      expect(hasAuthorizedCui2a0Boundary(libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath, path]), isFalse, reason: path);
+      expect(hasAuthorizedCui2a0Boundary(untrackedAuthorityPaths: [path]), isFalse, reason: path);
+    }
+    expect(hasAuthorizedCui2a0Boundary(sources: {
+      ..._acceptedSources, 'docs/extra.md': 'not authorized',
+    }), isFalse);
+    expect(hasAuthorizedCui2a0Boundary(sources: {
+      ..._acceptedSources, cui2a0RoadmapPath: '${_acceptedSources[cui2a0RoadmapPath]}\n# Arbitrary future authority\n',
+    }), isFalse);
+  });
+  test('post-closure rejects 00027, predecessor and arbitrary backend changes', () {
+    final migrations = Directory('supabase/migrations').listSync().whereType<File>().map((f) => f.uri.pathSegments.last).toList();
+    expect(hasAuthorizedCui2a0Boundary(migrationNames: [...migrations, '00027_unauthorized.sql']), isFalse);
+    for (final name in migrations.where((name) => name != cui2a0MigrationName)) {
+      expect(hasAuthorizedCui2a0Boundary(predecessorChanges: ['supabase/migrations/$name']), isFalse, reason: name);
+    }
+    expect(hasAuthorizedCui2a0Boundary(backendChanges: ['supabase/tests/arbitrary.sql']), isFalse);
   });
   test('T03-T05 exact permission in every public RPC, no membership/admin shortcut',(){
     for(final entry in <String,String>{
