@@ -691,6 +691,87 @@ bool _allowsClosedCui2a0Composition(
       postClosureImplementationChanges,
     );
 
+// Exact frozen documentary recognition; this is not A1 implementation authority.
+bool _allowsFrozenCui2a1Composition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) =>
+    cui2a0.matchesFrozenCui2a1Documents(
+      roadmap, documents[cui2a0.cui2a1ContractPath] ?? '',
+    ) &&
+    documents.length == _closedCommittedDocuments.length + 1 &&
+    _allowsClosedCui2a0Composition(
+      changedPaths.where((path) => path != cui2a0.cui2a1ContractPath),
+      _cui2a0ClosedRoadmap,
+      Map.fromEntries(documents.entries.where(
+        (entry) => entry.key != cui2a0.cui2a1ContractPath,
+      )),
+      postClosureImplementationChanges,
+    );
+
+void _registerFrozenCui2a1Tests() {
+  final paths = _cui1ChangedPaths(_git([
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+  ]));
+  final documents = <String, String>{
+    for (final path in _closedCommittedDocuments.keys) path: _read(path),
+    cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+  };
+  final roadmap = _read(_cui1RoadmapPath);
+  bool accepts({String? candidateRoadmap, Map<String, String>? candidateDocs,
+    Iterable<String>? candidatePaths}) => _allowsFrozenCui2a1Composition(
+      candidatePaths ?? paths, candidateRoadmap ?? roadmap,
+      candidateDocs ?? documents, [],
+    );
+  test('CUI-2A1 exact committed documentary composition preserves closed fixture', () {
+    expect(accepts(), isTrue);
+    expect(_allowsClosedCui2a0Composition(
+      paths.where((p) => p != cui2a0.cui2a1ContractPath),
+      _cui2a0ClosedRoadmap, _closedCommittedDocuments, [],
+    ), isTrue);
+    expect(_allowsClosedCui2a0Composition(
+      [...paths, cui2a0.cui2a1ContractPath],
+      _cui2a0ClosedRoadmap, _closedCommittedDocuments, [],
+    ), isFalse, reason: 'Historical closure still rejects the later A1 path');
+  });
+  test('CUI-2A1 live documentary predicate rejects missing or changed source', () {
+    for (final entry in documents.entries) {
+      expect(accepts(candidateDocs: {
+        ...documents, entry.key: '${entry.value}\nunauthorized',
+      }), isFalse, reason: entry.key);
+      expect(accepts(candidateDocs: Map.from(documents)..remove(entry.key)),
+        isFalse, reason: 'Missing ${entry.key}');
+    }
+  });
+  test('CUI-2A1 live documentary predicate rejects suffix and premature authority', () {
+    for (final altered in [
+      roadmap + '\n# Arbitrary future authorization\n',
+      roadmap.substring(0, roadmap.length - 1),
+      roadmap.replaceAll('CUI2A1_IMPLEMENTATION_AUTHORIZED: NO',
+        'CUI2A1_IMPLEMENTATION_AUTHORIZED: YES'),
+      roadmap.replaceAll('COMMERCIAL_CURRENT_SLICE: NONE',
+        'COMMERCIAL_CURRENT_SLICE: CUI-2A1'),
+      roadmap.replaceAll('CUI2A1_STATIC_COMPATIBILITY_MODIFICATIONS_AUTHORIZED: YES',
+        'CUI2A1_STATIC_COMPATIBILITY_MODIFICATIONS_AUTHORIZED: NO'),
+    ]) {
+      expect(accepts(candidateRoadmap: altered), isFalse);
+    }
+  });
+  test('CUI-2A1 live documentary predicate rejects extra and lookalike paths', () {
+    for (final path in [
+      '${cui2a0.cui2a1ContractPath}.bak',
+      cui2a0.cui2a1ContractPath.replaceFirst('_V1.md', '_V2.md'),
+      'docs/unauthorized.md', 'test/unauthorized_test.dart',
+      'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
+      'supabase/migrations/00027_unauthorized.sql',
+    ]) {
+      expect(accepts(candidatePaths: [...paths, path]), isFalse, reason: path);
+    }
+  });
+}
+
 bool _matchesCui1MediaAuthority(String actual, String committed) => actual == committed;
 
 List<String> _cui1ChangedPaths(String output) =>
@@ -831,6 +912,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
       final currentRoadmap = _read(_cui1RoadmapPath);
       final currentDocuments = <String, String>{
         for (final path in _closedCommittedDocuments.keys) path: _read(path),
+        cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
       };
       // Accepted production/test paths are immutable after CUI-1 closure.
       final postClosureChanges = _cui1ChangedPaths(_git([
@@ -842,7 +924,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         String? roadmap,
         Map<String, String>? documents,
         Iterable<String>? implementationChanges,
-      }) => _allowsClosedCui2a0Composition(
+      }) => _allowsFrozenCui2a1Composition(
         changedPaths ?? paths,
         roadmap ?? currentRoadmap,
         documents ?? currentDocuments,
@@ -880,7 +962,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         'docs/architecture/contracts/ARBITRARY_MEDIA_ADDENDUM.md',
         'docs/architecture/ARBITRARY_GOVERNANCE.md',
         'lib/features/directory/presentation/ninth.dart',
-        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A1_ADMIN_BUSINESS_DRAFT_CONSOLE_IMPLEMENTATION_CONTRACT_V1.md',
+        'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A1_ADMIN_BUSINESS_DRAFT_CONSOLE_IMPLEMENTATION_CONTRACT_V2.md',
         'docs/unauthorized.md',
         'lib/features/business/data/supabase_commercial_admin_gateway.dart',
         'lib/features/business/presentation/providers/commercial_admin_provider.dart',
@@ -1792,6 +1874,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
 ''';
 
 void main() {
+  _registerFrozenCui2a1Tests();
   _registerCui1CompatibilityTests();
   late String raw;
   late String body;
@@ -2170,9 +2253,7 @@ void main() {
               'expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl);',
             );
       expect(authorizedHarden, _git(['show', '$_cui1GovernanceCommit:$hardenPath']));
-      expect(
-        _read(hardenPath),
-        authorizedHarden.replaceFirst(
+      final historicalHarden = authorizedHarden.replaceFirst(
           "import 'package:flutter_test/flutter_test.dart';",
           "import 'package:flutter_test/flutter_test.dart';\nimport 'commercial_cui2a0_admin_business_draft_foundation_migration_test.dart' as cui2a0;",
         ).replaceFirst(
@@ -2187,8 +2268,9 @@ void main() {
         ).replaceFirst(
           'expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl);',
           'expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions);',
-        ),
-      );
+        );
+      expect(historicalHarden, _git(['show', '${cui2a0.cui2a1CompatibilityCommit}:$hardenPath']));
+      expect(_read(hardenPath), cui2a0.compatibleFrozenHardenSource(historicalHarden));
       final approvedDocs = <String, String>{
         'docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI1_BUSINESS_EXPERIENCE_FOUNDATION_IMPLEMENTATION_CONTRACT_V1.md':
             '889ff1da4389ba891247cfb5497554ca98fa58b3',
@@ -2221,7 +2303,7 @@ void main() {
                   _m3FormalClosure +
                   _cui1Authorization +
                   _cui1MediaReconciliation +
-                  _closedRoadmapAdditions
+                  _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend
             : checkpoint;
         expect(_read(entry.key), expected, reason: entry.key);
       }
