@@ -4276,3 +4276,82 @@ The current four guards may reject the newly accepted documentation until that f
 ### Git and historical preservation
 
 Entry HEAD and local origin/main are both 3f4ce87381ea97b0f3f6a772827c4d77b58aee66. This pass updates acceptance/status governance only in the existing untracked CUI-2A1 contract and appends only this one roadmap section. Every prior roadmap byte and all protected dirty files/artifacts, other contracts/reports, lib/tests/SQL/Supabase are preserved. Staging remains EMPTY; no stage, commit, push, reset, revert, clean or stash. The Owner retains final Git ownership and will commit after focused independent governance review. No future acceptance commit SHA or circular source hash is inserted.
+
+
+# COMMERCIAL CUI-2A1 STATIC COMPATIBILITY-ONLY AUTHORIZATION — 2026-10-09
+
+```yaml
+CUI2A1_STATIC_COMPATIBILITY_MODIFICATIONS_AUTHORIZED: YES — FOUR NAMED GUARDS ONLY
+CUI2A1_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_STATE: CONTRACT FROZEN — IMPLEMENTATION NOT AUTHORIZED
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A0_STATE: CLOSED
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+BACKEND_AUTHORITY_DELTA: ZERO
+PUBLICATION_AUTHORITY_DELTA: ZERO
+ENTITLEMENT_AUTHORITY_DELTA: ZERO
+PAYMENT_AUTHORITY_DELTA: ZERO
+REMOTE_DEPLOYED_DATABASE: UNVERIFIED
+IMPLEMENTATION_AUTHORIZED: NO
+CURRENT_PASS: STRICT GOVERNANCE-ONLY / ROADMAP APPEND
+COMPATIBILITY_EXECUTION_GATE: OWNER COMMIT OF THIS EXACT AUTHORIZATION REQUIRED
+FOCUSED_GREEN: NOT CLAIMED — NO TESTS EXECUTED IN THIS PASS
+GIT_OWNER: User
+```
+
+### Authority and verified committed documentary baseline
+
+Authority: Owner-provided **CIVILPEDIA — CUI-2A1 STATIC COMPATIBILITY AUTHORIZATION — CONTINUATION**, implementing only the frozen CUI-2A1 Contract V1 §16 step 3. The contract remains ACCEPTED / FROZEN. This record authorizes a later, separately performed static-compatibility correction; it performs no guard correction and grants no Flutter, A1 production/UI-test, backend or commercial implementation authority.
+
+| Verified Git input | Actual committed identity |
+| --- | --- |
+| Accepted/frozen governance commit; entry HEAD and local origin/main | `e767add487034171b0e8512ee6cfc8d56484004e` |
+| Frozen contract path | `docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A1_ADMIN_BUSINESS_DRAFT_CONSOLE_IMPLEMENTATION_CONTRACT_V1.md` |
+| Frozen contract blob at that commit | `8071f951ff336714c420a5216504d0d49183e055` |
+| Roadmap path | `docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md` |
+| Roadmap blob at that commit, before this append | `049dfcff25091616d80132c6db9402f095e02c56` |
+
+These identities were derived from local Git objects, not invented or inferred from filenames. The Owner must commit this exact append before guard work. The later implementer must verify the actual committed authorization commit and roadmap blob, the exact append text, every preceding roadmap byte and the frozen contract identity. This pending record is not a committed execution grant. Its future commit/blob identities must be observed after they exist; no self-referential or nonexistent future implementation hash is required.
+
+### Exact later four-guard correction boundary
+
+Permission is limited to compatibility predicates and adversarial probes in exactly these four existing files:
+
+```text
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+```
+
+Purpose: recognize only the exact committed frozen CUI-2A1 documentary composition, comprising the verified accepted/frozen contract and roadmap acceptance/freeze record plus this exact committed compatibility authorization, while preserving historical CUI-1/A0/HARDEN-1/M1b/M3 security and authority predicates. The later correction may not rewrite the contract, roadmap, other documentation, SQL/Supabase, production sources or any other test. The frozen 33-path manifest, API contracts, technical design, permissions and commercial scope remain unchanged.
+
+These two preservation suites remain **READ-ONLY / UNMODIFIED**, outside the correction allowlist:
+
+```text
+test/commercial_m1a_private_catalog_migration_test.dart
+test/v1_r09q_security_matrix_test.dart
+```
+
+### Mandatory later security and independent GREEN gate
+
+Preserve strict historical CUI-1/A0 CLOSED predicates and their exact historical fixtures; all historical source, commit, SQL, ACL, ownership and security pins; the exact migration inventory 00001–00026; and accepted A0 backend behavior. Documentary recognition must be separately bounded to the fixed committed inputs above and the observed committed authorization. Never introduce dynamic HEAD acceptance, broad directory allowlists, arbitrary future-record acceptance or a generic dirty-file exception. Preserve the protected dirty baseline by exact paths and bytes.
+
+Positive and adversarial negative checks must use the same live/current compatibility predicate and branch selection. Reject arbitrary future roadmap suffixes, extra documentation or other paths, A1 Flutter/production/UI-test additions, migration 00027 or any SQL/Supabase delta, changed historical pins, changes to unrelated protected sources, altered/uncommitted authorization, unauthorized contract/roadmap changes and premature CUI-2A1 implementation authorization. Retain historical positive/negative coverage, M1a/R09q protections and every unrelated security assertion. No skipping, weaker test-only predicate or bypass may manufacture GREEN.
+
+The later focused gate must independently execute **all six suites**: each of the four named guards above, unchanged M1a and unchanged R09q. **Zero failures and independent Big Pickle review are mandatory before the Owner commits the guard correction.** Review must accept the exact documentary recognition, adversarial probes and preservation evidence. If this cannot be achieved inside the four-file boundary while M1a/R09q remain unchanged, STOP for independent audit and an exact Architect amendment; do not expand scope.
+
+The currently expected transitional RED state grants no waiver and no implementation authority. No tests are executed or modified in this governance pass, and no GREEN or independent-review PASS is claimed.
+
+### Retained implementation locks and historical preservation
+
+This record satisfies only the separate authorization-record step, subject to Owner commit; it does not complete §16 steps 4–7. The future four-guard correction, focused GREEN, independent review and Owner compatibility commit remain prerequisites. The separately gated AUTHORIZED CUI-2A1 implementation current-composition predicate remains disabled: this record permits no anticipated implementation-YES append or A1 source changes.
+
+A later exact implementation authorization and coordinated four-guard pass under §16 step 6 remain separately required. Both committed preimplementation focused GREEN with zero A1 production/test changes and postimplementation focused GREEN remain mandatory under §§16/22. Only that later authorization may permit the frozen 18 production plus 11 focused/UI-test paths; guard-source changes belong exclusively to separately authorized compatibility passes. Final implementation acceptance must verify actual resulting Owner-committed source identities and the exact bounded path set, without requiring nonexistent future implementation hashes beforehand.
+
+This pass appends only this one roadmap section, preserving all previous roadmap bytes and historical controls, the frozen contract, guards, lib/tests/SQL/Supabase, other documents and protected dirty/untracked files. No stage, commit, push, reset, revert, clean, stash or remote/production database access occurs. Commercial CURRENT remains NONE, implementation remains NO and all authority deltas remain ZERO.
