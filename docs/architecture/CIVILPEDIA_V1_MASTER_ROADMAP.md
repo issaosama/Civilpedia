@@ -4202,3 +4202,77 @@ Still outside CUI-2A0 closure: Supabase public-schema defaults for future postgr
 COMMERCIAL_CURRENT_SLICE is **NONE** and COMMERCIAL_IMPLEMENTATION_AUTHORIZED is **NO**, until a later explicit Architect authorization record opens the next slice. M4, M5 and CUI-2A1 remain NOT AUTHORIZED; R10.5-D remains AUDIT-ONLY / IMPLEMENTATION NO. CUI-1 and M3 remain CLOSED. **No next slice is automatically authorized.**
 
 This governance pass creates only the closure report and appends this single chronological roadmap record. Frozen governing documents, implementation/SQL/tests/lib/Supabase, protected dirty files and all prior roadmap bytes are preserved. No implementation, backend operation, migration/test run, staging, commit, push, reset, revert, clean or stash occurs. Staging remains EMPTY and the User retains Git ownership; these closure documents are prepared for Architect verification.
+
+
+# COMMERCIAL CUI-2A1 CONTRACT ACCEPTANCE + FREEZE — 2026-10-08
+
+## Current Commercial Track Control — contract accepted/frozen; no implementation authorized
+
+```text
+COMMERCIAL_CONTRACT: docs/architecture/contracts/CIVILPEDIA_COMMERCIAL_CUI2A1_ADMIN_BUSINESS_DRAFT_CONSOLE_IMPLEMENTATION_CONTRACT_V1.md
+DOCUMENT_STATUS: ACCEPTED — CANONICAL CUI-2A1 IMPLEMENTATION CONTRACT
+ARCHITECT_ACCEPTANCE: ACCEPTED — 2026-10-08
+FREEZE_STATE: FROZEN
+IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_STATE: CONTRACT FROZEN — IMPLEMENTATION NOT AUTHORIZED
+CUI2A1_CONTRACT_STATE: ACCEPTED / FROZEN
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+COMMERCIAL_CONTROL: CUI-2A1 CONTRACT FROZEN — NO COMMERCIAL IMPLEMENTATION SLICE AUTHORIZED
+CUI2A0_STATE: CLOSED
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+BACKEND_AUTHORITY_DELTA: ZERO
+PUBLICATION_AUTHORITY_DELTA: ZERO
+ENTITLEMENT_AUTHORITY_DELTA: ZERO
+PAYMENT_AUTHORITY_DELTA: ZERO
+REMOTE_DEPLOYED_DATABASE: UNVERIFIED
+CUI2A1_STATIC_COMPATIBILITY_MODIFICATIONS_AUTHORIZED: NO
+CUI2A1_PREIMPLEMENTATION_GREEN: NOT CLAIMED — FUTURE SEPARATE GATE
+CURRENT_PASS: STRICT GOVERNANCE-ONLY ACCEPTANCE / FREEZE
+GIT_OWNER: User
+```
+
+Authority: Owner-provided **CIVILPEDIA — CUI-2A1 Final Architect Acceptance + Contract Freeze**, supplying the Architect decision **ACCEPTED — 2026-10-08** and final independent pre-freeze contract review **PASS with zero CRITICAL, HIGH or MEDIUM findings**. This records supplied acceptance; it is not agent self-acceptance, a new independent review/test run, implementation acceptance, static GREEN or deployed-readiness evidence.
+
+The [CUI-2A1 Implementation Contract V1](contracts/CIVILPEDIA_COMMERCIAL_CUI2A1_ADMIN_BUSINESS_DRAFT_CONSOLE_IMPLEMENTATION_CONTRACT_V1.md), current §23, is **ACCEPTED / FROZEN** as the canonical bounded Admin Business Draft Console consumer specification. Contract acceptance/freeze does not authorize implementation. Earlier CUI-2A1 draft/not-authorized status wording is superseded only as to contract maturity; all prior roadmap bytes, CUI-2A0/CUI-1/M3 closures, exclusions and technical/history records remain unchanged. **COMMERCIAL_CURRENT_SLICE is NONE; COMMERCIAL_IMPLEMENTATION_AUTHORIZED is NO. No new implementation slice is activated.**
+
+### Frozen future manifest and preserved authority boundaries
+
+The exact reconciled candidate is now frozen as a future boundary, not a present write allowance:
+
+| Frozen boundary | Paths | NEW | MODIFIED |
+| --- | ---: | ---: | ---: |
+| Production | 18 | 10 | 8 |
+| New focused tests | 6 | 6 | 0 |
+| Existing UI tests | 5 | 0 | 5 |
+| Separate compatibility guards | 4 | 0 | 4 |
+| Total | **33** | **16** | **17** |
+
+All exact production/test paths remain those in the frozen contract §§14–15. The four future compatibility guards are exactly:
+
+```text
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+```
+
+Both test/commercial_m1a_private_catalog_migration_test.dart and test/v1_r09q_security_matrix_test.dart remain **READ-ONLY / UNMODIFIED** and mandatory focused preservation regressions. Historical CUI-1, A0, M1a, HARDEN-1, M1b, M3, R09q, ownership, SQL and ACL protections remain intact. No static guard modification is authorized now.
+
+The frozen contract preserves the six accepted A0 RPC mappings; four independent permissions; three authenticated root routes; no-read creation/history/edit handling; exact six-key payloads; immutable create replay and optimistic update/unknown-result reconciliation; actor/session-generation private-state clearance; Draft-only/four-type authoring and primary-location completeness; Arabic/English compatibility and responsive design; narrow User Area navigation exception; and all commercial exclusions. Backend/publication/entitlement/payment authority deltas are ZERO. No new RPC, SQL/migration, production database operation, ownership/invitation, payment/publication/entitlement, M4/M5 or R10.5-D implementation is authorized.
+
+### Separate compatibility, review and GREEN prerequisites
+
+The exact contract §16 gate sequence is preserved unchanged, including strict historical CUI-1/A0 CLOSED predicates and the separately gated AUTHORIZED CUI-2A1 live/current predicate. Future authorized A1 implementation, if later opened, is restricted to the frozen 18 production plus 11 focused/UI-test paths; guard edits belong only to separate authorized four-guard compatibility passes. Positive/adversarial evidence must use the same live/current predicate, with committed authorization and zero A1 production/test changes at the preimplementation gate, and actual resulting committed source identities/exact bounded path set at final implementation acceptance. No nonexistent future implementation hashes are required or fabricated.
+
+After focused independent freeze-diff review and the Owner's governance commit, the next future action is a **SEPARATELY AUTHORIZED compatibility-only governance pass**. Compatibility-only authorization, guard correction, focused GREEN on the four guards plus unchanged M1a/R09q, independent review and Owner compatibility commit remain mandatory and have not occurred for this freeze composition. Separate implementation authorization and both preimplementation/postimplementation focused GREEN remain required before implementation/acceptance, respectively. Contract freeze alone supplies none of those authorities or PASS outcomes.
+
+The current four guards may reject the newly accepted documentation until that future separately authorized compatibility correction. This disclosed **LOW transitional condition** grants no waiver or implementation authority. No guards are changed to obtain GREEN now, no implementation/production/database tests run in this pass, and no GREEN is claimed for the new freeze composition. **REMOTE DEPLOYED DATABASE: UNVERIFIED**; local contract acceptance is not deployment, staff provisioning or live readiness.
+
+### Git and historical preservation
+
+Entry HEAD and local origin/main are both 3f4ce87381ea97b0f3f6a772827c4d77b58aee66. This pass updates acceptance/status governance only in the existing untracked CUI-2A1 contract and appends only this one roadmap section. Every prior roadmap byte and all protected dirty files/artifacts, other contracts/reports, lib/tests/SQL/Supabase are preserved. Staging remains EMPTY; no stage, commit, push, reset, revert, clean or stash. The Owner retains final Git ownership and will commit after focused independent governance review. No future acceptance commit SHA or circular source hash is inserted.
