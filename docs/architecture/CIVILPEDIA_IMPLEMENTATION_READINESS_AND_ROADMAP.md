@@ -6,6 +6,8 @@
 **Scope:** Converts approved M1–M7 architecture into a practical, atomic implementation roadmap.
 **Constraint:** No production code changes. Only this document is created/edited.
 
+**Current planning reference — 2026-10-11:** M8 snapshots, Wave IDs and earlier recommendations below are retained as planning history. The [Master Roadmap](CIVILPEDIA_V1_MASTER_ROADMAP.md) is the current phase/status SSOT; its [Owner Planning Direction (2026-10-11)](CIVILPEDIA_V1_MASTER_ROADMAP.md#owner-planning-direction-2026-10-11) records Full V1 with a paid commercial Directory and a simultaneous Android / iOS public-launch target. This reference grants no implementation authority and does not reactivate historical F0/Wave recommendations.
+
 ---
 
 ## 1. PURPOSE
@@ -676,6 +678,13 @@ Per wave/layer (preserve existing baseline; never require heavy integration infr
 | Global Search (release) | W2.4 green; failure isolation | aggregator+model+widget | N/A | `/search` full screen reachable from Home/Header (not a bottom-nav tab) | Home search unchanged |
 | Monetization/Ads | W7 green; honest ads already (F0.4) | repo+widget+visualQA | N/A | W7 | No ad = no slot |
 
+**Owner release-planning clarification — 2026-10-11:** The table above records earlier feature/navigation gates, not acceptance of the expanded commercial or cross-platform release. Apply the dated [roadmap planning entry](CIVILPEDIA_V1_MASTER_ROADMAP.md#owner-planning-direction-2026-10-11) alongside the existing R10–R19 context and accepted commercial contracts; no status, gate or executable phase is changed here.
+
+- Full V1 planning includes real paid subscription capability, server-authoritative commercial publication/enforcement and authorized Business management. Existing Directory UI, active records or M3 Shadow do not establish commercial readiness.
+- Both Android / Google Play and iOS / Apple App Store must use one shared Supabase authority, canonical Business identity, ownership, entitlements, approved content and publication visibility. Future acceptance must prove full Business E2E on both platforms, privacy/account deletion and shared production verification.
+- iOS release build/plugin compatibility, physical-device acceptance, signing/provisioning, release artifacts, App Store metadata/privacy declarations and submission/review gates are **PLANNED / UNVERIFIED**. Android release acceptance and both store review outcomes also require actual evidence; simultaneous public launch is a target.
+- Final permitted billing/collection is **OPEN — NOT APPROVED**, requiring independent validation for each store plus technical and qualified legal/accounting review before billing freeze. Include commercial operations and human engineering/content approval in future estimates. There is no evidence-backed committed public launch date; older Android-only or limited-promotion estimates are not accepted forecasts for this scope.
+
 ---
 
 ## 24. DO NOT TOUCH YET
@@ -689,6 +698,8 @@ Explicit areas worth leaving alone until implementation requires them:
 - Speculative plan/paywall/Monetization architecture beyond the honest-ads foundation and Directory de-coupling.
 - Calculator visual redesign (KEEP working).
 - Migration of `checklist_data` (Tools-owned, stays).
+
+**Owner future-backlog clarification — 2026-10-11:** RFQ (quotation/opportunity workflows) and CRM (lead/customer-relationship workflows) are **LONG-TERM DEFERRED**, outside V1 and not committed V1.1 deliverables. Later consideration depends on Business growth and validated demand. Preserve stable Business UUIDs, user/Business separation, modular authorization/API boundaries and server-authoritative entitlements only; no speculative schema, endpoint, grant, UI or messaging infrastructure. Official Civilpedia Sponsorship and unfrozen package-value concepts remain future planning candidates under the [dated roadmap entry](CIVILPEDIA_V1_MASTER_ROADMAP.md#owner-planning-direction-2026-10-11), without new entitlements or implementation promises.
 
 ---
 
@@ -742,6 +753,8 @@ The previously listed items are **RESOLVED** (see the sections cited):
 2. Whether the Directory V1 repository wraps `sb_profiles` in-place (dual-read/write in-place) vs migrates to a new versioned store up-front — both staged in W5.1; choose during implementation.
 3. Monetization model specifics (campaign sources, sponsorship pricing, plan/paywall tiers) — deferred to W7; speculative.
 4. Home layout polish details (D9 dark, aggregation widget placement) — deferred; finalized when Home aggregator work starts.
+
+**Current commercial/planning reference — 2026-10-11:** Item 3 is historical M8 context; plan identities/prices and existing commercial meaning now belong to the frozen Commercial Model V1 and accepted C1/C2/C3, preserved unchanged. The Owner prefers Business, Business Pro, Business Plus and Corporate; subscriptions, separately purchased Sponsored advertising, future Official Sponsorship and Corporate services remain distinct. Pending decisions include final permitted Android/iOS billing, applicable store validation, iOS release evidence and separate commercial execution contracts/authority. Any design conflicting with the frozen manual/assisted payment, manual-renewal/no-auto-charge or term rules requires **FORMAL AMENDMENT REQUIRED — NOT AUTHORIZED**, as traced in the [roadmap planning entry](CIVILPEDIA_V1_MASTER_ROADMAP.md#owner-planning-direction-2026-10-11). No commercial OQ or reconciliation risk is closed here.
 
 > If no genuine open decision remains for a specific area, it is resolved and not reopened without a real contradiction from implementation.
 

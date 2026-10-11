@@ -4355,3 +4355,85 @@ This record satisfies only the separate authorization-record step, subject to Ow
 A later exact implementation authorization and coordinated four-guard pass under §16 step 6 remain separately required. Both committed preimplementation focused GREEN with zero A1 production/test changes and postimplementation focused GREEN remain mandatory under §§16/22. Only that later authorization may permit the frozen 18 production plus 11 focused/UI-test paths; guard-source changes belong exclusively to separately authorized compatibility passes. Final implementation acceptance must verify actual resulting Owner-committed source identities and the exact bounded path set, without requiring nonexistent future implementation hashes beforehand.
 
 This pass appends only this one roadmap section, preserving all previous roadmap bytes and historical controls, the frozen contract, guards, lib/tests/SQL/Supabase, other documents and protected dirty/untracked files. No stage, commit, push, reset, revert, clean, stash or remote/production database access occurs. Commercial CURRENT remains NONE, implementation remains NO and all authority deltas remain ZERO.
+
+# OWNER PLANNING DIRECTION (2026-10-11)
+
+## Authority, status and preserved execution control
+
+Authority: Owner-provided **CIVILPEDIA — OWNER DECISIONS INTEGRATION / EXISTING ARCHITECTURE DOCUMENTATION UPDATE**. Status: **OWNER PLANNING DIRECTION — DOCUMENTATION UPDATED — OWNER REVIEW REQUIRED**. **IMPLEMENTATION NOT AUTHORIZED BY THIS UPDATE.** This chronological planning entry records the Owner's intended release and long-term direction; it is not Architect acceptance of new contracts, a commercial-policy amendment, a release-readiness PASS or an execution grant.
+
+The existing CURRENT PHASE CONTROL, phase table and commercial controls remain unchanged: R10.5-D is CURRENT for pre-implementation audit only, implementation NO / NOT STARTED; later UI slices remain LOCKED. Commercial CURRENT remains NONE; commercial implementation remains NO. CUI-2A1 remains ACCEPTED / FROZEN — IMPLEMENTATION NOT AUTHORIZED; CUI-2A0, CUI-1 and M3 remain CLOSED; M4/M5 remain NOT AUTHORIZED. The 2026-10-09 four-guard compatibility authorization and frozen CUI-2A1 §16 gates are preserved without expansion. Entry branch is main; observed HEAD is ed9840084eb67b1bb295459b420093a37d8bccbb. Its four-guard compatibility commit is repository evidence only; no fresh GREEN or acceptance outcome is asserted here.
+
+The [Frozen Commercial Model V1](CIVILPEDIA_COMMERCIAL_MODEL_V1.md), especially §§1.5/33, retains commercial-policy authority. Accepted [C1](contracts/CIVILPEDIA_COMMERCIAL_CORE_AUTHORITY_RECONCILIATION_CONTRACT_V1.md), [C2](contracts/CIVILPEDIA_COMMERCIAL_PUBLICATION_ENTITLEMENT_CONTRACT_V1.md) and [C3](contracts/CIVILPEDIA_COMMERCIAL_SUBSCRIPTION_ENTITLEMENT_ENFORCEMENT_CONTRACT_V1.md) retain reconciliation, publication/entitlement and technical architecture authority. Planning here does not alter their rules, registers, acceptance or history. The [Implementation Readiness & Gap Analysis](CIVILPEDIA_IMPLEMENTATION_READINESS_AND_ROADMAP.md), §§23–24/27, carries bounded release/backlog references to this entry; it does not replace this roadmap as phase/status SSOT.
+
+## Full V1 release direction and scope reconciliation
+
+Civilpedia V1 is intended to be a complete, professionally released engineering application with a real commercial Business Directory. Planned release scope includes the engineering encyclopedia, calculators and essential tools, existing core Projects functionality, Business Directory profiles and discovery, commercial subscription capability, authorized business management, and required security/privacy/release quality. A real paid commercial system belongs in this intended release; Directory presentation alone does not establish commercial completion.
+
+Publication requires valid server-side commercial authority and satisfaction of the applicable accepted/frozen entitlement, profile-quality, ownership/onboarding, moderation/verification and launch requirements. Existing entity or subscription active status alone is insufficient. M3 Shadow is not operational publication authority; accepted CUI-1 presentation and CUI-2A0 Draft authoring do not prove production commercial readiness. **Current commercial implementation is not declared production-ready; remote deployed database remains UNVERIFIED.**
+
+Earlier CORE ARCHITECTURE RULES item 17 and POST-V1 BY DEFAULT entries for payments/paid subscriptions/full monetization describe the preceding execution baseline and must not be presented as the current Owner's complete release target. Likewise, the older M8 Wave 7/§27 speculative plan wording and M6 Directory architecture §31's limited V1 scope are earlier planning context. They remain intact. Under SCOPE CHANGE PROTOCOL, the Architect/Owner must reconcile the intended paid Directory scope into separately accepted contracts and authorized execution boundaries before dependent implementation. This entry creates no new phase/slice, changes no CURRENT pointer or gate, and does not promote marketplace, e-commerce, commissions, RFQ, CRM or advanced advertising into V1.
+
+## Android and iOS: one shared authority
+
+The strategic target is **simultaneous public launch on Android / Google Play and iOS / Apple App Store**, using the existing Flutter application architecture where feasible. This is a target, not a guaranteed date or a claim that either platform has passed release acceptance.
+
+Both platforms must consume one authoritative production Supabase backend: one canonical Business UUID per genuine entity; shared Directory records and category data; shared ownership/membership roles; shared subscription/entitlement state; shared publication authority and approved public content; and consistent authorized Business visibility. Preserve directory_entities.id, business_memberships, separation of auth.users.id/personal identity from Business identity, one production Supabase initialization/client authority and one AuthProvider. Independent Android/iOS Business databases, duplicate Business identities or competing subscription authorities are prohibited.
+
+Native UI, build/signing, store compliance and permitted billing behavior may differ by platform. Future contracts and final acceptance must account for those differences while proving the same server authority, Business identity, ownership and commercial publication results. iOS build, dependency/plugin compatibility, physical-device acceptance, signing/provisioning, App Store submission/review and release gates are **PLANNED / UNVERIFIED**. No build/signing/dependency work is authorized here.
+
+## Commercial packages and separate products
+
+The Owner prefers retaining all three standard paid tiers plus negotiated Corporate: **Business**, **Business Pro**, **Business Plus**, **Corporate — Custom Quote**. Preserve frozen prices, durations, capabilities and their existing classifications, catalog identities, reference rows and historical data. Business Pro's frozen primary/default recommendation remains intact. Do not merge/delete tiers or reinterpret the entitlement matrix; provisional values remain provisional and unquotable.
+
+Package differentiation should reflect genuine Business value. Quality profiles, specialized company discovery, approved project/product portfolios, genuine contact-interaction analytics, multiple branches and appropriately authorized management tools are **PRODUCT-DIRECTION CANDIDATES** where not already decided or implemented. They create no new entitlement keys, tier assignments, feature promises, commercial eligibility or implementation requirements. Personal Projects do not become Business portfolios by inference. Commercial expansion requires separate architectural decisions and accepted contracts; excluded professional/specialist categories are not silently enrolled. Paid status never automatically means Verified; organic ranking must not silently become paid ranking.
+
+Preserve four distinct commercial product concepts: Business subscriptions; separately purchased Sponsored Listings/advertising; future Official Civilpedia Sponsorships; and Corporate negotiated services. An eligible subscription may permit a separate Sponsored purchase only under frozen policy; it does not automatically bundle advertising.
+
+**Official Civilpedia Sponsorship is FUTURE PLANNING ONLY.** It may cover independently contracted support/sponsorship of the app, sections, content or campaigns, subject to later policy, disclosure, editorial independence, commercial and legal review. It is not a fifth subscription tier, Verified status, a Sponsored Listing or an automatic Corporate entitlement. No sponsor record, financial table, price schedule, contract, UI, entitlement or advertising implementation is created or authorized.
+
+## Future Product Backlog clarification: RFQ and CRM
+
+Read with the existing Future Product Backlog — Architect Notes and POST-V1 BY DEFAULT sections: **RFQ and CRM are LONG-TERM DEFERRED**, outside V1 release requirements and **not committed V1.1 deliverables**. RFQ means future request-for-quotation/business-opportunity workflows; CRM means future lead/customer-relationship management. The Owner may consider them much later, depending on Business growth and validated customer demand. Earlier M6 §32's V2+ / optional concept is not a delivery commitment.
+
+Preserve only reasonable future extensibility through stable canonical Business UUIDs, separate user/Business identity, defined authorization and modular responsibility boundaries, forward-compatible API/data evolution, and server-authoritative Business-linked entitlements. No RFQ/CRM/opportunity schema, tables, placeholder endpoints, new authorization grants, UI, messaging infrastructure or speculative data models are authorized. Avoid overengineering the present release.
+
+## Payment remains OPEN; frozen policy is preserved
+
+The Owner wants a real paid commercial system, but the final permitted Android/iOS billing and collection architecture is **OPEN — NOT APPROVED**, pending independent Google Play and Apple App Store policy validation, technical validation and qualified legal/accounting review **before billing freeze**. Alternatives under review are external B2B contracting, locally supported Iraqi payment providers, applicable Apple in-app purchasing, applicable Google Play Billing and other officially permitted models. None is selected or certified compliant by this entry.
+
+Commercial entitlements remain server-authoritative and linked to the canonical Business Entity. A payment provider or store platform does not become canonical Business identity or publication authority. WhatsApp payment links inside the app are not assumed automatically compliant, and separation of web/mobile applications is not an assumed exemption from store billing policies. No payment integration, financial grant or publication shortcut is authorized.
+
+The following potential conflicts are recorded for later adjudication, not resolved:
+
+| Candidate change / affected frozen sections | Required disposition |
+| --- | --- |
+| A chosen store/provider flow replacing the manual/assisted WhatsApp Business payment flow: Commercial Model §§7.1/7.5; automated gateway deferral §21.8 and §33.2.10 | **FORMAL AMENDMENT REQUIRED — NOT AUTHORIZED** if the selected design changes those frozen requirements/classifications. Policy validation alone does not rewrite the model. |
+| Auto-renewal, auto-charge or stored instruments: Commercial Model §26.2.1–4 / L-56; C2 §11; A8 §32.2.2.6 | **FORMAL AMENDMENT REQUIRED — NOT AUTHORIZED** for any conflicting design. These are preserved rules, not newly open commercial choices. |
+| Different purchased durations, payment/publication term anchors or lifecycle outcomes: Commercial Model §§3.1/26.1–26.2; C2 §§4/10–13; accepted C3 time/publication architecture | **FORMAL AMENDMENT REQUIRED — NOT AUTHORIZED** if a billing proposal cannot preserve them. Provider purchase/receipt events alone cannot redefine the term or publication. |
+
+No amendment is made. Any actual frozen-policy change must follow Commercial Model §§1.5/33.1.10, including the required fresh independent audit and Architect acceptance, then reconcile affected accepted contracts before separate implementation authority. Frozen prices, IQD accounting, independently verified funds, renewal/Grace, A8/Launch Partner and Founding Partner separation, Corporate quotation rules, Baghdad-first launch density, identity/history preservation and no-open-public-CLAIM rules remain unchanged. C1 AR-01 through AR-14 remain OPEN/deferred; this entry resolves none and closes/reclassifies no commercial OQ.
+
+## Release planning and timeline clarification
+
+The planning basis is **FULL V1 + COMMERCIAL DIRECTORY + REAL PAID COMMERCIAL SYSTEM + ANDROID / iOS SIMULTANEOUS LAUNCH TARGET**. There is no evidence-backed committed public launch date. Earlier Android-only or limited-promotion estimates must not be reused as an accepted forecast for this expanded scope. Historical estimates/closure records remain intact; no optimistic, P50 or P80 date is invented.
+
+Future contract/estimate work must include the following in the existing phase context; this is a planning mapping, not new gates, phase authorization or acceptance evidence:
+
+| Existing context | Planning / acceptance coverage still required |
+| --- | --- |
+| R10–R11 / existing commercial contracts | Complete exposed core experience and Projects; paid subscription implementation, authorized Business management and commercial publication/enforcement through separately authorized slices. |
+| R12–R13 | Required human engineering/calculator/content approval and protected draft_jsons authoring pipeline. |
+| R14–R15 | One shared Supabase production authority/deployed verification; Auth/RLS/ownership/commercial security; privacy and account deletion, including applicable retention decisions. |
+| R16 | Android release build/device acceptance; iOS release build/plugin compatibility, physical-device acceptance and platform performance/configuration — iOS **PLANNED / UNVERIFIED**. |
+| R17 | Full Business E2E on both platforms against shared authority: canonical identity/roles, approved paid/promo entitlement, publication/visibility/enforcement, session changes, privacy/account deletion and existing offline/core journeys. No new public CLAIM authorization follows from the historical NEW/CLAIM journey list. |
+| R18 | Billing decision and separate store-policy validation; Android signing/Google Play release artifacts; iOS signing/provisioning, App Store release artifacts/metadata/privacy declarations and submission/review — iOS **PLANNED / UNVERIFIED**; qualified legal/accounting and commercial-operations readiness. |
+| R19 | Both store review outcomes and releasable artifacts, shared production verification, completed required acceptance and final Owner approval. Simultaneous launch remains a target subject to actual readiness and store review. |
+
+This adds planning references to the existing R10–R19 sections, including Android-focused R16/R18, without rewriting their status or historical requirements. The earlier M8 release/navigation table is not sufficient evidence of full commercial or two-platform readiness.
+
+## Documentary preservation and future compatibility
+
+No frozen/accepted source contract, commercial decision register, historical closure or implementation file is changed. The approved M1–M7 architecture sources listed as read-only in M8 §2 remain intact; new direction resides in this mutable parent planning record. The only edits in this pass are this roadmap append and localized references in the existing M8 readiness document. All preceding roadmap bytes, pre-existing dirty/untracked files and existing commercial/UI controls are preserved; no new standalone document is created.
+
+Exact documentary composition is protected by commercial static guards. This newly authorized planning delta is not automatically recognized by the earlier four-guard compatibility commit. Any later required recognition needs its own exact documentary authority/review within the existing gates; this task permits no guard change, bypass, broad suffix allowlist or manufactured GREEN. Validation here is documentary only. No test/runtime/SQL/remote deployment, staging, commit or push occurs.
