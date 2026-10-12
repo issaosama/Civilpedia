@@ -4437,3 +4437,320 @@ This adds planning references to the existing R10–R19 sections, including Andr
 No frozen/accepted source contract, commercial decision register, historical closure or implementation file is changed. The approved M1–M7 architecture sources listed as read-only in M8 §2 remain intact; new direction resides in this mutable parent planning record. The only edits in this pass are this roadmap append and localized references in the existing M8 readiness document. All preceding roadmap bytes, pre-existing dirty/untracked files and existing commercial/UI controls are preserved; no new standalone document is created.
 
 Exact documentary composition is protected by commercial static guards. This newly authorized planning delta is not automatically recognized by the earlier four-guard compatibility commit. Any later required recognition needs its own exact documentary authority/review within the existing gates; this task permits no guard change, bypass, broad suffix allowlist or manufactured GREEN. Validation here is documentary only. No test/runtime/SQL/remote deployment, staging, commit or push occurs.
+
+# COMMERCIAL STATIC GUARD OWNER-PLANNING COMPATIBILITY-ONLY AUTHORIZATION — 2026-10-12
+
+```yaml
+OWNER_PLANNING_STATIC_COMPATIBILITY_MODIFICATIONS_AUTHORIZED: YES — FOUR NAMED EXISTING GUARDS ONLY, SUBJECT TO EXECUTION GATE
+COMPATIBILITY_SCOPE: EXACT COMMITTED OWNER PLANNING DOCUMENTATION AND THIS EXACT AUTHORIZATION RECORD ONLY
+COMPATIBILITY_EXECUTION_GATE: OWNER COMMIT OF THIS EXACT RECORD PLUS SEPARATE OWNER EXECUTION INSTRUCTION
+IMPLEMENTATION_AUTHORIZED: NO
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+R10.5-D_IMPLEMENTATION_STATE: NOT STARTED
+R10.5-D_CONTRACT_FREEZE: NOT AUTHORIZED BY THIS RECORD
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_STATE: ACCEPTED / FROZEN — IMPLEMENTATION NOT AUTHORIZED
+CUI2A1_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A0_STATE: CLOSED
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+BACKEND_AUTHORITY_DELTA: ZERO
+UI_AUTHORITY_DELTA: ZERO
+PUBLICATION_AUTHORITY_DELTA: ZERO
+ENTITLEMENT_AUTHORITY_DELTA: ZERO
+PAYMENT_AUTHORITY_DELTA: ZERO
+REMOTE_DEPLOYED_DATABASE: UNVERIFIED
+INDEPENDENT_REVIEWER: Big Pickle
+FOCUSED_ACCEPTANCE_GATE: SIX NAMED SUITES — ZERO FAILURES
+CURRENT_PASS: GOVERNANCE-ONLY / APPEND-ONLY ROADMAP RECORD
+FOCUSED_GREEN: NOT CLAIMED BY THIS RECORD
+INDEPENDENT_REVIEW_PASS: NOT CLAIMED BY THIS RECORD
+GIT_OWNER: User
+```
+
+## Authority and exclusive purpose
+
+Authority is the Owner's explicit adoption of this exact record, following the supplied Architect acceptance of the completed R10.5-D commercial static guard compatibility source audit and narrow successive recognition design.
+
+That Architect acceptance accepted the analysis and proposed design; it did not authorize repository changes.
+
+This record conditionally authorizes one later, separately instructed compatibility correction whose exclusive purpose is recognition of the already committed Owner planning direction. “Documentary compatibility” describes the purpose of the four Dart guard changes; it grants no production implementation authority.
+
+The 2026-10-09 CUI-2A1 compatibility-only authorization remains preserved. Its exact input boundary is not silently enlarged. This new record supplies separate, additional authority only for the documentary transition enumerated below. Frozen CUI-2A1 §16/§22 implementation gates remain unchanged and unsatisfied by this record alone.
+
+No R10.5-D contract freeze, production implementation or implementation-authorized recognition branch is included. No CUI-2A1, M4 or M5 activation is included. Every other future documentary or implementation state requires a separate decision and exact recognition authority.
+
+## Exact committed inputs and permitted documentary transition
+
+| Input | Exact identity |
+| --- | --- |
+| Required entry branch | main |
+| Owner planning commit | ac64cd6275888fd2768db2a890e98fbfc9819ab1 |
+| Owner planning commit parent; previously landed four-guard correction | ed9840084eb67b1bb295459b420093a37d8bccbb |
+| Parent of that four-guard correction; prior compatibility authorization | acbcf9af85da749328b672234ce258b00cbb5c23 |
+| Roadmap path | docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md |
+| Approved planning roadmap blob | e2e239e08f14350b910ab22185c095387e5a2301 |
+| Readiness-document path | docs/architecture/CIVILPEDIA_IMPLEMENTATION_READINESS_AND_ROADMAP.md |
+| Approved planning readiness-document blob | ee696d6a4054fd5476f81f3d7c2c9b6e6e8cd7ab |
+| Parent roadmap blob | 4da132714f60b7f10c02d5732acc1646b549632d |
+| Parent readiness-document blob | 62d61b26fc3a32940b0f3b64058fd63c69eca74c |
+
+The Owner planning commit changes exactly those two documentation paths: 82 roadmap insertions and 13 readiness-document insertions, with zero deletions. The roadmap change is the exact end-of-file Owner Planning Direction append. The readiness-document change is the exact localized planning-reference delta committed in that object; it is not an append-only transformation of that document.
+
+The allowed successive documentary transition is exclusively:
+
+1. Retain the exact historical compatibility composition and its historical predicates.
+2. Verify the previously landed four-guard correction at ed9840084eb67b1bb295459b420093a37d8bccbb, including its parent and exact four-path delta.
+3. Verify the Owner planning commit, its exact parent, its exact two-path delta and both approved document blobs.
+4. Recognize the exact planning roadmap followed by this one literal Owner-approved authorization append.
+5. Keep the readiness document exactly equal to its approved planning identity.
+6. Preserve every other contract, source, security predicate and protected entry byte.
+
+The governance-persistence pass may append only this record to the existing Master Roadmap, preserving every preceding roadmap byte. Its Owner commit must have the planning commit as its parent and change only the roadmap.
+
+After that commit exists, the implementer must observe and verify its real commit and roadmap blob identities, compare the literal approved append exactly, and establish that it is committed in the execution ancestry. No future hash is invented. An absent, pending, altered or mismatched authorization must fail the execution gate.
+
+A pending candidate may be inspected as documentary review evidence; it may not enable the live authorized compatibility state.
+
+## Exact later four-file write boundary
+
+Only compatibility recognition, directly corresponding documentary/source expectations and positive/adversarial probes may change in:
+
+```text
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+```
+
+No new helper, guard, runner, report, fixture or other file is authorized.
+
+The original four guard blobs at the planning baseline are:
+
+| Guard | Original committed blob |
+| --- | --- |
+| CUI-2A0 | 3f57d0df207f7625d3d5a66e15ade3133d61b0ca |
+| HARDEN1 | 489a7975a095ba0d194fa52c7079651f32c4fb95 |
+| M1B | be632a82938259ba068ba3492691115d092f2871 |
+| M3 | 93a46d1a4a36bbab6374e50470aac244cde66723 |
+
+These are retained review inputs, not requirements that the corrected files remain unchanged.
+
+The shared documentary recognizer belongs in the existing CUI-2A0 guard. HARDEN1, M1B and M3 must consume the same recognition consistently, including their direct roadmap reconstruction assertions.
+
+M1B's historical HARDEN1 full-source oracle and existing reconstruction must remain intact. Any additional transformation must describe only the approved compatibility changes, validate its exact expected anchors and reject unrelated source changes. Expected HARDEN1 source must never be copied from the live file under test.
+
+During guard correction, the roadmap, readiness document and all other documents are read-only. Documentary recognition is an exact identity/transition check, never a general permission to modify those paths.
+
+## Immutable historical Git pins
+
+Preserve all existing historical pin values, ancestry checks, checkpoint lookups, source comparisons, historical fixtures and their rejection semantics. Do not replace them with the planning commit, current HEAD or a wholesale new baseline.
+
+The existing immutable commit-pin set in the four guards is:
+
+```text
+3c676f1042b5f8e6f6eff6b7cb4681417c7e140f
+3f4ce87381ea97b0f3f6a772827c4d77b58aee66
+41276132ba6a1606cd779f5ce92473bacfbcc7c8
+47096d45b98853af97ab5f3333b1b62b045dad81
+47fba3f64581c9a24eefaee18265a437d8c55505
+5642f329dc5dbf096847a08b1e5a30d3fc9d7c4f
+5d511256a4364a3226383c2a631d70bef02ecba6
+611f2dd30a32b730fc254a247dd4701a98e8b4f6
+6d064521307b57f17b45249fcfc3713882b59c61
+798b2af358735e871463790e746c8f5761fbb989
+7d1d671e7b837be8b1ffed55116aa495d4922eb5
+8103b551813715feaa1c2b8b3e2b198ae44d75af
+889ff1da4389ba891247cfb5497554ca98fa58b3
+a813b8c99309757bd7d03ac96dde0e7c12cfed79
+acbcf9af85da749328b672234ce258b00cbb5c23
+c60dbdda61bd656e281902b452ad937e14aa8c78
+d9bc74d42e0d3ebc56455b928f2dbc57d8ca6fb8
+dcc736ba7a8dc0b068f6c8bfc11b74566ab756dc
+e767add487034171b0e8512ee6cfc8d56484004e
+ebaf5f7b4402366285e214eec99735a931b69d8d
+f348e0609300858073e8a5143f685fef04362b6b
+f4e1331cdca6ec87cb37d32d1d2473479ffb2852
+f94e96c2c510a6cef25f9f491163c5ce4f9320bb
+```
+
+The existing documentary and accepted SQL blob pins remain:
+
+| Historical object | Blob |
+| --- | --- |
+| CUI-2A1 freeze roadmap | 049dfcff25091616d80132c6db9402f095e02c56 |
+| CUI-2A1 compatibility roadmap | 4da132714f60b7f10c02d5732acc1646b549632d |
+| CUI-2A1 frozen contract | 8071f951ff336714c420a5216504d0d49183e055 |
+| CUI-1 contract | 7a2ab8a4f9665726e86f59c0947ebf3fb6543fd7 |
+| CUI-1 media addendum | 6bd5e0e41b52e5a8b4a4df481a09b7bc196e56ea |
+| CUI-1 closure report | 309536865a922631a12db5db0111004c4822e695 |
+| CUI-1 closure roadmap | f9e793b3d001d75fee5da822cb43a8be12264942 |
+| CUI-2A0 freeze roadmap | d2ea2d137df6a002cd114494ddf60500653df900 |
+| CUI-2A0 original authorization roadmap | a36067d0634ae36437006175f825e68d70f92d0a |
+| CUI-2A0 security authorization roadmap | a5586dfdea1770f58d2333bcabad26ea00d8e747 |
+| CUI-2A0 closure roadmap | 8fa8595cfe9cc21a00db8016f930b45cf76b52d2 |
+| CUI-2A0 closure report | 068307bb6e3d64a0cb479f127d1c162a155cb0cd |
+| CUI-2A0 frozen contract | ed23e9136a39f71d95f91da7dd22e087a59dfca8 |
+| CUI-2A0 ACL security addendum | 38016765af82de2e5a25e3b2169536bcf5fab44b |
+| Accepted migration 00026 | 0de3aef18e9687a24917442649e5ffe831f391e0 |
+| Accepted CUI-2A0 SQL runtime test | 96a2bd1f6cff8d2bbe9ad6433eb223267da96b4b |
+
+These enumerations supplement, and do not replace, the guards' existing fixed-checkpoint comparisons and source-derived historical object identities. Preserve the wrong-pin adversarial cases as well.
+
+## Protected entry bytes and preservation suites
+
+Preserve the exact existing dirty and untracked path sets. Preserve these raw Git hash-object --no-filters identities:
+
+| Protected path | Raw-byte identity |
+| --- | --- |
+| test/a5_6_profile_bootstrap_test.dart | 3bf84c06d8de648c793b93168832dd3f4557f6c4 |
+| test/v1_r08_cloud_profile_foundation_test.dart | ed2fdfeace5d815d6c6a36df01bcf828c69e2e20 |
+| test/v1_r08_profile_edit_screen_widget_test.dart | 8044513a653f601c37c6c91d55638254b82554cc |
+| OpenCode_Usage_Report.txt | e0c432a4b8bd72e94d3db203b59ba260597dd601 |
+| artifacts/r10_4a/home_dark.png | 45e4ba795bbcffbf283b282e48ff0d436ecb6e20 |
+| artifacts/r10_4a/home_light.png | c35bb2314dd916f64cba5794d729aa12bd7a8247 |
+| test/commercial_m1a_private_catalog_migration_test.dart | 2f73cf52711fb78969741470724f2aa2567995a5 |
+| test/v1_r09q_security_matrix_test.dart | 8dcd0a3089833354fa49174b5db2a3d8c26318b9 |
+
+The final two paths are read/run-only preservation suites, outside the write boundary.
+
+Retain the existing distinction between normalized documentary comparisons and raw protected-byte hashes. No normalization, snapshot regeneration or formatting conversion may conceal a protected-byte change.
+
+## Historical commercial authority and security preservation
+
+Preserve every existing historical/composed commercial assertion, including:
+
+- Frozen Commercial Model V1, all decisions, prices, plan identities, durations, classifications, OQs and amendment requirements; accepted C1/C2/C3 and all frozen contracts/addenda.
+- Strict CUI-1 and CUI-2A0 CLOSED fixtures and predicates; historical CUI-2A1 documentary recognition.
+- Exact migration inventory 00001–00026, filenames, ordering and accepted bytes; no 00027 or SQL change.
+- M1a foundation, HARDEN1 raw-plans denial and privacy, and M1B's exact 40 canonical rows, UUIDs, tuples, constraints, catalog relationships and C/C′/D/E/F/G semantics.
+- M3 Shadow isolation, private schema/defaults/ACL/RLS, evaluator and generation/concurrency semantics, unresolved-policy blocking and zero operational publication/entitlement authority.
+- CUI-2A0's six RPCs, four independent permissions, two private helpers, private receipt, Draft-only/four-type authoring, complete-location eligibility, replay, optimistic concurrency and sanitized atomic audit.
+- Canonical CLAIM trigger/guard protections, receipt isolation, absent-target denial, locking, and preserved legacy CLAIM/NEW behavior.
+- append_audit_log owner-only direct EXECUTE: denied to PUBLIC, anon, authenticated and service_role; retained postgres/owner access; unchanged signature, body, owner, SECURITY DEFINER, search_path and audit schema.
+- All unrelated Auth, RLS, ownership, privacy, source-integrity and security-matrix assertions.
+- Canonical Business UUID and user/Business separation; one production Supabase authority and one AuthProvider; no service_role in Flutter and no blind automatic mutation retry.
+- All current implementation locks and separately deferred security findings.
+
+This correction changes no commercial meaning or deployed behavior. Static GREEN is not SQL/runtime, remote deployment or production-readiness evidence.
+
+## Recognition and adversarial acceptance requirements
+
+Add an explicit, separately named current-documentary recognizer. Preserve historical predicates with their original fixtures and rejection semantics.
+
+Validate the complete new extension before projecting it onto historical fixtures. Historical fallback must never certify an invalid live composition.
+
+Positive and adversarial cases must invoke the same live/current recognizer and branch selection used by the actual repository checks.
+
+Required positive evidence:
+
+1. Retained historical fixtures pass their original predicates.
+2. The exact planning commit/parent/two-document identities are recognized.
+3. The exact Owner-committed authorization append is recognized.
+4. The actual live repository passes with zero R10.5-D and CUI-2A1 production/test additions.
+5. Only the authorized guard correction delta and exact protected entry baseline are present.
+6. All three predecessor consumers and their direct documentary assertions agree with the shared recognizer.
+7. M1B accepts only the exact approved HARDEN1 source transformation.
+
+Required adversarial rejection evidence:
+
+- Wrong commit, parent, ancestry, documentary blob, missing document or altered historical pin.
+- Altered/truncated planning append, changed readiness content or arbitrary future roadmap suffix.
+- Missing, uncommitted, altered or mismatched compatibility authorization.
+- Any anticipated R10.5-D contract freeze or implementation-YES record.
+- Any R10.5-D implementation source/test change, including the audit's candidate presentation paths.
+- CUI-2A1 production/UI-test additions or activation; M4/M5 activation; reopened closures or authority deltas.
+- Extra documentation, helper, guard, runner, test or other path; lookalike paths, unauthorized rename or deletion.
+- Migration 00027, renamed migration, historical migration edit or any SQL/Supabase/configuration delta.
+- Protected-byte change, missing protected entry or changed dirty/untracked inventory.
+- Unauthorized committed or staged changes concealed by restoring the working copy.
+- Unrelated source/assertion removal, broad HARDEN1 replacement or an expected snapshot derived from live actual source.
+- An invalid current state accepted through historical fallback.
+
+Committed, index, unstaged and untracked inventories must be checked independently. Exact document identity must be checked in the committed objects and live composition; a path-set match alone is insufficient.
+
+No dynamic HEAD acceptance, broad path-prefix exception, generic dirty-file exception, arbitrary future-record acceptance, skip, comment-out, environment bypass or weaker test-only predicate is permitted.
+
+## Six-suite focused validation and independent review
+
+Run the following six suites sequentially in the separately authorized correction/review pass:
+
+```text
+flutter test --no-pub test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+flutter test --no-pub test/commercial_harden1_public_plans_exposure_migration_test.dart
+flutter test --no-pub test/commercial_m1b_catalog_reference_data_migration_test.dart
+flutter test --no-pub test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+flutter test --no-pub test/commercial_m1a_private_catalog_migration_test.dart
+flutter test --no-pub test/v1_r09q_security_matrix_test.dart
+```
+
+Acceptance requires all six suites executed, zero failures, preserved historical coverage, required live positive/adversarial evidence and unchanged M1a/R09q sources.
+
+Big Pickle must independently review the exact four-file diff, execute all six focused suites and accept the documentary recognition, source coupling, inventory checks and preservation evidence before the Owner commits the correction. The implementer and reviewer must be independent.
+
+If Big Pickle is unavailable, STOP for an explicit Owner decision on reviewer substitution. Do not infer a substitute from general routing defaults. Any substitution decision must identify the replacement and its authority explicitly.
+
+Unresolved CRITICAL, HIGH or MEDIUM findings block acceptance. Record LOW findings and their explicit disposition. Test PASS alone is not independent acceptance.
+
+No repository-wide suite is authorized. No SQL test, database connection, migration execution, reset, deployment or SDK/cache/global-package patch is authorized.
+
+## Prohibited changes
+
+The correction may not change:
+
+- Flutter production source, UI/localization/navigation, providers, repositories, models or dependencies.
+- Any test outside the four named guards, including M1a/R09q.
+- Contracts, commercial policy, closure reports, roadmap or readiness document.
+- SQL, migrations, schema, grants, ACL/RLS, Supabase configuration, seed or runtime data.
+- Ownership, invitation/CLAIM authority, staff provisioning, publication, entitlement, payment, Sponsored, Branch or media authority.
+- R10.5-D freeze/execution state, CUI-2A1 execution state, M4/M5 or later UI locks.
+
+No staging, commit, push, reset, revert, clean, stash, migration or deployment is authorized to an agent by this record. Git remains Owner-controlled.
+
+## Mandatory STOP conditions
+
+STOP without broadening scope or attempting a bypass if:
+
+1. Entry branch, required ancestry or any fixed commit/blob identity differs.
+2. The planning commit is not exactly the approved two-document transition.
+3. The authorization is absent, pending, altered, incorrectly committed or contains additional changes.
+4. An unexplained committed, staged, unstaged or untracked path appears.
+5. Any protected entry byte, historical source, contract, migration, security predicate or implementation lock differs.
+6. Recognition requires a fifth file, a new helper/report, a document rewrite, a production change or a broad exception.
+7. Exact HARDEN1 transformation anchors or historical reconstruction fail.
+8. The same live recognizer cannot provide both positive and adversarial evidence, or historical fallback admits an invalid current state.
+9. Any required suite fails, is skipped or cannot execute.
+10. Six-suite GREEN cannot be achieved within the four-file boundary while M1a/R09q remain unchanged.
+11. Independent Big Pickle review is unavailable or rejects the change; reviewer substitution lacks explicit Owner approval.
+12. A blocking review finding remains, or commercial meaning/authority would change.
+13. Closure evidence or explicit Owner acceptance is missing.
+
+Report the exact blocker. Boundary expansion requires independent audit and a new exact Architect/Owner amendment; commercial-policy changes additionally require the frozen model's formal amendment process. No blind mutation retry, retroactive authorization or manufactured GREEN.
+
+## Owner acceptance, Git ownership and closure evidence
+
+Before the correction is eligible for Owner commit, provide:
+
+- Actual authorization commit, parent and roadmap blob, with literal append/prefix verification.
+- Planning commit/parent/two-document identity and transition evidence.
+- Exact changed-path list and reviewed four-file diff.
+- Historical pin/source preservation and migration 00001–00026 evidence.
+- Protected raw-byte identities and independently checked repository inventories.
+- Live positive and adversarial recognition results, including branch-selection and hidden-drift cases.
+- Exact commands, environments, exit codes and observed counts for all six suites.
+- Independent Big Pickle review verdict and finding dispositions, or the explicit Owner-approved substitution record.
+- git diff --check, final status and index evidence.
+- Explicit Owner acceptance of this exact correction.
+
+Only the Owner may stage, commit and push the accepted correction unless separately and explicitly authorizing an agent. The guard correction commit must contain only accepted changes within the four named paths.
+
+After the Owner commits, observe the real correction commit/parent and resulting guard blob identities, verify parity with the reviewed sources and verify that no out-of-scope committed delta occurred. Establish focused GREEN for that committed composition; identical-source precommit results may be traced to it, but any changed source/composition requires renewed focused validation and review.
+
+Closure must identify the actual governance and correction identities, six-suite evidence, independent review and explicit Owner acceptance. This record itself claims none of those future outcomes.
+
+Any later roadmap closure append requires separate documentary authority and exact compatibility recognition if needed. It is not implicitly covered here.
+
+R10.5-D remains AUDIT-ONLY / IMPLEMENTATION NO. Commercial CURRENT remains NONE and commercial implementation remains NO. CUI-2A1/M4/M5 remain implementation-unauthorized. Repository compatibility closure does not certify remote deployment or production readiness.
