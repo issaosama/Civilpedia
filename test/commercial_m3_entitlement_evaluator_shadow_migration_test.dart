@@ -413,7 +413,7 @@ bool _allowsCurrentComposition(
     _currentCommittedDocuments.entries.every(
       (entry) => documents[entry.key] == entry.value,
     ) &&
-    postClosureImplementationChanges.isEmpty && cui2a0.hasAuthorizedCui2a0Boundary();
+    postClosureImplementationChanges.isEmpty && cui2a0.hasOwnerPlanningDocumentaryBoundary();
 
 // Exact post-closure recognition; the predecessor predicates and pins remain
 // historical. This path accepts no future A1 contract, source or authority.
@@ -468,14 +468,15 @@ bool _allowsFrozenCui2a1Composition(
     );
 
 void _registerFrozenCui2a1Tests() {
+  // Preserve the old branch's exact positive and adversarial fixtures.
   final paths = _cui1ChangedPaths(_git([
-    'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit, cui2a0.ownerPlanningParent,
   ]));
   final documents = <String, String>{
-    for (final path in _closedCommittedDocuments.keys) path: _read(path),
-    cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+    ..._closedCommittedDocuments,
+    cui2a0.cui2a1ContractPath: cui2a0.cui2a1FrozenContract,
   };
-  final roadmap = _read(_cui1RoadmapPath);
+  final roadmap = cui2a0.cui2a1CompatibilityRoadmap;
   bool accepts({String? candidateRoadmap, Map<String, String>? candidateDocs,
     Iterable<String>? candidatePaths}) => _allowsFrozenCui2a1Composition(
       candidatePaths ?? paths, candidateRoadmap ?? roadmap,
@@ -524,6 +525,79 @@ void _registerFrozenCui2a1Tests() {
       'supabase/migrations/00027_unauthorized.sql',
     ]) {
       expect(accepts(candidatePaths: [...paths, path]), isFalse, reason: path);
+    }
+  });
+}
+
+// Exact Owner planning extension. No historical fallback selects this live state.
+bool _allowsOwnerPlanningComposition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) =>
+    cui2a0.matchesOwnerPlanningDocuments(
+      roadmap, documents[cui2a0.cui2a1ContractPath] ?? '',
+      documents[cui2a0.ownerPlanningReadinessPath] ?? '',
+    ) &&
+    documents.length == _closedCommittedDocuments.length + 2 &&
+    _allowsFrozenCui2a1Composition(
+      changedPaths.where((path) => path != cui2a0.ownerPlanningReadinessPath),
+      cui2a0.cui2a1CompatibilityRoadmap,
+      Map.fromEntries(documents.entries.where(
+        (entry) => entry.key != cui2a0.ownerPlanningReadinessPath,
+      )),
+      postClosureImplementationChanges,
+    );
+
+void _registerOwnerPlanningTests() {
+  final paths = _cui1ChangedPaths(_git([
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+  ]));
+  final documents = <String, String>{
+    for (final path in _closedCommittedDocuments.keys) path: _read(path),
+    cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+    cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+  };
+  final roadmap = _read(_cui1RoadmapPath);
+  bool accepts({String? candidateRoadmap, Map<String, String>? candidateDocs,
+    Iterable<String>? candidatePaths, Iterable<String>? implementationChanges}) =>
+      _allowsOwnerPlanningComposition(
+        candidatePaths ?? paths, candidateRoadmap ?? roadmap,
+        candidateDocs ?? documents, implementationChanges ?? [],
+      );
+  test('Owner planning exact live consumer and historical rejection are distinct', () {
+    expect(accepts(), isTrue);
+    expect(cui2a0.hasOwnerPlanningDocumentaryBoundary(), isTrue);
+    expect(_allowsFrozenCui2a1Composition(paths, roadmap, documents, []), isFalse);
+    expect(accepts(candidateRoadmap: cui2a0.cui2a1CompatibilityRoadmap), isFalse);
+  });
+  test('Owner planning consumer rejects missing or altered documentary identities', () {
+    for (final entry in documents.entries) {
+      expect(accepts(candidateDocs: {...documents, entry.key: '${entry.value}\nunauthorized'}), isFalse);
+      expect(accepts(candidateDocs: Map.from(documents)..remove(entry.key)), isFalse);
+    }
+    for (final altered in [
+      '$roadmap\n# Arbitrary future authorization\n', '$roadmap\n# R10.5-D CONTRACT FROZEN\n',
+      roadmap.substring(0, roadmap.length - 1),
+      roadmap.replaceAll('IMPLEMENTATION_AUTHORIZED: NO', 'IMPLEMENTATION_AUTHORIZED: YES'),
+      roadmap.replaceAll('COMMERCIAL_CURRENT_SLICE: NONE', 'COMMERCIAL_CURRENT_SLICE: CUI-2A1'),
+      roadmap.replaceAll('M4_STATE: NOT AUTHORIZED', 'M4_STATE: AUTHORIZED'),
+      roadmap.replaceAll('M5_STATE: NOT AUTHORIZED', 'M5_STATE: AUTHORIZED'),
+    ]) {
+      expect(accepts(candidateRoadmap: altered), isFalse);
+    }
+  });
+  test('Owner planning consumer rejects extra paths and premature implementation', () {
+    for (final path in [
+      '${cui2a0.ownerPlanningReadinessPath}.bak', 'docs/unauthorized.md', 'test/unauthorized_test.dart',
+      'lib/features/profile/presentation/profile_screen.dart', 'lib/features/profile/presentation/user_area_screen.dart',
+      'test/v1_r10_5d_profile_user_area_visual_test.dart',
+      'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
+      'supabase/migrations/00027_unauthorized.sql',
+    ]) {
+      expect(accepts(candidatePaths: [...paths, path]), isFalse, reason: path);
+      expect(accepts(implementationChanges: [path]), isFalse, reason: path);
     }
   });
 }
@@ -669,6 +743,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
       final currentDocuments = <String, String>{
         for (final path in _closedCommittedDocuments.keys) path: _read(path),
         cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+        cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
       };
       // Accepted production/test paths are immutable after CUI-1 closure.
       final postClosureChanges = _cui1ChangedPaths(_git([
@@ -680,7 +755,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         String? roadmap,
         Map<String, String>? documents,
         Iterable<String>? implementationChanges,
-      }) => _allowsFrozenCui2a1Composition(
+      }) => _allowsOwnerPlanningComposition(
         changedPaths ?? paths,
         roadmap ?? currentRoadmap,
         documents ?? currentDocuments,
@@ -962,6 +1037,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
 
 void main() {
   _registerFrozenCui2a1Tests();
+  _registerOwnerPlanningTests();
   _registerCui1CompatibilityTests(roadmapControlsCovered: true);
   final source = _read(_migration);
   test('00025 unique additive suffix; all predecessor migrations byte exact', () {
@@ -1301,7 +1377,7 @@ void main() {
           _m3FormalClosure;
       expect(
         _matchesClosedCui2a0Roadmap(_cui2a0ClosedRoadmap, closedCheckpoint) &&
-          cui2a0.matchesFrozenCui2a1Documents(_read(roadmapPath), _read(cui2a0.cui2a1ContractPath)),
+          cui2a0.matchesOwnerPlanningDocuments(_read(roadmapPath), _read(cui2a0.cui2a1ContractPath), _read(cui2a0.ownerPlanningReadinessPath)),
         isTrue,
       );
       const cui1ContractPath =
