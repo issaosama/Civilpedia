@@ -4754,3 +4754,99 @@ Closure must identify the actual governance and correction identities, six-suite
 Any later roadmap closure append requires separate documentary authority and exact compatibility recognition if needed. It is not implicitly covered here.
 
 R10.5-D remains AUDIT-ONLY / IMPLEMENTATION NO. Commercial CURRENT remains NONE and commercial implementation remains NO. CUI-2A1/M4/M5 remain implementation-unauthorized. Repository compatibility closure does not certify remote deployment or production readiness.
+
+# V1-R10.5-D CONTRACT ACCEPTANCE / FREEZE — 2026-10-12
+
+```yaml
+R10.5-D_CONTRACT: docs/architecture/contracts/V1-R10_5D_PROFILE_USER_AREA_PRESENTATION_IMPLEMENTATION_CONTRACT.md
+R10.5-D_CONTRACT_ID: V1-R10.5-D-PRESENTATION-CONTRACT-v1
+R10.5-D_CONTRACT_STATUS: ACCEPTED / FROZEN
+R10.5-D_ARCHITECT_ACCEPTANCE: ACCEPTED — FOLLOWING INDEPENDENT A ACCEPTANCE
+R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO
+R10.5-D_IMPLEMENTATION_STATE: NOT STARTED
+IMPLEMENTATION_AUTHORIZED: NO
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A0_STATE: CLOSED
+CUI1_STATE: CLOSED
+M3_STATE: CLOSED
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+BACKEND_AUTHORITY_DELTA: ZERO
+UI_IMPLEMENTATION_DELTA: ZERO
+PUBLICATION_AUTHORITY_DELTA: ZERO
+ENTITLEMENT_AUTHORITY_DELTA: ZERO
+PAYMENT_AUTHORITY_DELTA: ZERO
+COMMERCIAL_GUARD_MODIFICATIONS_AUTHORIZED: NO
+FOCUSED_GREEN_FOR_THIS_DOCUMENTARY_TRANSITION: NOT CLAIMED
+OWNER_GIT_REVIEW: PENDING
+COMMIT_PUSH_AUTHORIZED: NO
+```
+
+## Authority and documentary acceptance
+
+Authority: the Owner-provided **CIVILPEDIA — R10.5-D CONTRACT FREEZE** instruction conveys the Architect's acceptance of the reviewed contract following independent A acceptance and explicitly accepts the §O correction. It authorizes exactly this existing contract's freeze and this append-only roadmap acceptance record. No additional Owner write authorization is required for these two documentary changes. The supplied acceptance is recorded without inventing a reviewer identity, review artifact or fresh test result.
+
+Verified entry branch: `main`; HEAD and local `origin/main`: `0ceb646621027e2ab902b13302c452038154ab11`; index empty. The corrected contract entered as an untracked document; protected modified/untracked files were already present and remain outside this task's write boundary.
+
+| Documentary identity | Observed value / meaning |
+| --- | --- |
+| Corrected reviewed draft, individual raw SHA-256 before freeze | DEB8340F1650B8AC54C6733D08EA0D242E253D2E789290D6B4690FDC1B5C389C |
+| Frozen contract working-tree Git blob identity | 0c8f38c87248d31a5aef23a4cfe9f20a546b1329 |
+| Frozen contract individual raw SHA-256 | 43A9CB63C5E2DC2EFAF022AF01F164DCCCA8F0B2CD5369E1C6C30B86BEBBDE67 |
+| Roadmap committed prefix blob at entry HEAD | dba35363152429ca78933e1669e80758cfaba48c |
+| Owner planning readiness blob, unchanged | ee696d6a4054fd5476f81f3d7c2c9b6e6e8cd7ab |
+| Freeze commit / parent / resulting roadmap blob | PENDING OWNER GIT REVIEW — observe actual identities after an explicitly authorized Owner commit |
+
+The working-tree identities describe the exact pending documentary review inputs; they do not assert a committed freeze or enable execution. No future commit/hash is invented. This record asserts no repository-wide aggregate hash.
+
+## Frozen future scope — implementation remains unauthorized
+
+The accepted future implementation boundary is exactly:
+
+```text
+lib/features/profile/presentation/profile_screen.dart
+lib/features/profile/presentation/screens/profile_setup_screen.dart
+lib/features/profile/presentation/screens/profile_edit_screen.dart
+lib/features/profile/presentation/screens/authenticated_profile_edit_screen.dart
+lib/features/user_area/presentation/user_area_screen.dart
+test/v1_r10_5d_profile_user_area_visual_test.dart
+```
+
+The first five are existing presentation screens; only the final focused visual-test path is new. None is changed or created by this freeze. All other implementation paths remain excluded.
+
+The accepted contract's per-file requirements, Auth/Supabase/profile-save/recovery/navigation invariants, User Area tile inventory, component/token reuse, Arabic RTL/light/dark/text-scale matrix, Projects responsive conventions and 760 logical-pixel content cap remain unchanged. The exact 17 existing regression paths in §F remain read-only. Android visual QA and the mandatory future iPhone compatibility dependency retain their prescribed status/gates. The accepted §O correction, eight individual protected raw-byte identities, historical security predicates and formal amendment boundaries are preserved.
+
+Earlier roadmap NOT FROZEN/no-frozen-file-list descriptions are superseded solely as to contract acceptance/freeze by this later record. All preceding roadmap bytes remain intact. R10.5-D remains CURRENT for audit only, IMPLEMENTATION_AUTHORIZED NO / NOT STARTED. Contract acceptance creates no production execution instruction. R10.5-E, R10.5-F, R10.6 and R10.7 remain LOCKED; Arabic-only active V1 and dormant English compatibility remain unchanged. Commercial CURRENT remains NONE, implementation NO; CUI-2A1/M4/M5 implementation remains unauthorized; CUI-1/CUI-2A0/M3 closures are preserved.
+
+## Exact remaining commercial-guard compatibility prerequisite
+
+The committed Owner-planning branch in the four commercial guards pins the roadmap to `dba35363152429ca78933e1669e80758cfaba48c` and independently restricts committed/index/unstaged/untracked inventories. This new contract path and this literal freeze append are additional documentary inputs outside that accepted composition. The prior planning-only compatibility authorization explicitly excludes R10.5-D freeze/implementation states. Its historical 178/178 GREEN does not certify this pending transition; no guard suites are run or fresh GREEN claimed in this freeze task.
+
+Before later execution, a separate exact Architect/Owner compatibility authorization must identify the actual Owner-committed freeze commit/parent, this frozen contract blob and the resulting roadmap blob; verify the contract addition, exact append and preserved roadmap prefix, unchanged readiness and every other historical authority. The authorization must define any exact additional authorization append separately, then observe its real commit/blob identities. Pending documentary review evidence must not enable live production authority.
+
+The potential future guard write boundary remains the four existing paths below, subject to that separate authorization; no write permission is granted here:
+
+```text
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+```
+
+Recognize only the exact ACCEPTED/FROZEN / implementation-NO documentary stage through a shared successive recognizer, as designed in contract §L. Preserve all historical commit/blob pins, positive/adversarial fixtures, commercial/security predicates, source oracles and independent per-layer inventories. HARDEN1/M1B/M3 must agree with CUI-2A0; direct roadmap reconstruction and M1B's historical HARDEN1 source transformation must remain exact and reject unrelated drift. Do not replace expected source with live actual source.
+
+Future positives must accept the exact committed freeze-only composition with zero R10.5-D production/test edits. Adversarial cases must reject altered/missing/uncommitted identities, arbitrary future roadmap suffixes, concealed committed/staged drift, unexpected paths/statuses, changed protected bytes/security sources, any SQL/Supabase/migration delta, premature R10.5-D implementation and commercial activation. No dynamic HEAD authority, broad path exception, skip, weakened assertion or historical fallback may certify an invalid live state.
+
+Require all six focused suites sequentially with `flutter test --no-pub`: CUI-2A0, HARDEN1, M1B, M3, unchanged M1a and unchanged R09q security matrix; zero failures and meaningful live positive/adversarial evidence. Independent Big Pickle review remains mandatory for future guard work. If unavailable, STOP for an explicit Owner decision naming a substitute; do not silently substitute. Unresolved CRITICAL/HIGH/MEDIUM findings block acceptance. Owner acceptance and separately authorized Git closure remain required.
+
+This record does not authorize the compatibility task, amend frozen CUI-2A1 §16/§22 gates, or approve an execution-active recognizer. Later implementation authorization and its exact six-path recognition require separate decisions after committed compatibility GREEN and the contract's preimplementation baseline gate. Any formally required frozen-contract amendment must itself be separately accepted.
+
+## Current change control and handoff
+
+Current write boundary: this existing R10.5-D contract and this append-only Master Roadmap record only. No Flutter/test/guard/SQL/Supabase/dependency/deployment/Git publication work. The contract's §Q records the supplied acceptance while retaining earlier drafting history and §O byte-for-byte.
+
+Owner Git review is pending for the exact two-document diff. Verify protected raw hashes, tracked/untracked inventories, empty index, preserved roadmap prefix, unchanged accepted requirements and `git diff --check`; inspect the untracked contract separately. No staging, committing or pushing is authorized. The remaining compatibility prerequisite is explicit and unsatisfied; no implementation starts automatically.
+
+**R10.5-D CONTRACT FROZEN — IMPLEMENTATION NOT AUTHORIZED — OWNER GIT REVIEW PENDING**
