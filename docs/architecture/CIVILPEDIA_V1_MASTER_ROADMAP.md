@@ -4850,3 +4850,51 @@ Current write boundary: this existing R10.5-D contract and this append-only Mast
 Owner Git review is pending for the exact two-document diff. Verify protected raw hashes, tracked/untracked inventories, empty index, preserved roadmap prefix, unchanged accepted requirements and `git diff --check`; inspect the untracked contract separately. No staging, committing or pushing is authorized. The remaining compatibility prerequisite is explicit and unsatisfied; no implementation starts automatically.
 
 **R10.5-D CONTRACT FROZEN — IMPLEMENTATION NOT AUTHORIZED — OWNER GIT REVIEW PENDING**
+
+# R10.5-D FREEZE-ONLY FOUR-GUARD COMPATIBILITY AUTHORIZATION
+
+The Owner prospectively authorizes completion of freeze-only commercial
+guard compatibility. This record does not assert that committed
+authorization existed when the current candidate was prepared.
+
+Exact frozen inputs:
+Freeze commit: bb59c7425527eed16a219c2043172ee9e523acfc
+Parent: 0ceb646621027e2ab902b13302c452038154ab11
+R10.5-D contract blob: 0c8f38c87248d31a5aef23a4cfe9f20a546b1329
+Freeze roadmap blob: 7a2e58253ddd9a9795dde59da864019931d3c5ee
+Unchanged readiness blob: ee696d6a4054fd5476f81f3d7c2c9b6e6e8cd7ab
+
+The authorization-persistence commit must have the freeze commit as
+parent and change only the Master Roadmap by this exact append.
+
+After that commit exists and a separate Owner execution instruction is
+issued, only the four guard paths enumerated at lines 4832–4835 of the
+freeze commit's Master Roadmap may change.
+
+Preserve the reviewed candidate except for the narrowly necessary
+recognition and enforcement of this exact committed authorization.
+Observe and pin its actual commit, parent and resulting roadmap blob.
+Verify the preserved prefix and exact append. Missing, pending,
+altered or mismatched authorization must fail live recognition.
+No future hash is supplied or invented.
+
+Retain the shared recognizer, all historical pins/security predicates,
+negative tests, exact HARDEN1 source oracle, independent repository-layer
+checks and all eight protected raw-byte identities. No broad exceptions,
+live-derived expected source, skipped assertions or historical fallback
+may admit unauthorized current states.
+
+Run CUI-2A0, HARDEN1, M1B, M3, unchanged M1a and unchanged R09q
+sequentially using flutter test --no-pub. Require zero failures,
+meaningful live positive/adversarial evidence, git diff --check and
+independent Big Pickle acceptance of the resulting exact composition.
+Reviewer substitution requires an explicit Owner decision naming it.
+
+STOP for any identity, scope, preservation, validation or review failure.
+Existing 193/193 and independent PASS remain prior candidate evidence;
+changed sources/composition require renewed focused validation/review.
+
+R10.5-D remains ACCEPTED / FROZEN, AUDIT-ONLY / IMPLEMENTATION NO.
+Commercial implementation remains NO; CUI-2A1/M4/M5 remain unauthorized.
+No UI, visual-test, SQL/Supabase, policy, contract or other-file changes.
+Git closure requires separate explicit Owner authorization.
