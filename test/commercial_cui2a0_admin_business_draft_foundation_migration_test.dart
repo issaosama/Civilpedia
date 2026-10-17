@@ -696,6 +696,626 @@ bool hasR10FreezeBoundary({
   );
 }
 
+// Exact literal prospective Owner/Architect record, not a live-file oracle.
+const r10PresentationAppend = '\n' r'''# V1-R10.5-D CONDITIONAL PRESENTATION EXECUTION AUTHORIZATION
+
+This is a prospective decision, effective only after explicit Owner adoption and an authorized Owner commit. It asserts no previous production implementation authority.
+
+R10.5-D_CONTRACT_STATUS: ACCEPTED / FROZEN
+IMPLEMENTATION_AUTHORIZED: YES — R10.5-D PRESENTATION ONLY, CONDITIONAL ON ALL EXECUTION GATES BELOW
+R10.5-D_IMPLEMENTATION_STATE: NOT STARTED
+R10.5-D_EXECUTION_STATE: BLOCKED UNTIL COMMITTED COMPATIBILITY GREEN, BASELINE/ANALYSIS DISPOSITION AND SEPARATE OWNER RELEASE
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_IMPLEMENTATION_AUTHORIZED: NO
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+CUI1_STATE: CLOSED
+CUI2A0_STATE: CLOSED
+M3_STATE: CLOSED
+R10.5-E/F_R10.6_R10.7: LOCKED
+BACKEND_PUBLICATION_ENTITLEMENT_PAYMENT_AUTHORITY_DELTA: ZERO
+COMMIT_PUSH_AUTHORIZED_TO_AGENTS: NO
+
+## Exact existing authority and documentary boundary
+
+Entry baseline: main at 48004703c8afe633a487f7612f07aecb459c7e7e.
+Frozen contract: docs/architecture/contracts/V1-R10_5D_PROFILE_USER_AREA_PRESENTATION_IMPLEMENTATION_CONTRACT.md, Git blob 0c8f38c87248d31a5aef23a4cfe9f20a546b1329.
+Roadmap prefix: docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md, Git blob d8a6511e1237efeebe62f745923550ce94609abc.
+Readiness document remains at blob ee696d6a4054fd5476f81f3d7c2c9b6e6e8cd7ab.
+
+Preserve every preceding roadmap byte and every frozen contract requirement. This later record supersedes only R10.5-D's ordinary UI implementation-NO/audit-only execution control, and only subject to the gates below. Historical records remain intact. No commercial phase is activated and no CUI-2A1 gate is satisfied or waived.
+
+## Exclusive future UI write boundary
+
+M lib/features/profile/presentation/profile_screen.dart
+M lib/features/profile/presentation/screens/profile_setup_screen.dart
+M lib/features/profile/presentation/screens/profile_edit_screen.dart
+M lib/features/profile/presentation/screens/authenticated_profile_edit_screen.dart
+M lib/features/user_area/presentation/user_area_screen.dart
+A test/v1_r10_5d_profile_user_area_visual_test.dart
+
+Only the new visual test may be untracked/added; once present it may be modified within the same authorized implementation. No deletion, rename, type change, seventh path, shared-component/provider/data/route/dependency/localization/native/SQL/Supabase change is permitted. Existing 17 regression files in frozen contract §F remain read-only. Preserve all eight literal raw Git identities in §O, including the existing three dirty tests and three untracked artifacts.
+
+## Frozen behavior and presentation requirements
+
+Implement §§A–E of the frozen R10.5-D contract without changing AuthProvider/Supabase authority, cloud-profile SSOT, local/guest fields and payloads, two-step setup/back/persistence, cloud save/single-flight/uncertain-save/manual retry, dirty/pending back protection, routes/destinations, whole-body Profile conflict versus header-only User Area conflict, five ordinary User Area entries and staff capability gates. No recovery parity redesign, new field, automatic retry, additional destination, backup-operation change or Google Play destination change.
+
+Reuse CivilAppBar, CivilSurfaceCard and existing theme/tokens, true-black dark hierarchy, Arabic RTL and representative dormant English LTR compatibility. Apply 16/24/32 gutters at 600/840 breakpoints, centered 760 logical-pixel content cap, readable 320×568/2.0 text-scale layouts, effective 48×48 hit targets and exactly one shell-safe bottom clearance. Replace only raw backup failure interpolation with the established localized failure text.
+
+## One coordinated compatibility pass, separately instructed
+
+The Owner/Architect must separately approve and instruct the exact coordinated activation pass before any edits. Its exclusive write boundary is this single roadmap append plus:
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+
+That pass performs zero UI implementation. It must implement one separately named shared R10.5-D recognition design for (a) the exact pending review pair, with live production execution disabled; (b) the committed authorization with zero UI changes; and (c) permitted partial and committed UI changes limited to the six paths above. A pending pair is review evidence only and cannot enable production execution. Preserve old exact historical/freeze-only fixtures, every security/hash predicate and independent committed/staged/unstaged/untracked inventories. Keep the three consumers and M1B's independently authored, unique-anchor HARDEN1 source oracle exact. Never derive expected source from the live file or accept arbitrary document suffixes, caller/environment bypass flags, directory exceptions or HEAD as expected authority.
+
+Observe actual authorization/guard commit and document/source blob identities only after the accepted coordinated commit exists. Do not invent future hashes or require a guard's own future hash inside its source. During UI work, the approved committed guards, all documents and unrelated sources are immutable; only the six UI paths and exact protected entry dirt may differ. Final UI identities are recorded after accepted Owner Git closure. Closure-document recognition remains a separate later decision.
+
+## Mandatory execution and acceptance gates
+
+1. Owner/Architect accepts this exact record and finite-stage compatibility design. Any genuine frozen-contract/gate change requires its own formal accepted amendment; this record silently amends none.
+2. Independently validate/review the exact coordinated roadmap/four-guard candidate, including meaningful positive/adversarial recognition. Owner separately authorizes and commits only its five paths, with entry baseline as parent. No UI edits occur in this pass.
+3. Verify the actual committed identities and run the four guards plus unchanged commercial_m1a_private_catalog_migration_test.dart and v1_r09q_security_matrix_test.dart sequentially with flutter test --no-pub. Require zero failures/skips and live committed preimplementation GREEN with zero UI changes. Pending-candidate GREEN cannot substitute for this committed gate.
+4. Satisfy frozen §G's 17-file baseline and targeted five-file analysis requirement. Reuse earlier test evidence only when exact source/test/toolchain inputs and composition traceability are verified and explicitly accepted; otherwise rerun the required baseline. The recorded internal Enum analyzer crash is not PASS; an explicit Architect tooling disposition or separately authorized successful analysis resolution is required. No SDK/dependency/global-cache patch is authorized.
+5. Owner issues a separate UI release instruction naming the actual committed execution/guard baseline and accepted prerequisite evidence. Only then may the designated UI implementer edit the six UI paths.
+6. After UI work, run the mandatory new visual suite, all 17 unchanged regressions and the same six security suites sequentially; require zero failures/skips, preserved raw identities and no new analyzer diagnostics under the accepted tooling disposition. Complete independent ordinary UI review and Owner Android visual acceptance with actual revision/device/settings evidence.
+7. Keep R10.5-D-IOS-01 mandatory before iOS launch and UNVERIFIED until native iPhone evidence exists. Android/widget results certify no native iOS readiness.
+8. Final Architect acceptance and separate Owner Git authorization are required. Stage only the accepted six-path UI scope, preserve unrelated dirt, inspect complete staged diff, run git diff --cached --check, verify actual parent and resulting source/test blobs, and use only normal expressly authorized Git publication. No automatic next-slice advancement.
+
+Guard compatibility requires independent Big Pickle review. The prior fresh-Codex substitution applied to the closed freeze-only acceptance gate and does not silently extend here; any new substitution must be explicitly named and scoped by the Owner. Routine UI implementation/review follows the Operating Model with independent implementer and reviewer.
+
+STOP for a missing/altered/uncommitted authority, failed required gate, protected-byte or source drift, unexpected path/status, weakened historical predicate, source-oracle mismatch, unresolved blocking review finding, missing analysis disposition, premature implementation or scope expansion. Report the exact required Owner/Architect decision; do not bypass, retry mutations blindly or edit protected tests.
+''';
+
+// Explicit fixed freeze-only fixture, never a live activation fallback.
+bool hasR10FreezeFixtureBoundary({
+  Map<String, String>? sources,
+  Iterable<String>? libDocsChanges, Iterable<String>? migrationNames,
+  Iterable<String>? predecessorChanges, Iterable<String>? backendChanges,
+  Iterable<String>? untrackedAuthorityPaths, Iterable<String>? repositoryChanges,
+  Iterable<String>? committedChanges, Iterable<String>? stagedChanges,
+  Iterable<String>? unstagedChanges, Iterable<String>? untrackedPaths,
+  Map<String, String>? preservedBlobs, Map<String, String>? pins,
+  String? executionCommit, String? committedStatus, String? stagedStatus, String? unstagedStatus,
+  String implementationCommit = cui2a0AcceptedImplementationCommit,
+  String closureCommit = cui2a0AcceptedClosureCommit,
+  String freezeCommit = cui2a1FreezeCommit,
+  String compatibilityCommit = cui2a1CompatibilityCommit,
+}) => hasR10FreezeBoundary(
+  sources: sources ?? _r10Sources,
+  libDocsChanges: libDocsChanges ?? [cui2a0RoadmapPath, cui2a0ClosureReportPath,
+    cui2a1ContractPath, ownerPlanningReadinessPath, r10ContractPath],
+  migrationNames: migrationNames, predecessorChanges: predecessorChanges,
+  backendChanges: backendChanges, untrackedAuthorityPaths: untrackedAuthorityPaths ?? const [],
+  repositoryChanges: repositoryChanges ?? _cui2a1DirtyPaths,
+  committedChanges: committedChanges ?? cui2a1CompatibilityPaths,
+  stagedChanges: stagedChanges ?? const [],
+  unstagedChanges: unstagedChanges ?? _cui2a1DirtyPaths,
+  untrackedPaths: untrackedPaths ?? _cui2a1UntrackedPaths,
+  preservedBlobs: preservedBlobs, pins: pins,
+  executionCommit: executionCommit ?? r10PresentationEntry,
+  committedStatus: committedStatus ?? cui2a1CompatibilityPaths.map((p) => 'M\t$p').join('\n'),
+  stagedStatus: stagedStatus ?? '',
+  unstagedStatus: unstagedStatus ?? _cui2a1DirtyPaths.map((p) => 'M\t$p').join('\n'),
+  implementationCommit: implementationCommit, closureCommit: closureCommit,
+  freezeCommit: freezeCommit, compatibilityCommit: compatibilityCommit,
+);
+
+// Separate ordinary R10.5-D compatibility classification. This is never an
+// Owner release authority: release/baseline/analysis/review evidence is procedural.
+const r10PresentationEntry = '48004703c8afe633a487f7612f07aecb459c7e7e';
+const _r10EntryGuardBlobs = <String, String>{
+  'test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart': 'f667537445effe110f2ee583d7831aec6ad36088',
+  'test/commercial_harden1_public_plans_exposure_migration_test.dart': '3174905cbecec1bff8dc8d2fcad5d1eb5ea37be8',
+  'test/commercial_m1b_catalog_reference_data_migration_test.dart': 'b4074a57cd6f59fbedf1ed5795f81542169ec975',
+  'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart': '4ce5e11dcd11b160db7bc819fe01da9192289dea',
+};
+const _r10VisualPath = 'test/v1_r10_5d_profile_user_area_visual_test.dart';
+final _r10PresentationSources = <String, String>{
+  ..._r10Sources, cui2a0RoadmapPath: r10AuthorizedRoadmap + r10PresentationAppend,
+};
+final _r10PresentationDocuments = <String, String>{
+  for (final e in _r10PresentationSources.entries)
+    if (e.key.startsWith('docs/')) e.key: e.value,
+};
+final _r10EntryDocuments = <String, String>{
+  for (final e in _r10Sources.entries)
+    if (e.key.startsWith('docs/')) e.key: e.value,
+};
+
+enum R10PresentationStage { rejected, pendingReview, committedZeroUi, boundedUi }
+class R10PresentationRecognition {
+  final R10PresentationStage stage;
+  final String? observedAuthorizationCommit;
+  final Map<String, String> observedGuardBlobs;
+  const R10PresentationRecognition(this.stage, [this.observedAuthorizationCommit,
+    this.observedGuardBlobs = const {}]);
+  bool get compatible => stage != R10PresentationStage.rejected;
+  bool get committedAuthorityObserved => observedAuthorizationCommit != null;
+  // Git proves composition, never the separate human UI-release instruction.
+  bool get separateOwnerUiReleaseRequired => true;
+  bool get productionExecutionAuthorized => false;
+}
+class _R10Revision {
+  final String id, parents, raw;
+  final Map<String, String> documents, guards;
+  const _R10Revision(this.id, this.parents, this.raw, this.documents, this.guards);
+}
+class _R10PresentationEvidence {
+  final String branch, head, indexRaw, workRaw;
+  final _R10Revision entry;
+  final List<_R10Revision> revisions;
+  final Map<String, String> sources, protected;
+  final List<String> untracked;
+  final Set<String> nonRegularPaths;
+  const _R10PresentationEvidence({required this.branch, required this.head,
+    required this.entry, required this.revisions, required this.sources,
+    required this.protected, required this.indexRaw, required this.workRaw,
+    required this.untracked, this.nonRegularPaths = const {}});
+}
+bool _r10SameMap(Map<String, String> actual, Map<String, String> expected) =>
+    actual.length == expected.length &&
+    expected.entries.every((e) => actual[e.key] == e.value);
+
+// Git --raw supplies modes independently of name-status. No symlink, executable,
+// rename/copy, deletion, duplicate path, or malformed status can become an M.
+List<({String path, String status})>? _r10RawChanges(String raw) {
+  final result = <({String path, String status})>[];
+  for (final line in _paths(raw)) {
+    final m = RegExp(r'^:(000000|100644) (000000|100644) [a-f0-9]{40} [a-f0-9]{40} ([AM])\t([^\t]+)$').firstMatch(line);
+    if (m == null || m[2] != '100644' ||
+        (m[3] == 'A' ? m[1] != '000000' : m[1] != '100644')) return null;
+    result.add((path: m[4]!, status: m[3]!));
+  }
+  if (result.map((e) => e.path).toSet().length != result.length) return null;
+  return result;
+}
+bool _r10UiLayer(List<({String path, String status})> changes,
+    {required bool visualPresent, Set<String> extraModified = const {}}) =>
+    changes.every((e) {
+      if (extraModified.contains(e.path)) return e.status == 'M';
+      if (!r10PresentationPaths.contains(e.path)) return false;
+      if (e.path != _r10VisualPath) return e.status == 'M';
+      return e.status == (visualPresent ? 'M' : 'A');
+    });
+
+R10PresentationRecognition _classifyR10Presentation(_R10PresentationEvidence e) {
+  const reject = R10PresentationRecognition(R10PresentationStage.rejected);
+  final five = {...cui2a1CompatibilityPaths, cui2a0RoadmapPath};
+  if (e.branch != 'main' || e.nonRegularPaths.isNotEmpty || e.entry.id != r10PresentationEntry ||
+      e.entry.parents != r10AuthorizationCommit ||
+      !_r10SameMap(e.entry.guards, _r10EntryGuardBlobs) ||
+      !_r10SameMap(e.entry.documents, _r10EntryDocuments) ||
+      !_r10SameMap(e.sources, _r10PresentationSources) ||
+      !_r10SameMap(e.protected, _cui2a1ProtectedBlobs)) return reject;
+  final index = _r10RawChanges(e.indexRaw), work = _r10RawChanges(e.workRaw);
+  if (index == null || work == null ||
+      !_samePaths(work.where((c) => _cui2a1DirtyPaths.contains(c.path)).map((c) => c.path), _cui2a1DirtyPaths)) return reject;
+  if (e.head == r10PresentationEntry) {
+    if (e.revisions.isNotEmpty || index.isNotEmpty ||
+        !_samePaths(work.map((c) => c.path), {...five, ..._cui2a1DirtyPaths}) ||
+        work.any((c) => c.status != 'M') ||
+        !_samePaths(e.untracked, _cui2a1UntrackedPaths)) return reject;
+    return const R10PresentationRecognition(R10PresentationStage.pendingReview);
+  }
+  if (e.revisions.isEmpty) return reject;
+  final authorization = e.revisions.first;
+  final first = _r10RawChanges(authorization.raw);
+  if (authorization.parents != r10PresentationEntry ||
+      !_r10SameMap(authorization.documents, _r10PresentationDocuments) ||
+      !_samePaths(authorization.guards.keys, cui2a1CompatibilityPaths) ||
+      authorization.guards.entries.any((g) =>
+        !RegExp(r'^[a-f0-9]{40}$').hasMatch(g.value) ||
+        g.value == _r10EntryGuardBlobs[g.key]) ||
+      first == null || !_samePaths(first.map((c) => c.path), five) ||
+      first.any((c) => c.status != 'M')) return reject;
+  // Walk every commit, not just the net tree diff: a later restoration cannot
+  // conceal an intervening unauthorized source/document/guard change or merge.
+  var previous = r10PresentationEntry;
+  var visualPresent = false;
+  var hasUi = false;
+  final seen = <String>{r10PresentationEntry};
+  for (var i = 0; i < e.revisions.length; i++) {
+    final revision = e.revisions[i];
+    if (!RegExp(r'^[a-f0-9]{40}$').hasMatch(revision.id) ||
+        !seen.add(revision.id) || revision.parents != previous ||
+        !_r10SameMap(revision.documents, _r10PresentationDocuments) ||
+        !_r10SameMap(revision.guards, authorization.guards)) return reject;
+    if (i > 0) {
+      final changes = _r10RawChanges(revision.raw);
+      if (changes == null || !_r10UiLayer(changes, visualPresent: visualPresent)) return reject;
+      hasUi |= changes.isNotEmpty;
+      visualPresent |= changes.any((c) => c.path == _r10VisualPath);
+    }
+    previous = revision.id;
+  }
+  if (previous != e.head || !_r10UiLayer(index, visualPresent: visualPresent)) return reject;
+  final visualInIndex = visualPresent || index.any((c) => c.path == _r10VisualPath);
+  // Unstaged tracked changes cannot be A; only the exact new untracked test can
+  // represent a file not yet in HEAD/index.
+  if (work.any((c) => c.status != 'M') ||
+      !_r10UiLayer(work, visualPresent: visualInIndex, extraModified: _cui2a1DirtyPaths)) return reject;
+  final expectedUntracked = {..._cui2a1UntrackedPaths};
+  if (!visualInIndex && e.untracked.contains(_r10VisualPath)) expectedUntracked.add(_r10VisualPath);
+  if (!_samePaths(e.untracked, expectedUntracked)) return reject;
+  hasUi |= index.isNotEmpty || work.any((c) => !_cui2a1DirtyPaths.contains(c.path)) ||
+      expectedUntracked.contains(_r10VisualPath);
+  return R10PresentationRecognition(hasUi ? R10PresentationStage.boundedUi :
+    R10PresentationStage.committedZeroUi, authorization.id, Map.unmodifiable(authorization.guards));
+}
+
+String _r10Read(String path) => File(path).readAsStringSync().replaceAll('\r\n', '\n');
+_R10Revision _r10Revision(String commit, String parent) => _R10Revision(
+  commit, _git(['show', '-s', '--format=%P', commit]).trim(),
+  _git(['diff', '--raw', '--no-abbrev', '--no-renames', parent, commit]),
+  {for (final path in _r10EntryDocuments.keys) path: _git(['show', '$commit:$path'])},
+  {for (final path in cui2a1CompatibilityPaths) path: _git(['rev-parse', '$commit:$path']).trim()},
+);
+final _r10PresentationEntryRevision = _r10Revision(r10PresentationEntry, r10AuthorizationCommit);
+_R10PresentationEvidence _collectR10PresentationEvidence() {
+  final head = _git(['rev-parse', 'HEAD']).trim();
+  final descendants = _paths(_git(['rev-list', '--reverse', '--ancestry-path', '$r10PresentationEntry..$head']));
+  final revisions = <_R10Revision>[];
+  var parent = r10PresentationEntry;
+  for (final commit in descendants) {
+    revisions.add(_r10Revision(commit, parent));
+    parent = commit;
+  }
+  return _R10PresentationEvidence(
+    branch: _git(['branch', '--show-current']).trim(), head: head,
+    entry: _r10PresentationEntryRevision, revisions: revisions,
+    sources: {for (final path in _r10Sources.keys) path: _r10Read(path)},
+    protected: {for (final path in _cui2a1ProtectedBlobs.keys)
+      path: _git(['hash-object', '--no-filters', '--', path]).trim()},
+    indexRaw: _git(['diff', '--cached', '--raw', '--no-abbrev', '--no-renames']),
+    workRaw: _git(['diff', '--raw', '--no-abbrev', '--no-renames']),
+    untracked: _paths(_git(['ls-files', '--others', '--exclude-standard'])),
+    nonRegularPaths: {
+      for (final path in {..._r10Sources.keys, ...cui2a1CompatibilityPaths,
+        ..._cui2a1ProtectedBlobs.keys, ...r10PresentationPaths})
+        if (FileSystemEntity.typeSync(path, followLinks: false) != FileSystemEntityType.file &&
+            (path != _r10VisualPath || FileSystemEntity.typeSync(path, followLinks: false) != FileSystemEntityType.notFound)) path,
+    },
+  );
+}
+R10PresentationRecognition recognizeR10PresentationStage() {
+  const reject = R10PresentationRecognition(R10PresentationStage.rejected);
+  try {
+    if (!_r10PinsMatch ||
+        _git(['merge-base', r10PresentationEntry, 'HEAD']).trim() != r10PresentationEntry ||
+        !hasR10FreezeFixtureBoundary()) return reject;
+    // The pending pair must preserve the exact entry raw prefix and verbatim append.
+    if (_git(['rev-parse', 'HEAD']).trim() == r10PresentationEntry &&
+        _git(['hash-object', '--no-filters', '--', cui2a0RoadmapPath]).trim() != 'b074b047ddff7b7c821933aa1b88d8e3b6666792') return reject;
+    return _classifyR10Presentation(_collectR10PresentationEvidence());
+  } on Object {
+    return reject; // Missing objects, paths, malformed UTF-8 and Git failures fail closed.
+  }
+}
+bool hasR10PresentationCompatibility() => recognizeR10PresentationStage().compatible;
+bool matchesR10PresentationDocuments(String roadmap, String contract,
+    String readiness, String r10Contract) =>
+    _r10PinsMatch && roadmap == r10AuthorizedRoadmap + r10PresentationAppend &&
+    contract == cui2a1FrozenContract && readiness == ownerPlanningReadiness &&
+    r10Contract == r10FrozenContract;
+
+// Synthetic IDs here are in-memory fixtures, never future authority pins.
+String _r10ProbeRaw(String path, {String status = 'M',
+  String oldMode = '100644', String newMode = '100644'}) =>
+    ':' + (status == 'A' ? '000000' : oldMode) + ' ' + newMode +
+    ' ' + '1' * 40 + ' ' + '2' * 40 + ' ' + status + '\t' + path + '\n';
+_R10PresentationEvidence _r10Probe(_R10PresentationEvidence e, {
+  String? branch, String? head, String? indexRaw, String? workRaw,
+  _R10Revision? entry, List<_R10Revision>? revisions,
+  Map<String, String>? sources, Map<String, String>? protected, List<String>? untracked,
+  Set<String>? nonRegularPaths,
+}) => _R10PresentationEvidence(branch: branch ?? e.branch, head: head ?? e.head,
+  entry: entry ?? e.entry, revisions: revisions ?? e.revisions,
+  sources: sources ?? e.sources, protected: protected ?? e.protected,
+  indexRaw: indexRaw ?? e.indexRaw, workRaw: workRaw ?? e.workRaw,
+  untracked: untracked ?? e.untracked, nonRegularPaths: nonRegularPaths ?? e.nonRegularPaths);
+_R10Revision _r10RevisionProbe(_R10Revision r, {String? parents, String? raw,
+  Map<String, String>? documents, Map<String, String>? guards}) =>
+    _R10Revision(r.id, parents ?? r.parents, raw ?? r.raw,
+      documents ?? r.documents, guards ?? r.guards);
+void _registerR10PresentationBoundaryTests() {
+  final dirtyRaw = _cui2a1DirtyPaths.map((p) => _r10ProbeRaw(p)).join();
+  final fiveRaw = {...cui2a1CompatibilityPaths, cui2a0RoadmapPath}.map((p) => _r10ProbeRaw(p)).join();
+  final entry = _r10PresentationEntryRevision;
+  final pending = _R10PresentationEvidence(
+    branch: 'main', head: r10PresentationEntry, entry: entry, revisions: const [],
+    sources: _r10PresentationSources, protected: _cui2a1ProtectedBlobs,
+    indexRaw: '', workRaw: fiveRaw + dirtyRaw, untracked: _cui2a1UntrackedPaths.toList());
+  final authorization = _R10Revision('b' * 40, r10PresentationEntry, fiveRaw,
+    _r10PresentationDocuments, {
+      for (var i = 0; i < cui2a1CompatibilityPaths.length; i++)
+        cui2a1CompatibilityPaths.elementAt(i): (i + 1).toString() * 40,
+    });
+  final committed = _r10Probe(pending, head: authorization.id,
+    revisions: [authorization], workRaw: dirtyRaw);
+  R10PresentationStage stage(_R10PresentationEvidence e) => _classifyR10Presentation(e).stage;
+  const no = R10PresentationStage.rejected;
+  test('R10 actual stage proves compatibility only, never procedural Owner UI release', () {
+    final live = recognizeR10PresentationStage();
+    expect(live.compatible, isTrue);
+    expect(live.productionExecutionAuthorized, isFalse);
+    expect(live.separateOwnerUiReleaseRequired, isTrue);
+    if (_git(['rev-parse', 'HEAD']).trim() == r10PresentationEntry) {
+      expect(live.stage, R10PresentationStage.pendingReview);
+      expect(live.committedAuthorityObserved, isFalse);
+      expect(live.observedAuthorizationCommit, isNull);
+      expect(hasR10FreezeBoundary(), isFalse);
+    } else {
+      expect(live.committedAuthorityObserved, isTrue);
+      expect(live.observedGuardBlobs.keys.toSet(), cui2a1CompatibilityPaths);
+    }
+    expect(hasR10FreezeFixtureBoundary(), isTrue);
+  });
+  test('R10 pending exact five-path pair is unstaged, zero UI, review only', () {
+    expect(stage(pending), R10PresentationStage.pendingReview);
+    for (final path in r10PresentationPaths) {
+      expect(stage(_r10Probe(pending, workRaw: pending.workRaw + _r10ProbeRaw(path))), no);
+      expect(stage(_r10Probe(pending, indexRaw: _r10ProbeRaw(path))), no);
+      expect(stage(_r10Probe(pending, untracked: [...pending.untracked, path])), no);
+    }
+    for (final path in {...cui2a1CompatibilityPaths, cui2a0RoadmapPath}) {
+      expect(stage(_r10Probe(pending, workRaw: pending.workRaw.replaceFirst(_r10ProbeRaw(path), ''))), no);
+      expect(stage(_r10Probe(pending, indexRaw: _r10ProbeRaw(path))), no);
+    }
+    expect(stage(_r10Probe(pending, branch: 'unauthorized')), no);
+    expect(stage(_r10Probe(pending, head: r10AuthorizationCommit)), no);
+  });
+  test('R10 committed zero UI requires exact five-path direct-child authority', () {
+    final result = _classifyR10Presentation(committed);
+    expect(result.stage, R10PresentationStage.committedZeroUi);
+    expect(result.observedAuthorizationCommit, authorization.id);
+    expect(result.observedGuardBlobs, authorization.guards);
+    expect(result.productionExecutionAuthorized, isFalse);
+    expect(result.separateOwnerUiReleaseRequired, isTrue);
+    expect(stage(_r10Probe(committed, revisions: [])), no);
+    for (final parent in [r10AuthorizationCommit, r10PresentationEntry + ' ' + 'a' * 40]) {
+      expect(stage(_r10Probe(committed, revisions: [
+        _r10RevisionProbe(authorization, parents: parent)])), no);
+    }
+    expect(stage(_r10Probe(committed, revisions: [
+      _r10RevisionProbe(authorization, raw: fiveRaw + _r10ProbeRaw(r10PresentationPaths.first))])), no);
+    expect(stage(_r10Probe(committed, revisions: [
+      _r10RevisionProbe(authorization, guards: _r10EntryGuardBlobs)])), no);
+  });
+  test('R10 permits exact partial UI at each layer and visual A then M only', () {
+    for (final path in r10PresentationPaths) {
+      final delta = _r10ProbeRaw(path, status: path == _r10VisualPath ? 'A' : 'M');
+      expect(stage(_r10Probe(committed, indexRaw: delta)), R10PresentationStage.boundedUi, reason: 'Index ' + path);
+      if (path != _r10VisualPath) {
+        expect(stage(_r10Probe(committed, workRaw: dirtyRaw + delta)), R10PresentationStage.boundedUi, reason: 'Work ' + path);
+      }
+      final revision = _R10Revision('c' * 40, authorization.id, delta,
+        _r10PresentationDocuments, authorization.guards);
+      final ui = _r10Probe(committed, head: revision.id, revisions: [authorization, revision]);
+      expect(stage(ui), R10PresentationStage.boundedUi, reason: 'Commit ' + path);
+      if (path == _r10VisualPath) {
+        expect(stage(_r10Probe(ui, indexRaw: _r10ProbeRaw(path),
+          workRaw: dirtyRaw + _r10ProbeRaw(path))), R10PresentationStage.boundedUi);
+        expect(stage(_r10Probe(committed, indexRaw: delta,
+          workRaw: dirtyRaw + _r10ProbeRaw(path))), R10PresentationStage.boundedUi);
+      }
+    }
+    expect(stage(_r10Probe(committed, untracked: [...committed.untracked, _r10VisualPath])),
+      R10PresentationStage.boundedUi);
+    expect(stage(_r10Probe(committed, indexRaw: _r10ProbeRaw(_r10VisualPath))), no);
+    expect(stage(_r10Probe(committed, workRaw: dirtyRaw + _r10ProbeRaw(_r10VisualPath))), no);
+  });
+  test('R10 extra paths fail independently in commit, index, work and untracked', () {
+    for (final path in {...cui2a1CompatibilityPaths, ..._r10Sources.keys,
+      ..._cui2a1ProtectedBlobs.keys, 'lib/unauthorized.dart', 'pubspec.yaml',
+      'supabase/config.toml', 'supabase/migrations/00027_unauthorized.sql',
+      'test/unauthorized_test.dart', 'docs/unauthorized.md', 'artifacts/new.png',
+      _r10VisualPath + '.bak'}) {
+      final raw = _r10ProbeRaw(path);
+      expect(stage(_r10Probe(committed, indexRaw: raw)), no, reason: 'Index ' + path);
+      if (!_cui2a1DirtyPaths.contains(path)) {
+        expect(stage(_r10Probe(committed, workRaw: dirtyRaw + raw)), no, reason: 'Work ' + path);
+      }
+      expect(stage(_r10Probe(committed, untracked: [...committed.untracked, path])), no, reason: 'Untracked ' + path);
+      final revision = _R10Revision('c' * 40, authorization.id, raw,
+        _r10PresentationDocuments, authorization.guards);
+      expect(stage(_r10Probe(committed, head: revision.id, revisions: [authorization, revision])), no,
+        reason: 'Committed ' + path);
+    }
+  });
+  test('R10 rejects unauthorized statuses, file modes, duplicate paths and new screens', () {
+    for (final path in r10PresentationPaths) {
+      expect(stage(_r10Probe(committed, nonRegularPaths: {path})), no,
+        reason: 'Reject nonregular files, including dangling untracked links: ' + path);
+      for (final status in ['D', 'T', 'R100', 'C100', '??']) {
+        final raw = _r10ProbeRaw(path, status: status);
+        expect(stage(_r10Probe(committed, indexRaw: raw)), no);
+        expect(stage(_r10Probe(committed, workRaw: dirtyRaw + raw)), no);
+      }
+      for (final mode in ['120000', '100755', '160000']) {
+        expect(stage(_r10Probe(committed, indexRaw: _r10ProbeRaw(path, newMode: mode))), no);
+        expect(stage(_r10Probe(committed, indexRaw: _r10ProbeRaw(path, oldMode: mode))), no);
+      }
+      if (path != _r10VisualPath) {
+        expect(stage(_r10Probe(committed, indexRaw: _r10ProbeRaw(path, status: 'A'))), no);
+        expect(stage(_r10Probe(committed, untracked: [...committed.untracked, path])), no);
+      }
+    }
+    expect(stage(_r10Probe(committed, indexRaw: _r10ProbeRaw(r10PresentationPaths.first) * 2)), no);
+    expect(stage(_r10Probe(committed, indexRaw: 'malformed')), no);
+  });
+  test('R10 rejects missing or changed documents, entry identities and authorization', () {
+    for (final e in _r10PresentationSources.entries) {
+      final changed = {..._r10PresentationSources, e.key: e.value + '\nunauthorized'};
+      expect(changed[e.key], isNot(e.value));
+      for (final base in [pending, committed]) {
+        expect(stage(_r10Probe(base, sources: changed)), no);
+        expect(stage(_r10Probe(base, sources: Map.from(_r10PresentationSources)..remove(e.key))), no);
+      }
+    }
+    for (final e in _r10EntryGuardBlobs.entries) {
+      expect(stage(_r10Probe(committed, entry: _r10RevisionProbe(entry,
+        guards: {...entry.guards, e.key: '0' * 40}))), no);
+    }
+    expect(stage(_r10Probe(committed, entry: _r10RevisionProbe(entry, parents: r10FreezeCommit))), no);
+    for (final path in _r10PresentationDocuments.keys) {
+      expect(stage(_r10Probe(committed, revisions: [
+        _r10RevisionProbe(authorization, documents: {..._r10PresentationDocuments, path: 'unauthorized'})])), no);
+    }
+  });
+  test('R10 exact eight raw hashes, dirty paths and untracked inventory are mandatory', () {
+    for (final e in _cui2a1ProtectedBlobs.entries) {
+      for (final base in [pending, committed]) {
+        expect(stage(_r10Probe(base, protected: {...base.protected, e.key: '0' * 40})), no);
+        expect(stage(_r10Probe(base, protected: Map.from(base.protected)..remove(e.key))), no);
+      }
+    }
+    expect(stage(_r10Probe(committed, untracked: [])), no);
+    expect(stage(_r10Probe(committed, workRaw: '')), no);
+    expect(stage(_r10Probe(committed, untracked: [...committed.untracked, committed.untracked.first])), no);
+  });
+  test('R10 per-commit history rejects restored drift and mutable approved guards', () {
+    for (final path in [cui2a0RoadmapPath, cui2a1CompatibilityPaths.first,
+      'lib/unauthorized.dart', 'supabase/config.toml']) {
+      final drift = _R10Revision('c' * 40, authorization.id, _r10ProbeRaw(path),
+        _r10PresentationDocuments, authorization.guards);
+      final restored = _R10Revision('d' * 40, drift.id, _r10ProbeRaw(path),
+        _r10PresentationDocuments, authorization.guards);
+      expect(stage(_r10Probe(committed, head: restored.id,
+        revisions: [authorization, drift, restored])), no);
+    }
+    final later = _R10Revision('c' * 40, authorization.id,
+      _r10ProbeRaw(r10PresentationPaths.first), _r10PresentationDocuments,
+      {...authorization.guards, cui2a1CompatibilityPaths.first: 'e' * 40});
+    expect(stage(_r10Probe(committed, head: later.id, revisions: [authorization, later])), no);
+    expect(stage(_r10Probe(committed, head: 'e' * 40)), no);
+  });
+  test('R10 exact append preserves commercial restrictions and procedural release gates', () {
+    for (final token in ['IMPLEMENTATION_AUTHORIZED: YES — R10.5-D PRESENTATION ONLY',
+      'R10.5-D_EXECUTION_STATE: BLOCKED', 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO',
+      'CUI2A1_IMPLEMENTATION_AUTHORIZED: NO', 'M4_STATE: NOT AUTHORIZED',
+      'M5_STATE: NOT AUTHORIZED', 'R10.5-E/F_R10.6_R10.7: LOCKED',
+      'COMMIT_PUSH_AUTHORIZED_TO_AGENTS: NO', 'separate UI release instruction',
+      'independent Big Pickle review']) {
+      expect(r10PresentationAppend, contains(token));
+      final altered = (r10AuthorizedRoadmap + r10PresentationAppend).replaceFirst(token, 'unauthorized');
+      expect(altered, isNot(_r10PresentationSources[cui2a0RoadmapPath]));
+      expect(stage(_r10Probe(committed, sources: {...committed.sources, cui2a0RoadmapPath: altered})), no);
+    }
+    for (final roadmap in [r10AuthorizedRoadmap, committed.sources[cui2a0RoadmapPath]! + '\n# Future authority']) {
+      expect(stage(_r10Probe(committed, sources: {...committed.sources, cui2a0RoadmapPath: roadmap})), no);
+    }
+  });
+}
+
+// Independently authored exact transformation of the fixed 48004703 HARDEN1.
+// Each anchor is unique; the expected result is never copied from the live file.
+const r10PresentationHardenEdits = <(String, String)>[
+  (r'''postClosureImplementationChanges.isEmpty && cui2a0.hasR10FreezeBoundary();''', r'''postClosureImplementationChanges.isEmpty && cui2a0.hasR10PresentationCompatibility();'''),
+  (r'''void _registerR10FreezeTests() {
+  final paths = _cui1ChangedPaths(_git([
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+  ]));
+  final documents = <String, String>{
+    for (final path in _closedCommittedDocuments.keys) path: _read(path),
+    cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+    cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+    cui2a0.r10ContractPath: _read(cui2a0.r10ContractPath),
+  };
+  final roadmap = _read(_cui1RoadmapPath);''', r'''void _registerR10FreezeTests() {
+  // Immutable freeze fixture; no pending activation is continuing freeze authority.
+  final paths = _cui1ChangedPaths(_git([
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit, cui2a0.r10PresentationEntry,
+  ]));
+  final documents = <String, String>{
+    ..._closedCommittedDocuments,
+    cui2a0.cui2a1ContractPath: cui2a0.cui2a1FrozenContract,
+    cui2a0.ownerPlanningReadinessPath: cui2a0.ownerPlanningReadiness,
+    cui2a0.r10ContractPath: cui2a0.r10FrozenContract,
+  };
+  final roadmap = cui2a0.r10AuthorizedRoadmap;'''),
+  (r'''expect(cui2a0.hasR10FreezeBoundary(), isTrue);''', r'''expect(cui2a0.hasR10FreezeFixtureBoundary(), isTrue);'''),
+  (r'''      }) => _allowsR10FreezeComposition(''', r'''      }) => _allowsR10PresentationComposition('''),
+  (r'''bool _matchesCui1MediaAuthority''', r'''// Ordinary R10.5-D stage projection, after the shared live layer checks.
+// This source boundary never proves the separate procedural Owner UI release.
+bool _allowsR10PresentationComposition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) {
+  final recognition = cui2a0.recognizeR10PresentationStage();
+  final uiPaths = recognition.stage == cui2a0.R10PresentationStage.boundedUi
+      ? cui2a0.r10PresentationPaths : const <String>{};
+  return recognition.compatible &&
+    cui2a0.matchesR10PresentationDocuments(
+      roadmap, documents[cui2a0.cui2a1ContractPath] ?? '',
+      documents[cui2a0.ownerPlanningReadinessPath] ?? '',
+      documents[cui2a0.r10ContractPath] ?? '',
+    ) &&
+    postClosureImplementationChanges.every(uiPaths.contains) &&
+    _allowsR10FreezeComposition(
+      changedPaths.where((path) => !uiPaths.contains(path)),
+      cui2a0.r10AuthorizedRoadmap, documents,
+      const [],
+    );
+}
+
+void _registerR10PresentationTests() {
+  test('R10 presentation consumer uses shared stage and requires procedural release', () {
+    final recognition = cui2a0.recognizeR10PresentationStage();
+    expect(recognition.compatible, isTrue);
+    expect(recognition.productionExecutionAuthorized, isFalse);
+    expect(recognition.separateOwnerUiReleaseRequired, isTrue);
+    final paths = _cui1ChangedPaths(_git([
+      'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+    ]));
+    final documents = <String, String>{
+      for (final path in _closedCommittedDocuments.keys) path: _read(path),
+      cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+      cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+      cui2a0.r10ContractPath: _read(cui2a0.r10ContractPath),
+    };
+    final roadmap = _read(_cui1RoadmapPath);
+    expect(_allowsR10PresentationComposition(paths, roadmap, documents, []), isTrue);
+    expect(_allowsR10FreezeComposition(paths, roadmap, documents, []), isFalse);
+    for (final altered in [cui2a0.r10AuthorizedRoadmap, roadmap + '\nunauthorized',
+      roadmap.replaceFirst('COMMERCIAL_CURRENT_SLICE: NONE', 'COMMERCIAL_CURRENT_SLICE: M4')]) {
+      expect(altered, isNot(roadmap));
+      expect(_allowsR10PresentationComposition(paths, altered, documents, []), isFalse);
+    }
+    for (final entry in documents.entries) {
+      expect(_allowsR10PresentationComposition(paths, roadmap,
+        {...documents, entry.key: entry.value + '\nunauthorized'}, []), isFalse);
+    }
+    for (final path in ['lib/unauthorized.dart', 'test/unauthorized_test.dart',
+      'supabase/config.toml', 'docs/unauthorized.md']) {
+      expect(_allowsR10PresentationComposition([...paths, path], roadmap, documents, []), isFalse);
+      expect(_allowsR10PresentationComposition(paths, roadmap, documents, [path]), isFalse);
+    }
+  });
+}
+
+bool _matchesCui1MediaAuthority'''),
+  (r'''  _registerR10FreezeTests();''', r'''  _registerR10FreezeTests();
+  _registerR10PresentationTests();'''),
+  (r'''              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend''', r'''              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend'''),
+  (r'''    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend);''', r'''    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend);'''),
+];
+String compatibleR10PresentationHardenSourceFromFreeze(String freeze) {
+  var expected = freeze;
+  for (final edit in r10PresentationHardenEdits) {
+    expected = _replaceOwnerPlanningAnchor(expected, edit.$1, edit.$2);
+  }
+  return expected;
+}
+String compatibleR10PresentationHardenSource(String historical) =>
+    compatibleR10PresentationHardenSourceFromFreeze(compatibleR10FreezeHardenSource(historical));
+
 bool hasOwnerPlanningFixtureBoundary({
   Map<String, String>? sources,
   Iterable<String>? libDocsChanges, Iterable<String>? migrationNames,
@@ -719,14 +1339,14 @@ bool hasOwnerPlanningFixtureBoundary({
   repositoryChanges: repositoryChanges ?? _cui2a1DirtyPaths,
   committedChanges: committedChanges ?? const [],
   stagedChanges: stagedChanges ?? const [],
-  unstagedChanges: unstagedChanges,
-  untrackedPaths: untrackedPaths,
+  unstagedChanges: unstagedChanges ?? _cui2a1DirtyPaths,
+  untrackedPaths: untrackedPaths ?? _cui2a1UntrackedPaths,
   preservedBlobs: preservedBlobs,
   pins: pins,
   executionCommit: executionCommit ?? r10FreezeParent,
   committedStatus: committedStatus ?? '',
   stagedStatus: stagedStatus ?? '',
-  unstagedStatus: unstagedStatus,
+  unstagedStatus: unstagedStatus ?? _cui2a1DirtyPaths.map((p) => 'M\t$p').join('\n'),
   implementationCommit: implementationCommit,
   closureCommit: closureCommit,
   freezeCommit: freezeCommit,
@@ -736,23 +1356,23 @@ bool hasOwnerPlanningFixtureBoundary({
 void _registerR10FreezeBoundaryTests() {
   test('R10 freeze live recognition is distinct from historical documentary fixtures', () {
     expect(_r10PinsMatch, isTrue);
-    expect(hasR10FreezeBoundary(), isTrue);
+    expect(hasR10FreezeFixtureBoundary(), isTrue);
     expect(hasOwnerPlanningFixtureBoundary(), isTrue);
     expect(hasOwnerPlanningDocumentaryBoundary(), isFalse);
-    expect(hasR10FreezeBoundary(sources: _ownerPlanningSources), isFalse);
-    expect(hasR10FreezeBoundary(executionCommit: r10FreezeCommit), isFalse);
-    expect(hasR10FreezeBoundary(executionCommit: r10FreezeParent), isFalse);
-    expect(hasR10FreezeBoundary(executionCommit: ownerPlanningCommit), isFalse);
+    expect(hasR10FreezeFixtureBoundary(sources: _ownerPlanningSources), isFalse);
+    expect(hasR10FreezeFixtureBoundary(executionCommit: r10FreezeCommit), isFalse);
+    expect(hasR10FreezeFixtureBoundary(executionCommit: r10FreezeParent), isFalse);
+    expect(hasR10FreezeFixtureBoundary(executionCommit: ownerPlanningCommit), isFalse);
   });
   test('R10 freeze requires the exact committed prospective authorization', () {
     expect(_git(['rev-parse', r10AuthorizationCommit + '^']).trim(), r10FreezeCommit);
     expect(r10AuthorizedRoadmap, r10FrozenRoadmap + r10AuthorizationAppend);
-    expect(hasR10FreezeBoundary(), isTrue);
-    expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: r10FrozenRoadmap}), isFalse);
-    expect(hasR10FreezeBoundary(executionCommit: r10FreezeCommit), isFalse,
+    expect(hasR10FreezeFixtureBoundary(), isTrue);
+    expect(hasR10FreezeFixtureBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: r10FrozenRoadmap}), isFalse);
+    expect(hasR10FreezeFixtureBoundary(executionCommit: r10FreezeCommit), isFalse,
       reason: 'A pending working-copy authorization cannot replace a committed ancestor');
-    expect(hasR10FreezeBoundary(pins: {..._r10Pins, 'authorization': r10FreezeCommit}), isFalse);
-    expect(hasR10FreezeBoundary(pins: {..._r10Pins, 'authorizedRoadmap': r10RoadmapBlob}), isFalse);
+    expect(hasR10FreezeFixtureBoundary(pins: {..._r10Pins, 'authorization': r10FreezeCommit}), isFalse);
+    expect(hasR10FreezeFixtureBoundary(pins: {..._r10Pins, 'authorizedRoadmap': r10RoadmapBlob}), isFalse);
     for (final key in [
       r10FreezeCommit, r10FreezeParent, r10ContractBlob, r10RoadmapBlob, ownerPlanningReadinessBlob,
       'prospectively authorizes', 'separate Owner execution instruction',
@@ -763,31 +1383,31 @@ void _registerR10FreezeBoundaryTests() {
       expect(r10AuthorizationAppend, contains(key));
       final changed = r10FrozenRoadmap + r10AuthorizationAppend.replaceFirst(key, 'unauthorized');
       expect(changed, isNot(r10AuthorizedRoadmap));
-      expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse, reason: key);
+      expect(hasR10FreezeFixtureBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse, reason: key);
     }
   });
   test('R10 freeze rejects wrong and missing pins and retained authority pins', () {
     for (final pin in _r10Pins.entries) {
-      expect(hasR10FreezeBoundary(pins: {..._r10Pins, pin.key: '0000000000000000000000000000000000000000'}), isFalse);
-      expect(hasR10FreezeBoundary(pins: Map.from(_r10Pins)..remove(pin.key)), isFalse);
+      expect(hasR10FreezeFixtureBoundary(pins: {..._r10Pins, pin.key: '0000000000000000000000000000000000000000'}), isFalse);
+      expect(hasR10FreezeFixtureBoundary(pins: Map.from(_r10Pins)..remove(pin.key)), isFalse);
     }
-    expect(hasR10FreezeBoundary(pins: {..._r10Pins, 'future': r10FreezeCommit}), isFalse);
-    expect(hasR10FreezeBoundary(freezeCommit: ownerPlanningCommit), isFalse);
-    expect(hasR10FreezeBoundary(compatibilityCommit: ownerPlanningCommit), isFalse);
+    expect(hasR10FreezeFixtureBoundary(pins: {..._r10Pins, 'future': r10FreezeCommit}), isFalse);
+    expect(hasR10FreezeFixtureBoundary(freezeCommit: ownerPlanningCommit), isFalse);
+    expect(hasR10FreezeFixtureBoundary(compatibilityCommit: ownerPlanningCommit), isFalse);
   });
   test('R10 freeze rejects altered missing or extra documentary and security sources', () {
     for (final entry in _r10Sources.entries) {
-      expect(hasR10FreezeBoundary(sources: {..._r10Sources, entry.key: entry.value + '\nunauthorized'}), isFalse, reason: entry.key);
-      expect(hasR10FreezeBoundary(sources: Map.from(_r10Sources)..remove(entry.key)), isFalse, reason: entry.key);
+      expect(hasR10FreezeFixtureBoundary(sources: {..._r10Sources, entry.key: entry.value + '\nunauthorized'}), isFalse, reason: entry.key);
+      expect(hasR10FreezeFixtureBoundary(sources: Map.from(_r10Sources)..remove(entry.key)), isFalse, reason: entry.key);
     }
-    expect(hasR10FreezeBoundary(sources: {..._r10Sources, r10ContractPath + '.bak': r10FrozenContract}), isFalse);
+    expect(hasR10FreezeFixtureBoundary(sources: {..._r10Sources, r10ContractPath + '.bak': r10FrozenContract}), isFalse);
     for (final key in ['STATUS: ACCEPTED / FROZEN', 'IMPLEMENTATION_AUTHORIZED: NO',
       'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO', 'CUI2A1_IMPLEMENTATION_AUTHORIZED: NO',
       'M4_STATE: NOT AUTHORIZED', 'M5_STATE: NOT AUTHORIZED']) {
       expect(r10FrozenContract, contains(key));
       final changed = r10FrozenContract.replaceFirst(key, 'unauthorized');
       expect(changed, isNot(r10FrozenContract));
-      expect(hasR10FreezeBoundary(sources: {..._r10Sources, r10ContractPath: changed}), isFalse, reason: key);
+      expect(hasR10FreezeFixtureBoundary(sources: {..._r10Sources, r10ContractPath: changed}), isFalse, reason: key);
     }
   });
   test('R10 freeze rejects premature authority future records and altered historical prefix', () {
@@ -803,7 +1423,7 @@ void _registerR10FreezeBoundaryTests() {
       expect(r10FreezeAppend, contains(key));
       final changed = ownerPlanningRoadmap + r10FreezeAppend.replaceFirst(key, 'unauthorized') + r10AuthorizationAppend;
       expect(changed, isNot(r10AuthorizedRoadmap));
-      expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse, reason: key);
+      expect(hasR10FreezeFixtureBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse, reason: key);
     }
     for (final changed in [
       ownerPlanningRoadmap, r10FrozenRoadmap,
@@ -814,7 +1434,7 @@ void _registerR10FreezeBoundaryTests() {
       r10AuthorizedRoadmap.substring(0, r10AuthorizedRoadmap.length - 1),
       r10AuthorizedRoadmap.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2'),
     ]) {
-      expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse);
+      expect(hasR10FreezeFixtureBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse);
     }
   });
   test('R10 freeze rejects independent repository-layer drift and wrong path status', () {
@@ -824,37 +1444,37 @@ void _registerR10FreezeBoundaryTests() {
       'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
       'supabase/migrations/00027_unauthorized.sql', 'supabase/config.toml', 'pubspec.yaml',
     ]) {
-      expect(hasR10FreezeBoundary(committedChanges: [path]), isFalse, reason: 'Committed ' + path);
-      expect(hasR10FreezeBoundary(stagedChanges: [path]), isFalse, reason: 'Staged ' + path);
+      expect(hasR10FreezeFixtureBoundary(committedChanges: [path]), isFalse, reason: 'Committed ' + path);
+      expect(hasR10FreezeFixtureBoundary(stagedChanges: [path]), isFalse, reason: 'Staged ' + path);
       if (!_cui2a1DirtyPaths.contains(path)) {
-        expect(hasR10FreezeBoundary(unstagedChanges: [path]), isFalse, reason: 'Unstaged ' + path);
-        expect(hasR10FreezeBoundary(repositoryChanges: [..._cui2a1DirtyPaths, path]), isFalse);
+        expect(hasR10FreezeFixtureBoundary(unstagedChanges: [path]), isFalse, reason: 'Unstaged ' + path);
+        expect(hasR10FreezeFixtureBoundary(repositoryChanges: [..._cui2a1DirtyPaths, path]), isFalse);
       }
-      expect(hasR10FreezeBoundary(untrackedPaths: [..._cui2a1UntrackedPaths, path]), isFalse);
+      expect(hasR10FreezeFixtureBoundary(untrackedPaths: [..._cui2a1UntrackedPaths, path]), isFalse);
     }
     for (final path in cui2a1CompatibilityPaths) {
       for (final status in ['A', 'D', 'T', 'R100', 'C100']) {
         final delta = status + '\t' + path + '\n';
-        expect(hasR10FreezeBoundary(committedStatus: delta), isFalse);
-        expect(hasR10FreezeBoundary(stagedStatus: delta), isFalse);
-        expect(hasR10FreezeBoundary(unstagedStatus: delta), isFalse);
+        expect(hasR10FreezeFixtureBoundary(committedStatus: delta), isFalse);
+        expect(hasR10FreezeFixtureBoundary(stagedStatus: delta), isFalse);
+        expect(hasR10FreezeFixtureBoundary(unstagedStatus: delta), isFalse);
       }
     }
-    expect(hasR10FreezeBoundary(repositoryChanges: []), isFalse);
-    expect(hasR10FreezeBoundary(untrackedPaths: []), isFalse);
-    expect(hasR10FreezeBoundary(libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath,
+    expect(hasR10FreezeFixtureBoundary(repositoryChanges: []), isFalse);
+    expect(hasR10FreezeFixtureBoundary(untrackedPaths: []), isFalse);
+    expect(hasR10FreezeFixtureBoundary(libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath,
       cui2a1ContractPath, ownerPlanningReadinessPath]), isFalse);
   });
   test('R10 freeze preserves every protected byte and retained SQL gate', () {
     for (final entry in _cui2a1ProtectedBlobs.entries) {
-      expect(hasR10FreezeBoundary(preservedBlobs: {..._cui2a1ProtectedBlobs,
+      expect(hasR10FreezeFixtureBoundary(preservedBlobs: {..._cui2a1ProtectedBlobs,
         entry.key: '0000000000000000000000000000000000000000'}), isFalse);
-      expect(hasR10FreezeBoundary(preservedBlobs: Map.from(_cui2a1ProtectedBlobs)..remove(entry.key)), isFalse);
+      expect(hasR10FreezeFixtureBoundary(preservedBlobs: Map.from(_cui2a1ProtectedBlobs)..remove(entry.key)), isFalse);
     }
     final names = Directory('supabase/migrations').listSync().whereType<File>().map((f) => f.uri.pathSegments.last).toList();
-    expect(hasR10FreezeBoundary(migrationNames: [...names, '00027_unauthorized.sql']), isFalse);
-    expect(hasR10FreezeBoundary(predecessorChanges: ['supabase/migrations/00001_initial_schema.sql']), isFalse);
-    expect(hasR10FreezeBoundary(backendChanges: ['supabase/config.toml']), isFalse);
+    expect(hasR10FreezeFixtureBoundary(migrationNames: [...names, '00027_unauthorized.sql']), isFalse);
+    expect(hasR10FreezeFixtureBoundary(predecessorChanges: ['supabase/migrations/00001_initial_schema.sql']), isFalse);
+    expect(hasR10FreezeFixtureBoundary(backendChanges: ['supabase/config.toml']), isFalse);
   });
 }
 
@@ -981,7 +1601,7 @@ bool hasFrozenCui2a1FixtureBoundary({
   stagedChanges: stagedChanges ?? const [],
   migrationNames: migrationNames, predecessorChanges: predecessorChanges,
   backendChanges: backendChanges, untrackedAuthorityPaths: untrackedAuthorityPaths,
-  untrackedPaths: untrackedPaths, preservedBlobs: preservedBlobs,
+  untrackedPaths: untrackedPaths ?? _cui2a1UntrackedPaths, preservedBlobs: preservedBlobs,
   implementationCommit: implementationCommit, closureCommit: closureCommit,
   freezeCommit: freezeCommit, compatibilityCommit: compatibilityCommit,
 );
@@ -1373,6 +1993,7 @@ bool hasAuthorizedCui2a0SecuritySupport([String? candidate]) {
 void main() {
   _registerOwnerPlanningBoundaryTests();
   _registerR10FreezeBoundaryTests();
+  _registerR10PresentationBoundaryTests();
 
   test('CUI-2A1 committed documentary pins and historical CLOSED positive', () {
     expect(_cui2a1PinsMatch, isTrue);
@@ -1469,7 +2090,7 @@ void main() {
   final source=File(cui2a0MigrationPath).readAsStringSync();
   final sql=_clean(source);
   test('T01-T02 exact objects, four permissions, zero provisioning and immutable history',(){
-    expect(hasR10FreezeBoundary(),isTrue);
+    expect(hasR10PresentationCompatibility(),isTrue);
     for(final code in ['read','create_draft','edit_draft','read_audit']) {
       expect(sql,contains("'business_entities.$code'"));
     }
@@ -1481,7 +2102,7 @@ void main() {
   });
   test('post-closure pins exact implementation and two-file documentary closure', () {
     expect(_acceptedCommitPinsMatch, isTrue);
-    expect(hasR10FreezeBoundary(), isTrue);
+    expect(hasR10FreezeFixtureBoundary(), isTrue);
     expect(hasHistoricalAuthorizedCui2a0Boundary(), isFalse,
       reason: 'The historical implementation boundary must not become continuing authority');
     expect(_samePaths(_paths(_git(['diff', '--name-only', '$cui2a0AcceptedImplementationCommit^', cui2a0AcceptedImplementationCommit])), [
@@ -1493,8 +2114,8 @@ void main() {
     expect(_samePaths(_paths(_git(['diff', '--name-only', cui2a0AcceptedImplementationCommit, cui2a0AcceptedClosureCommit])),
       [cui2a0RoadmapPath, cui2a0ClosureReportPath]), isTrue);
     const wrong = '0000000000000000000000000000000000000000';
-    expect(hasR10FreezeBoundary(implementationCommit: wrong), isFalse);
-    expect(hasR10FreezeBoundary(closureCommit: wrong), isFalse);
+    expect(hasR10FreezeFixtureBoundary(implementationCommit: wrong), isFalse);
+    expect(hasR10FreezeFixtureBoundary(closureCommit: wrong), isFalse);
   });
   for (final entry in _acceptedSources.entries) {
     test('post-closure rejects changed accepted source: ${entry.key}', () {
@@ -1536,7 +2157,7 @@ void main() {
       'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
     ]) {
       expect(hasClosedCui2a0Boundary(sources: _acceptedSources, libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath, path]), isFalse, reason: path);
-      expect(hasR10FreezeBoundary(untrackedAuthorityPaths: [path]), isFalse, reason: path);
+      expect(hasR10FreezeFixtureBoundary(untrackedAuthorityPaths: [path]), isFalse, reason: path);
     }
     expect(hasClosedCui2a0Boundary(
       libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath], sources: {
@@ -1549,11 +2170,11 @@ void main() {
   });
   test('post-closure rejects 00027, predecessor and arbitrary backend changes', () {
     final migrations = Directory('supabase/migrations').listSync().whereType<File>().map((f) => f.uri.pathSegments.last).toList();
-    expect(hasR10FreezeBoundary(migrationNames: [...migrations, '00027_unauthorized.sql']), isFalse);
+    expect(hasR10FreezeFixtureBoundary(migrationNames: [...migrations, '00027_unauthorized.sql']), isFalse);
     for (final name in migrations.where((name) => name != cui2a0MigrationName)) {
-      expect(hasR10FreezeBoundary(predecessorChanges: ['supabase/migrations/$name']), isFalse, reason: name);
+      expect(hasR10FreezeFixtureBoundary(predecessorChanges: ['supabase/migrations/$name']), isFalse, reason: name);
     }
-    expect(hasR10FreezeBoundary(backendChanges: ['supabase/tests/arbitrary.sql']), isFalse);
+    expect(hasR10FreezeFixtureBoundary(backendChanges: ['supabase/tests/arbitrary.sql']), isFalse);
   });
   test('T03-T05 exact permission in every public RPC, no membership/admin shortcut',(){
     for(final entry in <String,String>{

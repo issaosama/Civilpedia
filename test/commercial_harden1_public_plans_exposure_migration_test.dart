@@ -591,7 +591,7 @@ bool _allowsCurrentComposition(
     _currentCommittedDocuments.entries.every(
       (entry) => documents[entry.key] == entry.value,
     ) &&
-    postClosureImplementationChanges.isEmpty && cui2a0.hasR10FreezeBoundary();
+    postClosureImplementationChanges.isEmpty && cui2a0.hasR10PresentationCompatibility();
 
 // Exact post-closure recognition; the predecessor predicates and pins remain
 // historical. This path accepts no future A1 contract, source or authority.
@@ -803,16 +803,17 @@ bool _allowsR10FreezeComposition(
     );
 
 void _registerR10FreezeTests() {
+  // Immutable freeze fixture; no pending activation is continuing freeze authority.
   final paths = _cui1ChangedPaths(_git([
-    'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit, cui2a0.r10PresentationEntry,
   ]));
   final documents = <String, String>{
-    for (final path in _closedCommittedDocuments.keys) path: _read(path),
-    cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
-    cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
-    cui2a0.r10ContractPath: _read(cui2a0.r10ContractPath),
+    ..._closedCommittedDocuments,
+    cui2a0.cui2a1ContractPath: cui2a0.cui2a1FrozenContract,
+    cui2a0.ownerPlanningReadinessPath: cui2a0.ownerPlanningReadiness,
+    cui2a0.r10ContractPath: cui2a0.r10FrozenContract,
   };
-  final roadmap = _read(_cui1RoadmapPath);
+  final roadmap = cui2a0.r10AuthorizedRoadmap;
   bool accepts({String? candidateRoadmap, Map<String, String>? candidateDocs,
     Iterable<String>? candidatePaths, Iterable<String>? implementationChanges}) =>
       _allowsR10FreezeComposition(
@@ -821,7 +822,7 @@ void _registerR10FreezeTests() {
       );
   test('R10 freeze exact live consumer rejects historical fallback', () {
     expect(accepts(), isTrue);
-    expect(cui2a0.hasR10FreezeBoundary(), isTrue);
+    expect(cui2a0.hasR10FreezeFixtureBoundary(), isTrue);
     expect(_allowsOwnerPlanningComposition(paths, roadmap, documents, []), isFalse);
     expect(accepts(candidateRoadmap: cui2a0.ownerPlanningRoadmap), isFalse);
     expect(accepts(candidateRoadmap: cui2a0.r10FrozenRoadmap), isFalse);
@@ -858,6 +859,66 @@ void _registerR10FreezeTests() {
     ]) {
       expect(accepts(candidatePaths: [...paths, path]), isFalse, reason: path);
       expect(accepts(implementationChanges: [path]), isFalse, reason: path);
+    }
+  });
+}
+
+// Ordinary R10.5-D stage projection, after the shared live layer checks.
+// This source boundary never proves the separate procedural Owner UI release.
+bool _allowsR10PresentationComposition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) {
+  final recognition = cui2a0.recognizeR10PresentationStage();
+  final uiPaths = recognition.stage == cui2a0.R10PresentationStage.boundedUi
+      ? cui2a0.r10PresentationPaths : const <String>{};
+  return recognition.compatible &&
+    cui2a0.matchesR10PresentationDocuments(
+      roadmap, documents[cui2a0.cui2a1ContractPath] ?? '',
+      documents[cui2a0.ownerPlanningReadinessPath] ?? '',
+      documents[cui2a0.r10ContractPath] ?? '',
+    ) &&
+    postClosureImplementationChanges.every(uiPaths.contains) &&
+    _allowsR10FreezeComposition(
+      changedPaths.where((path) => !uiPaths.contains(path)),
+      cui2a0.r10AuthorizedRoadmap, documents,
+      const [],
+    );
+}
+
+void _registerR10PresentationTests() {
+  test('R10 presentation consumer uses shared stage and requires procedural release', () {
+    final recognition = cui2a0.recognizeR10PresentationStage();
+    expect(recognition.compatible, isTrue);
+    expect(recognition.productionExecutionAuthorized, isFalse);
+    expect(recognition.separateOwnerUiReleaseRequired, isTrue);
+    final paths = _cui1ChangedPaths(_git([
+      'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+    ]));
+    final documents = <String, String>{
+      for (final path in _closedCommittedDocuments.keys) path: _read(path),
+      cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+      cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+      cui2a0.r10ContractPath: _read(cui2a0.r10ContractPath),
+    };
+    final roadmap = _read(_cui1RoadmapPath);
+    expect(_allowsR10PresentationComposition(paths, roadmap, documents, []), isTrue);
+    expect(_allowsR10FreezeComposition(paths, roadmap, documents, []), isFalse);
+    for (final altered in [cui2a0.r10AuthorizedRoadmap, roadmap + '\nunauthorized',
+      roadmap.replaceFirst('COMMERCIAL_CURRENT_SLICE: NONE', 'COMMERCIAL_CURRENT_SLICE: M4')]) {
+      expect(altered, isNot(roadmap));
+      expect(_allowsR10PresentationComposition(paths, altered, documents, []), isFalse);
+    }
+    for (final entry in documents.entries) {
+      expect(_allowsR10PresentationComposition(paths, roadmap,
+        {...documents, entry.key: entry.value + '\nunauthorized'}, []), isFalse);
+    }
+    for (final path in ['lib/unauthorized.dart', 'test/unauthorized_test.dart',
+      'supabase/config.toml', 'docs/unauthorized.md']) {
+      expect(_allowsR10PresentationComposition([...paths, path], roadmap, documents, []), isFalse);
+      expect(_allowsR10PresentationComposition(paths, roadmap, documents, [path]), isFalse);
     }
   });
 }
@@ -1016,7 +1077,7 @@ void _registerCui1CompatibilityTests({bool roadmapControlsCovered = false}) {
         String? roadmap,
         Map<String, String>? documents,
         Iterable<String>? implementationChanges,
-      }) => _allowsR10FreezeComposition(
+      }) => _allowsR10PresentationComposition(
         changedPaths ?? paths,
         roadmap ?? currentRoadmap,
         documents ?? currentDocuments,
@@ -1300,6 +1361,7 @@ void main() {
   _registerFrozenCui2a1Tests();
   _registerOwnerPlanningTests();
   _registerR10FreezeTests();
+  _registerR10PresentationTests();
   _registerCui1CompatibilityTests();
   late String raw;
   late List<String> statements;
@@ -2002,7 +2064,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
                         'CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md'
               ? acceptedM1bReopeningAddendum
               : path == _roadmapPath
-              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend
+              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend
               : '');
       expect(_read(path), expected, reason: path);
     }
@@ -2016,7 +2078,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
     final roadmap = _read(_roadmapPath);
     final checkpoint = _baselineFile(_roadmapPath);
     expect(roadmap.substring(0, checkpoint.length), checkpoint);
-    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend);
+    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend);
     expect(
       RegExp(
         r'^# COMMERCIAL TRACK CURRENT CONTROL$',

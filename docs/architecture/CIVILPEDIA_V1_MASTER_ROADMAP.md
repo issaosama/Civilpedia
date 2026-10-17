@@ -4898,3 +4898,76 @@ R10.5-D remains ACCEPTED / FROZEN, AUDIT-ONLY / IMPLEMENTATION NO.
 Commercial implementation remains NO; CUI-2A1/M4/M5 remain unauthorized.
 No UI, visual-test, SQL/Supabase, policy, contract or other-file changes.
 Git closure requires separate explicit Owner authorization.
+
+# V1-R10.5-D CONDITIONAL PRESENTATION EXECUTION AUTHORIZATION
+
+This is a prospective decision, effective only after explicit Owner adoption and an authorized Owner commit. It asserts no previous production implementation authority.
+
+R10.5-D_CONTRACT_STATUS: ACCEPTED / FROZEN
+IMPLEMENTATION_AUTHORIZED: YES — R10.5-D PRESENTATION ONLY, CONDITIONAL ON ALL EXECUTION GATES BELOW
+R10.5-D_IMPLEMENTATION_STATE: NOT STARTED
+R10.5-D_EXECUTION_STATE: BLOCKED UNTIL COMMITTED COMPATIBILITY GREEN, BASELINE/ANALYSIS DISPOSITION AND SEPARATE OWNER RELEASE
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_IMPLEMENTATION_AUTHORIZED: NO
+M4_STATE: NOT AUTHORIZED
+M5_STATE: NOT AUTHORIZED
+CUI1_STATE: CLOSED
+CUI2A0_STATE: CLOSED
+M3_STATE: CLOSED
+R10.5-E/F_R10.6_R10.7: LOCKED
+BACKEND_PUBLICATION_ENTITLEMENT_PAYMENT_AUTHORITY_DELTA: ZERO
+COMMIT_PUSH_AUTHORIZED_TO_AGENTS: NO
+
+## Exact existing authority and documentary boundary
+
+Entry baseline: main at 48004703c8afe633a487f7612f07aecb459c7e7e.
+Frozen contract: docs/architecture/contracts/V1-R10_5D_PROFILE_USER_AREA_PRESENTATION_IMPLEMENTATION_CONTRACT.md, Git blob 0c8f38c87248d31a5aef23a4cfe9f20a546b1329.
+Roadmap prefix: docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md, Git blob d8a6511e1237efeebe62f745923550ce94609abc.
+Readiness document remains at blob ee696d6a4054fd5476f81f3d7c2c9b6e6e8cd7ab.
+
+Preserve every preceding roadmap byte and every frozen contract requirement. This later record supersedes only R10.5-D's ordinary UI implementation-NO/audit-only execution control, and only subject to the gates below. Historical records remain intact. No commercial phase is activated and no CUI-2A1 gate is satisfied or waived.
+
+## Exclusive future UI write boundary
+
+M lib/features/profile/presentation/profile_screen.dart
+M lib/features/profile/presentation/screens/profile_setup_screen.dart
+M lib/features/profile/presentation/screens/profile_edit_screen.dart
+M lib/features/profile/presentation/screens/authenticated_profile_edit_screen.dart
+M lib/features/user_area/presentation/user_area_screen.dart
+A test/v1_r10_5d_profile_user_area_visual_test.dart
+
+Only the new visual test may be untracked/added; once present it may be modified within the same authorized implementation. No deletion, rename, type change, seventh path, shared-component/provider/data/route/dependency/localization/native/SQL/Supabase change is permitted. Existing 17 regression files in frozen contract §F remain read-only. Preserve all eight literal raw Git identities in §O, including the existing three dirty tests and three untracked artifacts.
+
+## Frozen behavior and presentation requirements
+
+Implement §§A–E of the frozen R10.5-D contract without changing AuthProvider/Supabase authority, cloud-profile SSOT, local/guest fields and payloads, two-step setup/back/persistence, cloud save/single-flight/uncertain-save/manual retry, dirty/pending back protection, routes/destinations, whole-body Profile conflict versus header-only User Area conflict, five ordinary User Area entries and staff capability gates. No recovery parity redesign, new field, automatic retry, additional destination, backup-operation change or Google Play destination change.
+
+Reuse CivilAppBar, CivilSurfaceCard and existing theme/tokens, true-black dark hierarchy, Arabic RTL and representative dormant English LTR compatibility. Apply 16/24/32 gutters at 600/840 breakpoints, centered 760 logical-pixel content cap, readable 320×568/2.0 text-scale layouts, effective 48×48 hit targets and exactly one shell-safe bottom clearance. Replace only raw backup failure interpolation with the established localized failure text.
+
+## One coordinated compatibility pass, separately instructed
+
+The Owner/Architect must separately approve and instruct the exact coordinated activation pass before any edits. Its exclusive write boundary is this single roadmap append plus:
+test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+test/commercial_harden1_public_plans_exposure_migration_test.dart
+test/commercial_m1b_catalog_reference_data_migration_test.dart
+test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+
+That pass performs zero UI implementation. It must implement one separately named shared R10.5-D recognition design for (a) the exact pending review pair, with live production execution disabled; (b) the committed authorization with zero UI changes; and (c) permitted partial and committed UI changes limited to the six paths above. A pending pair is review evidence only and cannot enable production execution. Preserve old exact historical/freeze-only fixtures, every security/hash predicate and independent committed/staged/unstaged/untracked inventories. Keep the three consumers and M1B's independently authored, unique-anchor HARDEN1 source oracle exact. Never derive expected source from the live file or accept arbitrary document suffixes, caller/environment bypass flags, directory exceptions or HEAD as expected authority.
+
+Observe actual authorization/guard commit and document/source blob identities only after the accepted coordinated commit exists. Do not invent future hashes or require a guard's own future hash inside its source. During UI work, the approved committed guards, all documents and unrelated sources are immutable; only the six UI paths and exact protected entry dirt may differ. Final UI identities are recorded after accepted Owner Git closure. Closure-document recognition remains a separate later decision.
+
+## Mandatory execution and acceptance gates
+
+1. Owner/Architect accepts this exact record and finite-stage compatibility design. Any genuine frozen-contract/gate change requires its own formal accepted amendment; this record silently amends none.
+2. Independently validate/review the exact coordinated roadmap/four-guard candidate, including meaningful positive/adversarial recognition. Owner separately authorizes and commits only its five paths, with entry baseline as parent. No UI edits occur in this pass.
+3. Verify the actual committed identities and run the four guards plus unchanged commercial_m1a_private_catalog_migration_test.dart and v1_r09q_security_matrix_test.dart sequentially with flutter test --no-pub. Require zero failures/skips and live committed preimplementation GREEN with zero UI changes. Pending-candidate GREEN cannot substitute for this committed gate.
+4. Satisfy frozen §G's 17-file baseline and targeted five-file analysis requirement. Reuse earlier test evidence only when exact source/test/toolchain inputs and composition traceability are verified and explicitly accepted; otherwise rerun the required baseline. The recorded internal Enum analyzer crash is not PASS; an explicit Architect tooling disposition or separately authorized successful analysis resolution is required. No SDK/dependency/global-cache patch is authorized.
+5. Owner issues a separate UI release instruction naming the actual committed execution/guard baseline and accepted prerequisite evidence. Only then may the designated UI implementer edit the six UI paths.
+6. After UI work, run the mandatory new visual suite, all 17 unchanged regressions and the same six security suites sequentially; require zero failures/skips, preserved raw identities and no new analyzer diagnostics under the accepted tooling disposition. Complete independent ordinary UI review and Owner Android visual acceptance with actual revision/device/settings evidence.
+7. Keep R10.5-D-IOS-01 mandatory before iOS launch and UNVERIFIED until native iPhone evidence exists. Android/widget results certify no native iOS readiness.
+8. Final Architect acceptance and separate Owner Git authorization are required. Stage only the accepted six-path UI scope, preserve unrelated dirt, inspect complete staged diff, run git diff --cached --check, verify actual parent and resulting source/test blobs, and use only normal expressly authorized Git publication. No automatic next-slice advancement.
+
+Guard compatibility requires independent Big Pickle review. The prior fresh-Codex substitution applied to the closed freeze-only acceptance gate and does not silently extend here; any new substitution must be explicitly named and scoped by the Owner. Routine UI implementation/review follows the Operating Model with independent implementer and reviewer.
+
+STOP for a missing/altered/uncommitted authority, failed required gate, protected-byte or source drift, unexpected path/status, weakened historical predicate, source-oracle mismatch, unresolved blocking review finding, missing analysis disposition, premature implementation or scope expansion. Report the exact required Owner/Architect decision; do not bypass, retry mutations blindly or edit protected tests.
