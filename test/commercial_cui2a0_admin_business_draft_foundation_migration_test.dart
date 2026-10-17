@@ -504,32 +504,386 @@ bool hasOwnerPlanningDocumentaryBoundary({
   );
 }
 
+// Exact committed R10.5-D freeze only; never production execution authority.
+const r10FreezeCommit = 'bb59c7425527eed16a219c2043172ee9e523acfc';
+const r10FreezeParent = '0ceb646621027e2ab902b13302c452038154ab11';
+const r10ContractPath = 'docs/architecture/contracts/V1-R10_5D_PROFILE_USER_AREA_PRESENTATION_IMPLEMENTATION_CONTRACT.md';
+const r10ContractBlob = '0c8f38c87248d31a5aef23a4cfe9f20a546b1329';
+const r10RoadmapBlob = '7a2e58253ddd9a9795dde59da864019931d3c5ee';
+const r10AuthorizationCommit = '0f4085882786b0ac588e61c892048e162e76a243';
+const r10AuthorizedRoadmapBlob = 'd8a6511e1237efeebe62f745923550ce94609abc';
+const _r10GuardBlobs = <String, String>{
+  'test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart': 'fef6a5cc7fb3866a8ac99fcaf3a11943da443a1b',
+  'test/commercial_harden1_public_plans_exposure_migration_test.dart': '9c2687969ec27f96362264c470db3080281b377b',
+  'test/commercial_m1b_catalog_reference_data_migration_test.dart': 'c28a02599e431b0e7331cb2713ef74e634787027',
+  'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart': '06452fdbeda3d043a3f386d969b91e9e6aa5d7de',
+};
+const _r10Pins = <String, String>{
+  'freeze': r10FreezeCommit, 'parent': r10FreezeParent,
+  'contract': r10ContractBlob, 'roadmap': r10RoadmapBlob,
+  'authorization': r10AuthorizationCommit, 'authorizedRoadmap': r10AuthorizedRoadmapBlob,
+};
+const r10PresentationPaths = <String>{
+  'lib/features/profile/presentation/profile_screen.dart',
+  'lib/features/profile/presentation/screens/profile_setup_screen.dart',
+  'lib/features/profile/presentation/screens/profile_edit_screen.dart',
+  'lib/features/profile/presentation/screens/authenticated_profile_edit_screen.dart',
+  'lib/features/user_area/presentation/user_area_screen.dart',
+  'test/v1_r10_5d_profile_user_area_visual_test.dart',
+};
+final r10FrozenContract = _git(['cat-file', 'blob', r10ContractBlob]);
+final r10FrozenRoadmap = _git(['cat-file', 'blob', r10RoadmapBlob]);
+final r10FreezeAppend = r10FrozenRoadmap.substring(ownerPlanningRoadmap.length);
+final r10AuthorizedRoadmap = _git(['cat-file', 'blob', r10AuthorizedRoadmapBlob]);
+// Literal Owner-approved append; expected authority is never read from live source.
+const r10AuthorizationAppend = '\n' r'''# R10.5-D FREEZE-ONLY FOUR-GUARD COMPATIBILITY AUTHORIZATION
+
+The Owner prospectively authorizes completion of freeze-only commercial
+guard compatibility. This record does not assert that committed
+authorization existed when the current candidate was prepared.
+
+Exact frozen inputs:
+Freeze commit: bb59c7425527eed16a219c2043172ee9e523acfc
+Parent: 0ceb646621027e2ab902b13302c452038154ab11
+R10.5-D contract blob: 0c8f38c87248d31a5aef23a4cfe9f20a546b1329
+Freeze roadmap blob: 7a2e58253ddd9a9795dde59da864019931d3c5ee
+Unchanged readiness blob: ee696d6a4054fd5476f81f3d7c2c9b6e6e8cd7ab
+
+The authorization-persistence commit must have the freeze commit as
+parent and change only the Master Roadmap by this exact append.
+
+After that commit exists and a separate Owner execution instruction is
+issued, only the four guard paths enumerated at lines 4832–4835 of the
+freeze commit's Master Roadmap may change.
+
+Preserve the reviewed candidate except for the narrowly necessary
+recognition and enforcement of this exact committed authorization.
+Observe and pin its actual commit, parent and resulting roadmap blob.
+Verify the preserved prefix and exact append. Missing, pending,
+altered or mismatched authorization must fail live recognition.
+No future hash is supplied or invented.
+
+Retain the shared recognizer, all historical pins/security predicates,
+negative tests, exact HARDEN1 source oracle, independent repository-layer
+checks and all eight protected raw-byte identities. No broad exceptions,
+live-derived expected source, skipped assertions or historical fallback
+may admit unauthorized current states.
+
+Run CUI-2A0, HARDEN1, M1B, M3, unchanged M1a and unchanged R09q
+sequentially using flutter test --no-pub. Require zero failures,
+meaningful live positive/adversarial evidence, git diff --check and
+independent Big Pickle acceptance of the resulting exact composition.
+Reviewer substitution requires an explicit Owner decision naming it.
+
+STOP for any identity, scope, preservation, validation or review failure.
+Existing 193/193 and independent PASS remain prior candidate evidence;
+changed sources/composition require renewed focused validation/review.
+
+R10.5-D remains ACCEPTED / FROZEN, AUDIT-ONLY / IMPLEMENTATION NO.
+Commercial implementation remains NO; CUI-2A1/M4/M5 remain unauthorized.
+No UI, visual-test, SQL/Supabase, policy, contract or other-file changes.
+Git closure requires separate explicit Owner authorization.
+''';
+final _r10Sources = <String, String>{
+  ..._ownerPlanningSources, cui2a0RoadmapPath: r10AuthorizedRoadmap,
+  r10ContractPath: r10FrozenContract,
+};
+final _r10PinsMatch = _ownerPlanningPinsMatch &&
+    _git(['rev-parse', r10AuthorizationCommit + '^']).trim() == r10FreezeCommit &&
+    _samePaths(_paths(_git(['diff', '--name-status', '--no-renames',
+      r10FreezeCommit, r10AuthorizationCommit])), ['M\t' + cui2a0RoadmapPath]) &&
+    _git(['rev-parse', r10AuthorizationCommit + ':' + cui2a0RoadmapPath]).trim() == r10AuthorizedRoadmapBlob &&
+    _git(['rev-parse', r10AuthorizationCommit + ':' + r10ContractPath]).trim() == r10ContractBlob &&
+    _git(['rev-parse', r10AuthorizationCommit + ':' + ownerPlanningReadinessPath]).trim() == ownerPlanningReadinessBlob &&
+    _git(['rev-parse', r10AuthorizationCommit + ':' + cui2a1ContractPath]).trim() == cui2a1ContractBlob &&
+    r10AuthorizedRoadmap == r10FrozenRoadmap + r10AuthorizationAppend &&
+    _git(['rev-parse', r10FreezeCommit + '^']).trim() == r10FreezeParent &&
+    _git(['rev-parse', r10FreezeParent + '^']).trim() == ownerPlanningAuthorizationCommit &&
+    _samePaths(_paths(_git(['diff', '--name-status', '--no-renames',
+      ownerPlanningAuthorizationCommit, r10FreezeParent])),
+      cui2a1CompatibilityPaths.map((p) => 'M\t' + p)) &&
+    _samePaths(_paths(_git(['diff', '--name-status', '--no-renames',
+      r10FreezeParent, r10FreezeCommit])),
+      ['M\t' + cui2a0RoadmapPath, 'A\t' + r10ContractPath]) &&
+    _git(['rev-parse', r10FreezeParent + ':' + cui2a0RoadmapPath]).trim() == ownerPlanningAuthorizationRoadmapBlob &&
+    _git(['rev-parse', r10FreezeCommit + ':' + cui2a0RoadmapPath]).trim() == r10RoadmapBlob &&
+    _git(['rev-parse', r10FreezeCommit + ':' + r10ContractPath]).trim() == r10ContractBlob &&
+    _git(['rev-parse', r10FreezeCommit + ':' + ownerPlanningReadinessPath]).trim() == ownerPlanningReadinessBlob &&
+    _git(['rev-parse', r10FreezeCommit + ':' + cui2a1ContractPath]).trim() == cui2a1ContractBlob &&
+    _r10GuardBlobs.entries.every((e) => [r10FreezeParent, r10FreezeCommit, r10AuthorizationCommit].every(
+      (commit) => _git(['rev-parse', commit + ':' + e.key]).trim() == e.value)) &&
+    r10FrozenRoadmap.startsWith(ownerPlanningRoadmap) &&
+    RegExp(r'^STATUS: ACCEPTED / FROZEN$', multiLine: true).hasMatch(r10FrozenContract) &&
+    RegExp(r'^IMPLEMENTATION_AUTHORIZED: NO$', multiLine: true).hasMatch(r10FrozenContract) &&
+    [
+      'R10.5-D_CONTRACT_STATUS: ACCEPTED / FROZEN',
+      'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO',
+      'IMPLEMENTATION_AUTHORIZED: NO', 'COMMERCIAL_CURRENT_SLICE: NONE',
+      'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO', 'CUI2A1_IMPLEMENTATION_AUTHORIZED: NO',
+      'M4_STATE: NOT AUTHORIZED', 'M5_STATE: NOT AUTHORIZED',
+    ].every(r10FreezeAppend.contains);
+
+bool matchesR10FreezeDocuments(String roadmap, String contract,
+    String readiness, String r10Contract) =>
+    _r10PinsMatch && roadmap == r10AuthorizedRoadmap &&
+    contract == cui2a1FrozenContract && readiness == ownerPlanningReadiness &&
+    r10Contract == r10FrozenContract;
+
+bool hasR10FreezeBoundary({
+  Map<String, String>? sources,
+  Iterable<String>? libDocsChanges, Iterable<String>? migrationNames,
+  Iterable<String>? predecessorChanges, Iterable<String>? backendChanges,
+  Iterable<String>? untrackedAuthorityPaths, Iterable<String>? repositoryChanges,
+  Iterable<String>? committedChanges, Iterable<String>? stagedChanges,
+  Iterable<String>? unstagedChanges, Iterable<String>? untrackedPaths,
+  Map<String, String>? preservedBlobs, Map<String, String>? pins,
+  String? executionCommit, String? committedStatus, String? stagedStatus, String? unstagedStatus,
+  String implementationCommit = cui2a0AcceptedImplementationCommit,
+  String closureCommit = cui2a0AcceptedClosureCommit,
+  String freezeCommit = cui2a1FreezeCommit,
+  String compatibilityCommit = cui2a1CompatibilityCommit,
+}) {
+  final candidatePins = pins ?? _r10Pins;
+  if (candidatePins.length != _r10Pins.length ||
+      !_r10Pins.entries.every((e) => candidatePins[e.key] == e.value) ||
+      freezeCommit != cui2a1FreezeCommit || compatibilityCommit != cui2a1CompatibilityCommit ||
+      !_r10PinsMatch || _git(['branch', '--show-current']).trim() != 'main') return false;
+  // HEAD is the actual side of ancestry/delta verification, never an expected pin.
+  final actualHead = executionCommit ?? _git(['rev-parse', 'HEAD']).trim();
+  if (_git(['merge-base', r10AuthorizationCommit, actualHead]).trim() != r10AuthorizationCommit) return false;
+  final actual = sources ?? {
+    for (final path in _r10Sources.keys) path: File(path).readAsStringSync().replaceAll('\r\n', '\n'),
+  };
+  if (actual.length != _r10Sources.length ||
+      !_r10Sources.entries.every((e) => actual[e.key] == e.value) ||
+      !matchesR10FreezeDocuments(actual[cui2a0RoadmapPath]!, actual[cui2a1ContractPath]!, actual[ownerPlanningReadinessPath]!, actual[r10ContractPath]!)) return false;
+  final committed = committedChanges ?? _paths(_git(['diff', '--name-only', '--no-renames', r10AuthorizationCommit, actualHead]));
+  final staged = stagedChanges ?? _paths(_git(['diff', '--cached', '--name-only', '--no-renames']));
+  final unstaged = unstagedChanges ?? _paths(_git(['diff', '--name-only', '--no-renames']));
+  final changes = repositoryChanges ?? _paths(_git(['diff', '--name-only', '--no-renames', r10AuthorizationCommit]));
+  final workingPaths = <String>{...cui2a1CompatibilityPaths, ..._cui2a1DirtyPaths};
+  if ([...committed, ...staged].any((p) => !cui2a1CompatibilityPaths.contains(p)) ||
+      unstaged.any((p) => !workingPaths.contains(p)) ||
+      !_cui2a1DirtyPaths.every(changes.contains) || changes.any((p) => !workingPaths.contains(p)) ||
+      !_samePaths(untrackedPaths ?? _paths(_git(['ls-files', '--others', '--exclude-standard'])), _cui2a1UntrackedPaths) ||
+      !_onlyModifiedPaths(committedStatus ?? _git(['diff', '--name-status', '--no-renames', r10AuthorizationCommit, actualHead]), cui2a1CompatibilityPaths) ||
+      !_onlyModifiedPaths(stagedStatus ?? _git(['diff', '--cached', '--name-status', '--no-renames']), cui2a1CompatibilityPaths) ||
+      !_onlyModifiedPaths(unstagedStatus ?? _git(['diff', '--name-status', '--no-renames']), workingPaths)) return false;
+  final protected = preservedBlobs ?? {
+    for (final path in _cui2a1ProtectedBlobs.keys) path: _git(['hash-object', '--no-filters', '--', path]).trim(),
+  };
+  if (protected.length != _cui2a1ProtectedBlobs.length ||
+      !_cui2a1ProtectedBlobs.entries.every((e) => protected[e.key] == e.value)) return false;
+  final docsChanges = libDocsChanges ?? _paths(_git(['diff', '--name-only', '--no-renames', cui2a0AuthorizationCommit, '--', 'lib', 'docs']));
+  if (!_samePaths(docsChanges, [cui2a0RoadmapPath, cui2a0ClosureReportPath, cui2a1ContractPath, ownerPlanningReadinessPath, r10ContractPath])) return false;
+  // Validate the live freeze and every independent inventory before projecting
+  // onto the unchanged Owner-planning recognizer and its historical SQL gate.
+  return hasOwnerPlanningDocumentaryBoundary(
+    sources: {
+      for (final path in _ownerPlanningSources.keys)
+        path: path == cui2a0RoadmapPath ? ownerPlanningRoadmap : actual[path]!,
+    },
+    libDocsChanges: docsChanges.where((p) => p != r10ContractPath),
+    repositoryChanges: _cui2a1DirtyPaths,
+    committedChanges: const [], stagedChanges: const [], unstagedChanges: const [],
+    committedStatus: '', stagedStatus: '', unstagedStatus: '',
+    executionCommit: r10FreezeParent,
+    untrackedPaths: untrackedPaths, preservedBlobs: protected,
+    migrationNames: migrationNames, predecessorChanges: predecessorChanges,
+    backendChanges: backendChanges, untrackedAuthorityPaths: untrackedAuthorityPaths,
+    implementationCommit: implementationCommit, closureCommit: closureCommit,
+    freezeCommit: freezeCommit, compatibilityCommit: compatibilityCommit,
+  );
+}
+
+bool hasOwnerPlanningFixtureBoundary({
+  Map<String, String>? sources,
+  Iterable<String>? libDocsChanges, Iterable<String>? migrationNames,
+  Iterable<String>? predecessorChanges, Iterable<String>? backendChanges,
+  Iterable<String>? untrackedAuthorityPaths, Iterable<String>? repositoryChanges,
+  Iterable<String>? committedChanges, Iterable<String>? stagedChanges,
+  Iterable<String>? unstagedChanges, Iterable<String>? untrackedPaths,
+  Map<String, String>? preservedBlobs, Map<String, String>? pins,
+  String? executionCommit, String? committedStatus, String? stagedStatus, String? unstagedStatus,
+  String implementationCommit = cui2a0AcceptedImplementationCommit,
+  String closureCommit = cui2a0AcceptedClosureCommit,
+  String freezeCommit = cui2a1FreezeCommit,
+  String compatibilityCommit = cui2a1CompatibilityCommit,
+}) => hasOwnerPlanningDocumentaryBoundary(
+  sources: sources ?? _ownerPlanningSources,
+  libDocsChanges: libDocsChanges ?? [cui2a0RoadmapPath, cui2a0ClosureReportPath, cui2a1ContractPath, ownerPlanningReadinessPath],
+  migrationNames: migrationNames,
+  predecessorChanges: predecessorChanges,
+  backendChanges: backendChanges,
+  untrackedAuthorityPaths: untrackedAuthorityPaths,
+  repositoryChanges: repositoryChanges ?? _cui2a1DirtyPaths,
+  committedChanges: committedChanges ?? const [],
+  stagedChanges: stagedChanges ?? const [],
+  unstagedChanges: unstagedChanges,
+  untrackedPaths: untrackedPaths,
+  preservedBlobs: preservedBlobs,
+  pins: pins,
+  executionCommit: executionCommit ?? r10FreezeParent,
+  committedStatus: committedStatus ?? '',
+  stagedStatus: stagedStatus ?? '',
+  unstagedStatus: unstagedStatus,
+  implementationCommit: implementationCommit,
+  closureCommit: closureCommit,
+  freezeCommit: freezeCommit,
+  compatibilityCommit: compatibilityCommit,
+);
+
+void _registerR10FreezeBoundaryTests() {
+  test('R10 freeze live recognition is distinct from historical documentary fixtures', () {
+    expect(_r10PinsMatch, isTrue);
+    expect(hasR10FreezeBoundary(), isTrue);
+    expect(hasOwnerPlanningFixtureBoundary(), isTrue);
+    expect(hasOwnerPlanningDocumentaryBoundary(), isFalse);
+    expect(hasR10FreezeBoundary(sources: _ownerPlanningSources), isFalse);
+    expect(hasR10FreezeBoundary(executionCommit: r10FreezeCommit), isFalse);
+    expect(hasR10FreezeBoundary(executionCommit: r10FreezeParent), isFalse);
+    expect(hasR10FreezeBoundary(executionCommit: ownerPlanningCommit), isFalse);
+  });
+  test('R10 freeze requires the exact committed prospective authorization', () {
+    expect(_git(['rev-parse', r10AuthorizationCommit + '^']).trim(), r10FreezeCommit);
+    expect(r10AuthorizedRoadmap, r10FrozenRoadmap + r10AuthorizationAppend);
+    expect(hasR10FreezeBoundary(), isTrue);
+    expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: r10FrozenRoadmap}), isFalse);
+    expect(hasR10FreezeBoundary(executionCommit: r10FreezeCommit), isFalse,
+      reason: 'A pending working-copy authorization cannot replace a committed ancestor');
+    expect(hasR10FreezeBoundary(pins: {..._r10Pins, 'authorization': r10FreezeCommit}), isFalse);
+    expect(hasR10FreezeBoundary(pins: {..._r10Pins, 'authorizedRoadmap': r10RoadmapBlob}), isFalse);
+    for (final key in [
+      r10FreezeCommit, r10FreezeParent, r10ContractBlob, r10RoadmapBlob, ownerPlanningReadinessBlob,
+      'prospectively authorizes', 'separate Owner execution instruction',
+      'lines 4832–4835', 'Missing, pending,', 'independent Big Pickle acceptance',
+      'all eight protected raw-byte identities', 'Commercial implementation remains NO',
+      'CUI-2A1/M4/M5 remain unauthorized', 'IMPLEMENTATION NO',
+    ]) {
+      expect(r10AuthorizationAppend, contains(key));
+      final changed = r10FrozenRoadmap + r10AuthorizationAppend.replaceFirst(key, 'unauthorized');
+      expect(changed, isNot(r10AuthorizedRoadmap));
+      expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse, reason: key);
+    }
+  });
+  test('R10 freeze rejects wrong and missing pins and retained authority pins', () {
+    for (final pin in _r10Pins.entries) {
+      expect(hasR10FreezeBoundary(pins: {..._r10Pins, pin.key: '0000000000000000000000000000000000000000'}), isFalse);
+      expect(hasR10FreezeBoundary(pins: Map.from(_r10Pins)..remove(pin.key)), isFalse);
+    }
+    expect(hasR10FreezeBoundary(pins: {..._r10Pins, 'future': r10FreezeCommit}), isFalse);
+    expect(hasR10FreezeBoundary(freezeCommit: ownerPlanningCommit), isFalse);
+    expect(hasR10FreezeBoundary(compatibilityCommit: ownerPlanningCommit), isFalse);
+  });
+  test('R10 freeze rejects altered missing or extra documentary and security sources', () {
+    for (final entry in _r10Sources.entries) {
+      expect(hasR10FreezeBoundary(sources: {..._r10Sources, entry.key: entry.value + '\nunauthorized'}), isFalse, reason: entry.key);
+      expect(hasR10FreezeBoundary(sources: Map.from(_r10Sources)..remove(entry.key)), isFalse, reason: entry.key);
+    }
+    expect(hasR10FreezeBoundary(sources: {..._r10Sources, r10ContractPath + '.bak': r10FrozenContract}), isFalse);
+    for (final key in ['STATUS: ACCEPTED / FROZEN', 'IMPLEMENTATION_AUTHORIZED: NO',
+      'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO', 'CUI2A1_IMPLEMENTATION_AUTHORIZED: NO',
+      'M4_STATE: NOT AUTHORIZED', 'M5_STATE: NOT AUTHORIZED']) {
+      expect(r10FrozenContract, contains(key));
+      final changed = r10FrozenContract.replaceFirst(key, 'unauthorized');
+      expect(changed, isNot(r10FrozenContract));
+      expect(hasR10FreezeBoundary(sources: {..._r10Sources, r10ContractPath: changed}), isFalse, reason: key);
+    }
+  });
+  test('R10 freeze rejects premature authority future records and altered historical prefix', () {
+    for (final key in [
+      'R10.5-D_CONTRACT_STATUS: ACCEPTED / FROZEN',
+      'R10.5-D_STATE: AUDIT-ONLY / IMPLEMENTATION NO', 'IMPLEMENTATION_AUTHORIZED: NO',
+      'COMMERCIAL_CURRENT_SLICE: NONE', 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO',
+      'CUI2A1_IMPLEMENTATION_AUTHORIZED: NO', 'CUI2A0_STATE: CLOSED',
+      'CUI1_STATE: CLOSED', 'M3_STATE: CLOSED', 'M4_STATE: NOT AUTHORIZED', 'M5_STATE: NOT AUTHORIZED',
+      'BACKEND_AUTHORITY_DELTA: ZERO', 'PUBLICATION_AUTHORITY_DELTA: ZERO',
+      'ENTITLEMENT_AUTHORITY_DELTA: ZERO', 'PAYMENT_AUTHORITY_DELTA: ZERO',
+    ]) {
+      expect(r10FreezeAppend, contains(key));
+      final changed = ownerPlanningRoadmap + r10FreezeAppend.replaceFirst(key, 'unauthorized') + r10AuthorizationAppend;
+      expect(changed, isNot(r10AuthorizedRoadmap));
+      expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse, reason: key);
+    }
+    for (final changed in [
+      ownerPlanningRoadmap, r10FrozenRoadmap,
+      r10FrozenRoadmap.substring(0, r10FrozenRoadmap.length - 1),
+      r10FrozenRoadmap + '\n# Future execution authorization\n',
+      r10FrozenRoadmap.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2'),
+      r10AuthorizedRoadmap + '\n# Future execution authorization\n',
+      r10AuthorizedRoadmap.substring(0, r10AuthorizedRoadmap.length - 1),
+      r10AuthorizedRoadmap.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2'),
+    ]) {
+      expect(hasR10FreezeBoundary(sources: {..._r10Sources, cui2a0RoadmapPath: changed}), isFalse);
+    }
+  });
+  test('R10 freeze rejects independent repository-layer drift and wrong path status', () {
+    for (final path in [
+      ..._r10Sources.keys, ...r10PresentationPaths, ..._cui2a1ProtectedBlobs.keys,
+      r10ContractPath + '.bak', 'docs/unauthorized.md', 'test/unauthorized_test.dart',
+      'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
+      'supabase/migrations/00027_unauthorized.sql', 'supabase/config.toml', 'pubspec.yaml',
+    ]) {
+      expect(hasR10FreezeBoundary(committedChanges: [path]), isFalse, reason: 'Committed ' + path);
+      expect(hasR10FreezeBoundary(stagedChanges: [path]), isFalse, reason: 'Staged ' + path);
+      if (!_cui2a1DirtyPaths.contains(path)) {
+        expect(hasR10FreezeBoundary(unstagedChanges: [path]), isFalse, reason: 'Unstaged ' + path);
+        expect(hasR10FreezeBoundary(repositoryChanges: [..._cui2a1DirtyPaths, path]), isFalse);
+      }
+      expect(hasR10FreezeBoundary(untrackedPaths: [..._cui2a1UntrackedPaths, path]), isFalse);
+    }
+    for (final path in cui2a1CompatibilityPaths) {
+      for (final status in ['A', 'D', 'T', 'R100', 'C100']) {
+        final delta = status + '\t' + path + '\n';
+        expect(hasR10FreezeBoundary(committedStatus: delta), isFalse);
+        expect(hasR10FreezeBoundary(stagedStatus: delta), isFalse);
+        expect(hasR10FreezeBoundary(unstagedStatus: delta), isFalse);
+      }
+    }
+    expect(hasR10FreezeBoundary(repositoryChanges: []), isFalse);
+    expect(hasR10FreezeBoundary(untrackedPaths: []), isFalse);
+    expect(hasR10FreezeBoundary(libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath,
+      cui2a1ContractPath, ownerPlanningReadinessPath]), isFalse);
+  });
+  test('R10 freeze preserves every protected byte and retained SQL gate', () {
+    for (final entry in _cui2a1ProtectedBlobs.entries) {
+      expect(hasR10FreezeBoundary(preservedBlobs: {..._cui2a1ProtectedBlobs,
+        entry.key: '0000000000000000000000000000000000000000'}), isFalse);
+      expect(hasR10FreezeBoundary(preservedBlobs: Map.from(_cui2a1ProtectedBlobs)..remove(entry.key)), isFalse);
+    }
+    final names = Directory('supabase/migrations').listSync().whereType<File>().map((f) => f.uri.pathSegments.last).toList();
+    expect(hasR10FreezeBoundary(migrationNames: [...names, '00027_unauthorized.sql']), isFalse);
+    expect(hasR10FreezeBoundary(predecessorChanges: ['supabase/migrations/00001_initial_schema.sql']), isFalse);
+    expect(hasR10FreezeBoundary(backendChanges: ['supabase/config.toml']), isFalse);
+  });
+}
+
 void _registerOwnerPlanningBoundaryTests() {
   test('Owner planning live branch and historical A1 fixture remain distinct', () {
     expect(_ownerPlanningPinsMatch, isTrue);
-    expect(hasOwnerPlanningDocumentaryBoundary(), isTrue);
+    expect(hasOwnerPlanningFixtureBoundary(), isTrue);
     expect(hasAuthorizedCui2a0Boundary(
       sources: _cui2a1Sources,
       libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath, cui2a1ContractPath],
       repositoryChanges: _cui2a1DirtyPaths, committedChanges: [], stagedChanges: [],
     ), isTrue);
-    expect(hasOwnerPlanningDocumentaryBoundary(sources: _cui2a1Sources), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(sources: _cui2a1Sources), isFalse);
     expect(hasAuthorizedCui2a0Boundary(), isFalse);
-    expect(hasOwnerPlanningDocumentaryBoundary(executionCommit: ownerPlanningCommit), isFalse,
+    expect(hasOwnerPlanningFixtureBoundary(executionCommit: ownerPlanningCommit), isFalse,
       reason: 'Pending/uncommitted authorization must not enable the live branch');
   });
   test('Owner planning live branch rejects each wrong or missing pin', () {
     for (final pin in _ownerPlanningPins.entries) {
-      expect(hasOwnerPlanningDocumentaryBoundary(pins: {..._ownerPlanningPins, pin.key: '0000000000000000000000000000000000000000'}), isFalse);
-      expect(hasOwnerPlanningDocumentaryBoundary(pins: Map.from(_ownerPlanningPins)..remove(pin.key)), isFalse);
+      expect(hasOwnerPlanningFixtureBoundary(pins: {..._ownerPlanningPins, pin.key: '0000000000000000000000000000000000000000'}), isFalse);
+      expect(hasOwnerPlanningFixtureBoundary(pins: Map.from(_ownerPlanningPins)..remove(pin.key)), isFalse);
     }
   });
   test('Owner planning live branch rejects every missing or changed source', () {
     for (final source in _ownerPlanningSources.entries) {
-      expect(hasOwnerPlanningDocumentaryBoundary(sources: {..._ownerPlanningSources, source.key: '${source.value}\nunauthorized'}), isFalse, reason: source.key);
-      expect(hasOwnerPlanningDocumentaryBoundary(sources: Map.from(_ownerPlanningSources)..remove(source.key)), isFalse);
+      expect(hasOwnerPlanningFixtureBoundary(sources: {..._ownerPlanningSources, source.key: '${source.value}\nunauthorized'}), isFalse, reason: source.key);
+      expect(hasOwnerPlanningFixtureBoundary(sources: Map.from(_ownerPlanningSources)..remove(source.key)), isFalse);
     }
-    expect(hasOwnerPlanningDocumentaryBoundary(sources: {..._ownerPlanningSources, 'docs/extra.md': 'extra'}), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(sources: {..._ownerPlanningSources, 'docs/extra.md': 'extra'}), isFalse);
   });
   test('Owner planning live branch rejects final authority mutations and future records', () {
     final planning = _git(['cat-file', 'blob', ownerPlanningRoadmapBlob]);
@@ -551,7 +905,7 @@ void _registerOwnerPlanningBoundaryTests() {
       'PAYMENT_AUTHORITY_DELTA: ZERO': 'PAYMENT_AUTHORITY_DELTA: NONZERO',
     }.entries) {
       expect(authorization, contains(mutation.key));
-      expect(hasOwnerPlanningDocumentaryBoundary(sources: {..._ownerPlanningSources,
+      expect(hasOwnerPlanningFixtureBoundary(sources: {..._ownerPlanningSources,
         cui2a0RoadmapPath: planning + authorization.replaceFirst(mutation.key, mutation.value),
       }), isFalse, reason: mutation.key);
     }
@@ -561,7 +915,7 @@ void _registerOwnerPlanningBoundaryTests() {
       '$ownerPlanningRoadmap\n# Arbitrary future record\n', '$ownerPlanningRoadmap\n# R10.5-D CONTRACT FROZEN\n',
       ownerPlanningRoadmap.replaceFirst('ROADMAP_VERSION: 1', 'ROADMAP_VERSION: 2'),
     ]) {
-      expect(hasOwnerPlanningDocumentaryBoundary(sources: {..._ownerPlanningSources, cui2a0RoadmapPath: roadmap}), isFalse);
+      expect(hasOwnerPlanningFixtureBoundary(sources: {..._ownerPlanningSources, cui2a0RoadmapPath: roadmap}), isFalse);
     }
   });
   test('Owner planning live branch rejects hidden drift across repository layers', () {
@@ -575,35 +929,35 @@ void _registerOwnerPlanningBoundaryTests() {
       'supabase/migrations/00027_unauthorized.sql', cui2a0MigrationPath, cui2a0RuntimePath,
       'supabase/config.toml', 'pubspec.yaml', ..._cui2a1ProtectedBlobs.keys,
     ]) {
-      expect(hasOwnerPlanningDocumentaryBoundary(committedChanges: [path]), isFalse, reason: 'Committed $path');
-      expect(hasOwnerPlanningDocumentaryBoundary(stagedChanges: [path]), isFalse, reason: 'Staged $path');
+      expect(hasOwnerPlanningFixtureBoundary(committedChanges: [path]), isFalse, reason: 'Committed $path');
+      expect(hasOwnerPlanningFixtureBoundary(stagedChanges: [path]), isFalse, reason: 'Staged $path');
       if (!_cui2a1DirtyPaths.contains(path)) {
-        expect(hasOwnerPlanningDocumentaryBoundary(unstagedChanges: [path]), isFalse, reason: 'Unstaged $path');
-        expect(hasOwnerPlanningDocumentaryBoundary(repositoryChanges: [..._cui2a1DirtyPaths, path]), isFalse);
+        expect(hasOwnerPlanningFixtureBoundary(unstagedChanges: [path]), isFalse, reason: 'Unstaged $path');
+        expect(hasOwnerPlanningFixtureBoundary(repositoryChanges: [..._cui2a1DirtyPaths, path]), isFalse);
       }
-      expect(hasOwnerPlanningDocumentaryBoundary(untrackedPaths: [..._cui2a1UntrackedPaths, path]), isFalse);
+      expect(hasOwnerPlanningFixtureBoundary(untrackedPaths: [..._cui2a1UntrackedPaths, path]), isFalse);
     }
     for (final path in cui2a1CompatibilityPaths) {
       for (final status in ['A', 'D', 'T', 'R100', 'C100']) {
         final delta = '$status\t$path\n';
-        expect(hasOwnerPlanningDocumentaryBoundary(committedStatus: delta), isFalse);
-        expect(hasOwnerPlanningDocumentaryBoundary(stagedStatus: delta), isFalse);
-        expect(hasOwnerPlanningDocumentaryBoundary(unstagedStatus: delta), isFalse);
+        expect(hasOwnerPlanningFixtureBoundary(committedStatus: delta), isFalse);
+        expect(hasOwnerPlanningFixtureBoundary(stagedStatus: delta), isFalse);
+        expect(hasOwnerPlanningFixtureBoundary(unstagedStatus: delta), isFalse);
       }
     }
-    expect(hasOwnerPlanningDocumentaryBoundary(repositoryChanges: []), isFalse);
-    expect(hasOwnerPlanningDocumentaryBoundary(untrackedPaths: []), isFalse);
-    expect(hasOwnerPlanningDocumentaryBoundary(libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath, cui2a1ContractPath]), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(repositoryChanges: []), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(untrackedPaths: []), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath, cui2a1ContractPath]), isFalse);
   });
   test('Owner planning live branch preserves protected bytes and retained SQL gates', () {
     for (final source in _cui2a1ProtectedBlobs.entries) {
-      expect(hasOwnerPlanningDocumentaryBoundary(preservedBlobs: {..._cui2a1ProtectedBlobs,
+      expect(hasOwnerPlanningFixtureBoundary(preservedBlobs: {..._cui2a1ProtectedBlobs,
         source.key: '0000000000000000000000000000000000000000'}), isFalse);
     }
     final names = Directory('supabase/migrations').listSync().whereType<File>().map((f) => f.uri.pathSegments.last).toList();
-    expect(hasOwnerPlanningDocumentaryBoundary(migrationNames: [...names, '00027_unauthorized.sql']), isFalse);
-    expect(hasOwnerPlanningDocumentaryBoundary(predecessorChanges: ['supabase/migrations/00001_initial_schema.sql']), isFalse);
-    expect(hasOwnerPlanningDocumentaryBoundary(backendChanges: ['supabase/config.toml']), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(migrationNames: [...names, '00027_unauthorized.sql']), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(predecessorChanges: ['supabase/migrations/00001_initial_schema.sql']), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(backendChanges: ['supabase/config.toml']), isFalse);
   });
 }
 
@@ -845,6 +1199,149 @@ String compatibleOwnerPlanningHardenSource(String historical) {
     'bool _matchesCui1MediaAuthority',
     ownerPlanningGuardCompositionSource + 'bool _matchesCui1MediaAuthority');
 }
+
+const r10FreezeGuardCompositionSource = r'''// Exact R10.5-D freeze extension; historical branches remain distinct.
+bool _allowsR10FreezeComposition(
+  Iterable<String> changedPaths,
+  String roadmap,
+  Map<String, String> documents,
+  Iterable<String> postClosureImplementationChanges,
+) =>
+    cui2a0.matchesR10FreezeDocuments(
+      roadmap, documents[cui2a0.cui2a1ContractPath] ?? '',
+      documents[cui2a0.ownerPlanningReadinessPath] ?? '',
+      documents[cui2a0.r10ContractPath] ?? '',
+    ) &&
+    documents.length == _closedCommittedDocuments.length + 3 &&
+    _allowsOwnerPlanningComposition(
+      changedPaths.where((path) => path != cui2a0.r10ContractPath),
+      cui2a0.ownerPlanningRoadmap,
+      Map.fromEntries(documents.entries.where(
+        (entry) => entry.key != cui2a0.r10ContractPath,
+      )),
+      postClosureImplementationChanges,
+    );
+
+void _registerR10FreezeTests() {
+  final paths = _cui1ChangedPaths(_git([
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+  ]));
+  final documents = <String, String>{
+    for (final path in _closedCommittedDocuments.keys) path: _read(path),
+    cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+    cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+    cui2a0.r10ContractPath: _read(cui2a0.r10ContractPath),
+  };
+  final roadmap = _read(_cui1RoadmapPath);
+  bool accepts({String? candidateRoadmap, Map<String, String>? candidateDocs,
+    Iterable<String>? candidatePaths, Iterable<String>? implementationChanges}) =>
+      _allowsR10FreezeComposition(
+        candidatePaths ?? paths, candidateRoadmap ?? roadmap,
+        candidateDocs ?? documents, implementationChanges ?? [],
+      );
+  test('R10 freeze exact live consumer rejects historical fallback', () {
+    expect(accepts(), isTrue);
+    expect(cui2a0.hasR10FreezeBoundary(), isTrue);
+    expect(_allowsOwnerPlanningComposition(paths, roadmap, documents, []), isFalse);
+    expect(accepts(candidateRoadmap: cui2a0.ownerPlanningRoadmap), isFalse);
+    expect(accepts(candidateRoadmap: cui2a0.r10FrozenRoadmap), isFalse);
+    expect(cui2a0.hasR10FreezeBoundary(executionCommit: cui2a0.r10FreezeCommit), isFalse);
+  });
+  test('R10 freeze consumer rejects changed missing or extra documents', () {
+    for (final entry in documents.entries) {
+      expect(accepts(candidateDocs: {...documents, entry.key: entry.value + '\nunauthorized'}), isFalse);
+      expect(accepts(candidateDocs: Map.from(documents)..remove(entry.key)), isFalse);
+    }
+    expect(accepts(candidateDocs: {...documents, cui2a0.r10ContractPath + '.bak': cui2a0.r10FrozenContract}), isFalse);
+    for (final key in ['STATUS: ACCEPTED / FROZEN', 'IMPLEMENTATION_AUTHORIZED: NO']) {
+      expect(cui2a0.r10FrozenContract, contains(key));
+      final changed = cui2a0.r10FrozenContract.replaceFirst(key, 'unauthorized');
+      expect(changed, isNot(cui2a0.r10FrozenContract));
+      expect(accepts(candidateDocs: {...documents, cui2a0.r10ContractPath: changed}), isFalse);
+    }
+  });
+  test('R10 freeze consumer rejects future authority and extra source paths', () {
+    for (final changed in [
+      roadmap + '\n# Future authorization\n', roadmap.substring(0, roadmap.length - 1),
+      roadmap.replaceAll('IMPLEMENTATION_AUTHORIZED: NO', 'IMPLEMENTATION_AUTHORIZED: YES'),
+      roadmap.replaceAll('COMMERCIAL_CURRENT_SLICE: NONE', 'COMMERCIAL_CURRENT_SLICE: CUI-2A1'),
+      roadmap.replaceAll('M4_STATE: NOT AUTHORIZED', 'M4_STATE: AUTHORIZED'),
+      roadmap.replaceAll('M5_STATE: NOT AUTHORIZED', 'M5_STATE: AUTHORIZED'),
+    ]) {
+      expect(changed, isNot(roadmap));
+      expect(accepts(candidateRoadmap: changed), isFalse);
+    }
+    for (final path in [
+      ...cui2a0.r10PresentationPaths, cui2a0.r10ContractPath + '.bak',
+      'docs/unauthorized.md', 'test/unauthorized_test.dart',
+      'supabase/migrations/00027_unauthorized.sql',
+    ]) {
+      expect(accepts(candidatePaths: [...paths, path]), isFalse, reason: path);
+      expect(accepts(implementationChanges: [path]), isFalse, reason: path);
+    }
+  });
+}
+
+''';
+
+// Exact hand-authored extension of the retained Owner-planning HARDEN1 oracle.
+String compatibleR10FreezeHardenSource(String historical) {
+  return compatibleR10FreezeHardenSourceFromPlanning(compatibleOwnerPlanningHardenSource(historical));
+}
+String compatibleR10FreezeHardenSourceFromPlanning(String planning) {
+  var source = planning;
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''postClosureImplementationChanges.isEmpty && cui2a0.hasOwnerPlanningDocumentaryBoundary();''',
+    r'''postClosureImplementationChanges.isEmpty && cui2a0.hasR10FreezeBoundary();''');
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''void _registerOwnerPlanningTests() {
+  final paths = _cui1ChangedPaths(_git([
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit,
+  ]));
+  final documents = <String, String>{
+    for (final path in _closedCommittedDocuments.keys) path: _read(path),
+    cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+    cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+  };
+  final roadmap = _read(_cui1RoadmapPath);
+''',
+    r'''void _registerOwnerPlanningTests() {
+  final paths = _cui1ChangedPaths(_git([
+    'diff', '--name-only', '--no-renames', _cui1BaselineCommit, cui2a0.r10FreezeParent,
+  ]));
+  final documents = <String, String>{
+    ..._closedCommittedDocuments,
+    cui2a0.cui2a1ContractPath: cui2a0.cui2a1FrozenContract,
+    cui2a0.ownerPlanningReadinessPath: cui2a0.ownerPlanningReadiness,
+  };
+  final roadmap = cui2a0.ownerPlanningRoadmap;
+''');
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''    expect(cui2a0.hasOwnerPlanningDocumentaryBoundary(), isTrue);''',
+    r'''    expect(cui2a0.hasOwnerPlanningFixtureBoundary(), isTrue);''');
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''        cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+      };''',
+    r'''        cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+        cui2a0.r10ContractPath: _read(cui2a0.r10ContractPath),
+      };''');
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''      }) => _allowsOwnerPlanningComposition(''',
+    r'''      }) => _allowsR10FreezeComposition(''');
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''  _registerOwnerPlanningTests();''',
+    r'''  _registerOwnerPlanningTests();
+  _registerR10FreezeTests();''');
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend''',
+    r'''              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend''');
+  source = _replaceOwnerPlanningAnchor(source,
+    r'''    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend);''',
+    r'''    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend);''');
+  return _replaceOwnerPlanningAnchor(source, 'bool _matchesCui1MediaAuthority',
+    r10FreezeGuardCompositionSource + 'bool _matchesCui1MediaAuthority');
+}
+
 // The extra security-support path permits only this exact expectation change.
 // Removing any unrelated RLS/actor/secret assertion is still rejected.
 bool hasAuthorizedCui2a0SecuritySupport([String? candidate]) {
@@ -875,6 +1372,7 @@ bool hasAuthorizedCui2a0SecuritySupport([String? candidate]) {
 }
 void main() {
   _registerOwnerPlanningBoundaryTests();
+  _registerR10FreezeBoundaryTests();
 
   test('CUI-2A1 committed documentary pins and historical CLOSED positive', () {
     expect(_cui2a1PinsMatch, isTrue);
@@ -971,7 +1469,7 @@ void main() {
   final source=File(cui2a0MigrationPath).readAsStringSync();
   final sql=_clean(source);
   test('T01-T02 exact objects, four permissions, zero provisioning and immutable history',(){
-    expect(hasOwnerPlanningDocumentaryBoundary(),isTrue);
+    expect(hasR10FreezeBoundary(),isTrue);
     for(final code in ['read','create_draft','edit_draft','read_audit']) {
       expect(sql,contains("'business_entities.$code'"));
     }
@@ -983,7 +1481,7 @@ void main() {
   });
   test('post-closure pins exact implementation and two-file documentary closure', () {
     expect(_acceptedCommitPinsMatch, isTrue);
-    expect(hasOwnerPlanningDocumentaryBoundary(), isTrue);
+    expect(hasR10FreezeBoundary(), isTrue);
     expect(hasHistoricalAuthorizedCui2a0Boundary(), isFalse,
       reason: 'The historical implementation boundary must not become continuing authority');
     expect(_samePaths(_paths(_git(['diff', '--name-only', '$cui2a0AcceptedImplementationCommit^', cui2a0AcceptedImplementationCommit])), [
@@ -995,8 +1493,8 @@ void main() {
     expect(_samePaths(_paths(_git(['diff', '--name-only', cui2a0AcceptedImplementationCommit, cui2a0AcceptedClosureCommit])),
       [cui2a0RoadmapPath, cui2a0ClosureReportPath]), isTrue);
     const wrong = '0000000000000000000000000000000000000000';
-    expect(hasOwnerPlanningDocumentaryBoundary(implementationCommit: wrong), isFalse);
-    expect(hasOwnerPlanningDocumentaryBoundary(closureCommit: wrong), isFalse);
+    expect(hasR10FreezeBoundary(implementationCommit: wrong), isFalse);
+    expect(hasR10FreezeBoundary(closureCommit: wrong), isFalse);
   });
   for (final entry in _acceptedSources.entries) {
     test('post-closure rejects changed accepted source: ${entry.key}', () {
@@ -1038,7 +1536,7 @@ void main() {
       'lib/features/business/presentation/screens/admin_business_draft_screen.dart',
     ]) {
       expect(hasClosedCui2a0Boundary(sources: _acceptedSources, libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath, path]), isFalse, reason: path);
-      expect(hasOwnerPlanningDocumentaryBoundary(untrackedAuthorityPaths: [path]), isFalse, reason: path);
+      expect(hasR10FreezeBoundary(untrackedAuthorityPaths: [path]), isFalse, reason: path);
     }
     expect(hasClosedCui2a0Boundary(
       libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath], sources: {
@@ -1051,11 +1549,11 @@ void main() {
   });
   test('post-closure rejects 00027, predecessor and arbitrary backend changes', () {
     final migrations = Directory('supabase/migrations').listSync().whereType<File>().map((f) => f.uri.pathSegments.last).toList();
-    expect(hasOwnerPlanningDocumentaryBoundary(migrationNames: [...migrations, '00027_unauthorized.sql']), isFalse);
+    expect(hasR10FreezeBoundary(migrationNames: [...migrations, '00027_unauthorized.sql']), isFalse);
     for (final name in migrations.where((name) => name != cui2a0MigrationName)) {
-      expect(hasOwnerPlanningDocumentaryBoundary(predecessorChanges: ['supabase/migrations/$name']), isFalse, reason: name);
+      expect(hasR10FreezeBoundary(predecessorChanges: ['supabase/migrations/$name']), isFalse, reason: name);
     }
-    expect(hasOwnerPlanningDocumentaryBoundary(backendChanges: ['supabase/tests/arbitrary.sql']), isFalse);
+    expect(hasR10FreezeBoundary(backendChanges: ['supabase/tests/arbitrary.sql']), isFalse);
   });
   test('T03-T05 exact permission in every public RPC, no membership/admin shortcut',(){
     for(final entry in <String,String>{
