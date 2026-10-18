@@ -4971,3 +4971,50 @@ Observe actual authorization/guard commit and document/source blob identities on
 Guard compatibility requires independent Big Pickle review. The prior fresh-Codex substitution applied to the closed freeze-only acceptance gate and does not silently extend here; any new substitution must be explicitly named and scoped by the Owner. Routine UI implementation/review follows the Operating Model with independent implementer and reviewer.
 
 STOP for a missing/altered/uncommitted authority, failed required gate, protected-byte or source drift, unexpected path/status, weakened historical predicate, source-oracle mismatch, unresolved blocking review finding, missing analysis disposition, premature implementation or scope expansion. Report the exact required Owner/Architect decision; do not bypass, retry mutations blindly or edit protected tests.
+
+# R10.5-D HISTORICAL FIXTURE REPAIR — BOUNDED SECURITY MAINTENANCE — 2026-10-18
+
+This prospective record adopts the Owner/Architect's narrowly bounded maintenance instruction. It claims no earlier authority and grants no general guard-maintenance exception. UI implementation is PAUSED during this maintenance pass.
+
+MAINTENANCE_BASELINE: main / 20fff015921ec6c55cf09258298c2a06c05f9d43
+BASELINE_PARENT: 48004703c8afe633a487f7612f07aecb459c7e7e
+BASELINE_ROADMAP_BLOB: e66690adbd7615f2a8300ad1b13560f3c82efda2
+FROZEN_R10_5D_CONTRACT_BLOB: 0c8f38c87248d31a5aef23a4cfe9f20a546b1329
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_M4_M5_IMPLEMENTATION_AUTHORIZED: NO
+NEW_UI_IMPLEMENTATION_AUTHORIZED: NO
+COMMIT_PUSH_AUTHORIZED: NO
+
+The historical positive hasAuthorizedCui2a0Boundary assertion in _registerOwnerPlanningBoundaryTests omitted untrackedPaths and therefore combined historical inputs with today's untracked inventory. Its sole fixture correction is the explicit argument untrackedPaths: _cui2a1UntrackedPaths. The historical predicate, its literal three-path inventory and every negative outcome remain unchanged. Never filter the actual untracked inventory.
+
+This one maintenance candidate may append only this literal record and change only technically necessary recognition/source-oracle coordination in the existing guards. The actual maintenance delta is exactly:
+M docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md
+M test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+M test/commercial_harden1_public_plans_exposure_migration_test.dart
+M test/commercial_m1b_catalog_reference_data_migration_test.dart
+The M3 guard remains unchanged. No other repository path may change in this pass.
+
+Preserve the current UI candidate's six raw Git identities:
+lib/features/profile/presentation/profile_screen.dart: 48153fe3d36b59c122371f85215551e687a95cd7
+lib/features/profile/presentation/screens/profile_setup_screen.dart: 64da1f57fa4e6364c59b29c28c24256953460e7e
+lib/features/profile/presentation/screens/profile_edit_screen.dart: 9c2b3fea3e0f8c16f9eb79b7e02597a4ede9e043
+lib/features/profile/presentation/screens/authenticated_profile_edit_screen.dart: 8fa92706081297bd17cbeb95ff42d8448581470c
+lib/features/user_area/presentation/user_area_screen.dart: 8db72d58ae85d61c3c46ec099a686fb5db2f3c8b
+test/v1_r10_5d_profile_user_area_visual_test.dart: cfc81ef7be8d020771ccbebad07d31fffa01c782
+
+Recognition retains the original approved UI state and adds only this maintenance transition:
+1. Pending review: HEAD is the exact baseline above; index is empty; the four maintenance paths are modified, with their exact approved contents; all six UI identities remain exact. This is review evidence only. No new functionality, UI work or Git publication is authorized.
+2. Committed maintenance: observe the actual direct-child commit of that baseline, containing exactly the four maintenance modifications above, the exact literal append and approved guard sources. No future commit hash is invented.
+3. Subsequent UI closure: require unchanged maintenance documents/guards in every descendant, single-parent ancestry and only the original six UI paths with their original permitted statuses/modes. This supplies no additional UI execution permission; any further work requires its existing procedural Owner release. Closure-document recognition remains a separate decision.
+
+Verify every committed, indexed, unstaged and untracked layer independently. Only after the exact maintenance inputs are validated may this one transition be projected onto the unchanged original R10.5-D classifier. Do not remove or filter any untracked entry. Reject missing/altered authority, unexpected paths/modes/statuses, changed protected bytes, hidden/restored history drift and unrelated future maintenance.
+
+Source identity is exact after CRLF-to-LF normalization, as in existing source oracles. HARDEN1/M1B/M3 are checked against fixed complete Git blob identities. To avoid a circular future hash, the CUI-2A0 source fingerprint is the Git blob hash of its complete UTF-8 LF source with exactly one declaration, const _r10MaintenanceCuiFingerprint = '<40 lowercase hex>'; replaced by the identical declaration with forty zeroes. Require one unique declaration and its literal value to equal the compiled fixed fingerprint. No other source region is excluded. Compute with git hash-object --no-filters, without -w; independently reproduce before review. This fingerprint is not a raw protected-file identity. Actual complete committed guard blobs are observed and checked at closure; subsequent guard edits fail closed.
+
+Preserve all historical pins, fixtures and security predicates; CUI-1/CUI-2A0 closures; HARDEN1 public-plan restrictions; M1B catalog and independently authored unique-anchor HARDEN1 source oracle; M3 shadow entitlement isolation; unchanged M1a/R09q; RLS, actor/capability, ownership/publication, audit/receipt/SQL protections; every frozen policy and all eight literal contract §O raw identities. No contract, SQL/Supabase, Auth/provider, route, dependency or SDK change. No commercial capability expands.
+
+First validate the repaired historical assertion. Then run CUI-2A0, HARDEN1, M1B, M3, unchanged M1a and unchanged R09q sequentially with flutter test --no-pub; require zero failures/skips and live positive/adversarial evidence for all maintenance states. Previous 43/43 visual and 401/401 regression results remain previous evidence only while their exact inputs are preserved.
+
+Independent Big Pickle High acceptance is required. Any substitute requires a newly explicit Owner decision naming and scoping it. Final Owner acceptance and separate Git authorization are required; no staging/commit/push is granted here. After accepted maintenance closure, guards and documents are again immutable during ordinary UI work. The analyzer Enum failure remains NOT PASS; Android Owner visual acceptance and native iPhone QA remain separate gates.
+
+STOP for a genuinely required frozen-contract amendment, insecure transition, weakened historical protection, unexpected drift, failed mandatory validation/review or another native compiler/runtime crash. Preserve existing crash evidence. No automatic next-slice advancement.

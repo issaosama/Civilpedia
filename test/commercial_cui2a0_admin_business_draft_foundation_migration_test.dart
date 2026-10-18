@@ -832,8 +832,11 @@ class R10PresentationRecognition {
   final R10PresentationStage stage;
   final String? observedAuthorizationCommit;
   final Map<String, String> observedGuardBlobs;
+  final String maintenanceState;
+  final String? observedMaintenanceCommit;
   const R10PresentationRecognition(this.stage, [this.observedAuthorizationCommit,
-    this.observedGuardBlobs = const {}]);
+    this.observedGuardBlobs = const {}, this.maintenanceState = 'none',
+    this.observedMaintenanceCommit]);
   bool get compatible => stage != R10PresentationStage.rejected;
   bool get committedAuthorityObserved => observedAuthorizationCommit != null;
   // Git proves composition, never the separate human UI-release instruction.
@@ -991,7 +994,9 @@ R10PresentationRecognition recognizeR10PresentationStage() {
     // The pending pair must preserve the exact entry raw prefix and verbatim append.
     if (_git(['rev-parse', 'HEAD']).trim() == r10PresentationEntry &&
         _git(['hash-object', '--no-filters', '--', cui2a0RoadmapPath]).trim() != 'b074b047ddff7b7c821933aa1b88d8e3b6666792') return reject;
-    return _classifyR10Presentation(_collectR10PresentationEvidence());
+    final evidence = _collectR10PresentationEvidence();
+    final original = _classifyR10Presentation(evidence);
+    return original.compatible ? original : _recognizeR10FixtureMaintenance(evidence);
   } on Object {
     return reject; // Missing objects, paths, malformed UTF-8 and Git failures fail closed.
   }
@@ -999,9 +1004,323 @@ R10PresentationRecognition recognizeR10PresentationStage() {
 bool hasR10PresentationCompatibility() => recognizeR10PresentationStage().compatible;
 bool matchesR10PresentationDocuments(String roadmap, String contract,
     String readiness, String r10Contract) =>
-    _r10PinsMatch && roadmap == r10AuthorizedRoadmap + r10PresentationAppend &&
+    _r10PinsMatch && roadmap == r10AuthorizedRoadmap + r10PresentationCurrentAppend &&
     contract == cui2a1FrozenContract && readiness == ownerPlanningReadiness &&
     r10Contract == r10FrozenContract;
+
+
+// One exact fixture-maintenance transition; historical classifiers stay intact.
+const r10FixtureMaintenanceEntry = '20fff015921ec6c55cf09258298c2a06c05f9d43';
+const _r10MaintenanceCuiFingerprint = '5dbe13d4307deb3391637bf185c574408bca2c73';
+const _r10MaintenanceOtherGuardBlobs = <String, String>{
+  'test/commercial_harden1_public_plans_exposure_migration_test.dart': '09215627742a979310d5a42d3330e37ff0153535',
+  'test/commercial_m1b_catalog_reference_data_migration_test.dart': '9f92a04ba56d5ec0d482a34813bb17d348392701',
+  'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart': '78bdb558bc46332a0c4dcac3103f9b1500c21c44',
+};
+const _r10MaintenancePaths = <String>{
+  cui2a0RoadmapPath,
+  'test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart',
+  'test/commercial_harden1_public_plans_exposure_migration_test.dart',
+  'test/commercial_m1b_catalog_reference_data_migration_test.dart',
+};
+const _r10MaintenanceUiBlobs = <String, String>{
+  'lib/features/profile/presentation/profile_screen.dart': '48153fe3d36b59c122371f85215551e687a95cd7',
+  'lib/features/profile/presentation/screens/profile_setup_screen.dart': '64da1f57fa4e6364c59b29c28c24256953460e7e',
+  'lib/features/profile/presentation/screens/profile_edit_screen.dart': '9c2b3fea3e0f8c16f9eb79b7e02597a4ede9e043',
+  'lib/features/profile/presentation/screens/authenticated_profile_edit_screen.dart': '8fa92706081297bd17cbeb95ff42d8448581470c',
+  'lib/features/user_area/presentation/user_area_screen.dart': '8db72d58ae85d61c3c46ec099a686fb5db2f3c8b',
+  'test/v1_r10_5d_profile_user_area_visual_test.dart': 'cfc81ef7be8d020771ccbebad07d31fffa01c782',
+};
+const r10FixtureMaintenanceAppend = '\n' r'''
+# R10.5-D HISTORICAL FIXTURE REPAIR — BOUNDED SECURITY MAINTENANCE — 2026-10-18
+
+This prospective record adopts the Owner/Architect's narrowly bounded maintenance instruction. It claims no earlier authority and grants no general guard-maintenance exception. UI implementation is PAUSED during this maintenance pass.
+
+MAINTENANCE_BASELINE: main / 20fff015921ec6c55cf09258298c2a06c05f9d43
+BASELINE_PARENT: 48004703c8afe633a487f7612f07aecb459c7e7e
+BASELINE_ROADMAP_BLOB: e66690adbd7615f2a8300ad1b13560f3c82efda2
+FROZEN_R10_5D_CONTRACT_BLOB: 0c8f38c87248d31a5aef23a4cfe9f20a546b1329
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_M4_M5_IMPLEMENTATION_AUTHORIZED: NO
+NEW_UI_IMPLEMENTATION_AUTHORIZED: NO
+COMMIT_PUSH_AUTHORIZED: NO
+
+The historical positive hasAuthorizedCui2a0Boundary assertion in _registerOwnerPlanningBoundaryTests omitted untrackedPaths and therefore combined historical inputs with today's untracked inventory. Its sole fixture correction is the explicit argument untrackedPaths: _cui2a1UntrackedPaths. The historical predicate, its literal three-path inventory and every negative outcome remain unchanged. Never filter the actual untracked inventory.
+
+This one maintenance candidate may append only this literal record and change only technically necessary recognition/source-oracle coordination in the existing guards. The actual maintenance delta is exactly:
+M docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md
+M test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+M test/commercial_harden1_public_plans_exposure_migration_test.dart
+M test/commercial_m1b_catalog_reference_data_migration_test.dart
+The M3 guard remains unchanged. No other repository path may change in this pass.
+
+Preserve the current UI candidate's six raw Git identities:
+lib/features/profile/presentation/profile_screen.dart: 48153fe3d36b59c122371f85215551e687a95cd7
+lib/features/profile/presentation/screens/profile_setup_screen.dart: 64da1f57fa4e6364c59b29c28c24256953460e7e
+lib/features/profile/presentation/screens/profile_edit_screen.dart: 9c2b3fea3e0f8c16f9eb79b7e02597a4ede9e043
+lib/features/profile/presentation/screens/authenticated_profile_edit_screen.dart: 8fa92706081297bd17cbeb95ff42d8448581470c
+lib/features/user_area/presentation/user_area_screen.dart: 8db72d58ae85d61c3c46ec099a686fb5db2f3c8b
+test/v1_r10_5d_profile_user_area_visual_test.dart: cfc81ef7be8d020771ccbebad07d31fffa01c782
+
+Recognition retains the original approved UI state and adds only this maintenance transition:
+1. Pending review: HEAD is the exact baseline above; index is empty; the four maintenance paths are modified, with their exact approved contents; all six UI identities remain exact. This is review evidence only. No new functionality, UI work or Git publication is authorized.
+2. Committed maintenance: observe the actual direct-child commit of that baseline, containing exactly the four maintenance modifications above, the exact literal append and approved guard sources. No future commit hash is invented.
+3. Subsequent UI closure: require unchanged maintenance documents/guards in every descendant, single-parent ancestry and only the original six UI paths with their original permitted statuses/modes. This supplies no additional UI execution permission; any further work requires its existing procedural Owner release. Closure-document recognition remains a separate decision.
+
+Verify every committed, indexed, unstaged and untracked layer independently. Only after the exact maintenance inputs are validated may this one transition be projected onto the unchanged original R10.5-D classifier. Do not remove or filter any untracked entry. Reject missing/altered authority, unexpected paths/modes/statuses, changed protected bytes, hidden/restored history drift and unrelated future maintenance.
+
+Source identity is exact after CRLF-to-LF normalization, as in existing source oracles. HARDEN1/M1B/M3 are checked against fixed complete Git blob identities. To avoid a circular future hash, the CUI-2A0 source fingerprint is the Git blob hash of its complete UTF-8 LF source with exactly one declaration, const _r10MaintenanceCuiFingerprint = '<40 lowercase hex>'; replaced by the identical declaration with forty zeroes. Require one unique declaration and its literal value to equal the compiled fixed fingerprint. No other source region is excluded. Compute with git hash-object --no-filters, without -w; independently reproduce before review. This fingerprint is not a raw protected-file identity. Actual complete committed guard blobs are observed and checked at closure; subsequent guard edits fail closed.
+
+Preserve all historical pins, fixtures and security predicates; CUI-1/CUI-2A0 closures; HARDEN1 public-plan restrictions; M1B catalog and independently authored unique-anchor HARDEN1 source oracle; M3 shadow entitlement isolation; unchanged M1a/R09q; RLS, actor/capability, ownership/publication, audit/receipt/SQL protections; every frozen policy and all eight literal contract §O raw identities. No contract, SQL/Supabase, Auth/provider, route, dependency or SDK change. No commercial capability expands.
+
+First validate the repaired historical assertion. Then run CUI-2A0, HARDEN1, M1B, M3, unchanged M1a and unchanged R09q sequentially with flutter test --no-pub; require zero failures/skips and live positive/adversarial evidence for all maintenance states. Previous 43/43 visual and 401/401 regression results remain previous evidence only while their exact inputs are preserved.
+
+Independent Big Pickle High acceptance is required. Any substitute requires a newly explicit Owner decision naming and scoping it. Final Owner acceptance and separate Git authorization are required; no staging/commit/push is granted here. After accepted maintenance closure, guards and documents are again immutable during ordinary UI work. The analyzer Enum failure remains NOT PASS; Android Owner visual acceptance and native iPhone QA remain separate gates.
+
+STOP for a genuinely required frozen-contract amendment, insecure transition, weakened historical protection, unexpected drift, failed mandatory validation/review or another native compiler/runtime crash. Preserve existing crash evidence. No automatic next-slice advancement.
+''';
+final _r10MaintenanceDocuments = <String, String>{
+  ..._r10PresentationDocuments,
+  cui2a0RoadmapPath: _r10PresentationDocuments[cui2a0RoadmapPath]! + r10FixtureMaintenanceAppend,
+};
+final _r10MaintenanceSources = <String, String>{
+  ..._r10PresentationSources, cui2a0RoadmapPath: _r10MaintenanceDocuments[cui2a0RoadmapPath]!,
+};
+
+// Temporary source bytes are outside the repository; hash-object never uses -w.
+String _r10SourceBlob(String source) {
+  final scratch = Directory.systemTemp.createTempSync('civilpedia-r10-fixture-');
+  try {
+    final file = File(scratch.path + Platform.pathSeparator + 'source');
+    file.writeAsBytesSync(utf8.encode(source));
+    return _git(['hash-object', '--no-filters', '--', file.path]).trim();
+  } finally {
+    scratch.deleteSync(recursive: true);
+  }
+}
+Map<String, String>? _r10ApprovedMaintenanceGuardBlobs(Map<String, String> sources) {
+  if (!_samePaths(sources.keys, cui2a1CompatibilityPaths)) return null;
+  const path = 'test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart';
+  final source = sources[path]!;
+  final marker = RegExp(r"^const _r10MaintenanceCuiFingerprint = '[a-f0-9]{40}';$", multiLine: true);
+  final anchors = marker.allMatches(source).toList();
+  final declaration = "const _r10MaintenanceCuiFingerprint = '$_r10MaintenanceCuiFingerprint';";
+  if (anchors.length != 1 || anchors.single.group(0) != declaration) return null;
+  final canonical = source.replaceRange(anchors.single.start, anchors.single.end,
+    "const _r10MaintenanceCuiFingerprint = '0000000000000000000000000000000000000000';");
+  if (_r10SourceBlob(canonical) != _r10MaintenanceCuiFingerprint) return null;
+  final blobs = {for (final entry in sources.entries) entry.key: _r10SourceBlob(entry.value)};
+  if (!_r10MaintenanceOtherGuardBlobs.entries.every((e) => blobs[e.key] == e.value)) return null;
+  return blobs;
+}
+
+R10PresentationRecognition _classifyR10FixtureMaintenance(_R10PresentationEvidence e,
+    Map<String, String> approvedGuards, Map<String, String> uiBlobs) {
+  const reject = R10PresentationRecognition(R10PresentationStage.rejected);
+  if (e.branch != 'main' || e.nonRegularPaths.isNotEmpty ||
+      !_r10SameMap(e.sources, _r10MaintenanceSources) ||
+      !_r10SameMap(e.protected, _cui2a1ProtectedBlobs) ||
+      !_samePaths(approvedGuards.keys, cui2a1CompatibilityPaths) ||
+      e.revisions.isEmpty || e.revisions.first.id != r10FixtureMaintenanceEntry) return reject;
+  final work = _r10RawChanges(e.workRaw), index = _r10RawChanges(e.indexRaw);
+  if (work == null || index == null) return reject;
+  if (e.head == r10FixtureMaintenanceEntry) {
+    if (e.revisions.length != 1 || index.isNotEmpty ||
+        !_r10SameMap(uiBlobs, _r10MaintenanceUiBlobs) ||
+        !_maintenanceChangesExact(work.where((c) => _r10MaintenancePaths.contains(c.path)).toList())) return reject;
+    // Exact source/document checks precede projection; untracked is untouched.
+    final projected = _r10Probe(e, sources: _r10PresentationSources,
+      workRaw: _paths(e.workRaw).where((line) =>
+        !_r10MaintenancePaths.contains(line.split('\t').last)).join('\n'));
+    final base = _classifyR10Presentation(projected);
+    if (base.stage != R10PresentationStage.boundedUi) return reject;
+    return R10PresentationRecognition(base.stage, base.observedAuthorizationCommit,
+      base.observedGuardBlobs, 'pendingReview');
+  }
+  if (e.revisions.length < 2) return reject;
+  final maintenance = e.revisions[1];
+  final changes = _r10RawChanges(maintenance.raw);
+  if (maintenance.parents != r10FixtureMaintenanceEntry || changes == null ||
+      !_maintenanceChangesExact(changes)) return reject;
+  final revisions = <_R10Revision>[e.revisions.first];
+  var previous = r10FixtureMaintenanceEntry;
+  final seen = <String>{r10PresentationEntry, r10FixtureMaintenanceEntry};
+  for (var i = 1; i < e.revisions.length; i++) {
+    final revision = e.revisions[i];
+    if (!RegExp(r'^[a-f0-9]{40}$').hasMatch(revision.id) || !seen.add(revision.id) ||
+        revision.parents != previous ||
+        !_r10SameMap(revision.documents, _r10MaintenanceDocuments) ||
+        !_r10SameMap(revision.guards, approvedGuards)) return reject;
+    if (i > 1) revisions.add(_R10Revision(revision.id,
+      i == 2 ? r10FixtureMaintenanceEntry : revision.parents,
+      revision.raw, _r10PresentationDocuments, e.revisions.first.guards));
+    previous = revision.id;
+  }
+  if (previous != e.head) return reject;
+  final projected = _r10Probe(e,
+    head: revisions.length == 1 ? r10FixtureMaintenanceEntry : e.head,
+    revisions: revisions, sources: _r10PresentationSources);
+  final base = _classifyR10Presentation(projected);
+  if (!base.compatible) return reject;
+  return R10PresentationRecognition(base.stage, base.observedAuthorizationCommit,
+    Map.unmodifiable(approvedGuards), 'committed', maintenance.id);
+}
+bool _maintenanceChangesExact(List<({String path, String status})> changes) =>
+  _samePaths(changes.map((c) => c.path), _r10MaintenancePaths) &&
+  changes.every((c) => c.status == 'M');
+
+R10PresentationRecognition _recognizeR10FixtureMaintenance(_R10PresentationEvidence evidence) {
+  const reject = R10PresentationRecognition(R10PresentationStage.rejected);
+  final guards = _r10ApprovedMaintenanceGuardBlobs({
+    for (final path in cui2a1CompatibilityPaths) path: _r10Read(path),
+  });
+  if (guards == null) return reject;
+  return _classifyR10FixtureMaintenance(evidence, guards, {
+    for (final path in r10PresentationPaths)
+      path: _git(['hash-object', '--no-filters', '--', path]).trim(),
+  });
+}
+String get r10PresentationCurrentAppend =>
+  r10PresentationAppend + (recognizeR10PresentationStage().maintenanceState == 'none'
+    ? '' : r10FixtureMaintenanceAppend);
+
+const r10FixtureMaintenanceHardenEdits = <(String, String)>[
+  (r'''              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend''', r'''              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationCurrentAppend'''),
+  (r'''    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend);''', r'''    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationCurrentAppend);'''),
+];
+String compatibleR10FixtureMaintenanceHardenSourceFromPresentation(String presentation) {
+  var expected = presentation;
+  for (final edit in r10FixtureMaintenanceHardenEdits) {
+    expected = _replaceOwnerPlanningAnchor(expected, edit.$1, edit.$2);
+  }
+  return expected;
+}
+String compatibleR10FixtureMaintenanceHardenSource(String historical) =>
+  compatibleR10FixtureMaintenanceHardenSourceFromPresentation(compatibleR10PresentationHardenSource(historical));
+
+void _registerR10FixtureMaintenanceTests() {
+  final pending = _collectR10PresentationEvidence();
+  final sources = {for (final path in cui2a1CompatibilityPaths) path: _r10Read(path)};
+  final guards = _r10ApprovedMaintenanceGuardBlobs(sources)!;
+  final raw = _r10MaintenancePaths.map((p) => _r10ProbeRaw(p)).join();
+  // Synthetic commits below are in-memory adversarial fixtures, never authority pins.
+  final maintenance = _R10Revision('c' * 40, r10FixtureMaintenanceEntry, raw,
+    _r10MaintenanceDocuments, guards);
+  final committed = _r10Probe(pending, head: maintenance.id,
+    revisions: [pending.revisions.first, maintenance],
+    workRaw: _cui2a1DirtyPaths.followedBy(r10PresentationPaths.where((p) => p != _r10VisualPath))
+      .map((p) => _r10ProbeRaw(p)).join());
+  R10PresentationRecognition recognize(_R10PresentationEvidence e,
+      {Map<String, String>? ui}) => _classifyR10FixtureMaintenance(e, guards, ui ?? _r10MaintenanceUiBlobs);
+  const no = R10PresentationStage.rejected;
+  test('R10 fixture maintenance live pending review preserves UI and grants no release', () {
+    final live = recognizeR10PresentationStage();
+    expect(live.compatible, isTrue);
+    expect(live.stage, R10PresentationStage.boundedUi);
+    expect(live.maintenanceState, 'pendingReview');
+    expect(live.observedMaintenanceCommit, isNull);
+    expect(live.productionExecutionAuthorized, isFalse);
+    expect(live.separateOwnerUiReleaseRequired, isTrue);
+    expect(recognize(pending).maintenanceState, 'pendingReview');
+    final original = _r10Probe(committed, head: r10FixtureMaintenanceEntry,
+      revisions: [pending.revisions.first], sources: _r10PresentationSources);
+    expect(_classifyR10Presentation(original).stage, R10PresentationStage.boundedUi);
+  });
+  test('R10 historical fixture inventory stays literal and rejects the UI test', () {
+    expect(hasFrozenCui2a1FixtureBoundary(), isTrue);
+    expect(hasFrozenCui2a1FixtureBoundary(
+      untrackedPaths: [..._cui2a1UntrackedPaths, _r10VisualPath]), isFalse);
+    expect(hasOwnerPlanningFixtureBoundary(
+      untrackedPaths: [..._cui2a1UntrackedPaths, _r10VisualPath]), isFalse);
+  });
+  test('R10 maintenance direct child observes actual sources and supports later six-path UI closure', () {
+    final result = recognize(committed);
+    expect(result.stage, R10PresentationStage.boundedUi);
+    expect(result.maintenanceState, 'committed');
+    expect(result.observedMaintenanceCommit, maintenance.id);
+    expect(result.observedGuardBlobs, guards);
+    expect(result.productionExecutionAuthorized, isFalse);
+    for (final path in r10PresentationPaths) {
+      final revision = _R10Revision('d' * 40, maintenance.id,
+        _r10ProbeRaw(path, status: path == _r10VisualPath ? 'A' : 'M'),
+        _r10MaintenanceDocuments, guards);
+      final next = _r10Probe(committed, head: revision.id,
+        revisions: [...committed.revisions, revision],
+        untracked: path == _r10VisualPath ? _cui2a1UntrackedPaths.toList() : committed.untracked);
+      expect(recognize(next).stage, R10PresentationStage.boundedUi, reason: path);
+    }
+  });
+  test('R10 maintenance rejects missing altered or commercially expanded authority and protected bytes', () {
+    for (final base in [pending, committed]) {
+      for (final entry in _r10MaintenanceSources.entries) {
+        expect(recognize(_r10Probe(base, sources: {...base.sources,
+          entry.key: entry.value + '\nunauthorized'})).stage, no);
+        expect(recognize(_r10Probe(base, sources: Map.from(base.sources)..remove(entry.key))).stage, no);
+      }
+      expect(recognize(_r10Probe(base, sources: _r10PresentationSources)).stage, no);
+      expect(recognize(_r10Probe(base, sources: {...base.sources, cui2a0RoadmapPath:
+        base.sources[cui2a0RoadmapPath]!.replaceFirst(
+          'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO', 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES')})).stage, no);
+      for (final entry in _cui2a1ProtectedBlobs.entries) {
+        expect(recognize(_r10Probe(base, protected: {...base.protected, entry.key: '0' * 40})).stage, no);
+      }
+    }
+  });
+  test('R10 maintenance rejects source drift and nonunique fingerprint declarations', () {
+    for (final entry in sources.entries) {
+      expect(_r10ApprovedMaintenanceGuardBlobs({...sources,
+        entry.key: entry.value + '\n// unauthorized drift\n'}), isNull);
+    }
+    const path = 'test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart';
+    final declaration = "const _r10MaintenanceCuiFingerprint = '$_r10MaintenanceCuiFingerprint';";
+    for (final replacement in ['', declaration + '\n' + declaration,
+      "const _r10MaintenanceCuiFingerprint = '0';"]) {
+      expect(_r10ApprovedMaintenanceGuardBlobs({...sources,
+        path: sources[path]!.replaceFirst(declaration, replacement)}), isNull);
+    }
+  });
+  test('R10 maintenance rejects extra untracked paths index drift modes and altered UI', () {
+    for (final base in [pending, committed]) {
+      for (final path in ['test/unauthorized_test.dart', _r10VisualPath + '.bak',
+        'docs/unauthorized.md', 'supabase/config.toml']) {
+        expect(recognize(_r10Probe(base, untracked: [...base.untracked, path])).stage, no);
+        expect(recognize(_r10Probe(base, workRaw: base.workRaw + _r10ProbeRaw(path))).stage, no);
+        expect(recognize(_r10Probe(base, indexRaw: _r10ProbeRaw(path))).stage, no);
+      }
+      expect(recognize(_r10Probe(base, nonRegularPaths: {_r10VisualPath})).stage, no);
+    }
+    expect(recognize(_r10Probe(pending, indexRaw: _r10ProbeRaw(r10PresentationPaths.first))).stage, no);
+    for (final entry in _r10MaintenanceUiBlobs.entries) {
+      expect(recognize(pending, ui: {..._r10MaintenanceUiBlobs, entry.key: '0' * 40}).stage, no);
+    }
+    for (final status in ['D', 'A', 'T', 'R100']) {
+      expect(recognize(_r10Probe(committed, revisions: [pending.revisions.first,
+        _r10RevisionProbe(maintenance, raw: raw.replaceFirst(
+          _r10ProbeRaw(cui2a0RoadmapPath), _r10ProbeRaw(cui2a0RoadmapPath, status: status)))])).stage, no);
+    }
+  });
+  test('R10 maintenance rejects invalid ancestry changed guards documents and post-maintenance drift', () {
+    for (final parent in [r10PresentationEntry, r10FixtureMaintenanceEntry + ' ' + 'a' * 40]) {
+      expect(recognize(_r10Probe(committed, revisions: [pending.revisions.first,
+        _r10RevisionProbe(maintenance, parents: parent)])).stage, no);
+    }
+    for (final path in _r10MaintenancePaths) {
+      final drift = _R10Revision('d' * 40, maintenance.id, _r10ProbeRaw(path),
+        _r10MaintenanceDocuments, guards);
+      final restore = _R10Revision('e' * 40, drift.id, _r10ProbeRaw(path),
+        _r10MaintenanceDocuments, guards);
+      expect(recognize(_r10Probe(committed, head: restore.id,
+        revisions: [...committed.revisions, drift, restore])).stage, no);
+    }
+    for (final path in cui2a1CompatibilityPaths) {
+      expect(recognize(_r10Probe(committed, revisions: [pending.revisions.first,
+        _r10RevisionProbe(maintenance, guards: {...guards, path: '0' * 40})])).stage, no);
+    }
+    expect(recognize(_r10Probe(committed, revisions: [pending.revisions.first,
+      _r10RevisionProbe(maintenance, documents: _r10PresentationDocuments)])).stage, no);
+    expect(recognize(_r10Probe(committed, branch: 'other')).stage, no);
+  });
+}
 
 // Synthetic IDs here are in-memory fixtures, never future authority pins.
 String _r10ProbeRaw(String path, {String status = 'M',
@@ -1486,6 +1805,7 @@ void _registerOwnerPlanningBoundaryTests() {
       sources: _cui2a1Sources,
       libDocsChanges: [cui2a0RoadmapPath, cui2a0ClosureReportPath, cui2a1ContractPath],
       repositoryChanges: _cui2a1DirtyPaths, committedChanges: [], stagedChanges: [],
+      untrackedPaths: _cui2a1UntrackedPaths,
     ), isTrue);
     expect(hasOwnerPlanningFixtureBoundary(sources: _cui2a1Sources), isFalse);
     expect(hasAuthorizedCui2a0Boundary(), isFalse);
@@ -1994,6 +2314,7 @@ void main() {
   _registerOwnerPlanningBoundaryTests();
   _registerR10FreezeBoundaryTests();
   _registerR10PresentationBoundaryTests();
+  _registerR10FixtureMaintenanceTests();
 
   test('CUI-2A1 committed documentary pins and historical CLOSED positive', () {
     expect(_cui2a1PinsMatch, isTrue);

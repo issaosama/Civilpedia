@@ -2498,7 +2498,19 @@ void main() {
       expect(_git(['show', cui2a0.r10FreezeParent + ':' + hardenPath]), planningHarden);
       final freezeHarden = cui2a0.compatibleR10FreezeHardenSource(historicalHarden);
       expect(freezeHarden, _git(['show', cui2a0.r10PresentationEntry + ':' + hardenPath]));
-      expect(_read(hardenPath), cui2a0.compatibleR10PresentationHardenSource(historicalHarden));
+      expect(_read(hardenPath), cui2a0.compatibleR10FixtureMaintenanceHardenSource(historicalHarden));
+
+      final presentationHarden = cui2a0.compatibleR10PresentationHardenSource(historicalHarden);
+      for (final edit in cui2a0.r10FixtureMaintenanceHardenEdits) {
+        final anchor = edit.$1;
+        expect(RegExp(RegExp.escape(anchor)).allMatches(presentationHarden), hasLength(1));
+        for (final replacement in ['', 'unauthorized source', anchor + anchor]) {
+          final drift = presentationHarden.replaceFirst(anchor, replacement);
+          expect(drift, isNot(presentationHarden));
+          expect(() => cui2a0.compatibleR10FixtureMaintenanceHardenSourceFromPresentation(drift),
+            throwsStateError, reason: 'Missing, altered or duplicate maintenance anchor');
+        }
+      }
       for (final edit in cui2a0.r10PresentationHardenEdits) {
         final anchor = edit.$1;
         expect(RegExp(RegExp.escape(anchor)).allMatches(freezeHarden), hasLength(1));
@@ -2567,7 +2579,7 @@ void main() {
                   _m3FormalClosure +
                   _cui1Authorization +
                   _cui1MediaReconciliation +
-                  _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend
+                  _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationCurrentAppend
             : checkpoint;
         expect(_read(entry.key), expected, reason: entry.key);
       }

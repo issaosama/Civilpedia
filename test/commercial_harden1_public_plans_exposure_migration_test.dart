@@ -2064,7 +2064,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
                         'CIVILPEDIA_COMMERCIAL_M1B_CATALOG_REFERENCE_DATA_IMPLEMENTATION_CONTRACT_V1.md'
               ? acceptedM1bReopeningAddendum
               : path == _roadmapPath
-              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend
+              ? _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationCurrentAppend
               : '');
       expect(_read(path), expected, reason: path);
     }
@@ -2078,7 +2078,7 @@ No database operation, SQL-test correction, staging, commit or push is authorize
     final roadmap = _read(_roadmapPath);
     final checkpoint = _baselineFile(_roadmapPath);
     expect(roadmap.substring(0, checkpoint.length), checkpoint);
-    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationAppend);
+    expect(roadmap.substring(checkpoint.length), _authorizedCommercialTrackControl + _cui1MediaReconciliation + _closedRoadmapAdditions + cui2a0.cui2a1DocumentaryAppend + cui2a0.ownerPlanningDocumentaryAppend + cui2a0.r10FreezeAppend + cui2a0.r10AuthorizationAppend + cui2a0.r10PresentationCurrentAppend);
     expect(
       RegExp(
         r'^# COMMERCIAL TRACK CURRENT CONTROL$',
