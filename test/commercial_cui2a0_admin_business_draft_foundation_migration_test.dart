@@ -1011,11 +1011,18 @@ bool matchesR10PresentationDocuments(String roadmap, String contract,
 
 // One exact fixture-maintenance transition; historical classifiers stay intact.
 const r10FixtureMaintenanceEntry = '20fff015921ec6c55cf09258298c2a06c05f9d43';
-const _r10MaintenanceCuiFingerprint = '5dbe13d4307deb3391637bf185c574408bca2c73';
+const _r10MaintenanceCuiFingerprint = 'c3b282d86daa375e93801b88c3033a573602b6ba';
 const _r10MaintenanceOtherGuardBlobs = <String, String>{
   'test/commercial_harden1_public_plans_exposure_migration_test.dart': '09215627742a979310d5a42d3330e37ff0153535',
   'test/commercial_m1b_catalog_reference_data_migration_test.dart': '9f92a04ba56d5ec0d482a34813bb17d348392701',
   'test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart': '78bdb558bc46332a0c4dcac3103f9b1500c21c44',
+};
+// The completed maintenance is immutable. This correction is a separate step.
+const _r10FixtureMaintenanceCommit = '47621d5b8a19ce88902bba4fa0d00e7393ac402d';
+const _r10CuiPath = 'test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart';
+const _r10HistoricalMaintenanceGuardBlobs = <String, String>{
+  _r10CuiPath: 'aea8f8d53e2c75475e6f9836f98f593668dd5110',
+  ..._r10MaintenanceOtherGuardBlobs,
 };
 const _r10MaintenancePaths = <String>{
   cui2a0RoadmapPath,
@@ -1100,6 +1107,8 @@ String _r10SourceBlob(String source) {
 }
 Map<String, String>? _r10ApprovedMaintenanceGuardBlobs(Map<String, String> sources) {
   if (!_samePaths(sources.keys, cui2a1CompatibilityPaths)) return null;
+  final blobs = {for (final entry in sources.entries) entry.key: _r10SourceBlob(entry.value)};
+  if (_r10SameMap(blobs, _r10HistoricalMaintenanceGuardBlobs)) return blobs;
   const path = 'test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart';
   final source = sources[path]!;
   final marker = RegExp(r"^const _r10MaintenanceCuiFingerprint = '[a-f0-9]{40}';$", multiLine: true);
@@ -1109,7 +1118,6 @@ Map<String, String>? _r10ApprovedMaintenanceGuardBlobs(Map<String, String> sourc
   final canonical = source.replaceRange(anchors.single.start, anchors.single.end,
     "const _r10MaintenanceCuiFingerprint = '0000000000000000000000000000000000000000';");
   if (_r10SourceBlob(canonical) != _r10MaintenanceCuiFingerprint) return null;
-  final blobs = {for (final entry in sources.entries) entry.key: _r10SourceBlob(entry.value)};
   if (!_r10MaintenanceOtherGuardBlobs.entries.every((e) => blobs[e.key] == e.value)) return null;
   return blobs;
 }
@@ -1169,16 +1177,67 @@ bool _maintenanceChangesExact(List<({String path, String status})> changes) =>
   _samePaths(changes.map((c) => c.path), _r10MaintenancePaths) &&
   changes.every((c) => c.status == 'M');
 
+// Owner-authorized CUI-only repair at the fixed completed-maintenance anchor.
+// Source approval still requires the complete canonical fingerprint above.
+// Pending review and its one direct-child commit grant no production release.
+R10PresentationRecognition _classifyR10CuiFixtureCorrection(
+    _R10PresentationEvidence e, Map<String, String> approvedGuards,
+    Map<String, String> uiBlobs) {
+  const reject = R10PresentationRecognition(R10PresentationStage.rejected);
+  if (!_samePaths(approvedGuards.keys, cui2a1CompatibilityPaths) ||
+      !RegExp(r'^[a-f0-9]{40}$').hasMatch(approvedGuards[_r10CuiPath] ?? '') ||
+      approvedGuards[_r10CuiPath] == _r10HistoricalMaintenanceGuardBlobs[_r10CuiPath] ||
+      !_r10MaintenanceOtherGuardBlobs.entries.every((g) => approvedGuards[g.key] == g.value) ||
+      e.revisions.length < 2 || e.revisions[1].id != _r10FixtureMaintenanceCommit ||
+      !_r10SameMap(e.revisions[1].guards, _r10HistoricalMaintenanceGuardBlobs) ||
+      !_r10SameMap(uiBlobs, _r10MaintenanceUiBlobs) ||
+      !_samePaths(e.untracked, {..._cui2a1UntrackedPaths, _r10VisualPath})) return reject;
+  final index = _r10RawChanges(e.indexRaw), work = _r10RawChanges(e.workRaw);
+  if (index == null || index.isNotEmpty || work == null) return reject;
+  final checkpointWork = {..._cui2a1DirtyPaths,
+    ...r10PresentationPaths.where((p) => p != _r10VisualPath)};
+  if (work.any((c) => c.status != 'M') ||
+      !_samePaths(work.map((c) => c.path), {...checkpointWork,
+        if (e.head == _r10FixtureMaintenanceCommit) _r10CuiPath})) return reject;
+  bool onlyCui(List<({String path, String status})> changes) =>
+    changes.length == 1 && changes.single.path == _r10CuiPath && changes.single.status == 'M';
+  var projectedWork = e.workRaw;
+  if (e.head == _r10FixtureMaintenanceCommit) {
+    if (e.revisions.length != 2 || !onlyCui(work.where((c) => c.path == _r10CuiPath).toList())) return reject;
+    // Remove only the independently approved CUI delta; preserve every inventory entry.
+    projectedWork = _paths(e.workRaw).where((line) => line.split('\t').last != _r10CuiPath).join('\n');
+  } else {
+    if (e.revisions.length != 3 || work.any((c) => c.path == _r10CuiPath)) return reject;
+    final correction = e.revisions.last;
+    final changes = _r10RawChanges(correction.raw);
+    if (!RegExp(r'^[a-f0-9]{40}$').hasMatch(correction.id) ||
+        {r10PresentationEntry, r10FixtureMaintenanceEntry, _r10FixtureMaintenanceCommit}.contains(correction.id) ||
+        correction.id != e.head || correction.parents != _r10FixtureMaintenanceCommit ||
+        changes == null || !onlyCui(changes) ||
+        !_r10SameMap(correction.documents, _r10MaintenanceDocuments) ||
+        !_r10SameMap(correction.guards, approvedGuards)) return reject;
+  }
+  final base = _classifyR10FixtureMaintenance(_r10Probe(e,
+    head: _r10FixtureMaintenanceCommit, revisions: e.revisions.take(2).toList(),
+    workRaw: projectedWork), _r10HistoricalMaintenanceGuardBlobs, uiBlobs);
+  if (!base.compatible) return reject;
+  return R10PresentationRecognition(base.stage, base.observedAuthorizationCommit,
+    Map.unmodifiable(approvedGuards), base.maintenanceState, base.observedMaintenanceCommit);
+}
+
 R10PresentationRecognition _recognizeR10FixtureMaintenance(_R10PresentationEvidence evidence) {
   const reject = R10PresentationRecognition(R10PresentationStage.rejected);
   final guards = _r10ApprovedMaintenanceGuardBlobs({
     for (final path in cui2a1CompatibilityPaths) path: _r10Read(path),
   });
   if (guards == null) return reject;
-  return _classifyR10FixtureMaintenance(evidence, guards, {
+  final ui = {
     for (final path in r10PresentationPaths)
       path: _git(['hash-object', '--no-filters', '--', path]).trim(),
-  });
+  };
+  return _r10SameMap(guards, _r10HistoricalMaintenanceGuardBlobs)
+    ? _classifyR10FixtureMaintenance(evidence, guards, ui)
+    : _classifyR10CuiFixtureCorrection(evidence, guards, ui);
 }
 String get r10PresentationCurrentAppend =>
   r10PresentationAppend + (recognizeR10PresentationStage().maintenanceState == 'none'
@@ -1199,32 +1258,48 @@ String compatibleR10FixtureMaintenanceHardenSource(String historical) =>
   compatibleR10FixtureMaintenanceHardenSourceFromPresentation(compatibleR10PresentationHardenSource(historical));
 
 void _registerR10FixtureMaintenanceTests() {
-  final pending = _collectR10PresentationEvidence();
   final sources = {for (final path in cui2a1CompatibilityPaths) path: _r10Read(path)};
-  final guards = _r10ApprovedMaintenanceGuardBlobs(sources)!;
+  const guards = _r10HistoricalMaintenanceGuardBlobs;
+  final uiWork = _cui2a1DirtyPaths.followedBy(r10PresentationPaths.where((p) => p != _r10VisualPath))
+    .map((p) => _r10ProbeRaw(p)).join();
   final raw = _r10MaintenancePaths.map((p) => _r10ProbeRaw(p)).join();
+  // Historical evidence is independent of live HEAD, index and working inventory.
+  final pending = _R10PresentationEvidence(
+    branch: 'main', head: r10FixtureMaintenanceEntry, entry: _r10PresentationEntryRevision,
+    revisions: [_r10Revision(r10FixtureMaintenanceEntry, r10PresentationEntry)],
+    sources: _r10MaintenanceSources, protected: _cui2a1ProtectedBlobs,
+    indexRaw: '', workRaw: uiWork + raw,
+    untracked: [..._cui2a1UntrackedPaths, _r10VisualPath]);
   // Synthetic commits below are in-memory adversarial fixtures, never authority pins.
-  final maintenance = _R10Revision('c' * 40, r10FixtureMaintenanceEntry, raw,
+  final maintenance = _R10Revision(_r10FixtureMaintenanceCommit, r10FixtureMaintenanceEntry, raw,
     _r10MaintenanceDocuments, guards);
   final committed = _r10Probe(pending, head: maintenance.id,
     revisions: [pending.revisions.first, maintenance],
-    workRaw: _cui2a1DirtyPaths.followedBy(r10PresentationPaths.where((p) => p != _r10VisualPath))
-      .map((p) => _r10ProbeRaw(p)).join());
+    workRaw: uiWork);
   R10PresentationRecognition recognize(_R10PresentationEvidence e,
       {Map<String, String>? ui}) => _classifyR10FixtureMaintenance(e, guards, ui ?? _r10MaintenanceUiBlobs);
   const no = R10PresentationStage.rejected;
-  test('R10 fixture maintenance live pending review preserves UI and grants no release', () {
-    final live = recognizeR10PresentationStage();
-    expect(live.compatible, isTrue);
-    expect(live.stage, R10PresentationStage.boundedUi);
-    expect(live.maintenanceState, 'pendingReview');
-    expect(live.observedMaintenanceCommit, isNull);
-    expect(live.productionExecutionAuthorized, isFalse);
-    expect(live.separateOwnerUiReleaseRequired, isTrue);
+  test('R10 fixture maintenance historical pending review preserves UI and grants no release', () {
+    final historical = recognize(pending);
+    expect(historical.compatible, isTrue);
+    expect(historical.stage, R10PresentationStage.boundedUi);
+    expect(historical.maintenanceState, 'pendingReview');
+    expect(historical.observedMaintenanceCommit, isNull);
+    expect(historical.productionExecutionAuthorized, isFalse);
+    expect(historical.separateOwnerUiReleaseRequired, isTrue);
     expect(recognize(pending).maintenanceState, 'pendingReview');
     final original = _r10Probe(committed, head: r10FixtureMaintenanceEntry,
       revisions: [pending.revisions.first], sources: _r10PresentationSources);
     expect(_classifyR10Presentation(original).stage, R10PresentationStage.boundedUi);
+  });
+  test('R10 fixture maintenance live committed composition is independently recognized', () {
+    final live = recognizeR10PresentationStage();
+    expect(live.stage, R10PresentationStage.boundedUi);
+    expect(live.maintenanceState, 'committed');
+    expect(live.observedMaintenanceCommit, _r10FixtureMaintenanceCommit);
+    expect(live.observedAuthorizationCommit, r10FixtureMaintenanceEntry);
+    expect(live.productionExecutionAuthorized, isFalse);
+    expect(live.separateOwnerUiReleaseRequired, isTrue);
   });
   test('R10 historical fixture inventory stays literal and rejects the UI test', () {
     expect(hasFrozenCui2a1FixtureBoundary(), isTrue);
@@ -1319,6 +1394,129 @@ void _registerR10FixtureMaintenanceTests() {
     expect(recognize(_r10Probe(committed, revisions: [pending.revisions.first,
       _r10RevisionProbe(maintenance, documents: _r10PresentationDocuments)])).stage, no);
     expect(recognize(_r10Probe(committed, branch: 'other')).stage, no);
+  });
+  final correctedGuards = _r10ApprovedMaintenanceGuardBlobs(sources)!;
+  final correctionPending = _r10Probe(committed,
+    workRaw: committed.workRaw + _r10ProbeRaw(_r10CuiPath));
+  final correction = _R10Revision('f' * 40, _r10FixtureMaintenanceCommit,
+    _r10ProbeRaw(_r10CuiPath), _r10MaintenanceDocuments, correctedGuards);
+  final correctionCommitted = _r10Probe(committed, head: correction.id,
+    revisions: [...committed.revisions, correction]);
+  R10PresentationRecognition corrected(_R10PresentationEvidence e,
+      {Map<String, String>? candidateSources, Map<String, String>? ui}) {
+    final approved = _r10ApprovedMaintenanceGuardBlobs(candidateSources ?? sources);
+    return approved == null ? const R10PresentationRecognition(R10PresentationStage.rejected)
+      : _classifyR10CuiFixtureCorrection(e, approved, ui ?? _r10MaintenanceUiBlobs);
+  }
+  test('R10 CUI correction preserves the exact historical source and fingerprint oracle', () {
+    final historicalSources = {...sources,
+      _r10CuiPath: _git(['cat-file', 'blob', guards[_r10CuiPath]!])};
+    expect(_r10ApprovedMaintenanceGuardBlobs(historicalSources), guards);
+    expect(correctedGuards[_r10CuiPath], isNot(guards[_r10CuiPath]));
+    for (final entry in _r10MaintenanceOtherGuardBlobs.entries) {
+      expect(correctedGuards[entry.key], entry.value);
+    }
+    for (final base in [correctionPending, correctionCommitted]) {
+      for (final entry in sources.entries) {
+        expect(corrected(base, candidateSources: {...sources,
+          entry.key: entry.value + '\n// unauthorized correction\n'}).stage, no);
+      }
+    }
+  });
+  test('R10 CUI correction exact unstaged candidate preserves committed maintenance without release', () {
+    final result = corrected(correctionPending);
+    expect(result.stage, R10PresentationStage.boundedUi);
+    expect(result.maintenanceState, 'committed');
+    expect(result.observedMaintenanceCommit, _r10FixtureMaintenanceCommit);
+    expect(result.observedGuardBlobs, correctedGuards);
+    expect(result.productionExecutionAuthorized, isFalse);
+    expect(result.separateOwnerUiReleaseRequired, isTrue);
+    expect(corrected(pending).stage, no);
+    expect(corrected(committed).stage, no); // Corrected source cannot masquerade as the old tree.
+  });
+  test('R10 CUI correction exact direct child remains testable independently of live HEAD', () {
+    final result = corrected(correctionCommitted);
+    expect(result.stage, R10PresentationStage.boundedUi);
+    expect(result.maintenanceState, 'committed');
+    expect(result.observedMaintenanceCommit, _r10FixtureMaintenanceCommit);
+    expect(result.observedGuardBlobs, correctedGuards);
+    expect(result.productionExecutionAuthorized, isFalse);
+    expect(result.separateOwnerUiReleaseRequired, isTrue);
+    expect(corrected(_r10Probe(correctionCommitted,
+      workRaw: correctionPending.workRaw)).stage, no);
+  });
+  test('R10 CUI correction rejects authorization protected UI and independent inventory drift', () {
+    for (final base in [correctionPending, correctionCommitted]) {
+      expect(corrected(_r10Probe(base, branch: 'other')).stage, no);
+      expect(corrected(_r10Probe(base, nonRegularPaths: {_r10CuiPath})).stage, no);
+      for (final entry in _r10MaintenanceSources.entries) {
+        expect(corrected(_r10Probe(base, sources: {...base.sources,
+          entry.key: entry.value + '\nunauthorized'})).stage, no);
+        expect(corrected(_r10Probe(base,
+          sources: Map.from(base.sources)..remove(entry.key))).stage, no);
+      }
+      expect(corrected(_r10Probe(base, sources: {...base.sources, cui2a0RoadmapPath:
+        base.sources[cui2a0RoadmapPath]!.replaceFirst(
+          'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO', 'COMMERCIAL_IMPLEMENTATION_AUTHORIZED: YES')})).stage, no);
+      for (final entry in _cui2a1ProtectedBlobs.entries) {
+        expect(corrected(_r10Probe(base,
+          protected: {...base.protected, entry.key: '0' * 40})).stage, no);
+      }
+      for (final entry in _r10MaintenanceUiBlobs.entries) {
+        expect(corrected(base, ui: {..._r10MaintenanceUiBlobs, entry.key: '0' * 40}).stage, no);
+      }
+      for (final path in ['test/unauthorized_test.dart', _r10VisualPath + '.bak',
+        'docs/unauthorized.md', 'supabase/config.toml',
+        ..._r10MaintenanceOtherGuardBlobs.keys, cui2a0RoadmapPath]) {
+        expect(corrected(_r10Probe(base, untracked: [...base.untracked, path])).stage, no);
+        expect(corrected(_r10Probe(base, workRaw: base.workRaw + _r10ProbeRaw(path))).stage, no);
+      }
+      for (final path in [_r10CuiPath, ...r10PresentationPaths, cui2a0RoadmapPath]) {
+        expect(corrected(_r10Probe(base, indexRaw: _r10ProbeRaw(path))).stage, no);
+      }
+      expect(corrected(_r10Probe(base,
+        untracked: base.untracked.where((p) => p != _r10VisualPath).toList())).stage,
+        no);
+      expect(corrected(_r10Probe(base,
+        untracked: base.untracked.where((p) => p != _cui2a1UntrackedPaths.first).toList())).stage, no);
+      for (final parent in [r10PresentationEntry, r10FixtureMaintenanceEntry + ' ' + 'a' * 40]) {
+        expect(corrected(_r10Probe(base, revisions: [base.revisions.first,
+          _r10RevisionProbe(maintenance, parents: parent), ...base.revisions.skip(2)])).stage, no);
+      }
+      for (final path in cui2a1CompatibilityPaths) {
+        expect(corrected(_r10Probe(base, revisions: [base.revisions.first,
+          _r10RevisionProbe(maintenance, guards: {...guards, path: '0' * 40}),
+          ...base.revisions.skip(2)])).stage, no);
+      }
+    }
+  });
+  test('R10 CUI correction rejects extra paths modes source mismatches and unrelated successors', () {
+    for (final raw in ['', _r10ProbeRaw(_r10CuiPath) + _r10ProbeRaw(_r10CuiPath),
+      _r10ProbeRaw(_r10CuiPath) + _r10ProbeRaw(cui2a0RoadmapPath),
+      for (final status in ['A', 'D', 'T', 'R100']) _r10ProbeRaw(_r10CuiPath, status: status),
+      _r10ProbeRaw(_r10CuiPath, newMode: '100755'),
+      _r10ProbeRaw(_r10CuiPath, newMode: '120000')]) {
+      expect(corrected(_r10Probe(correctionPending, workRaw: uiWork + raw)).stage, no);
+      expect(corrected(_r10Probe(correctionCommitted,
+        revisions: [...committed.revisions, _r10RevisionProbe(correction, raw: raw)])).stage, no);
+    }
+    for (final parent in [r10FixtureMaintenanceEntry,
+      _r10FixtureMaintenanceCommit + ' ' + 'a' * 40]) {
+      expect(corrected(_r10Probe(correctionCommitted, revisions: [...committed.revisions,
+        _r10RevisionProbe(correction, parents: parent)])).stage, no);
+    }
+    for (final path in cui2a1CompatibilityPaths) {
+      expect(corrected(_r10Probe(correctionCommitted, revisions: [...committed.revisions,
+        _r10RevisionProbe(correction, guards: {...correctedGuards, path: '0' * 40})])).stage, no);
+    }
+    expect(corrected(_r10Probe(correctionCommitted, revisions: [...committed.revisions,
+      _r10RevisionProbe(correction, documents: _r10PresentationDocuments)])).stage, no);
+    expect(corrected(_r10Probe(correctionPending, head: 'e' * 40)).stage, no);
+    final unrelated = _R10Revision('e' * 40, correction.id, _r10ProbeRaw(_r10CuiPath),
+      _r10MaintenanceDocuments, correctedGuards);
+    expect(corrected(_r10Probe(correctionCommitted, head: unrelated.id,
+      revisions: [...correctionCommitted.revisions, unrelated])).stage, no);
+    expect(corrected(_r10Probe(correctionCommitted, head: _r10FixtureMaintenanceCommit)).stage, no);
   });
 }
 
