@@ -5018,3 +5018,36 @@ First validate the repaired historical assertion. Then run CUI-2A0, HARDEN1, M1B
 Independent Big Pickle High acceptance is required. Any substitute requires a newly explicit Owner decision naming and scoping it. Final Owner acceptance and separate Git authorization are required; no staging/commit/push is granted here. After accepted maintenance closure, guards and documents are again immutable during ordinary UI work. The analyzer Enum failure remains NOT PASS; Android Owner visual acceptance and native iPhone QA remain separate gates.
 
 STOP for a genuinely required frozen-contract amendment, insecure transition, weakened historical protection, unexpected drift, failed mandatory validation/review or another native compiler/runtime crash. Preserve existing crash evidence. No automatic next-slice advancement.
+
+# V1-R10.5-D ACCEPTANCE EVIDENCE / TOOLING DISPOSITION STATUS — 2026-10-22
+
+The original Master Roadmap remains the phase/status authority. This record preserves all preceding bytes and frozen requirements. It records supplied Owner/Architect facts and prior evidence; it grants no implementation, final acceptance, Git publication or next-slice authority.
+
+R10.5-D_STATUS: CURRENT — EXISTING CANDIDATE UNDER ACCEPTANCE REVIEW / NOT CLOSED
+UI_CANDIDATE: FIVE MODIFIED PRESENTATION SCREENS + ONE UNTRACKED VISUAL TEST
+INDEPENDENT_UI_REVIEW: OWNER-REPORTED BIG PICKLE HIGH — PASS WITH NONBLOCKING FINDINGS / READY FOR OWNER ANDROID QA; NO HIGH OR MEDIUM IMPLEMENTATION DEFECTS REPORTED
+PREVIOUS_EVIDENCE: VISUAL 43/43; FUNCTIONAL 401/401; POST-CUI SECURITY 220/220; SEPARATE 2026-10-21 EMULATOR OBSERVATIONS 16/16 — ALL PREVIOUS PASS RESULTS, NOT RERUN FOR THIS RECORD
+OWNER_VISUAL_APPROVAL: PROVISIONAL ONLY — NOT FINAL OWNER ACCEPTANCE
+ANALYZER_STATUS: NOT PASS — INTERNAL ANALYSIS TOOLING FAILURE
+FINAL_ARCHITECT_TOOLING_DISPOSITION: PENDING EXPLICIT ACCEPTANCE
+NATIVE_FLUTTER_DART_CRASH_ROOT_CAUSE: UNKNOWN
+R10.5-D-IOS-01: UNVERIFIED / REQUIRED BEFORE IOS LAUNCH
+ROADMAP_UI_CLOSURE: NOT COMPLETED
+UI_GIT_CLOSURE: NOT COMPLETED
+PRODUCTION_EXECUTION_AUTHORIZED: NO
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+R10.5-E: LOCKED / NOT AUTHORIZED
+COMMIT_PUSH_AUTHORIZED: NO
+
+Owner provisional visual approval covers Profile, User Area, Profile Setup and Local Profile Edit on Pixel_9_Pro, Android 17/API 37. Future observations remain open and are not presumed cosmetic. Authenticated Profile Edit has independent code-review and previous widget evidence, but authenticated/cloud emulator runtime inspection was unavailable because the QA launch lacked configured Supabase. This is an evidence limitation, not an established cloud-feature defect.
+
+LOW findings: F1/F2 — Architect recommends deferring protected-test hygiene; Owner approval of that recommendation remains pending. F3 — existing roadmap UI pins establish checkpoint provenance, not final committed UI closure. F4 — representative responsive combinations are permitted by frozen contract §E; required assertions remain mandatory.
+
+Frozen §§G/P and the conditional execution record permit an explicit Architect tooling disposition. Proposed alternative, not yet accepted: retain Analyzer NOT PASS; accept only a bounded alternative evidence package for the exact reviewed candidate and toolchain, comprising independent review, successful Android compilation, preserved visual/functional/security results and emulator observations. Accept explicitly the residual absence of complete analyzer diagnostics, lint coverage and a verified no-new-diagnostics comparison. Tests and compilation do not prove analyzer cleanliness or resolve native crashes.
+
+Final acceptance still requires explicit tooling disposition or separately authorized successful analysis, LOW-finding dispositions, completion or formally authorized adjudication of outstanding §H Android evidence, final Owner visual acceptance and final Architect acceptance. UI Git closure requires separate Owner authority and actual resulting identities. No emulator evidence certifies physical Android or native iPhone readiness.
+
+Separate observations: Home image HTTP 404 responses, debug-emulator startup skipped-frame warnings and Android OnBackInvokedCallback warnings. No R10.5-D blocking attribution or root cause is established for them.
+
+Arabic-only RTL remains active. No frozen requirement, protected identity, Auth/Supabase authority, commercial restriction or later-slice lock is waived.
