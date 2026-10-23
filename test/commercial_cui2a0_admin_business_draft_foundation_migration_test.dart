@@ -836,9 +836,12 @@ class R10PresentationRecognition {
   final String? observedMaintenanceCommit;
   final String decisionState;
   final String? observedDecisionCommit;
+  final String toolingDispositionState;
+  final String? observedToolingDispositionCommit;
   const R10PresentationRecognition(this.stage, [this.observedAuthorizationCommit,
     this.observedGuardBlobs = const {}, this.maintenanceState = 'none',
-    this.observedMaintenanceCommit, this.decisionState = 'none', this.observedDecisionCommit]);
+    this.observedMaintenanceCommit, this.decisionState = 'none', this.observedDecisionCommit,
+    this.toolingDispositionState = 'none', this.observedToolingDispositionCommit]);
   bool get compatible => stage != R10PresentationStage.rejected;
   bool get committedAuthorityObserved => observedAuthorizationCommit != null;
   // Git proves composition, never the separate human UI-release instruction.
@@ -1002,7 +1005,9 @@ R10PresentationRecognition recognizeR10PresentationStage() {
     final original = _classifyR10Presentation(evidence);
     if (original.compatible) return original;
     final maintenance = _recognizeR10FixtureMaintenance(evidence);
-    return maintenance.compatible ? maintenance : _recognizeR10DecisionRecord(evidence);
+    if (maintenance.compatible) return maintenance;
+    final decision = _recognizeR10DecisionRecord(evidence);
+    return decision.compatible ? decision : _recognizeR10ToolingDisposition(evidence);
   } on Object {
     return reject; // Missing objects, paths, malformed UTF-8 and Git failures fail closed.
   }
@@ -1249,7 +1254,8 @@ String get r10PresentationCurrentAppend {
   final recognition = recognizeR10PresentationStage();
   return r10PresentationAppend + (recognition.maintenanceState == 'none'
     ? '' : r10FixtureMaintenanceAppend) + (recognition.decisionState == 'none'
-      ? '' : r10DecisionRecordAppend);
+      ? '' : r10DecisionRecordAppend) + (recognition.toolingDispositionState == 'none'
+        ? '' : r10ToolingDispositionAppend);
 }
 
 const r10FixtureMaintenanceHardenEdits = <(String, String)>[
@@ -1396,8 +1402,402 @@ R10PresentationRecognition _recognizeR10DecisionRecord(_R10PresentationEvidence 
       path: _git(['hash-object', '--no-filters', '--', path]).trim(),
   });
 }
-void _registerR10DecisionRecordTests() {
+
+// Exact tooling-disposition persistence; historical decision oracles stay fixed.
+const _r10ToolingEntry = '6c7ddb307f6729181ed86ae9fe6cc4b1561bc167';
+const _r10ToolingCuiFingerprint = '929172b9eaeb2d21722634c1210ca148872e0580';
+const _r10ToolingRoadmapRawBlob = '85f200c2190034e571d8712a4dbe027a397be286';
+const _r10ToolingEntryGuardBlobs = <String, String>{
+  _r10CuiPath: '16aaa1170b75fb3ad381100be0ca75205d4f7aed',
+  ..._r10MaintenanceOtherGuardBlobs,
+};
+const _r10ToolingPaths = <String>{cui2a0RoadmapPath, _r10CuiPath};
+const r10ToolingDispositionAppend = '\n' r'''
+# V1-R10.5-D ARCHITECT LIMITED ALTERNATIVE TOOLING DISPOSITION — 2026-10-23
+
+Authority: the Owner-forwarded Architect decision accepts the bounded alternative evidence below under frozen contract §§G/P. This subsequent record changes only the pending Architect tooling-disposition state in the preserved October 22 record. Every other requirement and acceptance gate remains intact.
+
+R10.5-D_ARCHITECT_TOOLING_DISPOSITION: LIMITED ALTERNATIVE ACCEPTED FOR THE EXISTING REVIEWED UI CANDIDATE ONLY
+ANALYZER_STATUS: NOT PASS — INTERNAL ANALYSIS TOOLING FAILURE
+RECORDED_ANALYZER_FAILURE: Bad state: No definition of type Enum.
+RECORDED_ANALYZER_EXITS: flutter analyze exit 1; Analysis Server exit 255
+RECORDED_TOOLING_BASELINE: Flutter 3.32.8; Dart 3.8.1
+FAILURE_TRIGGER: NOT ESTABLISHED
+HISTORICAL_NATIVE_CRASH_ROOT_CAUSE: UNKNOWN
+
+The accepted package applies only to the exact six raw UI checkpoint identities preserved in the October 18 maintenance record, with all eight frozen §O identities preserved, at the recorded tooling baseline. Previous evidence: independent ordinary UI review PASS WITH NONBLOCKING FINDINGS; successful Android debug build and installation of that candidate; visual 43/43 PASS; functional 401/401 PASS; accepted security evidence including 231/231 across the October 22–23 sessions and independent governance-checkpoint verification; and October 21 Android emulator technical observations 16/16 PASS. These are previously collected results, not tests rerun by this record. Governance provenance is the published checkpoint 6c7ddb307f6729181ed86ae9fe6cc4b1561bc167; it does not establish committed UI closure.
+
+Recent bounded emulator and test-session observations reported no newly observed native Flutter/Dart crash. This observation establishes neither the analyzer failure trigger nor the historical native-crash root cause.
+
+Residual limitations accepted explicitly: no complete analyzer diagnostic result; no verified zero-new-diagnostics comparison; and no complete lint coverage from the failed analysis. Missing diagnostics are not evidence that Civilpedia source is analyzer-clean. This disposition does not prove the application is free of defects. Future UI source changes require their own validation. This is a candidate-specific acceptance decision, not an Analyzer PASS or a blanket waiver for future phases.
+
+OWNER_VISUAL_APPROVAL: PROVISIONAL ONLY
+AUTHENTICATED_CLOUD_RUNTIME: UNVERIFIED — UNCONFIGURED SUPABASE EMULATOR LAUNCH
+F1_F2_OWNER_FINDING_DISPOSITION: PENDING
+R10.5-D: NOT CLOSED
+UI_GIT_CLOSURE: NOT COMPLETED
+R10.5-D-IOS-01: UNVERIFIED / REQUIRED BEFORE IOS RELEASE
+R10.5-E_AND_LATER_SLICES: LOCKED / NOT AUTHORIZED
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+PRODUCTION_EXECUTION_AUTHORIZED: NO
+STAGE_COMMIT_PUSH_AUTHORIZED_BY_THIS_TASK: NO
+CIVILPEDIA_V1: ARABIC-ONLY RTL
+
+Owner provisional review covers Profile, User Area, Profile Setup and Local Profile Edit, with future observations reserved. Authenticated Profile Edit retains independent review and previous widget evidence; unavailable authenticated/cloud runtime inspection is a verification limitation, not an established defect.
+
+F1/F2 remain the Architect's recommendation to defer protected-test hygiene, awaiting the Owner's separate disposition. F3 hashes establish prior checkpoint provenance, not final UI Git closure. F4 representative responsive combinations remain permitted by frozen §E, with its required assertions preserved. Final Owner/Architect acceptance, outstanding Android evidence and separately authorized UI Git closure remain separate gates.
+''';
+final _r10ToolingSources = <String, String>{
+  ..._r10DecisionSources,
+  cui2a0RoadmapPath: _r10DecisionSources[cui2a0RoadmapPath]! + r10ToolingDispositionAppend,
+};
+final _r10ToolingDocuments = <String, String>{
+  for (final e in _r10ToolingSources.entries)
+    if (e.key.startsWith('docs/')) e.key: e.value,
+};
+Map<String, String>? _r10ApprovedToolingGuardBlobs(Map<String, String> sources) {
+  if (!_samePaths(sources.keys, cui2a1CompatibilityPaths)) return null;
+  final source = sources[_r10CuiPath]!;
+  final marker = RegExp(r"^const _r10ToolingCuiFingerprint = '[a-f0-9]{40}';$", multiLine: true);
+  final anchors = marker.allMatches(source).toList();
+  final declaration = "const _r10ToolingCuiFingerprint = '$_r10ToolingCuiFingerprint';";
+  if (anchors.length != 1 || anchors.single.group(0) != declaration) return null;
+  final canonical = source.replaceRange(anchors.single.start, anchors.single.end,
+    "const _r10ToolingCuiFingerprint = '0000000000000000000000000000000000000000';");
+  if (_r10SourceBlob(canonical) != _r10ToolingCuiFingerprint) return null;
+  final blobs = {for (final e in sources.entries) e.key: _r10SourceBlob(e.value)};
+  if (!_r10MaintenanceOtherGuardBlobs.entries.every((e) => blobs[e.key] == e.value) ||
+      blobs[_r10CuiPath] == _r10ToolingEntryGuardBlobs[_r10CuiPath]) return null;
+  return blobs;
+}
+R10PresentationRecognition _classifyR10ToolingDisposition(
+    _R10PresentationEvidence e, Map<String, String> approvedGuards,
+    Map<String, String> uiBlobs) {
+  const reject = R10PresentationRecognition(R10PresentationStage.rejected);
+  if (e.branch != 'main' || e.nonRegularPaths.isNotEmpty ||
+      e.roadmapRawBlob != _r10ToolingRoadmapRawBlob ||
+      !_r10SameMap(e.sources, _r10ToolingSources) ||
+      !_r10SameMap(e.protected, _cui2a1ProtectedBlobs) ||
+      !_r10SameMap(uiBlobs, _r10MaintenanceUiBlobs) ||
+      !_samePaths(e.untracked, {..._cui2a1UntrackedPaths, _r10VisualPath}) ||
+      !_samePaths(approvedGuards.keys, cui2a1CompatibilityPaths) ||
+      !_r10MaintenanceOtherGuardBlobs.entries.every((g) => approvedGuards[g.key] == g.value) ||
+      !RegExp(r'^[a-f0-9]{40}$').hasMatch(approvedGuards[_r10CuiPath] ?? '') ||
+      {_r10HistoricalMaintenanceGuardBlobs[_r10CuiPath],
+        _r10DecisionEntryGuardBlobs[_r10CuiPath],
+        _r10ToolingEntryGuardBlobs[_r10CuiPath]}.contains(approvedGuards[_r10CuiPath])) return reject;
+  final pending = e.head == _r10ToolingEntry;
+  if (e.revisions.length != (pending ? 4 : 5) ||
+      e.revisions[3].id != _r10ToolingEntry) return reject;
+  final work = _r10RawChanges(e.workRaw), index = _r10RawChanges(e.indexRaw);
+  final checkpoint = {..._cui2a1DirtyPaths,
+    ...r10PresentationPaths.where((p) => p != _r10VisualPath)};
+  if (work == null || index == null || index.isNotEmpty ||
+      work.any((c) => c.status != 'M') ||
+      !_samePaths(work.map((c) => c.path),
+        {...checkpoint, if (pending) ..._r10ToolingPaths})) return reject;
+  if (!pending) {
+    final tooling = e.revisions.last;
+    final changes = _r10RawChanges(tooling.raw);
+    if (!RegExp(r'^[a-f0-9]{40}$').hasMatch(tooling.id) ||
+        tooling.id == '0' * 40 || tooling.id != e.head ||
+        {r10PresentationEntry, ...e.revisions.take(4).map((r) => r.id)}.contains(tooling.id) ||
+        tooling.parents != _r10ToolingEntry || changes == null ||
+        !_samePaths(changes.map((c) => c.path), _r10ToolingPaths) ||
+        changes.any((c) => c.status != 'M') ||
+        !_r10SameMap(tooling.documents, _r10ToolingDocuments) ||
+        !_r10SameMap(tooling.guards, approvedGuards)) return reject;
+  }
+  // Only the independently validated documentary pair is removed. Every old
+  // revision, source pin, protected byte and untracked entry remains checked.
+  final priorWork = _paths(e.workRaw).where((line) =>
+    !_r10ToolingPaths.contains(line.split('\t').last)).join('\n');
+  final predecessor = _r10Probe(e, head: _r10ToolingEntry,
+    revisions: e.revisions.take(4).toList(), sources: _r10DecisionSources,
+    workRaw: priorWork, roadmapRawBlob: _r10DecisionRoadmapRawBlob);
+  final base = _classifyR10DecisionRecord(predecessor,
+    _r10ToolingEntryGuardBlobs, uiBlobs);
+  if (!base.compatible || base.decisionState != 'committed' ||
+      base.observedDecisionCommit != _r10ToolingEntry) return reject;
+  return R10PresentationRecognition(base.stage, base.observedAuthorizationCommit,
+    Map.unmodifiable(approvedGuards), base.maintenanceState,
+    base.observedMaintenanceCommit, base.decisionState, base.observedDecisionCommit,
+    pending ? 'pendingReview' : 'committed', pending ? null : e.head);
+}
+R10PresentationRecognition _recognizeR10ToolingDisposition(_R10PresentationEvidence evidence) {
+  final guards = _r10ApprovedToolingGuardBlobs({
+    for (final path in cui2a1CompatibilityPaths) path: _r10Read(path),
+  });
+  if (guards == null) return const R10PresentationRecognition(R10PresentationStage.rejected);
+  return _classifyR10ToolingDisposition(evidence, guards, {
+    for (final path in r10PresentationPaths)
+      path: _git(['hash-object', '--no-filters', '--', path]).trim(),
+  });
+}
+void _registerR10ToolingDispositionTests() {
   final sources = {for (final path in cui2a1CompatibilityPaths) path: _r10Read(path)};
+  final guards = _r10ApprovedToolingGuardBlobs(sources)!;
+  final uiWork = _cui2a1DirtyPaths.followedBy(r10PresentationPaths.where((p) => p != _r10VisualPath))
+    .map((p) => _r10ProbeRaw(p)).join();
+  final pair = _r10ToolingPaths.map((p) => _r10ProbeRaw(p)).join();
+  final pending = _R10PresentationEvidence(
+    branch: 'main', head: _r10ToolingEntry, entry: _r10PresentationEntryRevision,
+    revisions: [
+      _r10Revision(r10FixtureMaintenanceEntry, r10PresentationEntry),
+      _r10Revision(_r10FixtureMaintenanceCommit, r10FixtureMaintenanceEntry),
+      _r10Revision(_r10DecisionEntry, _r10FixtureMaintenanceCommit),
+      _r10Revision(_r10ToolingEntry, _r10DecisionEntry),
+    ], sources: _r10ToolingSources, protected: _cui2a1ProtectedBlobs,
+    indexRaw: '', workRaw: uiWork + pair,
+    untracked: [..._cui2a1UntrackedPaths, _r10VisualPath],
+    roadmapRawBlob: _r10ToolingRoadmapRawBlob);
+  // This is an in-memory fixture, never a future commit authority pin.
+  final tooling = _R10Revision('b' * 40, _r10ToolingEntry, pair,
+    _r10ToolingDocuments, guards);
+  final committed = _r10Probe(pending, head: tooling.id,
+    revisions: [...pending.revisions, tooling], workRaw: uiWork);
+  R10PresentationRecognition recognize(_R10PresentationEvidence e,
+      {Map<String, String>? candidateSources, Map<String, String>? ui}) {
+    final approved = candidateSources == null ? guards
+      : _r10ApprovedToolingGuardBlobs(candidateSources);
+    return approved == null ? const R10PresentationRecognition(R10PresentationStage.rejected)
+      : _classifyR10ToolingDisposition(e, approved, ui ?? _r10MaintenanceUiBlobs);
+  }
+  const no = R10PresentationStage.rejected;
+  test('R10 tooling preserves fixed decision and maintenance source oracles', () {
+    final entrySources = {for (final e in _r10ToolingEntryGuardBlobs.entries)
+      e.key: _git(['cat-file', 'blob', e.value])};
+    expect(_r10ApprovedDecisionGuardBlobs(entrySources), _r10ToolingEntryGuardBlobs);
+    expect(_r10ApprovedDecisionGuardBlobs(sources), isNull);
+    expect(_r10ApprovedMaintenanceGuardBlobs(sources), isNull);
+    expect(_r10ApprovedToolingGuardBlobs(entrySources), isNull);
+    expect(_git(['rev-parse', _r10ToolingEntry + ':' + cui2a0RoadmapPath]).trim(),
+      _r10DecisionRoadmapRawBlob);
+    expect(_git(['rev-parse', _r10ToolingEntry + ':' + _r10CuiPath]).trim(),
+      _r10ToolingEntryGuardBlobs[_r10CuiPath]);
+  });
+  test('R10 tooling exact pending pair preserves decision provenance without release', () {
+    final result = recognize(pending);
+    expect(result.stage, R10PresentationStage.boundedUi);
+    expect(result.toolingDispositionState, 'pendingReview');
+    expect(result.observedToolingDispositionCommit, isNull);
+    expect(result.decisionState, 'committed');
+    expect(result.observedDecisionCommit, _r10ToolingEntry);
+    expect(result.productionExecutionAuthorized, isFalse);
+    expect(result.separateOwnerUiReleaseRequired, isTrue);
+  });
+  test('R10 tooling exact direct child remains documentary only', () {
+    final result = recognize(committed);
+    expect(result.stage, R10PresentationStage.boundedUi);
+    expect(result.toolingDispositionState, 'committed');
+    expect(result.observedToolingDispositionCommit, tooling.id);
+    expect(result.decisionState, 'committed');
+    expect(result.observedDecisionCommit, _r10ToolingEntry);
+    expect(result.productionExecutionAuthorized, isFalse);
+    expect(result.separateOwnerUiReleaseRequired, isTrue);
+  });
+  test('R10 tooling live exact append is recognized without Analyzer or execution PASS', () {
+    final result = recognizeR10PresentationStage();
+    expect(result.stage, R10PresentationStage.boundedUi);
+    expect(result.decisionState, 'committed');
+    expect(result.observedDecisionCommit, _r10ToolingEntry);
+    expect(result.toolingDispositionState, isIn(['pendingReview', 'committed']));
+    if (result.toolingDispositionState == 'pendingReview') {
+      expect(_git(['rev-parse', 'HEAD']).trim(), _r10ToolingEntry);
+      expect(result.observedToolingDispositionCommit, isNull);
+    } else {
+      expect(_git(['rev-parse', 'HEAD^']).trim(), _r10ToolingEntry);
+      expect(result.observedToolingDispositionCommit, _git(['rev-parse', 'HEAD']).trim());
+    }
+    expect(result.productionExecutionAuthorized, isFalse);
+    expect(result.separateOwnerUiReleaseRequired, isTrue);
+    expect(r10PresentationCurrentAppend, r10PresentationAppend +
+      r10FixtureMaintenanceAppend + r10DecisionRecordAppend + r10ToolingDispositionAppend);
+    expect(matchesR10PresentationDocuments(_r10Read(cui2a0RoadmapPath),
+      _r10Read(cui2a1ContractPath), _r10Read(ownerPlanningReadinessPath),
+      _r10Read(r10ContractPath)), isTrue);
+    expect(matchesR10PresentationDocuments(_r10DecisionSources[cui2a0RoadmapPath]!,
+      _r10Read(cui2a1ContractPath), _r10Read(ownerPlanningReadinessPath),
+      _r10Read(r10ContractPath)), isFalse);
+  });
+  test('R10 tooling rejects missing duplicate truncated extra and falsely expanded records', () {
+    final roadmap = _r10ToolingSources[cui2a0RoadmapPath]!;
+    for (final base in [pending, committed]) {
+      for (final e in _r10ToolingSources.entries) {
+        expect(recognize(_r10Probe(base, sources: {...base.sources,
+          e.key: e.value + '\nunauthorized'})).stage, no);
+        expect(recognize(_r10Probe(base,
+          sources: Map.from(base.sources)..remove(e.key))).stage, no);
+      }
+      for (final text in [
+        _r10DecisionSources[cui2a0RoadmapPath]!,
+        roadmap + r10ToolingDispositionAppend,
+        roadmap.substring(0, roadmap.length - 1),
+        roadmap + '\n# Forged authority\n',
+        roadmap.replaceFirst('ANALYZER_STATUS: NOT PASS', 'ANALYZER_STATUS: PASS'),
+        roadmap.replaceFirst('PRODUCTION_EXECUTION_AUTHORIZED: NO', 'PRODUCTION_EXECUTION_AUTHORIZED: YES'),
+        roadmap.replaceFirst('UI_GIT_CLOSURE: NOT COMPLETED', 'UI_GIT_CLOSURE: COMPLETED'),
+        roadmap.replaceFirst('LIMITED ALTERNATIVE ACCEPTED FOR THE EXISTING REVIEWED UI CANDIDATE ONLY',
+          'BLANKET ANALYZER WAIVER FOR ALL FUTURE PHASES'),
+      ]) {
+        expect(text, isNot(roadmap));
+        expect(recognize(_r10Probe(base,
+          sources: {...base.sources, cui2a0RoadmapPath: text})).stage, no);
+      }
+      expect(recognize(_r10Probe(base,
+        sources: {...base.sources, 'docs/forged.md': 'release'})).stage, no);
+      for (final blob in ['', _r10DecisionRoadmapRawBlob, '0' * 40]) {
+        expect(recognize(_r10Probe(base, roadmapRawBlob: blob)).stage, no);
+      }
+    }
+  });
+  test('R10 tooling rejects source drift wrong duplicate and historical fingerprint tampering', () {
+    for (final e in sources.entries) {
+      expect(_r10ApprovedToolingGuardBlobs({...sources,
+        e.key: e.value + '\n// unauthorized source\n'}), isNull);
+    }
+    final declaration = "const _r10ToolingCuiFingerprint = '$_r10ToolingCuiFingerprint';";
+    for (final replacement in ['', declaration + '\n' + declaration,
+      "const _r10ToolingCuiFingerprint = '0000000000000000000000000000000000000000';",
+      "const _r10ToolingCuiFingerprint = 'NOT_A_FINGERPRINT';"]) {
+      expect(_r10ApprovedToolingGuardBlobs({...sources, _r10CuiPath:
+        sources[_r10CuiPath]!.replaceFirst(declaration, replacement)}), isNull);
+    }
+    for (final declaration in [
+      "const _r10DecisionCuiFingerprint = '$_r10DecisionCuiFingerprint';",
+      "const _r10MaintenanceCuiFingerprint = '$_r10MaintenanceCuiFingerprint';",
+      "const _r10ToolingEntry = '$_r10ToolingEntry';",
+    ]) {
+      final changed = sources[_r10CuiPath]!.replaceFirst(declaration, '// unapproved historical pin');
+      expect(changed, isNot(sources[_r10CuiPath]));
+      expect(_r10ApprovedToolingGuardBlobs({...sources, _r10CuiPath: changed}), isNull);
+    }
+    expect(_r10ApprovedToolingGuardBlobs(Map.from(sources)..remove(_r10CuiPath)), isNull);
+  });
+  test('R10 tooling rejects staged extra duplicate and missing working paths', () {
+    for (final base in [pending, committed]) {
+      for (final path in {..._r10ToolingPaths, ...r10PresentationPaths,
+        'docs/forged.md', 'test/helper.dart', 'supabase/config.toml'}) {
+        expect(recognize(_r10Probe(base, indexRaw: _r10ProbeRaw(path))).stage, no);
+        expect(recognize(_r10Probe(base, workRaw: base.workRaw + _r10ProbeRaw(path))).stage, no);
+      }
+      for (final path in {..._cui2a1DirtyPaths,
+        ...r10PresentationPaths.where((p) => p != _r10VisualPath),
+        if (base.head == _r10ToolingEntry) ..._r10ToolingPaths}) {
+        expect(recognize(_r10Probe(base,
+          workRaw: base.workRaw.replaceFirst(_r10ProbeRaw(path), ''))).stage, no);
+      }
+    }
+  });
+  test('R10 tooling rejects addition deletion rename copy executable and symlink modes', () {
+    final invalid = [
+      '', pair + _r10ProbeRaw(cui2a0RoadmapPath),
+      for (final path in _r10ToolingPaths)
+        for (final status in ['A', 'D', 'T', 'R100', 'C100'])
+          pair.replaceFirst(_r10ProbeRaw(path), _r10ProbeRaw(path, status: status)),
+      for (final path in _r10ToolingPaths)
+        for (final mode in ['100755', '120000', '000000'])
+          pair.replaceFirst(_r10ProbeRaw(path), _r10ProbeRaw(path, newMode: mode)),
+      pair.replaceFirst(_r10ProbeRaw(_r10CuiPath),
+        _r10ProbeRaw(_r10CuiPath, oldMode: '100755')),
+      pair + _r10ProbeRaw('docs/forged.md'),
+      _r10ProbeRaw(cui2a0RoadmapPath),
+    ];
+    for (final raw in invalid) {
+      expect(recognize(_r10Probe(pending, workRaw: uiWork + raw)).stage, no);
+      expect(recognize(_r10Probe(committed, revisions: [...pending.revisions,
+        _r10RevisionProbe(tooling, raw: raw)])).stage, no);
+    }
+  });
+  test('R10 tooling rejects altered historical ancestry entry and revision counts', () {
+    for (final base in [pending, committed]) {
+      for (var i = 0; i < 4; i++) {
+        final revisions = base.revisions.toList();
+        revisions[i] = _r10RevisionProbe(revisions[i], parents: 'c' * 40);
+        expect(recognize(_r10Probe(base, revisions: revisions)).stage, no);
+        expect(recognize(_r10Probe(base,
+          revisions: [...base.revisions.take(i), ...base.revisions.skip(i + 1)])).stage, no);
+      }
+      expect(recognize(_r10Probe(base, head: '0' * 40)).stage, no);
+      expect(recognize(_r10Probe(base,
+        entry: _r10RevisionProbe(base.entry, parents: 'c' * 40))).stage, no);
+    }
+    for (final parent in [_r10DecisionEntry, _r10ToolingEntry + ' ' + 'c' * 40]) {
+      expect(recognize(_r10Probe(committed, revisions: [...pending.revisions,
+        _r10RevisionProbe(tooling, parents: parent)])).stage, no);
+    }
+    final wrongEntry = pending.revisions.toList();
+    wrongEntry[3] = _R10Revision('c' * 40, _r10DecisionEntry,
+      pending.revisions[3].raw, _r10DecisionDocuments, _r10ToolingEntryGuardBlobs);
+    expect(recognize(_r10Probe(pending, revisions: wrongEntry)).stage, no);
+  });
+  test('R10 tooling rejects committed source document and prior decision mutation', () {
+    for (final path in guards.keys) {
+      expect(recognize(_r10Probe(committed, revisions: [...pending.revisions,
+        _r10RevisionProbe(tooling, guards: {...guards, path: '0' * 40})])).stage, no);
+    }
+    for (var i = 0; i < 4; i++) {
+      final revisions = committed.revisions.toList();
+      revisions[i] = _r10RevisionProbe(revisions[i], documents: _r10ToolingDocuments);
+      expect(recognize(_r10Probe(committed, revisions: revisions)).stage, no);
+    }
+    final priorSourceDrift = committed.revisions.toList();
+    priorSourceDrift[3] = _r10RevisionProbe(priorSourceDrift[3],
+      guards: {..._r10ToolingEntryGuardBlobs, _r10CuiPath: guards[_r10CuiPath]!});
+    expect(recognize(_r10Probe(committed, revisions: priorSourceDrift)).stage, no);
+    expect(recognize(_r10Probe(committed, revisions: [...pending.revisions,
+      _r10RevisionProbe(tooling, documents: _r10DecisionDocuments)])).stage, no);
+    expect(recognize(_r10Probe(pending, sources: {...pending.sources,
+      r10ContractPath: pending.sources[r10ContractPath]! + '\nwaiver'})).stage, no);
+  });
+  test('R10 tooling rejects future descendants extra commits and restored documentary history', () {
+    for (final path in {...r10PresentationPaths, ..._r10ToolingPaths,
+      'supabase/config.toml', 'docs/future_authority.md'}) {
+      final next = _R10Revision('c' * 40, tooling.id,
+        _r10ProbeRaw(path, status: path == _r10VisualPath ? 'A' : 'M'),
+        _r10ToolingDocuments, guards);
+      expect(recognize(_r10Probe(committed, head: next.id,
+        revisions: [...committed.revisions, next])).stage, no);
+    }
+    final drift = _R10Revision('c' * 40, tooling.id, pair, _r10ToolingDocuments, guards);
+    final restore = _R10Revision('d' * 40, drift.id, pair, _r10ToolingDocuments, guards);
+    expect(recognize(_r10Probe(committed, head: restore.id,
+      revisions: [...committed.revisions, drift, restore])).stage, no);
+    expect(recognize(_r10Probe(pending,
+      revisions: [...pending.revisions, tooling])).stage, no);
+  });
+  test('R10 tooling rejects protected UI branch nonregular and untracked inventory drift', () {
+    for (final base in [pending, committed]) {
+      for (final path in _cui2a1ProtectedBlobs.keys) {
+        expect(recognize(_r10Probe(base,
+          protected: {...base.protected, path: '0' * 40})).stage, no);
+        expect(recognize(_r10Probe(base,
+          protected: Map.from(base.protected)..remove(path))).stage, no);
+      }
+      for (final path in _r10MaintenanceUiBlobs.keys) {
+        expect(recognize(base, ui: {..._r10MaintenanceUiBlobs, path: '0' * 40}).stage, no);
+      }
+      for (final path in base.untracked) {
+        expect(recognize(_r10Probe(base,
+          untracked: base.untracked.where((p) => p != path).toList())).stage, no);
+      }
+      for (final extra in ['docs/forged.md', _r10VisualPath, 'test/helper.dart']) {
+        expect(recognize(_r10Probe(base,
+          untracked: [...base.untracked, extra])).stage, no);
+      }
+      for (final path in {..._r10ToolingSources.keys, ...cui2a1CompatibilityPaths,
+        ..._cui2a1ProtectedBlobs.keys, ...r10PresentationPaths}) {
+        expect(recognize(_r10Probe(base, nonRegularPaths: {path})).stage, no);
+      }
+      expect(recognize(_r10Probe(base, branch: 'unapproved')).stage, no);
+    }
+  });
+}
+
+void _registerR10DecisionRecordTests() {
+  // Freeze this historical fixture's inputs at the reviewed published decision.
+  final sources = {for (final e in _r10ToolingEntryGuardBlobs.entries)
+    e.key: _git(['cat-file', 'blob', e.value])};
   final guards = _r10ApprovedDecisionGuardBlobs(sources)!;
   final uiWork = _cui2a1DirtyPaths.followedBy(r10PresentationPaths.where((p) => p != _r10VisualPath))
     .map((p) => _r10ProbeRaw(p)).join();
@@ -1461,6 +1861,11 @@ void _registerR10DecisionRecordTests() {
     if (live.decisionState == 'pendingReview') {
       expect(_git(['rev-parse', 'HEAD']).trim(), _r10DecisionEntry);
       expect(live.observedDecisionCommit, isNull);
+    } else if (live.toolingDispositionState == 'committed') {
+      expect(live.decisionState, 'committed');
+      expect(live.observedDecisionCommit, _r10ToolingEntry);
+      expect(_git(['rev-parse', 'HEAD^']).trim(), _r10ToolingEntry);
+      expect(live.observedToolingDispositionCommit, _git(['rev-parse', 'HEAD']).trim());
     } else {
       expect(_git(['rev-parse', 'HEAD^']).trim(), _r10DecisionEntry);
       expect(live.observedDecisionCommit, _git(['rev-parse', 'HEAD']).trim());
@@ -2863,6 +3268,7 @@ void main() {
   _registerR10PresentationBoundaryTests();
   _registerR10FixtureMaintenanceTests();
   _registerR10DecisionRecordTests();
+  _registerR10ToolingDispositionTests();
 
   test('CUI-2A1 committed documentary pins and historical CLOSED positive', () {
     expect(_cui2a1PinsMatch, isTrue);

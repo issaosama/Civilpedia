@@ -5051,3 +5051,37 @@ Final acceptance still requires explicit tooling disposition or separately autho
 Separate observations: Home image HTTP 404 responses, debug-emulator startup skipped-frame warnings and Android OnBackInvokedCallback warnings. No R10.5-D blocking attribution or root cause is established for them.
 
 Arabic-only RTL remains active. No frozen requirement, protected identity, Auth/Supabase authority, commercial restriction or later-slice lock is waived.
+
+# V1-R10.5-D ARCHITECT LIMITED ALTERNATIVE TOOLING DISPOSITION — 2026-10-23
+
+Authority: the Owner-forwarded Architect decision accepts the bounded alternative evidence below under frozen contract §§G/P. This subsequent record changes only the pending Architect tooling-disposition state in the preserved October 22 record. Every other requirement and acceptance gate remains intact.
+
+R10.5-D_ARCHITECT_TOOLING_DISPOSITION: LIMITED ALTERNATIVE ACCEPTED FOR THE EXISTING REVIEWED UI CANDIDATE ONLY
+ANALYZER_STATUS: NOT PASS — INTERNAL ANALYSIS TOOLING FAILURE
+RECORDED_ANALYZER_FAILURE: Bad state: No definition of type Enum.
+RECORDED_ANALYZER_EXITS: flutter analyze exit 1; Analysis Server exit 255
+RECORDED_TOOLING_BASELINE: Flutter 3.32.8; Dart 3.8.1
+FAILURE_TRIGGER: NOT ESTABLISHED
+HISTORICAL_NATIVE_CRASH_ROOT_CAUSE: UNKNOWN
+
+The accepted package applies only to the exact six raw UI checkpoint identities preserved in the October 18 maintenance record, with all eight frozen §O identities preserved, at the recorded tooling baseline. Previous evidence: independent ordinary UI review PASS WITH NONBLOCKING FINDINGS; successful Android debug build and installation of that candidate; visual 43/43 PASS; functional 401/401 PASS; accepted security evidence including 231/231 across the October 22–23 sessions and independent governance-checkpoint verification; and October 21 Android emulator technical observations 16/16 PASS. These are previously collected results, not tests rerun by this record. Governance provenance is the published checkpoint 6c7ddb307f6729181ed86ae9fe6cc4b1561bc167; it does not establish committed UI closure.
+
+Recent bounded emulator and test-session observations reported no newly observed native Flutter/Dart crash. This observation establishes neither the analyzer failure trigger nor the historical native-crash root cause.
+
+Residual limitations accepted explicitly: no complete analyzer diagnostic result; no verified zero-new-diagnostics comparison; and no complete lint coverage from the failed analysis. Missing diagnostics are not evidence that Civilpedia source is analyzer-clean. This disposition does not prove the application is free of defects. Future UI source changes require their own validation. This is a candidate-specific acceptance decision, not an Analyzer PASS or a blanket waiver for future phases.
+
+OWNER_VISUAL_APPROVAL: PROVISIONAL ONLY
+AUTHENTICATED_CLOUD_RUNTIME: UNVERIFIED — UNCONFIGURED SUPABASE EMULATOR LAUNCH
+F1_F2_OWNER_FINDING_DISPOSITION: PENDING
+R10.5-D: NOT CLOSED
+UI_GIT_CLOSURE: NOT COMPLETED
+R10.5-D-IOS-01: UNVERIFIED / REQUIRED BEFORE IOS RELEASE
+R10.5-E_AND_LATER_SLICES: LOCKED / NOT AUTHORIZED
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+PRODUCTION_EXECUTION_AUTHORIZED: NO
+STAGE_COMMIT_PUSH_AUTHORIZED_BY_THIS_TASK: NO
+CIVILPEDIA_V1: ARABIC-ONLY RTL
+
+Owner provisional review covers Profile, User Area, Profile Setup and Local Profile Edit, with future observations reserved. Authenticated Profile Edit retains independent review and previous widget evidence; unavailable authenticated/cloud runtime inspection is a verification limitation, not an established defect.
+
+F1/F2 remain the Architect's recommendation to defer protected-test hygiene, awaiting the Owner's separate disposition. F3 hashes establish prior checkpoint provenance, not final UI Git closure. F4 representative responsive combinations remain permitted by frozen §E, with its required assertions preserved. Final Owner/Architect acceptance, outstanding Android evidence and separately authorized UI Git closure remain separate gates.
