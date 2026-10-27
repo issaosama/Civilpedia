@@ -5126,3 +5126,46 @@ Foundation recognition is finite: exact pending six-path governance candidate at
 Future contract freeze/release, shell/test candidates, implementation staging/commit and closure are LOCKED / NOT RECOGNIZED by this foundation. Their separate finite transition must use observed committed governance identities after a separately authorized Owner commit. Recognition never supplies a human execution or Git authorization. Reject premature shell changes, unexpected staging, unrelated descendants, merges, renames, concealed change/restore history, extra paths or altered protected bytes.
 
 Run targeted recognition cases first, then CUI-2A0, HARDEN1, M1B, M3, unchanged M1a and unchanged R09q sequentially with flutter test --no-pub; require zero failures/skipped mandatory tests and preserve actual exits/counts. Stop on a new native Flutter/Dart crash; no SDK/cache/registry/toolchain repair or repository-wide suite. Independent Big Pickle High review, subsequent Owner/Architect decisions and separate local commit/push authority remain mandatory. No independent acceptance is claimed here.
+
+# R10-SHELL-A11Y-01 CONTRACT-FREEZE REVIEW PREPARATION — 2026-10-27
+
+Authority: the Owner-forwarded CONTRACT FREEZE PREPARATION & SECURITY TRANSITION instruction authorizes one six-path governance candidate and justified focused validation. Preparation is not contract freeze, shell implementation, staging, commit, push or production execution.
+
+R10-SHELL-A11Y-01_STATUS: CONTRACT-FREEZE REVIEW CANDIDATE / NOT FROZEN / NOT INDEPENDENTLY ACCEPTED
+PUBLISHED_GOVERNANCE_FOUNDATION: 4ca5b895562cf554b48a1d19a3569528258c87e5
+FOUNDATION_PARENT: 213073496d0f7b2e3d9caf8046d3684944db5fec
+FOUNDATION_ROADMAP_RAW_BLOB: 4362c6e0b0555b4584def0d80298d0276a213a12
+CONTRACT_FREEZE_AUTHORIZED: NO
+SHELL_IMPLEMENTATION_AUTHORIZED: NO
+SHELL_EXECUTION_RELEASED: NO
+STAGE_COMMIT_PUSH_AUTHORIZED: NO
+PRODUCTION_EXECUTION_AUTHORIZED: NO
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_M4_M5_IMPLEMENTATION_AUTHORIZED: NO
+R10.5-D: NOT CLOSED
+R10.5-E: LOCKED
+R10.6: LOCKED
+ANALYZER_STATUS: NOT PASS
+AUTHENTICATED_CLOUD_RUNTIME_AND_BACKEND_INTEGRATION: UNVERIFIED
+GOOGLE_SIGN_IN_NATIVE_UTILITIES_AND_SUCCESSFUL_EXPORT: UNVERIFIED
+R10.5-D-IOS-01: UNVERIFIED / REQUIRED BEFORE IOS LAUNCH
+INDEPENDENT_REVIEW_OF_THIS_FREEZE_CANDIDATE: PENDING
+
+The foundation is published at the exact commit above. The Owner/Architect accepted its substitute independent audit, PASS WITH NONBLOCKING FINDINGS: a fresh Codex session completed 29/29 focused checks and inspected prior 254/254 full-suite evidence without independently repeating those full suites. This was a review of the prior Codex implementation, not Big Pickle or a different-model review. The subsequent local governance commit passed two focused direct-child/live-recognition cases and actual remote main was verified after push. These are previous results only; this new candidate requires its own focused validation and independent review. No historical interrupted test attempt is counted as PASS.
+
+The Owner/Architect deferred the LOW scroll-cell fit finding to contract freeze. This preparation resolves that specification gap: supported horizontal fallback requires cellWidth <= available viewport W, full canonical labels and actual 48x48 hit targets. Otherwise report UNSUPPORTED; never shrink text, clip labels, hide destinations or navigate to satisfy focus alone. Preserve all five canonical Arabic destinations and RTL scrolling. The 70dp ordinary minimum, provisional 128dp ceiling and reserved-height formula remain proposed implementation conditions with required widget measurements and later actual Android acceptance, not independently validated Android geometry. Required Android evidence includes actual effective system scaling, short landscape, three-button navigation, Home final-content clearance and TalkBack activation. The MEDIUM shell defect remains OPEN.
+
+The exact current candidate is six modifications only:
+M docs/architecture/contracts/V1-R10_SHELL_A11Y_01_BOUNDED_REMEDIATION_CONTRACT.md
+M docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md
+M test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+M test/commercial_harden1_public_plans_exposure_migration_test.dart
+M test/commercial_m1b_catalog_reference_data_migration_test.dart
+M test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+
+All committed roadmap bytes through the published foundation remain exact. Preserve the original eight modified tracked and four untracked paths, all six UI raw checkpoints and eight frozen section O raw identities. Frozen R10.5-D scope, predicates, fixtures, accepted fingerprints, SQL/security negatives and M1B's independent unique-anchor HARDEN1 source oracle remain unchanged. Historical source fixtures use fixed committed blobs, never today's sources.
+
+Recognition adds a distinct finite freeze-review layer: the exact unstaged six-modification candidate at the published foundation with empty index; or its exact single-parent direct-child review-candidate commit, only under separate Owner publication authority, with empty index. Validate full committed/index/work/untracked inventories, statuses/modes, exact documents, guard sources, protected/UI/shell identities and the raw foundation prefix before projecting the immutable committed predecessor. No arbitrary descendant, restored-history exception, live-derived expected source, filter of unexplained paths or future commit hash. Recognition never grants contract freeze, human execution or Git authority.
+
+Actual freeze, implementation release, shell/test edits, staging and later closure remain LOCKED / NOT RECOGNIZED. They require separate authority and finite compatibility against observed committed identities. This record changes none of the F1/F2 deferral, limited Android fixture adjudication, authenticated/Google Sign-In/native/backend evidence limits, Analyzer NOT PASS or later-slice locks. Independent Big Pickle High review or a newly explicit Owner-named/scoped substitute, final Architect acceptance and separate Owner Git authority remain required. No new independent acceptance is claimed.

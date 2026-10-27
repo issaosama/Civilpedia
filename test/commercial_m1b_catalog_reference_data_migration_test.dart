@@ -873,6 +873,22 @@ bool _allowsR10PresentationComposition(
 }
 
 void _registerR10PresentationTests() {
+  test('R10 shell freeze review consumer retains exact foundation without freeze or release', () {
+    final recognition = cui2a0.recognizeR10PresentationStage();
+    expect(recognition.compatible, isTrue);
+    expect(recognition.shellFreezeReviewState, isIn(['pendingReview', 'committedReviewCandidate']));
+    expect(recognition.shellGovernanceState, 'committedReviewCandidate');
+    expect(recognition.observedShellGovernanceCommit, cui2a0.r10ShellFreezeReviewEntry);
+    expect(recognition.productionExecutionAuthorized, isFalse);
+    expect(recognition.separateOwnerUiReleaseRequired, isTrue);
+    expect(cui2a0.r10PresentationPaths, isNot(contains(cui2a0.r10ShellContractPath)));
+    expect(cui2a0.r10PresentationPaths, isNot(contains('lib/core/navigation/app_shell.dart')));
+    final contract = _read(cui2a0.r10ShellContractPath);
+    expect(contract, contains('STATUS: REVIEW CANDIDATE'));
+    expect(contract, contains('CONTRACT_FREEZE_AUTHORIZED: NO'));
+    expect(contract, contains('IMPLEMENTATION_RELEASE: LOCKED / NOT AUTHORIZED'));
+  });
+
   test('R10 shell governance consumer preserves separate scope and rejects early implementation', () {
     final recognition = cui2a0.recognizeR10PresentationStage();
     expect(recognition.shellGovernanceState, isIn(['pendingReview', 'committedReviewCandidate']));
@@ -2522,7 +2538,18 @@ void main() {
       expect(freezeHarden, _git(['show', cui2a0.r10PresentationEntry + ':' + hardenPath]));
       expect(_git(['cat-file', 'blob', '09215627742a979310d5a42d3330e37ff0153535']),
         cui2a0.compatibleR10FixtureMaintenanceHardenSource(historicalHarden));
-      expect(_read(hardenPath), cui2a0.compatibleR10ShellHardenSource(historicalHarden));
+      expect(_git(['cat-file', 'blob', '01012805ca8e373d83f34cec2a27b70f59430f2a']),
+        cui2a0.compatibleR10ShellHardenSource(historicalHarden));
+      expect(_read(hardenPath), cui2a0.compatibleR10ShellFreezeHardenSource(historicalHarden));
+      final foundationHarden = cui2a0.compatibleR10ShellHardenSource(historicalHarden);
+      for (final edit in cui2a0.r10ShellFreezeHardenEdits) {
+        expect(RegExp(RegExp.escape(edit.$1)).allMatches(foundationHarden), hasLength(1));
+        for (final replacement in ['', edit.$1 + edit.$1, 'unauthorized source']) {
+          final drift = foundationHarden.replaceFirst(edit.$1, replacement);
+          expect(drift, isNot(foundationHarden));
+          expect(() => cui2a0.compatibleR10ShellFreezeHardenSourceFromFoundation(drift), throwsStateError);
+        }
+      }
       final maintenanceHarden = cui2a0.compatibleR10FixtureMaintenanceHardenSource(historicalHarden);
       for (final edit in cui2a0.r10ShellHardenEdits) {
         expect(RegExp(RegExp.escape(edit.$1)).allMatches(maintenanceHarden), hasLength(1));

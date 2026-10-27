@@ -1,8 +1,8 @@
 # CIVILPEDIA R10-SHELL-A11Y-01 — BOUNDED REMEDIATION CONTRACT
 
 CONTRACT_ID: R10-SHELL-A11Y-01-v1
-STATUS: REVIEW CANDIDATE — NOT FROZEN / NOT INDEPENDENTLY ACCEPTED
-GOVERNANCE_CANDIDATE_AUTHORIZED: YES — EXACT SIX-PATH FOUNDATION ONLY
+STATUS: REVIEW CANDIDATE — CONTRACT-FREEZE PREPARATION / NOT FROZEN / NOT INDEPENDENTLY ACCEPTED
+GOVERNANCE_CANDIDATE_AUTHORIZED: YES — EXACT SIX-PATH FREEZE-REVIEW PREPARATION ONLY
 IMPLEMENTATION_AUTHORIZED: NO
 SHELL_EXECUTION_RELEASED: NO
 STAGE_COMMIT_PUSH_AUTHORIZED: NO
@@ -91,8 +91,10 @@ Let W be the resulting bar viewport width. Let V be the shell viewport height
 after the top system safe area. Let B = max(device bottom inset, 16).
 Let R = max(96, 0.40 * V) reserve vertical space above navigation for the
 existing banner and branch viewport. Let Hmax = min(128, V - B - R).
-These proposed budgets require independent review and actual short-landscape
-validation before freeze; they are not a claim of universal geometry support.
+These provisional budgets require independent specification review before freeze.
+Widget/device short-landscape validation follows separately authorized implementation
+and precedes implementation acceptance. No universal geometry support or independent
+Android validation of the 128dp ceiling or reserve formula is claimed.
 
 Measure with the actual inherited TextScaler, locale, direction, font metrics,
 11-pixel base label, line height 1.3 and both weights 500/600. Rendering and
@@ -107,14 +109,16 @@ shortened canonical label or scaled-down text. Detect horizontal glyph overflow;
 width-constrained paragraph size alone is insufficient proof of full visibility.
 
 Otherwise use horizontal-scroll fallback in the same floating surface. Use
-uniform cell width max(48, 40, widest full unwrapped scaled label + 8).
+uniform cellWidth = max(48, 40, widest full unwrapped scaled label + 8).
+Supported fallback requires 48 <= cellWidth <= W; scrolling cannot make a wider
+cell fully visible. Otherwise the geometry is UNSUPPORTED and must be reported.
 Its height Hscroll = max(70, 32 + 3 + tallest unwrapped label height + 20)
 must be <= Hmax and W must be >= 48. All five destinations remain present;
 retain RTL ordering/initial alignment, expose scrolling to accessibility, and
 bring selected or accessibility-focused items fully into view. Fallback must
 activate only for the failed measurable ordinary-layout conditions above.
 
-If neither mode fits, STOP/report W, V, B, R, Hmax, both measured heights,
+If neither mode fits, STOP/report W, V, B, R, Hmax, cellWidth, both measured heights,
 effective scaling and font inputs. Do not shrink targets/text, hide destinations,
 cap global scaling, clip content or claim support. No rail/drawer/grid redesign.
 The viewport budgets and fallback's usability are unresolved acceptance risks
@@ -244,3 +248,88 @@ readiness and R10.5-D-IOS-01 remain unestablished/open as previously governed.
 STOP for drift, missing authority, failed mandatory gate, native crash, required
 out-of-manifest change, weakened oracle, unsupported geometry or unresolved
 MEDIUM/HIGH finding. Preserve evidence and report the precise required decision.
+
+## I. Contract-freeze review preparation — 2026-10-27
+
+CURRENT_REVIEW_STAGE: CONTRACT-FREEZE REVIEW CANDIDATE / NOT FROZEN
+CONTRACT_FREEZE_AUTHORIZED: NO
+PUBLISHED_FOUNDATION: 4ca5b895562cf554b48a1d19a3569528258c87e5
+INDEPENDENT_REVIEW_OF_THIS_CANDIDATE: PENDING
+IMPLEMENTATION_RELEASE: LOCKED / NOT AUTHORIZED
+
+The current Owner/Architect instruction authorizes preparation of exactly the
+six governance paths in section C, now all M against the published foundation;
+the contract already exists. Sections A/B/C/F/G retain the foundation's entry,
+manifest, validation and finite-recognition history. This addendum supersedes
+only their current preparation-stage controls: no contract freeze or shell
+implementation, no implementation test, and no staging/commit/push is authorized.
+
+The accepted foundation audit was a fresh Codex substitute review of prior Codex
+implementation, not Big Pickle or a different-model review. It completed 29/29
+targeted checks and inspected previous 254/254 full-suite results without
+independently rerunning them. The Owner/Architect accepted its governance-only
+verdict and deferred the LOW scrolling-fit finding to contract freeze. The
+subsequent local commit passed two focused recognition checks; publication was
+verified against actual remote main. These are historical results, not evidence
+that this revised candidate or any shell implementation is independently accepted.
+
+A. Specified implementation conditions: section D's 70dp ordinary minimum,
+provisional 128dp ceiling and R/Hmax formula remain bounded proposed budgets.
+If W or V is nonpositive/nonfinite, Hmax < 70, or neither ordinary nor fallback
+satisfies every fit/target/glyph condition, report UNSUPPORTED. Fallback requires
+48 <= cellWidth <= W and Hscroll <= Hmax. A larger cell cannot be made fully
+visible by scrolling. Preserve all five complete canonical Arabic labels,
+correct RTL ordering/initial scroll position and accessible scrolling. Bring
+each newly selected or accessibility-focused destination fully into view;
+accessibility focus alone must not activate navigation. No clipping, text
+shrinkage, global scaling cap, hidden tab or substituted rail/drawer/grid.
+
+B. Required widget measurements: use actual local constraints and the inherited
+effective TextScaler, locale, direction, font and both selected/unselected
+weights. Test ordinary/fallback/unsupported conditions on both sides of every
+threshold, including cellWidth == W and cellWidth > W, Hmax below 70 and label
+glyph overflow. Verify the actual >=48x48 hit rectangles, full label visibility,
+focus/selection scroll visibility, semantic activation and one shared callback.
+Measure bar height and published obstruction from the same geometry result on
+constraint/scaler changes. Preserve the existing navigation SafeArea once and
+max-based helper; Home's final content must clear resolved H + B with the
+existing breathing room exactly once. Normal-scale geometry remains 70 where
+all labels fit. An unsupported case must return deterministic diagnostic
+evidence; it must not silently fall through to a partially visible layout.
+
+C. Required actual Android acceptance: after separately authorized implementation
+and build/device execution, verify effective Android system font scale 2.0,
+three-button and gesture navigation, portrait/short landscape, light/dark,
+all five destinations, final Home content, RTL scrolling and TalkBack focus/tap.
+Record actual settings, constraints, effective scaler/insets and device/revision.
+Widget measurements and theoretical calculations do not certify Android
+accessibility. Neither the 128dp ceiling nor the reserve formula is independently
+validated Android geometry. Independent specification review precedes freeze;
+widget/device evidence follows a separately released implementation and precedes
+implementation acceptance. This preparation grants neither release nor acceptance.
+
+D. Unsupported geometry: report W, V, B, R, Hmax, cellWidth, both measured heights,
+font/scaler inputs and the violated condition. Preserve complete labels and
+minimum targets even when that requires refusing support. The remaining risks
+are actual font metrics/scaling, short-landscape reserve sufficiency, fallback
+usability and accessibility-focus behavior; none is declared empirically solved.
+
+Current security compatibility is a distinct finite freeze-review transition
+from the exact published foundation: pending six M paths with empty index, or
+their exact single-parent direct-child review-candidate commit under separately
+granted Owner Git authority, still unfrozen and with empty index. Require exact
+content identities in every layer and preserve the full original checkpoint
+inventory. Earlier classifiers/fingerprints and M1B's independent historical
+source oracle stay immutable on fixed Git inputs. Future actual freeze, shell
+candidate/test, release, publication staging and implementation closure remain
+unrecognized until separately authorized compatibility is prepared against
+observed committed identities. Recognition supplies no human authorization.
+
+For this preparation only, run justified focused transition, historical-oracle
+and consumer checks sequentially with flutter test --no-pub, recording actual
+exits/pass/fail/skip counts. The previous six-suite foundation gate remains
+historical; this instruction does not require another long full HARDEN1 run.
+Independent Big Pickle High review or a newly explicit Owner-named/scoped
+substitute is required for this candidate. Owner/Architect acceptance is pending.
+All section H evidence limits, F1/F2 deferral, Analyzer NOT PASS, the OPEN MEDIUM
+shell defect, R10.5-D NOT CLOSED and R10.5-E/R10.6 locks remain intact.

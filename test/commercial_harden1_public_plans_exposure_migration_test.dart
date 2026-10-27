@@ -890,6 +890,22 @@ bool _allowsR10PresentationComposition(
 }
 
 void _registerR10PresentationTests() {
+  test('R10 shell freeze review consumer retains exact foundation without freeze or release', () {
+    final recognition = cui2a0.recognizeR10PresentationStage();
+    expect(recognition.compatible, isTrue);
+    expect(recognition.shellFreezeReviewState, isIn(['pendingReview', 'committedReviewCandidate']));
+    expect(recognition.shellGovernanceState, 'committedReviewCandidate');
+    expect(recognition.observedShellGovernanceCommit, cui2a0.r10ShellFreezeReviewEntry);
+    expect(recognition.productionExecutionAuthorized, isFalse);
+    expect(recognition.separateOwnerUiReleaseRequired, isTrue);
+    expect(cui2a0.r10PresentationPaths, isNot(contains(cui2a0.r10ShellContractPath)));
+    expect(cui2a0.r10PresentationPaths, isNot(contains('lib/core/navigation/app_shell.dart')));
+    final contract = _read(cui2a0.r10ShellContractPath);
+    expect(contract, contains('STATUS: REVIEW CANDIDATE'));
+    expect(contract, contains('CONTRACT_FREEZE_AUTHORIZED: NO'));
+    expect(contract, contains('IMPLEMENTATION_RELEASE: LOCKED / NOT AUTHORIZED'));
+  });
+
   test('R10 shell governance consumer preserves separate scope and rejects early implementation', () {
     final recognition = cui2a0.recognizeR10PresentationStage();
     expect(recognition.shellGovernanceState, isIn(['pendingReview', 'committedReviewCandidate']));
