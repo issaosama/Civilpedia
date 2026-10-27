@@ -865,13 +865,35 @@ bool _allowsR10PresentationComposition(
     ) &&
     postClosureImplementationChanges.every(uiPaths.contains) &&
     _allowsR10FreezeComposition(
-      changedPaths.where((path) => !uiPaths.contains(path)),
+      changedPaths.where((path) => !uiPaths.contains(path) &&
+        !(recognition.shellGovernanceState != 'none' && path == cui2a0.r10ShellContractPath)),
       cui2a0.r10AuthorizedRoadmap, documents,
       const [],
     );
 }
 
 void _registerR10PresentationTests() {
+  test('R10 shell governance consumer preserves separate scope and rejects early implementation', () {
+    final recognition = cui2a0.recognizeR10PresentationStage();
+    expect(recognition.shellGovernanceState, isIn(['pendingReview', 'committedReviewCandidate']));
+    expect(recognition.productionExecutionAuthorized, isFalse);
+    final documents = <String, String>{
+      for (final p in _closedCommittedDocuments.keys) p: _read(p),
+      cui2a0.cui2a1ContractPath: _read(cui2a0.cui2a1ContractPath),
+      cui2a0.ownerPlanningReadinessPath: _read(cui2a0.ownerPlanningReadinessPath),
+      cui2a0.r10ContractPath: _read(cui2a0.r10ContractPath),
+    };
+    final roadmap = _read(cui2a0.cui2a0RoadmapPath);
+    expect(_allowsR10PresentationComposition([cui2a0.r10ShellContractPath], roadmap, documents, []), isTrue);
+    for (final p in ['lib/core/navigation/app_shell.dart',
+      'test/shared_bottom_navigation_accessibility_test.dart',
+      cui2a0.r10ShellContractPath + '.bak']) {
+      expect(_allowsR10PresentationComposition([p], roadmap, documents, []), isFalse);
+      expect(_allowsR10PresentationComposition([], roadmap, documents, [p]), isFalse);
+    }
+    expect(_allowsR10PresentationComposition([], roadmap + '\nextra', documents, []), isFalse);
+  });
+
   test('R10 presentation consumer uses shared stage and requires procedural release', () {
     final recognition = cui2a0.recognizeR10PresentationStage();
     expect(recognition.compatible, isTrue);
@@ -2498,7 +2520,18 @@ void main() {
       expect(_git(['show', cui2a0.r10FreezeParent + ':' + hardenPath]), planningHarden);
       final freezeHarden = cui2a0.compatibleR10FreezeHardenSource(historicalHarden);
       expect(freezeHarden, _git(['show', cui2a0.r10PresentationEntry + ':' + hardenPath]));
-      expect(_read(hardenPath), cui2a0.compatibleR10FixtureMaintenanceHardenSource(historicalHarden));
+      expect(_git(['cat-file', 'blob', '09215627742a979310d5a42d3330e37ff0153535']),
+        cui2a0.compatibleR10FixtureMaintenanceHardenSource(historicalHarden));
+      expect(_read(hardenPath), cui2a0.compatibleR10ShellHardenSource(historicalHarden));
+      final maintenanceHarden = cui2a0.compatibleR10FixtureMaintenanceHardenSource(historicalHarden);
+      for (final edit in cui2a0.r10ShellHardenEdits) {
+        expect(RegExp(RegExp.escape(edit.$1)).allMatches(maintenanceHarden), hasLength(1));
+        for (final replacement in ['', edit.$1 + edit.$1, 'unauthorized source']) {
+          final drift = maintenanceHarden.replaceFirst(edit.$1, replacement);
+          expect(drift, isNot(maintenanceHarden));
+          expect(() => cui2a0.compatibleR10ShellHardenSourceFromMaintenance(drift), throwsStateError);
+        }
+      }
 
       final presentationHarden = cui2a0.compatibleR10PresentationHardenSource(historicalHarden);
       for (final edit in cui2a0.r10FixtureMaintenanceHardenEdits) {
@@ -2583,6 +2616,8 @@ void main() {
             : checkpoint;
         expect(_read(entry.key), expected, reason: entry.key);
       }
+      final shellGovernance = cui2a0.recognizeR10PresentationStage();
+      expect(shellGovernance.compatible, isTrue);
       expect(
         _git([
           'ls-files',
@@ -2592,7 +2627,9 @@ void main() {
           'lib',
           'docs',
         ]).trim(),
-        isEmpty,
+        shellGovernance.shellGovernanceState == 'pendingReview'
+            ? cui2a0.r10ShellContractPath
+            : isEmpty,
       );
     },
   );

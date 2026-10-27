@@ -5085,3 +5085,44 @@ CIVILPEDIA_V1: ARABIC-ONLY RTL
 Owner provisional review covers Profile, User Area, Profile Setup and Local Profile Edit, with future observations reserved. Authenticated Profile Edit retains independent review and previous widget evidence; unavailable authenticated/cloud runtime inspection is a verification limitation, not an established defect.
 
 F1/F2 remain the Architect's recommendation to defer protected-test hygiene, awaiting the Owner's separate disposition. F3 hashes establish prior checkpoint provenance, not final UI Git closure. F4 representative responsive combinations remain permitted by frozen §E, with its required assertions preserved. Final Owner/Architect acceptance, outstanding Android evidence and separately authorized UI Git closure remain separate gates.
+
+# R10-SHELL-A11Y-01 GOVERNANCE FOUNDATION REVIEW CANDIDATE — 2026-10-25
+
+Authority: the Owner-forwarded R10-SHELL-A11Y-01 GOVERNANCE FOUNDATION instruction authorizes one bounded governance/compatibility candidate and focused validation. The Architect accepts the prior proposal as the preferred direction, not as a frozen or implemented contract. This record does not invent earlier approval dates or fresh QA results.
+
+R10-SHELL-A11Y-01_STATUS: REVIEW CANDIDATE / NOT FROZEN / NOT INDEPENDENTLY ACCEPTED
+GOVERNANCE_BASELINE: main / 213073496d0f7b2e3d9caf8046d3684944db5fec
+BASELINE_PARENT: 6c7ddb307f6729181ed86ae9fe6cc4b1561bc167
+BASELINE_ROADMAP_RAW_BLOB: 85f200c2190034e571d8712a4dbe027a397be286
+SHELL_IMPLEMENTATION_AUTHORIZED: NO
+PRODUCTION_EXECUTION_AUTHORIZED: NO
+STAGE_COMMIT_PUSH_AUTHORIZED: NO
+R10.5-D: NOT CLOSED
+R10.5-E: LOCKED
+R10.6: LOCKED
+COMMERCIAL_CURRENT_SLICE: NONE
+COMMERCIAL_IMPLEMENTATION_AUTHORIZED: NO
+CUI2A1_M4_M5_IMPLEMENTATION_AUTHORIZED: NO
+ANALYZER_STATUS: NOT PASS
+
+The confirmed MEDIUM enlarged-text bottom-navigation defect and separate missing semantic activation finding belong to a separately governed shared-shell remediation. Fixed 70-pixel height, five equal slots and one-line/no-wrap/fade labels do not adapt adequately to actual Android system font scale 2.0. The existing single SafeArea and max-based clearance are not the diagnosed cause. The finding remains OPEN; no deferral, waiver or closure is granted. The accepted Profile, User Area and local editor screenshots retain their bounded acceptance without redesign or inference about untested states. This does not expand the frozen R10.5-D six-file implementation scope, reopen R10.3 or activate later slices.
+
+The exact current governance candidate is:
+A docs/architecture/contracts/V1-R10_SHELL_A11Y_01_BOUNDED_REMEDIATION_CONTRACT.md
+M docs/architecture/CIVILPEDIA_V1_MASTER_ROADMAP.md
+M test/commercial_cui2a0_admin_business_draft_foundation_migration_test.dart
+M test/commercial_harden1_public_plans_exposure_migration_test.dart
+M test/commercial_m1b_catalog_reference_data_migration_test.dart
+M test/commercial_m3_entitlement_evaluator_shadow_migration_test.dart
+
+The exact future implementation proposal is M lib/core/navigation/app_shell.dart plus A test/shared_bottom_navigation_accessibility_test.dart. Neither path may change in this foundation. shell_content_insets.dart and app_shell_test.dart remain read-only. The contract is R10-SHELL-A11Y-01-v1, REVIEW CANDIDATE; it proposes measured wrapping, bounded dynamic height, synchronized obstruction, 48x48 targets, semantic activation and deterministic scrolling/STOP fallback for insufficient viewport geometry. It requires independent geometry review, focused widget evidence and actual Android font scale 2.0/three-button/TalkBack acceptance before implementation acceptance.
+
+The current Owner instruction explicitly records the Owner-approved F1/F2 LOW protected-test-hygiene deferral. Protected tests remain unchanged. It also records the Owner-approved limited Android fixture adjudication strictly for supplied presentation/behavior evidence. Actual Google Sign-In, authenticated runtime/backend integration, native utilities and successful export remain UNVERIFIED. No earlier approval date, fresh test result, backend authority, native readiness, final Owner acceptance or production readiness is asserted. These later dispositions supersede only the corresponding pending Owner-disposition descriptions in earlier records; all historical bytes and other requirements remain intact.
+
+The prior limited analyzer alternative remains specific to the exact existing R10.5-D candidate. Analyzer is NOT PASS and no alternative automatically extends to new shell source. Later shell release needs successful targeted analysis or a new explicit Architect disposition with exact evidence/residual limits. R10.5-D-IOS-01 remains UNVERIFIED / REQUIRED BEFORE IOS LAUNCH.
+
+Foundation recognition is finite: exact pending six-path governance candidate at the named baseline with empty index, or its exact single-parent direct-child governance commit with empty index. Preserve the original eight modified tracked paths, four untracked files, six UI raw checkpoint identities and eight protected section O raw identities. Validate independent committed/index/working/untracked inventories, modes, exact documents and guard sources before any predecessor projection. Preserve historical classifiers/fixtures, the original R10.5-D path set, all security negatives and M1B's independent unique-anchor HARDEN1 source oracle. No broad exception, ignore rule, live-derived expected source or future hash authority.
+
+Future contract freeze/release, shell/test candidates, implementation staging/commit and closure are LOCKED / NOT RECOGNIZED by this foundation. Their separate finite transition must use observed committed governance identities after a separately authorized Owner commit. Recognition never supplies a human execution or Git authorization. Reject premature shell changes, unexpected staging, unrelated descendants, merges, renames, concealed change/restore history, extra paths or altered protected bytes.
+
+Run targeted recognition cases first, then CUI-2A0, HARDEN1, M1B, M3, unchanged M1a and unchanged R09q sequentially with flutter test --no-pub; require zero failures/skipped mandatory tests and preserve actual exits/counts. Stop on a new native Flutter/Dart crash; no SDK/cache/registry/toolchain repair or repository-wide suite. Independent Big Pickle High review, subsequent Owner/Architect decisions and separate local commit/push authority remain mandatory. No independent acceptance is claimed here.
